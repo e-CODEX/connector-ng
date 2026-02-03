@@ -1,0 +1,9 @@
+ifndef::basepath[]
+:basepath: {rootdir}
+endif::basepath[]
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+== e-CODEX Connector Configuration

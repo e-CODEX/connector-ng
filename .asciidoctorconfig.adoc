@@ -1,0 +1,2 @@
+:basepath: src/docs/asciidoc
+:imagesdir: images

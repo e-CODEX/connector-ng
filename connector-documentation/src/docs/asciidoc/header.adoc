@@ -1,0 +1,19 @@
+ifndef::basepath[]
+:basepath: {rootdir}
+endif::basepath[]
+
+ifndef::header[]
+:header: header
+:toc: left
+:toc-title: Table of Content
+:toclevels: 4
+:sectnums:
+endif::header[]
+
+ifndef::imgdir[]
+:imgdir: resources/images
+endif::imgdir[]
+
+ifndef::imagesdir[]
+:imagesdir: {basepath}/{imgdir}
+endif::imagesdir[]

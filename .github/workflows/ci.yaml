@@ -1,0 +1,11 @@
+on:
+    push:
+    pull_request:
+    merge_group:
+name: CI Pipeline
+jobs:
+    ci:
+        uses: e-CODEX/workflows/.github/workflows/gradle-ci.yaml@40549266006efdd4a80a4a621e7b2d4ec58df453
+        with:
+            java-version: 21
+            sbom-path: 'build/reports/cyclonedx/bom.xml'

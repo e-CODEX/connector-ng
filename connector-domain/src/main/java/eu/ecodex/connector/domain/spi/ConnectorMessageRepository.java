@@ -1,0 +1,104 @@
+/*
+ * Copyright 2025 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.domain.spi;
+
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import java.util.List;
+
+/**
+ * e-Codex Connector Message Repository.
+ */
+public interface ConnectorMessageRepository {
+    /**
+     * Persists a given {@link ConnectorMessage} instance in the repository.
+     *
+     * @param message the {@link ConnectorMessage} to be saved; must not be null. This object
+     *                contains the detailed metadata and content of the connector message.
+     *
+     * @return the saved {@link ConnectorMessage}, including any automatically generated fields such
+     *         as timestamps or identifiers. If the save operation fails, this method may throw an
+     *         exception.
+     */
+    ConnectorMessage save(ConnectorMessage message);
+
+    /**
+     * Finds a {@link ConnectorMessage} by its unique identifier.
+     *
+     * @param identifier the unique identifier of the connector message; must not be null or blank.
+     *
+     * @return the {@link ConnectorMessage} matching the specified identifier, or null if no such
+     *         message exists in the repository.
+     */
+    ConnectorMessage findByIdentifier(String identifier);
+
+    /**
+     * Finds a {@link ConnectorMessage} in the repository based on the provided message instance and
+     * the specified direction. This method is used to retrieve a connector message that matches
+     * both the content of the given {@code message} and the {@code direction}.
+     *
+     * @param message   the {@link ConnectorMessage} instance containing the identifier or content
+     *                  to search for; must not be null.
+     * @param direction the {@link ConnectorMessageDirection} specifying the direction of the
+     *                  message (such as inbound or outbound); must not be null.
+     *
+     * @return the {@link ConnectorMessage} that matches both the specified {@code message} and
+     *         {@code direction}, or null if no matching message is found in the repository.
+     */
+    ConnectorMessage findByIdentifierAndDirection(
+            ConnectorMessage message, ConnectorMessageDirection direction);
+
+    /**
+     * Retrieves a list of {@link ConnectorMessage} objects associated with the specified
+     * conversation uuid.
+     *
+     * @param conversationIdentifier the unique uuid of the conversation; must not be null or
+     *                               blank.
+     *
+     * @return a list of {@link ConnectorMessage} instances associated with the given conversation
+     *         uuid, or an empty list if no such messages exist.
+     */
+    List<ConnectorMessage> findByConversationIdentifier(String conversationIdentifier);
+
+    /**
+     * Adds the specified evidence to the given connector message.
+     *
+     * @param message  the connector message to which the evidence will be added; must not be null.
+     * @param evidence the evidence to be added to the message; must not be null.
+     *
+     * @return the updated connector message after the evidence has been added.
+     */
+    ConnectorMessage addEvidence(ConnectorMessage message, ConnectorEvidence evidence);
+
+    /**
+     * Marks the provided {@link ConnectorMessage} as rejected. This typically involves updating the
+     * status of the message to indicate that it has been rejected, and may include additional
+     * actions such as logging or persisting this state change in the repository.
+     *
+     * @param message the {@link ConnectorMessage} to be marked as rejected; must not be null.
+     *
+     * @return the updated {@link ConnectorMessage} instance reflecting the rejected status.
+     */
+    ConnectorMessage setAsRejected(ConnectorMessage message);
+
+    /**
+     * Marks the provided {@link ConnectorMessage} as confirmed. This typically involves updating
+     * the status of the message to reflect a confirmed state and may include additional persistence
+     * or logging actions.
+     *
+     * @param message the {@link ConnectorMessage} to be marked as confirmed; must not be null. This
+     *                object contains the detailed metadata and content of the connector message.
+     *
+     * @return the updated {@link ConnectorMessage} instance after being marked as confirmed.
+     */
+    ConnectorMessage setAsConfirmed(ConnectorMessage message);
+}

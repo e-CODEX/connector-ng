@@ -1,0 +1,56 @@
+/*
+ * Copyright 2025 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.domain.service;
+
+import eu.ecodex.connector.domain.annotation.DomainService;
+import eu.ecodex.connector.domain.api.service.ConnectorServiceService;
+import eu.ecodex.connector.domain.exception.ConnectorServiceNotFoundException;
+import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+
+/**
+ * Default Implementation of the {@link ConnectorServiceService}.
+ */
+@Slf4j
+@DomainService
+public class ConnectorServiceServiceImpl implements ConnectorServiceService {
+    private final ConnectorServiceRepository serviceRepository;
+
+    public ConnectorServiceServiceImpl(ConnectorServiceRepository serviceRepository) {
+        this.serviceRepository = serviceRepository;
+    }
+
+    @Override
+    public ConnectorService findByNameAndBusinessDomain(
+            @NonNull String serviceName,
+            @NonNull String businessDomainIdentifier) {
+        log.debug(
+                "finding service with name [{}] and business domain [{}]", serviceName,
+                businessDomainIdentifier
+        );
+
+        var service = this.serviceRepository.findByNameAndBusinessDomain(
+                serviceName, businessDomainIdentifier
+        );
+
+        if (service == null) {
+            log.warn(
+                    "service with name [{}] and business domain [{}] not found",
+                    serviceName, businessDomainIdentifier
+            );
+            throw new ConnectorServiceNotFoundException("service not found");
+        }
+
+        return service;
+    }
+}

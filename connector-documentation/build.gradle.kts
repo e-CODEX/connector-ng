@@ -49,6 +49,7 @@ fun org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.commonConfig() {
 tasks.withType<AsciidoctorTask>().configureEach {
     commonConfig()
     setOutputDir(layout.buildDirectory.dir("docs/html"))
+    notCompatibleWithConfigurationCache("Asciidoctor does not support configuration caching yet.")
 }
 
 tasks.named("build") {

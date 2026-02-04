@@ -1,0 +1,24 @@
+[versions]
+apache-commons = "3.20.0"
+jakarta-annotation = "3.0.0"
+jakarta-validation = "3.1.1"
+jakarta-jms-api = "3.1.0"
+lombok = "1.18.42"
+slf4j-api = "2.0.17"
+# tests
+assertj = "3.27.7"
+junit = "5.10.0"
+mockito = "5.21.0"
+
+[libraries]
+apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commons" }
+jakarta-annotation = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
+jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
+jakarta-jms-api = { module = "jakarta.jms:jakarta.jms-api", version.ref = "jakarta-jms-api" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
+# test
+mockito = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

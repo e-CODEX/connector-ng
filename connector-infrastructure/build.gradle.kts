@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("org.springframework.boot") version "4.0.2"
 }
 
 group = "eu.ecodex"
@@ -7,6 +8,11 @@ version = "1.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+}
+
+// TODO might potentially be incorporated into a dedicated starter module
+springBoot {
+    mainClass.set("eu.ecodex.connector.ConnectorApplication")
 }
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")

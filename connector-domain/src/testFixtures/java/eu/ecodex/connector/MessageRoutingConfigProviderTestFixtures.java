@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
@@ -20,7 +20,7 @@ import eu.ecodex.connector.domain.routing.ConnectorRoutingRulePattern;
 import java.util.Map;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "LineLength"})
-public class MessageRoutingConfigProviderUtil {
+public class MessageRoutingConfigProviderTestFixtures {
     public static ConnectorMessageRoutingConfigProperties getRoutingProperties() {
         return routingProperties();
     }
@@ -34,7 +34,7 @@ public class MessageRoutingConfigProviderUtil {
         var routingProperties = routingProperties();
         var backendRoutingRule = routingProperties
                 .businessDomains()
-                .get(BusinessDomainIdentifierUtil.createDefaultBusinessDomainIdentifier())
+                .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
                 .backend();
 
         var domainProperties = defaultBusinessDomainProperties()
@@ -43,7 +43,7 @@ public class MessageRoutingConfigProviderUtil {
                 .build();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierUtil.createDefaultBusinessDomainIdentifier(),
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
                 domainProperties
         );
 
@@ -53,7 +53,7 @@ public class MessageRoutingConfigProviderUtil {
     public static ConnectorMessageRoutingConfigProperties getRoutingPropertiesWithNoDefaultBackendRules() {
         var routingProperties = routingProperties();
         var backendRoutingRule = routingProperties.businessDomains().get(
-                BusinessDomainIdentifierUtil.createDefaultBusinessDomainIdentifier()
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         ).backend();
 
         var domainProperties = defaultBusinessDomainProperties()
@@ -62,7 +62,7 @@ public class MessageRoutingConfigProviderUtil {
                 .build();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierUtil.createDefaultBusinessDomainIdentifier(),
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
                 domainProperties
         );
 
@@ -77,7 +77,7 @@ public class MessageRoutingConfigProviderUtil {
         var defaultBusinessDomainProperties = defaultBusinessDomainProperties();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierUtil.createDefaultBusinessDomainIdentifier(),
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
                 defaultBusinessDomainProperties
         );
 

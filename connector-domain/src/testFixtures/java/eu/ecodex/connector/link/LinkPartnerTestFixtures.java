@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils.link;
+package eu.ecodex.connector.link;
 
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
@@ -17,7 +17,7 @@ import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class LinkPartnerUtil {
+public class LinkPartnerTestFixtures {
     public static ConnectorLinkPartner createLinkPartner() {
         var builder = createAbstractLinkPartner();
         return builder.build();
@@ -48,8 +48,10 @@ public class LinkPartnerUtil {
                 .mode(ConnectorLinkMode.PUSH)
                 .type(ConnectorLinkType.BACKEND)
                 .pullInterval("0")
-                .properties(LinkPartnerPropertiesUtil.createBackendLinkPartnerProperties())
-                .configuration(ConnectorLinkConfigurationUtil.createConnectorLinkConfiguration())
+                .properties(LinkPartnerPropertiesTestFixtures.createBackendLinkPartnerProperties())
+                .configuration(
+                        ConnectorLinkConfigurationTestFixtures.createConnectorLinkConfiguration()
+                )
                 .source(ConnectorConfigurationSource.IMPLEMENTATION);
     }
 }

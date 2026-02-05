@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
@@ -24,9 +27,6 @@ import eu.ecodex.connector.domain.service.ConnectorEvidenceServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
-import eu.ecodex.connector.utils.EvidenceUtil;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,12 +67,12 @@ public class ConnectorOutboundMessageRejectionStepTest {
 
     @Test
     void should_execute_outbound_message_rejection_creation_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(evidenceToolkit.create(any(), any(), any()))
-                .thenReturn(EvidenceUtil.createSubmissionRejectionEvidence());
+                .thenReturn(EvidenceTestFixtures.createSubmissionRejectionEvidence());
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 
         var outputMessage = outboundMessageRejectionCreationStep.execute(outboundMessage);
 

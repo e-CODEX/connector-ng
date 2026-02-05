@@ -14,13 +14,12 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
-import eu.ecodex.connector.domain.spi.property.ConnectorMessageRoutingConfigProvider;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,8 +36,6 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
     private ConnectorMessageRepository messageRepository;
     @Mock
     private ConnectorMessageProcessingConfigProvider messageProcessingConfigProvider;
-    @Mock
-    private ConnectorMessageRoutingConfigProvider messageRoutingConfigProvider;
 
     private ConnectorMessageStep outboundMessageEbmsIdCreationStep;
 
@@ -55,10 +52,10 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
 
     @Test
     void should_execute_outbound_message_and_set_ebms_id_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 
         var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
 
@@ -71,11 +68,11 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
 
     @Test
     void should_execute_outbound_message_and_not_set_ebms_id_if_disabled() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(messageProcessingConfigProvider.getProcessingProperties())
                 .thenReturn(
-                        MessageProcessingConfigProviderUtil.getProcessingProperties()
+                        MessageProcessingConfigProviderTestFixtures.getProcessingProperties()
                                 .toBuilder()
                                 .ebmsIdGeneratorEnabled(false)
                                 .build()

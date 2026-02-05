@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.exception.ConnectorMessageIdentifierException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotBusinessException;
@@ -25,9 +28,6 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
-import eu.ecodex.connector.utils.EvidenceUtil;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import java.util.Collections;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
@@ -54,15 +54,15 @@ public class ConnectorMessageServiceTest {
 
     private static Stream<ConnectorEvidence> provideEvidence() {
         return Stream.of(
-                EvidenceUtil.createSubmissionAcceptanceEvidence(),
-                EvidenceUtil.createSubmissionRejectionEvidence(),
-                EvidenceUtil.createRelayREMMDAcceptanceEvidence(),
-                EvidenceUtil.createRelayREMMDRejectionEvidence(),
-                EvidenceUtil.createRelayREMMDFailureEvidence(),
-                EvidenceUtil.createDeliveryEvidence(),
-                EvidenceUtil.createNonDeliveryEvidence(),
-                EvidenceUtil.createRetrievalEvidence(),
-                EvidenceUtil.createNonRetrievalEvidence()
+                EvidenceTestFixtures.createSubmissionAcceptanceEvidence(),
+                EvidenceTestFixtures.createSubmissionRejectionEvidence(),
+                EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence(),
+                EvidenceTestFixtures.createRelayREMMDRejectionEvidence(),
+                EvidenceTestFixtures.createRelayREMMDFailureEvidence(),
+                EvidenceTestFixtures.createDeliveryEvidence(),
+                EvidenceTestFixtures.createNonDeliveryEvidence(),
+                EvidenceTestFixtures.createRetrievalEvidence(),
+                EvidenceTestFixtures.createNonRetrievalEvidence()
         );
     }
 
@@ -77,21 +77,21 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_register_message_successfully() {
         when(messageRepository.save(any())).thenReturn(
-                MessageUtil.createValidOutboundBusinessMessage());
+                MessageTestFixtures.createValidOutboundBusinessMessage());
 
         var savedMessage = this.connectorMessageService.register(
-                MessageUtil.createValidOutboundBusinessMessage());
+                MessageTestFixtures.createValidOutboundBusinessMessage());
         assertThat(savedMessage).isNotNull();
     }
 
     @Test
     void should_throw_exception_when_message_identifier_already_exists() {
         when(messageRepository.findByIdentifier(any())).thenReturn(
-                MessageUtil.createValidOutboundBusinessMessage());
+                MessageTestFixtures.createValidOutboundBusinessMessage());
 
         assertThrows(
                 ConnectorMessageIdentifierException.class, () -> this.connectorMessageService.register(
-                        MessageUtil.createValidOutboundBusinessMessage())
+                        MessageTestFixtures.createValidOutboundBusinessMessage())
         );
     }
 
@@ -104,7 +104,7 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_find_message_by_identifier_successfully() {
         when(messageRepository.findByIdentifier(any()))
-                .thenReturn(MessageUtil.createValidOutboundBusinessMessage());
+                .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
 
         var message = this.connectorMessageService.findByIdentifier(
                 "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
@@ -132,10 +132,10 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_find_message_by_identifier_and_direction_successfully() {
         when(messageRepository.findByIdentifierAndDirection(any(), any()))
-                .thenReturn(MessageUtil.createValidOutboundBusinessMessage());
+                .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
 
         var message = connectorMessageService.findByIdentifierAndDirection(
-                MessageUtil.createValidOutboundBusinessMessage(),
+                MessageTestFixtures.createValidOutboundBusinessMessage(),
                 ConnectorMessageDirection.BACKEND_TO_GATEWAY
         );
 
@@ -153,7 +153,7 @@ public class ConnectorMessageServiceTest {
         assertThrows(
                 ConnectorMessageNotFoundException.class,
                 () -> this.connectorMessageService.findByIdentifierAndDirection(
-                        MessageUtil.createValidOutboundBusinessMessage(),
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
                         ConnectorMessageDirection.BACKEND_TO_GATEWAY
                 )
         );
@@ -183,7 +183,7 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_find_messages_by_conversation_identifier_successfully() {
         when(messageRepository.findByConversationIdentifier(any()))
-                .thenReturn(Collections.singletonList(MessageUtil.createValidOutboundBusinessMessage()));
+                .thenReturn(Collections.singletonList(MessageTestFixtures.createValidOutboundBusinessMessage()));
 
         var messages = this.connectorMessageService.findByConversationIdentifier("f76276d5-d058-4477-95de-848c9673e543");
 
@@ -202,14 +202,14 @@ public class ConnectorMessageServiceTest {
     // check outgoing message to and from parties info
     @Test
     void should_check_outgoing_message_parties_info_successfully() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         // no thrown exception mean from and to parties are set correctly
         this.connectorMessageService.checkPartiesInfo(message);
     }
 
     @Test
     void should_throw_exception_when_outbound_message_from_party_info_is_null() {
-        var message = MessageUtil.createNullFromPartyOutboundBusinessMessage();
+        var message = MessageTestFixtures.createNullFromPartyOutboundBusinessMessage();
         assertThrows(
                 ConnectorMessagePartyException.class,
                 () -> connectorMessageService.checkPartiesInfo(message)
@@ -218,7 +218,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_throw_exception_when_outbound_message_to_party_info_is_null() {
-        var message = MessageUtil.createNullToPartyOutboundBusinessMessage();
+        var message = MessageTestFixtures.createNullToPartyOutboundBusinessMessage();
         assertThrows(
                 ConnectorMessagePartyException.class,
                 () -> connectorMessageService.checkPartiesInfo(message)
@@ -227,7 +227,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_throw_exception_when_outbound_message_from_party_info_are_incorrect() {
-        var message = MessageUtil.createInvalidFromPartyOutboundBusinessMessage();
+        var message = MessageTestFixtures.createInvalidFromPartyOutboundBusinessMessage();
         assertThrows(
                 ConnectorMessagePartyException.class,
                 () -> connectorMessageService.checkPartiesInfo(message)
@@ -236,7 +236,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_throw_exception_when_outbound_message_to_party_info_are_incorrect() {
-        var message = MessageUtil.createInvalidToPartyOutboundBusinessMessage();
+        var message = MessageTestFixtures.createInvalidToPartyOutboundBusinessMessage();
         assertThrows(
                 ConnectorMessagePartyException.class,
                 () -> connectorMessageService.checkPartiesInfo(message)
@@ -245,7 +245,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_throw_exception_when_outbound_message_direction_is_incorrect() {
-        var message = MessageUtil.createValidOutboundBusinessMessage()
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage()
                 .toBuilder()
                 .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
                 .build();
@@ -265,7 +265,7 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_return_true_if_message_is_business_message() {
         var isBusiness = this.connectorMessageService.isBusinessMessage(
-                MessageUtil.createValidOutboundBusinessMessage());
+                MessageTestFixtures.createValidOutboundBusinessMessage());
         assertThat(isBusiness).isTrue();
     }
 
@@ -278,27 +278,27 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_return_false_if_message_is_not_business_message() {
         var isBusiness = this.connectorMessageService.isBusinessMessage(
-                MessageUtil.createSubmissionAcceptanceEvidenceMessage());
+                MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage());
         assertThat(isBusiness).isFalse();
     }
 
     @Test
     void should_return_true_if_message_is_an_evidence_message() {
         var isEvidence = this.connectorMessageService.isEvidenceMessage(
-                MessageUtil.createSubmissionAcceptanceEvidenceMessage());
+                MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage());
         assertThat(isEvidence).isTrue();
     }
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_message() {
         var isEvidence = this.connectorMessageService.isEvidenceMessage(
-                MessageUtil.createValidOutboundBusinessMessage());
+                MessageTestFixtures.createValidOutboundBusinessMessage());
         assertThat(isEvidence).isFalse();
     }
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_message_when_evidences_is_null() {
-        var message = MessageUtil.createSubmissionAcceptanceEvidenceMessage()
+        var message = MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage()
                 .toBuilder()
                 .evidences(null)
                 .build();
@@ -309,7 +309,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_message_when_evidences_is_empty() {
-        var message = MessageUtil.createSubmissionAcceptanceEvidenceMessage()
+        var message = MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage()
                                  .toBuilder()
                                  .evidences(Collections.emptyList())
                                  .build();
@@ -330,7 +330,7 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_return_true_if_message_is_evidence_trigger_message() {
         var isEvidenceTrigger = this.connectorMessageService.isEvidenceTriggerMessage(
-                MessageUtil.createEvidenceTriggerMessage()
+                MessageTestFixtures.createEvidenceTriggerMessage()
         );
 
         assertThat(isEvidenceTrigger).isTrue();
@@ -339,7 +339,7 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_return_false_if_message_is_not_an_evidence_trigger_message() {
         var isEvidenceTrigger = this.connectorMessageService.isEvidenceTriggerMessage(
-                MessageUtil.createValidInboundBusinessMessage()
+                MessageTestFixtures.createValidInboundBusinessMessage()
         );
 
         assertThat(isEvidenceTrigger).isFalse();
@@ -347,7 +347,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_trigger_message_when_evidences_is_null() {
-        var message = MessageUtil.createEvidenceTriggerMessage()
+        var message = MessageTestFixtures.createEvidenceTriggerMessage()
                 .toBuilder()
                 .evidences(null)
                 .build();
@@ -358,7 +358,7 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_trigger_message_when_evidences_is_empty() {
-        var message = MessageUtil.createEvidenceTriggerMessage()
+        var message = MessageTestFixtures.createEvidenceTriggerMessage()
                                  .toBuilder()
                                  .evidences(Collections.emptyList())
                                  .build();
@@ -369,14 +369,14 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_trigger_message_when_evidences_content_is_empty() {
-        var message = MessageUtil.createEvidenceTriggerMessage()
+        var message = MessageTestFixtures.createEvidenceTriggerMessage()
                                  .toBuilder()
                                  .evidences(
                                          Collections.singletonList(
-                                                 EvidenceUtil.createEvidenceTrigger()
-                                                         .toBuilder()
-                                                         .content(new byte[1])
-                                                         .build()
+                                                 EvidenceTestFixtures.createEvidenceTrigger()
+                                                                     .toBuilder()
+                                                                     .content(new byte[1])
+                                                                     .build()
                                          )
                                  )
                                  .build();
@@ -397,11 +397,11 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_add_evidence_to_message_successfully() {
         when(messageRepository.findByIdentifier(any())).thenReturn(
-                MessageUtil.createValidOutboundBusinessMessage());
+                MessageTestFixtures.createValidOutboundBusinessMessage());
         when(messageRepository.addEvidence(any(), any())).thenReturn(
-                MessageUtil.createSubmissionAcceptanceEvidenceMessage());
-        var businessMessage = MessageUtil.createValidOutboundBusinessMessage();
-        var evidence = EvidenceUtil.createSubmissionAcceptanceEvidence();
+                MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage());
+        var businessMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var savedMessage = this.connectorMessageService.addEvidence(businessMessage, evidence);
         assertThat(savedMessage.evidences()).isNotNull();
         assertThat(savedMessage.evidences()).isNotEmpty();
@@ -410,8 +410,8 @@ public class ConnectorMessageServiceTest {
 
     @Test
     void should_throw_exception_when_message_is_not_a_business_message_when_adding_an_evidence() {
-        var businessMessage = MessageUtil.createSubmissionAcceptanceEvidenceMessage();
-        var evidence = EvidenceUtil.createSubmissionAcceptanceEvidence();
+        var businessMessage = MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage();
+        var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         Assertions.assertThrows(
                 ConnectorMessageNotBusinessException.class,
                 () -> this.connectorMessageService.addEvidence(businessMessage, evidence)
@@ -424,8 +424,8 @@ public class ConnectorMessageServiceTest {
         Assertions.assertThrows(
                 ConnectorMessageNotFoundException.class,
                 () -> this.connectorMessageService.addEvidence(
-                        MessageUtil.createValidOutboundBusinessMessage(),
-                        EvidenceUtil.createSubmissionAcceptanceEvidence()
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
+                        EvidenceTestFixtures.createSubmissionAcceptanceEvidence()
                 )
         );
     }
@@ -435,7 +435,7 @@ public class ConnectorMessageServiceTest {
         Assertions.assertThrows(
                 NullPointerException.class, () -> this.connectorMessageService.addEvidence(
                         null,
-                        EvidenceUtil.createSubmissionAcceptanceEvidence()
+                        EvidenceTestFixtures.createSubmissionAcceptanceEvidence()
                 )
         );
     }
@@ -444,17 +444,17 @@ public class ConnectorMessageServiceTest {
     void should_throw_null_pointer_exception_when_evidence_is_null_when_adding_evidence() {
         Assertions.assertThrows(
                 NullPointerException.class, () -> this.connectorMessageService.addEvidence(
-                        MessageUtil.createValidOutboundBusinessMessage(), null)
+                        MessageTestFixtures.createValidOutboundBusinessMessage(), null)
         );
     }
 
     // set a message as rejected
     @Test
     void should_set_message_as_rejected_successfully() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         when(messageRepository.setAsRejected(any())).thenReturn(
-                MessageUtil.createRejectedMessage());
+                MessageTestFixtures.createRejectedMessage());
         var rejectedMessage = this.connectorMessageService.setAsRejected(message);
         assertThat(rejectedMessage.rejectedAt()).isNotNull();
     }
@@ -464,7 +464,7 @@ public class ConnectorMessageServiceTest {
         assertThrows(
                 ConnectorMessageNotFoundException.class,
                 () -> connectorMessageService.setAsRejected(
-                        MessageUtil.createValidOutboundBusinessMessage())
+                        MessageTestFixtures.createValidOutboundBusinessMessage())
         );
     }
 
@@ -477,10 +477,10 @@ public class ConnectorMessageServiceTest {
     // set the message as confirmed
     @Test
     void should_set_message_as_confirmed_successfully() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         when(messageRepository.setAsConfirmed(any())).thenReturn(
-                MessageUtil.createConfirmedMessage());
+                MessageTestFixtures.createConfirmedMessage());
         var confirmedMessage = connectorMessageService.setAsConfirmed(message);
         assertThat(confirmedMessage.confirmedAt()).isNotNull();
     }
@@ -490,7 +490,7 @@ public class ConnectorMessageServiceTest {
         assertThrows(
                 ConnectorMessageNotFoundException.class,
                 () -> connectorMessageService.setAsConfirmed(
-                        MessageUtil.createValidOutboundBusinessMessage())
+                        MessageTestFixtures.createValidOutboundBusinessMessage())
         );
     }
 
@@ -504,8 +504,8 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_return_true_if_message_has_been_rejected() {
         when(messageRepository.findByIdentifier(any())).thenReturn(
-                MessageUtil.createRejectedMessage());
-        var message = MessageUtil.createRejectedMessage();
+                MessageTestFixtures.createRejectedMessage());
+        var message = MessageTestFixtures.createRejectedMessage();
         var isRejected = connectorMessageService.isRejected(message);
         assertThat(isRejected).isTrue();
     }
@@ -513,8 +513,8 @@ public class ConnectorMessageServiceTest {
     @Test
     void should_return_false_if_message_has_not_been_rejected() {
         when(messageRepository.findByIdentifier(any())).thenReturn(
-                MessageUtil.createValidOutboundBusinessMessage());
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+                MessageTestFixtures.createValidOutboundBusinessMessage());
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var isRejected = connectorMessageService.isRejected(message);
         assertThat(isRejected).isFalse();
     }
@@ -530,9 +530,9 @@ public class ConnectorMessageServiceTest {
     @MethodSource("provideEvidence")
     void should_create_evidence_message_successfully(ConnectorEvidence evidence) {
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var evidenceMessage = this.connectorMessageService.createEvidenceMessage(message, evidence);
 
         assertThat(evidenceMessage).isNotNull();
@@ -571,7 +571,7 @@ public class ConnectorMessageServiceTest {
     // switch message direction
     @Test
     void should_switch_message_direction_successfully() {
-        var initialMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var initialMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
         var switchedMessage = this.connectorMessageService.switchDirection(initialMessage);
         assertThat(switchedMessage.direction()).isNotEqualTo(initialMessage.direction());
         assertThat(switchedMessage.as4Properties().originalSender()).isNotEqualTo(
@@ -595,10 +595,10 @@ public class ConnectorMessageServiceTest {
     // assign ebms uuid to message
     @Test
     void should_assign_ebms_identifier_to_message_successfully() {
-        var processingProperties = MessageProcessingConfigProviderUtil.getProcessingProperties();
+        var processingProperties = MessageProcessingConfigProviderTestFixtures.getProcessingProperties();
         when(messageProcessingConfigProvider.getProcessingProperties()).thenReturn(
                 processingProperties);
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var assignedMessage = connectorMessageService.assignEbmsIdentifier(message);
         assertThat(assignedMessage.as4Properties().ebmsMessageIdentifier()).isNotNull();
         assertThat(assignedMessage.as4Properties().ebmsMessageIdentifier())

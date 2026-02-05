@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("jacoco")
+    id("java-test-fixtures")
 }
 
 group = "eu.ecodex"

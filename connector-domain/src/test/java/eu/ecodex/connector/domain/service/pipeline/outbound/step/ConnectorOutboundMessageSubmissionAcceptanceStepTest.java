@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
@@ -25,8 +27,6 @@ import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageRoutingConfigProvider;
-import eu.ecodex.connector.utils.EvidenceUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,8 +47,6 @@ public class ConnectorOutboundMessageSubmissionAcceptanceStepTest {
     private ConnectorMessageRepository messageRepository;
     @Mock
     private ConnectorMessageProcessingConfigProvider messageProcessingConfigProvider;
-    @Mock
-    private ConnectorMessageRoutingConfigProvider messageRoutingConfigProvider;
     private ConnectorMessageService connectorMessageService;
 
     private ConnectorMessageStep outboundMessageSubmissionAcceptanceCreationStep;
@@ -70,20 +68,20 @@ public class ConnectorOutboundMessageSubmissionAcceptanceStepTest {
 
     @Test
     void should_create_outbound_message_execute_relay_remmd_acceptance_evidence() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(messageRepository.findByIdentifier(any())).thenReturn(outboundMessage);
         when(messageRepository.addEvidence(any(), any()))
                 .thenReturn(
                         outboundMessage.toBuilder()
                                        .evidences(Collections.singletonList(
-                                               EvidenceUtil.createSubmissionAcceptanceEvidence()))
+                                               EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
                                        .transportedEvidences(Collections.singletonList(
-                                               EvidenceUtil.createSubmissionAcceptanceEvidence()))
+                                               EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
                                        .build()
                 );
         when(evidenceToolkit.create(any(), any(), any()))
-                .thenReturn(EvidenceUtil.createSubmissionAcceptanceEvidence());
+                .thenReturn(EvidenceTestFixtures.createSubmissionAcceptanceEvidence());
 
         var outputMessage = outboundMessageSubmissionAcceptanceCreationStep.execute(
                 outboundMessage);

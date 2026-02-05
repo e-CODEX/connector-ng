@@ -17,12 +17,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
 import eu.ecodex.connector.domain.api.service.ConnectorLinkService;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
-import eu.ecodex.connector.utils.MessageUtil;
-import eu.ecodex.connector.utils.link.LinkPartnerUtil;
+import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,10 +52,10 @@ public class ConnectorBackendLinkEventHandlerTest {
     @Test
     void should_submit_inbound_message_successfully_to_backend_if_link_partner_is_valid() {
         when(linkService.getByLinkPartnerName(any()))
-                .thenReturn(LinkPartnerUtil.createDefaultBackendLinkPartner());
+                .thenReturn(LinkPartnerTestFixtures.createDefaultBackendLinkPartner());
         doNothing().when(linkTransportStrategy).process(any(), any());
 
-        var message = MessageUtil.createValidInboundBusinessMessage();
+        var message = MessageTestFixtures.createValidInboundBusinessMessage();
         backendLinkEventHandler.handle(message);
 
         verify(linkService, times(1)).getByLinkPartnerName(any());
@@ -69,7 +69,7 @@ public class ConnectorBackendLinkEventHandlerTest {
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
                 () -> backendLinkEventHandler.handle(
-                        MessageUtil.createValidInboundBusinessMessage())
+                        MessageTestFixtures.createValidInboundBusinessMessage())
         );
 
         verify(linkService, times(1)).getByLinkPartnerName(any());

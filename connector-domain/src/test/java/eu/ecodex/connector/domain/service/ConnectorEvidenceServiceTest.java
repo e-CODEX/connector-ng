@@ -16,6 +16,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
@@ -25,8 +27,6 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
-import eu.ecodex.connector.utils.EvidenceUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,10 +64,10 @@ class ConnectorEvidenceServiceTest {
                 any(),
                 eq(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE),
                 any()
-        )).thenReturn(EvidenceUtil.createSubmissionAcceptanceEvidence());
+        )).thenReturn(EvidenceTestFixtures.createSubmissionAcceptanceEvidence());
         var evidence = this.evidenceService.createSuccess(
                 ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                MessageUtil.createValidOutboundBusinessMessage()
+                MessageTestFixtures.createValidOutboundBusinessMessage()
         );
 
         assertThat(evidence).isNotNull();
@@ -88,7 +88,7 @@ class ConnectorEvidenceServiceTest {
         assertThrows(
                 NullPointerException.class, () -> this.evidenceService.createSuccess(
                         null,
-                        MessageUtil.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createValidOutboundBusinessMessage()
                 )
         );
     }
@@ -100,7 +100,7 @@ class ConnectorEvidenceServiceTest {
         assertThrows(
                 NullPointerException.class, () -> this.evidenceService.createFailure(
                         null,
-                        MessageUtil.createValidOutboundBusinessMessage(),
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
                         ConnectorMessageRejectionReason.OTHER
                 )
         );
@@ -122,10 +122,10 @@ class ConnectorEvidenceServiceTest {
     @EnumSource(value = ConnectorEvidenceType.class, names = {"DELIVERY", "RETRIEVAL"})
     void should_process_a_message_as_confirmed_successfully_if_its_evidence_is_delivery_or_retrieval(
             ConnectorEvidenceType evidenceType) {
-        var message = MessageUtil.createSubmissionAcceptanceEvidenceMessage();
+        var message = MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage();
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         when(messageRepository.setAsConfirmed(any())).thenReturn(
-                MessageUtil.createConfirmedMessage());
+                MessageTestFixtures.createConfirmedMessage());
         this.evidenceService.processMessage(evidenceType, message);
     }
 
@@ -136,10 +136,10 @@ class ConnectorEvidenceServiceTest {
     )
     void should_process_a_message_as_rejected_successfully_if_its_evidence_is_not_delivery_or_retrieval(
             ConnectorEvidenceType evidenceType) {
-        var message = MessageUtil.createRejectedMessage();
+        var message = MessageTestFixtures.createRejectedMessage();
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         when(messageRepository.setAsRejected(any())).thenReturn(
-                MessageUtil.createConfirmedMessage());
+                MessageTestFixtures.createConfirmedMessage());
         this.evidenceService.processMessage(evidenceType, message);
     }
 
@@ -147,7 +147,7 @@ class ConnectorEvidenceServiceTest {
     @EnumSource(value = ConnectorEvidenceType.class, names = {"DELIVERY", "RETRIEVAL"})
     void should_throw_exception_when_processing_message_as_delivery_or_retrieval_if_it_has_been_rejected(
             ConnectorEvidenceType evidenceType) {
-        var message = MessageUtil.createRejectedMessage();
+        var message = MessageTestFixtures.createRejectedMessage();
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         var exception = assertThrows(
                 ConnectorEvidenceNotRelevantException.class,
@@ -159,7 +159,7 @@ class ConnectorEvidenceServiceTest {
 
     @Test
     void should_throw_exception_when_processing_message_as_retrieval_if_it_has_been_rejected() {
-        var message = MessageUtil.createRejectedMessage();
+        var message = MessageTestFixtures.createRejectedMessage();
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         var exception = assertThrows(
                 ConnectorEvidenceNotRelevantException.class,
@@ -175,7 +175,7 @@ class ConnectorEvidenceServiceTest {
 
     @Test
     void should_throw_exception_if_evidence_priority_is_lower_than_message_highest_evidence_priority() {
-        var message = MessageUtil.createRejectedMessage();
+        var message = MessageTestFixtures.createRejectedMessage();
         assertThrows(
                 ConnectorEvidenceNotRelevantException.class,
                 () -> this.evidenceService.processMessage(
@@ -185,7 +185,7 @@ class ConnectorEvidenceServiceTest {
 
     @Test
     void should_thrown_null_pointer_exception_when_processing_message_with_null_transported_evidences() {
-        var message = MessageUtil.createRejectedMessage()
+        var message = MessageTestFixtures.createRejectedMessage()
                                  .toBuilder()
                                  .transportedEvidences(null)
                                  .build();
@@ -202,7 +202,7 @@ class ConnectorEvidenceServiceTest {
         assertThrows(
                 NullPointerException.class, () -> this.evidenceService.processMessage(
                         null,
-                        MessageUtil.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createValidOutboundBusinessMessage()
                 )
         );
     }
@@ -218,7 +218,7 @@ class ConnectorEvidenceServiceTest {
     // isEvidenceTriggeringAllowed
     @Test
     void should_return_true_when_checking_is_evidence_trigger_and_message_is_evidence_trigger() {
-        var businessMessage = MessageUtil.createEvidenceTriggerMessage();
+        var businessMessage = MessageTestFixtures.createEvidenceTriggerMessage();
         this.evidenceService.isEvidenceTriggeringAllowed(businessMessage);
     }
 
@@ -232,7 +232,7 @@ class ConnectorEvidenceServiceTest {
 
     @Test
     void should_throw_exception_when_checking_is_evidence_trigger_and_message_is_not_evidence() {
-        var businessMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var businessMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
         assertThrows(
                 ConnectorEvidenceException.class,
                 () -> this.evidenceService.isEvidenceTriggeringAllowed(businessMessage)
@@ -241,7 +241,7 @@ class ConnectorEvidenceServiceTest {
 
     @Test
     void should_throw_exception_when_checking_is_evidence_trigger_and_message_direction_is_backend() {
-        var businessMessage = MessageUtil.createEvidenceTriggerMessage()
+        var businessMessage = MessageTestFixtures.createEvidenceTriggerMessage()
                                          .toBuilder()
                                          .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
                                          .build();

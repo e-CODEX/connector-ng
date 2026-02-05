@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import eu.ecodex.connector.utils.MessageUtil;
+import eu.ecodex.connector.MessageTestFixtures;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -25,7 +25,7 @@ public class ConnectorNotExpressionTest {
         var notExpression = new ConnectorNotExpression(equalsExpression, null);
 
         var evaluationResult = notExpression.evaluate(
-                MessageUtil.createValidOutboundBusinessMessage()
+                MessageTestFixtures.createValidOutboundBusinessMessage()
         );
 
         assertThat(evaluationResult).isTrue();
@@ -37,7 +37,7 @@ public class ConnectorNotExpressionTest {
         var notExpression = new ConnectorNotExpression(equalsExpression, null);
 
         var evaluationResult = notExpression.evaluate(
-                MessageUtil.createValidOutboundBusinessMessage()
+                MessageTestFixtures.createValidOutboundBusinessMessage()
         );
 
         assertThat(evaluationResult).isFalse();

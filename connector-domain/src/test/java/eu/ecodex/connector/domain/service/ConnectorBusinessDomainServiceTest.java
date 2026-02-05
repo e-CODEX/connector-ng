@@ -15,13 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
+import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorBusinessDomainService;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
-import eu.ecodex.connector.utils.BusinessDomainIdentifierUtil;
-import eu.ecodex.connector.utils.BusinessDomainUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +48,7 @@ public class ConnectorBusinessDomainServiceTest {
     // save business domain
     @Test
     void should_register_a_business_domain_successfully() {
-        var businessDomain = BusinessDomainUtil.createDefaultBusinessDomain();
+        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
         when(businessDomainRepository.findByIdentifier(any()))
                 .thenReturn(null);
@@ -65,7 +65,7 @@ public class ConnectorBusinessDomainServiceTest {
 
     @Test
     void should_throw_exception_when_saving_business_domain_with_already_existing_identifier() {
-        var businessDomain = BusinessDomainUtil.createDefaultBusinessDomain();
+        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
         when(businessDomainRepository.findByIdentifier(any()))
                 .thenReturn(businessDomain);
@@ -87,7 +87,7 @@ public class ConnectorBusinessDomainServiceTest {
     // find by uuid
     @Test
     void should_find_business_domain_by_identifier_successfully() {
-        var businessDomain = BusinessDomainUtil.createDefaultBusinessDomain();
+        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
 
@@ -104,7 +104,7 @@ public class ConnectorBusinessDomainServiceTest {
         assertThrows(
                 ConnectorBusinessDomainNotFoundException.class,
                 () -> connectorBusinessDomainService.findByIdentifier(
-                        BusinessDomainIdentifierUtil.createDefaultBusinessDomainIdentifier()
+                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
                 )
         );
     }

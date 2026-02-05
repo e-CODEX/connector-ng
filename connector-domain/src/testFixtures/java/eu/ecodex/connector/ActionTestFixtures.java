@@ -8,12 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class ActionUtil {
+public class ActionTestFixtures {
     public static ConnectorAction createAction() {
         return ConnectorAction.builder()
                               .name("ConTest_Form")

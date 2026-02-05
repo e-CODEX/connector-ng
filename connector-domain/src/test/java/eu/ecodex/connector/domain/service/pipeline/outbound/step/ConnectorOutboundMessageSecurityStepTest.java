@@ -17,9 +17,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +43,7 @@ public class ConnectorOutboundMessageSecurityStepTest {
 
     @Test
     void should_execute_outbound_message_security_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(securityToolkit.buildContainer(any())).thenReturn(outboundMessage);
 

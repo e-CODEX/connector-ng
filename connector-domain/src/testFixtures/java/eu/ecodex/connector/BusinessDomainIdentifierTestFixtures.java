@@ -8,18 +8,16 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils.link;
+package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerProperties;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class LinkPartnerPropertiesUtil {
-    public static ConnectorLinkPartnerProperties createBackendLinkPartnerProperties() {
-        return ConnectorLinkPartnerProperties
+public class BusinessDomainIdentifierTestFixtures {
+    public static ConnectorBusinessDomainIdentifier createDefaultBusinessDomainIdentifier() {
+        return ConnectorBusinessDomainIdentifier
                 .builder()
-                .pushAddress("http://localhost:8080/push")
-                .encryptionAlias("alice")
-                .certificateDn("cn=alice")
+                .messageLaneIdentifier("default_business_domain")
                 .build();
     }
 }

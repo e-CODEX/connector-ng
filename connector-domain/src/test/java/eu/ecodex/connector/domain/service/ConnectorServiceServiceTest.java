@@ -15,10 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorServiceService;
 import eu.ecodex.connector.domain.exception.ConnectorServiceNotFoundException;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
-import eu.ecodex.connector.utils.ServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +44,7 @@ public class ConnectorServiceServiceTest {
     @Test
     void should_find_service_by_name_and_business_domain_successfully() {
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
-                ServiceUtil.createService());
+                ServiceTestFixtures.createService());
         var service = this.connectorService.findByNameAndBusinessDomain(
                 "Connector-TEST", "default");
         assertThat(service).isNotNull();

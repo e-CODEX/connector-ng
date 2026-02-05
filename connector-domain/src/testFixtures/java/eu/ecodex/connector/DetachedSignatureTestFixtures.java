@@ -8,16 +8,19 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
+import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class BusinessDomainIdentifierUtil {
-    public static ConnectorBusinessDomainIdentifier createDefaultBusinessDomainIdentifier() {
-        return ConnectorBusinessDomainIdentifier
+public class DetachedSignatureTestFixtures {
+    public static DetachedSignature createDetachedSignature() {
+        return DetachedSignature
                 .builder()
-                .messageLaneIdentifier("default_business_domain")
+                .name("test_signature")
+                .signature(new byte[1])
+                .mimeType(DetachedSignatureMimeType.PKCS7)
                 .build();
     }
 }

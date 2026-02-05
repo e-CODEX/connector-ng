@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.domain.routing;
 
-import eu.ecodex.connector.utils.MessageUtil;
+import eu.ecodex.connector.MessageTestFixtures;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 public class ConnectorRoutingRulePatternTest {
     @Test
     void should_throw_exception_when_attribute_to_extract_is_not_an_as4_attribute() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         Assertions.assertThrows(
                 RuntimeException.class,

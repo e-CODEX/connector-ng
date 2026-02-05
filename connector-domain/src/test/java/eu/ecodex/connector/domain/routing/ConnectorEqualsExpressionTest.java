@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import eu.ecodex.connector.utils.MessageUtil;
+import eu.ecodex.connector.MessageTestFixtures;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 public class ConnectorEqualsExpressionTest {
     @Test
     void should_successfully_check_if_as4_attribute_matches_with_the_given_value() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form");
         var evaluationResult = equalsExpression.evaluate(message);
         assertThat(evaluationResult).isTrue();
@@ -29,7 +29,7 @@ public class ConnectorEqualsExpressionTest {
 
     @Test
     void should_fail_to_check_if_as4_attribute_matches_with_the_given_value() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form2");
         var evaluationResult = equalsExpression.evaluate(message);
         assertThat(evaluationResult).isFalse();

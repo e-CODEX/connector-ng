@@ -8,12 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAttachment;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class MessageAttachmentUtil {
+public class MessageAttachmentTestFixtures {
     public static ConnectorMessageAttachment createAttachment() {
         return ConnectorMessageAttachment.builder()
                                          .name("test_attachment")

@@ -15,6 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.ActionTestFixtures;
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.service.ConnectorActionServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorBusinessDomainServiceImpl;
@@ -29,10 +33,6 @@ import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
-import eu.ecodex.connector.utils.ActionUtil;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
-import eu.ecodex.connector.utils.ServiceUtil;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,14 +92,14 @@ public class ConnectorOutboundMessageValidationStepTest {
 
     @Test
     void should_execute_outbound_message_validation_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
         when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
-                ServiceUtil.createService());
+                ServiceTestFixtures.createService());
         when(actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
-                ActionUtil.createAction());
+                ActionTestFixtures.createAction());
         when(partyRepository.findByPartyAndBusinessDomain(any(), any()))
                 .thenReturn(
                         outboundMessage.as4Properties().toParty(),

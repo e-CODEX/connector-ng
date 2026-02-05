@@ -13,9 +13,9 @@ package eu.ecodex.connector.domain.service.pipeline.outbound.step;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +36,7 @@ public class ConnectorOutboundMessageGatewayValidationStepTest {
 
     @Test
     void should_execute_outbound_message_gateway_name_validation_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessageWithoutGatewayName();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessageWithoutGatewayName();
 
         var outputMessage = outboundMessageGatewayNameValidationStep.execute(outboundMessage);
 
@@ -48,7 +48,7 @@ public class ConnectorOutboundMessageGatewayValidationStepTest {
 
     @Test
     void should_execute_outbound_message_gateway_name_validation_successfully_by_sending_back_message_if_name_already_set() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         var outputMessage = outboundMessageGatewayNameValidationStep.execute(outboundMessage);
 

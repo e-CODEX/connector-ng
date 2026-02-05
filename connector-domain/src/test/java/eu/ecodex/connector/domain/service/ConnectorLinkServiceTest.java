@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.domain.api.service.ConnectorLinkService;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.service.link.ConnectorLinkServiceImpl;
-import eu.ecodex.connector.utils.link.LinkPartnerUtil;
+import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,7 @@ public class ConnectorLinkServiceTest {
 
     @Test
     void should_succeed_to_add_link_partner() {
-        this.connectorLinkService.add(LinkPartnerUtil.createLinkPartner());
+        this.connectorLinkService.add(LinkPartnerTestFixtures.createLinkPartner());
         var linkPartnerName = new ConnectorLinkPartnerName("default_gateway");
         var linkPartner = this.connectorLinkService.getByLinkPartnerName(linkPartnerName);
         assertThat(linkPartner).isNotNull();
@@ -51,7 +51,7 @@ public class ConnectorLinkServiceTest {
         var linkPartner = this.connectorLinkService.getByLinkPartnerName(linkPartnerName);
         assertThat(linkPartner).isNull();
 
-        this.connectorLinkService.add(LinkPartnerUtil.createLinkPartner());
+        this.connectorLinkService.add(LinkPartnerTestFixtures.createLinkPartner());
 
         linkPartner = this.connectorLinkService.getByLinkPartnerName(linkPartnerName);
         assertThat(linkPartner).isNotNull();

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+  ~ in the Area of Freedom, Security and Justice (eu-LISA)
+  ~
+  ~ Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+  ~ European Commission - subsequent versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the Licence.
+  ~ You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+  -->
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{%d{yyyy-MM-dd HH:mm:ss}}{cyan} %highlight{%-5level}{FATAL=bg_red,ERROR=red,WARN=yellow,INFO=green,DEBUG=blue,TRACE=cyan} %style{[%t]}{yellow} %style{[%X{traceId:-}]}{blue} %style{%c{1}}{magenta} - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <!-- Package-specific logging -->
+        <Logger name="eu.ecodex.connector" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <!-- Root logger -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

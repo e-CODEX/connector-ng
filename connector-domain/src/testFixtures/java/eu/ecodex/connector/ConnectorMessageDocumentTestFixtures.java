@@ -8,17 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageDocument;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class ConnectorMessageDocumentUtil {
+public class ConnectorMessageDocumentTestFixtures {
     public static ConnectorMessageDocument createDocument() {
         return ConnectorMessageDocument
                 .builder()
                 .name("test_document")
-                .detachedSignature(DetachedSignatureUtil.createDetachedSignature())
+                .detachedSignature(DetachedSignatureTestFixtures.createDetachedSignature())
                 .build();
     }
 

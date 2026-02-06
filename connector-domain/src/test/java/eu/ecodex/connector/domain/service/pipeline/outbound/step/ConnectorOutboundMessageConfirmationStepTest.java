@@ -14,6 +14,9 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -22,9 +25,6 @@ import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageRoutingConfigProvider;
-import eu.ecodex.connector.utils.EvidenceUtil;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import java.util.Collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,16 +62,17 @@ public class ConnectorOutboundMessageConfirmationStepTest {
 
     @Test
     void should_execute_outbound_message_confirmation_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage()
-                                         .toBuilder()
-                                         .evidences(Collections.singletonList(
-                                                 EvidenceUtil.createSubmissionAcceptanceEvidence()))
-                                         .transportedEvidences(Collections.singletonList(
-                                                 EvidenceUtil.createSubmissionAcceptanceEvidence()))
-                                         .build();
+        var outboundMessage = MessageTestFixtures
+                .createValidOutboundBusinessMessage()
+                .toBuilder()
+                .evidences(Collections.singletonList(
+                        EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
+                .transportedEvidences(Collections.singletonList(
+                        EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
+                .build();
 
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 
         var outputMessage = outboundMessageConfirmationCreationStep.execute(outboundMessage);
 
@@ -89,10 +90,10 @@ public class ConnectorOutboundMessageConfirmationStepTest {
 
     @Test
     void should_throw_exception_executing_outbound_message_confirmation_when_transported_evidences_is_null() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage()
-                .toBuilder()
-                .transportedEvidences(null)
-                .build();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage()
+                                         .toBuilder()
+                                         .transportedEvidences(null)
+                                         .build();
 
         assertThrows(
                 IllegalStateException.class,
@@ -102,7 +103,7 @@ public class ConnectorOutboundMessageConfirmationStepTest {
 
     @Test
     void should_throw_exception_executing_outbound_message_confirmation_when_transported_evidences_is_empty() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage()
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage()
                                          .toBuilder()
                                          .evidences(Collections.emptyList())
                                          .transportedEvidences(Collections.emptyList())

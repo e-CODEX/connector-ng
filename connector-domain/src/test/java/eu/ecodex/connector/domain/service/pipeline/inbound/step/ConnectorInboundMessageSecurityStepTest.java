@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +41,7 @@ public class ConnectorInboundMessageSecurityStepTest {
 
     @Test
     void should_execute_inbound_message_security_check_successfully() {
-        var inboundMessage = MessageUtil.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
 
         doNothing().when(securityToolkit).validateMessage(any());
 

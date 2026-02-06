@@ -16,10 +16,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +50,7 @@ class ConnectorLinkSubmissionServiceTest {
     void should_submit_outgoing_message_to_link_successfully() {
         doNothing().when(gatewayLinkEventPublisher).publish(any());
 
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         linkSubmissionService.submit(message);
 
         verify(gatewayLinkEventPublisher, times(1)).publish(any());
@@ -61,7 +61,7 @@ class ConnectorLinkSubmissionServiceTest {
     void should_submit_incoming_message_to_link_successfully() {
         doNothing().when(backendLinkEventPublisher).publish(any());
 
-        var message = MessageUtil.createValidInboundBusinessMessage();
+        var message = MessageTestFixtures.createValidInboundBusinessMessage();
         linkSubmissionService.submit(message);
 
         verify(gatewayLinkEventPublisher, times(0)).publish(any());
@@ -70,7 +70,7 @@ class ConnectorLinkSubmissionServiceTest {
 
     @Test
     void should_not_submit_message_to_link_when_gateway_name_is_unknown() {
-        var message = MessageUtil.createValidOutboundBusinessMessageWithoutGatewayName();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessageWithoutGatewayName();
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
                 () -> linkSubmissionService.submit(message)
@@ -79,7 +79,7 @@ class ConnectorLinkSubmissionServiceTest {
 
     @Test
     void should_not_submit_message_to_link_when_backend_name_is_unknown() {
-        var message = MessageUtil.createValidInboundBusinessMessageWithoutBackendName();
+        var message = MessageTestFixtures.createValidInboundBusinessMessageWithoutBackendName();
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
                 () -> linkSubmissionService.submit(message)

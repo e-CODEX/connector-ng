@@ -18,11 +18,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.exception.ConnectorGatewaySubmissionException;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,7 +66,7 @@ public class ConnectorOutboundMessagePipelineTest {
 
     @Test
     void should_process_outbound_message_pipeline_successfully() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(connectorOutboundMessageValidationStep.execute(any())).thenReturn(outboundMessage);
         when(connectorOutboundMessageSecurityStep.execute(any())).thenReturn(outboundMessage);
@@ -90,7 +90,7 @@ public class ConnectorOutboundMessagePipelineTest {
 
     @Test
     void should_send_back_successfully_submission_rejection_evidence_when_security_error_occurs_during_outbound_message_processing() {
-        var outboundMessage = MessageUtil.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(connectorOutboundMessageValidationStep.execute(any())).thenReturn(outboundMessage);
         doThrow(RuntimeException.class).when(

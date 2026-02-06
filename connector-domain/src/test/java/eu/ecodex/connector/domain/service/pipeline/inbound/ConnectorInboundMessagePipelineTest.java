@@ -18,10 +18,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +59,7 @@ public class ConnectorInboundMessagePipelineTest {
 
     @Test
     void should_process_inbound_message_pipeline_successfully() {
-        var inboundMessage = MessageUtil.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
 
         when(connectorInboundMessageValidationStep.execute(any())).thenReturn(inboundMessage);
         when(connectorInboundMessageBackendValidationStep.execute(any())).thenReturn(inboundMessage);
@@ -79,7 +79,7 @@ public class ConnectorInboundMessagePipelineTest {
 
     @Test
     void should_send_back_successfully_non_delivery_evidence_message_when_security_error_occurs_during_inbound_message_processing() {
-        var inboundMessage = MessageUtil.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
 
         when(connectorInboundMessageValidationStep.execute(any())).thenReturn(inboundMessage);
         when(connectorInboundMessageBackendValidationStep.execute(any())).thenReturn(inboundMessage);

@@ -8,14 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils.link;
+package eu.ecodex.connector.link;
 
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.configuration.ConnectorLinkConfiguration;
 import eu.ecodex.connector.domain.model.link.configuration.ConnectorLinkConfigurationName;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class ConnectorLinkConfigurationUtil {
+public class ConnectorLinkConfigurationTestFixtures {
     public static ConnectorLinkConfiguration createConnectorLinkConfiguration() {
         return ConnectorLinkConfiguration
                 .builder()

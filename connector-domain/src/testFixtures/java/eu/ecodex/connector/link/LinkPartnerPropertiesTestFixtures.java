@@ -8,19 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector.link;
 
-import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
-import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
+import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerProperties;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class DetachedSignatureUtil {
-    public static DetachedSignature createDetachedSignature() {
-        return DetachedSignature
+public class LinkPartnerPropertiesTestFixtures {
+    public static ConnectorLinkPartnerProperties createBackendLinkPartnerProperties() {
+        return ConnectorLinkPartnerProperties
                 .builder()
-                .name("test_signature")
-                .signature(new byte[1])
-                .mimeType(DetachedSignatureMimeType.PKCS7)
+                .pushAddress("http://localhost:8080/push")
+                .encryptionAlias("alice")
+                .certificateDn("cn=alice")
                 .build();
     }
 }

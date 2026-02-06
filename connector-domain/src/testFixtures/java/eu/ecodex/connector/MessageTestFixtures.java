@@ -1,4 +1,4 @@
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "LineLength"})
-public class MessageUtil {
+public class MessageTestFixtures {
     public static ConnectorMessage createValidOutboundBusinessMessage() {
         var builder = backendToGatewayMessage();
         return builder.build();
@@ -55,7 +55,7 @@ public class MessageUtil {
         builder.as4Properties(
                 defaultASProperties()
                         .fromParty(
-                                PartyUtil.createFromParty().toBuilder().identifierType("").build())
+                                PartyTestFixtures.createFromParty().toBuilder().identifierType("").build())
                         .build()
         );
         return builder.build();
@@ -75,7 +75,7 @@ public class MessageUtil {
         var builder = backendToGatewayMessage();
         builder.as4Properties(
                 defaultASProperties()
-                        .toParty(PartyUtil.createToParty().toBuilder().identifierType("").build())
+                        .toParty(PartyTestFixtures.createToParty().toBuilder().identifierType("").build())
                         .build()
         );
         return builder.build();
@@ -85,7 +85,7 @@ public class MessageUtil {
         var builder = backendToGatewayMessage();
         builder.as4Properties(
                 defaultASProperties()
-                        .fromParty(PartyUtil.createToParty())
+                        .fromParty(PartyTestFixtures.createToParty())
                         .build()
         );
         return builder.build();
@@ -95,14 +95,14 @@ public class MessageUtil {
         var builder = backendToGatewayMessage();
         builder.as4Properties(
                 defaultASProperties()
-                        .toParty(PartyUtil.createFromParty())
+                        .toParty(PartyTestFixtures.createFromParty())
                         .build()
         );
         return builder.build();
     }
 
     public static ConnectorMessage createSubmissionAcceptanceEvidenceMessage() {
-        var evidence = EvidenceUtil.createSubmissionAcceptanceEvidence();
+        var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorEvidence>();
         evidences.add(evidence);
         var builder = createValidOutboundBusinessMessage().toBuilder();
@@ -113,7 +113,7 @@ public class MessageUtil {
     }
 
     public static ConnectorMessage createRelayRMMDAcceptanceEvidenceMessage() {
-        var evidence = EvidenceUtil.createRelayREMMDAcceptanceEvidence();
+        var evidence = EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorEvidence>();
         evidences.add(evidence);
         var builder = createValidInboundBusinessMessage().toBuilder();
@@ -124,7 +124,7 @@ public class MessageUtil {
     }
 
     public static ConnectorMessage createNonDeliveryEvidenceMessage() {
-        var evidence = EvidenceUtil.createNonDeliveryEvidence();
+        var evidence = EvidenceTestFixtures.createNonDeliveryEvidence();
         var evidences = new ArrayList<ConnectorEvidence>();
         evidences.add(evidence);
         var builder = createValidInboundBusinessMessage().toBuilder();
@@ -135,7 +135,7 @@ public class MessageUtil {
     }
 
     public static ConnectorMessage createEvidenceTriggerMessage() {
-        var evidence = EvidenceUtil.createEvidenceTrigger();
+        var evidence = EvidenceTestFixtures.createEvidenceTrigger();
         var evidences = new ArrayList<ConnectorEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
@@ -146,7 +146,7 @@ public class MessageUtil {
     }
 
     public static ConnectorMessage createRejectedMessage() {
-        var evidence = EvidenceUtil.createSubmissionRejectionEvidence();
+        var evidence = EvidenceTestFixtures.createSubmissionRejectionEvidence();
         var evidences = new ArrayList<ConnectorEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
@@ -158,7 +158,7 @@ public class MessageUtil {
     }
 
     public static ConnectorMessage createConfirmedMessage() {
-        var evidence = EvidenceUtil.createSubmissionAcceptanceEvidence();
+        var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
@@ -174,8 +174,8 @@ public class MessageUtil {
         return ConnectorMessage
                 .builder()
                 .businessDomainIdentifier(
-                        BusinessDomainUtil.createDefaultBusinessDomain()
-                                          .identifier()
+                        BusinessDomainTestFixtures.createDefaultBusinessDomain()
+                                                  .identifier()
                 )
                 .uuid("223caef9-cae9-4387-a38c-ad4879f94b4e")
                 .identifier("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
@@ -198,9 +198,9 @@ public class MessageUtil {
                 .ebmsMessageIdentifier(null)
                 .originalSender("alice")
                 .finalRecipient("bob")
-                .fromParty(PartyUtil.createFromParty())
-                .toParty(PartyUtil.createToParty())
-                .service(ServiceUtil.createService())
-                .action(ActionUtil.createAction());
+                .fromParty(PartyTestFixtures.createFromParty())
+                .toParty(PartyTestFixtures.createToParty())
+                .service(ServiceTestFixtures.createService())
+                .action(ActionTestFixtures.createAction());
     }
 }

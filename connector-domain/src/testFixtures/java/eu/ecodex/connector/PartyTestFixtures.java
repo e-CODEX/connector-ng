@@ -1,10 +1,10 @@
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class PartyUtil {
+public class PartyTestFixtures {
     public static ConnectorParty createFromParty() {
         return ConnectorParty.builder()
                              .name("service_blue_ecodex")

@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageContentService;
 import eu.ecodex.connector.domain.spi.ConnectorMessageContentRepository;
-import eu.ecodex.connector.utils.MessageContentUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,9 +43,10 @@ public class ConnectorMessageContentServiceTest {
 
     @Test
     void should_register_message_content_successfully() {
-        var messageContent = MessageContentUtil.createContent();
+        var messageContent = MessageContentTestFixtures.createContent();
 
-        when(messageContentRepository.save(any())).thenReturn(MessageContentUtil.createSaveContent());
+        when(messageContentRepository.save(any()))
+                .thenReturn(MessageContentTestFixtures.createSaveContent());
 
         var savedContent = connectorMessageContentService.register(messageContent);
 

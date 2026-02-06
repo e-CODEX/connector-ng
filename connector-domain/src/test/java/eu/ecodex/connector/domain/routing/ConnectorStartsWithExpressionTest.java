@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import eu.ecodex.connector.utils.MessageUtil;
+import eu.ecodex.connector.MessageTestFixtures;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 public class ConnectorStartsWithExpressionTest {
     @Test
     void should_successfully_check_if_as4_attribute_starts_with_the_given_value() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var startsWithExpression = new ConnectorStartsWithExpression(
                 TokenType.AS4_ACTION, "ConTest"
         );
@@ -31,7 +31,7 @@ public class ConnectorStartsWithExpressionTest {
 
     @Test
     void should_fail_to_check_if_as4_attribute_starts_with_the_given_value() {
-        var message = MessageUtil.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var startsWithExpression = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Hello");
         var evaluationResult = startsWithExpression.evaluate(message);
         assertThat(evaluationResult).isFalse();

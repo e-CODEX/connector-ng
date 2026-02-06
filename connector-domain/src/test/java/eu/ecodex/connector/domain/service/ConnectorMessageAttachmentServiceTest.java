@@ -15,9 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageAttachmentService;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.utils.MessageAttachmentUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,10 +44,10 @@ public class ConnectorMessageAttachmentServiceTest {
 
     @Test
     void should_register_message_attachment_successfully() {
-        var attachment = MessageAttachmentUtil.createAttachment();
+        var attachment = MessageAttachmentTestFixtures.createAttachment();
 
         when(messageAttachmentRepository.save(any()))
-                .thenReturn(MessageAttachmentUtil.createSavedAttachment());
+                .thenReturn(MessageAttachmentTestFixtures.createSavedAttachment());
 
         var savedAttachment = connectorMessageAttachmentService.register(attachment);
 

@@ -15,6 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.ActionTestFixtures;
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.service.ConnectorActionServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorBusinessDomainServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorPartyServiceImpl;
@@ -26,10 +30,6 @@ import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
-import eu.ecodex.connector.utils.ActionUtil;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
-import eu.ecodex.connector.utils.ServiceUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,14 +77,14 @@ public class ConnectorInboundMessageValidationStepTest {
 
     @Test
     void should_execute_inbound_message_validation_successfully() {
-        var inboundMessage = MessageUtil.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
 
         when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
-                ServiceUtil.createService());
+                ServiceTestFixtures.createService());
         when(actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
-                ActionUtil.createAction());
+                ActionTestFixtures.createAction());
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 
         var outputMessage = inboundMessageValidationStep.execute(inboundMessage);
 

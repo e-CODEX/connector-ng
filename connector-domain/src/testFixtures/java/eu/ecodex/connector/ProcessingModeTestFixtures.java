@@ -8,21 +8,21 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import java.util.Set;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class ProcessingModeUtil {
+public class ProcessingModeTestFixtures {
     public static ConnectorProcessingMode createWithNoBusinessDomain() {
         return ConnectorProcessingMode
                 .builder()
                 .description("test processing mode")
-                .services(Set.of(ServiceUtil.createService()))
-                .actions(Set.of(ActionUtil.createAction()))
-                .parties(Set.of(PartyUtil.createFromParty()))
-                .homeParty(PartyUtil.createToParty())
+                .services(Set.of(ServiceTestFixtures.createService()))
+                .actions(Set.of(ActionTestFixtures.createAction()))
+                .parties(Set.of(PartyTestFixtures.createFromParty()))
+                .homeParty(PartyTestFixtures.createToParty())
                 .content(new byte[1])
                 .build();
     }
@@ -30,12 +30,12 @@ public class ProcessingModeUtil {
     public static ConnectorProcessingMode createWithBusinessDomain() {
         return ConnectorProcessingMode
                 .builder()
-                .businessDomain(BusinessDomainUtil.createDefaultBusinessDomain())
+                .businessDomain(BusinessDomainTestFixtures.createDefaultBusinessDomain())
                 .description("test processing mode")
-                .services(Set.of(ServiceUtil.createService()))
-                .actions(Set.of(ActionUtil.createAction()))
-                .parties(Set.of(PartyUtil.createFromParty()))
-                .homeParty(PartyUtil.createToParty())
+                .services(Set.of(ServiceTestFixtures.createService()))
+                .actions(Set.of(ActionTestFixtures.createAction()))
+                .parties(Set.of(PartyTestFixtures.createFromParty()))
+                .homeParty(PartyTestFixtures.createToParty())
                 .content(new byte[1])
                 .build();
     }

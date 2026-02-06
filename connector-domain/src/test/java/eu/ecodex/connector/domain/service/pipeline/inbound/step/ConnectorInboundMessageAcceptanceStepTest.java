@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageProcessingConfigProviderTestFixtures;
+import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
@@ -25,9 +28,6 @@ import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageRoutingConfigProvider;
-import eu.ecodex.connector.utils.EvidenceUtil;
-import eu.ecodex.connector.utils.MessageProcessingConfigProviderUtil;
-import eu.ecodex.connector.utils.MessageUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,15 +70,15 @@ public class ConnectorInboundMessageAcceptanceStepTest {
 
     @Test
     void should_create_inbound_message_execute_relay_remmd_acceptance_evidence() {
-        var inboundMessage = MessageUtil.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
 
         when(messageRepository.findByIdentifier(any())).thenReturn(inboundMessage);
         when(messageRepository.addEvidence(any(), any()))
-                .thenReturn(MessageUtil.createRelayRMMDAcceptanceEvidenceMessage());
+                .thenReturn(MessageTestFixtures.createRelayRMMDAcceptanceEvidenceMessage());
         when(evidenceToolkit.create(any(), any(), any()))
-                .thenReturn(EvidenceUtil.createRelayREMMDAcceptanceEvidence());
+                .thenReturn(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence());
         when(messageProcessingConfigProvider.getProcessingProperties())
-                .thenReturn(MessageProcessingConfigProviderUtil.getProcessingProperties());
+                .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 
         var outputMessage = inboundMessageAcceptanceCreationStep.execute(inboundMessage);
 

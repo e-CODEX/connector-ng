@@ -8,12 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class ServiceUtil {
+public class ServiceTestFixtures {
     public static ConnectorService createService() {
         return ConnectorService.builder()
                                .name("Connector-TEST")

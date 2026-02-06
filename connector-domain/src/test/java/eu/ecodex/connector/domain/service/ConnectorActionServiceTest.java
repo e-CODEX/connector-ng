@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.ActionTestFixtures;
+import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorActionService;
 import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
-import eu.ecodex.connector.utils.ActionUtil;
-import eu.ecodex.connector.utils.BusinessDomainUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,9 +43,9 @@ class ConnectorActionServiceTest {
     @Test
     void should_find_action_by_name_and_business_domain_successfully() {
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
-                ActionUtil.createAction());
+                ActionTestFixtures.createAction());
         var action = this.actionService.findByNameAndBusinessDomain(
-                "", BusinessDomainUtil.createDefaultBusinessDomain().identifier());
+                "", BusinessDomainTestFixtures.createDefaultBusinessDomain().identifier());
         assertThat(action).isNotNull();
         assertThat(action.name()).isEqualTo("ConTest_Form");
     }
@@ -56,7 +56,7 @@ class ConnectorActionServiceTest {
         assertThrows(
                 ConnectorActionNotFoundException.class,
                 () -> this.actionService.findByNameAndBusinessDomain(
-                        "", BusinessDomainUtil.createDefaultBusinessDomain().identifier())
+                        "", BusinessDomainTestFixtures.createDefaultBusinessDomain().identifier())
         );
     }
 }

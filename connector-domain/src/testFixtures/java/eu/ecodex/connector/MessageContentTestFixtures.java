@@ -8,24 +8,25 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageContent;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class MessageContentUtil {
+public class MessageContentTestFixtures {
     public static ConnectorMessageContent createContent() {
-        return ConnectorMessageContent.builder()
-                                      .xmlContent(new byte[1])
-                                      .document(ConnectorMessageDocumentUtil.createDocument())
-                                      .build();
+        return ConnectorMessageContent
+                .builder()
+                .xmlContent(new byte[1])
+                .document(ConnectorMessageDocumentTestFixtures.createDocument())
+                .build();
     }
 
     public static ConnectorMessageContent createSaveContent() {
         return createContent()
                 .toBuilder()
                 .uuid("96a818f9-606a-4ff5-abc0-3ab31fa90ac3")
-                .document(ConnectorMessageDocumentUtil.createSavedDocument())
+                .document(ConnectorMessageDocumentTestFixtures.createSavedDocument())
                 .build();
     }
 }

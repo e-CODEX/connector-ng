@@ -8,13 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class EvidenceUtil {
+public class EvidenceTestFixtures {
     public static ConnectorEvidence createSubmissionAcceptanceEvidence() {
         return ConnectorEvidence.builder()
                                 .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)

@@ -8,13 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.utils;
+package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.property.ConnectorMessageProcessingProperties;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
-public class MessageProcessingConfigProviderUtil {
+public class MessageProcessingConfigProviderTestFixtures {
     public static ConnectorMessageProcessingProperties getProcessingProperties() {
         return ConnectorMessageProcessingProperties
                 .builder()

@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.domain.service.pipeline.inbound;
 
-import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
@@ -34,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
  * routing.
  */
 @Slf4j
-@DomainService
 public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline {
     // IMPORTANT: The names of the steps are important! They should correspond to the names of
     //  the implementation classes, but in camel case.

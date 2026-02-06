@@ -13,7 +13,6 @@ package eu.ecodex.connector.domain.service.link;
 
 import static eu.ecodex.connector.domain.model.message.ConnectorMessageDirectionType.BACKEND;
 
-import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
@@ -43,7 +42,6 @@ import org.apache.commons.lang3.StringUtils;
  * </ul>
  */
 @Slf4j
-@DomainService
 public class ConnectorLinkSubmissionServiceImpl implements ConnectorLinkSubmissionService {
     private final ConnectorEventPublisher backendLinkEventPublisher;
     private final ConnectorEventPublisher gatewayLinkEventPublisher;

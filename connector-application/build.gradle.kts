@@ -1,5 +1,7 @@
 plugins {
     id("java")
+    id("jacoco")
+    id("java-test-fixtures")
 }
 
 group = "eu.ecodex"
@@ -13,10 +15,21 @@ val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
 dependencies {
     implementation(project(":connector-domain"))
+    // spring
     implementation(platform(libs.spring.boot.bom))
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    // jakarta
+    implementation(libs.jakarta.validation)
+    // other
+    implementation(libs.lombok)
+    annotationProcessor(libs.lombok)
     // test
+    testImplementation(testFixtures(project(":connector-domain")))
+    testFixturesImplementation(testFixtures(project(":connector-domain")))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation(platform(libs.junit.bom ))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")

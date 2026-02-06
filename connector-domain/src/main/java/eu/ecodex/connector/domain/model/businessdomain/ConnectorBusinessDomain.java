@@ -27,7 +27,8 @@ import lombok.Builder;
  * <p>The class provides predefined constants for a default business domain, which can serve as a
  * general fallback configuration.
  *
- * @param identifier  The unique uuid for the business domain.
+ * @param uuid        A unique string uuid representing the business domain.
+ * @param identifier  The unique identifier for the business domain.
  * @param description A textual description of the business domain.
  * @param enabled     A boolean flag indicating if the business domain is active or disabled.
  * @param properties  A map of additional key-value settings associated with the business domain.
@@ -36,6 +37,7 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDomain(
+        String uuid,
         @NotBlank ConnectorBusinessDomainIdentifier identifier,
         @NotBlank String description, boolean enabled,
         Map<String, String> properties,

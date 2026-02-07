@@ -19,6 +19,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,7 +36,7 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "CONNECTOR_BUSINESS_DOMAIN")
-public class ConnectorBusinessDomainEntity {
+public class ConnectorBusinessDomainEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,5 +52,5 @@ public class ConnectorBusinessDomainEntity {
     private boolean enabled;
     @Enumerated(EnumType.STRING)
     @Column(name = "SOURCE")
-    ConnectorConfigurationSource source;
+    private ConnectorConfigurationSource source;
 }

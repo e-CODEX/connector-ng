@@ -25,14 +25,15 @@ dependencies {
     // other
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
+    // doc
+    implementation(libs.spring.doc)
     // test
     testImplementation(testFixtures(project(":connector-domain")))
     testFixturesImplementation(testFixtures(project(":connector-domain")))
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testFixturesImplementation(platform(libs.spring.boot.bom))
+    testFixturesImplementation("org.springframework:spring-core")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testImplementation(platform(libs.junit.bom ))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    implementation("org.springframework.boot:spring-boot-starter-restclient-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)

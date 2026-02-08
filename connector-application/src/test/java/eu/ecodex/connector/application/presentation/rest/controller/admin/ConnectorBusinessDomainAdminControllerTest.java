@@ -95,4 +95,12 @@ public class ConnectorBusinessDomainAdminControllerTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+
+    @Test
+    void should_send_200_response_when_retrieving_business_domains() {
+        apiClient.get()
+                .uri("/api/v1/admin/business-domains")
+                .exchange()
+                .expectStatus().isOk();
+    }
 }

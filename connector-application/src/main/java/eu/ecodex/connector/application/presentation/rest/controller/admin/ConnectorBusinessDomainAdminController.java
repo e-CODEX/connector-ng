@@ -17,6 +17,7 @@ import eu.ecodex.connector.domain.api.service.ConnectorBusinessDomainService;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +39,13 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
         var created = this.connectorBusinessDomainService.register(toDomain(request));
 
         return toDto(created);
+    }
+
+    @Override
+    public List<ConnectorBusinessDomainDto> getAll() {
+        var businessDomains = this.connectorBusinessDomainService.findAll();
+
+        return businessDomains.stream().map(this::toDto).toList();
     }
 
     private ConnectorBusinessDomainDto toDto(ConnectorBusinessDomain businessDomain) {

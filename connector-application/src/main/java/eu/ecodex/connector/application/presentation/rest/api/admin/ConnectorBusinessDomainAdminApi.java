@@ -20,7 +20,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,4 +58,9 @@ public interface ConnectorBusinessDomainAdminApi {
     )
     ConnectorBusinessDomainDto create(
             @Valid @RequestBody ConnectorBusinessDomainCreationRequest request);
+
+    @GetMapping("")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get all business domains.")
+    List<ConnectorBusinessDomainDto> getAll();
 }

@@ -23,19 +23,21 @@ public interface ConnectorBusinessDomainRepository {
      * @param businessDomain the business domain to be saved; must not be null. It encapsulates
      *                       information such as the uuid, description, activation status,
      *                       associated properties, and configuration source of a business domain.
-     * @return the persisted instance of ConnectorBusinessDomain, which reflects the state stored
-     *         in the repository.
+     *
+     * @return the persisted instance of ConnectorBusinessDomain, which reflects the state stored in
+     *         the repository.
      */
     ConnectorBusinessDomain save(ConnectorBusinessDomain businessDomain);
 
     /**
      * Retrieves a {@code ConnectorBusinessDomain} by its unique uuid.
      *
-     * @param identifier the unique uuid of the business domain to retrieve; must not be null.
-     *                   The uuid encapsulates details such as the message routing lane
-     *                   for the business domain.
-     * @return the {@code ConnectorBusinessDomain} associated with the given uuid, or null if
-     *         no matching business domain is found in the repository.
+     * @param identifier the unique uuid of the business domain to retrieve; must not be null. The
+     *                   uuid encapsulates details such as the message routing lane for the business
+     *                   domain.
+     *
+     * @return the {@code ConnectorBusinessDomain} associated with the given uuid, or null if no
+     *         matching business domain is found in the repository.
      */
     ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier);
 }

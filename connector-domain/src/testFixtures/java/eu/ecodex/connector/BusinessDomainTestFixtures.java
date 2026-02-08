@@ -19,7 +19,6 @@ public class BusinessDomainTestFixtures {
                 )
                 .description("test business domain")
                 .enabled(true)
-                .source(ConnectorConfigurationSource.IMPLEMENTATION)
-                .properties(null);
+                .source(ConnectorConfigurationSource.IMPLEMENTATION);
     }
 }

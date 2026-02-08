@@ -7,6 +7,7 @@ lombok = "1.18.42"
 micrometer = "1.6.2"
 slf4j-api = "2.0.17"
 spring-boot = "4.0.2"
+spring-doc = "3.0.1"
 # dbms
 h2 = "2.4.240"
 # tests
@@ -23,6 +24,7 @@ lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
+spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}
 # dbms
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 # test

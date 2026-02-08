@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.model.businessdomain;
 
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import jakarta.validation.constraints.NotBlank;
+import java.time.Instant;
 import java.util.Map;
 import lombok.Builder;
 
@@ -31,9 +32,10 @@ import lombok.Builder;
  * @param identifier  The unique identifier for the business domain.
  * @param description A textual description of the business domain.
  * @param enabled     A boolean flag indicating if the business domain is active or disabled.
- * @param properties  A map of additional key-value settings associated with the business domain.
  * @param source      Specifies the configuration source for this business domain, such as database
  *                    or environment.
+ * @param createdAt   The timestamp when the business domain was created.
+ * @param updatedAt   The timestamp when the business domain was last updated.
  */
 @Builder
 public record ConnectorBusinessDomain(
@@ -41,7 +43,9 @@ public record ConnectorBusinessDomain(
         @NotBlank ConnectorBusinessDomainIdentifier identifier,
         @NotBlank String description, boolean enabled,
         Map<String, String> properties,
-        ConnectorConfigurationSource source
+        ConnectorConfigurationSource source,
+        Instant createdAt,
+        Instant updatedAt
 ) {
     public static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN_ID =
             ConnectorBusinessDomainIdentifier
@@ -54,6 +58,5 @@ public record ConnectorBusinessDomain(
                                    .identifier(DEFAULT_BUSINESS_DOMAIN_ID)
                                    .description("Default Business Domain")
                                    .enabled(true)
-                                   .properties(Map.of())
                                    .build();
 }

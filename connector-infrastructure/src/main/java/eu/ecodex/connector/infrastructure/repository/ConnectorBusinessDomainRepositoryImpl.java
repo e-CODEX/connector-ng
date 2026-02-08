@@ -13,6 +13,8 @@ package eu.ecodex.connector.infrastructure.repository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import eu.ecodex.connector.infrastructure.database.entity.ConnectorBusinessDomainEntity;
+import eu.ecodex.connector.infrastructure.database.repository.ConnectorBusinessDomainJpaRepository;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,13 +22,61 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessDomainRepository {
+    private final ConnectorBusinessDomainJpaRepository jpaRepository;
+
+    /**
+     * Constructs a new instance of {@code ConnectorBusinessDomainRepositoryImpl} with the provided
+     * JPA repository.
+     *
+     * @param jpaRepository the repository used for accessing and managing
+     *                      {@link ConnectorBusinessDomainEntity} entities in the database; must not
+     *                      be null.
+     */
+    public ConnectorBusinessDomainRepositoryImpl(
+            ConnectorBusinessDomainJpaRepository jpaRepository) {
+        this.jpaRepository = jpaRepository;
+    }
+
     @Override
     public ConnectorBusinessDomain save(ConnectorBusinessDomain businessDomain) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        var entity = ConnectorBusinessDomainEntity
+                .builder()
+                .identifier(businessDomain.identifier().messageLaneIdentifier())
+                .enabled(businessDomain.enabled())
+                .description(businessDomain.description())
+                .source(businessDomain.source())
+                .build();
+
+        var savedEntity = jpaRepository.save(entity);
+
+        return toDomain(savedEntity);
     }
 
     @Override
     public ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        var entity = jpaRepository.findByIdentifier(identifier.messageLaneIdentifier());
+
+        return toDomain(entity);
+    }
+
+    private ConnectorBusinessDomain toDomain(ConnectorBusinessDomainEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorBusinessDomain
+                .builder()
+                .uuid(entity.getUuid())
+                .description(entity.getDescription())
+                .enabled(entity.isEnabled())
+                .identifier(
+                        ConnectorBusinessDomainIdentifier
+                                .builder()
+                                .messageLaneIdentifier(entity.getIdentifier()).build()
+                )
+                .source(entity.getSource())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 }

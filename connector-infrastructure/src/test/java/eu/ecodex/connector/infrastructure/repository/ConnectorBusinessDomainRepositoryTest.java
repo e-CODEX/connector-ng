@@ -79,4 +79,15 @@ public class ConnectorBusinessDomainRepositoryTest {
 
         assertThat(foundDomain).isNull();
     }
+
+    @Test
+    void should_return_all_business_domains_from_database() {
+        var domain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+
+        repository.save(domain);
+
+        var domains = repository.findAll();
+
+        assertThat(domains).hasSize(1);
+    }
 }

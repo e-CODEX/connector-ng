@@ -13,6 +13,7 @@ package eu.ecodex.connector.domain.api.service;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Service interface for managing and persisting {@link ConnectorBusinessDomain} entities.
@@ -48,4 +49,13 @@ public interface ConnectorBusinessDomainService {
      *         {@code null} if no matching entity is found.
      */
     ConnectorBusinessDomain findByIdentifier(@Nonnull ConnectorBusinessDomainIdentifier identifier);
+
+    /**
+     * Retrieves all {@link ConnectorBusinessDomain} entities managed by the system.
+     *
+     * @return a list of {@link ConnectorBusinessDomain} objects representing all business domains
+     *         available in the connector environment. The list is empty if no business domains are
+     *         registered.
+     */
+    List<ConnectorBusinessDomain> findAll();
 }

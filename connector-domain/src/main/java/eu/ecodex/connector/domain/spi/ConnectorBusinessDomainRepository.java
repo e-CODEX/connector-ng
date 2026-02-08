@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import java.util.List;
 
 /**
  * Defines the contract for managing and querying business domains within the connector system.
@@ -40,4 +41,12 @@ public interface ConnectorBusinessDomainRepository {
      *         matching business domain is found in the repository.
      */
     ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier);
+
+    /**
+     * Retrieves all available business domain configurations from the repository.
+     *
+     * @return a list of {@code ConnectorBusinessDomain} instances representing all configured
+     *         business domains. If no business domains are found, an empty list is returned.
+     */
+    List<ConnectorBusinessDomain> findAll();
 }

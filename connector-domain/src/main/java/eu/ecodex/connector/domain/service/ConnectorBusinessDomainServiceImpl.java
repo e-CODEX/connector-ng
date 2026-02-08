@@ -17,6 +17,7 @@ import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundExcep
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,5 +68,10 @@ public class ConnectorBusinessDomainServiceImpl implements ConnectorBusinessDoma
         }
 
         return businessDomain;
+    }
+
+    @Override
+    public List<ConnectorBusinessDomain> findAll() {
+        return businessDomainRepository.findAll();
     }
 }

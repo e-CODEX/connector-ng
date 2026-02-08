@@ -22,6 +22,7 @@ import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -115,5 +116,17 @@ public class ConnectorBusinessDomainServiceTest {
                 NullPointerException.class,
                 () -> connectorBusinessDomainService.findByIdentifier(null)
         );
+    }
+
+    @Test
+    void should_find_all_business_domains_successfully() {
+        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+
+        when(businessDomainRepository.findAll()).thenReturn(List.of(businessDomain));
+
+        var foundBusinessDomains = connectorBusinessDomainService.findAll();
+
+        assertThat(foundBusinessDomains).isNotNull();
+        assertThat(foundBusinessDomains).hasSize(1);
     }
 }

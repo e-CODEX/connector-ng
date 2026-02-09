@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.service.link.ConnectorLinkSubmissionServiceImpl;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -22,6 +23,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  * InfrastructureConfigurations class for configuring the infrastructure-specific components.
  */
 @Configuration
+@ConfigurationPropertiesScan
 @EnableJpaRepositories(
         basePackages = {"eu.ecodex.connector.infrastructure.database.repository"}
 )

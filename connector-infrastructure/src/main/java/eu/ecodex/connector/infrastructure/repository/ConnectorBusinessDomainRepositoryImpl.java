@@ -38,36 +38,16 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
         this.jpaRepository = jpaRepository;
     }
 
-    @Override
-    public ConnectorBusinessDomain save(ConnectorBusinessDomain businessDomain) {
-        var entity = ConnectorBusinessDomainEntity
-                .builder()
-                .identifier(businessDomain.identifier().messageLaneIdentifier())
-                .enabled(businessDomain.enabled())
-                .description(businessDomain.description())
-                .source(businessDomain.source())
-                .build();
-
-        var savedEntity = jpaRepository.save(entity);
-
-        return toDomain(savedEntity);
-    }
-
-    @Override
-    public ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier) {
-        var entity = jpaRepository.findByIdentifier(identifier.messageLaneIdentifier());
-
-        return toDomain(entity);
-    }
-
-    @Override
-    public List<ConnectorBusinessDomain> findAll() {
-        var businessDomains = jpaRepository.findAll();
-
-        return businessDomains.stream().map(this::toDomain).toList();
-    }
-
-    private ConnectorBusinessDomain toDomain(ConnectorBusinessDomainEntity entity) {
+    /**
+     * Converts a {@link ConnectorBusinessDomainEntity} to its corresponding
+     * {@link ConnectorBusinessDomain} representation.
+     *
+     * @param entity the {@link ConnectorBusinessDomainEntity} object to be converted; may be null.
+     *
+     * @return the converted {@link ConnectorBusinessDomain} object, or null if the input entity is
+     *         null.
+     */
+    public static ConnectorBusinessDomain toDomain(ConnectorBusinessDomainEntity entity) {
         if (entity == null) {
             return null;
         }
@@ -86,5 +66,48 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();
+    }
+
+    /**
+     * Converts a {@link ConnectorBusinessDomain} object into a
+     * {@link ConnectorBusinessDomainEntity} object to be used for persistence.
+     *
+     * @param businessDomain the {@link ConnectorBusinessDomain} object to be converted; must not be
+     *                       null.
+     *
+     * @return the corresponding {@link ConnectorBusinessDomainEntity} instance constructed from the
+     *         {@link ConnectorBusinessDomain}.
+     */
+    public static ConnectorBusinessDomainEntity toEntity(ConnectorBusinessDomain businessDomain) {
+        return ConnectorBusinessDomainEntity
+                .builder()
+                .identifier(businessDomain.identifier().messageLaneIdentifier())
+                .enabled(businessDomain.enabled())
+                .description(businessDomain.description())
+                .source(businessDomain.source())
+                .build();
+    }
+
+    @Override
+    public ConnectorBusinessDomain save(ConnectorBusinessDomain businessDomain) {
+
+        var savedEntity = jpaRepository.save(toEntity(businessDomain));
+
+        return toDomain(savedEntity);
+    }
+
+    @Override
+    public ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier) {
+        var entity = jpaRepository.findByIdentifier(identifier.messageLaneIdentifier());
+
+        return toDomain(entity);
+    }
+
+    @Override
+    public List<ConnectorBusinessDomain> findAll() {
+        var businessDomains = jpaRepository.findAll();
+
+        return businessDomains.stream().map(
+                ConnectorBusinessDomainRepositoryImpl::toDomain).toList();
     }
 }

@@ -8,18 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.database.entity;
+package eu.ecodex.connector.infrastructure.database.entity.pmode;
 
-import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
+import eu.ecodex.connector.infrastructure.database.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,30 +27,29 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
 /**
- * Represents the Connector Business Domain entity used to manage and store information about
+ * Represents the Connector Processing Mode Action entity used to manage and store information about
  * connector configurations within the system.
  */
-@Builder
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_BUSINESS_DOMAINS")
-public class ConnectorBusinessDomainEntity extends BaseEntity {
+@Table(name = "CONNECTOR_ACTIONS")
+public class ConnectorActionEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @UuidGenerator
     @Column(name = "UUID", unique = true, nullable = false, updatable = false)
     private String uuid;
-    @Column(name = "IDENTIFIER", unique = true, nullable = false)
-    private String identifier;
-    @Column(name = "DESCRIPTION")
-    private String description;
-    @Column(name = "ENABLED")
-    private boolean enabled;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "SOURCE")
-    private ConnectorConfigurationSource source;
+
+    @Column(name = "NAME", nullable = false)
+    private String name;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "PROCESSING_MODE_ID", nullable = false)
+    private ConnectorProcessingModeEntity processingMode;
 }

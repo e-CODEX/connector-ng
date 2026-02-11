@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("jacoco")
+    id("java-test-fixtures")
     id("org.springframework.boot") version "4.0.2"
 }
 
@@ -22,11 +23,12 @@ dependencies {
     implementation(project(":connector-domain"))
     // spring boot
     implementation(platform(libs.spring.boot.bom))
-    // implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    // implementation("org.springframework.boot:spring-boot-starter-log4j2")
     // databases
     implementation(libs.h2)
+    // jakarta
+    implementation(libs.jakarta.annotation)
+    implementation(libs.jakarta.validation)
     // other
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
@@ -35,9 +37,8 @@ dependencies {
     testImplementation(testFixtures(project(":connector-domain")))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-data-jpa-test")
-    testImplementation(platform(libs.junit.bom ))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testFixturesImplementation(platform(libs.spring.boot.bom))
+    testFixturesImplementation("org.springframework:spring-core")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)

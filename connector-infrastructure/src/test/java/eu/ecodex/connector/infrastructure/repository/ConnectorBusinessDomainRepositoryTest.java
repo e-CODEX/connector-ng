@@ -27,13 +27,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 public class ConnectorBusinessDomainRepositoryTest {
     @MockitoSpyBean
     private ConnectorBusinessDomainJpaRepository jpaRepository;
-
-    private final ConnectorBusinessDomainRepository repository;
-
     @Autowired
-    public ConnectorBusinessDomainRepositoryTest(ConnectorBusinessDomainRepository repository) {
-        this.repository = repository;
-    }
+    private ConnectorBusinessDomainRepository repository;
 
     @Test
     void should_save_business_domain_successfully_to_database() {
@@ -81,7 +76,7 @@ public class ConnectorBusinessDomainRepositoryTest {
     }
 
     @Test
-    void should_return_all_business_domains_from_database() {
+    void should_return_all_business_domains_from_database_successfully() {
         var domain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
         repository.save(domain);

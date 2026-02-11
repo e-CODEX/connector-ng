@@ -10,16 +10,19 @@
 
 package eu.ecodex.connector.application.presentation.rest.controller.admin;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ProcessingModeTestFixtures;
+import eu.ecodex.connector.application.presentation.rest.dto.ConnectorProcessingModeDto;
 import eu.ecodex.connector.application.presentation.rest.request.pmode.ConnectorKeystoreCreationRequest;
 import eu.ecodex.connector.application.presentation.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import eu.ecodex.connector.domain.api.service.ConnectorProcessingModeService;
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -57,6 +60,7 @@ public class ConnectorProcessingModeAdminControllerTest {
     @MockitoBean
     private ConnectorProcessingModeService connectorProcessingModeService;
 
+    // save processing mode
     @Test
     void should_send_201_response_when_creating_processing_mode_with_application_xml() throws Exception {
         when(connectorProcessingModeService.register(any(), any()))
@@ -169,8 +173,27 @@ public class ConnectorProcessingModeAdminControllerTest {
                  .expectStatus().isBadRequest();
     }
 
+    // find all
+    @Test
+    void should_find_all_processing_modes_successfully() {
+        when(connectorProcessingModeService.findAll())
+                .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
+
+        var response = apiClient.get()
+                                .uri("/api/v1/admin/processing-modes")
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .returnResult(ConnectorProcessingModeDto[].class);
+
+        var responseBody = response.getResponseBody();
+
+        assertThat(responseBody).isNotNull();
+        assertThat(responseBody).hasSize(1);
+    }
+
     private String asJsonString(Object obj) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        var objectMapper = new ObjectMapper();
         return objectMapper.writeValueAsString(obj);
     }
 }

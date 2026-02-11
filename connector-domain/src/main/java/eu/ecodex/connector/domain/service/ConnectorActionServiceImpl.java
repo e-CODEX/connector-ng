@@ -16,6 +16,8 @@ import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
+import java.util.List;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,6 +33,17 @@ public class ConnectorActionServiceImpl implements ConnectorActionService {
 
     public ConnectorActionServiceImpl(ConnectorActionRepository actionRepository) {
         this.actionRepository = actionRepository;
+    }
+
+    @Override
+    public List<ConnectorAction> persistAll(
+            @NonNull List<ConnectorAction> actions,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        log.debug(
+                "saving actions [{}] for business domain [{}]", actions, businessDomainIdentifier
+        );
+
+        return this.actionRepository.saveAll(actions, businessDomainIdentifier);
     }
 
     @Override

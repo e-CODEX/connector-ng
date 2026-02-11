@@ -10,13 +10,20 @@
 
 package eu.ecodex.connector.domain.spi;
 
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Defines the contract for managing connector services within a specified business domain in the
  * connector system.
  */
 public interface ConnectorServiceRepository {
+    List<ConnectorService> saveAll(
+            @Nonnull List<ConnectorService> services,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
     /**
      * Retrieves a {@link ConnectorService} based on its name and the associated business domain
      * identifier.

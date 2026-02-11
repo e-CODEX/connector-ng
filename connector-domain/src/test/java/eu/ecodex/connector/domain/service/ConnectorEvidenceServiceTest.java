@@ -184,7 +184,7 @@ class ConnectorEvidenceServiceTest {
     }
 
     @Test
-    void should_thrown_null_pointer_exception_when_processing_message_with_null_transported_evidences() {
+    void should_throw_null_pointer_exception_when_processing_message_with_null_transported_evidences() {
         var message = MessageTestFixtures.createRejectedMessage()
                                  .toBuilder()
                                  .transportedEvidences(null)
@@ -198,7 +198,7 @@ class ConnectorEvidenceServiceTest {
     }
 
     @Test
-    void should_thrown_null_pointer_exception_when_processing_message_with_null_evidence_type() {
+    void should_throw_null_pointer_exception_when_processing_message_with_null_evidence_type() {
         assertThrows(
                 NullPointerException.class, () -> this.evidenceService.processMessage(
                         null,
@@ -208,7 +208,7 @@ class ConnectorEvidenceServiceTest {
     }
 
     @Test
-    void should_thrown_null_pointer_exception_when_processing_message_with_null_message() {
+    void should_throw_null_pointer_exception_when_processing_message_with_null_message() {
         assertThrows(
                 NullPointerException.class, () -> this.evidenceService.processMessage(
                         ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null)

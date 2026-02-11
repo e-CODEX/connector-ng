@@ -12,12 +12,18 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Defines the contract for managing and querying parties within a specific business domain in the
  * connector system.
  */
 public interface ConnectorPartyRepository {
+    List<ConnectorParty> saveAll(
+            @Nonnull List<ConnectorParty> parties,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
     /**
      * Retrieves a {@link ConnectorParty} based on the specified party and associated business
      * domain identifier.

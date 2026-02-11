@@ -13,8 +13,10 @@ package eu.ecodex.connector.domain.service;
 import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.service.ConnectorServiceService;
 import eu.ecodex.connector.domain.exception.ConnectorServiceNotFoundException;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +30,18 @@ public class ConnectorServiceServiceImpl implements ConnectorServiceService {
 
     public ConnectorServiceServiceImpl(ConnectorServiceRepository serviceRepository) {
         this.serviceRepository = serviceRepository;
+    }
+
+    @Override
+    public List<ConnectorService> persistAll(
+            @NonNull List<ConnectorService> services,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        log.debug(
+                "saving services [{}] for business domain [{}]", services,
+                businessDomainIdentifier
+        );
+
+        return this.serviceRepository.saveAll(services, businessDomainIdentifier);
     }
 
     @Override

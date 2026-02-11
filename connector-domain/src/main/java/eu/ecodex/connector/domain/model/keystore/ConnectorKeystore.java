@@ -24,7 +24,9 @@ import lombok.Builder;
  * @param password    The password of the keystore (plain text.
  * @param description The description of the keystore.
  * @param type        The type of the keystore.
+ * @param filename    The filename of the keystore.
  * @param createdAt   The creation date of the keystore.
+ * @param updatedAt   The last update date of the keystore.
  */
 @Builder
 public record ConnectorKeystore(
@@ -33,7 +35,9 @@ public record ConnectorKeystore(
         @NotBlank String password,
         @NotBlank String description,
         @Nonnull ConnectorKeystoreType type,
-        Instant createdAt
+        @Nonnull String filename,
+        Instant createdAt,
+        Instant updatedAt
 ) implements Serializable {
     @Override
     public @Nonnull String toString() {

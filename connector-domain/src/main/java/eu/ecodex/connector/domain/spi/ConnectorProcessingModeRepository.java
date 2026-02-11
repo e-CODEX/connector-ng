@@ -13,6 +13,7 @@ package eu.ecodex.connector.domain.spi;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines the contract for managing and querying processing modes associated with a specific
@@ -23,15 +24,41 @@ public interface ConnectorProcessingModeRepository {
      * Persists a given {@link ConnectorProcessingMode} for a specific
      * {@link ConnectorBusinessDomain}.
      *
-     * @param businessDomain the business domain associated with the processing mode; must not be
-     *                       null.
-     * @param processingMode the processing mode to be saved; must not be null.
+     * @param processingMode           the processing mode to be saved; must not be null.
+     * @param businessDomainIdentifier the business domain identifier associated with the processing
+     *                                 mode; must not be null.
      *
      * @return the persisted {@link ConnectorProcessingMode}, which may include additional metadata
      *         such as timestamps or identifiers.
      */
     ConnectorProcessingMode save(
-            ConnectorBusinessDomain businessDomain, ConnectorProcessingMode processingMode);
+            @Nonnull ConnectorProcessingMode processingMode,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier
+    );
+
+    /**
+     * Updates the keystore associated with the specified Connector processing mode.
+     *
+     * @param uuid         the unique identifier of the Connector processing mode to be updated;
+     *                     must not be null.
+     * @param keystoreUuid the unique identifier of the keystore to associate with the specified
+     *                     processing mode; must not be null.
+     *
+     * @return the updated {@link ConnectorProcessingMode} with the new keystore association.
+     */
+    ConnectorProcessingMode updateKeystore(
+            @Nonnull String uuid, @Nonnull String keystoreUuid);
+
+    /**
+     * Retrieves a {@link ConnectorProcessingMode} identified by its unique UUID.
+     *
+     * @param uuid the unique identifier of the {@link ConnectorProcessingMode} to retrieve; must
+     *             not be null.
+     *
+     * @return the {@link ConnectorProcessingMode} matching the specified UUID, or null if no such
+     *         processing mode exists.
+     */
+    ConnectorProcessingMode findByUuid(@Nonnull String uuid);
 
     /**
      * Retrieves a {@link ConnectorProcessingMode} associated with the specified
@@ -44,5 +71,5 @@ public interface ConnectorProcessingModeRepository {
      *         if no matching processing mode exists.
      */
     ConnectorProcessingMode findByBusinessDomainIdentifier(
-            ConnectorBusinessDomainIdentifier identifier);
+            @Nonnull ConnectorBusinessDomainIdentifier identifier);
 }

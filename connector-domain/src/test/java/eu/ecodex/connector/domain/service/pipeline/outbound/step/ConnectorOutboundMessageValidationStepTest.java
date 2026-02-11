@@ -22,12 +22,14 @@ import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.service.ConnectorActionServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorBusinessDomainServiceImpl;
+import eu.ecodex.connector.domain.service.ConnectorKeystoreServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorPartyServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorProcessingModeServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorServiceServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import eu.ecodex.connector.domain.spi.ConnectorKeystoreRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
@@ -60,6 +62,8 @@ public class ConnectorOutboundMessageValidationStepTest {
     private ConnectorPartyRepository partyRepository;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
+    @Mock
+    private ConnectorKeystoreRepository keystoreRepository;
 
     private ConnectorMessageStep outboundMessageValidationStep;
 
@@ -80,13 +84,15 @@ public class ConnectorOutboundMessageValidationStepTest {
         var actionService = new ConnectorActionServiceImpl(actionRepository);
         var partyService = new ConnectorPartyServiceImpl(partyRepository);
         var businessDomainService = new ConnectorBusinessDomainServiceImpl(businessDomainRepository);
+        var keystoreService = new ConnectorKeystoreServiceImpl(keystoreRepository);
 
         return new ConnectorProcessingModeServiceImpl(
                 processingModeRepository,
                 businessDomainService,
                 serviceService,
                 actionService,
-                partyService
+                partyService,
+                keystoreService
         );
     }
 

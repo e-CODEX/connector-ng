@@ -39,6 +39,7 @@ public class WebSecurityConfiguration {
                    .authorizeHttpRequests(request -> request
                            .requestMatchers(
                                    "/api/v1/admin/business-domains",
+                                   "/api/v1/admin/processing-modes",
                                    // swagger ui
                                    "/swagger-ui/**",
                                    "/v3/api-docs/**",

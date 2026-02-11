@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
+import eu.ecodex.connector.KeystoreTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
@@ -26,14 +27,17 @@ import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorProcessingModeService;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
+import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import eu.ecodex.connector.domain.spi.ConnectorKeystoreRepository;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +60,9 @@ public class ConnectorProcessingModeServiceTest {
     private ConnectorPartyRepository partyRepository;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
+    @Mock
+    private ConnectorKeystoreRepository keystoreRepository;
+
     private ConnectorProcessingModeService processingModeService;
 
     @BeforeEach
@@ -66,25 +73,41 @@ public class ConnectorProcessingModeServiceTest {
         var businessDomainService = new ConnectorBusinessDomainServiceImpl(
                 businessDomainRepository
         );
+        var keystoreService = new ConnectorKeystoreServiceImpl(keystoreRepository);
 
         this.processingModeService = new ConnectorProcessingModeServiceImpl(
                 processingModeRepository,
                 businessDomainService,
                 serviceService,
                 actionService,
-                partyService
+                partyService,
+                keystoreService
         );
     }
 
     // save
     @Test
-    void should_register_processing_mode_successfully() {
+    void should_register_pmode_successfully() {
         var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
         var processingMode = ProcessingModeTestFixtures.createWithNoBusinessDomain();
 
-        when(processingModeRepository.save(any(), any())).thenReturn(
-                ProcessingModeTestFixtures.createWithBusinessDomain());
+        when(processingModeRepository.save(any(), any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+        when(processingModeRepository.findByBusinessDomainIdentifier(any()))
+                .thenReturn(null);
+        when(processingModeRepository.findByUuid(any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+        when(processingModeRepository.updateKeystore(any(), any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
+        when(actionRepository.saveAll(any(), any()))
+                .thenReturn(List.of(ActionTestFixtures.createAction()));
+        when(serviceRepository.saveAll(any(), any()))
+                .thenReturn(List.of(ServiceTestFixtures.createService()));
+        when(partyRepository.saveAll(any(), any()))
+                .thenReturn(List.of(PartyTestFixtures.createToParty()));
+        when(keystoreRepository.save(any(), any()))
+                .thenReturn(KeystoreTestFixtures.createKeystore());
 
         var createdProcessingMode = this.processingModeService.register(
                 businessDomain.identifier(), processingMode);
@@ -93,11 +116,12 @@ public class ConnectorProcessingModeServiceTest {
         assertThat(createdProcessingMode.description()).isEqualTo(processingMode.description());
         assertThat(createdProcessingMode.businessDomain()).isEqualTo(businessDomain);
 
-        verify(processingModeRepository, times(1)).save(businessDomain, processingMode);
+        verify(processingModeRepository, times(1))
+                .save(any(), any());
     }
 
     @Test
-    void should_throw_exception_when_saving_processing_mode_if_business_domain_does_not_exists() {
+    void should_throw_exception_when_saving_pmode_if_business_domain_does_not_exists() {
         var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
         var processingMode = ProcessingModeTestFixtures.createWithNoBusinessDomain();
 
@@ -111,7 +135,7 @@ public class ConnectorProcessingModeServiceTest {
 
     @SuppressWarnings("checkstyle:LineLength")
     @Test
-    void should_throw_exception_when_saving_processing_mode_if_business_domains_has_already_one_processing_mode() {
+    void should_throw_exception_when_saving_pmode_if_business_domains_has_already_one_pmode() {
         var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
         var processingMode = ProcessingModeTestFixtures.createWithBusinessDomain();
 
@@ -130,7 +154,24 @@ public class ConnectorProcessingModeServiceTest {
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_saving_processing_mode_if_business_domain_is_null() {
+    void should_throw_exception_when_saving_pmode_and_no_home_party_is_found() {
+        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+        var processingMode = ProcessingModeTestFixtures.createWithNoBusinessDomainAndNoHomeParty();
+
+        when(processingModeRepository.findByBusinessDomainIdentifier(any()))
+                .thenReturn(null);
+        when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
+
+        assertThrows(
+                ConnectorProcessingModeException.class,
+                () -> this.processingModeService.register(
+                        BusinessDomainTestFixtures.createDefaultBusinessDomain().identifier(), processingMode
+                )
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_saving_pmode_if_business_domain_is_null() {
         assertThrows(
                 NullPointerException.class,
                 () -> this.processingModeService.register(
@@ -140,12 +181,23 @@ public class ConnectorProcessingModeServiceTest {
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_saving_processing_mode_if_processing_mode_is_null() {
+    void should_throw_null_pointer_exception_when_saving_pmode_if_pmode_is_null() {
         assertThrows(
                 NullPointerException.class,
                 () -> this.processingModeService.register(
                         BusinessDomainTestFixtures.createDefaultBusinessDomain().identifier(), null
                 )
+        );
+    }
+
+    // update keystore
+    @Test
+    void should_throw_exception_when_updating_keystore_if_pmode_does_not_exists() {
+        when(processingModeRepository.findByUuid(any())).thenReturn(null);
+
+        assertThrows(
+                ConnectorProcessingModeNotFoundException.class,
+                () -> processingModeService.updateKeystore("invalid", "valid")
         );
     }
 

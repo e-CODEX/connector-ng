@@ -21,11 +21,13 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.service.ConnectorActionServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorBusinessDomainServiceImpl;
+import eu.ecodex.connector.domain.service.ConnectorKeystoreServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorPartyServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorProcessingModeServiceImpl;
 import eu.ecodex.connector.domain.service.ConnectorServiceServiceImpl;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import eu.ecodex.connector.domain.spi.ConnectorKeystoreRepository;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
@@ -54,6 +56,8 @@ public class ConnectorInboundMessageValidationStepTest {
     private ConnectorPartyRepository partyRepository;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
+    @Mock
+    private ConnectorKeystoreRepository keystoreRepository;
 
     private ConnectorInboundMessageValidationStep inboundMessageValidationStep;
 
@@ -63,12 +67,15 @@ public class ConnectorInboundMessageValidationStepTest {
         var actionService = new ConnectorActionServiceImpl(actionRepository);
         var partyService = new ConnectorPartyServiceImpl(partyRepository);
         var businessDomainService = new ConnectorBusinessDomainServiceImpl(businessDomainRepository);
+        var keystoreService = new ConnectorKeystoreServiceImpl(keystoreRepository);
+
         var processingModeService = new ConnectorProcessingModeServiceImpl(
                 processingModeRepository,
                 businessDomainService,
                 serviceService,
                 actionService,
-                partyService
+                partyService,
+                keystoreService
         );
         inboundMessageValidationStep = new ConnectorInboundMessageValidationStep(
                 processingModeService, messageProcessingConfigProvider

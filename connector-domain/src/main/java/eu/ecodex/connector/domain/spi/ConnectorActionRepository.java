@@ -12,12 +12,18 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Defines the contract for managing and querying actions associated with a specific business domain
  * and action name within the connector system.
  */
 public interface ConnectorActionRepository {
+    List<ConnectorAction> saveAll(
+            @Nonnull List<ConnectorAction> actions,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
     /**
      * Retrieves a {@link ConnectorAction} based on its name and associated business domain
      * identifier.

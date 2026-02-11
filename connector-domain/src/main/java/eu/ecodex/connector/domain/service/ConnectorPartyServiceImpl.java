@@ -15,16 +15,30 @@ import eu.ecodex.connector.domain.api.service.ConnectorPartyService;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
+import java.util.List;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Default implementation of {@link ConnectorPartyService}.
  */
+@Slf4j
 @DomainService
 public class ConnectorPartyServiceImpl implements ConnectorPartyService {
     private final ConnectorPartyRepository partyRepository;
 
     public ConnectorPartyServiceImpl(ConnectorPartyRepository partyRepository) {
         this.partyRepository = partyRepository;
+    }
+
+    @Override
+    public List<ConnectorParty> persistAll(
+            @NonNull List<ConnectorParty> parties,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        log.debug(
+                "saving parties [{}] for business domain [{}]", parties, businessDomainIdentifier);
+
+        return this.partyRepository.saveAll(parties, businessDomainIdentifier);
     }
 
     @Override

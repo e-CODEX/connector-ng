@@ -35,6 +35,18 @@ public interface ConnectorProcessingModeService {
             @Nonnull ConnectorProcessingMode mode);
 
     /**
+     * Updates the keystore associated with an existing {@link ConnectorProcessingMode}.
+     *
+     * @param uuid         The unique identifier of the {@link ConnectorProcessingMode} to be
+     *                     updated. Must not be null.
+     * @param keystoreUuid The unique identifier of the new keystore to associate with the
+     *                     {@link ConnectorProcessingMode}. Must not be null.
+     *
+     * @return The updated {@link ConnectorProcessingMode} instance.
+     */
+    ConnectorProcessingMode updateKeystore(@Nonnull String uuid, @Nonnull String keystoreUuid);
+
+    /**
      * Validates the provided {@link ConnectorMessage} based on the specified
      * {@link ProcessingModeVerificationMode}.
      *

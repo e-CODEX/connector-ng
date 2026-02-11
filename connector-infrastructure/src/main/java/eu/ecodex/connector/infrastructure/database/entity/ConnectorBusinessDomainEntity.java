@@ -35,7 +35,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_BUSINESS_DOMAIN")
+@Table(name = "CONNECTOR_BUSINESS_DOMAINS")
 public class ConnectorBusinessDomainEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

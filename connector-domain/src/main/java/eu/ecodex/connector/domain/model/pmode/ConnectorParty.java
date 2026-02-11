@@ -11,6 +11,7 @@
 package eu.ecodex.connector.domain.model.pmode;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import lombok.Builder;
@@ -19,26 +20,30 @@ import lombok.Builder;
  * The Party represents a party in the Connector. It contains information about the party's ID, ID
  * type, and role.
  *
+ * @param uuid           The UUID of the party.
  * @param name           The name of the party.
  * @param identifier     The ID of the party.
  * @param identifierType The type of the ID of the party.
  * @param role           The role of the party.
  * @param roleType       The type of the role of the party.
+ * @param isHome         Whether the party is the home party of the connector.
  */
 @Builder(toBuilder = true)
 public record ConnectorParty(
+        @Nullable String uuid,
         @Nonnull String name,
         @NotBlank String identifier,
         @Nonnull String identifierType,
         @NotBlank String role,
-        @Nonnull ConnectorPartyRoleType roleType
+        @Nonnull ConnectorPartyRoleType roleType,
+        boolean isHome
 ) implements Serializable {
     @Override
     @Nonnull
     public String toString() {
         return String.format(
-                "{name=%s, uuid=%s, identifierType=%s, role=%s, roleType=%s}", name,
-                identifier, identifierType, role, roleType
+                "{name=%s, uuid=%s, identifierType=%s, role=%s, roleType=%s, isHome=%s}",
+                name, identifier, identifierType, role, roleType, isHome
         );
     }
 }

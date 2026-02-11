@@ -10,19 +10,26 @@
 
 package eu.ecodex.connector.domain.api.service;
 
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Service interface for managing {@link ConnectorService} entities.
  */
 public interface ConnectorServiceService {
+    List<ConnectorService> persistAll(
+            @Nonnull List<ConnectorService> services,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
     /**
      * Retrieves a {@link ConnectorService} by its name and associated business domain identifier.
      *
-     * @param serviceName                the name of the service to find. Must not be {@code null}.
-     * @param businessDomainIdentifier   the unique identifier of the business domain in which the
-     *                                   service resides. Must not be {@code null}.
+     * @param serviceName              the name of the service to find. Must not be {@code null}.
+     * @param businessDomainIdentifier the unique identifier of the business domain in which the
+     *                                 service resides. Must not be {@code null}.
+     *
      * @return the {@link ConnectorService} matching the specified name and business domain
      *         identifier, or {@code null} if no matching service is found.
      */

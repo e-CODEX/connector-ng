@@ -15,10 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorServiceService;
 import eu.ecodex.connector.domain.exception.ConnectorServiceNotFoundException;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Unit test class for {@code ConnectorServiceService} implementation.
  */
-@SuppressWarnings("DataFlowIssue")
+@SuppressWarnings({"DataFlowIssue", "checkstyle:LineLength"})
 @ExtendWith(MockitoExtension.class)
 public class ConnectorServiceServiceTest {
     @Mock
@@ -38,6 +40,49 @@ public class ConnectorServiceServiceTest {
     @BeforeEach
     void setUp() {
         this.connectorService = new ConnectorServiceServiceImpl(serviceRepository);
+    }
+
+    // bulk save
+    @Test
+    void should_bulk_save_services_successfully() {
+        var services = List.of(ServiceTestFixtures.createService());
+
+        when(serviceRepository.saveAll(any(), any())).thenReturn(services);
+
+        connectorService.persistAll(
+                services,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+        );
+
+        assertThat(services).isNotNull();
+        assertThat(services).hasSize(1);
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_bulk_saving_services_with_null_services() {
+        assertThrows(
+                NullPointerException.class,
+                () -> connectorService.persistAll(
+                        null,
+                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+                )
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_bulk_saving_services_with_null_business_domain_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> connectorService.persistAll(List.of(), null)
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_bulk_saving_services_with_null_services_and_business_domain_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> connectorService.persistAll(null, null)
+        );
     }
 
     // find service by name and business domain

@@ -12,20 +12,25 @@ package eu.ecodex.connector.domain.api.service;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Service interface for managing and retrieving {@link ConnectorAction} entities.
  */
 public interface ConnectorActionService {
+    List<ConnectorAction> persistAll(
+            @Nonnull List<ConnectorAction> actions,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
     /**
      * Retrieves a {@link ConnectorAction} by its name and associated business domain uuid.
      *
      * @param actionName               the name of the action to search for.
-     * @param businessDomainIdentifier the uuid of the business domain in which the action
-     *                                 resides.
+     * @param businessDomainIdentifier the uuid of the business domain in which the action resides.
      *
-     * @return the {@link ConnectorAction} matching the specified name and business domain
-     *         uuid, or {@code null} if no such action exists.
+     * @return the {@link ConnectorAction} matching the specified name and business domain uuid, or
+     *         {@code null} if no such action exists.
      */
     ConnectorAction findByNameAndBusinessDomain(
             String actionName, ConnectorBusinessDomainIdentifier businessDomainIdentifier);

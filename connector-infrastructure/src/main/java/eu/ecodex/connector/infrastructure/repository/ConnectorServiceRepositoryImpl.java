@@ -10,15 +10,102 @@
 
 package eu.ecodex.connector.infrastructure.repository;
 
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import eu.ecodex.connector.infrastructure.database.entity.pmode.ConnectorProcessingModeEntity;
+import eu.ecodex.connector.infrastructure.database.entity.pmode.ConnectorServiceEntity;
+import eu.ecodex.connector.infrastructure.database.repository.ConnectorProcessingModeJpaRepository;
+import eu.ecodex.connector.infrastructure.database.repository.ConnectorServiceJpaRepository;
+import java.util.List;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorServiceRepository}.
  */
+@Slf4j
 @Component
 public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepository {
+    private final ConnectorServiceJpaRepository jpaRepository;
+    private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
+
+    /**
+     * Constructs a new instance of {@code ConnectorServiceRepositoryImpl}.
+     *
+     * @param jpaRepository               the {@link ConnectorServiceJpaRepository} used to perform
+     *                                    CRUD operations on ConnectorService entities.
+     * @param processingModeJpaRepository the {@link ConnectorProcessingModeJpaRepository} used to
+     *                                    perform CRUD operations on ConnectorProcessingMode
+     *                                    entities and retrieve processing mode configurations.
+     */
+    public ConnectorServiceRepositoryImpl(
+            ConnectorServiceJpaRepository jpaRepository,
+            ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
+        this.jpaRepository = jpaRepository;
+        this.processingModeJpaRepository = processingModeJpaRepository;
+    }
+
+    /**
+     * Converts a {@link ConnectorService} and a {@link ConnectorProcessingModeEntity} into a
+     * {@link ConnectorServiceEntity}.
+     *
+     * @param service        the {@link ConnectorService} to be converted
+     * @param processingMode the {@link ConnectorProcessingModeEntity} to associate with the
+     *                       resulting {@link ConnectorServiceEntity}
+     *
+     * @return a new {@link ConnectorServiceEntity} instance with values derived from the provided
+     *         {@link ConnectorService} and {@link ConnectorProcessingModeEntity}
+     */
+    public static ConnectorServiceEntity toEntity(
+            ConnectorService service, ConnectorProcessingModeEntity processingMode) {
+        return ConnectorServiceEntity
+                .builder()
+                .name(service.name())
+                .type(service.type())
+                .processingMode(processingMode)
+                .build();
+    }
+
+    /**
+     * Converts a {@link ConnectorServiceEntity} instance to a {@link ConnectorService} domain
+     * object.
+     *
+     * @param entity the {@link ConnectorServiceEntity} to be converted
+     *
+     * @return a new {@link ConnectorService} instance populated with data from the provided entity,
+     *         or {@code null} if the input entity is {@code null}
+     */
+    public static ConnectorService toDomain(ConnectorServiceEntity entity) {
+        // TODO handle null entity by returning null
+        return ConnectorService
+                .builder()
+                .name(entity.getName())
+                .type(entity.getType())
+                .build();
+    }
+
+    @Override
+    public List<ConnectorService> saveAll(
+            @NonNull List<ConnectorService> services,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        log.debug(
+                "saving services [{}] for business domain [{}]", services,
+                businessDomainIdentifier
+        );
+
+        var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
+                businessDomainIdentifier.messageLaneIdentifier()
+        );
+
+        var savedServices = this.jpaRepository.saveAll(
+                services.stream().map(service -> toEntity(service, processingMode)).toList()
+        );
+
+        return savedServices.stream().map(ConnectorServiceRepositoryImpl::toDomain).toList();
+    }
+
     @Override
     public ConnectorService findByNameAndBusinessDomain(
             String serviceName,

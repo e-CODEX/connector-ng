@@ -12,12 +12,18 @@ package eu.ecodex.connector.domain.api.service;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Service interface for managing and validating the {@link ConnectorParty} entities in relation to
  * a specified {@link ConnectorBusinessDomainIdentifier}.
  */
 public interface ConnectorPartyService {
+    List<ConnectorParty> persistAll(
+            @Nonnull List<ConnectorParty> parties,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
     boolean exists(
             ConnectorParty party, ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 }

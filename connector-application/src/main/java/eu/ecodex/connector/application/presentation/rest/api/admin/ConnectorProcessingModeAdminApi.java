@@ -21,8 +21,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,4 +56,9 @@ public interface ConnectorProcessingModeAdminApi {
             @RequestParam("truststoreFile") MultipartFile truststoreFile,
             @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
             throws IOException;
+
+    @GetMapping("")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get all processing modes.")
+    List<ConnectorProcessingModeDto> getAll();
 }

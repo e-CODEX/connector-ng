@@ -178,4 +178,15 @@ public class ConnectorProcessingModeRepositoryTest {
                 () -> this.repository.findByBusinessDomainIdentifier(null)
         );
     }
+
+    // find all
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    void should_find_all_pmodes_successfully_from_database() {
+        var processingModes = repository.findAll();
+
+        assertThat(processingModes).isNotNull();
+        assertThat(processingModes).hasSize(1);
+    }
 }

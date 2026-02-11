@@ -20,6 +20,7 @@ import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
@@ -60,6 +61,13 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
         );
 
         return toDto(created);
+    }
+
+    @Override
+    public List<ConnectorProcessingModeDto> getAll() {
+        var processingModes = processingModeService.findAll();
+
+        return processingModes.stream().map(this::toDto).toList();
     }
 
     private ConnectorProcessingMode processCreationRequest(

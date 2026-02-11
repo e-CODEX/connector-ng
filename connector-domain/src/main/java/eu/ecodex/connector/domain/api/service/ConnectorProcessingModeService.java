@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Service interface for managing and persisting Connector P-Modes.
@@ -47,6 +48,14 @@ public interface ConnectorProcessingModeService {
     ConnectorProcessingMode updateKeystore(@Nonnull String uuid, @Nonnull String keystoreUuid);
 
     /**
+     * Retrieves all available {@link ConnectorProcessingMode} instances.
+     *
+     * @return a list of {@link ConnectorProcessingMode} objects representing all configured
+     *         processing modes. The list is immutable and never null, but it may be empty
+     *         if no processing modes are configured.
+     */
+    List<ConnectorProcessingMode> findAll();
+    /**
      * Validates the provided {@link ConnectorMessage} based on the specified
      * {@link ProcessingModeVerificationMode}.
      *
@@ -54,6 +63,7 @@ public interface ConnectorProcessingModeService {
      * @param verificationMode The {@link ProcessingModeVerificationMode} which determines the level
      *                         of validation to be applied. Must not be null.
      */
+
     void checkMessage(
             @Nonnull ConnectorMessage message,
             @Nonnull ProcessingModeVerificationMode verificationMode);

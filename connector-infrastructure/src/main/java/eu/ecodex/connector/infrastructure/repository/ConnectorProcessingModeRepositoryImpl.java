@@ -17,6 +17,7 @@ import eu.ecodex.connector.infrastructure.database.entity.pmode.ConnectorProcess
 import eu.ecodex.connector.infrastructure.database.repository.ConnectorBusinessDomainJpaRepository;
 import eu.ecodex.connector.infrastructure.database.repository.ConnectorKeystoreJpaRepository;
 import eu.ecodex.connector.infrastructure.database.repository.ConnectorProcessingModeJpaRepository;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -101,6 +102,11 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
         );
 
         return toDomain(processingMode);
+    }
+
+    @Override
+    public List<ConnectorProcessingMode> findAll() {
+        return processingModeJpaRepository.findAll().stream().map(this::toDomain).toList();
     }
 
     private ConnectorProcessingModeEntity toEntity(ConnectorProcessingMode processingMode) {

@@ -376,4 +376,14 @@ public class ConnectorProcessingModeServiceTest {
                 )
         );
     }
+
+    // find all
+    @Test
+    void should_return_all_processing_modes_successfully() {
+        when(processingModeRepository.findAll())
+                .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
+        var foundProcessingModes = this.processingModeService.findAll();
+        assertThat(foundProcessingModes).isNotEmpty();
+        assertThat(foundProcessingModes).hasSize(1);
+    }
 }

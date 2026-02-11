@@ -35,6 +35,7 @@ import eu.ecodex.connector.domain.util.SecureXmlParserUtil;
 import jakarta.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.NonNull;
@@ -169,6 +170,11 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
         }
 
         return this.processingModeRepository.updateKeystore(uuid, keystoreUuid);
+    }
+
+    @Override
+    public List<ConnectorProcessingMode> findAll() {
+        return processingModeRepository.findAll();
     }
 
     @Override

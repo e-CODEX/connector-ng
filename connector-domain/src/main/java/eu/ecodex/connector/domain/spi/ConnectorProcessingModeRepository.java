@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Defines the contract for managing and querying processing modes associated with a specific
@@ -72,4 +73,12 @@ public interface ConnectorProcessingModeRepository {
      */
     ConnectorProcessingMode findByBusinessDomainIdentifier(
             @Nonnull ConnectorBusinessDomainIdentifier identifier);
+
+    /**
+     * Retrieves all available {@link ConnectorProcessingMode} entries.
+     *
+     * @return a list of {@link ConnectorProcessingMode} instances representing all defined
+     *         processing modes, or an empty list if no processing modes are available.
+     */
+    List<ConnectorProcessingMode> findAll();
 }

@@ -8,14 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.admin;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain;
 
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.infrastructure.controller.rest.dto.ConnectorBusinessDomainDto;
-import eu.ecodex.connector.infrastructure.controller.rest.request.ConnectorBusinessDomainCreationRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.ConnectorBusinessDomainCreationRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestBody;

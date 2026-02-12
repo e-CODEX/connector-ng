@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.advice;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 
 /**
  * Represents a generic error response for REST API endpoints.

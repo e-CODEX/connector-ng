@@ -8,10 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector;
+package eu.ecodex.connector.infrastructure.config;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
-public class TestConfiguration {
+/**
+ * BeanConfig class for configuring the infrastructure-specific components.
+ */
+@Configuration
+@EnableJpaRepositories(
+        basePackages = {"eu.ecodex.connector.infrastructure.outbound.persistence.repository"}
+)
+public class JpaConfig {
 }

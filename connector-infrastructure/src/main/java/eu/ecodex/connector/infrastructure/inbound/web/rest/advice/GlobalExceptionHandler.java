@@ -8,14 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.advice;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
-import eu.ecodex.connector.infrastructure.controller.rest.exception.ConnectorBadRequestException;
-import eu.ecodex.connector.infrastructure.controller.rest.exception.ConnectorInternalServerException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;

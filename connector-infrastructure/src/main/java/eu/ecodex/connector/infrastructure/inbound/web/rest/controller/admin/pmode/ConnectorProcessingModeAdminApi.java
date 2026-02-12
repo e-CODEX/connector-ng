@@ -8,11 +8,11 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.admin;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
 
-import eu.ecodex.connector.infrastructure.controller.rest.advice.ErrorResponse;
-import eu.ecodex.connector.infrastructure.controller.rest.dto.ConnectorProcessingModeDto;
-import eu.ecodex.connector.infrastructure.controller.rest.request.pmode.ConnectorProcessingModeCreationRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

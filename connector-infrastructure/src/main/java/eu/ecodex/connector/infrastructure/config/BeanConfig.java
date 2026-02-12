@@ -17,14 +17,13 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
- * InfrastructureConfigurations class for configuring the infrastructure-specific components.
+ * BeanConfig class for configuring the infrastructure-specific components.
  */
 @Configuration
 @ConfigurationPropertiesScan
-public class InfrastructureConfigurations {
+public class BeanConfig {
     @Bean
     ConnectorLinkSubmissionService connectorLinkSubmissionService(
             @Qualifier("connectorBackendLinkEventPublisher")

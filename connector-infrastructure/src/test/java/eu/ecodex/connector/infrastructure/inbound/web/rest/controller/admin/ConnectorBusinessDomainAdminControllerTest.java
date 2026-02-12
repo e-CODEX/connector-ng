@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.admin;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,12 +17,13 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.JsonTestFixtures;
+import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain.ConnectorBusinessDomainAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain.ConnectorBusinessDomainAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +31,14 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTe
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @SuppressWarnings("checkstyle:MissingJavadocType")
 @AutoConfigureRestTestClient
 @WebMvcTest(ConnectorBusinessDomainAdminController.class)
+@ContextConfiguration(classes = TestConfiguration.class)
 public class ConnectorBusinessDomainAdminControllerTest {
     @Autowired
     private RestTestClient apiClient;

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.dto;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import java.time.Instant;

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.exception;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.exception;
 
 /**
  * Exception to signal a bad request error related to the connector processing.

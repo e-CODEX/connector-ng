@@ -8,9 +8,9 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.persistence.repository;
+package eu.ecodex.connector.infrastructure.outbound.persistence.repository;
 
-import eu.ecodex.connector.infrastructure.persistence.entity.ConnectorBusinessDomainEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.ConnectorBusinessDomainEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

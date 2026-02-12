@@ -8,10 +8,10 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.persistence.entity.pmode;
+package eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode;
 
-import eu.ecodex.connector.infrastructure.persistence.entity.BaseEntity;
-import eu.ecodex.connector.infrastructure.persistence.entity.ConnectorBusinessDomainEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.BaseEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.ConnectorBusinessDomainEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

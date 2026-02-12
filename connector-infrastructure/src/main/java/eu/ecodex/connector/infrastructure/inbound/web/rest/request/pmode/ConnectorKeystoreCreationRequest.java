@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.request.pmode;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
 import jakarta.annotation.Nonnull;

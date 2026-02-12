@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.admin;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ProcessingModeTestFixtures;
+import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
@@ -32,6 +33,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -39,6 +41,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @AutoConfigureRestTestClient
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength"})
+@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorProcessingModeAdminController.class)
 public class ConnectorProcessingModeAdminControllerTest {
     private final ConnectorProcessingModeCreationRequest metadata =

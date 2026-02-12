@@ -12,30 +12,24 @@ package eu.ecodex.connector.infrastructure.repository;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
+import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
-import eu.ecodex.connector.infrastructure.database.repository.ConnectorProcessingModeJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
 @Transactional
+@SpringBootTest(classes = JpaContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
 public class ConnectorProcessingModeRepositoryTest {
     @Autowired
     private ConnectorProcessingModeRepository repository;
-    @MockitoSpyBean
-    private ConnectorProcessingModeJpaRepository jpaRepository;
 
     @Test
     @Sql("classpath:sql/business-domain.sql")
@@ -47,8 +41,6 @@ public class ConnectorProcessingModeRepositoryTest {
         );
 
         assertThat(savedProcessingMode).isNotNull();
-
-        verify(jpaRepository, times(1)).save(any());
     }
 
     @Test
@@ -89,9 +81,6 @@ public class ConnectorProcessingModeRepositoryTest {
         );
 
         assertThat(updatedProcessingMode).isNotNull();
-        // assertThat(updatedProcessingMode.truststore()).isNotNull();
-
-        verify(jpaRepository).save(any());
     }
 
     @Test

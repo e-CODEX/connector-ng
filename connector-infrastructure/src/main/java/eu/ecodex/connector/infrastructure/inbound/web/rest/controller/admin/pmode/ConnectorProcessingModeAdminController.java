@@ -8,16 +8,16 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.controller.rest.admin;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
 
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.infrastructure.controller.rest.dto.ConnectorProcessingModeDto;
-import eu.ecodex.connector.infrastructure.controller.rest.exception.ConnectorBadRequestException;
-import eu.ecodex.connector.infrastructure.controller.rest.request.pmode.ConnectorProcessingModeCreationRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;

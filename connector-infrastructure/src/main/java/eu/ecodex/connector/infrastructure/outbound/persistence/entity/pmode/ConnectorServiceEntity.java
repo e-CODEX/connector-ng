@@ -8,9 +8,9 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.persistence.entity.pmode;
+package eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode;
 
-import eu.ecodex.connector.infrastructure.persistence.entity.BaseEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

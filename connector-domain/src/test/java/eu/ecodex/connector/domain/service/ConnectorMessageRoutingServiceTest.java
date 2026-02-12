@@ -29,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Unit tests for the {@code ConnectorMessageRoutingService} implementation.
  */
-@SuppressWarnings({"checkstyle:LineLength"})
 @ExtendWith(MockitoExtension.class)
 public class ConnectorMessageRoutingServiceTest {
     @Mock

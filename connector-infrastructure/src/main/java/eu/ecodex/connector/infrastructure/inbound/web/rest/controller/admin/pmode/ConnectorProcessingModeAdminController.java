@@ -1,0 +1,124 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
+
+import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
+import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
+import jakarta.validation.Valid;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * Defines the REST controller for managing processing modes within the connector system.
+ */
+@RestController
+public class ConnectorProcessingModeAdminController implements ConnectorProcessingModeAdminApi {
+    private final ConnectorRegisterProcessingMode registerProcessingMode;
+    private final ConnectorListProcessingMode listProcessingMode;
+
+    public ConnectorProcessingModeAdminController(
+            ConnectorRegisterProcessingMode registerProcessingMode,
+            ConnectorListProcessingMode listProcessingMode) {
+        this.registerProcessingMode = registerProcessingMode;
+        this.listProcessingMode = listProcessingMode;
+    }
+
+    @Override
+    public ConnectorProcessingModeDto create(
+            @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
+            @RequestParam("truststoreFile") MultipartFile truststoreFile,
+            @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
+            throws IOException {
+        var businessDomainIdentifier = ConnectorBusinessDomainIdentifier
+                .builder()
+                .messageLaneIdentifier(metadata.businessDomainIdentifier())
+                .build();
+
+        var processingMode = processCreationRequest(
+                metadata, processingModeXmlFile, truststoreFile
+        );
+
+        var created = this.registerProcessingMode.execute(
+                businessDomainIdentifier, processingMode
+        );
+
+        return toDto(created);
+    }
+
+    @Override
+    public List<ConnectorProcessingModeDto> getAll() {
+        var processingModes = listProcessingMode.execute();
+
+        return processingModes.stream().map(this::toDto).toList();
+    }
+
+    private ConnectorProcessingMode processCreationRequest(
+            ConnectorProcessingModeCreationRequest metadata,
+            MultipartFile processingModeXmlFile,
+            MultipartFile truststoreFile) throws IOException {
+        var xmlFileContentType = processingModeXmlFile.getContentType();
+
+        if (!Objects.equals(xmlFileContentType, MediaType.APPLICATION_XML_VALUE)
+            && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
+            throw new ConnectorBadRequestException("pmode file must be XML");
+        }
+
+        var truststore = ConnectorKeystore
+                .builder()
+                .description(metadata.truststore().description())
+                .content(truststoreFile.getBytes())
+                .password(metadata.truststore().password())
+                .type(metadata.truststore().type())
+                .filename(StringUtils.cleanPath(
+                        Objects.requireNonNull(truststoreFile.getOriginalFilename()))
+                )
+                .build();
+
+        return ConnectorProcessingMode
+                .builder()
+                .description(metadata.description())
+                .content(new String(processingModeXmlFile.getBytes()))
+                .filename(StringUtils.cleanPath(
+                        Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
+                )
+                .truststore(truststore)
+                .build();
+    }
+
+    private ConnectorProcessingModeDto toDto(ConnectorProcessingMode processingMode) {
+        return ConnectorProcessingModeDto
+                .builder()
+                .uuid(processingMode.uuid())
+                .description(processingMode.description())
+                .content(processingMode.content())
+                .filename(processingMode.filename())
+                .businessDomainIdentifier(
+                        Objects.requireNonNull(processingMode.businessDomain())
+                               .identifier().messageLaneIdentifier()
+                )
+                .createdAt(processingMode.createdAt())
+                .updatedAt(processingMode.updatedAt())
+                .build();
+    }
+}

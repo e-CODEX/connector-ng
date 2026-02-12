@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Unit test class for {@code ConnectorServiceService} implementation.
  */
-@SuppressWarnings({"DataFlowIssue", "checkstyle:LineLength"})
+@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorServiceServiceTest {
     @Mock

@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.repository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
-import eu.ecodex.connector.infrastructure.database.entity.ConnectorBusinessDomainEntity;
-import eu.ecodex.connector.infrastructure.database.repository.ConnectorBusinessDomainJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.ConnectorBusinessDomainEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorBusinessDomainJpaRepository;
 import java.util.List;
 import org.springframework.stereotype.Component;
 

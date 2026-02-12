@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for the {@code ConnectorBinaryOperatorExpression}.
  */
-@SuppressWarnings("checkstyle:LineLength")
 public class ConnectorBinaryOperatorExpressionTest {
     // OR expression
     @Test

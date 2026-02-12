@@ -11,22 +11,19 @@
 package eu.ecodex.connector.infrastructure.repository;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
+import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
-import eu.ecodex.connector.infrastructure.database.repository.ConnectorBusinessDomainJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
+@Transactional
+@SpringBootTest(classes = JpaContextConfiguration.class)
 @SuppressWarnings("checkstyle:MissingJavadocType")
 public class ConnectorBusinessDomainRepositoryTest {
-    @MockitoSpyBean
-    private ConnectorBusinessDomainJpaRepository jpaRepository;
     @Autowired
     private ConnectorBusinessDomainRepository repository;
 
@@ -45,8 +42,6 @@ public class ConnectorBusinessDomainRepositoryTest {
         assertThat(savedDomain.enabled()).isEqualTo(domain.enabled());
         assertThat(savedDomain.createdAt()).isNotNull();
         assertThat(savedDomain.updatedAt()).isNotNull();
-
-        verify(jpaRepository).save(any());
     }
 
     @Test

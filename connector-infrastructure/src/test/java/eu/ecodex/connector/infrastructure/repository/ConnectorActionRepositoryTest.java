@@ -12,30 +12,24 @@ package eu.ecodex.connector.infrastructure.repository;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
+import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
-import eu.ecodex.connector.infrastructure.database.repository.ConnectorActionJpaRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
 @Transactional
+@SpringBootTest(classes = JpaContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
 public class ConnectorActionRepositoryTest {
     @Autowired
     private ConnectorActionRepository repository;
-    @MockitoSpyBean
-    private ConnectorActionJpaRepository jpaRepository;
 
     // bulk saving
     @Test
@@ -51,8 +45,6 @@ public class ConnectorActionRepositoryTest {
 
         assertThat(savedAction).isNotNull();
         assertThat(savedAction).hasSize(1);
-
-        verify(jpaRepository, times(1)).saveAll(anyList());
     }
 
     @Test

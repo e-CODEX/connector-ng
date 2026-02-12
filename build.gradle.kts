@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     id("java")
     id("jacoco")
@@ -26,6 +28,9 @@ subprojects {
         val localConfigFile = rootProject.file("config/checkstyle/checkstyle.xml")
 
         config = try {
+            URI.create(onlineCheckstyleUrl).toURL().openStream().use { it.readBytes() }
+
+            logger.lifecycle("Using online checkstyle config: $onlineCheckstyleUrl")
             // Attempt to reach the online config
             resources.text.fromUri(onlineCheckstyleUrl)
         } catch (e: Exception) {

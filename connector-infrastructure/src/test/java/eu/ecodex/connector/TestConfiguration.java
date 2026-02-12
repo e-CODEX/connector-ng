@@ -10,13 +10,8 @@
 
 package eu.ecodex.connector;
 
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@SuppressWarnings("checkstyle:MissingJavadocType")
-@ComponentScan(basePackages = {"eu.ecodex.connector.infrastructure"})
+@SpringBootApplication
 public class TestConfiguration {
 }

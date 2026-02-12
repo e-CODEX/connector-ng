@@ -20,6 +20,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework:spring-tx")
     // jakarta
     implementation(libs.jakarta.validation)
     // other
@@ -30,8 +31,6 @@ dependencies {
     // test
     testImplementation(testFixtures(project(":connector-domain")))
     testFixturesImplementation(testFixtures(project(":connector-domain")))
-    testFixturesImplementation(platform(libs.spring.boot.bom))
-    testFixturesImplementation("org.springframework:spring-core")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     implementation("org.springframework.boot:spring-boot-starter-restclient-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

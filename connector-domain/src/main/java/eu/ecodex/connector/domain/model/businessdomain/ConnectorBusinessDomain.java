@@ -50,7 +50,7 @@ public record ConnectorBusinessDomain(
     public static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN_ID =
             ConnectorBusinessDomainIdentifier
                     .builder()
-                    .messageLaneIdentifier("defaultBusinessDomain")
+                    .messageLaneIdentifier("default_business_domain")
                     .build();
 
     public static final ConnectorBusinessDomain DEFAULT_BUSINESS_DOMAIN =

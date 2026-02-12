@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit tests for the {@code ConnectorLinkService} implementation.
  */
-@SuppressWarnings({"DataFlowIssue", "checkstyle:LineLength"})
+@SuppressWarnings("DataFlowIssue")
 public class ConnectorLinkServiceTest {
     private ConnectorLinkService connectorLinkService;
 

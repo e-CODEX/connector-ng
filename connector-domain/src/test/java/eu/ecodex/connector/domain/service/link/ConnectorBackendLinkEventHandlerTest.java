@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Unit tests for the {@code ConnectorBackendLinkEventHandler} implementation.
  */
-@SuppressWarnings({"checkstyle:LineLength", "DataFlowIssue"})
+@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorBackendLinkEventHandlerTest {
     @Mock

@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Unit tests for the {@code ConnectorOutboundMessagePipeline}.
  */
-@SuppressWarnings({"DataFlowIssue", "checkstyle:LineLength"})
+@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorOutboundMessagePipelineTest {
     private ConnectorMessagePipeline outboundMessagePipeline;

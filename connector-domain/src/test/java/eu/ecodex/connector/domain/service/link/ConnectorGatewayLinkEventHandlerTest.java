@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 /**
  * Unit tests for the {@code ConnectorGatewayLinkEventHandler} implementation.
  */
-@SuppressWarnings({"DataFlowIssue", "checkstyle:LineLength"})
+@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorGatewayLinkEventHandlerTest {
     @Mock

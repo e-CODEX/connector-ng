@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Unit tests for the {@code ConnectorExpressionParser}.
  */
-@SuppressWarnings("checkstyle:LineLength")
 public class ConnectorExpressionParserTest {
     @ParameterizedTest
     @ValueSource(strings = {

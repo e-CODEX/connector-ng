@@ -10,13 +10,26 @@
 
 package eu.ecodex.connector;
 
+import eu.ecodex.connector.application.initializer.ConnectorDefaultBusinessDomainInitializer;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
-@SpringBootConfiguration
+@org.springframework.boot.test.context.TestConfiguration
 @EnableAutoConfiguration
 @SuppressWarnings("checkstyle:MissingJavadocType")
-@ComponentScan(basePackages = {"eu.ecodex.connector.infrastructure"})
+@ComponentScan(
+        basePackages = {
+        "eu.ecodex.connector.domain",
+        "eu.ecodex.connector.application",
+        "eu.ecodex.connector.infrastructure"
+},
+        excludeFilters = @ComponentScan.Filter(
+                type = FilterType.ASSIGNABLE_TYPE,
+                classes = ConnectorDefaultBusinessDomainInitializer.class
+        )
+)
 public class TestConfiguration {
 }

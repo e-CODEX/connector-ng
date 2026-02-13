@@ -75,6 +75,7 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
                                                       .build()
                                       )
                                       .description(request.description())
+                                      .enabled(request.enabled())
                                       .source(request.source())
                                       .build();
     }

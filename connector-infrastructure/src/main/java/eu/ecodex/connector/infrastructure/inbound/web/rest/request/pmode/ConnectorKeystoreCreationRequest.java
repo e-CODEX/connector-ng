@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import lombok.Builder;
 
@@ -25,8 +26,11 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorKeystoreCreationRequest(
-        @NotBlank String password,
-        @NotBlank String description,
+        @NotBlank(message = "Keystore password must not be blank.")
+        String password,
+        @NotBlank(message = "Keystore description must not be blank.")
+        String description,
+        @NotNull(message = "Keystore type must not be null.")
         @Nonnull ConnectorKeystoreType type
 ) implements Serializable {
 }

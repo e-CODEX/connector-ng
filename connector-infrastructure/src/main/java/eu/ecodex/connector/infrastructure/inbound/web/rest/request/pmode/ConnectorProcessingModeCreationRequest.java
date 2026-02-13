@@ -27,8 +27,11 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorProcessingModeCreationRequest(
-        @NotBlank String description,
-        @NotBlank String businessDomainIdentifier,
-        @NotNull ConnectorKeystoreCreationRequest truststore
+        @NotBlank(message = "Processing mode description must not be blank.")
+        String description,
+        @NotBlank(message = "Business domain identifier must not be blank.")
+        String businessDomainIdentifier,
+        @NotNull(message = "Truststore configuration must not be null.")
+        ConnectorKeystoreCreationRequest truststore
 ) {
 }

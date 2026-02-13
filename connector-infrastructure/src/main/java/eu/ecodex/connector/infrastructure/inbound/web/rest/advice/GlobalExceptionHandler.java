@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
@@ -30,18 +30,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
-    /**
-     * Handles exceptions of type {@link ConnectorBusinessDomainException} that indicate business
-     * domain-specific rule violations or issues within the connector context.
-     *
-     * @param exception the {@code ConnectorBusinessDomainException} that needs to be handled
-     *
-     * @return an {@code ErrorResponse} containing the HTTP status code and exception details
-     */
     @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorBusinessDomainException.class)
-    public ErrorResponse handleBusinessDomainException(ConnectorBusinessDomainException exception) {
+    @ExceptionHandler(ConnectorBusinessDomainAlreadyExistsException.class)
+    public ErrorResponse handleBusinessDomainException(
+            ConnectorBusinessDomainAlreadyExistsException exception) {
         return new ErrorResponse(
                 HttpStatus.CONFLICT.value(), exception.getMessage()
         );

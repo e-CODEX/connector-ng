@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.impl.businessdomain;
 
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import lombok.NonNull;
@@ -40,7 +40,9 @@ public class ConnectorRegisterBusinessDomainService implements ConnectorRegister
         );
 
         if (foundBusinessDomain != null) {
-            throw new ConnectorBusinessDomainException("business domain already exists");
+            throw new ConnectorBusinessDomainAlreadyExistsException(
+                    "business domain already exists"
+            );
         }
 
         return this.businessDomainRepository.save(businessDomain);

@@ -24,22 +24,11 @@ subprojects {
     checkstyle {
         toolVersion = "10.17.0"
 
-        val onlineCheckstyleUrl: String by project
         val localConfigFile = rootProject.file("config/checkstyle/checkstyle.xml")
 
-        config = try {
-            URI.create(onlineCheckstyleUrl).toURL().openStream().use { it.readBytes() }
+        config = resources.text.fromFile(localConfigFile)
 
-            logger.lifecycle("Using online checkstyle config: $onlineCheckstyleUrl")
-            // Attempt to reach the online config
-            resources.text.fromUri(onlineCheckstyleUrl)
-        } catch (e: Exception) {
-            // Fallback to a local file if offline or URL is unreachable
-            logger.warn(
-                "online checkstyle config unavailable, falling back to local file: ${e.message}"
-            )
-            resources.text.fromFile(localConfigFile)
-        }
+        configDirectory.set(rootProject.file("config/checkstyle"))
 
         isIgnoreFailures = true
         isShowViolations = true

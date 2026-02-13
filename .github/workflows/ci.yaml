@@ -5,7 +5,7 @@ on:
 name: CI Pipeline
 jobs:
     ci:
-        uses: e-CODEX/workflows/.github/workflows/gradle-ci.yaml@980ac49b3c61d0938d130d88ccfc543f26fa9bc1
+        uses: e-CODEX/workflows/.github/workflows/gradle-ci.yaml@8fe7dfab4831dddc935e4375c7aa24109cde97ed
         with:
             java-version: 21
             sbom-path: 'build/reports/cyclonedx/bom.xml'

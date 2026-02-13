@@ -5,4 +5,4 @@ on:
 name: Java Code Checkstyle
 jobs:
     checkstyle:
-        uses: e-CODEX/workflows/.github/workflows/java-linting.yaml@main
+        uses: e-CODEX/workflows/.github/workflows/java-linting.yaml@f7157b007761f75f54b09e6b84d23ce37829b686

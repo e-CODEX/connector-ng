@@ -2,6 +2,5 @@
     "identifier": "default_business_domain",
     "description": "default business domain",
     "enabled": true,
-    "properties": {},
     "source": "IMPLEMENTATION"
 }

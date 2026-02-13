@@ -42,7 +42,6 @@ public record ConnectorBusinessDomain(
         String uuid,
         @NotBlank ConnectorBusinessDomainIdentifier identifier,
         @NotBlank String description, boolean enabled,
-        Map<String, String> properties,
         ConnectorConfigurationSource source,
         Instant createdAt,
         Instant updatedAt

@@ -30,9 +30,13 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDomainCreationRequest(
-        @NotBlank String identifier,
-        @NotBlank String description,
-        boolean enabled,
-        @NotNull ConnectorConfigurationSource source
+        @NotBlank(message = "Business domain identifier must not be blank.")
+        String identifier,
+        @NotBlank(message = "Business domain description must not be blank.")
+        String description,
+        @NotNull(message = "Enabled flag must not be null.")
+        Boolean enabled,
+        @NotNull(message = "Configuration source must not be null.")
+        ConnectorConfigurationSource source
 ) {
 }

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.application.service.impl.businessdomain.ConnectorRegisterBusinessDomainService;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
@@ -27,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorRegisterBusinessDomainServiceTest {
     @Mock
@@ -59,7 +60,7 @@ public class ConnectorRegisterBusinessDomainServiceTest {
                 .thenReturn(businessDomain);
 
         assertThrows(
-                ConnectorBusinessDomainException.class,
+                ConnectorBusinessDomainAlreadyExistsException.class,
                 () -> connectorBusinessDomainService.execute(businessDomain)
         );
     }

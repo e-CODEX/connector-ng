@@ -20,6 +20,7 @@ import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
@@ -74,7 +75,7 @@ public class ConnectorBusinessDomainAdminControllerTest {
 
     @Test
     void should_send_409_response_when_creating_business_domain_with_already_existing_identifier() {
-        doThrow(ConnectorBusinessDomainException.class)
+        doThrow(ConnectorBusinessDomainAlreadyExistsException.class)
                 .when(registerBusinessDomain).execute(any());
 
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");

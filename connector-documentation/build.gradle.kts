@@ -4,13 +4,6 @@ plugins {
     id("org.asciidoctor.jvm.convert") version "4.0.2"
 }
 
-group = "eu.ecodex"
-version = "1.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 // common asciidoctor configuration
 fun org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.commonConfig() {
     baseDirFollowsSourceDir()

@@ -3,13 +3,6 @@ plugins {
     id("org.springframework.boot") version "4.0.2"
 }
 
-group = "eu.ecodex"
-version = "1.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 springBoot {
     mainClass.set("eu.ecodex.connector.ConnectorApplication")
 }

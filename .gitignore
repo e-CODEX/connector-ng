@@ -41,3 +41,6 @@ bin/
 
 ### .env ###
 .env
+
+### artemis data ###
+data/

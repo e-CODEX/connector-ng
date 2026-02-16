@@ -1,5 +1,3 @@
-import java.net.URI
-
 plugins {
     id("java")
     id("jacoco")
@@ -41,6 +39,15 @@ subprojects {
         testTasks.configureEach {
             useJUnitPlatform()
 
+            // increase memory for integration tests
+            maxHeapSize = "1g"
+
+            testLogging {
+                events("passed", "skipped", "failed")
+                showStandardStreams = false
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            }
+
             // set mockito agent to run in all subprojects
             val mockitoAgent by configurations.getting
             jvmArgs("-javaagent:${mockitoAgent.asPath}")
@@ -73,8 +80,12 @@ tasks.named("build") {
     dependsOn("cyclonedxBom")
 }
 
+tasks.named("check") {
+    dependsOn(":connector-integrationtest:test")
+}
+
 tasks.register<JacocoReport>("jacocoRootReport") {
-    group = "Verification"
+    group = "verification"
     description = "Generates an aggregate report from all subprojects"
 
     // Ensure all subproject tests run before generating the root report

@@ -25,7 +25,7 @@ import lombok.Builder;
  * @param truststore               The truststore configuration required for the processing mode,
  *                                 encapsulated in a {@link ConnectorKeystoreCreationRequest}.
  */
-@Builder
+@Builder(toBuilder = true)
 public record ConnectorProcessingModeCreationRequest(
         @NotBlank(message = "Processing mode description must not be blank.")
         String description,

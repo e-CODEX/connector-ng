@@ -10,6 +10,7 @@ spring-boot = "4.0.2"
 spring-doc = "3.0.1"
 # dbms
 h2 = "2.4.240"
+mysql = "8.0.33"
 # tests
 assertj = "3.27.7"
 junit = "5.10.0"
@@ -27,6 +28,7 @@ spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies"
 spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}
 # dbms
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
+mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
 # test
 mockito = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }

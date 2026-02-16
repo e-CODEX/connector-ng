@@ -15,11 +15,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-artemis")
     // databases
     implementation(libs.h2)
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)
+    // artemis
+    implementation("org.apache.activemq:artemis-jakarta-server")
     // doc
     implementation(libs.spring.doc)
     // other

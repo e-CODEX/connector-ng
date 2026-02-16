@@ -4,13 +4,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-group = "eu.ecodex"
-version = "1.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
 dependencies {

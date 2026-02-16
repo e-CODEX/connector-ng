@@ -5,13 +5,6 @@ plugins {
     id("java-test-fixtures")
 }
 
-group = "eu.ecodex"
-version = "1.0.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}
-
 sourceSets {
     main {
         java.setSrcDirs(emptyList<String>())

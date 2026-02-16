@@ -5,11 +5,13 @@ plugins {
     id("org.cyclonedx.bom") version "3.1.0"
 }
 
-group = "eu.ecodex"
-version = "1.0.0-SNAPSHOT"
+allprojects {
+    group = "eu.ecodex"
+    version = "1.0.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+    }
 }
 
 jacoco {

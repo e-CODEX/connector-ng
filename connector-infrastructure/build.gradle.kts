@@ -18,6 +18,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-artemis")
     // databases
     implementation(libs.h2)
+    runtimeOnly(libs.mysql)
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)

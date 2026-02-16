@@ -38,7 +38,3 @@ dependencies {
     testImplementation(libs.mockito)
     mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
-
-tasks.test {
-    useJUnitPlatform()
-}

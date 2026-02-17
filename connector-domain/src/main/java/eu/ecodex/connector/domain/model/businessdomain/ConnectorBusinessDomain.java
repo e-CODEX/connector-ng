@@ -13,7 +13,6 @@ package eu.ecodex.connector.domain.model.businessdomain;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
-import java.util.Map;
 import lombok.Builder;
 
 /**
@@ -56,6 +55,7 @@ public record ConnectorBusinessDomain(
             ConnectorBusinessDomain.builder()
                                    .identifier(DEFAULT_BUSINESS_DOMAIN_ID)
                                    .description("Default Business Domain")
+                                   .source(ConnectorConfigurationSource.APPLICATION)
                                    .enabled(true)
                                    .build();
 }

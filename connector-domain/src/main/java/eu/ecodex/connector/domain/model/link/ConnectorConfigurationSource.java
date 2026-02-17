@@ -21,6 +21,7 @@ package eu.ecodex.connector.domain.model.link;
  *       directly in the implementation.</li>
  *   <li>ENVIRONMENT: Indicates that the configuration is derived from environmental
  *       variables or external runtime context.</li>
+ *       <li>APPLICATION: Indicates that the configuration is hardcoded.</li>
  * </ul>
  *
  * <p>It is used to enable clear classification of configuration sources, supporting
@@ -29,5 +30,6 @@ package eu.ecodex.connector.domain.model.link;
 public enum ConnectorConfigurationSource {
     DATABASE,
     IMPLEMENTATION,
-    ENVIRONMENT
+    ENVIRONMENT,
+    APPLICATION
 }

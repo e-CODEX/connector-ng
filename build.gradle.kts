@@ -93,8 +93,14 @@ tasks.named("build") {
     dependsOn("cyclonedxBom")
 }
 
+tasks.register("integrationTest") {
+    group = "verification"
+    description = "Delegates to connector-integrationtest:integrationTest"
+    dependsOn(":connector-integrationtest:integrationTest")
+}
+
 tasks.named("check") {
-    dependsOn(":connector-integrationtest:test")
+    dependsOn(":connector-integrationtest:integrationTest")
 }
 
 tasks.register<JacocoReport>("jacocoRootReport") {

@@ -12,6 +12,7 @@ package eu.ecodex.connector.rest;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
@@ -20,12 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-@AutoConfigureRestTestClient
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ConnectorRegisterBusinessDomainIT {
+public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
     @Autowired

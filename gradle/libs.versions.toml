@@ -3,8 +3,10 @@ apache-commons = "3.20.0"
 jakarta-annotation = "3.0.0"
 jakarta-validation = "3.1.1"
 jakarta-jms-api = "3.1.0"
+jackson-databind = "2.21.0"
 lombok = "1.18.42"
 micrometer = "1.6.2"
+okhttp = "5.3.2"
 slf4j-api = "2.0.17"
 spring-boot = "4.0.2"
 spring-doc = "3.0.1"
@@ -15,6 +17,8 @@ mysql = "8.0.33"
 # tests
 assertj = "3.27.7"
 junit = "5.10.0"
+minio = "8.5.0"
+minio-container = "2.0.1"
 mockito = "5.21.0"
 
 [libraries]
@@ -22,8 +26,10 @@ apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.re
 jakarta-annotation = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
 jakarta-jms-api = { module = "jakarta.jms:jakarta.jms-api", version.ref = "jakarta-jms-api" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}
@@ -32,6 +38,8 @@ s3 = { module = "software.amazon.awssdk:s3", version.ref = "s3"}
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
 # test
+minio = { module = "io.minio:minio", version.ref = "minio" }
+minio-container = { module = "org.testcontainers:testcontainers-minio", version.ref = "minio-container" }
 mockito = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }

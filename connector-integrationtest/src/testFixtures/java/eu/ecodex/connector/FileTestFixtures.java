@@ -12,6 +12,7 @@ package eu.ecodex.connector;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 
@@ -38,5 +39,12 @@ public class FileTestFixtures {
         } catch (IOException e) {
             return new byte[1];
         }
+    }
+
+    public static byte[] generateFakeFile(int sizeInMegaByte) {
+        byte[] largeFile = new byte[sizeInMegaByte * 1024 * 1024];
+        new Random().nextBytes(largeFile);
+
+        return largeFile;
     }
 }

@@ -8,6 +8,7 @@ micrometer = "1.6.2"
 slf4j-api = "2.0.17"
 spring-boot = "4.0.2"
 spring-doc = "3.0.1"
+s3 = "2.41.30"
 # dbms
 h2 = "2.4.240"
 mysql = "8.0.33"
@@ -26,6 +27,7 @@ micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}
+s3 = { module = "software.amazon.awssdk:s3", version.ref = "s3"}
 # dbms
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }

@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
     implementation(libs.micrometer)
+    implementation(libs.s3)
     // test
     testImplementation(testFixtures(project(":connector-domain")))
     testImplementation("org.springframework.boot:spring-boot-starter-test")

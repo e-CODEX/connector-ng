@@ -25,5 +25,18 @@ services:
             # copy and place them in sql folder
             # - ./sql/:/docker-entrypoint-initdb.d/
             - connector-ng-mysql-data:/var/lib/mysql
+    minio:
+        image: minio/minio:latest
+        container_name: minio
+        ports:
+            - "9000:9000"      # S3 API
+            - "9001:9001"      # Web Console
+        environment:
+            MINIO_ROOT_USER: admin
+            MINIO_ROOT_PASSWORD: admin123
+        command: server /data --console-address ":9001"
+        volumes:
+            - minio_data:/data
 volumes:
     connector-ng-mysql-data:
+    minio_data:

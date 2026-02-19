@@ -12,6 +12,7 @@ package eu.ecodex.connector.rest;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
@@ -28,19 +29,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import tools.jackson.databind.ObjectMapper;
 
-@AutoConfigureRestTestClient
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ConnectorProcessingModeIT {
+public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     private final ConnectorProcessingModeCreationRequest metadata =
             ConnectorProcessingModeCreationRequest
                     .builder()

@@ -1,0 +1,68 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import eu.ecodex.connector.FileTestFixtures;
+import eu.ecodex.connector.TestConfiguration;
+import eu.ecodex.connector.application.service.usecase.attachment.ConnectorFileStorage;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement.ConnectorAttachmentController;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+@AutoConfigureRestTestClient
+@ContextConfiguration(classes = TestConfiguration.class)
+@WebMvcTest(ConnectorAttachmentController.class)
+public class ConnectorAttachmentControllerTest {
+    @MockitoBean
+    private ConnectorFileStorage connectorFileStorage;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void should_send_201_when_uploading_attachments() throws Exception {
+        when(connectorFileStorage.store(any())).thenReturn(List.of("id", "id"));
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/attachments/upload")
+                                .file(getAttachment("raw/fake_file.pdf", "fake_file.pdf"))
+                                .file(getAttachment("raw/fake_file.txt", "fake_file.txt"))
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+               )
+               .andExpect(status().isCreated())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    private MockMultipartFile getAttachment(String resourcePath, String filename) {
+        return new MockMultipartFile(
+                "attachments",
+                filename,
+                MediaType.APPLICATION_XML_VALUE,
+                FileTestFixtures.readAsBytes(resourcePath)
+        );
+    }
+}

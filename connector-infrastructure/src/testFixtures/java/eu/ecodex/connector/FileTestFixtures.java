@@ -11,25 +11,11 @@
 package eu.ecodex.connector;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Random;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class FileTestFixtures {
-    public static String readAsString(String path) {
-        try {
-            var resource = new ClassPathResource(path);
-            return StreamUtils.copyToString(
-                    resource.getInputStream(),
-                    StandardCharsets.UTF_8
-            );
-        } catch (IOException e) {
-            return "";
-        }
-    }
-
     public static byte[] readAsBytes(String path) {
         try {
             ClassPathResource resource = new ClassPathResource(path);
@@ -37,14 +23,7 @@ public class FileTestFixtures {
                     resource.getInputStream()
             );
         } catch (IOException e) {
-            return new byte[1];
+            return new byte[0];
         }
-    }
-
-    public static byte[] generateFakeFile(int sizeInMegaByte) {
-        byte[] largeFile = new byte[sizeInMegaByte * 1024 * 1024];
-        new Random().nextBytes(largeFile);
-
-        return largeFile;
     }
 }

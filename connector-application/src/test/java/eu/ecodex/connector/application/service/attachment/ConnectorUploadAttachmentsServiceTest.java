@@ -10,17 +10,18 @@
 
 package eu.ecodex.connector.application.service.attachment;
 
-
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.impl.attachement.ConnectorFileStorageService;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
+import eu.ecodex.connector.application.service.impl.attachement.ConnectorUploadAttachmentsService;
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
-import eu.ecodex.connector.domain.exception.ConnectorStorageException;
+import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import java.io.InputStream;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,19 +32,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-public class ConnectorFileStorageServiceTest {
+public class ConnectorUploadAttachmentsServiceTest {
     @Mock
-    private ConnectorFileStorageProvider fileStorageProvider;
+    private ConnectorMessageAttachmentRepository attachmentRepository;
+    @Mock
+    private ConnectorFileStorageProvider storageProvider;
     @InjectMocks
-    private ConnectorFileStorageService fileStorageService;
+    private ConnectorUploadAttachmentsService uploadAttachmentsService;
 
     @Test
-    void should_store_file_successfully() {
-        when(fileStorageProvider.save(any(), any(), any(), any()))
-               .thenReturn("f6e85600-2dca-44df-9ccd-1a2be538355a");
+    void should_upload_attachments_successfully() {
+        var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
+        when(attachmentRepository.save(any())).thenReturn(savedAttachment);
+        when(storageProvider.save(any(), any())).thenReturn(savedAttachment.identifier());
 
         var fileUploadCommand = new FileUploadCommand(
-                "fakeName.txt",
+                "test_attachment.txt",
                 100L,
                 "text/plain",
                 new InputStream() {
@@ -53,14 +57,22 @@ public class ConnectorFileStorageServiceTest {
                     }
                 }
         );
-        var identifier = fileStorageService.store(List.of(fileUploadCommand));
+        var attachments = uploadAttachmentsService.execute(List.of(fileUploadCommand));
 
-        assertThat(identifier).isEqualTo(List.of("f6e85600-2dca-44df-9ccd-1a2be538355a"));
+        assertThat(attachments).isNotNull();
+        assertThat(attachments).hasSize(1);
+        var attachment = attachments.getFirst();
+        assertThat(attachment.identifier()).endsWith("test_attachment");
+        assertThat(attachment.name()).isEqualTo("test_attachment");
+        assertThat(attachment.contentType()).isEqualTo("text/plain");
+        assertThat(attachment.size()).isEqualTo(100L);
     }
 
     @Test
-    void should_throw_storage_exception_when_storing_file_if_an_io_exception_occurs() {
-        doThrow(RuntimeException.class).when(fileStorageProvider).save(any(), any(), any(), any());
+    void should_throw_attachment_exception_when_uploading_attachment_if_an_io_exception_occurs() {
+        var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
+        when(attachmentRepository.save(any())).thenReturn(savedAttachment);
+        doThrow(RuntimeException.class).when(storageProvider).save(any(), any());
 
         var fileUploadCommand = new FileUploadCommand(
                 "fakeName.txt",
@@ -75,16 +87,16 @@ public class ConnectorFileStorageServiceTest {
         );
 
         assertThrows(
-                ConnectorStorageException.class,
-                () -> fileStorageService.store(List.of(fileUploadCommand))
+                ConnectorMessageAttachmentException.class,
+                () -> uploadAttachmentsService.execute(List.of(fileUploadCommand))
         );
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_storing_file_if_the_file_command_is_null() {
+    void should_throw_null_pointer_exception_when_saving_attachments_if_upload_commands_is_null() {
         assertThrows(
                 NullPointerException.class,
-                () -> fileStorageService.store(null)
+                () -> uploadAttachmentsService.execute(null)
         );
     }
 }

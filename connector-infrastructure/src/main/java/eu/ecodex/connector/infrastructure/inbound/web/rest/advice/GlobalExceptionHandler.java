@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
@@ -75,6 +76,16 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleBadRequestException(ConnectorBadRequestException exception) {
         return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ConnectorMessageAttachmentException.class)
+    public ErrorResponse handleMessageAttachmentException(
+            ConnectorMessageAttachmentException exception) {
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );
     }
 

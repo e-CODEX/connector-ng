@@ -10,8 +10,10 @@
 
 package eu.ecodex.connector.infrastructure.repository;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageAttachmentEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorMessageAttachmentJpaRepository;
 import org.springframework.stereotype.Component;
 
 /**
@@ -20,8 +22,43 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorMessageAttachmentRepositoryImpl implements
         ConnectorMessageAttachmentRepository {
+    private final ConnectorMessageAttachmentJpaRepository jpaRepository;
+
+    public ConnectorMessageAttachmentRepositoryImpl(
+            ConnectorMessageAttachmentJpaRepository jpaRepository) {
+        this.jpaRepository = jpaRepository;
+    }
+
     @Override
     public ConnectorMessageAttachment save(ConnectorMessageAttachment attachment) {
-        throw new UnsupportedOperationException("not yet implemented");
+        var attachmentToSave = toEntity(attachment);
+        var savedAttachment = jpaRepository.save(attachmentToSave);
+
+        return toDomain(savedAttachment);
+    }
+
+    private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {
+        return ConnectorMessageAttachmentEntity
+                .builder()
+                .identifier(attachment.identifier())
+                .name(attachment.name())
+                .size(attachment.size())
+                .contentType(attachment.contentType())
+                .description(attachment.description())
+                .storage(attachment.storage())
+                .build();
+    }
+
+    private ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
+        // TODO handle null case
+        return ConnectorMessageAttachment
+                .builder()
+                .identifier(entity.getIdentifier())
+                .name(entity.getName())
+                .size(entity.getSize())
+                .contentType(entity.getContentType())
+                .description(entity.getDescription())
+                .storage(entity.getStorage())
+                .build();
     }
 }

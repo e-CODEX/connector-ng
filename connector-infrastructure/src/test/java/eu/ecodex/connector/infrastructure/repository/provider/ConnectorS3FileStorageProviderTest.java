@@ -10,13 +10,14 @@
 
 package eu.ecodex.connector.infrastructure.repository.provider;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
 import java.io.InputStream;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +40,7 @@ public class ConnectorS3FileStorageProviderTest {
 
     @Test
     void should_store_files_into_s3_bucket_successfully() {
-        when(s3ProviderProperties.getBucket()).thenReturn("attachment");
+        when(s3ProviderProperties.getBucket()).thenReturn("attachments");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
@@ -49,18 +50,41 @@ public class ConnectorS3FileStorageProviderTest {
                 return 100;
             }
         };
+        var attachment = MessageAttachmentTestFixtures.createAttachment();
+        var identifier = fileStorageProvider.save(attachment, inputStream);
 
-        var identifier = fileStorageProvider.save(
-                "fake_file.txt", 100L, "text/plain", inputStream);
-
-        AssertionsForInterfaceTypes.assertThat(identifier).endsWith("_fake_file.txt");
+        assertThat(identifier).endsWith("test_attachment");
     }
 
     @Test
     void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_input_stream_is_null() {
+        var attachment = MessageAttachmentTestFixtures.createAttachment();
         assertThrows(
                 NullPointerException.class,
-                () -> fileStorageProvider.save("fake_file.txt", 100L, "text/plain", null)
+                () -> fileStorageProvider.save(attachment, null)
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_attachment_is_null() {
+        var inputStream = new InputStream() {
+            @Override
+            public int read() {
+                return 100;
+            }
+        };
+
+        assertThrows(
+                NullPointerException.class,
+                () -> fileStorageProvider.save(null, inputStream)
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_attachment_and_input_stream_are_null() {
+        assertThrows(
+                NullPointerException.class,
+                () -> fileStorageProvider.save(null, null)
         );
     }
 }

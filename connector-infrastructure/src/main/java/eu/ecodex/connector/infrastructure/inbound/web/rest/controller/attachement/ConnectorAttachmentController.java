@@ -11,7 +11,9 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement;
 
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorFileStorage;
+import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import java.io.IOException;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,28 +24,32 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorAttachmentController implements ConnectorAttachmentControllerApi {
-    private final ConnectorFileStorage fileService;
+    private final ConnectorUploadAttachments uploadAttachmentsService;
 
-    public ConnectorAttachmentController(ConnectorFileStorage fileService) {
-        this.fileService = fileService;
+    public ConnectorAttachmentController(ConnectorUploadAttachments uploadAttachmentsService) {
+        this.uploadAttachmentsService = uploadAttachmentsService;
     }
 
     @Override
     public List<String> upload(List<MultipartFile> attachments) {
-        var fileCommand = attachments.stream()
-                                     .map(attachment -> {
-                                              try {
-                                                  return new FileUploadCommand(
-                                                          attachment.getOriginalFilename(),
-                                                          attachment.getSize(),
-                                                          attachment.getContentType(),
-                                                          attachment.getInputStream()
-                                                  );
-                                              } catch (IOException e) {
-                                                  throw new RuntimeException(e);
-                                              }
-                                          }
-                                     ).toList();
-        return fileService.store(fileCommand);
+        var fileUploadCommands = attachments
+                .stream()
+                .map(attachment -> {
+                         try {
+                             return new FileUploadCommand(
+                                     attachment.getOriginalFilename(),
+                                     attachment.getSize(),
+                                     attachment.getContentType(),
+                                     attachment.getInputStream()
+                             );
+                         } catch (IOException e) {
+                             throw new ConnectorInternalServerException(e.getMessage());
+                         }
+                     }
+                ).toList();
+        return this.uploadAttachmentsService.execute(fileUploadCommands)
+                                            .stream()
+                                            .map(ConnectorMessageAttachment::identifier)
+                                            .toList();
     }
 }

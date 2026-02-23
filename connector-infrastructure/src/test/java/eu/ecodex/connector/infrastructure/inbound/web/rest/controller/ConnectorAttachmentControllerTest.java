@@ -19,8 +19,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.FileTestFixtures;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorFileStorage;
+import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement.ConnectorAttachmentController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -39,13 +40,14 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ConnectorAttachmentController.class)
 public class ConnectorAttachmentControllerTest {
     @MockitoBean
-    private ConnectorFileStorage connectorFileStorage;
+    private ConnectorUploadAttachments uploadAttachmentsService;
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void should_send_201_when_uploading_attachments() throws Exception {
-        when(connectorFileStorage.store(any())).thenReturn(List.of("id", "id"));
+        when(uploadAttachmentsService.execute(any()))
+                .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/attachments/upload")
                                 .file(getAttachment("raw/fake_file.pdf", "fake_file.pdf"))
@@ -54,7 +56,7 @@ public class ConnectorAttachmentControllerTest {
                )
                .andExpect(status().isCreated())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$", hasSize(2)));
+               .andExpect(jsonPath("$", hasSize(1)));
     }
 
     private MockMultipartFile getAttachment(String resourcePath, String filename) {

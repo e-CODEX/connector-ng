@@ -21,8 +21,8 @@ package eu.ecodex.connector.domain.exception;
  * handled at the application boundary (e.g. service layer, REST controller, or global exception
  * handler).
  */
-public class ConnectorStorageException extends RuntimeException {
-    public ConnectorStorageException(String message) {
+public class ConnectorMessageAttachmentException extends RuntimeException {
+    public ConnectorMessageAttachmentException(String message) {
         super(message);
     }
 }

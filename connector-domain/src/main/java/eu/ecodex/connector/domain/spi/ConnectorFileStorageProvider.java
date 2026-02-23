@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.spi;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import jakarta.annotation.Nonnull;
 import java.io.InputStream;
 
@@ -25,25 +26,18 @@ import java.io.InputStream;
  */
 public interface ConnectorFileStorageProvider {
     /**
-     * Stores a file in the underlying storage system.
+     * Saves the given attachment content to the underlying storage system.
      *
-     * @param filename    the original name of the file; may be used to determine storage path or
-     *                    naming conventions
-     * @param fileSize    the size of the file in bytes; may be {@code null} if unknown
-     * @param contentType the MIME type of the file (e.g., {@code "application/pdf"},
-     *                    {@code "image/png"}); may be {@code null} if not provided
-     * @param inputStream the input stream containing the file data; must not be {@code null}
+     * @param attachment  a non-null {@link ConnectorMessageAttachment} metadata associated with the
+     *                    file being stored
+     * @param inputStream a non-null {@link InputStream} containing the file data
      *
-     * @return a unique identifier, URL, or storage key representing the saved file; never
-     *         {@code null}
-     * @throws IllegalArgumentException if required parameters are invalid
-     * @throws RuntimeException         if the file cannot be stored due to I/O errors or storage
-     *                                  provider failures
+     * @return a {@link String} representing the storage reference (e.g., object key, path, or URL)
+     *         of the saved file
+     * @throws NullPointerException if {@code inputStream} is null
      */
     String save(
-            String filename,
-            Long fileSize,
-            String contentType,
+            @Nonnull ConnectorMessageAttachment attachment,
             @Nonnull InputStream inputStream
     );
 }

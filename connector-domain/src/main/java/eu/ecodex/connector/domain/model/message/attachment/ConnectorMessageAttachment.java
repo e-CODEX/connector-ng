@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.model.message;
+package eu.ecodex.connector.domain.model.message.attachment;
 
 import jakarta.annotation.Nonnull;
 import java.io.Serializable;
@@ -19,25 +19,29 @@ import lombok.Builder;
  * (mostly PDF's) sent along with. Therefore, those documents are attached to the message over this
  * type.
  *
- * @param uuid  The uuid of the attachment.
+ * @param identifier  The identifier of the attachment.
  * @param name        The name of the attachment.
- * @param mimeType    The MIME type of the attachment.
+ * @param contentType The MIME type of the attachment.
+ * @param size        The size of the attachment
  * @param description A description of the attachment.
+ * @param storage     The message storage type.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageAttachment(
-        String uuid,
-        // TODO add large file which is the content of the document
+        String identifier,
         String name,
-        String mimeType,
-        String description
+        String contentType,
+        long size,
+        String description,
+        ConnectorAttachmentStorage storage
+
 ) implements Serializable {
     @Override
     @Nonnull
     public String toString() {
         return String.format(
-                "{uuid=%s, name=%s, mimeType=%s, description=%s}",
-                uuid, name, mimeType, description
+                "{identifier=%s, name=%s, contentType=%s, description=%s}",
+                identifier, name, contentType, description
         );
     }
 }

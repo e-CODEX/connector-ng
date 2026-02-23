@@ -10,22 +10,22 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class MessageAttachmentTestFixtures {
     public static ConnectorMessageAttachment createAttachment() {
-        return ConnectorMessageAttachment.builder()
-                                         .name("test_attachment")
-                                         .description("test attachment description")
-                                         .mimeType("application/pdf")
-                                         .build();
-    }
-
-    public static ConnectorMessageAttachment createSavedAttachment() {
-        return createAttachment()
-                .toBuilder()
-                .uuid("c12f879b-3c9a-4d26-b36c-b6d67a84f0ed")
+        var name = "test_attachment";
+        var identifier = String.format("%s_%s", "c12f879b-3c9a-4d26-b36c-b6d67a84f0ed", name);
+        return ConnectorMessageAttachment
+                .builder()
+                .identifier(identifier)
+                .name(name)
+                .size(100L)
+                .description("test attachment description")
+                .contentType("text/plain")
+                .storage(ConnectorAttachmentStorage.S3_BUCKET)
                 .build();
     }
 }

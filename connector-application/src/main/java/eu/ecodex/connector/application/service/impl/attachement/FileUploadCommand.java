@@ -10,7 +10,10 @@
 
 package eu.ecodex.connector.application.service.impl.attachement;
 
-import java.io.InputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Command object representing a single file upload request.
@@ -19,20 +22,28 @@ import java.io.InputStream;
  * transport object between application layers.
  *
  * <p>Instances of this record are immutable with respect to their fields.
- * However, note that the {@link InputStream} itself may represent a mutable and consumable
- * resource.
  *
- * @param filename    the original name of the file; must not be {@code null}
- * @param size        the size of the file in bytes; must be greater than or equal to zero
- * @param contentType the MIME type of the file (e.g. {@code "application/pdf"},
- *                    {@code "image/png"}); may be {@code null} if unknown
- * @param inputStream the stream containing the file's binary data; must not be {@code null} and is
- *                    expected to be consumed once
+ * @param filename         the original name of the file; must not be {@code null}
+ * @param size             the size of the file in bytes; must be greater than or equal to zero
+ * @param contentType      the MIME type of the file (e.g. {@code "application/pdf"},
+ *                         {@code "image/png"}); may be {@code null} if unknown
+ * @param tempFileLocation the {@link Path} pointing to the temporary file location
  */
+@Slf4j
 public record FileUploadCommand(
         String filename,
         long size,
         String contentType,
-        InputStream inputStream
+        Path tempFileLocation
 ) {
+    /**
+     * Deletes the temporary file.
+     */
+    public void cleanup() {
+        try {
+            Files.deleteIfExists(tempFileLocation);
+        } catch (IOException e) {
+            log.error("failed to delete temporary file {}", tempFileLocation, e);
+        }
+    }
 }

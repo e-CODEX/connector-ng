@@ -17,7 +17,10 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
-import java.io.InputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,19 +42,13 @@ public class ConnectorS3FileStorageProviderTest {
     private ConnectorS3FileStorageProvider fileStorageProvider;
 
     @Test
-    void should_store_files_into_s3_bucket_successfully() {
+    void should_store_files_into_s3_bucket_successfully() throws IOException {
         when(s3ProviderProperties.getBucket()).thenReturn("attachments");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
-        var inputStream = new InputStream() {
-            @Override
-            public int read() {
-                return 100;
-            }
-        };
         var attachment = MessageAttachmentTestFixtures.createAttachment();
-        var identifier = fileStorageProvider.save(attachment, inputStream);
+        var identifier = fileStorageProvider.save(attachment, provideTemporaryPath());
 
         assertThat(identifier).endsWith("test_attachment");
     }
@@ -67,16 +64,9 @@ public class ConnectorS3FileStorageProviderTest {
 
     @Test
     void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_attachment_is_null() {
-        var inputStream = new InputStream() {
-            @Override
-            public int read() {
-                return 100;
-            }
-        };
-
         assertThrows(
                 NullPointerException.class,
-                () -> fileStorageProvider.save(null, inputStream)
+                () -> fileStorageProvider.save(null, provideTemporaryPath())
         );
     }
 
@@ -86,5 +76,13 @@ public class ConnectorS3FileStorageProviderTest {
                 NullPointerException.class,
                 () -> fileStorageProvider.save(null, null)
         );
+    }
+
+    private Path provideTemporaryPath() throws IOException {
+        var tempPath = Files.createTempFile("test-upload-", ".txt");
+        var content = "test content";
+        Files.writeString(tempPath, content, StandardOpenOption.WRITE);
+
+        return tempPath;
     }
 }

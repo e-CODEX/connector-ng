@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.model.message.attachment;
 
 import jakarta.annotation.Nonnull;
 import java.io.Serializable;
+import java.time.Instant;
 import lombok.Builder;
 
 /**
@@ -25,6 +26,8 @@ import lombok.Builder;
  * @param size        The size of the attachment
  * @param description A description of the attachment.
  * @param storage     The message storage type.
+ * @param createdAt   The creation date of the attachment.
+ * @param updatedAt   The last update date of the attachment.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageAttachment(
@@ -33,7 +36,9 @@ public record ConnectorMessageAttachment(
         String contentType,
         long size,
         String description,
-        ConnectorAttachmentStorage storage
+        ConnectorAttachmentStorage storage,
+        Instant createdAt,
+        Instant updatedAt
 
 ) implements Serializable {
     @Override

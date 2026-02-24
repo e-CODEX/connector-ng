@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
 import java.io.InputStream;
+import java.nio.file.Path;
 import lombok.NonNull;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
 
     @Override
     public String save(
-            @NonNull ConnectorMessageAttachment attachment, @NonNull InputStream inputStream) {
+            @NonNull ConnectorMessageAttachment attachment, @NonNull Path filePath) {
 
         var putObjectRequest = PutObjectRequest.builder()
                                                .bucket(this.s3ProviderProperties.getBucket())
@@ -47,7 +48,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
                                                .build();
         this.s3Client.putObject(
                 putObjectRequest,
-                RequestBody.fromInputStream(inputStream, attachment.size())
+                RequestBody.fromFile(filePath)
         );
 
         return attachment.identifier();

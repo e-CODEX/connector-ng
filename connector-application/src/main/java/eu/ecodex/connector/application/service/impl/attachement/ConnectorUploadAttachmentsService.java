@@ -42,9 +42,9 @@ public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachm
 
     @Override
     public List<ConnectorMessageAttachment> execute(@NonNull List<FileUploadCommand> files) {
-        try {
-            return files.stream()
-                        .map(uploadCommand -> {
+        return files.stream()
+                    .map(uploadCommand -> {
+                        try {
                             var name = StringUtils.stripFilenameExtension(uploadCommand.filename());
                             var identifier = String.format("%s_%s", UUID.randomUUID(), name);
 
@@ -61,15 +61,14 @@ public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachm
                             var savedAttachments = this.attachmentRepository.save(attachmentToSave);
 
                             this.storageProvider.save(
-                                    attachmentToSave,
-                                    uploadCommand.inputStream()
+                                    attachmentToSave, uploadCommand.tempFileLocation()
                             );
 
                             return savedAttachments;
-                        })
-                        .toList();
-        } catch (Exception e) {
-            throw new ConnectorMessageAttachmentException(e.getMessage());
-        }
+                        } catch (Exception e) {
+                            throw new ConnectorMessageAttachmentException(e.getMessage());
+                        }
+                    })
+                    .toList();
     }
 }

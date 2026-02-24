@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import jakarta.annotation.Nonnull;
-import java.io.InputStream;
+import java.nio.file.Path;
 
 /**
  * Defines a contract for storing files in an external or internal storage system.
@@ -28,16 +28,14 @@ public interface ConnectorFileStorageProvider {
     /**
      * Saves the given attachment content to the underlying storage system.
      *
-     * @param attachment  a non-null {@link ConnectorMessageAttachment} metadata associated with the
-     *                    file being stored
-     * @param inputStream a non-null {@link InputStream} containing the file data
+     * @param attachment a non-null {@link ConnectorMessageAttachment} metadata associated with the
+     *                   file being stored
+     * @param filePath   the path to the file on the local filesystem to be stored (must not be
+     *                   null)
      *
      * @return a {@link String} representing the storage reference (e.g., object key, path, or URL)
      *         of the saved file
      * @throws NullPointerException if {@code inputStream} is null
      */
-    String save(
-            @Nonnull ConnectorMessageAttachment attachment,
-            @Nonnull InputStream inputStream
-    );
+    String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull Path filePath);
 }

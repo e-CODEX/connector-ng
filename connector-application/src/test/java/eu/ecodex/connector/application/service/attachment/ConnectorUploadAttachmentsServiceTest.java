@@ -22,7 +22,10 @@ import eu.ecodex.connector.application.service.impl.attachement.FileUploadComman
 import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
-import java.io.InputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +44,7 @@ public class ConnectorUploadAttachmentsServiceTest {
     private ConnectorUploadAttachmentsService uploadAttachmentsService;
 
     @Test
-    void should_upload_attachments_successfully() {
+    void should_upload_attachments_successfully() throws IOException {
         var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
         when(attachmentRepository.save(any())).thenReturn(savedAttachment);
         when(storageProvider.save(any(), any())).thenReturn(savedAttachment.identifier());
@@ -50,12 +53,7 @@ public class ConnectorUploadAttachmentsServiceTest {
                 "test_attachment.txt",
                 100L,
                 "text/plain",
-                new InputStream() {
-                    @Override
-                    public int read() {
-                        return 100;
-                    }
-                }
+                provideTemporaryPath()
         );
         var attachments = uploadAttachmentsService.execute(List.of(fileUploadCommand));
 
@@ -69,21 +67,16 @@ public class ConnectorUploadAttachmentsServiceTest {
     }
 
     @Test
-    void should_throw_attachment_exception_when_uploading_attachment_if_an_io_exception_occurs() {
+    void should_throw_attachment_exception_when_uploading_attachment_if_an_io_exception_occurs() throws IOException {
         var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
         when(attachmentRepository.save(any())).thenReturn(savedAttachment);
         doThrow(RuntimeException.class).when(storageProvider).save(any(), any());
 
         var fileUploadCommand = new FileUploadCommand(
-                "fakeName.txt",
+                "test_attachment.txt",
                 100L,
                 "text/plain",
-                new InputStream() {
-                    @Override
-                    public int read() {
-                        return 100;
-                    }
-                }
+                provideTemporaryPath()
         );
 
         assertThrows(
@@ -98,5 +91,13 @@ public class ConnectorUploadAttachmentsServiceTest {
                 NullPointerException.class,
                 () -> uploadAttachmentsService.execute(null)
         );
+    }
+
+    private Path provideTemporaryPath() throws IOException {
+        var tempPath = Files.createTempFile("test-upload-", ".txt");
+        var content = "test content";
+        Files.writeString(tempPath, content, StandardOpenOption.WRITE);
+
+        return tempPath;
     }
 }

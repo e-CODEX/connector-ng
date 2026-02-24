@@ -15,6 +15,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,5 +41,20 @@ public class ConnectorMessageAttachmentRepositoryTest {
         assertThat(savedAttachment.contentType()).isEqualTo("text/plain");
         assertThat(savedAttachment.description()).isNotBlank();
         assertThat(savedAttachment.storage()).isEqualTo(ConnectorAttachmentStorage.S3_BUCKET);
+    }
+
+    @Test
+    void should_find_all_attachments_successfully_from_database() {
+        var attachment = MessageAttachmentTestFixtures.createAttachment();
+        this.repository.save(attachment);
+
+        var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
+        var attachments = this.repository.findAll(pageRequest);
+
+        assertThat(attachments).isNotNull();
+        assertThat(attachments.content()).hasSize(1);
+        assertThat(attachments.totalElements()).isEqualTo(1L);
+        assertThat(attachments.page()).isEqualTo(0);
+        assertThat(attachments.size()).isEqualTo(20);
     }
 }

@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,7 +22,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
+import eu.ecodex.connector.application.service.usecase.attachment.ConnectorListAttachments;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement.ConnectorAttachmentController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,8 @@ import org.springframework.test.web.servlet.MockMvc;
 public class ConnectorAttachmentControllerTest {
     @MockitoBean
     private ConnectorUploadAttachments uploadAttachmentsService;
+    @MockitoBean
+    private ConnectorListAttachments listAttachmentsService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -57,6 +62,27 @@ public class ConnectorAttachmentControllerTest {
                .andExpect(status().isCreated())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void should_return_200_when_retrieving_attachments() throws Exception {
+        var pageResult = new ConnectorPageResult<>(
+                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 0, 20
+        );
+
+        when(listAttachmentsService.execute(any())).thenReturn(pageResult);
+
+        mockMvc.perform(get("/api/v1/attachments")
+                                .param("page", "0")
+                                .param("size", "20")
+                                .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.totalElements").value(1))
+               .andExpect(jsonPath("$.page").value(0))
+               .andExpect(jsonPath("$.size").value(20))
+               .andExpect(jsonPath("$.content").isArray())
+               .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     private MockMultipartFile getAttachment(String resourcePath, String filename) {

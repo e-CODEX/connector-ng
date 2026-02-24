@@ -40,6 +40,7 @@ public class WebSecurityConfiguration {
                            .requestMatchers(
                                    "/api/v1/admin/business-domains",
                                    "/api/v1/admin/processing-modes",
+                                   "/api/v1/attachments",
                                    "/api/v1/attachments/upload",
                                    // swagger ui
                                    "/swagger-ui/**",

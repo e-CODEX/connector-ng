@@ -10,7 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement;
 
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,4 +49,11 @@ public interface ConnectorAttachmentControllerApi {
             )
     )
     List<String> upload(@RequestParam("attachments") List<MultipartFile> attachments);
+
+    @GetMapping
+    @Operation(summary = "Get paginated list of message attachments.")
+    ConnectorPageResult<ConnectorAttachmentDto> getAll(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size
+    );
 }

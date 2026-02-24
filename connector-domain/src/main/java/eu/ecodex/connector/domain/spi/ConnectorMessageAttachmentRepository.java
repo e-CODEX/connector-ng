@@ -12,6 +12,8 @@ package eu.ecodex.connector.domain.spi;
 
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 
 /**
  * Repository interface for managing {@link ConnectorMessageAttachment}.
@@ -35,4 +37,6 @@ public interface ConnectorMessageAttachmentRepository {
      *         persistence process, such as the generation of an identifier.
      */
     ConnectorMessageAttachment save(ConnectorMessageAttachment attachment);
+
+    ConnectorPageResult<ConnectorMessageAttachment> findAll(ConnectorPageRequest request);
 }

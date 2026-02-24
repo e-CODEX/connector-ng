@@ -11,9 +11,12 @@
 package eu.ecodex.connector.infrastructure.repository;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageAttachmentEntity;
 import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorMessageAttachmentJpaRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,6 +38,20 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         var savedAttachment = jpaRepository.save(attachmentToSave);
 
         return toDomain(savedAttachment);
+    }
+
+    @Override
+    public ConnectorPageResult<ConnectorMessageAttachment> findAll(ConnectorPageRequest request) {
+        var pageable = PageRequest.of(request.page(), request.size());
+
+        var result = jpaRepository.findAll(pageable);
+
+        return new ConnectorPageResult<>(
+                result.getContent().stream().map(this::toDomain).toList(),
+                result.getTotalElements(),
+                result.getNumber(),
+                result.getSize()
+        );
     }
 
     private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {
@@ -59,6 +76,8 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
                 .contentType(entity.getContentType())
                 .description(entity.getDescription())
                 .storage(entity.getStorage())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 }

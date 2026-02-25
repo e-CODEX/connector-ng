@@ -19,8 +19,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.ConnectorBusinessDomainPropertiesProviderTestFixtures;
-import eu.ecodex.connector.domain.api.service.ConnectorBusinessDomainService;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
+import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorBusinessDomainPropertiesProvider;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.springframework.boot.ApplicationArguments;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorDefaultBusinessDomainInitializerTest {
     @Mock
-    private ConnectorBusinessDomainService businessDomainService;
+    private ConnectorBusinessDomainRepository businessDomainRepository;
     @Mock
     private ConnectorBusinessDomainPropertiesProvider domainPropertiesProvider;
 
@@ -44,25 +44,25 @@ public class ConnectorDefaultBusinessDomainInitializerTest {
     @BeforeEach
     void setUp() {
         initializer = new ConnectorDefaultBusinessDomainInitializer(
-                businessDomainService, domainPropertiesProvider
+                businessDomainRepository, domainPropertiesProvider
         );
     }
 
     @Test
     void should_not_initialize_business_domain_when_already_exists() {
-        when(businessDomainService.findAll())
+        when(businessDomainRepository.findAll())
                 .thenReturn(List.of(BusinessDomainTestFixtures.createDefaultBusinessDomain()));
 
         initializer.run(mock(ApplicationArguments.class));
 
-        verify(businessDomainService).findAll();
-        verify(businessDomainService, never()).register(any());
+        verify(businessDomainRepository).findAll();
+        verify(businessDomainRepository, never()).save(any());
         verify(domainPropertiesProvider, never()).getProperties();
     }
 
     @Test
     void should_initialize_business_domain_from_properties_when_not_exists() {
-        when(businessDomainService.findAll()).thenReturn(Collections.emptyList());
+        when(businessDomainRepository.findAll()).thenReturn(Collections.emptyList());
         when(domainPropertiesProvider.getProperties())
                 .thenReturn(
                         ConnectorBusinessDomainPropertiesProviderTestFixtures
@@ -72,16 +72,16 @@ public class ConnectorDefaultBusinessDomainInitializerTest {
         initializer.run(mock(ApplicationArguments.class));
 
         verify(domainPropertiesProvider, times(1)).getProperties();
-        verify(businessDomainService, times(1)).register(any());
+        verify(businessDomainRepository, times(1)).save(any());
     }
 
     @Test
     void should_initialize_business_domain_from_connector_when_not_exists() {
-        when(businessDomainService.findAll()).thenReturn(Collections.emptyList());
+        when(businessDomainRepository.findAll()).thenReturn(Collections.emptyList());
         when(domainPropertiesProvider.getProperties()).thenReturn(null);
 
         initializer.run(mock(ApplicationArguments.class));
 
-        verify(businessDomainService).register(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN);
+        verify(businessDomainRepository).save(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN);
     }
 }

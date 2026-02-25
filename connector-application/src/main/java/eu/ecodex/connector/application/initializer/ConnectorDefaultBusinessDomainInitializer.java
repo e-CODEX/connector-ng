@@ -10,15 +10,17 @@
 
 package eu.ecodex.connector.application.initializer;
 
-import eu.ecodex.connector.domain.api.service.ConnectorBusinessDomainService;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.property.ConnectorBusinessDomainProperties;
+import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorBusinessDomainPropertiesProvider;
 import jakarta.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Initializes the default business domain for the connector system during application startup.
@@ -32,28 +34,42 @@ import org.springframework.stereotype.Component;
  * predefined constant ({@link ConnectorBusinessDomain#DEFAULT_BUSINESS_DOMAIN}) is used as the
  * fallback.
  */
-@Component
+@Slf4j
+@Service
 public class ConnectorDefaultBusinessDomainInitializer implements ApplicationRunner {
-    private final ConnectorBusinessDomainService businessDomainService;
+    private final ConnectorBusinessDomainRepository businessDomainRepository;
     private final ConnectorBusinessDomainPropertiesProvider domainPropertiesProvider;
 
     public ConnectorDefaultBusinessDomainInitializer(
-            ConnectorBusinessDomainService businessDomainService,
+            ConnectorBusinessDomainRepository businessDomainRepository,
             ConnectorBusinessDomainPropertiesProvider domainPropertiesProvider) {
-        this.businessDomainService = businessDomainService;
+        this.businessDomainRepository = businessDomainRepository;
         this.domainPropertiesProvider = domainPropertiesProvider;
     }
 
+
     @Override
     public void run(@Nonnull ApplicationArguments args) {
-        if (!businessDomainService.findAll().isEmpty()) {
+        log.debug("initializing default business domain");
+
+        if (!businessDomainRepository.findAll().isEmpty()) {
             return;
         }
 
         var configProperties = domainPropertiesProvider.getProperties();
         var defaultDomain = createDefaultDomain(configProperties);
 
-        businessDomainService.register(defaultDomain);
+        var foundBusinessDomain = this.businessDomainRepository.findByIdentifier(
+                defaultDomain.identifier()
+        );
+
+        if (foundBusinessDomain != null) {
+            throw new ConnectorBusinessDomainException("business domain already exists");
+        }
+
+        var createdDomain = businessDomainRepository.save(defaultDomain);
+
+        log.info("default business domain created successfully: [{}]", createdDomain);
     }
 
     private ConnectorBusinessDomain createDefaultDomain(
@@ -67,8 +83,7 @@ public class ConnectorDefaultBusinessDomainInitializer implements ApplicationRun
                 .identifier(
                         ConnectorBusinessDomainIdentifier
                                 .builder()
-                                .messageLaneIdentifier(
-                                        configProperties.identifier())
+                                .messageLaneIdentifier(configProperties.identifier())
                                 .build()
                 )
                 .description(configProperties.description())

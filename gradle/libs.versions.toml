@@ -14,6 +14,10 @@ s3 = "2.41.30"
 # dbms
 h2 = "2.4.240"
 mysql = "8.0.33"
+# jta
+narayana = "4.0.0"
+agroal = "3.0"
+messaginghub = "3.2.2"
 # tests
 assertj = "3.27.7"
 junit = "5.10.0"
@@ -37,6 +41,10 @@ s3 = { module = "software.amazon.awssdk:s3", version.ref = "s3"}
 # dbms
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
+# narayana
+narayana = { module = "dev.snowdrop:narayana-spring-boot-starter", version.ref = "narayana" }
+agroal = { module = "io.agroal:agroal-spring-boot-starter", version.ref = "agroal" }
+messaginghub = { module = "org.messaginghub:pooled-jms", version.ref = "messaginghub" }
 # test
 minio = { module = "io.minio:minio", version.ref = "minio" }
 minio-container = { module = "org.testcontainers:testcontainers-minio", version.ref = "minio-container" }

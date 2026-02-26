@@ -24,6 +24,10 @@ dependencies {
     implementation(libs.jakarta.validation)
     // artemis
     implementation("org.apache.activemq:artemis-jakarta-server")
+    // jta
+    implementation(libs.narayana)
+    implementation(libs.agroal)
+    implementation(libs.messaginghub)
     // doc
     implementation(libs.spring.doc)
     // other

@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.config;
 
 import jakarta.jms.ConnectionFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
@@ -29,16 +30,17 @@ import org.springframework.jms.support.converter.MessageType;
 public class JmsConfig {
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-            ConnectionFactory connectionFactory) {
+            @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setPubSubDomain(false);
-        factory.setConcurrency("1-10");  // min 1, max 10 consumers
+        factory.setMessageConverter(jacksonConverter());
         return factory;
     }
 
     @Bean
-    public JmsTemplate jmsTemplate(ConnectionFactory connectionFactory) {
+    public JmsTemplate jmsTemplate(
+            @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
         JmsTemplate template = new JmsTemplate(connectionFactory);
         template.setMessageConverter(jacksonConverter());
         template.setPubSubDomain(false);

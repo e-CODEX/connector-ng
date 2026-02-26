@@ -44,3 +44,5 @@ bin/
 
 ### artemis data ###
 data/
+### narayana log ###
+transaction-logs/

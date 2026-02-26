@@ -1,6 +1,9 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     id("java")
     id("org.springframework.boot") version "4.0.2"
+    id("io.spring.dependency-management") version "1.1.0"
 }
 
 springBoot {
@@ -23,4 +26,12 @@ configurations {
     all {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
     }
+}
+
+tasks.named<BootJar>("bootJar") {
+    archiveFileName.set("connector-ng.jar")
+}
+
+tasks.named("build") {
+    dependsOn("bootJar")
 }

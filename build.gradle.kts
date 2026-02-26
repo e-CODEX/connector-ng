@@ -45,7 +45,7 @@ subprojects {
         isShowViolations = true
     }
 
-    if (name != "connector-documentation") {
+    if (name != "connector-documentation" || name != "connector-distribution") {
         val testTasks = tasks.withType<Test>()
         val jacocoReportTasks = tasks.withType<JacocoReport>()
 

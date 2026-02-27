@@ -32,7 +32,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Represents the Connector Processing Mode entity used to manage and store information about
@@ -59,6 +61,7 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "CONTENT", nullable = false)
     private String content;
 

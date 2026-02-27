@@ -29,7 +29,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Represents the Connector Processing Mode Keystore entity used to manage and store information
@@ -56,6 +58,7 @@ public class ConnectorKeystoreEntity extends BaseEntity {
 
     @Lob
     @Basic(fetch = FetchType.LAZY)
+    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
     @Column(name = "CONTENT", nullable = false)
     private byte[] content;
 

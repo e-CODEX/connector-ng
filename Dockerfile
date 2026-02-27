@@ -32,6 +32,6 @@ RUN chmod +x /app/start.sh
 
 USER $USERNAME
 
-EXPOSE 9090
+EXPOSE 30000
 
 ENTRYPOINT ["/app/start.sh"]

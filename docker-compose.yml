@@ -12,7 +12,7 @@ services:
             MYSQL_PASSWORD: connector
             MYSQL_ROOT_PASSWORD: connector
         ports:
-            - "40000:3306"
+            - "30006:3306"
         expose:
             - "3306"
         healthcheck:
@@ -58,9 +58,9 @@ services:
         env_file:
             -   ./docker.env
         ports:
-            - "30000:9090"
+            - "30000:30000"
         expose:
-            -   "9090"
+            -   "30000"
         volumes:
             - ./data:/app/data
 volumes:

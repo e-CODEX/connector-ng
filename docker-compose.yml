@@ -2,11 +2,11 @@
 services:
     connector-ng-db:
         container_name: mysql
-        # can be replaced with appropriate database image. e.g. postgres
+        # can be replaced with the appropriate database image. e.g. postgres
         image: mysql:8
         restart: always
         environment:
-            # can be replaced with appropriate database env. e.g. POSTGRES_PASSWORD, POSTGRES_USER ...
+            # can be replaced with the appropriate database env. e.g. POSTGRES_PASSWORD, POSTGRES_USER ...
             MYSQL_DATABASE: connector
             MYSQL_USER: connector
             MYSQL_PASSWORD: connector
@@ -25,7 +25,7 @@ services:
             # copy and place them in sql folder
             # - ./sql/:/docker-entrypoint-initdb.d/
             - connector-ng-mysql-data:/var/lib/mysql
-    minio:
+    minio-s3:
         image: minio/minio:latest
         container_name: minio
         ports:
@@ -35,8 +35,34 @@ services:
             MINIO_ROOT_USER: admin
             MINIO_ROOT_PASSWORD: admin123
         command: server /data --console-address ":9001"
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/ready" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
         volumes:
             - minio_data:/data
+    connector-ng:
+        container_name: connector-ng
+        # uncomment the bellow section if you want to build your connector image during the launch of docker-compose
+        # build:
+        #   context: ./
+        #   dockerfile: Dockerfile
+        image: connector-ng:latest
+        depends_on:
+            connector-ng-db:
+                condition: service_healthy
+            minio-s3:
+                condition: service_started
+        env_file:
+            -   ./docker.env
+        ports:
+            - "30000:9090"
+        expose:
+            -   "9090"
+        volumes:
+            - ./data:/app/data
 volumes:
     connector-ng-mysql-data:
     minio_data:

@@ -29,13 +29,13 @@ val prepareDistribution by tasks.registering(Copy::class) {
         }
     }
 
-    into(layout.buildDirectory.dir("connector-distribution-${version}"))
+    into(layout.buildDirectory.dir("connector-distribution"))
 }
 
 // Task: Build a zip distribution
 tasks.register<Zip>("distributionZip") {
     dependsOn(prepareDistribution)
-    from(layout.buildDirectory.dir("connector-distribution-${version}"))
+    from(layout.buildDirectory.dir("connector-distribution"))
     archiveFileName.set("connector-distribution-${version}.zip")
     destinationDirectory.set(layout.buildDirectory)
 }

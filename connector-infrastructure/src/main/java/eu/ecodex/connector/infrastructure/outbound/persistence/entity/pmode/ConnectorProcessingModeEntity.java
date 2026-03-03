@@ -21,10 +21,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -32,9 +32,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
 
 /**
  * Represents the Connector Processing Mode entity used to manage and store information about
@@ -59,10 +57,9 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     @Column(name = "DESCRIPTION", nullable = false)
     private String description;
 
-    @Lob
+    @Size(max = 10_000_000)
     @Basic(fetch = FetchType.LAZY)
-    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
-    @Column(name = "CONTENT", nullable = false)
+    @Column(name = "CONTENT", nullable = false, length = 10_000_000)
     private String content;
 
     @Column(name = "FILENAME", nullable = false)

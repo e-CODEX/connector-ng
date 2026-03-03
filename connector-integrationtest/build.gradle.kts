@@ -21,7 +21,7 @@ dependencies {
     // app modules
     testImplementation(project(":connector-domain"))
     testImplementation(project(":connector-infrastructure"))
-    // testImplementation(project(":connector-bootstrapper"))
+    testImplementation(project(":connector-bootstrapper"))
     // test
     testImplementation(testFixtures(project(":connector-infrastructure")))
     testFixturesImplementation(testFixtures(project(":connector-infrastructure")))
@@ -47,6 +47,12 @@ dependencies {
     mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
 
+configurations {
+    all {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
+    }
+}
+
 tasks.named<ProcessResources>("processTestResources") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
@@ -54,22 +60,26 @@ tasks.named<ProcessResources>("processTestResources") {
 tasks.named<Jar>("jar") {
     enabled = false
 }
+
 tasks.test {
     useJUnitPlatform {
         excludeTags("integration")
     }
 }
 
-// Separate task for integration tests
+// separate task for integration tests
 tasks.register<Test>("integrationTest") {
-    useJUnitPlatform {
-        includeTags("integration")
-    }
     group = "verification"
     description = "Runs integration tests requiring Testcontainers (Linux only)"
 
-    maxParallelForks = 1
-    forkEvery = 0
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+
+    dependsOn(tasks.testClasses)
+
+    useJUnitPlatform {
+        includeTags("integration")
+    }
 
     // increase memory for integration tests
     maxHeapSize = "2g"

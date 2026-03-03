@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.rest;
 
-import eu.ecodex.connector.AbstractFileStorageTest;
+import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
-public class ConnectorAttachmentIT extends AbstractFileStorageTest {
+public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
@@ -46,7 +46,7 @@ public class ConnectorAttachmentIT extends AbstractFileStorageTest {
 
     @Test
     void should_fail_to_upload_attachment_if_payload_is_over_200_MB() {
-        var parts = produceFilePart(300);
+        var parts = produceFilePart(201);
 
         apiClient.post()
                  .uri("/api/v1/attachments/upload")

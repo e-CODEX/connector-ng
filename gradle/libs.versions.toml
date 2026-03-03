@@ -21,7 +21,7 @@ messaginghub = "3.2.2"
 # tests
 assertj = "3.27.7"
 junit = "5.10.0"
-minio = "8.5.0"
+minio = "8.6.0"
 minio-container = "2.0.1"
 mockito = "5.21.0"
 

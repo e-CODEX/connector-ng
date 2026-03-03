@@ -78,7 +78,7 @@ jobs:
                 run: chmod +x ./gradlew
 
             -   name: Run integration tests with Gradle
-                run: ./gradlew :connector-integrationtest:integrationTest
+                run: ./gradlew integrationTest
                 shell: bash
     build:
         name: Build artifact and SBOM using Java 21

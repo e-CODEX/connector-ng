@@ -19,11 +19,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusiness
 import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorBusinessDomainJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {

@@ -31,6 +31,7 @@ DB_USERNAME=connector
 DB_PASSWORD=connector
 DB_URL=jdbc:mysql://connector-ng-db:30006/connector
 DB_DRIVER_CLASSNAME=com.mysql.cj.jdbc.MysqlXADataSource
+DB_DIALECT=org.hibernate.dialect.MySQLDialect
 # S3
 S3_ACCESS_KEY=admin
 S3_SECRET_KEY=admin123

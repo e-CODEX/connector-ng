@@ -19,11 +19,6 @@ import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorKeystoreCreationRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorActionJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorKeystoreJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorPartyJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorProcessingModeJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorServiceJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +26,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.util.LinkedMultiValueMap;
@@ -57,29 +53,18 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
-    private ConnectorProcessingModeJpaRepository processingModeJpaRepository;
-    @Autowired
-    private ConnectorKeystoreJpaRepository keystoreJpaRepository;
-    @Autowired
-    private ConnectorActionJpaRepository actionJpaRepository;
-    @Autowired
-    private ConnectorPartyJpaRepository partyJpaRepository;
-    @Autowired
-    private ConnectorServiceJpaRepository serviceJpaRepository;
+    private JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void setUp() {
-        serviceJpaRepository.deleteAll();
-        actionJpaRepository.deleteAll();
-        partyJpaRepository.deleteAll();
-
-        processingModeJpaRepository.findAll().forEach(pm -> {
-            pm.setTruststore(null);
-            processingModeJpaRepository.save(pm);
-        });
-
-        keystoreJpaRepository.deleteAll();
-        processingModeJpaRepository.deleteAll();
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_services");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_actions");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_processing_modes");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_keystores");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
     }
 
     /*
@@ -88,6 +73,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
      */
 
     @Test
+    @Sql("classpath:sql/business-domain.sql")
     void should_succeed_to_create_processing_mode() {
         var parts = producePart();
 
@@ -133,6 +119,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql("classpath:sql/business-domain.sql")
     @Sql("classpath:sql/processing-mode.sql")
     void should_fail_to_create_a_pmode_if_the_specified_business_domain_has_already_one() {
         var parts = producePart();
@@ -155,6 +142,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql("classpath:sql/business-domain.sql")
     @Sql("classpath:sql/processing-mode.sql")
     void should_succeed_to_get_processing_modes() {
         var response = apiClient.get()

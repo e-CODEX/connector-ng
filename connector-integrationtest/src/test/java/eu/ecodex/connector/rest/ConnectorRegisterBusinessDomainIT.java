@@ -16,26 +16,30 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorBusinessDomainJpaRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
     @Autowired
-    private ConnectorBusinessDomainJpaRepository domainJpaRepository;
+    private JdbcTemplate jdbcTemplate;
 
-    /*
-     * By default, a business domain is created at the startup if no one exists
-     * We are going to use it for our tests
-     */
+    @AfterEach
+    void cleanUp() {
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+    }
 
     @Test
+    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     void should_register_business_domain_successfully() {
-        domainJpaRepository.deleteAll();
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
                                 .uri("/api/v1/admin/business-domains")
@@ -56,6 +60,8 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
+    @Sql("classpath:sql/business-domain.sql")
     void should_fail_to_register_business_domain_with_existing_identifier() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         apiClient.post()
@@ -67,6 +73,8 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
+    @Sql("classpath:sql/business-domain.sql")
     void should_retrieve_business_domains_successfully() {
         var response = apiClient.get()
                                 .uri("/api/v1/admin/business-domains")

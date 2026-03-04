@@ -1,4 +1,4 @@
-INSERT INTO CONNECTOR_KEYSTORES
+INSERT INTO connector_keystores
 (id, uuid, description, content, password, type, filename, processing_mode_id, created_at,
  updated_at)
 VALUES (1,

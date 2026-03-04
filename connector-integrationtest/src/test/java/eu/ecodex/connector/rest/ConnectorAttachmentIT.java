@@ -13,10 +13,12 @@ package eu.ecodex.connector.rest;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -24,11 +26,21 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
 public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
     private RestTestClient apiClient;
 
     @BeforeEach
     void setUp() {
         s3Client.createBucket(CreateBucketRequest.builder().bucket("attachments").build());
+    }
+
+    @AfterEach
+    void cleanUp() {
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
     }
 
     @Test

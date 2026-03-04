@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-INSERT INTO CONNECTOR_BUSINESS_DOMAINS (id, uuid, identifier, description, enabled, source, created_at,
+INSERT INTO connector_business_domains (id, uuid, identifier, description, enabled, source, created_at,
                              updated_at)
 VALUES (1,
         'b25872bd-6056-4679-bbe4-3e8357bdb1b0',

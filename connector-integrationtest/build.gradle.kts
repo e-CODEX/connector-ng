@@ -22,27 +22,37 @@ dependencies {
     testImplementation(project(":connector-domain"))
     testImplementation(project(":connector-infrastructure"))
     testImplementation(project(":connector-bootstrapper"))
-    // test
+
+    // module
     testImplementation(testFixtures(project(":connector-infrastructure")))
     testFixturesImplementation(testFixtures(project(":connector-infrastructure")))
+
     // spring boot
     testImplementation(platform(libs.spring.boot.bom))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+
+    // testcontainers
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-mysql")
+
+    // other
+    testImplementation(libs.assertj.core)
     testImplementation(libs.jackson.databind)
     testImplementation(libs.okhttp)
     testImplementation(libs.minio)
     testImplementation(libs.minio.container)
+    testImplementation(libs.s3)
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // other fixtures
     testFixturesImplementation(platform(libs.spring.boot.bom))
     testFixturesImplementation("org.springframework:spring-core")
     testFixturesImplementation("org.springframework.boot:spring-boot-starter-web")
-    // other
-    testImplementation(libs.s3)
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation(libs.assertj.core)
+
 
     mockitoAgent(libs.mockito.core) { isTransitive = false }
 }

@@ -1,4 +1,4 @@
-INSERT INTO CONNECTOR_PARTIES
+INSERT INTO connector_parties
 (id, uuid, name, identifier, identifier_type, role, role_type, processing_mode_id, created_at,
  updated_at)
 VALUES (1,

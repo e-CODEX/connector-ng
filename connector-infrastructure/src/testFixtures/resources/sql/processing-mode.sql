@@ -1,4 +1,4 @@
-INSERT INTO CONNECTOR_PROCESSING_MODES
+INSERT INTO connector_processing_modes
 (id, uuid, description, content, filename, business_domain_id, truststore_id, created_at,
  updated_at)
 VALUES (1,

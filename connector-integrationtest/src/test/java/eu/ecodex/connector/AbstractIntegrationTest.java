@@ -27,6 +27,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Testcontainers
@@ -42,6 +43,11 @@ public abstract class AbstractIntegrationTest {
             .withPassword("testpassword")
             .withStartupTimeout(Duration.ofMinutes(2));
 
+    public static MySQLContainer mysql = new MySQLContainer("mysql:8.0.33")
+            .withDatabaseName("connector")
+            .withUsername("connector")
+            .withPassword("connector");
+
     private static MinioClient minioClient;
     @Autowired
     protected S3Client s3Client;
@@ -49,15 +55,18 @@ public abstract class AbstractIntegrationTest {
     @BeforeAll
     public static void startServer() {
         minio.start();
+        mysql.start();
     }
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.agroal.driver-class-name", () -> "org.h2.jdbcx.JdbcDataSource");
-        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.H2Dialect");
-        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:db;DB_CLOSE_DELAY=-1");
-        registry.add("spring.datasource.username", () -> "sa");
-        registry.add("spring.datasource.password", () -> "sa");
+        registry.add("spring.datasource.agroal.driver-class-name", () -> "com.mysql.cj.jdbc.MysqlXADataSource");
+        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
+        registry.add("spring.datasource.url", () -> mysql.getJdbcUrl());
+        registry.add("spring.datasource.username", () -> mysql.getUsername());
+        registry.add("spring.datasource.password", () -> mysql.getPassword());
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("spring.jpa.defer-datasource-initialization", () -> "true");
 
         registry.add("connector.file.storage.s3.access-key", () -> minio.getUserName());
         registry.add("connector.file.storage.s3.secret-key", () -> minio.getPassword());

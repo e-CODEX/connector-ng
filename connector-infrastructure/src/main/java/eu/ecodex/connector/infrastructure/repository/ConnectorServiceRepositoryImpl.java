@@ -78,7 +78,10 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
      *         or {@code null} if the input entity is {@code null}
      */
     public static ConnectorService toDomain(ConnectorServiceEntity entity) {
-        // TODO handle null entity by returning null
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorService
                 .builder()
                 .name(entity.getName())
@@ -108,8 +111,12 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
 
     @Override
     public ConnectorService findByNameAndBusinessDomain(
-            String serviceName,
-            String businessDomainIdentifier) {
-        throw new UnsupportedOperationException("Not implemented yet");
+            @NonNull String name,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        var service = this.jpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
+                name, businessDomainIdentifier.messageLaneIdentifier()
+        );
+
+        return toDomain(service);
     }
 }

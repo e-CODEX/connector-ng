@@ -20,4 +20,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorServiceJpaRepository extends JpaRepository<ConnectorServiceEntity, Long> {
+    ConnectorServiceEntity findByNameAndProcessingModeBusinessDomainIdentifier(
+            String name, String businessDomainIdentifier);
 }

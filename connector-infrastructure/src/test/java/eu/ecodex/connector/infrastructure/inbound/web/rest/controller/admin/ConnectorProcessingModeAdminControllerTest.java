@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
@@ -37,27 +38,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import tools.jackson.databind.ObjectMapper;
 
 @AutoConfigureRestTestClient
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength"})
 @ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorProcessingModeAdminController.class)
 public class ConnectorProcessingModeAdminControllerTest {
-    private final ConnectorProcessingModeCreationRequest metadata =
-            ConnectorProcessingModeCreationRequest
-                    .builder()
-                    .description("test processing mode")
-                    .businessDomainIdentifier("fake_business_domain")
-                    .truststore(
-                            ConnectorKeystoreCreationRequest
-                                    .builder()
-                                    .description("test truststore")
-                                    .password("12345")
-                                    .type(ConnectorKeystoreType.JKS)
-                                    .build()
-                    )
-                    .build();
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -91,7 +77,7 @@ public class ConnectorProcessingModeAdminControllerTest {
                 "metadata",
                 "",
                 MediaType.APPLICATION_JSON_VALUE,
-                asJsonString(metadata).getBytes()
+                JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
@@ -125,7 +111,7 @@ public class ConnectorProcessingModeAdminControllerTest {
                 "metadata",
                 "",
                 MediaType.APPLICATION_JSON_VALUE,
-                asJsonString(metadata).getBytes()
+                JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
@@ -159,7 +145,7 @@ public class ConnectorProcessingModeAdminControllerTest {
                 "metadata",
                 "",
                 MediaType.APPLICATION_JSON_VALUE,
-                asJsonString(metadata).getBytes()
+                JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
@@ -197,10 +183,5 @@ public class ConnectorProcessingModeAdminControllerTest {
 
         assertThat(responseBody).isNotNull();
         assertThat(responseBody).hasSize(1);
-    }
-
-    private String asJsonString(Object obj) {
-        var objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(obj);
     }
 }

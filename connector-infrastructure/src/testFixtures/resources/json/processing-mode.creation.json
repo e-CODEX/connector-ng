@@ -1,15 +1,15 @@
 {
-    "description": "description_8212d6f31b9f",
+    "businessDomainIdentifier": "fake_business_domain",
+    "description": "test processing mode",
     "content": [
         0
     ],
-    "businessDomainIdentifier": "businessDomainIdentifier_6daf4565bf0a",
     "truststore": {
         "content": [
             0
         ],
         "password": "12345",
-        "description": "description_c5ea3c1ec469",
+        "description": "test truststore",
         "type": "JKS"
     }
 }

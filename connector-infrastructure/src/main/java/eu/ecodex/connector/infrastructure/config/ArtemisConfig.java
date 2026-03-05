@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.config;
 
 import eu.ecodex.connector.infrastructure.property.ArtemisAddressSettingsProperties;
+import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import lombok.NonNull;
 import org.apache.activemq.artemis.api.core.RoutingType;
 import org.apache.activemq.artemis.api.core.SimpleString;
@@ -27,10 +28,14 @@ import org.springframework.context.annotation.Configuration;
 public class ArtemisConfig {
     @Bean
     public ArtemisConfigurationCustomizer artemisCustomizer(
-            ArtemisAddressSettingsProperties settingsProperties) {
+            ArtemisAddressSettingsProperties settingsProperties,
+            ConnectorQueueProperties queueProperties) {
         return configuration -> {
-            // TODO configure here addresses
-            addQueueWithDLQ(configuration, "queue-name", settingsProperties);
+            addQueueWithDLQ(
+                    configuration,
+                    queueProperties.getOutboundMessageStagingQueue(),
+                    settingsProperties
+            );
             // set DLQ addresses configs
             configuration.addAddressSetting("DLQ.#", defaultDLQAddressSettings());
         };

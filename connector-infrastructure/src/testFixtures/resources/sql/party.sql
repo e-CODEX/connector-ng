@@ -1,23 +1,5 @@
-INSERT INTO connector_parties
-(id, uuid, name, identifier, identifier_type, role, role_type, processing_mode_id, created_at,
- updated_at)
-VALUES (1,
-        '3d88bd98-215c-4a48-b10a-a51d2b5d13ba',
-        'service_blue_ecodex',
-        'BL',
-        'urn:oasis:names:tc:ebcore:partyid-type:ecodex',
-        'GW',
-        'INITIATOR',
-        1
-       ),
-    (2,
-     'afeb93ac-535d-464a-9b68-8b77ee44a960',
-     'service_red_ecodex',
-     'RE',
-     'urn:oasis:names:tc:ebcore:partyid-type:ecodex',
-     'GW',
-     'RESPONDER',
-     1,
-     now(),
-     now()
-    );
+INSERT INTO connector_parties (id, identifier, identifier_type, is_home, name, role, role_type, uuid, processing_mode_id, created_at, updated_at)
+VALUES  (1, 'BL', 'urn:oasis:names:tc:ebcore:partyid-type:ecodex', true, 'service_blue_ecodex', 'GW', 'RESPONDER', '46e505d0-4703-48fb-8d09-3b7600b15caa', 1, now(), now()),
+        (2, 'RE', 'urn:oasis:names:tc:ebcore:partyid-type:ecodex', false, 'service_red_ecodex', 'GW', 'INITIATOR', 'a719d231-1286-4e9c-a198-e8dd5fa269c4', 1, now(), now()),
+        (3, 'BL', 'urn:oasis:names:tc:ebcore:partyid-type:ecodex', true, 'service_blue_ecodex', 'GW', 'INITIATOR', 'bc63341a-0667-47d7-a1e2-46a802663f06', 1, now(), now()),
+        (4, 'RE', 'urn:oasis:names:tc:ebcore:partyid-type:ecodex', false, 'service_red_ecodex', 'GW', 'RESPONDER', '0b9d13eb-6b58-40ff-8feb-b881fc615e3c', 1, now(), now());

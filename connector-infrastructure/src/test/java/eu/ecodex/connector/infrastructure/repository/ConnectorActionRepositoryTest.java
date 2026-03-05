@@ -76,4 +76,63 @@ public class ConnectorActionRepositoryTest {
                 )
         );
     }
+
+    // find by name and business domain identifier
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/action.sql")
+    void should_find_action_by_name_and_business_domain_identifier_successfully_from_database() {
+        var action = repository.findByNameAndBusinessDomain(
+                "Test_Form",
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+        );
+
+        assertThat(action).isNotNull();
+        assertThat(action.name()).isEqualTo("Test_Form");
+    }
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/action.sql")
+    void should_return_null_when_searching_action_by_unknown_name_and_business_domain_identifier_from_database() {
+        var action = repository.findByNameAndBusinessDomain(
+                "Test_Form_Unknown",
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+        );
+
+        assertThat(action).isNull();
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_action_with_a_null_name_from_database() {
+        assertThrows(
+                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                        null,
+                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+                )
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_action_with_a_null_business_domain_identifier_from_database() {
+        assertThrows(
+                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                        "Test_Form",
+                        null
+                )
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_action_with_a_null_name_and_business_domain_identifier_from_database() {
+        assertThrows(
+                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                        null,
+                        null
+                )
+        );
+    }
 }

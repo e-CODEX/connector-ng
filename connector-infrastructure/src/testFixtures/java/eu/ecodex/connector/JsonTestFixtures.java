@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
+import tools.jackson.databind.ObjectMapper;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class JsonTestFixtures {
@@ -27,5 +28,10 @@ public class JsonTestFixtures {
         } catch (IOException e) {
             return "{}";
         }
+    }
+
+    public static String asJsonString(Object obj) {
+        var objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(obj);
     }
 }

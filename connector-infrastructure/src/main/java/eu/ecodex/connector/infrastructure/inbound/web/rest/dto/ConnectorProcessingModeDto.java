@@ -19,8 +19,8 @@ import lombok.Builder;
  *
  * @param uuid                     A unique identifier for the processing mode.
  * @param description              A brief textual description of the processing mode.
- * @param content                  The raw (XML) content or configuration details of the processing
- *                                 mode.
+ * @param content                  The raw (XML) businessContent or configuration details of the
+ *                                 processing mode.
  * @param filename                 The filename of the processing mode configuration file.
  * @param businessDomainIdentifier A logical identifier representing the business domain associated
  *                                 with the processing mode.

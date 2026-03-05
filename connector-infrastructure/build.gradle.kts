@@ -8,7 +8,11 @@ val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
 dependencies {
     implementation(project(":connector-domain"))
+    implementation(project(":connector-soap-api"))
     implementation(project(":connector-application"))
+    // apache
+    implementation(libs.apache.cxf.spring.boot)
+    implementation(libs.apache.commons.lang3)
     // spring boot
     implementation(platform(libs.spring.boot.bom))
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -31,6 +35,7 @@ dependencies {
     // doc
     implementation(libs.spring.doc)
     // other
+    implementation(libs.apache.cxf)
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
     implementation(libs.micrometer)
@@ -40,8 +45,12 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testFixturesImplementation(project(":connector-soap-api"))
     testFixturesImplementation(platform(libs.spring.boot.bom))
     testFixturesImplementation("org.springframework:spring-core")
+    testFixturesImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+    testFixturesImplementation(libs.jakarta.activation)
+    testFixturesImplementation(libs.jakarta.mail)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)

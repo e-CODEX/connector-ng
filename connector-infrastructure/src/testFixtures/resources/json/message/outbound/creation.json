@@ -1,0 +1,36 @@
+{
+    "businessDomainIdentifier": "default_business_domain",
+    "backendMessageIdentifier": "56ed1a8f-b089-4615-9ddd-da302a665a11@backend_system",
+    "businessContent": {
+        "detachedSignature": {
+            "name": "detached_signature.xml",
+            "signature": "ZW5jb2RlZF9zaWduYXR1cmU=",
+            "mimeType": "BINARY"
+        },
+        "aesType": "AUTHENTICATION_BASED",
+        "attachmentIdentifier": "c78d6ff6-3efb-4d0d-a1e2-04288c735dfc_fake_file"
+    },
+    "attachments": ["28b42e4b-6f59-4c30-94cd-a613adc46dd9_fake_file"],
+    "as4Properties": {
+        "conversationIdentifier": "e6a173ec-de21-46dc-8a19-63a6cb74915d",
+        "originalSender": "alice",
+        "finalRecipient": "bob",
+        "service": {
+            "name": "Connector-TEST",
+            "type": "urn:e-codex:services:"
+        },
+        "action": {
+            "name": "ConTest_Form"
+        },
+        "fromParty": {
+            "identifier": "BL",
+            "identifierType": "urn:oasis:names:tc:ebcore:partyid-type:ecodex",
+            "role": "GW"
+        },
+        "toParty": {
+            "identifier": "RE",
+            "identifierType": "urn:oasis:names:tc:ebcore:partyid-type:ecodex",
+            "role": "GW"
+        }
+    }
+}

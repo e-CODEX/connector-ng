@@ -20,7 +20,8 @@ import jakarta.annotation.Nonnull;
  * instances of {@code ConnectorMessage} to the appropriate endpoint or system.
  *
  * <p>The submission process may involve:
- * - Validation of the message content. - Transformation or preparation of the message for dispatch.
+ * - Validation of the message content.
+ * - Transformation or preparation of the message for dispatch.
  * - Interfacing with external systems or services for message delivery.
  *
  * <p>Typical usage scenarios include:

@@ -15,6 +15,15 @@ public class PartyTestFixtures {
                              .build();
     }
 
+    public static ConnectorParty createStagingFromParty() {
+        return createFromParty().toBuilder()
+                             .name(null)
+                             .identifier("BL")
+                             .identifierType("urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                             .role("GW")
+                             .build();
+    }
+
     public static ConnectorParty createToParty() {
         return ConnectorParty.builder()
                              .name("service_red_ecodex")
@@ -22,6 +31,15 @@ public class PartyTestFixtures {
                              .identifierType("urn:oasis:names:tc:ebcore:partyid-type:ecodex")
                              .role("GW")
                              .roleType(ConnectorPartyRoleType.RESPONDER)
+                             .build();
+    }
+
+    public static ConnectorParty createToStagingParty() {
+        return createToParty().toBuilder()
+                             .name(null)
+                             .identifier("RE")
+                             .identifierType("urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                             .role("GW")
                              .build();
     }
 }

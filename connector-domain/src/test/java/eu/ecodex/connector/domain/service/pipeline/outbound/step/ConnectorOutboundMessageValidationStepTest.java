@@ -106,7 +106,7 @@ public class ConnectorOutboundMessageValidationStepTest {
                 ServiceTestFixtures.createService());
         when(actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(partyRepository.findByPartyAndBusinessDomain(any(), any()))
+        when(partyRepository.findByNameAndBusinessDomain(any(), any()))
                 .thenReturn(
                         outboundMessage.as4Properties().toParty(),
                         outboundMessage.as4Properties().fromParty()

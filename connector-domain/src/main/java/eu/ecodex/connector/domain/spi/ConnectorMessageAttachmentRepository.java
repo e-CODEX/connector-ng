@@ -10,10 +10,10 @@
 
 package eu.ecodex.connector.domain.spi;
 
-
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import jakarta.annotation.Nonnull;
 
 /**
  * Repository interface for managing {@link ConnectorMessageAttachment}.
@@ -38,5 +38,44 @@ public interface ConnectorMessageAttachmentRepository {
      */
     ConnectorMessageAttachment save(ConnectorMessageAttachment attachment);
 
+    /**
+     * Retrieves a {@link ConnectorMessageAttachment} based on its unique identifier.
+     *
+     * @param identifier the unique identifier of the attachment to be retrieved; must not be null
+     *                   or blank.
+     *
+     * @return the {@link ConnectorMessageAttachment} matching the specified identifier, or null if
+     *         no such attachment exists.
+     */
+    ConnectorMessageAttachment findByIdentifier(@Nonnull String identifier);
+
+    /**
+     * Retrieves a paginated collection of {@link ConnectorMessageAttachment} entities based on the
+     * specified {@link ConnectorPageRequest}.
+     *
+     * @param request the pagination request containing the zero-based page index and the number of
+     *                elements per page; must not be null and must adhere to validation rules
+     *                defined in {@code ConnectorPageRequest}.
+     *
+     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessageAttachment}
+     *         entities for the requested page, along with pagination metadata such as total
+     *         elements and page size.
+     */
     ConnectorPageResult<ConnectorMessageAttachment> findAll(ConnectorPageRequest request);
+
+    /**
+     * Associates an attachment with a specific message.
+     *
+     * <p>This method links an attachment identified by its unique identifier
+     * to a message identified by its unique identifier. The association typically enables the
+     * attached document or file to be retrieved or referenced in communication workflows or logging
+     * purposes related to the message.
+     *
+     * @param attachmentIdentifier a non-null and non-blank string representing the unique
+     *                             identifier of the attachment to be linked.
+     * @param messageIdentifier    a non-null and non-blank string representing the unique
+     *                             identifier of the message to which the attachment has to be
+     *                             associated.
+     */
+    void attachToMessage(@Nonnull String attachmentIdentifier, @Nonnull String messageIdentifier);
 }

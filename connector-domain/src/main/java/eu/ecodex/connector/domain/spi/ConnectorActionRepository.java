@@ -28,7 +28,7 @@ public interface ConnectorActionRepository {
      * Retrieves a {@link ConnectorAction} based on its name and associated business domain
      * identifier.
      *
-     * @param actionName               the name of the action; must not be null or blank.
+     * @param name                     the name of the action; must not be null or blank.
      * @param businessDomainIdentifier the identifier representing the business domain with which
      *                                 the action is associated; must not be null.
      *
@@ -36,5 +36,6 @@ public interface ConnectorActionRepository {
      *         identifier, or null if no such action exists.
      */
     ConnectorAction findByNameAndBusinessDomain(
-            String actionName, ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+            @Nonnull String name,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 }

@@ -20,7 +20,7 @@ import lombok.Builder;
  * Represents a keystore used by the Domibus connector.
  *
  * @param uuid        The UUID of the keystore.
- * @param content     The content of the keystore.
+ * @param content     The businessContent of the keystore.
  * @param password    The password of the keystore (plain text.
  * @param description The description of the keystore.
  * @param type        The type of the keystore.

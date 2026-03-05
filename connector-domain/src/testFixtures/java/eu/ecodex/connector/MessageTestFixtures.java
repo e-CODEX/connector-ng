@@ -3,7 +3,7 @@ package eu.ecodex.connector;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageContent;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,6 +13,26 @@ public class MessageTestFixtures {
     public static ConnectorMessage createValidOutboundBusinessMessage() {
         var builder = backendToGatewayMessage();
         return builder.build();
+    }
+
+    public static ConnectorMessage createValidOutboundStagingBusinessMessage() {
+        var builder = backendToGatewayMessage();
+        return builder
+                .identifier(null)
+                .uuid(null)
+                .backendName(null)
+                .gatewayName(null)
+                .direction(null)
+                .evidences(null)
+                .createdAt(null)
+                .updatedAt(null)
+                .as4Properties(
+                        defaultASProperties()
+                                .toParty(PartyTestFixtures.createToStagingParty())
+                                .fromParty(PartyTestFixtures.createStagingFromParty())
+                                .build()
+                )
+                .build();
     }
 
     public static ConnectorMessage createValidInboundBusinessMessage() {
@@ -108,7 +128,7 @@ public class MessageTestFixtures {
         var builder = createValidOutboundBusinessMessage().toBuilder();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
-        builder.content(null);
+        builder.businessContent(null);
         return builder.build();
     }
 
@@ -119,7 +139,7 @@ public class MessageTestFixtures {
         var builder = createValidInboundBusinessMessage().toBuilder();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
-        builder.content(null);
+        builder.businessContent(null);
         return builder.build();
     }
 
@@ -130,7 +150,7 @@ public class MessageTestFixtures {
         var builder = createValidInboundBusinessMessage().toBuilder();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
-        builder.content(null);
+        builder.businessContent(null);
         return builder.build();
     }
 
@@ -141,7 +161,7 @@ public class MessageTestFixtures {
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
-        builder.content(null);
+        builder.businessContent(null);
         return builder.build();
     }
 
@@ -152,7 +172,7 @@ public class MessageTestFixtures {
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
-        builder.content(null);
+        builder.businessContent(null);
         builder.rejectedAt(Instant.now());
         return builder.build();
     }
@@ -164,7 +184,7 @@ public class MessageTestFixtures {
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
-        builder.content(null);
+        builder.businessContent(null);
         builder.confirmedAt(Instant.now());
         return builder.build();
     }
@@ -177,6 +197,7 @@ public class MessageTestFixtures {
                         BusinessDomainTestFixtures.createDefaultBusinessDomain()
                                                   .identifier()
                 )
+                .businessContent(MessageContentTestFixtures.createContent())
                 .uuid("223caef9-cae9-4387-a38c-ad4879f94b4e")
                 .identifier("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
                 .backendMessageIdentifier(
@@ -186,7 +207,7 @@ public class MessageTestFixtures {
                 .as4Properties(defaultASProperties().build())
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .evidences(new ArrayList<>())
-                .content(ConnectorMessageContent.builder().build())
+                .businessContent(ConnectorMessageBusinessContent.builder().build())
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now());
     }

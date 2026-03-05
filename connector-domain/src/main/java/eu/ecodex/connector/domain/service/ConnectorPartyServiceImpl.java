@@ -46,8 +46,8 @@ public class ConnectorPartyServiceImpl implements ConnectorPartyService {
             ConnectorParty party,
             ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
 
-        return this.partyRepository.findByPartyAndBusinessDomain(
-                party, businessDomainIdentifier
+        return this.partyRepository.findByNameAndBusinessDomain(
+                party.name(), businessDomainIdentifier
         ) != null;
     }
 }

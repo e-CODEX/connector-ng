@@ -20,7 +20,7 @@ import lombok.Builder;
  *
  * @param uuid    The UUID of the evidence.
  * @param type    The type of the evidence.
- * @param content The content of the evidence.
+ * @param content The businessContent of the evidence.
  */
 @Builder(toBuilder = true)
 public record ConnectorEvidence(

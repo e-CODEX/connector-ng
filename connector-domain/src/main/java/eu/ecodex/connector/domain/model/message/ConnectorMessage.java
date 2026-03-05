@@ -11,7 +11,8 @@
 package eu.ecodex.connector.domain.model.message;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageContent;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -26,9 +27,9 @@ import lombok.Builder;
  * Represents the main structure of a connector message within the system.
  *
  * <p>This record encapsulates the complete state of a message flowing within the system, which
- * includes its identifiers, associated metadata, direction, timestamps, and content. It is used for
- * tracking, auditing, processing, and transforming messages as they transition between the backend
- * and the gateway.
+ * includes its identifiers, associated metadata, direction, timestamps, and businessContent. It is
+ * used for tracking, auditing, processing, and transforming messages as they transition between the
+ * backend and the gateway.
  *
  * @param businessDomainIdentifier            The uuid for the business domain where the message is
  *                                            being used.
@@ -60,10 +61,12 @@ import lombok.Builder;
  *                                            successfully delivered to the gateway. Maybe null.
  * @param deliveredToBackendAt                The timestamp indicating when the message was
  *                                            successfully delivered to the backend. Maybe null.
- * @param content                             The core content of the message, encapsulated as XML
- *                                            data and potentially a printable document. This field
- *                                            determines if the message is considered a business
- *                                            message.
+ * @param businessContent                     The core businessContent of the message, encapsulated
+ *                                            as XML data and potentially a printable
+ *                                            businessDocument. This field determines if the message
+ *                                            is considered a business message.
+ * @param attachments                         A list of attachment files associated with the
+ *                                            message. Maybe null.
  * @param errors                              A list of errors, if any, encountered during message
  *                                            processing. Maybe null.
  * @param evidences                           A list of evidences associated with the message,
@@ -77,13 +80,13 @@ public record ConnectorMessage(
         // TODO check if caused by should be set to connector message definition
         @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
         @Nullable String uuid,
-        @NotBlank String identifier,
+        @Nullable String identifier,
         @NotBlank String backendMessageIdentifier,
         @Nullable String referenceToBackendMessageIdentifier,
         @Nullable String backendName,
         @Nullable String gatewayName,
         @Nonnull ConnectorMessageAS4Properties as4Properties,
-        @Nonnull ConnectorMessageDirection direction,
+        @Nullable ConnectorMessageDirection direction,
         @Nullable Instant createdAt,
         @Nullable Instant updatedAt,
         @Nullable Instant deletedAt,
@@ -91,7 +94,8 @@ public record ConnectorMessage(
         @Nullable Instant confirmedAt,
         @Nullable Instant deliveredToGatewayAt,
         @Nullable Instant deliveredToBackendAt,
-        ConnectorMessageContent content,
+        @Nullable ConnectorMessageBusinessContent businessContent,
+        @Nullable List<ConnectorMessageAttachment> attachments,
         @Nullable List<ConnectorMessageError> errors,
         @Nullable List<ConnectorEvidence> evidences,
         @Nullable List<ConnectorEvidence> transportedEvidences
@@ -102,9 +106,9 @@ public record ConnectorMessage(
         return String.format(
                 "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
                 + "referenceToBackendMessageIdentifier=%s,  direction=%s, as4Properties=%s "
-                + "content=%s",
+                + "businessContent=%s",
                 identifier, backendMessageIdentifier, backendName, gatewayName,
-                referenceToBackendMessageIdentifier, direction, as4Properties, content
+                referenceToBackendMessageIdentifier, direction, as4Properties, businessContent
         );
     }
 }

@@ -18,7 +18,7 @@ public class MessageProcessingConfigProviderTestFixtures {
     public static ConnectorMessageProcessingProperties getProcessingProperties() {
         return ConnectorMessageProcessingProperties
                 .builder()
-                .identifierSuffix("domibus.connector.eu")
+                .identifierSuffix("ecodex.connector.eu")
                 .ebmsIdSuffix("ecodex.eu")
                 .ebmsIdGeneratorEnabled(true)
                 .sendGeneratedEvidencesToBackend(true)

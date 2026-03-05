@@ -17,25 +17,25 @@ import java.io.Serializable;
 import lombok.Builder;
 
 /**
- * Message content holds the main content of a message. This is the XML data of
- * the main Form of the message and the printable document that most of the
+ * Message businessContent holds the main businessContent of a message. This is the XML data of
+ * the main Form of the message and the printable businessDocument that most of the
  * {@link ConnectorAction} require.
  *
  * <p>A message is a business message only if a messageContent is present.
  *
- * @param uuid The unique uuid of the message content.
- * @param xmlContent The XML content of the message.
- * @param document The printable document of the message.
+ * @param uuid The unique uuid of the message businessContent.
+ * @param xmlContent The XML businessContent of the message.
+ * @param businessDocument The printable businessDocument of the message.
  */
 @Builder(toBuilder = true)
-public record ConnectorMessageContent(
-        String uuid,
-        byte[] xmlContent,
-        @Nullable ConnectorMessageDocument document
+public record ConnectorMessageBusinessContent(
+        @Nullable String uuid,
+        @Nonnull String xmlContent,
+        @Nullable ConnectorMessageBusinessDocument businessDocument // TODO set as non nullable
 ) implements Serializable {
     @Override
     @Nonnull
     public String toString() {
-        return String.format("{uuid=%s, document=%s}", uuid, document);
+        return String.format("{uuid=%s, businessDocument=%s}", uuid, businessDocument);
     }
 }

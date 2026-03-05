@@ -10,19 +10,28 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageDocument;
+import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ConnectorMessageDocumentTestFixtures {
-    public static ConnectorMessageDocument createDocument() {
-        return ConnectorMessageDocument
+    public static ConnectorMessageBusinessDocument createDocument() {
+        return ConnectorMessageBusinessDocument
                 .builder()
-                .name("test_document")
+                .attachment(MessageAttachmentTestFixtures.createAttachment())
+                .aesType(ConnectorBusinessDocumentAESType.SIGNATURE_BASED)
                 .detachedSignature(DetachedSignatureTestFixtures.createDetachedSignature())
                 .build();
     }
 
-    public static ConnectorMessageDocument createSavedDocument() {
+    public static ConnectorMessageBusinessDocument createDocumentWithoutDetachedSignature() {
+        return ConnectorMessageBusinessDocument
+                .builder()
+                .attachment(MessageAttachmentTestFixtures.createAttachment())
+                .build();
+    }
+
+    public static ConnectorMessageBusinessDocument createSavedDocument() {
         return createDocument()
                 .toBuilder()
                 .uuid("05768e36-dc7d-48e4-a403-1eceeecc1788")

@@ -18,6 +18,7 @@ import java.util.List;
 /**
  * Service interface for managing {@link ConnectorService} entities.
  */
+// TODO to be removed
 public interface ConnectorServiceService {
     List<ConnectorService> persistAll(
             @Nonnull List<ConnectorService> services,
@@ -34,5 +35,6 @@ public interface ConnectorServiceService {
      *         identifier, or {@code null} if no matching service is found.
      */
     ConnectorService findByNameAndBusinessDomain(
-            @Nonnull String serviceName, @Nonnull String businessDomainIdentifier);
+            @Nonnull String serviceName,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 }

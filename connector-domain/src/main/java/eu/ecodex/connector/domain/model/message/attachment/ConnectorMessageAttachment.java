@@ -39,7 +39,6 @@ public record ConnectorMessageAttachment(
         ConnectorAttachmentStorage storage,
         Instant createdAt,
         Instant updatedAt
-
 ) implements Serializable {
     @Override
     @Nonnull

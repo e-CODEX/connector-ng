@@ -47,7 +47,7 @@ public class ConnectorServiceServiceImpl implements ConnectorServiceService {
     @Override
     public ConnectorService findByNameAndBusinessDomain(
             @NonNull String serviceName,
-            @NonNull String businessDomainIdentifier) {
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         log.debug(
                 "finding service with name [{}] and business domain [{}]", serviceName,
                 businessDomainIdentifier

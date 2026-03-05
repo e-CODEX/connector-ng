@@ -94,7 +94,7 @@ class ConnectorPartyServiceTest {
     // exists
     @Test
     void should_return_true_if_found_party_by_name_and_business_domain() {
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 PartyTestFixtures.createFromParty());
         var exists = this.partyService.exists(
                 PartyTestFixtures.createFromParty(),
@@ -106,7 +106,7 @@ class ConnectorPartyServiceTest {
 
     @Test
     void should_return_false_if_does_not_found_party_by_name_and_business_domain() {
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(null);
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(null);
         var exists = this.partyService.exists(
                 PartyTestFixtures.createFromParty(),
                 BusinessDomainTestFixtures.createDefaultBusinessDomain().identifier()

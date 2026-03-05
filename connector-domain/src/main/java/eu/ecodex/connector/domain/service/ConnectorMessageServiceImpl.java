@@ -221,14 +221,14 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
 
     @Override
     public boolean isEvidenceMessage(@NonNull ConnectorMessage message) {
-        return message.content() == null
+        return message.businessContent() == null
                && message.evidences() != null
                && !message.evidences().isEmpty();
     }
 
     @Override
     public boolean isEvidenceTriggerMessage(@NonNull ConnectorMessage message) {
-        return message.content() == null
+        return message.businessContent() == null
                && message.evidences() != null
                && message.evidences().size() == 1
                && ArrayUtils.isEmpty(message.evidences().getFirst().content());

@@ -16,6 +16,7 @@ import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties
 import java.io.InputStream;
 import java.nio.file.Path;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -25,6 +26,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 /**
  * S3 Implementation of the {@link ConnectorFileStorageProvider}.
  */
+@Slf4j
 @Component
 @ConditionalOnProperty(value = "connector.file.storage.s3.enable", havingValue = "true")
 public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvider {
@@ -41,6 +43,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
     @Override
     public String save(
             @NonNull ConnectorMessageAttachment attachment, @NonNull Path filePath) {
+        log.info("saving attachment [{}] to s3", attachment.identifier());
 
         var putObjectRequest = PutObjectRequest.builder()
                                                .bucket(this.s3ProviderProperties.getBucket())

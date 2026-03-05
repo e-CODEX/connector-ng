@@ -8,17 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.persistence.repository;
+package eu.ecodex.connector.infrastructure.outbound.persistence.repository.message;
 
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageAttachmentEntity;
+import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageBusinessDocumentDetachedSignatureEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for performing CRUD operations on the
- * {@link ConnectorMessageAttachmentEntity}.
+ * {@link ConnectorMessageBusinessDocumentDetachedSignatureEntity}.
  */
 @Repository
-public interface ConnectorMessageAttachmentJpaRepository extends
-        JpaRepository<ConnectorMessageAttachmentEntity, Long> {
+public interface ConnectorMessageBusinessDocumentSignatureJpaRepository extends
+        JpaRepository<ConnectorMessageBusinessDocumentDetachedSignatureEntity, Long> {
 }

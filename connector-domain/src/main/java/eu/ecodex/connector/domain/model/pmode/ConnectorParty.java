@@ -31,7 +31,7 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record ConnectorParty(
         @Nullable String uuid,
-        @Nonnull String name,
+        @Nullable String name,
         @NotBlank String identifier,
         @Nonnull String identifierType,
         @NotBlank String role,

@@ -19,4 +19,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorActionJpaRepository extends JpaRepository<ConnectorActionEntity, Long> {
+    ConnectorActionEntity findByNameAndProcessingModeBusinessDomainIdentifier(
+            String name, String businessDomainIdentifier);
 }

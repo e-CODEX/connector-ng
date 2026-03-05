@@ -21,7 +21,6 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorProcessingModeService;
-import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
@@ -102,7 +101,7 @@ public class ConnectorProcessingModeServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(0)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(0)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(0)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test
@@ -119,7 +118,7 @@ public class ConnectorProcessingModeServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(0)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(0)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test
@@ -128,7 +127,7 @@ public class ConnectorProcessingModeServiceTest {
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 PartyTestFixtures.createToParty(), PartyTestFixtures.createFromParty()
         );
         var message = MessageTestFixtures.createValidOutboundBusinessMessage();
@@ -136,28 +135,28 @@ public class ConnectorProcessingModeServiceTest {
 
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(2)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(2)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test
-    void should_throw_exception_in_relaxed_verification_mode_when_message_is_invalid_due_to_null_to_party_not_found() {
+    void should_throw_exception_in_relaxed_verification_mode_when_message_is_invalid_due_to_to_party_not_found() {
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 null
         );
         assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> this.processingModeService.checkMessage(
-                        MessageTestFixtures.createNullToPartyOutboundBusinessMessage(),
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(1)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(1)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test
@@ -166,7 +165,7 @@ public class ConnectorProcessingModeServiceTest {
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 null
         );
         assertThrows(
@@ -178,7 +177,7 @@ public class ConnectorProcessingModeServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(1)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(1)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test
@@ -187,18 +186,18 @@ public class ConnectorProcessingModeServiceTest {
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 PartyTestFixtures.createToParty(),
                 (ConnectorParty) null
         );
         assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> this.processingModeService.checkMessage(
-                        MessageTestFixtures.createNullFromPartyOutboundBusinessMessage(),
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
-        verify(partyRepository, times(2)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(2)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test
@@ -207,7 +206,7 @@ public class ConnectorProcessingModeServiceTest {
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByPartyAndBusinessDomain(any(), any())).thenReturn(
+        when(this.partyRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 PartyTestFixtures.createToParty(),
                 (ConnectorParty) null
         );
@@ -218,7 +217,7 @@ public class ConnectorProcessingModeServiceTest {
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
-        verify(partyRepository, times(2)).findByPartyAndBusinessDomain(any(), any());
+        verify(partyRepository, times(2)).findByNameAndBusinessDomain(any(), any());
     }
 
     @Test

@@ -13,6 +13,7 @@ package eu.ecodex.connector.domain.spi;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -23,13 +24,13 @@ public interface ConnectorMessageRepository {
      * Persists a given {@link ConnectorMessage} instance in the repository.
      *
      * @param message the {@link ConnectorMessage} to be saved; must not be null. This object
-     *                contains the detailed metadata and content of the connector message.
+     *                contains the detailed metadata and businessContent of the connector message.
      *
      * @return the saved {@link ConnectorMessage}, including any automatically generated fields such
      *         as timestamps or identifiers. If the save operation fails, this method may throw an
      *         exception.
      */
-    ConnectorMessage save(ConnectorMessage message);
+    ConnectorMessage save(@Nonnull ConnectorMessage message);
 
     /**
      * Finds a {@link ConnectorMessage} by its unique identifier.

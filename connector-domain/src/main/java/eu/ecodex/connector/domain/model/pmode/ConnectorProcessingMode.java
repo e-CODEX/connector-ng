@@ -24,7 +24,7 @@ import lombok.Builder;
  *
  * @param uuid                     The UUID of the PMode.
  * @param description              The description of the PMode.
- * @param content                  The content of the PMode.
+ * @param content                  The businessContent of the PMode.
  * @param filename                 The filename of the PMode.
  * @param businessDomain The business domain of the PMode.
  * @param truststore               The truststore of the PMode.

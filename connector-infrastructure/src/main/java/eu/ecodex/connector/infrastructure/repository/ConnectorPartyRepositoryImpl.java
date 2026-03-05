@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.repository;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode.ConnectorPartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode.ConnectorProcessingModeEntity;
@@ -75,7 +76,10 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
      *         from the {@code entity}. Returns {@code null} if the {@code entity} is {@code null}.
      */
     public static ConnectorParty toDomain(ConnectorPartyEntity entity) {
-        // TODO handle null entity by returning null
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorParty
                 .builder()
                 .uuid(entity.getUuid())
@@ -93,7 +97,8 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
             @NonNull List<ConnectorParty> parties,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         log.debug(
-                "saving parties [{}] for business domain [{}]", parties, businessDomainIdentifier);
+                "saving parties [{}] for business domain [{}]", parties, businessDomainIdentifier
+        );
 
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
                 businessDomainIdentifier.messageLaneIdentifier()
@@ -106,10 +111,26 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
         return savedParties.stream().map(ConnectorPartyRepositoryImpl::toDomain).toList();
     }
 
+    // TODO to be removed
     @Override
-    public ConnectorParty findByPartyAndBusinessDomain(
-            ConnectorParty party,
+    public ConnectorParty findByNameAndBusinessDomain(
+            String name,
             ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    @Override
+    public ConnectorParty findByIdentifierAndRoleTypeAndBusinessDomain(
+            @NonNull String identifier,
+            @NonNull ConnectorPartyRoleType roleType,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        var party = this.jpaRepository
+                .findByIdentifierAndRoleTypeAndProcessingModeBusinessDomainIdentifier(
+                        identifier,
+                        roleType,
+                        businessDomainIdentifier.messageLaneIdentifier()
+                );
+
+        return toDomain(party);
     }
 }

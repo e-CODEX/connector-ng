@@ -15,15 +15,17 @@ import java.io.Serializable;
 import lombok.Builder;
 
 /**
- * The DetachedSignature class represents a detached signature for a document. It contains the
- * signature data, signature name, and MIME type of the signature.
+ * The DetachedSignature class represents a detached signature for a businessDocument. It contains
+ * the signature data, signature name, and MIME type of the signature.
  *
+ * @param uuid      The unique uuid of the detached signature.
  * @param signature The signature data.
  * @param name      The signature name.
  * @param mimeType  The MIME type of the signature.
  */
 @Builder
 public record DetachedSignature(
+        String uuid,
         byte[] signature,
         String name,
         DetachedSignatureMimeType mimeType
@@ -31,6 +33,6 @@ public record DetachedSignature(
     @Override
     @Nonnull
     public String toString() {
-        return String.format("{name=%s, mimeType=%s}", name, mimeType);
+        return String.format("{name=%s, contentType=%s}", name, mimeType);
     }
 }

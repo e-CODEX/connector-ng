@@ -50,10 +50,10 @@ public record ConnectorMessageAS4Properties(
         @Nullable String conversationIdentifier,
         @NotBlank String originalSender,
         @NotBlank String finalRecipient,
-        @Nonnull ConnectorService service,
-        @Nonnull ConnectorAction action,
-        ConnectorParty fromParty,
-        ConnectorParty toParty
+        @Nullable ConnectorService service,
+        @Nullable ConnectorAction action,
+        @Nullable ConnectorParty fromParty,
+        @Nullable ConnectorParty toParty
 ) implements Serializable {
     @Override
     @Nonnull

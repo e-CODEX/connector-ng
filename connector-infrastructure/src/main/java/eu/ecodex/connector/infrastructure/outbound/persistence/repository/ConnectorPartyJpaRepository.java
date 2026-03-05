@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.repository;
 
+import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode.ConnectorPartyEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -19,4 +20,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorPartyJpaRepository extends JpaRepository<ConnectorPartyEntity, Long> {
+    ConnectorPartyEntity findByNameAndProcessingModeBusinessDomainIdentifier(
+            String name, String businessDomainIdentifier);
+
+    ConnectorPartyEntity findByIdentifierAndRoleTypeAndProcessingModeBusinessDomainIdentifier(
+            String identifier, ConnectorPartyRoleType roleType, String businessDomainIdentifier);
 }

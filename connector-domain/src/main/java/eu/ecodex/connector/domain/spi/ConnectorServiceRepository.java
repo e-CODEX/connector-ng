@@ -28,7 +28,7 @@ public interface ConnectorServiceRepository {
      * Retrieves a {@link ConnectorService} based on its name and the associated business domain
      * identifier.
      *
-     * @param serviceName              the name of the service; must not be null or blank.
+     * @param name                     the name of the service; must not be null or blank.
      * @param businessDomainIdentifier the identifier representing the business domain with which
      *                                 the service is associated; must not be null.
      *
@@ -36,5 +36,6 @@ public interface ConnectorServiceRepository {
      *         identifier, or null if no such service exists.
      */
     ConnectorService findByNameAndBusinessDomain(
-            String serviceName, String businessDomainIdentifier);
+            @Nonnull String name,
+            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 }

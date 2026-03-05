@@ -83,6 +83,7 @@ subprojects {
 }
 
 tasks.withType<Checkstyle>().configureEach {
+    exclude("**/generated/**")
     reports {
         xml.required.set(true)
         html.required.set(true)

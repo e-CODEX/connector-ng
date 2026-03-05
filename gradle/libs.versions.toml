@@ -1,13 +1,17 @@
 [versions]
+# apache
 apache-commons = "3.20.0"
+apache-cxf = "4.1.0"
+# jakarta
 jakarta-annotation = "3.0.0"
+jakarta-activation = "2.1.4"
 jakarta-validation = "3.1.1"
 jakarta-jms-api = "3.1.0"
-jackson-databind = "2.21.0"
-lombok = "1.18.42"
-micrometer = "1.6.2"
-okhttp = "5.3.2"
-slf4j-api = "2.0.17"
+jakarta-jws-api = "3.0.0"
+jakarta-mail = "2.0.2"
+jakarta-xml-bind-api = "4.0.2"
+jakarta-xml-ws-api = "4.0.2"
+# spring boot
 spring-boot = "4.0.2"
 spring-doc = "3.0.1"
 s3 = "2.41.30"
@@ -18,6 +22,12 @@ mysql = "8.0.33"
 narayana = "4.0.0"
 agroal = "3.0"
 messaginghub = "3.2.2"
+# other
+jackson-databind = "2.21.0"
+lombok = "1.18.42"
+micrometer = "1.6.2"
+okhttp = "5.3.2"
+slf4j-api = "2.0.17"
 # tests
 assertj = "3.27.7"
 junit = "5.10.0"
@@ -26,15 +36,20 @@ minio-container = "2.0.1"
 mockito = "5.21.0"
 
 [libraries]
+# apache
 apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commons" }
+apache-cxf = { module = "org.apache.cxf:cxf-rt-frontend-jaxws", version.ref = "apache-cxf" }
+apache-cxf-spring-boot = { module = "org.apache.cxf:cxf-spring-boot-starter-jaxws", version.ref = "apache-cxf" }
+# jakarta
 jakarta-annotation = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
+jakarta-activation = { module = "jakarta.activation:jakarta.activation-api", version.ref = "jakarta-activation" }
 jakarta-validation = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakarta-validation" }
 jakarta-jms-api = { module = "jakarta.jms:jakarta.jms-api", version.ref = "jakarta-jms-api" }
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
-lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
-micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
+jakarta-jws-api = { module = "jakarta.jws:jakarta.jws-api", version.ref = "jakarta-jws-api" }
+jakarta-mail = { module = "com.sun.mail:jakarta.mail", version.ref = "jakarta-mail" }
+jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind-api" }
+jakarta-xml-ws-api = { module = "jakarta.xml.ws:jakarta.xml.ws-api", version.ref = "jakarta-xml-ws-api" }
+# spring + boot
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}
 s3 = { module = "software.amazon.awssdk:s3", version.ref = "s3"}
@@ -45,6 +60,12 @@ mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
 narayana = { module = "dev.snowdrop:narayana-spring-boot-starter", version.ref = "narayana" }
 agroal = { module = "io.agroal:agroal-spring-boot-starter", version.ref = "agroal" }
 messaginghub = { module = "org.messaginghub:pooled-jms", version.ref = "messaginghub" }
+# other
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 # test
 minio = { module = "io.minio:minio", version.ref = "minio" }
 minio-container = { module = "org.testcontainers:testcontainers-minio", version.ref = "minio-container" }

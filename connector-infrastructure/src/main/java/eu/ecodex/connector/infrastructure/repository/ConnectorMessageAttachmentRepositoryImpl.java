@@ -15,7 +15,9 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageAttachmentEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorMessageAttachmentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageAttachmentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageJpaRepository;
+import lombok.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +28,13 @@ import org.springframework.stereotype.Component;
 public class ConnectorMessageAttachmentRepositoryImpl implements
         ConnectorMessageAttachmentRepository {
     private final ConnectorMessageAttachmentJpaRepository jpaRepository;
+    private final ConnectorMessageJpaRepository messageJpaRepository;
 
     public ConnectorMessageAttachmentRepositoryImpl(
-            ConnectorMessageAttachmentJpaRepository jpaRepository) {
+            ConnectorMessageAttachmentJpaRepository jpaRepository,
+            ConnectorMessageJpaRepository messageJpaRepository) {
         this.jpaRepository = jpaRepository;
+        this.messageJpaRepository = messageJpaRepository;
     }
 
     @Override
@@ -38,6 +43,13 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         var savedAttachment = jpaRepository.save(attachmentToSave);
 
         return toDomain(savedAttachment);
+    }
+
+    @Override
+    public ConnectorMessageAttachment findByIdentifier(@NonNull String identifier) {
+        var attachment = this.jpaRepository.findByIdentifier(identifier);
+
+        return toDomain(attachment);
     }
 
     @Override
@@ -54,6 +66,21 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         );
     }
 
+    @Override
+    public void attachToMessage(
+            @NonNull String attachmentIdentifier,
+            @NonNull String messageIdentifier) {
+        var attachment = jpaRepository.findByIdentifier(attachmentIdentifier);
+
+        if (attachment.getMessage() != null) {
+            throw new IllegalStateException("attachment already assigned to a message");
+        }
+
+        var message = messageJpaRepository.findByIdentifier(messageIdentifier);
+        attachment.setMessage(message);
+        jpaRepository.save(attachment);
+    }
+
     private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {
         return ConnectorMessageAttachmentEntity
                 .builder()
@@ -67,7 +94,10 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
     }
 
     private ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
-        // TODO handle null case
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorMessageAttachment
                 .builder()
                 .identifier(entity.getIdentifier())

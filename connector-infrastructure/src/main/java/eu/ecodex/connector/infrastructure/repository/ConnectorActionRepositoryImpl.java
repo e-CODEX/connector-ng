@@ -65,6 +65,10 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
      * @return the corresponding {@link ConnectorAction} instance
      */
     public static ConnectorAction toDomain(ConnectorActionEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorAction
                 .builder()
                 .name(entity.getName())
@@ -91,8 +95,12 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
 
     @Override
     public ConnectorAction findByNameAndBusinessDomain(
-            String actionName,
-            ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        throw new UnsupportedOperationException("Not implemented yet");
+            @NonNull String name,
+            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        var action = this.jpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
+                name, businessDomainIdentifier.messageLaneIdentifier()
+        );
+
+        return toDomain(action);
     }
 }

@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Default Implementation of the {@link ConnectorProcessingModeService}.
  */
+// TODO to be removed
 @Slf4j
 @DomainService
 public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingModeService {
@@ -112,7 +113,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
             log.warn(
                     "message with uuid [{}] verification mode is RELAXED."
                     + "Assuming ToParty IdentifierType [{}] as empty!",
-                    message.identifier(), message.as4Properties().toParty().identifierType()
+                    message.identifier(), toParty.identifierType()
             );
         }
 
@@ -165,7 +166,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
 
             this.serviceService.findByNameAndBusinessDomain(
                     as4Properties.service().name(),
-                    message.businessDomainIdentifier().messageLaneIdentifier()
+                    message.businessDomainIdentifier()
             );
 
             this.actionService.findByNameAndBusinessDomain(

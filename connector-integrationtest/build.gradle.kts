@@ -1,7 +1,6 @@
 plugins {
     id("java")
     id("jacoco")
-    id("checkstyle")
     id("java-test-fixtures")
 }
 
@@ -20,11 +19,13 @@ val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 dependencies {
     // app modules
     testImplementation(project(":connector-domain"))
+    testImplementation(project(":connector-soap-api"))
     testImplementation(project(":connector-infrastructure"))
     testImplementation(project(":connector-bootstrapper"))
 
-    // module
+    // fixtures
     testImplementation(testFixtures(project(":connector-infrastructure")))
+    testFixturesImplementation(project(":connector-domain"))
     testFixturesImplementation(testFixtures(project(":connector-infrastructure")))
 
     // spring boot
@@ -39,6 +40,7 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-mysql")
 
     // other
+    testImplementation(libs.apache.cxf)
     testImplementation(libs.assertj.core)
     testImplementation(libs.jackson.databind)
     testImplementation(libs.okhttp)

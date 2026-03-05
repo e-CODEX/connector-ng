@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.impl.attachement;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -30,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @param tempFileLocation the {@link Path} pointing to the temporary file location
  */
 @Slf4j
+@Builder
 public record FileUploadCommand(
         String filename,
         long size,

@@ -1,0 +1,177 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.application.service.impl.message;
+
+import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
+import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
+import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
+import eu.ecodex.connector.domain.exception.ConnectorServiceNotFoundException;
+import eu.ecodex.connector.domain.exception.NotFoundException;
+import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
+import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
+import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/**
+ * Implementation of the {@link ConnectorMessageVerifier} service.
+ */
+@Slf4j
+@Service
+public class ConnectorMessageVerifierService implements ConnectorMessageVerifier {
+    private final ConnectorPartyRepository partyRepository;
+    private final ConnectorServiceRepository serviceRepository;
+    private final ConnectorActionRepository actionRepository;
+
+    /**
+     * Creates a new {@code ConnectorMessageVerifierService}.
+     *
+     * @param partyRepository   repository used to resolve and validate message parties
+     * @param serviceRepository repository used to resolve and validate message services
+     * @param actionRepository  repository used to resolve and validate message actions
+     */
+    public ConnectorMessageVerifierService(
+            ConnectorPartyRepository partyRepository, ConnectorServiceRepository serviceRepository,
+            ConnectorActionRepository actionRepository) {
+        this.partyRepository = partyRepository;
+        this.serviceRepository = serviceRepository;
+        this.actionRepository = actionRepository;
+    }
+
+    @Override
+    public void verify(
+            @NonNull ConnectorMessage message,
+            @NonNull ProcessingModeVerificationMode verificationMode) {
+        log.debug(
+                "verifying message [{}] with verification mode [{}]",
+                message.identifier(), verificationMode
+        );
+
+        switch (verificationMode) {
+            case STRICT -> this.processStrictVerification(message);
+            case RELAXED -> this.processRelaxedVerification(message);
+            default -> this.processCreateVerification(message);
+        }
+    }
+
+    private void processStrictVerification(ConnectorMessage message) {
+        this.processServiceAndActionVerification(message);
+    }
+
+    private void processRelaxedVerification(ConnectorMessage message) {
+        this.processServiceAndActionVerification(message);
+
+        var toParty = message.as4Properties().toParty();
+
+        if (toParty != null && toParty.identifierType().isBlank()) {
+            log.warn(
+                    "message with identifier [{}] verification mode is RELAXED."
+                    + "Assuming ToParty IdentifierType [{}] as empty!",
+                    message.identifier(), toParty.identifierType()
+            );
+        }
+
+        // TODO improve the verification
+        var foundToParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                toParty.identifier(), toParty.roleType(), message.businessDomainIdentifier()
+        );
+
+        if (foundToParty == null) {
+            throw new ConnectorProcessingModeVerificationException(
+                    String.format(
+                            "message toParty [%s] is not configured on the connector! "
+                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                            toParty, message.businessDomainIdentifier()
+                    )
+            );
+        }
+
+        var fromParty = message.as4Properties().fromParty();
+
+        if (fromParty != null && fromParty.identifierType().isBlank()) {
+            log.warn(
+                    "message with identifier [{}] verification mode is RELAXED."
+                    + "Assuming FromParty IdentifierType [{}] as empty!",
+                    message.identifier(), fromParty.identifierType()
+            );
+        }
+
+        var foundFromParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                fromParty.name(), fromParty.roleType(), message.businessDomainIdentifier()
+        );
+
+        if (foundFromParty == null) {
+            throw new ConnectorProcessingModeVerificationException(
+                    String.format(
+                            "message fromParty [%s] is not configured on the connector! "
+                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                            fromParty, message.businessDomainIdentifier()
+                    )
+            );
+        }
+    }
+
+    private void processCreateVerification(ConnectorMessage message) {
+        var warning = String.format(
+                "message with identifier [%s] verification failed because P-Mode CREATE "
+                + "verification mode is not supported!",
+                message.identifier()
+        );
+        log.warn(warning);
+        throw new ConnectorProcessingModeVerificationException(warning);
+    }
+
+    private void processServiceAndActionVerification(ConnectorMessage message) {
+        log.debug("verifying service and action for message [{}]", message.identifier());
+
+        try {
+            var as4Properties = message.as4Properties();
+            var serviceName = as4Properties.service().name();
+            var businessDomainIdentifier = message.businessDomainIdentifier();
+            var service = this.serviceRepository.findByNameAndBusinessDomain(
+                    serviceName,
+                    businessDomainIdentifier
+            );
+
+            if (service == null) {
+                log.warn(
+                        "service with name [{}] and business domain [{}] not found",
+                        serviceName, businessDomainIdentifier
+                );
+                throw new ConnectorServiceNotFoundException("service not found");
+            }
+
+            var action = this.actionRepository.findByNameAndBusinessDomain(
+                    as4Properties.action().name(), message.businessDomainIdentifier()
+            );
+
+            var actionName = as4Properties.action().name();
+
+            if (action == null) {
+                log.warn(
+                        "action with name [{}] and business domain [{}] not found",
+                        actionName, businessDomainIdentifier
+                );
+
+                throw new ConnectorActionNotFoundException("action not found");
+            }
+        } catch (NotFoundException e) {
+            log.error("message with identifier [{}] verification failed", message.identifier());
+
+            throw new ConnectorProcessingModeVerificationException(
+                    "message verification failed", e
+            );
+        }
+    }
+}

@@ -13,7 +13,7 @@ package eu.ecodex.connector.domain.exception;
 /**
  * Represents a specific exception indicating that a message in the connector context is not
  * classified as a business message. This exception is used to handle cases where operations related
- * to business messages encounter unexpected non-business message content.
+ * to business messages encounter unexpected non-business message businessContent.
  *
  * <p>As a subclass of {@link ConnectorMessageException}, this exception provides a more
  * specific context for message-related errors associated with business classification.

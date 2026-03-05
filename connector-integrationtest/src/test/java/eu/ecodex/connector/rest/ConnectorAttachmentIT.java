@@ -11,18 +11,12 @@
 package eu.ecodex.connector.rest;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.FilePartTestFixtures;
-import eu.ecodex.connector.FileTestFixtures;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 
 public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     @Autowired
@@ -30,22 +24,16 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
-    @BeforeEach
-    void setUp() {
-        s3Client.createBucket(CreateBucketRequest.builder().bucket("attachments").build());
-    }
-
     @AfterEach
     void cleanUp() {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
     }
 
     @Test
     void should_succeed_to_upload_attachment() {
-        var parts = produceFilePart(150);
+        var parts = produceAttachmentPart(MediaType.APPLICATION_PDF, 150);
 
         apiClient.post()
                  .uri("/api/v1/attachments/upload")
@@ -58,7 +46,7 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
 
     @Test
     void should_fail_to_upload_attachment_if_payload_is_over_200_MB() {
-        var parts = produceFilePart(201);
+        var parts = produceAttachmentPart(MediaType.APPLICATION_PDF, 201);
 
         apiClient.post()
                  .uri("/api/v1/attachments/upload")
@@ -66,19 +54,5 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
                  .body(parts)
                  .exchange()
                  .expectStatus().is4xxClientError();
-    }
-
-    private MultiValueMap<String, Object> produceFilePart(int fileSize) {
-        var parts = new LinkedMultiValueMap<String, Object>();
-
-        parts.add(
-                "attachments",
-                FilePartTestFixtures.filePart(
-                        "fake_file.pdf",
-                        FileTestFixtures.generateFakeFile(fileSize),
-                        MediaType.APPLICATION_PDF
-                )
-        );
-        return parts;
     }
 }

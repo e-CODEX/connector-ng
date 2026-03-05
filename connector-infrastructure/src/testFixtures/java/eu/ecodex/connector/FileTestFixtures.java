@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector;
 
+import java.io.File;
 import java.io.IOException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
@@ -24,6 +25,15 @@ public class FileTestFixtures {
             );
         } catch (IOException e) {
             return new byte[0];
+        }
+    }
+
+    public static File readAsFile(String path) {
+        try {
+            ClassPathResource resource = new ClassPathResource(path);
+            return resource.getFile();
+        } catch (IOException e) {
+            return null;
         }
     }
 }

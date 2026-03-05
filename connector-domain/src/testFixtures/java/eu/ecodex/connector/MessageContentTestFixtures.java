@@ -10,23 +10,23 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageContent;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class MessageContentTestFixtures {
-    public static ConnectorMessageContent createContent() {
-        return ConnectorMessageContent
+    public static ConnectorMessageBusinessContent createContent() {
+        return ConnectorMessageBusinessContent
                 .builder()
-                .xmlContent(new byte[1])
-                .document(ConnectorMessageDocumentTestFixtures.createDocument())
+                .xmlContent("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+                .businessDocument(ConnectorMessageDocumentTestFixtures.createDocument())
                 .build();
     }
 
-    public static ConnectorMessageContent createSaveContent() {
+    public static ConnectorMessageBusinessContent createSaveContent() {
         return createContent()
                 .toBuilder()
                 .uuid("96a818f9-606a-4ff5-abc0-3ab31fa90ac3")
-                .document(ConnectorMessageDocumentTestFixtures.createSavedDocument())
+                .businessDocument(ConnectorMessageDocumentTestFixtures.createSavedDocument())
                 .build();
     }
 }

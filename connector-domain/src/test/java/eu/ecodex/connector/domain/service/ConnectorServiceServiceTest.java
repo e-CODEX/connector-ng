@@ -91,7 +91,7 @@ public class ConnectorServiceServiceTest {
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         var service = this.connectorService.findByNameAndBusinessDomain(
-                "Connector-TEST", "default");
+                "Connector-TEST", BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier());
         assertThat(service).isNotNull();
         assertThat(service.name()).isEqualTo("Connector-TEST");
         assertThat(service.type()).isEqualTo("urn:e-codex:services:");
@@ -102,7 +102,7 @@ public class ConnectorServiceServiceTest {
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(null);
         assertThrows(
                 ConnectorServiceNotFoundException.class,
-                () -> this.connectorService.findByNameAndBusinessDomain("Connector-TEST", "default")
+                () -> this.connectorService.findByNameAndBusinessDomain("Connector-TEST", BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
         );
     }
 
@@ -110,7 +110,7 @@ public class ConnectorServiceServiceTest {
     void should_throw_exception_when_service_name_is_null() {
         assertThrows(
                 NullPointerException.class,
-                () -> this.connectorService.findByNameAndBusinessDomain(null, "default")
+                () -> this.connectorService.findByNameAndBusinessDomain(null, BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
         );
     }
 

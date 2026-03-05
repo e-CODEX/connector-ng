@@ -56,7 +56,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     private JdbcTemplate jdbcTemplate;
 
     @AfterEach
-    void setUp() {
+    void cleanUp() {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
         jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
         jdbcTemplate.execute("TRUNCATE TABLE connector_services");
@@ -73,6 +73,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
      */
 
     @Test
+    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     @Sql("classpath:sql/business-domain.sql")
     void should_succeed_to_create_processing_mode() {
         var parts = producePart();
@@ -119,6 +120,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     @Sql("classpath:sql/business-domain.sql")
     @Sql("classpath:sql/processing-mode.sql")
     void should_fail_to_create_a_pmode_if_the_specified_business_domain_has_already_one() {
@@ -142,6 +144,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     @Sql("classpath:sql/business-domain.sql")
     @Sql("classpath:sql/processing-mode.sql")
     void should_succeed_to_get_processing_modes() {

@@ -17,6 +17,7 @@ import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
+import eu.ecodex.connector.infrastructure.config.DatabaseConfig;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

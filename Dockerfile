@@ -1,7 +1,7 @@
 FROM gradle:9-jdk21-alpine AS build
 WORKDIR /app
 COPY . .
-RUN gradle clean build -x test
+RUN gradle clean build -x test -x :connector-integrationtest:integrationTest -x integrationTest
 
 FROM eclipse-temurin:21-jre-jammy
 

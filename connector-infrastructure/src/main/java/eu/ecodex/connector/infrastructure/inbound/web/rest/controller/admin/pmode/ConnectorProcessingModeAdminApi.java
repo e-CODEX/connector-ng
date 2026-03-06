@@ -10,12 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
 
-import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,14 +39,7 @@ public interface ConnectorProcessingModeAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new processing mode.")
     @ApiResponses(
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
+            @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     ConnectorProcessingModeDto create(
             @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,

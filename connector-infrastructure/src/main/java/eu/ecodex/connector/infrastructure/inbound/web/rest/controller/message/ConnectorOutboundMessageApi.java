@@ -10,12 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
-import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,14 +36,7 @@ public interface ConnectorOutboundMessageApi {
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Submit a message from the backend system to the connector")
     @ApiResponses(
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
+            @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     ConnectorOutboundMessageDto submit(
             @RequestPart("businessXMLDocument") MultipartFile businessXMLDocument,

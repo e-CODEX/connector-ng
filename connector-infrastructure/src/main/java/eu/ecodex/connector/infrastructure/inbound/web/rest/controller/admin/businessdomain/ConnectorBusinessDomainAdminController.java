@@ -36,7 +36,6 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
         this.listBusinessDomain = listBusinessDomain;
     }
 
-
     @Override
     public ConnectorBusinessDomainDto create(
             @Valid @RequestBody ConnectorBusinessDomainCreationRequest request) {

@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Defines the REST controller for managing large files within the connector system.
  */
 @RestController
-public class ConnectorAttachmentController implements ConnectorAttachmentControllerApi {
+public class ConnectorAttachmentController implements ConnectorAttachmentApi {
     private final ConnectorUploadAttachments uploadAttachmentsService;
     private final ConnectorListAttachments listAttachmentsService;
 

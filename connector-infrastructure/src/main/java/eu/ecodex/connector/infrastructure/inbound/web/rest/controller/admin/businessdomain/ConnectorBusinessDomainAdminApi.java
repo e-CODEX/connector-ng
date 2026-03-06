@@ -10,12 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain;
 
-import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.ConnectorBusinessDomainCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -42,19 +39,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Tag(name = "BusinessDomainsAdministration", description = "API for managing business domains.")
 @RequestMapping(value = "/api/v1/admin/business-domains")
 public interface ConnectorBusinessDomainAdminApi {
-
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new business domain.")
     @ApiResponses(
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
+            @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     ConnectorBusinessDomainDto create(
             @Valid @RequestBody ConnectorBusinessDomainCreationRequest request);

@@ -11,11 +11,8 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,19 +32,12 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RequestMapping("/api/v1/attachments")
 @Tag(name = "MessageAttachment", description = "API for managing message attachments")
-public interface ConnectorAttachmentControllerApi {
+public interface ConnectorAttachmentApi {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a message attachment.")
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses(
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponse.class)
-                    )
-            )
+            @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     List<String> upload(@RequestPart("attachments") List<MultipartFile> attachments);
 

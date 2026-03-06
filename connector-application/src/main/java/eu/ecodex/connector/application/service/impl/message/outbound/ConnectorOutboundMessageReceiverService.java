@@ -8,12 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.impl.message;
+package eu.ecodex.connector.application.service.impl.message.outbound;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorOutboundMessageProcessor;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
@@ -23,18 +24,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorOutboundMessageProcessor} service.
+ * Implementation of the {@link ConnectorOutboundMessageReceiver} service.
  */
 @Slf4j
 @Service
-public class ConnectorOutboundMessageProcessorService implements ConnectorOutboundMessageProcessor {
+public class ConnectorOutboundMessageReceiverService implements
+        ConnectorOutboundMessageReceiver {
     private final ConnectorMessageProcessingConfigurationProvider configurationProvider;
     private final ConnectorMessageVerifier messageVerifier;
     private final ConnectorEventPublisher stagingEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGenerator;
 
     /**
-     * Constructs a new {@code ConnectorOutboundMessageProcessorService}.
+     * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
      *
      * @param configurationProvider provider of the current
      *                              {@link ConnectorMessageProcessingConfiguration}
@@ -44,7 +46,7 @@ public class ConnectorOutboundMessageProcessorService implements ConnectorOutbou
      * @param messageIdGenerator    generator used to assign unique identifiers to outbound
      *                              messages
      */
-    public ConnectorOutboundMessageProcessorService(
+    public ConnectorOutboundMessageReceiverService(
             ConnectorMessageProcessingConfigurationProvider configurationProvider,
             ConnectorMessageVerifier messageVerifier,
             @Qualifier("connectorOutboundMessageStagingEventPublisher")
@@ -58,7 +60,7 @@ public class ConnectorOutboundMessageProcessorService implements ConnectorOutbou
 
     @Override
     @Transactional
-    public ConnectorMessage process(@NonNull final ConnectorMessage message) {
+    public ConnectorMessage register(@NonNull final ConnectorMessage message) {
         var configuration = this.configurationProvider.getConfiguration();
         var messageWithId = this.assignIdentifier(message);
         this.messageVerifier.verify(messageWithId, configuration.outboundMessageVerificationMode());

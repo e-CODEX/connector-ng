@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorOutboundMessageProcessor;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
@@ -48,7 +48,7 @@ import org.springframework.util.StringUtils;
 @MTOM
 @Component
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
-    private final ConnectorOutboundMessageProcessor messageStagingService;
+    private final ConnectorOutboundMessageReceiver messageStagingService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
 
     /**
@@ -60,7 +60,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      *                                 not be null)
      */
     public ConnectorBackendWebServiceController(
-            ConnectorOutboundMessageProcessor messageStagingService,
+            ConnectorOutboundMessageReceiver messageStagingService,
             ConnectorUploadAttachments uploadAttachmentsService) {
         this.messageStagingService = messageStagingService;
         this.uploadAttachmentsService = uploadAttachmentsService;
@@ -108,7 +108,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             );
 
 
-            var createdMessage = this.messageStagingService.process(parsedMessage);
+            var createdMessage = this.messageStagingService.register(parsedMessage);
 
             answer.setMessageId(createdMessage.identifier());
             answer.setResult(true);

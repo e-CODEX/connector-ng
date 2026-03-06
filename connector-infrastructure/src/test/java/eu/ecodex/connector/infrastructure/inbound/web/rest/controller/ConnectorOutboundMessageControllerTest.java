@@ -20,7 +20,7 @@ import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.MultipartFileTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorOutboundMessageProcessor;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message.ConnectorOutboundMessageController;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -39,9 +39,9 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureRestTestClient
 @ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorOutboundMessageController.class)
-public class ConnectorOutboundMessageProcessorControllerTest {
+public class ConnectorOutboundMessageControllerTest {
     @MockitoBean
-    private ConnectorOutboundMessageProcessor messageStagingService;
+    private ConnectorOutboundMessageReceiver messageStagingService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -49,7 +49,7 @@ public class ConnectorOutboundMessageProcessorControllerTest {
     @MethodSource("getMetadataJson")
     void should_send_201_response_when_submitting_outbound_message(String jsonBody) throws Exception {
         // TODO set appropriate response
-        when(messageStagingService.process(any()))
+        when(messageStagingService.register(any()))
                 .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
 
         var metadataFile = new MockMultipartFile(

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.usecase.message;
+package eu.ecodex.connector.application.service.usecase.message.outbound;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 
@@ -21,7 +21,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
  * <p>Implementations may store the message temporarily, update its processing state, or perform
  * additional preparation logic required by the connector pipeline.
  */
-public interface ConnectorStageMessage {
+public interface ConnectorOutboundMessageStager {
     /**
      * Stages the given {@link ConnectorMessage}.
      *

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.usecase.message;
+package eu.ecodex.connector.application.service.usecase.message.outbound;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
@@ -28,6 +28,6 @@ import jakarta.annotation.Nonnull;
  * <p>The processor may modify and return the same instance or return a new,
  * processed {@link ConnectorMessage} instance depending on the implementation.
  */
-public interface ConnectorOutboundMessageProcessor {
-    ConnectorMessage process(@Nonnull ConnectorMessage message);
+public interface ConnectorOutboundMessageReceiver {
+    ConnectorMessage register(@Nonnull ConnectorMessage message);
 }

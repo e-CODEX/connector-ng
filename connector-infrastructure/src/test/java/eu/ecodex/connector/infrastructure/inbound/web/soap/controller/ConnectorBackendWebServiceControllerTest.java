@@ -18,7 +18,7 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorOutboundMessageProcessor;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorBackendWebServiceControllerTest {
     @Mock
-    private ConnectorOutboundMessageProcessor messageStagingService;
+    private ConnectorOutboundMessageReceiver messageStagingService;
     @Mock
     private ConnectorUploadAttachments uploadAttachmentsService;
 
@@ -48,7 +48,7 @@ public class ConnectorBackendWebServiceControllerTest {
         when(uploadAttachmentsService.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
         // TODO set appropriate response
-        when(messageStagingService.process(any()))
+        when(messageStagingService.register(any()))
                 .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
 
         var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
@@ -67,7 +67,7 @@ public class ConnectorBackendWebServiceControllerTest {
         when(uploadAttachmentsService.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
-        when(messageStagingService.process(any()))
+        when(messageStagingService.register(any()))
                 .thenThrow(new RuntimeException("Error"));
 
         var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.message;
+package eu.ecodex.connector.application.service.message.outbound;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.ConnectorStageOutboundMessageService;
+import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageStagerService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
@@ -31,7 +31,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ConnectorStageOutboundMessageServiceTest {
+public class ConnectorOutboundMessageStagerServiceTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
@@ -39,7 +39,7 @@ public class ConnectorStageOutboundMessageServiceTest {
     @Mock
     private ConnectorMessageBusinessContentRepository businessContentRepository;
     @InjectMocks
-    private ConnectorStageOutboundMessageService connectorStageOutboundMessageService;
+    private ConnectorOutboundMessageStagerService connectorStageOutboundMessageService;
 
     @Test
     void should_stage_message_successfully_with_attachments() {

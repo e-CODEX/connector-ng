@@ -8,9 +8,9 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.impl.message;
+package eu.ecodex.connector.application.service.impl.message.outbound;
 
-import eu.ecodex.connector.application.service.usecase.message.ConnectorStageMessage;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorStageMessage} service.
+ * Implementation of the {@link ConnectorOutboundMessageStager} service.
  *
  * <p>This service stages an outbound {@link ConnectorMessage} by:
  * <ol>
@@ -39,13 +39,13 @@ import org.springframework.transaction.annotation.Transactional;
  * outbound processing pipeline.
  */
 @Service
-public class ConnectorStageOutboundMessageService implements ConnectorStageMessage {
+public class ConnectorOutboundMessageStagerService implements ConnectorOutboundMessageStager {
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageBusinessContentRepository businessContentRepository;
 
     /**
-     * Creates a new {@code ConnectorStageOutboundMessageService}.
+     * Creates a new {@code ConnectorOutboundMessageStagerService}.
      *
      * @param messageRepository         repository used to persist {@link ConnectorMessage}
      *                                  entities
@@ -55,7 +55,7 @@ public class ConnectorStageOutboundMessageService implements ConnectorStageMessa
      *                                  {@link ConnectorMessageBusinessContent} entities linked to a
      *                                  message
      */
-    public ConnectorStageOutboundMessageService(
+    public ConnectorOutboundMessageStagerService(
             ConnectorMessageRepository messageRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorMessageBusinessContentRepository businessContentRepository) {

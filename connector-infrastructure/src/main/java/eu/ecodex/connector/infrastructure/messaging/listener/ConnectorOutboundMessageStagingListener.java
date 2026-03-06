@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
-import eu.ecodex.connector.application.service.usecase.message.ConnectorStageMessage;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -32,10 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 public class ConnectorOutboundMessageStagingListener implements ConnectorEventHandler {
-    private final ConnectorStageMessage stagingHandler;
+    private final ConnectorOutboundMessageStager stagingHandler;
 
     public ConnectorOutboundMessageStagingListener(
-            ConnectorStageMessage stagingHandler) {
+            ConnectorOutboundMessageStager stagingHandler) {
         this.stagingHandler = stagingHandler;
     }
 

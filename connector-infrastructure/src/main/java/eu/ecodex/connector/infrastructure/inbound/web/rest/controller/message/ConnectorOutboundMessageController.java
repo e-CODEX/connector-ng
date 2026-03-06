@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
-import eu.ecodex.connector.application.service.usecase.message.ConnectorOutboundMessageProcessor;
+import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -41,10 +41,10 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorOutboundMessageController implements ConnectorOutboundMessageApi {
-    private final ConnectorOutboundMessageProcessor messageStagingService;
+    private final ConnectorOutboundMessageReceiver messageStagingService;
 
     public ConnectorOutboundMessageController(
-            ConnectorOutboundMessageProcessor messageStagingService) {
+            ConnectorOutboundMessageReceiver messageStagingService) {
         this.messageStagingService = messageStagingService;
     }
 
@@ -54,7 +54,7 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
             ConnectorOutboundMessageRequest messageMetadata) throws IOException {
         var message = toDomain(messageMetadata, businessXMLDocument.getBytes());
 
-        var processedMessage = messageStagingService.process(message);
+        var processedMessage = messageStagingService.register(message);
 
         return toDto(processedMessage);
     }

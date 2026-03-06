@@ -20,7 +20,7 @@ import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorServiceJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorServiceJpaRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

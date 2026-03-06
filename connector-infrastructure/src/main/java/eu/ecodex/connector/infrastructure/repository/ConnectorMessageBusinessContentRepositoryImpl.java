@@ -14,16 +14,16 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageAttachmentEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageBusinessContentEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageBusinessDocumentDetachedSignatureEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageBusinessDocumentEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageAttachmentJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageBusinessContentJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageBusinessDocumentJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageBusinessDocumentSignatureJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageBusinessContentEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageBusinessDocumentDetachedSignatureEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageBusinessDocumentEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageBusinessContentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageBusinessDocumentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageBusinessDocumentSignatureJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 

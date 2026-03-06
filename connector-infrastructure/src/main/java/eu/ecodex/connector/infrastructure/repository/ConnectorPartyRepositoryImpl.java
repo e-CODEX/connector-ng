@@ -14,10 +14,10 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode.ConnectorPartyEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.pmode.ConnectorProcessingModeEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorPartyJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.ConnectorProcessingModeJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorPartyJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorProcessingModeJpaRepository;
 import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

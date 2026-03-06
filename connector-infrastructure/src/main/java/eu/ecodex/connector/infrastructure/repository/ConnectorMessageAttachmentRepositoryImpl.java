@@ -14,9 +14,9 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.entity.message.ConnectorMessageAttachmentEntity;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageAttachmentJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.repository.message.ConnectorMessageJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import lombok.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;

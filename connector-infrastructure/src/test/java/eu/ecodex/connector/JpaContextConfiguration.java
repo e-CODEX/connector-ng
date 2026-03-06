@@ -13,7 +13,6 @@ package eu.ecodex.connector;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootConfiguration
 @EnableAutoConfiguration
@@ -21,12 +20,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ComponentScan(
         basePackages = {
                 "eu.ecodex.connector.domain",
-                "eu.ecodex.connector.infrastructure.outbound.persistence",
+                "eu.ecodex.connector.infrastructure.outbound.database",
                 "eu.ecodex.connector.infrastructure.repository"
         }
-)
-@EnableJpaRepositories(
-        basePackages = {"eu.ecodex.connector.infrastructure.outbound.persistence.repository"}
 )
 public class JpaContextConfiguration {
 }

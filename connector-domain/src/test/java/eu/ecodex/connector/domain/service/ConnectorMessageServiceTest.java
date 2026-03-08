@@ -25,7 +25,7 @@ import eu.ecodex.connector.domain.exception.ConnectorMessageNotBusinessException
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorMessagePartyException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.property.ConnectorMessageProcessingConfigProvider;
 import java.util.Collections;
@@ -52,7 +52,7 @@ public class ConnectorMessageServiceTest {
 
     private ConnectorMessageService connectorMessageService;
 
-    private static Stream<ConnectorEvidence> provideEvidence() {
+    private static Stream<ConnectorMessageEvidence> provideEvidence() {
         return Stream.of(
                 EvidenceTestFixtures.createSubmissionAcceptanceEvidence(),
                 EvidenceTestFixtures.createSubmissionRejectionEvidence(),
@@ -528,7 +528,7 @@ public class ConnectorMessageServiceTest {
     // create an evidence message
     @ParameterizedTest
     @MethodSource("provideEvidence")
-    void should_create_evidence_message_successfully(ConnectorEvidence evidence) {
+    void should_create_evidence_message_successfully(ConnectorMessageEvidence evidence) {
         when(messageProcessingConfigProvider.getProcessingProperties())
                 .thenReturn(MessageProcessingConfigProviderTestFixtures.getProcessingProperties());
 

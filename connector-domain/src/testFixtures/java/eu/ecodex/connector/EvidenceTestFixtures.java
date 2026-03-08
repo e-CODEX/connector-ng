@@ -10,78 +10,78 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class EvidenceTestFixtures {
-    public static ConnectorEvidence createSubmissionAcceptanceEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createSubmissionAcceptanceEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createSubmissionRejectionEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.SUBMISSION_REJECTION)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createSubmissionRejectionEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.SUBMISSION_REJECTION)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createRelayREMMDAcceptanceEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createRelayREMMDAcceptanceEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createRelayREMMDRejectionEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.RELAY_REMMD_REJECTION)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createRelayREMMDRejectionEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.RELAY_REMMD_REJECTION)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createRelayREMMDFailureEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.RELAY_REMMD_FAILURE)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createRelayREMMDFailureEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.RELAY_REMMD_FAILURE)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createDeliveryEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.DELIVERY)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createDeliveryEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.DELIVERY)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createNonDeliveryEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.NON_DELIVERY)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createNonDeliveryEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.NON_DELIVERY)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createRetrievalEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.RETRIEVAL)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createRetrievalEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.RETRIEVAL)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createNonRetrievalEvidence() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.NON_RETRIEVAL)
-                                .content(new byte[1])
-                                .build();
+    public static ConnectorMessageEvidence createNonRetrievalEvidence() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.NON_RETRIEVAL)
+                                       .content(new byte[1])
+                                       .build();
     }
 
-    public static ConnectorEvidence createEvidenceTrigger() {
-        return ConnectorEvidence.builder()
-                                .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
-                                .content(new byte[0])
-                                .build();
+    public static ConnectorMessageEvidence createEvidenceTrigger() {
+        return ConnectorMessageEvidence.builder()
+                                       .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
+                                       .content(new byte[0])
+                                       .build();
     }
 }

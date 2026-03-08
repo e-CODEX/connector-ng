@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.api.service;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public interface ConnectorMessageService {
      * @return a newly created evidence message containing the specified evidence
      */
     ConnectorMessage createEvidenceMessage(
-            @Nonnull ConnectorMessage businessMessage, @Nonnull ConnectorEvidence evidence);
+            @Nonnull ConnectorMessage businessMessage, @Nonnull ConnectorMessageEvidence evidence);
 
     /**
      * Retrieves a {@link ConnectorMessage} using the given unique uuid.
@@ -87,7 +87,7 @@ public interface ConnectorMessageService {
      * @return the updated connector message instance containing the newly added evidence
      */
     ConnectorMessage addEvidence(
-            @Nonnull ConnectorMessage message, @Nonnull ConnectorEvidence evidence);
+            @Nonnull ConnectorMessage message, @Nonnull ConnectorMessageEvidence evidence);
 
     /**
      * Validates and processes the party information associated with the provided connector

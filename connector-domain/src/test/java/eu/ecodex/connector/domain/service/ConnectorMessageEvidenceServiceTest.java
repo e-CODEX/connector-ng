@@ -40,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-class ConnectorEvidenceServiceTest {
+class ConnectorMessageEvidenceServiceTest {
     @Mock
     private ConnectorEvidenceToolkit evidenceToolkit;
     @Mock

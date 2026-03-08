@@ -13,7 +13,8 @@ package eu.ecodex.connector.domain.model.message;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
+import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
@@ -97,9 +98,94 @@ public record ConnectorMessage(
         @Nullable ConnectorMessageBusinessContent businessContent,
         @Nullable List<ConnectorMessageAttachment> attachments,
         @Nullable List<ConnectorMessageError> errors,
-        @Nullable List<ConnectorEvidence> evidences,
-        @Nullable List<ConnectorEvidence> transportedEvidences
+        @Nullable List<ConnectorMessageEvidence> evidences,
+        @Nullable List<ConnectorMessageEvidence> transportedEvidences
 ) implements Serializable {
+    /**
+     * Determines whether the current message has been rejected.
+     *
+     * <p>A message is considered rejected if the `rejectedAt` timestamp
+     * is not null, indicating that rejection has been recorded for the message.
+     *
+     * @return {@code true} if the message is rejected; {@code false} otherwise.
+     */
+    public boolean isRejected() {
+        return this.rejectedAt() != null;
+    }
+
+    /**
+     * Determines whether the current message qualifies as an evidence message.
+     *
+     * <p>A message is categorized as an evidence message if it has no associated
+     * business content and contains at least one evidence. This is established by checking if the
+     * {@code businessContent} is {@code null} and the {@code evidences} list is non-null and not
+     * empty.
+     *
+     * @return {@code true} if the message is an evidence message; {@code false} otherwise.
+     */
+    public boolean isEvidenceMessage() {
+        return this.businessContent() == null
+               && this.evidences() != null
+               && !this.evidences().isEmpty();
+    }
+
+    /**
+     * Determines whether the current message qualifies as a business message.
+     *
+     * <p>A message is classified as a business message if it is not an evidence message.
+     * This method relies on the {@code isEvidenceMessage()} method to determine whether the current
+     * message falls into the evidence category.
+     *
+     * @return {@code true} if the message is a business message, {@code false} otherwise.
+     */
+    public boolean isBusinessMessage() {
+        return !this.isEvidenceMessage();
+    }
+
+    /**
+     * Switches the direction of the current message by altering its AS4 properties and swapping the
+     * roles and parties involved. The method reassigns the sender and receiver roles, switches the
+     * original sender and final recipient, and updates the direction of the message.
+     *
+     * <p>The resulting message maintains its general structure and compliance with the expected
+     * properties, but with reversed sender-to-receiver directions.
+     *
+     * @return A new {@code ConnectorMessage} instance with updated direction, roles, and party
+     *         information, reflecting the switched communication flow.
+     */
+    @Nonnull
+    public ConnectorMessage switchDirection() {
+        final var as4Properties = this.as4Properties();
+        final var direction = this.direction();
+        final var fromParty = as4Properties.fromParty();
+        final var toParty = as4Properties.toParty();
+
+        var switchedAS4PropertiesBuilder = this.as4Properties().toBuilder();
+        // switching party, but keep Role and RoleType
+        final var switchedFromParty = toParty.toBuilder()
+                                             .roleType(ConnectorPartyRoleType.INITIATOR)
+                                             .role(fromParty.role())
+                                             .build();
+
+        final var switchedToParty = fromParty.toBuilder()
+                                             .roleType(ConnectorPartyRoleType.RESPONDER)
+                                             .role(toParty.role())
+                                             .build();
+
+        switchedAS4PropertiesBuilder.fromParty(switchedFromParty);
+        switchedAS4PropertiesBuilder.toParty(switchedToParty);
+        switchedAS4PropertiesBuilder.originalSender(as4Properties.finalRecipient());
+        switchedAS4PropertiesBuilder.finalRecipient(as4Properties.originalSender());
+
+        var switchedMessageBuilder = this.toBuilder();
+        switchedMessageBuilder.direction(
+                ConnectorMessageDirection.from(direction.getTarget(), direction.getSource())
+        );
+        switchedMessageBuilder.as4Properties(switchedAS4PropertiesBuilder.build());
+
+        return switchedMessageBuilder.build();
+    }
+
     @Override
     @Nonnull
     public String toString() {

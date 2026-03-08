@@ -13,6 +13,7 @@ package eu.ecodex.connector.domain.model.message.evidence;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
+import java.time.Instant;
 import lombok.Builder;
 
 /**
@@ -23,10 +24,12 @@ import lombok.Builder;
  * @param content The businessContent of the evidence.
  */
 @Builder(toBuilder = true)
-public record ConnectorEvidence(
+public record ConnectorMessageEvidence(
         @Nullable String uuid,
         @Nonnull ConnectorEvidenceType type,
-        @Nullable byte[] content
+        @Nullable byte[] content,
+        @Nullable Instant createdAt,
+        @Nullable Instant updatedAt
 ) implements Serializable {
     @Override
     @Nonnull

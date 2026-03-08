@@ -17,6 +17,8 @@ import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorMessageRepositoryTest {
     @Autowired
     private ConnectorMessageRepository repository;
+    @Autowired
+    private ConnectorMessageJpaRepository jpaRepository;
 
+    // save
     @Test
     @Sql("classpath:sql/business-domain.sql")
     @Sql("classpath:sql/processing-mode.sql")
@@ -52,6 +57,156 @@ public class ConnectorMessageRepositoryTest {
     void should_throw_null_pointer_exception_when_saving_connector_message_with_a_null_message_to_database() {
         assertThrows(
                 NullPointerException.class, () -> repository.save(null)
+        );
+    }
+
+    // update gateway name
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/party.sql")
+    @Sql("classpath:sql/service.sql")
+    @Sql("classpath:sql/action.sql")
+    @Sql("classpath:sql/message.sql")
+    @Sql("classpath:sql/message-as4-properties.sql")
+    void should_update_connector_message_gateway_name_successfully_in_the_database() {
+        var message = jpaRepository.findByIdentifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+        assertThat(message).isNotNull();
+        assertThat(message.getGatewayName()).isNull();
+
+        var update = repository.updateGatewayName("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", "gateway-name");
+
+        assertThat(update).isNotNull();
+        assertThat(update.gatewayName()).isEqualTo("gateway-name");
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_connector_message_gateway_name_with_a_null_message_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateGatewayName(null, "gateway-name")
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_connector_message_gateway_name_with_a_null_gateway_name() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateGatewayName("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", null)
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_connector_message_gateway_name_with_a_null_message_identifier_and_gateway_name() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateGatewayName(null, null)
+        );
+    }
+
+    // update ebms identifier
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/party.sql")
+    @Sql("classpath:sql/service.sql")
+    @Sql("classpath:sql/action.sql")
+    @Sql("classpath:sql/message.sql")
+    @Sql("classpath:sql/message-as4-properties.sql")
+    void should_update_connector_message_ebms_identifier_successfully_in_the_database() {
+        var message = jpaRepository.findByIdentifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+        assertThat(message).isNotNull();
+        assertThat(message.getAs4Properties().getEbmsMessageIdentifier()).isNull();
+
+        var ebmsIdentifier = String.format("%s@%s", UUID.randomUUID(), "connector.ecodex.eu");
+
+        var update = repository.updateEbmsIdentifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", ebmsIdentifier);
+
+        assertThat(update).isNotNull();
+        assertThat(update.as4Properties().ebmsMessageIdentifier()).isEqualTo(ebmsIdentifier);
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_connector_message_ebms_identifier_with_a_null_message_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateEbmsIdentifier(null, "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_connector_message_ebms_identifier_with_a_null_ebms_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateEbmsIdentifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", null)
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_connector_message_ebms_identifier_with_a_null_message_identifier_and_ebms_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateEbmsIdentifier(null, null)
+        );
+    }
+
+    // set as rejected
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/party.sql")
+    @Sql("classpath:sql/service.sql")
+    @Sql("classpath:sql/action.sql")
+    @Sql("classpath:sql/message.sql")
+    @Sql("classpath:sql/message-as4-properties.sql")
+    void should_set_connector_message_as_rejected_successfully_in_the_database() {
+        var message = jpaRepository.findByIdentifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+        assertThat(message).isNotNull();
+        assertThat(message.getRejectedAt()).isNull();
+
+        var update = repository.setAsRejected(message.getIdentifier());
+
+        assertThat(update).isNotNull();
+        assertThat(update.rejectedAt()).isNotNull();
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_setting_connector_message_as_rejected_with_a_null_message_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.setAsRejected(null)
+        );
+    }
+
+    // set as confirmed
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/party.sql")
+    @Sql("classpath:sql/service.sql")
+    @Sql("classpath:sql/action.sql")
+    @Sql("classpath:sql/message.sql")
+    @Sql("classpath:sql/message-as4-properties.sql")
+    void should_set_connector_message_as_confirmed_successfully_in_the_database() {
+        var message = jpaRepository.findByIdentifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+        assertThat(message).isNotNull();
+        assertThat(message.getConfirmedAt()).isNull();
+
+        var update = repository.setAsConfirmed(message.getIdentifier());
+
+        assertThat(update).isNotNull();
+        assertThat(update.confirmedAt()).isNotNull();
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_setting_connector_message_as_confirmed_with_a_null_message_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.setAsRejected(null)
         );
     }
 }

@@ -25,9 +25,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -62,6 +67,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Column(name = "BACKEND_NAME")
     private String backendName;
 
+    @Setter
     @Column(name = "GATEWAY_NAME")
     private String gatewayName;
 
@@ -72,9 +78,11 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Column(name = "DELETED_AT")
     private Instant deletedAt;
 
+    @Setter
     @Column(name = "REJECTED_AT")
     private Instant rejectedAt;
 
+    @Setter
     @Column(name = "CONFIRMED_AT")
     private Instant confirmedAt;
 
@@ -91,4 +99,12 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Setter
     @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private ConnectorMessageAS4PropertiesEntity as4Properties;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConnectorMessageAttachmentEntity> attachments = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ConnectorMessageEvidenceEntity> evidences = new HashSet<>();
 }

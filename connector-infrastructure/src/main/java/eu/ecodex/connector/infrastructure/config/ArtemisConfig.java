@@ -36,6 +36,11 @@ public class ArtemisConfig {
                     queueProperties.getOutboundMessageStagingQueue(),
                     settingsProperties
             );
+            addQueueWithDLQ(
+                    configuration,
+                    queueProperties.getOutboundMessageProcessingQueue(),
+                    settingsProperties
+            );
             // set DLQ addresses configs
             configuration.addAddressSetting("DLQ.#", defaultDLQAddressSettings());
         };

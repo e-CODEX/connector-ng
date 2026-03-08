@@ -12,16 +12,19 @@ package eu.ecodex.connector.infrastructure.messaging.publisher;
 
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
  * Gateway Implementation of the {@link ConnectorEventPublisher}.
  */
+@Slf4j
 @Component("connectorGatewayLinkEventPublisher")
 public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublisher {
     @Override
     public void publish(@NonNull ConnectorMessage message) {
-        throw new UnsupportedOperationException("not yet implemented");
+        log.info("submitting message [{}] to gateway link", message.identifier());
+        // TODO fake implementation. to be replaced with real implementation
     }
 }

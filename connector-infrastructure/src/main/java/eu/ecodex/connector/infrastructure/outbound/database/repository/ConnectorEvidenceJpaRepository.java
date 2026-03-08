@@ -8,18 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.database.repository.message;
+package eu.ecodex.connector.infrastructure.outbound.database.repository;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEvidenceEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for performing CRUD operations on the {@link ConnectorMessageAS4Properties}.
+ * Repository interface for performing CRUD operations on the
+ * {@link ConnectorMessageEvidenceEntity}.
  */
 @Repository
-public interface ConnectorMessageAS4PropertiesJpaRepository extends
-        JpaRepository<ConnectorMessageAS4PropertiesEntity, Long> {
-    ConnectorMessageAS4PropertiesEntity findByMessageIdentifier(String messageIdentifier);
+public interface ConnectorEvidenceJpaRepository extends
+        JpaRepository<ConnectorMessageEvidenceEntity, Long> {
 }

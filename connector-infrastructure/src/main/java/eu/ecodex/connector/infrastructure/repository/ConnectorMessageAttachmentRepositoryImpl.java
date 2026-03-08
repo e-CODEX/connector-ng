@@ -59,7 +59,8 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         var result = jpaRepository.findAll(pageable);
 
         return new ConnectorPageResult<>(
-                result.getContent().stream().map(this::toDomain).toList(),
+                result.getContent().stream()
+                      .map(ConnectorMessageAttachmentRepositoryImpl::toDomain).toList(),
                 result.getTotalElements(),
                 result.getNumber(),
                 result.getSize()
@@ -93,7 +94,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
                 .build();
     }
 
-    private ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
+    static ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
         if (entity == null) {
             return null;
         }

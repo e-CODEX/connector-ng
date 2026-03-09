@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.service.impl.message.outbound;
 
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
+import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
@@ -18,6 +19,7 @@ import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class ConnectorOutboundMessageStagerService implements ConnectorOutboundMessageStager {
+    private final ConnectorEventPublisher pipelineEventPublisher;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageBusinessContentRepository businessContentRepository;
@@ -56,9 +59,12 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
      *                                  message
      */
     public ConnectorOutboundMessageStagerService(
+            @Qualifier("connectorOutboundMessagePipelineEventPublisher")
+            ConnectorEventPublisher pipelineEventPublisher,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorMessageBusinessContentRepository businessContentRepository) {
+        this.pipelineEventPublisher = pipelineEventPublisher;
         this.messageRepository = messageRepository;
         this.attachmentRepository = attachmentRepository;
         this.businessContentRepository = businessContentRepository;
@@ -71,7 +77,7 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
         var messageIdentifier = createdMessage.identifier();
         attachAttachments(message.attachments(), messageIdentifier);
         persistBusinessDocument(message.businessContent(), messageIdentifier);
-        // TODO submit to outbound pipeline queue
+        this.pipelineEventPublisher.publish(createdMessage);
     }
 
     private void attachAttachments(

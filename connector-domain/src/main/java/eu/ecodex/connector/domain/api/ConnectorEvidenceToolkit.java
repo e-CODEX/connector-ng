@@ -12,13 +12,13 @@ package eu.ecodex.connector.domain.api;
 
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Interface for creating instances of {@link ConnectorEvidence} to represent the results of
+ * Interface for creating instances of {@link ConnectorMessageEvidence} to represent the results of
  * operations performed on {@link ConnectorMessage}.
  *
  * <p>This toolkit provides methods to create evidence objects for both successful and failed
@@ -35,9 +35,9 @@ import jakarta.annotation.Nullable;
  */
 public interface ConnectorEvidenceToolkit {
     /**
-     * Creates an instance of {@link ConnectorEvidence} based on the provided message, evidence
-     * type, and optional rejection reason. The evidence represents the outcome of an operation
-     * performed on a message within the connector domain.
+     * Creates an instance of {@link ConnectorMessageEvidence} based on the provided message,
+     * evidence type, and optional rejection reason. The evidence represents the outcome of an
+     * operation performed on a message within the connector domain.
      *
      * @param message         The {@link ConnectorMessage} object to which the evidence is linked.
      *                        Must not be null.
@@ -46,9 +46,10 @@ public interface ConnectorEvidenceToolkit {
      * @param rejectionReason The {@link ConnectorMessageRejectionReason} describing the reason for
      *                        rejection, if applicable. Can be null if the evidence does not relate
      *                        to a rejection.
-     * @return A {@link ConnectorEvidence} instance representing the operation result.
+     *
+     * @return A {@link ConnectorMessageEvidence} instance representing the operation result.
      */
-    ConnectorEvidence create(
+    ConnectorMessageEvidence create(
             @Nonnull ConnectorMessage message,
             @Nonnull ConnectorEvidenceType evidenceType,
             @Nullable ConnectorMessageRejectionReason rejectionReason

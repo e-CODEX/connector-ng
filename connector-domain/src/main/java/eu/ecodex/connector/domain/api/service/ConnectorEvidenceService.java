@@ -12,8 +12,8 @@ package eu.ecodex.connector.domain.api.service;
 
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
 
 /**
@@ -22,7 +22,7 @@ import jakarta.annotation.Nonnull;
  */
 public interface ConnectorEvidenceService {
     /**
-     * Creates a new instance of {@link ConnectorEvidence} of the specified evidence type and
+     * Creates a new instance of {@link ConnectorMessageEvidence} of the specified evidence type and
      * associates it with the given connector message. This method is intended to generate evidence
      * representing a successful event or operation.
      *
@@ -30,14 +30,14 @@ public interface ConnectorEvidenceService {
      *                     operation. Must not be null.
      * @param message      The connector message associated with the evidence. Must not be null.
      *
-     * @return A new {@link ConnectorEvidence} instance representing the success evidence for the
-     *         given message.
+     * @return A new {@link ConnectorMessageEvidence} instance representing the success evidence for
+     *         the given message.
      */
-    ConnectorEvidence createSuccess(
+    ConnectorMessageEvidence createSuccess(
             @Nonnull ConnectorEvidenceType evidenceType, @Nonnull ConnectorMessage message);
 
     /**
-     * Creates a new instance of {@link ConnectorEvidence} of the specified evidence type,
+     * Creates a new instance of {@link ConnectorMessageEvidence} of the specified evidence type,
      * associates it with the given connector message, and assigns a rejection reason if applicable.
      * This method is intended to generate evidence representing a failure event or operation.
      *
@@ -47,10 +47,10 @@ public interface ConnectorEvidenceService {
      * @param reason       The reason for the message rejection, providing additional context for
      *                     the failure. Can be null if no specific rejection reason is required.
      *
-     * @return A new {@link ConnectorEvidence} instance representing the failure evidence for the
-     *         given message.
+     * @return A new {@link ConnectorMessageEvidence} instance representing the failure evidence for
+     *         the given message.
      */
-    ConnectorEvidence createFailure(
+    ConnectorMessageEvidence createFailure(
             @Nonnull ConnectorEvidenceType evidenceType,
             @Nonnull ConnectorMessage message,
             ConnectorMessageRejectionReason reason);

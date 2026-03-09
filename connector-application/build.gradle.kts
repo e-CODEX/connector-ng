@@ -15,6 +15,7 @@ dependencies {
     // jakarta
     implementation(libs.jakarta.validation)
     // other
+    implementation(libs.apache.commons.lang3)
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
     // test

@@ -29,6 +29,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Represents the Connector Message entity used to manage and store information about
@@ -39,13 +40,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGES_AS4_PROPERTIES")
+@Table(name = "CONNECTOR_MESSAGE_AS4_PROPERTIES")
 public class ConnectorMessageAS4PropertiesEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Setter
     @Column(name = "EBMS_MESSAGE_IDENTIFIER")
     private String ebmsMessageIdentifier;
 

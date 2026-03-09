@@ -60,7 +60,7 @@ public class ConnectorOutboundMessageIT extends AbstractIntegrationTest {
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_document_signatures");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_messages_as4_properties");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_as4_properties");
         jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
         jdbcTemplate.execute("TRUNCATE TABLE connector_parties");

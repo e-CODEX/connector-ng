@@ -32,11 +32,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 public class ConnectorOutboundMessageStagingListener implements ConnectorEventHandler {
-    private final ConnectorOutboundMessageStager stagingHandler;
+    private final ConnectorOutboundMessageStager messageStager;
 
     public ConnectorOutboundMessageStagingListener(
-            ConnectorOutboundMessageStager stagingHandler) {
-        this.stagingHandler = stagingHandler;
+            ConnectorOutboundMessageStager messageStager) {
+        this.messageStager = messageStager;
     }
 
     @Override
@@ -44,6 +44,6 @@ public class ConnectorOutboundMessageStagingListener implements ConnectorEventHa
     @JmsListener(destination = "${connector.queues.outbound-message-staging-queue}")
     public void handle(@NonNull ConnectorMessage message) {
         log.info("received outbound message staging event: [{}]", message);
-        stagingHandler.stage(message);
+        messageStager.stage(message);
     }
 }

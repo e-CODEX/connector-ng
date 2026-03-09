@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.evidence;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
@@ -25,10 +25,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     @Override
-    public ConnectorEvidence create(
+    public ConnectorMessageEvidence create(
             @NonNull ConnectorMessage message,
             @NonNull ConnectorEvidenceType evidenceType,
             @Nullable ConnectorMessageRejectionReason rejectionReason) {
-        throw new UnsupportedOperationException("not yet implemented");
+        // TODO this is fake implementation. will be replaced with real implementation
+        return ConnectorMessageEvidence
+                .builder()
+                .type(evidenceType)
+                .content(new byte[0])
+                .build();
     }
 }

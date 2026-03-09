@@ -19,8 +19,8 @@ import eu.ecodex.connector.domain.exception.ConnectorMessagePartyException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
@@ -98,7 +98,7 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
 
     @Override
     public ConnectorMessage createEvidenceMessage(
-            @Nonnull ConnectorMessage businessMessage, @Nonnull ConnectorEvidence evidence) {
+            @Nonnull ConnectorMessage businessMessage, @Nonnull ConnectorMessageEvidence evidence) {
         var action = getEvidenceAction(evidence.type());
 
         var as4Properties = ConnectorMessageAS4Properties
@@ -163,7 +163,7 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
 
     @Override
     public ConnectorMessage addEvidence(
-            @NonNull ConnectorMessage message, @NonNull ConnectorEvidence evidence) {
+            @NonNull ConnectorMessage message, @NonNull ConnectorMessageEvidence evidence) {
         log.debug("adding evidence [{}] to message: [{}]", evidence, message);
 
         if (!this.isBusinessMessage(message)) {
@@ -240,7 +240,7 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
 
         var foundMessage = this.findByIdentifier(message.identifier());
 
-        return this.messageRepository.setAsRejected(foundMessage);
+        return this.messageRepository.setAsRejected(foundMessage.identifier());
     }
 
     @Override
@@ -249,7 +249,7 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
 
         var foundMessage = this.findByIdentifier(message.identifier());
 
-        return this.messageRepository.setAsConfirmed(foundMessage);
+        return this.messageRepository.setAsConfirmed(foundMessage.identifier());
     }
 
     @Override

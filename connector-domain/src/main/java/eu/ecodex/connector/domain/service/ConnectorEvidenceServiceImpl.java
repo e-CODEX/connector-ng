@@ -21,8 +21,8 @@ import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotRelevantExceptio
 import eu.ecodex.connector.domain.model.ConnectorErrorCode;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
@@ -63,14 +63,14 @@ public class ConnectorEvidenceServiceImpl implements ConnectorEvidenceService {
         this.messageService = messageService;
     }
 
-    private int getHighestReceivedEvidencePriority(List<ConnectorEvidence> evidences) {
+    private int getHighestReceivedEvidencePriority(List<ConnectorMessageEvidence> evidences) {
         return evidences.stream()
                         .map(evidence -> evidence.type().getPriority())
                         .max(Comparator.naturalOrder())
                         .orElse(0);
     }
 
-    private ConnectorEvidence create(
+    private ConnectorMessageEvidence create(
             ConnectorEvidenceType evidenceType,
             ConnectorMessage message,
             ConnectorMessageRejectionReason rejectionReason) {
@@ -78,14 +78,14 @@ public class ConnectorEvidenceServiceImpl implements ConnectorEvidenceService {
     }
 
     @Override
-    public ConnectorEvidence createSuccess(
+    public ConnectorMessageEvidence createSuccess(
             @NonNull ConnectorEvidenceType evidenceType,
             @NonNull ConnectorMessage message) {
         return this.create(evidenceType, message, null);
     }
 
     @Override
-    public ConnectorEvidence createFailure(
+    public ConnectorMessageEvidence createFailure(
             @NonNull ConnectorEvidenceType evidenceType,
             @NonNull ConnectorMessage message,
             ConnectorMessageRejectionReason reason) {

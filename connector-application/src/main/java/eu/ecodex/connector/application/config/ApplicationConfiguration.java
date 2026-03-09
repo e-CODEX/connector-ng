@@ -10,12 +10,13 @@
 
 package eu.ecodex.connector.application.config;
 
+import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.ConnectorOutboundMessagePipeline;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.service.pipeline.inbound.ConnectorInboundMessagePipeline;
-import eu.ecodex.connector.domain.service.pipeline.outbound.ConnectorOutboundMessagePipeline;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -48,33 +49,34 @@ public class ApplicationConfiguration {
         );
     }
 
+    @Bean
     public ConnectorMessagePipeline connectorOutboundMessagePipeline(
             @Qualifier("connectorOutboundMessageValidationStep")
-            ConnectorMessageStep connectorOutboundMessageValidationStep,
+            ConnectorMessageStep validationStep,
             @Qualifier("connectorOutboundMessageSecurityStep")
-            ConnectorMessageStep connectorOutboundMessageSecurityStep,
-            @Qualifier("connectorOutboundMessageGatewayValidationStep")
-            ConnectorMessageStep connectorOutboundMessageGatewayValidationStep,
+            ConnectorMessageStep securityStep,
+            @Qualifier("connectorOutboundMessageGatewayNameStep")
+            ConnectorMessageStep gatewayNameStep,
             @Qualifier("connectorOutboundMessageEbmsIdStep")
-            ConnectorMessageStep connectorOutboundMessageEbmsIdStep,
-            @Qualifier("connectorOutboundMessageSubmissionAcceptanceStep")
-            ConnectorMessageStep connectorOutboundMessageSubmissionAcceptanceStep,
+            ConnectorMessageStep ebmsIdStep,
+            @Qualifier("connectorOutboundMessageAcceptanceStep")
+            ConnectorMessageStep acceptanceStep,
             @Qualifier("connectorOutboundMessageConfirmationStep")
-            ConnectorMessageStep connectorOutboundMessageConfirmationStep,
+            ConnectorMessageStep confirmationStep,
             @Qualifier("connectorOutboundMessageRejectionStep")
-            ConnectorMessageStep connectorOutboundMessageRejectionStep,
-            @Qualifier("connectorLinkSubmissionService")
-            ConnectorLinkSubmissionService linkSubmissionService
+            ConnectorMessageStep rejectionStep,
+            @Qualifier("connectorMessageLinkSubmissionStep")
+            ConnectorMessageStep linkSubmissionStep
     ) {
         return new ConnectorOutboundMessagePipeline(
-                connectorOutboundMessageValidationStep,
-                connectorOutboundMessageSecurityStep,
-                connectorOutboundMessageGatewayValidationStep,
-                connectorOutboundMessageEbmsIdStep,
-                connectorOutboundMessageSubmissionAcceptanceStep,
-                connectorOutboundMessageConfirmationStep,
-                connectorOutboundMessageRejectionStep,
-                linkSubmissionService
+                validationStep,
+                securityStep,
+                gatewayNameStep,
+                ebmsIdStep,
+                acceptanceStep,
+                confirmationStep,
+                rejectionStep,
+                linkSubmissionStep
         );
     }
 }

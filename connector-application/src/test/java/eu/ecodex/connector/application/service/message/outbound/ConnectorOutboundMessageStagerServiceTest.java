@@ -19,6 +19,7 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageStagerService;
+import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
@@ -32,6 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class ConnectorOutboundMessageStagerServiceTest {
+    @Mock
+    private ConnectorEventPublisher pipelineEventPublisher;
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
@@ -49,6 +52,7 @@ public class ConnectorOutboundMessageStagerServiceTest {
         doNothing().when(attachmentRepository).attachToMessage(any(), any());
         when(businessContentRepository.save(any(), any()))
                 .thenReturn(MessageContentTestFixtures.createContent());
+        doNothing().when(pipelineEventPublisher).publish(any());
 
         connectorStageOutboundMessageService.stage(createMessage());
     }
@@ -67,6 +71,7 @@ public class ConnectorOutboundMessageStagerServiceTest {
         doNothing().when(attachmentRepository).attachToMessage(any(), any());
         when(businessContentRepository.save(any(), any()))
                 .thenReturn(MessageContentTestFixtures.createContent());
+        doNothing().when(pipelineEventPublisher).publish(any());
 
         connectorStageOutboundMessageService.stage(createMessage());
     }

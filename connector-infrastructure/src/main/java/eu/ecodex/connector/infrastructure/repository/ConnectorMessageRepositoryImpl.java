@@ -14,7 +14,7 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
@@ -27,6 +27,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.Connector
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAS4PropertiesJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
+import java.time.Instant;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
@@ -114,6 +115,28 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
+    public ConnectorMessage updateGatewayName(
+            @NonNull String identifier,
+            @NonNull String gatewayName) {
+        var message = this.messageJpaRepository.findByIdentifier(identifier);
+        message.setGatewayName(gatewayName);
+        var updated = this.messageJpaRepository.save(message);
+
+        return toDomain(updated);
+    }
+
+    @Override
+    public ConnectorMessage updateEbmsIdentifier(
+            @NonNull String identifier,
+            @NonNull String ebmsIdentifier) {
+        var as4Properties = as4PropertiesJpaRepository.findByMessageIdentifier(identifier);
+        as4Properties.setEbmsMessageIdentifier(ebmsIdentifier);
+        var updated = as4PropertiesJpaRepository.save(as4Properties);
+
+        return toDomain(updated.getMessage());
+    }
+
+    @Override
     public ConnectorMessage findByIdentifier(String identifier) {
         throw new UnsupportedOperationException("not yet implemented");
     }
@@ -131,18 +154,27 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage addEvidence(ConnectorMessage message, ConnectorEvidence evidence) {
+    public ConnectorMessage addEvidence(
+            ConnectorMessage message, ConnectorMessageEvidence evidence) {
         throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override
-    public ConnectorMessage setAsRejected(ConnectorMessage message) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public ConnectorMessage setAsRejected(@NonNull String identifier) {
+        var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
+        foundMessage.setRejectedAt(Instant.now());
+        var updatedMessage = this.messageJpaRepository.save(foundMessage);
+
+        return toDomain(updatedMessage);
     }
 
     @Override
-    public ConnectorMessage setAsConfirmed(ConnectorMessage message) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public ConnectorMessage setAsConfirmed(@NonNull String identifier) {
+        var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
+        foundMessage.setConfirmedAt(Instant.now());
+        var updatedMessage = this.messageJpaRepository.save(foundMessage);
+
+        return toDomain(updatedMessage);
     }
 
     private ConnectorMessageEntity toEntity(ConnectorMessage message) {
@@ -209,6 +241,19 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
                 .deliveredToBackendAt(entity.getDeliveredToBackendAt())
                 .deliveredToGatewayAt(entity.getDeliveredToGatewayAt())
                 .as4Properties(toDomain(entity.getAs4Properties()))
+                .evidences(
+                        entity.getEvidences() == null
+                                ? List.of()
+                                : entity.getEvidences().stream()
+                                        .map(ConnectorMessageEvidenceRepositoryImpl::toDomain)
+                                        .toList()
+                )
+                .attachments(
+                        entity.getAttachments() == null
+                                ? List.of()
+                                : entity.getAttachments().stream()
+                                        .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
+                                        .toList())
                 .build();
     }
 

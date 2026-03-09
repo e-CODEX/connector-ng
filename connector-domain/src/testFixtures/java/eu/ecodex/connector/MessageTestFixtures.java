@@ -4,7 +4,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.time.Instant;
 import java.util.ArrayList;
 
@@ -123,7 +123,7 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createSubmissionAcceptanceEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
-        var evidences = new ArrayList<ConnectorEvidence>();
+        var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = createValidOutboundBusinessMessage().toBuilder();
         builder.evidences(evidences);
@@ -134,7 +134,7 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createRelayRMMDAcceptanceEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence();
-        var evidences = new ArrayList<ConnectorEvidence>();
+        var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = createValidInboundBusinessMessage().toBuilder();
         builder.evidences(evidences);
@@ -145,7 +145,7 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createNonDeliveryEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createNonDeliveryEvidence();
-        var evidences = new ArrayList<ConnectorEvidence>();
+        var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = createValidInboundBusinessMessage().toBuilder();
         builder.evidences(evidences);
@@ -156,7 +156,7 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createEvidenceTriggerMessage() {
         var evidence = EvidenceTestFixtures.createEvidenceTrigger();
-        var evidences = new ArrayList<ConnectorEvidence>();
+        var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);
@@ -167,7 +167,7 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createRejectedMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionRejectionEvidence();
-        var evidences = new ArrayList<ConnectorEvidence>();
+        var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);
@@ -179,7 +179,7 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createConfirmedMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
-        var evidences = new ArrayList<ConnectorEvidence>();
+        var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);

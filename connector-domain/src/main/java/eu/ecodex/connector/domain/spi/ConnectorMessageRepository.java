@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidence;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
@@ -31,6 +31,11 @@ public interface ConnectorMessageRepository {
      *         exception.
      */
     ConnectorMessage save(@Nonnull ConnectorMessage message);
+
+    ConnectorMessage updateGatewayName(@Nonnull String identifier, @Nonnull String gatewayName);
+
+    ConnectorMessage updateEbmsIdentifier(
+            @Nonnull String identifier, @Nonnull String ebmsIdentifier);
 
     /**
      * Finds a {@link ConnectorMessage} by its unique identifier.
@@ -78,28 +83,30 @@ public interface ConnectorMessageRepository {
      *
      * @return the updated connector message after the evidence has been added.
      */
-    ConnectorMessage addEvidence(ConnectorMessage message, ConnectorEvidence evidence);
+    ConnectorMessage addEvidence(ConnectorMessage message, ConnectorMessageEvidence evidence);
 
     /**
      * Marks the provided {@link ConnectorMessage} as rejected. This typically involves updating the
      * status of the message to indicate that it has been rejected, and may include additional
      * actions such as logging or persisting this state change in the repository.
      *
-     * @param message the {@link ConnectorMessage} to be marked as rejected; must not be null.
+     * @param identifier the identifier of {@link ConnectorMessage} to be marked as rejected; must
+     *                   not be null.
      *
      * @return the updated {@link ConnectorMessage} instance reflecting the rejected status.
      */
-    ConnectorMessage setAsRejected(ConnectorMessage message);
+    ConnectorMessage setAsRejected(@Nonnull String identifier);
 
     /**
      * Marks the provided {@link ConnectorMessage} as confirmed. This typically involves updating
      * the status of the message to reflect a confirmed state and may include additional persistence
      * or logging actions.
      *
-     * @param message the {@link ConnectorMessage} to be marked as confirmed; must not be null. This
-     *                object contains the detailed metadata and content of the connector message.
+     * @param identifier the identifier of the {@link ConnectorMessage} to be marked as confirmed;
+     *                   must not be null. This object contains the detailed metadata and content of
+     *                   the connector message.
      *
      * @return the updated {@link ConnectorMessage} instance after being marked as confirmed.
      */
-    ConnectorMessage setAsConfirmed(ConnectorMessage message);
+    ConnectorMessage setAsConfirmed(@Nonnull String identifier);
 }

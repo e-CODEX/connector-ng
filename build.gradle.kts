@@ -104,6 +104,14 @@ tasks.named("check") {
     dependsOn(":connector-integrationtest:integrationTest")
 }
 
+val jacocoExclusions = listOf(
+    "**/config/**",
+    "**/*Config.class",
+    "**/*Configuration.class",
+    "**/entity/**",
+    "**/property/**",
+)
+
 tasks.register<JacocoReport>("jacocoRootReport") {
     group = "verification"
     description = "Generates an aggregate report from all subprojects"
@@ -138,4 +146,10 @@ tasks.register<JacocoReport>("jacocoRootReport") {
         html.required.set(true)
         csv.required.set(true)
     }
+
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) { exclude(jacocoExclusions) }
+        })
+    )
 }

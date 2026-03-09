@@ -23,4 +23,5 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "connector.queues")
 public class ConnectorQueueProperties {
     private final String outboundMessageStagingQueue = "connector.queues.outbound-message-staging-queue";
+    private final String outboundMessageProcessingQueue = "connector.queues.outbound-message-processing-queue";
 }

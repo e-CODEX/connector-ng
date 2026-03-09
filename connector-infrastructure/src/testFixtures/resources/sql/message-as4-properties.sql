@@ -1,0 +1,21 @@
+insert into connector_message_as4_properties (id,
+                                                         conversation_identifier,
+                                                         ebms_message_identifier, final_recipient,
+                                                         original_sender, reference_to_identifier,
+                                                         action_id, from_party_id, message_id,
+                                                         service_id, to_party_id, created_at,
+                                                         updated_at)
+values (1,
+        '5abe51ce-e94a-4df6-8b77-41b10bc47da7@backend_system',
+        null,
+        'bob',
+        'alice',
+        null,
+        11,
+        3,
+        1,
+        4,
+        4,
+        now(),
+        now()
+       );

@@ -12,12 +12,14 @@ package eu.ecodex.connector.infrastructure.security;
 
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorSecurityToolkit}.
  */
+@Slf4j
 @Component
 public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
     @Override
@@ -27,6 +29,8 @@ public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
 
     @Override
     public ConnectorMessage buildContainer(@NonNull ConnectorMessage message) {
-        throw new UnsupportedOperationException("not yet implemented");
+        log.debug("building container for message: [{}]", message.identifier());
+        // TODO fake implementation. to be replaced with real implementation
+        return message;
     }
 }

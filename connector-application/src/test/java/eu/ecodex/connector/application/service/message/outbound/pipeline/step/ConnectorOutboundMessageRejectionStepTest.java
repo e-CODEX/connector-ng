@@ -22,7 +22,7 @@ import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.st
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import org.junit.jupiter.api.Assertions;

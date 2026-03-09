@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step;
 
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;

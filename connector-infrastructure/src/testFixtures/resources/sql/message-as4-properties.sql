@@ -6,7 +6,7 @@ insert into connector_message_as4_properties (id,
                                                          service_id, to_party_id, created_at,
                                                          updated_at)
 values (1,
-        '5abe51ce-e94a-4df6-8b77-41b10bc47da7@backend_system',
+        '5abe51ce-e94a-4df6-8b77-41b10bc47da7',
         null,
         'bob',
         'alice',

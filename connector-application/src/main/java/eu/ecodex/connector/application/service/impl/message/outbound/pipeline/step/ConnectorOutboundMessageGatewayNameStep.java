@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step;
 
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.ConnectorDefaults;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import lombok.NonNull;

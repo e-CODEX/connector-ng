@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.impl.message;
 
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;

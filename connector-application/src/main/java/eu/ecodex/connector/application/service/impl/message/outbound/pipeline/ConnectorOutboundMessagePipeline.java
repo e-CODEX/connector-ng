@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.impl.message.outbound.pipeline;
 
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.exception.ConnectorGatewaySubmissionException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;

@@ -115,11 +115,18 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage updateGatewayName(
-            @NonNull String identifier,
-            @NonNull String gatewayName) {
+    public ConnectorMessage updateGatewayName(@NonNull String identifier, @NonNull String name) {
         var message = this.messageJpaRepository.findByIdentifier(identifier);
-        message.setGatewayName(gatewayName);
+        message.setGatewayName(name);
+        var updated = this.messageJpaRepository.save(message);
+
+        return toDomain(updated);
+    }
+
+    @Override
+    public ConnectorMessage updateBackendName(@NonNull String identifier, @NonNull String name) {
+        var message = this.messageJpaRepository.findByIdentifier(identifier);
+        message.setBackendName(name);
         var updated = this.messageJpaRepository.save(message);
 
         return toDomain(updated);
@@ -149,8 +156,13 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public List<ConnectorMessage> findByConversationIdentifier(String conversationIdentifier) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public List<ConnectorMessage> findByConversationIdentifier(
+            @NonNull String conversationIdentifier) {
+        var messages = this.messageJpaRepository.findByAs4PropertiesConversationIdentifier(
+                conversationIdentifier
+        );
+
+        return messages.stream().map(this::toDomain).toList();
     }
 
     @Override

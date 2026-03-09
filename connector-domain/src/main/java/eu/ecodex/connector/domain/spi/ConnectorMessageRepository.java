@@ -32,7 +32,10 @@ public interface ConnectorMessageRepository {
      */
     ConnectorMessage save(@Nonnull ConnectorMessage message);
 
-    ConnectorMessage updateGatewayName(@Nonnull String identifier, @Nonnull String gatewayName);
+    ConnectorMessage updateGatewayName(@Nonnull String identifier, @Nonnull String name);
+
+
+    ConnectorMessage updateBackendName(@Nonnull String identifier, @Nonnull String name);
 
     ConnectorMessage updateEbmsIdentifier(
             @Nonnull String identifier, @Nonnull String ebmsIdentifier);
@@ -73,7 +76,7 @@ public interface ConnectorMessageRepository {
      * @return a list of {@link ConnectorMessage} instances associated with the given conversation
      *         uuid, or an empty list if no such messages exist.
      */
-    List<ConnectorMessage> findByConversationIdentifier(String conversationIdentifier);
+    List<ConnectorMessage> findByConversationIdentifier(@Nonnull String conversationIdentifier);
 
     /**
      * Adds the specified evidence to the given connector message.

@@ -10,11 +10,10 @@
 
 package eu.ecodex.connector.application.config;
 
+import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.ConnectorInboundMessagePipeline;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.ConnectorOutboundMessagePipeline;
-import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.service.pipeline.inbound.ConnectorInboundMessagePipeline;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,26 +25,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class ApplicationConfiguration {
+    @Bean
     public ConnectorMessagePipeline connectorInboundMessagePipeline(
-            @Qualifier("connectorInboundMessageValidationStep")
-            ConnectorMessageStep connectorInboundMessageValidationStep,
-            @Qualifier("connectorInboundMessageBackendValidationStep")
-            ConnectorMessageStep connectorInboundMessageBackendValidationStep,
+            @Qualifier("connectorInboundMessageBackendNameStep")
+            ConnectorMessageStep backendNameStep,
             @Qualifier("connectorInboundMessageAcceptanceStep")
-            ConnectorMessageStep connectorInboundMessageAcceptanceStep,
+            ConnectorMessageStep acceptanceStep,
             @Qualifier("connectorInboundMessageSecurityStep")
-            ConnectorMessageStep connectorInboundMessageSecurityStep,
+            ConnectorMessageStep securityStep,
             @Qualifier("connectorInboundMessageNonDeliveryStep")
-            ConnectorMessageStep connectorInboundMessageNonDeliveryStep,
-            @Qualifier("connectorLinkSubmissionService")
-            ConnectorLinkSubmissionService connectorLinkSubmissionService) {
+            ConnectorMessageStep nonDeliveryStep,
+            @Qualifier("connectorMessageLinkSubmissionStep")
+            ConnectorMessageStep linkSubmissionStep) {
         return new ConnectorInboundMessagePipeline(
-                connectorInboundMessageValidationStep,
-                connectorInboundMessageBackendValidationStep,
-                connectorInboundMessageAcceptanceStep,
-                connectorInboundMessageSecurityStep,
-                connectorInboundMessageNonDeliveryStep,
-                connectorLinkSubmissionService
+                backendNameStep,
+                acceptanceStep,
+                securityStep,
+                nonDeliveryStep,
+                linkSubmissionStep
         );
     }
 

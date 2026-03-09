@@ -19,8 +19,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.ConnectorOutboundMessagePipeline;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.exception.ConnectorGatewaySubmissionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -24,7 +24,8 @@ import org.springframework.stereotype.Component;
 public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
     @Override
     public void validateMessage(@NonNull ConnectorMessage message) {
-        throw new UnsupportedOperationException("not yet implemented");
+        log.debug("validating message [{}] ASIC-S container", message.identifier());
+        // TODO fake implementation. to be replaced with real implementation
     }
 
     @Override

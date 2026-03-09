@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,4 +21,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConnectorMessageJpaRepository extends JpaRepository<ConnectorMessageEntity, Long> {
     ConnectorMessageEntity findByIdentifier(String identifier);
+
+    List<ConnectorMessageEntity> findByAs4PropertiesConversationIdentifier(
+            String conversationIdentifier);
 }

@@ -20,7 +20,7 @@ import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProces
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageEbmsIdStep;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;

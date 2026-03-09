@@ -19,7 +19,7 @@ import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageConfirmationStep;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.Collections;

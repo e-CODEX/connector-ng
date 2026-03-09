@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.s
 
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotBusinessException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;

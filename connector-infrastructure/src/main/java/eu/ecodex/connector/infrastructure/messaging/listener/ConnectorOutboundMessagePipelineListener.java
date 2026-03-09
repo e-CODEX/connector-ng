@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;

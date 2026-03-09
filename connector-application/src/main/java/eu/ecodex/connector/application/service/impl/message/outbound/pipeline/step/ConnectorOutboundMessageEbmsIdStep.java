@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.s
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;

@@ -18,7 +18,7 @@ import static org.mockito.Mockito.doNothing;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageValidationStep;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessagePartiesVerifier;
-import eu.ecodex.connector.domain.api.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -13,57 +13,51 @@ package eu.ecodex.connector.domain.service.link;
 import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
-import eu.ecodex.connector.domain.api.service.ConnectorLinkService;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
+import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * A handler for processing connector messages and routing them to the appropriate link partner.
+ * Handles events related to connector gateway link processing within the system.
  *
- * <p>This class implements the {@link ConnectorEventHandler} interface and provides functionality
- * for handling {@link ConnectorMessage} instances by identifying the corresponding link partner and
- * executing the specified transport strategy. It relies on the {@link ConnectorLinkService} to
- * retrieve link partner configurations and the {@link ConnectorLinkTransportStrategy} for managing
- * message delivery.
+ * <p>The {@code ConnectorBackendLinkEventHandler} class is responsible for processing
+ * {@link ConnectorMessage} instances received from the backend, identifying the appropriate
+ * {@link ConnectorLinkPartner}, and delegating the message to the specified
+ * {@link ConnectorLinkTransportStrategy} for further processing.
  *
  * <p>Responsibilities:
  * <ul>
- *     <li> Retrieve the link partner associated with the message's gateway name.
- *     <li> Process the message using the configured transport strategy for the identified link
- *     partner.
- *     <li> Throw an exception if the link partner cannot be found for the provided gateway name.
+ *     <li> Retrieves the {@link ConnectorLinkPartner} associated with the backend name in
+ *     the message.
+ *     <li> Delegates the message for processing using the defined transport strategy.
+ *     <li> Throws an exception if no link partner is found for the given backend name.
  * </ul>
- *
- * <p>Thread Safety:
- * Instances of this class are expected to be thread-safe as long as the provided dependencies
- * ({@code ConnectorLinkService} and {@code ConnectorLinkTransportStrategy}) are thread-safe.
- *
- * <p>Throws:
- * {@link ConnectorLinkPartnerSubmissionException} - if the link partner associated with the
- * provided gateway name cannot be found.
  */
 @Slf4j
 @DomainService
 public class ConnectorGatewayLinkEventHandler implements ConnectorEventHandler {
-    private final ConnectorLinkService linkService;
+    private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final ConnectorLinkTransportStrategy linkTransportStrategy;
 
     /**
      * Constructs an instance of {@code ConnectorGatewayLinkEventHandler}.
      *
-     * @param linkService           the service responsible for managing connector link partners,
-     *                              allowing retrieval or addition of link partner configurations.
-     * @param linkTransportStrategy the strategy to handle the transport of connector messages to
-     *                              designated link partners, ensuring proper communication with
-     *                              external or internal systems.
+     * @param linkPartnerRepository the repository used to retrieve {@code ConnectorLinkPartner}
+     *                              instances based on their names. This dependency is used to look
+     *                              up the link partner associated with a given gateway name.
+     * @param linkTransportStrategy the strategy responsible for transporting
+     *                              {@code ConnectorMessage} instances to the identified
+     *                              {@code ConnectorLinkPartner}. This handles the mechanism of
+     *                              message delivery based on the partner's configuration.
      */
     public ConnectorGatewayLinkEventHandler(
-            ConnectorLinkService linkService,
+            ConnectorLinkPartnerRepository linkPartnerRepository,
             ConnectorLinkTransportStrategy linkTransportStrategy) {
-        this.linkService = linkService;
+        this.linkPartnerRepository = linkPartnerRepository;
         this.linkTransportStrategy = linkTransportStrategy;
     }
 
@@ -72,7 +66,7 @@ public class ConnectorGatewayLinkEventHandler implements ConnectorEventHandler {
         log.debug("processing gateway message for: [{}]", message);
 
         var linkPartnerName = new ConnectorLinkPartnerName(message.gatewayName());
-        var linkPartner = this.linkService.getByLinkPartnerName(linkPartnerName);
+        var linkPartner = this.linkPartnerRepository.findByName(linkPartnerName);
 
         if (linkPartner != null) {
             log.debug(

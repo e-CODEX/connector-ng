@@ -13,7 +13,6 @@ package eu.ecodex.connector.domain.model.link.partner;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
-import eu.ecodex.connector.domain.model.link.configuration.ConnectorLinkConfiguration;
 import jakarta.annotation.Nonnull;
 import lombok.Builder;
 
@@ -22,21 +21,22 @@ import lombok.Builder;
  * attributes, and operational characteristics of the link.
  *
  * <p>This record is designed to define the essential properties and configuration for a link
- * partner in the system. It serves to manage the partner details, mode of operation, and associated
- * metadata required for integration and communication purposes.
+ * partner in the system. It serves to manage the partner details, receiveMode of operation, and
+ * associated metadata required for integration and communication purposes.
  *
  * @param name          The name of the link partner, represented by the
  *                      {@link ConnectorLinkPartnerName} record.
  * @param description   A textual description of the link partner, providing additional context or
  *                      details.
  * @param enabled       A flag indicating whether the link partner is currently enabled or active.
- * @param mode          The interaction mode of the link, defined by {@link ConnectorLinkMode},
- *                      specifying how communication or data transfer is managed.
+ * @param receiverMode   The interaction receiveMode of the link, defined by
+ *                      {@link ConnectorLinkMode}, specifying how communication or data transfer is
+ *                      managed.
+ * @param senderMode      The interaction receiveMode of the link, defined by
+ *                      {@link ConnectorLinkMode}, specifying how communication or data transfer is
+ *                      managed.
  * @param type          The type of the connector link, categorized by {@link ConnectorLinkType},
  *                      distinguishing backend and gateway link types.
- * @param properties    Metadata associated with the link partner.
- * @param configuration The configuration settings of the connector link, encapsulated by
- *                      {@link ConnectorLinkConfiguration}, which define the behaviour and structure
  *                      of the link.
  * @param source        The origin source of the link configuration, defined by
  *                      {@link ConnectorConfigurationSource}, specifying where the configuration
@@ -44,19 +44,20 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorLinkPartner(
-        // TODO receive and send link mode
         ConnectorLinkPartnerName name,
         String description,
         boolean enabled,
-        ConnectorLinkMode mode,
+        ConnectorLinkMode receiverMode,
+        ConnectorLinkMode senderMode,
         ConnectorLinkType type,
-        String pullInterval,
-        ConnectorLinkPartnerProperties properties,
-        ConnectorLinkConfiguration configuration,
         ConnectorConfigurationSource source
 ) {
     @Override
-    @Nonnull public String toString() {
-        return String.format("{name=%s, enabled=%s, source=%s}", name, enabled, source);
+    @Nonnull
+    public String toString() {
+        return String.format(
+                "{name=%s, enabled=%s, senderMode=%s, receiverMode=%s, source=%s}",
+                name, enabled, senderMode, receiverMode, source
+        );
     }
 }

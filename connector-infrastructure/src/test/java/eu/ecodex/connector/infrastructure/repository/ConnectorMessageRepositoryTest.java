@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.repository;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @SuppressWarnings("DataFlowIssue")
-@SpringBootTest(classes = JpaContextConfiguration.class)
+@SpringBootTest(classes = RepositoryContextConfiguration.class)
 public class ConnectorMessageRepositoryTest {
     @Autowired
     private ConnectorMessageRepository repository;

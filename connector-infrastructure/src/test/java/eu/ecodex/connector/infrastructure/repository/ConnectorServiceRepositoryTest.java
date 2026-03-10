@@ -17,7 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
-import eu.ecodex.connector.JpaContextConfiguration;
+import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorServiceJpaRepository;
@@ -30,7 +30,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@SpringBootTest(classes = JpaContextConfiguration.class)
+@SpringBootTest(classes = RepositoryContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
 public class ConnectorServiceRepositoryTest {
     @Autowired

@@ -14,8 +14,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
-import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.PartyTestFixtures;
+import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
 import java.util.List;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 @Transactional
-@SpringBootTest(classes = JpaContextConfiguration.class)
+@SpringBootTest(classes = RepositoryContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
 public class ConnectorPartyRepositoryTest {
     @Autowired

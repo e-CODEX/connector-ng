@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.JpaContextConfiguration;
+import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("DataFlowIssue")
 @Transactional
-@SpringBootTest(classes = JpaContextConfiguration.class)
+@SpringBootTest(classes = RepositoryContextConfiguration.class)
 public class ConnectorMessageEvidenceRepositoryImplTest {
     @Autowired
     private ConnectorMessageEvidenceRepository repository;

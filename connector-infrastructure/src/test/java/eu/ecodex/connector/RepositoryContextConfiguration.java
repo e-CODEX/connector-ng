@@ -21,8 +21,9 @@ import org.springframework.context.annotation.ComponentScan;
         basePackages = {
                 "eu.ecodex.connector.domain",
                 "eu.ecodex.connector.infrastructure.outbound.database",
-                "eu.ecodex.connector.infrastructure.repository"
+                "eu.ecodex.connector.infrastructure.repository",
+                "eu.ecodex.connector.infrastructure.property",
         }
 )
-public class JpaContextConfiguration {
+public class RepositoryContextConfiguration {
 }

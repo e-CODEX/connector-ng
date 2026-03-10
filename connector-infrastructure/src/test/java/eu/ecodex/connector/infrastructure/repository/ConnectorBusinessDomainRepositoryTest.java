@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.repository;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.JpaContextConfiguration;
+import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@SpringBootTest(classes = JpaContextConfiguration.class)
+@SpringBootTest(classes = RepositoryContextConfiguration.class)
 @SuppressWarnings("checkstyle:MissingJavadocType")
 public class ConnectorBusinessDomainRepositoryTest {
     @Autowired

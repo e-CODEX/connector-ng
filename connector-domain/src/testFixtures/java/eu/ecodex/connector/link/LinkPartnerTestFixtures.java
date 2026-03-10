@@ -45,13 +45,9 @@ public class LinkPartnerTestFixtures {
                 )
                 .description("linkPartnerDescription")
                 .enabled(true)
-                .mode(ConnectorLinkMode.PUSH)
+                .receiverMode(ConnectorLinkMode.PASSIVE)
+                .senderMode(ConnectorLinkMode.PUSH)
                 .type(ConnectorLinkType.BACKEND)
-                .pullInterval("0")
-                .properties(LinkPartnerPropertiesTestFixtures.createBackendLinkPartnerProperties())
-                .configuration(
-                        ConnectorLinkConfigurationTestFixtures.createConnectorLinkConfiguration()
-                )
                 .source(ConnectorConfigurationSource.IMPLEMENTATION);
     }
 }

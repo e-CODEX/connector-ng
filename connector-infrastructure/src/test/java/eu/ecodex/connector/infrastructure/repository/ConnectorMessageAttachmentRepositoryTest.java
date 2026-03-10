@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.repository;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.JpaContextConfiguration;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
+import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
         statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-@SpringBootTest(classes = JpaContextConfiguration.class)
+@SpringBootTest(classes = RepositoryContextConfiguration.class)
 public class ConnectorMessageAttachmentRepositoryTest {
     @Autowired
     private ConnectorMessageAttachmentRepository repository;

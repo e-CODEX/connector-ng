@@ -20,8 +20,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
-import eu.ecodex.connector.domain.api.service.ConnectorLinkService;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
+import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorBackendLinkEventHandlerTest {
     @Mock
-    private ConnectorLinkService linkService;
+    private ConnectorLinkPartnerRepository linkPartnerRepository;
     @Mock
     private ConnectorLinkTransportStrategy linkTransportStrategy;
 
@@ -45,26 +45,26 @@ public class ConnectorBackendLinkEventHandlerTest {
     @BeforeEach
     void setUp() {
         backendLinkEventHandler = new ConnectorBackendLinkEventHandler(
-                linkService, linkTransportStrategy
+                linkPartnerRepository, linkTransportStrategy
         );
     }
 
     @Test
     void should_submit_inbound_message_successfully_to_backend_if_link_partner_is_valid() {
-        when(linkService.getByLinkPartnerName(any()))
+        when(linkPartnerRepository.findByName(any()))
                 .thenReturn(LinkPartnerTestFixtures.createDefaultBackendLinkPartner());
         doNothing().when(linkTransportStrategy).process(any(), any());
 
         var message = MessageTestFixtures.createValidInboundBusinessMessage();
         backendLinkEventHandler.handle(message);
 
-        verify(linkService, times(1)).getByLinkPartnerName(any());
+        verify(linkPartnerRepository, times(1)).findByName(any());
         verify(linkTransportStrategy, times(1)).process(any(), any());
     }
 
     @Test
     void should_throw_exception_if_link_partner_does_not_exist_when_submitting_inbound_message_to_backend() {
-        when(linkService.getByLinkPartnerName(any())).thenReturn(null);
+        when(linkPartnerRepository.findByName(any())).thenReturn(null);
 
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
@@ -72,7 +72,7 @@ public class ConnectorBackendLinkEventHandlerTest {
                         MessageTestFixtures.createValidInboundBusinessMessage())
         );
 
-        verify(linkService, times(1)).getByLinkPartnerName(any());
+        verify(linkPartnerRepository, times(1)).findByName(any());
         verify(linkTransportStrategy, times(0)).process(any(), any());
     }
 

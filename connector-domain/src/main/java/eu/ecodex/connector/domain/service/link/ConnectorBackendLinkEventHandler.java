@@ -13,11 +13,11 @@ package eu.ecodex.connector.domain.service.link;
 import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
-import eu.ecodex.connector.domain.api.service.ConnectorLinkService;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,21 +36,28 @@ import lombok.extern.slf4j.Slf4j;
  *     <li> Delegates the message for processing using the defined transport strategy.
  *     <li> Throws an exception if no link partner is found for the given backend name.
  * </ul>
- *
- * <p>Thread Safety:
- * This class is thread-safe provided that its dependencies, {@link ConnectorLinkService} and
- * {@link ConnectorLinkTransportStrategy}, are thread-safe.
  */
 @Slf4j
 @DomainService
 public class ConnectorBackendLinkEventHandler implements ConnectorEventHandler {
-    private final ConnectorLinkService linkService;
+    private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final ConnectorLinkTransportStrategy linkTransportStrategy;
 
+    /**
+     * Constructs an instance of {@code ConnectorBackendLinkEventHandler}.
+     *
+     * @param linkPartnerRepository the repository used to retrieve {@code ConnectorLinkPartner}
+     *                              instances based on their names. This dependency is used to look
+     *                              up the link partner associated with a given gateway name.
+     * @param linkTransportStrategy the strategy responsible for transporting
+     *                              {@code ConnectorMessage} instances to the identified
+     *                              {@code ConnectorLinkPartner}. This handles the mechanism of
+     *                              message delivery based on the partner's configuration.
+     */
     public ConnectorBackendLinkEventHandler(
-            ConnectorLinkService linkService,
+            ConnectorLinkPartnerRepository linkPartnerRepository,
             ConnectorLinkTransportStrategy linkTransportStrategy) {
-        this.linkService = linkService;
+        this.linkPartnerRepository = linkPartnerRepository;
         this.linkTransportStrategy = linkTransportStrategy;
     }
 
@@ -59,7 +66,7 @@ public class ConnectorBackendLinkEventHandler implements ConnectorEventHandler {
         log.debug("processing backend message for: [{}]", message);
 
         var linkPartnerName = new ConnectorLinkPartnerName(message.backendName());
-        var linkPartner = this.linkService.getByLinkPartnerName(linkPartnerName);
+        var linkPartner = this.linkPartnerRepository.findByName(linkPartnerName);
 
         if (linkPartner != null) {
             log.debug(

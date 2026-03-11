@@ -20,6 +20,8 @@ services:
             interval: 3s
             retries: 5
             timeout: 5s
+        networks:
+            ecodex:
         volumes:
             # based on your DBMS, initial scripts can be found in documentation/database-scripts/initial
             # copy and place them in sql folder
@@ -41,6 +43,8 @@ services:
             timeout: 5s
             retries: 5
             start_period: 20s
+        networks:
+            ecodex:
         volumes:
             - minio_data:/data
     activemq:
@@ -57,6 +61,8 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
+        networks:
+            ecodex:
         volumes:
             - activemq-data:/var/lib/activemq/data
     connector-ng:
@@ -65,21 +71,31 @@ services:
         # build:
         #   context: ./
         #   dockerfile: Dockerfile
-        image: connector-ng:latest
+        image: connector-ng:activemq
         depends_on:
             connector-ng-db:
                 condition: service_healthy
             minio-s3:
                 condition: service_started
+            activemq:
+                condition: service_started
         env_file:
-            -   ./docker.env
+            - ./docker.env
         ports:
             - "30000:30000"
         expose:
-            -   "30000"
+            - "30000"
+        networks:
+            ecodex:
         volumes:
-            - ./data:/app/data
+            - ./docker/connector/config:/app/config
 volumes:
     connector-ng-mysql-data:
     minio_data:
     activemq-data:
+networks:
+    ecodex:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.19.0.0/16

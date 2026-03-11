@@ -46,6 +46,11 @@ BROKER_USER=admin
 BROKER_PASSWORD=admin
 ```
 
+```
+**NOTE**
+These variables can also be set directly in the application.properties file located in the docker/connector/config directory
+```
+
 #### Run the container via docker-compose
 ```
 **NOTE**

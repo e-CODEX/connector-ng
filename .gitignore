@@ -42,7 +42,7 @@ bin/
 ### .env ###
 *.env
 
-### artemis data ###
 data/
+
 ### narayana log ###
 transaction-logs/

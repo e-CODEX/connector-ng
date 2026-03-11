@@ -11,15 +11,20 @@
 package eu.ecodex.connector.infrastructure.config;
 
 import jakarta.jms.ConnectionFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
+import jakarta.jms.XAConnectionFactory;
+import org.apache.activemq.ActiveMQXAConnectionFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.jms.XAConnectionFactoryWrapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.support.converter.JacksonJsonMessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
+import org.springframework.transaction.jta.JtaTransactionManager;
 
 /**
  * JmsConfig class for configuring the messaging service.
@@ -29,21 +34,50 @@ import org.springframework.jms.support.converter.MessageType;
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class JmsConfig {
     @Bean
+    public XAConnectionFactory xaConnectionFactory(
+            @Value("${spring.activemq.broker-url}") String brokerUrl,
+            @Value("${spring.activemq.user}") String user,
+            @Value("${spring.activemq.password}") String password) {
+        var xaConnectionFactory = new ActiveMQXAConnectionFactory();
+
+        xaConnectionFactory.setBrokerURL(brokerUrl);
+        xaConnectionFactory.setUserName(user);
+        xaConnectionFactory.setPassword(password);
+        xaConnectionFactory.setTrustAllPackages(true);
+
+        return xaConnectionFactory;
+    }
+
+    @Bean
+    @Primary
+    public ConnectionFactory connectionFactory(
+            XAConnectionFactory xaConnectionFactory,
+            XAConnectionFactoryWrapper wrapper) throws Exception {
+        return wrapper.wrapConnectionFactory(xaConnectionFactory);
+    }
+
+    @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-            @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
-        DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+            ConnectionFactory connectionFactory,
+            JtaTransactionManager transactionManager,
+            MessageConverter messageConverter) {
+        var factory = new DefaultJmsListenerContainerFactory();
+
         factory.setConnectionFactory(connectionFactory);
-        factory.setPubSubDomain(false);
-        factory.setMessageConverter(jacksonConverter());
+        factory.setTransactionManager(transactionManager);
+        factory.setSessionTransacted(false);
+        factory.setMessageConverter(messageConverter);
+
         return factory;
     }
 
     @Bean
     public JmsTemplate jmsTemplate(
-            @Qualifier("jmsConnectionFactory") ConnectionFactory connectionFactory) {
-        JmsTemplate template = new JmsTemplate(connectionFactory);
-        template.setMessageConverter(jacksonConverter());
+            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+        var template = new JmsTemplate(connectionFactory);
+        template.setMessageConverter(messageConverter);
         template.setPubSubDomain(false);
+
         return template;
     }
 

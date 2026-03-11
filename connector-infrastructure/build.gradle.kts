@@ -19,15 +19,15 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-artemis")
+    implementation("org.springframework.boot:spring-boot-starter-activemq")
     // databases
     implementation(libs.h2)
     runtimeOnly(libs.mysql)
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)
-    // artemis
-    implementation("org.apache.activemq:artemis-jakarta-server")
+    // activemq
+    implementation("org.apache.activemq:activemq-client")
     // jta
     implementation(libs.narayana)
     implementation(libs.agroal)

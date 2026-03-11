@@ -15,12 +15,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration properties for the default artemis address settings.
+ * Configuration properties for the default activemq settings.
  */
 @Getter
 @Configuration
-@ConfigurationProperties(prefix = "connector.artemis.address-settings")
-public class ArtemisAddressSettingsProperties {
+@ConfigurationProperties(prefix = "connector.activemq.address-settings")
+public class ActiveMQAddressSettingsProperties {
     private final int maxDeliveryAttempts = 5;
     private final int redeliveryDelay = 60000; // set 60s redelivery delay
     private final int redeliveryMultiplier = 2;

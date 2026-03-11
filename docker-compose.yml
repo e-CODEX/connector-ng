@@ -43,6 +43,22 @@ services:
             start_period: 20s
         volumes:
             - minio_data:/data
+    activemq:
+        image: apache/activemq-classic:6.2.0
+        container_name: activemq
+        ports:
+            - "8161:8161"   # Web console
+            - "61616:61616" # OpenWire
+        environment:
+            ACTIVEMQ_CONNECTION_USER: admin
+            ACTIVEMQ_CONNECTION_PASSWORD: admin
+        healthcheck:
+            test: [ "CMD", "curl", "-f", "http://localhost:8161" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+        volumes:
+            - activemq-data:/var/lib/activemq/data
     connector-ng:
         container_name: connector-ng
         # uncomment the bellow section if you want to build your connector image during the launch of docker-compose
@@ -66,3 +82,4 @@ services:
 volumes:
     connector-ng-mysql-data:
     minio_data:
+    activemq-data:

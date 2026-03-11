@@ -47,6 +47,7 @@ dependencies {
     testImplementation(libs.minio)
     testImplementation(libs.minio.container)
     testImplementation(libs.s3)
+    testImplementation("org.apache.activemq:activemq-broker")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 

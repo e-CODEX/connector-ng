@@ -40,6 +40,10 @@ S3_BUCKET=attachments
 S3_ENDPOINT=http://localhost:9000
 # temporary dir
 TEMP_DIR_LOCATION=/app/temp
+# ACTIVEMQ
+BROKER_URL=tcp://activemq:61616
+BROKER_USER=admin
+BROKER_PASSWORD=admin
 ```
 
 #### Run the container via docker-compose
@@ -66,3 +70,4 @@ Once containers are up and running, you can access:
 * the application APIs at `http://localhost:30000`.
 * the application database at `http://localhost:40000`.
 * the MiniIO admin console at `http://localhost:9001` (```username```: admin, ```password```: admin123).
+* the Artemis broker admin console at `http://localhost:8161` (```username```: admin, ```password```: admin).

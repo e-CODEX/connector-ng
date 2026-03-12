@@ -65,6 +65,12 @@ Again, we assume that Docker Compose is installed on your local machine. If it i
 You can also run the connector container and its database as a service (avoiding DBMS and MiniIO (S3 bucket) installation and configuration).
 To achieve this goal, we have provided a `docker-compose` configuration file. In our example, we are using MySQL as the DBMS service, so feel free to customize the `docker-compose.yml` file with your preferred DBMS (Postgres, MariaDB and Oracle will be supported in the future).
 
+```
+**NOTE**
+The gateway docker image should be built before running the docker-compose file.
+To build the gateway docker image, please follow the instructions provided in the README.md file on this repository: https://github.com/e-CODEX/gw-container/.
+```
+
 once done, run the following command:
 
 ```shell
@@ -76,3 +82,4 @@ Once containers are up and running, you can access:
 * the application database at `http://localhost:40000`.
 * the MiniIO admin console at `http://localhost:9001` (```username```: admin, ```password```: admin123).
 * the Artemis broker admin console at `http://localhost:8161` (```username```: admin, ```password```: admin).
+* the Domibus Gateway admin console at `http://localhost:30010` (```username```: admin, ```password```: 123456).

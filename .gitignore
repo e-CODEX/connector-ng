@@ -42,7 +42,9 @@ bin/
 ### .env ###
 *.env
 
+# activemq persistence
 data/
+**/work/
 
 ### narayana log ###
 transaction-logs/

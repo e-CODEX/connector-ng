@@ -1,32 +1,5 @@
 # version: "3.8"
 services:
-    connector-ng-db:
-        container_name: mysql
-        # can be replaced with the appropriate database image. e.g. postgres
-        image: mysql:8
-        restart: always
-        environment:
-            # can be replaced with the appropriate database env. e.g. POSTGRES_PASSWORD, POSTGRES_USER ...
-            MYSQL_DATABASE: connector
-            MYSQL_USER: connector
-            MYSQL_PASSWORD: connector
-            MYSQL_ROOT_PASSWORD: connector
-        ports:
-            - "30006:3306"
-        expose:
-            - "3306"
-        healthcheck:
-            test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD' ]
-            interval: 3s
-            retries: 5
-            timeout: 5s
-        networks:
-            ecodex:
-        volumes:
-            # based on your DBMS, initial scripts can be found in documentation/database-scripts/initial
-            # copy and place them in sql folder
-            # - ./sql/:/docker-entrypoint-initdb.d/
-            - connector-ng-mysql-data:/var/lib/mysql
     minio-s3:
         image: minio/minio:latest
         container_name: minio
@@ -53,6 +26,7 @@ services:
         ports:
             - "8161:8161"   # Web console
             - "61616:61616" # OpenWire
+            - "1099:1099" # JMX
         environment:
             ACTIVEMQ_CONNECTION_USER: admin
             ACTIVEMQ_CONNECTION_PASSWORD: admin
@@ -65,6 +39,82 @@ services:
             ecodex:
         volumes:
             - activemq-data:/var/lib/activemq/data
+    gateway-db:
+        container_name: gateway_db_mysql
+        # can be replaced with the appropriate database image. e.g. postgres
+        image: mysql:8
+        restart: always
+        environment:
+            # can be replaced with the appropriate database env. e.g. POSTGRES_PASSWORD, POSTGRES_USER ...
+            MYSQL_DATABASE: gateway
+            MYSQL_USER: gateway
+            MYSQL_PASSWORD: gateway
+            MYSQL_ROOT_PASSWORD: gateway
+            MYSQL_TCP_PORT: 3307
+        ports:
+            - "30007:3307"
+        expose:
+            - "3307"
+        healthcheck:
+            test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD' ]
+            interval: 3s
+            retries: 5
+            timeout: 5s
+        networks:
+            ecodex:
+        volumes:
+            - ./docker/gateway/sql/:/docker-entrypoint-initdb.d/
+            - gateway-mysql-data:/var/lib/mysql
+    gateway:
+        container_name: gateway
+        image: gateway:5.1.9
+        environment:
+            DOMIBUS_DATABASE_SERVERNAME: gateway-db
+            DOMIBUS_DATABASE_PORT: 3307
+            DOMIBUS_DATABASE_SCHEMA: gateway
+            DOMIBUS_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+            DOMIBUS_DATASOURCE_USER: gateway
+            DOMIBUS_DATASOURCE_PASSWORD: gateway
+            JAVA_IO_TMPDIR: ./temp
+        depends_on:
+            gateway-db:
+                condition: service_healthy
+        ports:
+            - "30010:8080"
+        expose:
+            - "8080"
+        networks:
+            ecodex:
+        volumes:
+            - ./docker/gateway/config/conf/domibus:/app/conf/domibus
+    connector-ng-db:
+        container_name: mysql
+        # can be replaced with the appropriate database image. e.g. postgres
+        image: mysql:8
+        restart: always
+        environment:
+            # can be replaced with the appropriate database env. e.g. POSTGRES_PASSWORD, POSTGRES_USER ...
+            MYSQL_DATABASE: connector
+            MYSQL_USER: connector
+            MYSQL_PASSWORD: connector
+            MYSQL_ROOT_PASSWORD: connector
+            MYSQL_TCP_PORT: 3306
+        ports:
+            - "30006:3306"
+        expose:
+            - "3306"
+        healthcheck:
+            test: [ 'CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD' ]
+            interval: 3s
+            retries: 5
+            timeout: 5s
+        networks:
+            ecodex:
+        volumes:
+            # based on your DBMS, initial scripts can be found in documentation/database-scripts/initial
+            # copy and place them in sql folder
+            # - ./sql/:/docker-entrypoint-initdb.d/
+            - ng-mysql-data:/var/lib/mysql
     connector-ng:
         container_name: connector-ng
         # uncomment the bellow section if you want to build your connector image during the launch of docker-compose
@@ -89,13 +139,14 @@ services:
             ecodex:
         volumes:
             - ./docker/connector/config:/app/config
-volumes:
-    connector-ng-mysql-data:
-    minio_data:
-    activemq-data:
 networks:
     ecodex:
         driver: bridge
         ipam:
             config:
                 - subnet: 172.19.0.0/16
+volumes:
+    ng-mysql-data:
+    gateway-mysql-data:
+    minio_data:
+    activemq-data:

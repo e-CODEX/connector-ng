@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -22,7 +23,9 @@ import java.util.List;
  * databases, in-memory collections.
  */
 public interface ConnectorLinkPartnerRepository {
-    ConnectorLinkPartner findByName(ConnectorLinkPartnerName name);
+    ConnectorLinkPartner findByName(@Nonnull ConnectorLinkPartnerName name);
+
+    ConnectorLinkPartner findByCertificateDn(@Nonnull String certificateDn);
 
     List<ConnectorLinkPartner> findAll();
 }

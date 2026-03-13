@@ -20,6 +20,8 @@ import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
+import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,13 +35,15 @@ public class ConnectorBackendWebServiceControllerTest {
     private ConnectorOutboundMessageReceiver messageStagingService;
     @Mock
     private ConnectorUploadAttachments uploadAttachmentsService;
+    @Mock
+    private ConnectorBackendClientVerifier backendClientVerifierService;
 
     private DomibusConnectorBackendWebService backendWebService;
 
     @BeforeEach
     void setUp() {
         backendWebService = new ConnectorBackendWebServiceController(
-                messageStagingService, uploadAttachmentsService
+                messageStagingService, uploadAttachmentsService, backendClientVerifierService
         );
     }
 
@@ -50,6 +54,8 @@ public class ConnectorBackendWebServiceControllerTest {
         // TODO set appropriate response
         when(messageStagingService.register(any()))
                 .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
+        when(backendClientVerifierService.getBackendClient(any()))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
 
         var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
         var ack = backendWebService.submitMessage(payload);

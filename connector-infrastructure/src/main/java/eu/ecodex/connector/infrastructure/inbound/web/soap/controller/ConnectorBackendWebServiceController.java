@@ -24,6 +24,7 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorMessagesType;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
 import eu.ecodex.connector.domain.transition.ListPendingMessageIdsResponse;
+import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import eu.ecodex.connector.infrastructure.inbound.web.soap.helper.AttachmentHelpers;
 import eu.ecodex.connector.infrastructure.inbound.web.soap.helper.MessageHelpers;
@@ -50,6 +51,7 @@ import org.springframework.util.StringUtils;
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
     private final ConnectorOutboundMessageReceiver messageStagingService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
+    private final ConnectorBackendClientVerifier backendClientVerifierService;
 
     /**
      * Creates a new backend web service controller.
@@ -61,9 +63,11 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      */
     public ConnectorBackendWebServiceController(
             ConnectorOutboundMessageReceiver messageStagingService,
-            ConnectorUploadAttachments uploadAttachmentsService) {
+            ConnectorUploadAttachments uploadAttachmentsService,
+            ConnectorBackendClientVerifier backendClientVerifierService) {
         this.messageStagingService = messageStagingService;
         this.uploadAttachmentsService = uploadAttachmentsService;
+        this.backendClientVerifierService = backendClientVerifierService;
     }
 
     @Override
@@ -101,10 +105,13 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             var businessDocumentAttachmentIdentifier = persistBusinessDocument(
                     businessContent.getDocument()
             );
+            // TODO current cn is fake, retrieve the certificate dn from user principal
+            var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
             var parsedMessage = MessageHelpers.toDomain(
                     submitMessageRequest,
                     attachmentIdentifiers,
-                    businessDocumentAttachmentIdentifier
+                    businessDocumentAttachmentIdentifier,
+                    backendClientName
             );
 
 

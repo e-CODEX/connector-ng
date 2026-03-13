@@ -23,6 +23,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -85,8 +87,21 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
     }
 
     @Override
-    public ConnectorLinkPartner findByName(ConnectorLinkPartnerName name) {
+    public ConnectorLinkPartner findByName(@NonNull ConnectorLinkPartnerName name) {
         return this.partners.getOrDefault(name, null);
+    }
+
+    @Override
+    public ConnectorLinkPartner findByCertificateDn(@NonNull String certificateDn) {
+        return this.partners.values().stream()
+                            .filter(partner -> Objects.equals(
+                                    partner.certificateDn(), certificateDn))
+                            .findFirst()
+                            .orElse(null);
+    }
+
+    public List<ConnectorLinkPartner> findAll() {
+        return partners.values().stream().toList();
     }
 
     private ConnectorLinkPartner toDomain(
@@ -96,7 +111,7 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
                 .name(properties.getName())
                 .build();
 
-        return ConnectorLinkPartner
+        var linkPartnerBuilder = ConnectorLinkPartner
                 .builder()
                 .name(linkPartnerName)
                 .description(properties.getDescription())
@@ -104,12 +119,15 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
                 .type(type)
                 .source(ConnectorConfigurationSource.IMPLEMENTATION)
                 .receiverMode(ConnectorLinkMode.valueOf(properties.getReceiverMode().toUpperCase()))
-                .senderMode(ConnectorLinkMode.valueOf(properties.getSenderMode().toUpperCase()))
-                .build();
-    }
+                .senderMode(ConnectorLinkMode.valueOf(properties.getSenderMode().toUpperCase()));
 
-    public List<ConnectorLinkPartner> findAll() {
-        return partners.values().stream().toList();
+        if (type == ConnectorLinkType.BACKEND) {
+            linkPartnerBuilder
+                    .encryptionAlias(properties.getProperties().getEncryptionAlias())
+                    .certificateDn(properties.getProperties().getCertificateDn());
+        }
+
+        return linkPartnerBuilder.build();
     }
 
     @PostConstruct

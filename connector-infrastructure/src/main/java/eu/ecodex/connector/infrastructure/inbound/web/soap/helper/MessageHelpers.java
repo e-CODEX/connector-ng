@@ -38,7 +38,8 @@ public class MessageHelpers {
     public static ConnectorMessage toDomain(
             DomibusConnectorMessageType message,
             List<String> attachments,
-            String businessDocumentAttachmentIdentifier
+            String businessDocumentAttachmentIdentifier,
+            String backendClientName
     ) throws Exception {
         var details = message.getMessageDetails();
 
@@ -47,8 +48,7 @@ public class MessageHelpers {
         return ConnectorMessage
                 .builder()
                 .backendMessageIdentifier(details.getBackendMessageId())
-                // TODO, to be changed once backend cn security will be implemented
-                .backendName(ConnectorDefaults.DEFAULT_BACKEND_NAME)
+                .backendName(backendClientName)
                 .referenceToBackendMessageIdentifier(details.getRefToMessageId())
                 .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
                 .as4Properties(toAS4Properties(details))

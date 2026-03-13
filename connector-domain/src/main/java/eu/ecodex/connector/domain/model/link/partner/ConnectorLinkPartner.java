@@ -24,23 +24,27 @@ import lombok.Builder;
  * partner in the system. It serves to manage the partner details, receiveMode of operation, and
  * associated metadata required for integration and communication purposes.
  *
- * @param name          The name of the link partner, represented by the
- *                      {@link ConnectorLinkPartnerName} record.
- * @param description   A textual description of the link partner, providing additional context or
- *                      details.
- * @param enabled       A flag indicating whether the link partner is currently enabled or active.
- * @param receiverMode   The interaction receiveMode of the link, defined by
- *                      {@link ConnectorLinkMode}, specifying how communication or data transfer is
- *                      managed.
+ * @param name            The name of the link partner, represented by the
+ *                        {@link ConnectorLinkPartnerName} record.
+ * @param description     A textual description of the link partner, providing additional context or
+ *                        details.
+ * @param enabled         A flag indicating whether the link partner is currently enabled or
+ *                        active.
+ * @param receiverMode    The interaction receiveMode of the link, defined by
+ *                        {@link ConnectorLinkMode}, specifying how communication or data transfer
+ *                        is managed.
  * @param senderMode      The interaction receiveMode of the link, defined by
- *                      {@link ConnectorLinkMode}, specifying how communication or data transfer is
- *                      managed.
- * @param type          The type of the connector link, categorized by {@link ConnectorLinkType},
- *                      distinguishing backend and gateway link types.
- *                      of the link.
- * @param source        The origin source of the link configuration, defined by
- *                      {@link ConnectorConfigurationSource}, specifying where the configuration
- *                      data is derived from.
+ *                        {@link ConnectorLinkMode}, specifying how communication or data transfer
+ *                        is managed.
+ * @param type            The type of the connector link, categorized by {@link ConnectorLinkType},
+ *                        distinguishing backend and gateway link types. of the link.
+ * @param source          The origin source of the link configuration, defined by
+ *                        {@link ConnectorConfigurationSource}, specifying where the configuration
+ *                        data is derived from.
+ * @param encryptionAlias alias of the encryption key used when communicating with this partner,
+ *                        typically referencing a keystore entry
+ * @param certificateDn   distinguished name (DN) of the partner certificate used for authentication
+ *                        or secure communication
  */
 @Builder(toBuilder = true)
 public record ConnectorLinkPartner(
@@ -50,7 +54,9 @@ public record ConnectorLinkPartner(
         ConnectorLinkMode receiverMode,
         ConnectorLinkMode senderMode,
         ConnectorLinkType type,
-        ConnectorConfigurationSource source
+        ConnectorConfigurationSource source,
+        String encryptionAlias,
+        String certificateDn
 ) {
     @Override
     @Nonnull

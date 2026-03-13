@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.repository;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@SuppressWarnings("DataFlowIssue")
 @SpringBootTest(
         classes = RepositoryContextConfiguration.class,
         properties = {
@@ -85,6 +87,8 @@ public class ConnectorLinkPartnerRepositoryTest {
         assertThat(partners).hasSize(2);
     }
 
+    // find by name
+
     @Test
     void should_find_link_partner_by_name_successfully() {
         var name = ConnectorLinkPartnerName.builder().name("default_gateway").build();
@@ -93,5 +97,29 @@ public class ConnectorLinkPartnerRepositoryTest {
 
         assertThat(partner).isNotNull();
         assertThat(partner.name()).isEqualTo(name);
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_link_partner_by_null_partner_name() {
+        assertThrows(
+                NullPointerException.class, () -> this.repository.findByName(null)
+        );
+    }
+
+    // find by certificate DN
+
+    @Test
+    void should_find_link_partner_by_certificate_dn_successfully() {
+        var partner = this.repository.findByCertificateDn("cn=alice");
+
+        assertThat(partner).isNotNull();
+        assertThat(partner.name().name()).isEqualTo("backend_alice");
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_link_partner_by_null_certificate_dn() {
+        assertThrows(
+                NullPointerException.class, () -> this.repository.findByCertificateDn(null)
+        );
     }
 }

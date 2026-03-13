@@ -11,7 +11,6 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -25,6 +24,7 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessDocument;
@@ -43,10 +43,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class ConnectorOutboundMessageController implements ConnectorOutboundMessageApi {
     private final ConnectorOutboundMessageReceiver messageStagingService;
+    private final ConnectorBackendClientVerifier backendClientVerifierService;
 
     public ConnectorOutboundMessageController(
-            ConnectorOutboundMessageReceiver messageStagingService) {
+            ConnectorOutboundMessageReceiver messageStagingService,
+            ConnectorBackendClientVerifier backendClientVerifierService) {
         this.messageStagingService = messageStagingService;
+        this.backendClientVerifierService = backendClientVerifierService;
     }
 
     @Override
@@ -72,6 +75,8 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
 
     private ConnectorMessage toDomain(
             ConnectorOutboundMessageRequest request, byte[] xmlBusinessDocument) {
+        // TODO current cn is fake, retrieve the certificate dn from user principal
+        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
         return ConnectorMessage
                 .builder()
                 .businessDomainIdentifier(
@@ -79,8 +84,7 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
                 )
                 .backendMessageIdentifier(request.backendMessageIdentifier())
                 .referenceToBackendMessageIdentifier(request.referenceToBackendMessageIdentifier())
-                // TODO, to be changed once backend cn security will be implemented
-                .backendName(ConnectorDefaults.DEFAULT_BACKEND_NAME)
+                .backendName(backendClientName)
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .as4Properties(
                         toDomainAS4Properties(request.as4Properties())

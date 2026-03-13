@@ -37,6 +37,15 @@ public class LinkPartnerTestFixtures {
         return builder.build();
     }
 
+    public static ConnectorLinkPartner createAliceBackendLinkPartner() {
+        var builder = createAbstractLinkPartner();
+        builder.type(ConnectorLinkType.BACKEND);
+        builder.name(ConnectorLinkPartnerName.builder().name("backend_alice").build());
+        builder.encryptionAlias("alice");
+        builder.certificateDn("cn=alice");
+        return builder.build();
+    }
+
     private static ConnectorLinkPartner.ConnectorLinkPartnerBuilder createAbstractLinkPartner() {
         return ConnectorLinkPartner
                 .builder()

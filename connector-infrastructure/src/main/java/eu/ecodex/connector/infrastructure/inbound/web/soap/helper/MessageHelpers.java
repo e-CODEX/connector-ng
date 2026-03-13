@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.helper;
 
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
@@ -46,6 +47,8 @@ public class MessageHelpers {
         return ConnectorMessage
                 .builder()
                 .backendMessageIdentifier(details.getBackendMessageId())
+                // TODO, to be changed once backend cn security will be implemented
+                .backendName(ConnectorDefaults.DEFAULT_BACKEND_NAME)
                 .referenceToBackendMessageIdentifier(details.getRefToMessageId())
                 .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
                 .as4Properties(toAS4Properties(details))

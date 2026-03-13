@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -78,6 +79,8 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
                 )
                 .backendMessageIdentifier(request.backendMessageIdentifier())
                 .referenceToBackendMessageIdentifier(request.referenceToBackendMessageIdentifier())
+                // TODO, to be changed once backend cn security will be implemented
+                .backendName(ConnectorDefaults.DEFAULT_BACKEND_NAME)
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .as4Properties(
                         toDomainAS4Properties(request.as4Properties())

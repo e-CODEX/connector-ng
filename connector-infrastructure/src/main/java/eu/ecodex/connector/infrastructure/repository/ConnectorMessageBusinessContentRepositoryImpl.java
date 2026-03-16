@@ -70,6 +70,59 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         this.detachedSignatureJpaRepository = detachedSignatureJpaRepository;
     }
 
+    /**
+     * Converts a {@link ConnectorMessageBusinessContentEntity} to a
+     * {@link ConnectorMessageBusinessContent} domain object.
+     *
+     * @param entity the {@link ConnectorMessageBusinessContentEntity} to be converted; can be null,
+     *               in which case the method returns null.
+     *
+     * @return a {@link ConnectorMessageBusinessContent} domain object built from the provided
+     *         entity, or null if the input entity is null.
+     */
+    public static ConnectorMessageBusinessContent toDomain(
+            ConnectorMessageBusinessContentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorMessageBusinessContent
+                .builder()
+                .uuid(entity.getUuid())
+                .xmlContent(entity.getXmlContent())
+                .businessDocument(toDomain(entity.getBusinessDocument()))
+                .build();
+    }
+
+    private static ConnectorMessageBusinessDocument toDomain(
+            ConnectorMessageBusinessDocumentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorMessageBusinessDocument
+                .builder()
+                .uuid(entity.getUuid())
+                .aesType(entity.getAesType())
+                .detachedSignature(toDomain(entity.getDetachedSignature()))
+                .hashValue(entity.getHashValue())
+                .build();
+    }
+
+    private static DetachedSignature toDomain(
+            ConnectorMessageBusinessDocumentDetachedSignatureEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return DetachedSignature
+                .builder()
+                .name(entity.getName())
+                .signature(entity.getSignature())
+                .mimeType(entity.getMimeType())
+                .build();
+    }
+
     @Override
     public ConnectorMessageBusinessContent save(
             @NonNull ConnectorMessageBusinessContent businessContent,
@@ -90,45 +143,6 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         }
 
         return toDomain(savedContent);
-    }
-
-    private ConnectorMessageBusinessContent toDomain(ConnectorMessageBusinessContentEntity entity) {
-        // TODO handle null case
-        return ConnectorMessageBusinessContent
-                .builder()
-                .uuid(entity.getUuid())
-                .xmlContent(entity.getXmlContent())
-                .businessDocument(toDomain(entity.getBusinessDocument()))
-                .build();
-    }
-
-    private ConnectorMessageBusinessDocument toDomain(
-            ConnectorMessageBusinessDocumentEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return ConnectorMessageBusinessDocument
-                .builder()
-                .uuid(entity.getUuid())
-                .aesType(entity.getAesType())
-                .detachedSignature(toDomain(entity.getDetachedSignature()))
-                .hashValue(entity.getHashValue())
-                .build();
-    }
-
-    private DetachedSignature toDomain(
-            ConnectorMessageBusinessDocumentDetachedSignatureEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return DetachedSignature
-                .builder()
-                .name(entity.getName())
-                .signature(entity.getSignature())
-                .mimeType(entity.getMimeType())
-                .build();
     }
 
     private ConnectorMessageBusinessContentEntity toEntity(

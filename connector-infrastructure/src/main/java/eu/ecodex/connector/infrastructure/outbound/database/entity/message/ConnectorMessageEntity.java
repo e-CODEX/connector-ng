@@ -97,6 +97,9 @@ public class ConnectorMessageEntity extends BaseEntity {
     @JoinColumn(name = "BUSINESS_DOMAIN_ID", nullable = false)
     private ConnectorBusinessDomainEntity businessDomain;
 
+    @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ConnectorMessageBusinessContentEntity businessContent;
+
     @Setter
     @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private ConnectorMessageAS4PropertiesEntity as4Properties;

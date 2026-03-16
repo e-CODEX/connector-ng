@@ -252,6 +252,11 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
                 .confirmedAt(entity.getConfirmedAt())
                 .deliveredToBackendAt(entity.getDeliveredToBackendAt())
                 .deliveredToGatewayAt(entity.getDeliveredToGatewayAt())
+                .businessContent(
+                        ConnectorMessageBusinessContentRepositoryImpl.toDomain(
+                                entity.getBusinessContent()
+                        )
+                )
                 .as4Properties(toDomain(entity.getAs4Properties()))
                 .evidences(
                         entity.getEvidences() == null

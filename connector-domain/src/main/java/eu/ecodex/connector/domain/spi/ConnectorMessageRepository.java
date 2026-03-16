@@ -112,4 +112,6 @@ public interface ConnectorMessageRepository {
      * @return the updated {@link ConnectorMessage} instance after being marked as confirmed.
      */
     ConnectorMessage setAsConfirmed(@Nonnull String identifier);
+
+    ConnectorMessage setDeliveredToGatewayAt(@Nonnull String identifier);
 }

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.api.link;
+package eu.ecodex.connector.application.service.usecase.link;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
@@ -30,7 +30,7 @@ import jakarta.annotation.Nonnull;
  *
  * <p>The implementation should define the behaviour and outcomes of the submission process.
  */
-public interface ConnectorLinkSubmissionService {
+public interface ConnectorLinkSubmitter {
     /**
      * Submits a specified {@link ConnectorMessage} for processing and delivery.
      * The method is responsible for handling the message submission to the appropriate

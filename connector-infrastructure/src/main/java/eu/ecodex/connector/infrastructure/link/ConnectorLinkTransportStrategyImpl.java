@@ -10,21 +10,39 @@
 
 package eu.ecodex.connector.infrastructure.link;
 
-import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
+import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkTransportStrategy;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorLinkTransportStrategy}.
  */
+@Slf4j
 @Component
 public class ConnectorLinkTransportStrategyImpl implements ConnectorLinkTransportStrategy {
+    private final ConnectorEventPublisher gatewayLinkEventPublisher;
+
+    public ConnectorLinkTransportStrategyImpl(
+            @Qualifier("connectorGatewayLinkEventPublisher")
+            ConnectorEventPublisher gatewayLinkEventPublisher) {
+        this.gatewayLinkEventPublisher = gatewayLinkEventPublisher;
+    }
+
     @Override
-    public void process(
-            @NonNull ConnectorMessage message,
-            @NonNull ConnectorLinkPartner linkPartner) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public void transport(@NonNull ConnectorMessage message) {
+        if (message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
+            log.debug("transporting backend to gateway message: [{}]", message.identifier());
+
+            gatewayLinkEventPublisher.publish(message);
+        } else {
+            log.debug("gateway to backend message transport strategy not yet implemented");
+            // TODO to be implemented. no exception thrown to allow testing
+        }
     }
 }

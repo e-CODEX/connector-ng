@@ -11,12 +11,14 @@
 package eu.ecodex.connector.infrastructure.property;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration properties for the default connector queues.
  */
+@Setter
 @Getter
 @Configuration
 @SuppressWarnings("checkstyle:LineLength")
@@ -24,4 +26,6 @@ import org.springframework.context.annotation.Configuration;
 public class ConnectorQueueProperties {
     private final String outboundMessageStagingQueue = "connector.queues.outbound-message-staging-queue";
     private final String outboundMessageProcessingQueue = "connector.queues.outbound-message-processing-queue";
+    private final String gatewaySubmissionQueue = "domibus.backend.jms.inQueue";
+    private final String gatewaySubmissionReplyQueue = "domibus.backend.jms.replyQueue";
 }

@@ -26,8 +26,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
@@ -40,6 +43,8 @@ public class ConnectorS3FileStorageProviderTest {
     private ConnectorS3ProviderProperties s3ProviderProperties;
     @InjectMocks
     private ConnectorS3FileStorageProvider fileStorageProvider;
+
+    // save file
 
     @Test
     void should_store_files_into_s3_bucket_successfully() throws IOException {
@@ -75,6 +80,32 @@ public class ConnectorS3FileStorageProviderTest {
         assertThrows(
                 NullPointerException.class,
                 () -> fileStorageProvider.save(null, null)
+        );
+    }
+
+    // find by identifier
+
+    @Test
+    void should_find_file_by_identifier_successfully() {
+        var attachment = MessageAttachmentTestFixtures.createAttachment();
+        when(s3ProviderProperties.getBucket()).thenReturn("attachments");
+        when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
+                .thenReturn(
+                        ResponseBytes.fromByteArray(
+                                GetObjectResponse.builder().build(), new byte[1])
+                );
+
+        var foundAttachment = fileStorageProvider.findByIdentifier(attachment.identifier());
+
+        assertThat(foundAttachment).isNotNull();
+        assertThat(foundAttachment).hasSize(1);
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_finding_file_by_null_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> fileStorageProvider.findByIdentifier(null)
         );
     }
 

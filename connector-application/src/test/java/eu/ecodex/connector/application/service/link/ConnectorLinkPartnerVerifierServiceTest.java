@@ -8,17 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.service.link;
+package eu.ecodex.connector.application.service.link;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.domain.api.link.ConnectorLinkTransportStrategy;
+import eu.ecodex.connector.application.service.impl.link.ConnectorLinkPartnerVerifierService;
+import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkPartnerVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
 import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
@@ -33,17 +33,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-public class ConnectorGatewayLinkEventHandlerTest {
+public class ConnectorLinkPartnerVerifierServiceTest {
     @Mock
     private ConnectorLinkPartnerRepository linkPartnerRepository;
-    @Mock
-    private ConnectorLinkTransportStrategy linkTransportStrategy;
-    private ConnectorGatewayLinkEventHandler gatewayLinkEventHandler;
+
+    private ConnectorLinkPartnerVerifier gatewayLinkEventHandler;
 
     @BeforeEach
     void setUp() {
-        gatewayLinkEventHandler = new ConnectorGatewayLinkEventHandler(
-                linkPartnerRepository, linkTransportStrategy
+        gatewayLinkEventHandler = new ConnectorLinkPartnerVerifierService(
+                linkPartnerRepository
         );
     }
 
@@ -51,13 +50,11 @@ public class ConnectorGatewayLinkEventHandlerTest {
     void should_submit_outbound_message_successfully_to_gateway_if_link_partner_is_valid() {
         when(linkPartnerRepository.findByName(any()))
                 .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
-        doNothing().when(linkTransportStrategy).process(any(), any());
 
         var message = MessageTestFixtures.createValidOutboundBusinessMessage();
-        gatewayLinkEventHandler.handle(message);
+        gatewayLinkEventHandler.verify(message);
 
         verify(linkPartnerRepository, times(1)).findByName(any());
-        verify(linkTransportStrategy, times(1)).process(any(), any());
     }
 
     @Test
@@ -66,18 +63,41 @@ public class ConnectorGatewayLinkEventHandlerTest {
 
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
-                () -> gatewayLinkEventHandler.handle(
+                () -> gatewayLinkEventHandler.verify(
                         MessageTestFixtures.createValidOutboundBusinessMessage())
         );
 
         verify(linkPartnerRepository, times(1)).findByName(any());
-        verify(linkTransportStrategy, times(0)).process(any(), any());
     }
 
     @Test
     void should_throw_exception_if_message_is_null_when_submitting_outbound_message_to_gateway() {
         assertThrows(
-                NullPointerException.class, () -> gatewayLinkEventHandler.handle(null)
+                NullPointerException.class, () -> gatewayLinkEventHandler.verify(null)
+        );
+    }
+
+    @Test
+    void should_throw_exception_when_submitting_message_to_gateway_with_backend_link_partner() {
+        when(linkPartnerRepository.findByName(any()))
+                .thenReturn(LinkPartnerTestFixtures.createDefaultBackendLinkPartner());
+
+        assertThrows(
+                ConnectorLinkPartnerSubmissionException.class,
+                () -> gatewayLinkEventHandler.verify(
+                        MessageTestFixtures.createValidOutboundBusinessMessage())
+        );
+    }
+
+    @Test
+    void should_throw_exception_when_submitting_message_to_backend_with_gateway_link_partner() {
+        when(linkPartnerRepository.findByName(any()))
+                .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
+
+        assertThrows(
+                ConnectorLinkPartnerSubmissionException.class,
+                () -> gatewayLinkEventHandler.verify(
+                        MessageTestFixtures.createValidInboundBusinessMessage())
         );
     }
 }

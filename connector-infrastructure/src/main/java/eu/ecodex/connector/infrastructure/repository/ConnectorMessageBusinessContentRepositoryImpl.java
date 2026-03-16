@@ -70,17 +70,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         this.detachedSignatureJpaRepository = detachedSignatureJpaRepository;
     }
 
-    /**
-     * Converts a {@link ConnectorMessageBusinessContentEntity} to a
-     * {@link ConnectorMessageBusinessContent} domain object.
-     *
-     * @param entity the {@link ConnectorMessageBusinessContentEntity} to be converted; can be null,
-     *               in which case the method returns null.
-     *
-     * @return a {@link ConnectorMessageBusinessContent} domain object built from the provided
-     *         entity, or null if the input entity is null.
-     */
-    public static ConnectorMessageBusinessContent toDomain(
+    static ConnectorMessageBusinessContent toDomain(
             ConnectorMessageBusinessContentEntity entity) {
         if (entity == null) {
             return null;
@@ -104,6 +94,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
                 .builder()
                 .uuid(entity.getUuid())
                 .aesType(entity.getAesType())
+                .attachment(ConnectorMessageAttachmentRepositoryImpl.toDomain(entity.getAttachment()))
                 .detachedSignature(toDomain(entity.getDetachedSignature()))
                 .hashValue(entity.getHashValue())
                 .build();

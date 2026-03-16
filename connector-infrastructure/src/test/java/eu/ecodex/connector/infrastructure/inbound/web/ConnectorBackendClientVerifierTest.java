@@ -10,19 +10,16 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.service.usecase.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
-import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")

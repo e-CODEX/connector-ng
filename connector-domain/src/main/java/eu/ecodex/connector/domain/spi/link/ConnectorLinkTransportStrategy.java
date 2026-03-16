@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.api.link;
+package eu.ecodex.connector.domain.spi.link;
 
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -35,5 +35,5 @@ import jakarta.annotation.Nonnull;
  * communication context.
  */
 public interface ConnectorLinkTransportStrategy {
-    void process(@Nonnull ConnectorMessage message, @Nonnull ConnectorLinkPartner linkPartner);
+    void transport(@Nonnull ConnectorMessage message);
 }

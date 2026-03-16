@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.impl.message;
 
+import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  * partner.
  *
  * <p>This step is part of the connector message processing pipeline. It delegates
- * the submission of the message to {@link ConnectorLinkSubmissionService}, which handles the
+ * the submission of the message to {@link ConnectorLinkSubmitter}, which handles the
  * communication with the external link partner.
  *
  * <p>The original message is returned unchanged to allow further processing in the pipeline.
@@ -30,10 +30,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ConnectorMessageLinkSubmissionStep implements ConnectorMessageStep {
-    private final ConnectorLinkSubmissionService linkSubmissionService;
+    private final ConnectorLinkSubmitter linkSubmissionService;
 
     public ConnectorMessageLinkSubmissionStep(
-            ConnectorLinkSubmissionService linkSubmissionService) {
+            ConnectorLinkSubmitter linkSubmissionService) {
         this.linkSubmissionService = linkSubmissionService;
     }
 
@@ -41,10 +41,7 @@ public class ConnectorMessageLinkSubmissionStep implements ConnectorMessageStep 
     public ConnectorMessage execute(@NonNull ConnectorMessage message) {
         log.debug("submitting message [{}] to link partner", message);
 
-        // TODO uncomment below once link management is implemented
-        // this.linkSubmissionService.submit(message);
-
-        log.debug("message submitted [{}] to link partner", message);
+        this.linkSubmissionService.submit(message);
 
         return message;
     }

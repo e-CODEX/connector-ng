@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
@@ -184,6 +185,15 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     public ConnectorMessage setAsConfirmed(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setConfirmedAt(Instant.now());
+        var updatedMessage = this.messageJpaRepository.save(foundMessage);
+
+        return toDomain(updatedMessage);
+    }
+
+    @Override
+    public ConnectorMessage setDeliveredToGatewayAt(@NonNull String identifier) {
+        var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
+        foundMessage.setDeliveredToGatewayAt(Instant.now());
         var updatedMessage = this.messageJpaRepository.save(foundMessage);
 
         return toDomain(updatedMessage);

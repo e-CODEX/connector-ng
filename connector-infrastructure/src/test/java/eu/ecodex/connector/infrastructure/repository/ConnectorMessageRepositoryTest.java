@@ -268,6 +268,36 @@ public class ConnectorMessageRepositoryTest {
         );
     }
 
+    // set submitted to gateway at
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/party.sql")
+    @Sql("classpath:sql/service.sql")
+    @Sql("classpath:sql/action.sql")
+    @Sql("classpath:sql/message.sql")
+    @Sql("classpath:sql/message-as4-properties.sql")
+    void should_set_connector_message_submitted_to_gateway_at_successfully_in_the_database() {
+        var message = jpaRepository.findByIdentifier(
+                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+        assertThat(message).isNotNull();
+        assertThat(message.getDeliveredToGatewayAt()).isNull();
+
+        var update = repository.setDeliveredToGatewayAt(message.getIdentifier());
+
+        assertThat(update).isNotNull();
+        assertThat(update.deliveredToGatewayAt()).isNotNull();
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_setting_connector_message_as_submitted_to_gateway_with_a_null_message_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.setDeliveredToGatewayAt(null)
+        );
+    }
+
     // find by conversation identifier
 
     @Test

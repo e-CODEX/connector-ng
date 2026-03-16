@@ -26,10 +26,19 @@ services:
         ports:
             - "8161:8161"   # Web console
             - "61616:61616" # OpenWire
-            - "1099:1099" # JMX
+            - "1099:1099"   # JMX RMI registry
+            - "1199:1199"   # JMX RMI server (second port RMI needs)
         environment:
             ACTIVEMQ_CONNECTION_USER: admin
             ACTIVEMQ_CONNECTION_PASSWORD: admin
+            JAVA_OPTS: >-
+                -Dcom.sun.jndi.rmiregistry.registryImpl=true
+                -Dcom.sun.management.jmxremote
+                -Dcom.sun.management.jmxremote.port=1099
+                -Dcom.sun.management.jmxremote.rmi.port=1199
+                -Dcom.sun.management.jmxremote.ssl=false
+                -Dcom.sun.management.jmxremote.authenticate=false
+                -Djava.rmi.server.hostname=activemq
         healthcheck:
             test: [ "CMD", "curl", "-f", "http://localhost:8161" ]
             interval: 10s
@@ -87,6 +96,7 @@ services:
             ecodex:
         volumes:
             - ./docker/gateway/config/conf/domibus:/app/conf/domibus
+            - gateway-attachments:/app/attachments
     connector-ng-db:
         container_name: mysql
         # can be replaced with the appropriate database image. e.g. postgres
@@ -148,5 +158,6 @@ networks:
 volumes:
     ng-mysql-data:
     gateway-mysql-data:
+    gateway-attachments:
     minio_data:
     activemq-data:

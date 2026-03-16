@@ -38,4 +38,6 @@ public interface ConnectorFileStorageProvider {
      * @throws NullPointerException if {@code inputStream} is null
      */
     String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull Path filePath);
+
+    byte[] findByIdentifier(String identifier);
 }

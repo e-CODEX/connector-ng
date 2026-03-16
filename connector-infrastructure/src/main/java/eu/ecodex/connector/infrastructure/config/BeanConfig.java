@@ -10,12 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
-import eu.ecodex.connector.domain.service.link.ConnectorLinkSubmissionServiceImpl;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -24,15 +19,4 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationPropertiesScan
 public class BeanConfig {
-    @Bean
-    ConnectorLinkSubmissionService connectorLinkSubmissionService(
-            @Qualifier("connectorBackendLinkEventPublisher")
-            ConnectorEventPublisher backendLinkEventPublisher,
-            @Qualifier("connectorGatewayLinkEventPublisher")
-            ConnectorEventPublisher gatewayLinkEventPublisher
-    ) {
-        return new ConnectorLinkSubmissionServiceImpl(
-                backendLinkEventPublisher, gatewayLinkEventPublisher
-        );
-    }
 }

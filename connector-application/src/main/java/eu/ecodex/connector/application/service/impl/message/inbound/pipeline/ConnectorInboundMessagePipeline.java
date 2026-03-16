@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.service.impl.message.inbound.pipeline;
 
+import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.api.link.ConnectorLinkSubmissionService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.util.ConnectorBusinessDomainUtil;
 import lombok.NonNull;
@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  * non-delivery processing.
  *
  * <p>Additionally, the {@code ConnectorInboundMessagePipeline} utilizes a
- * {@link ConnectorLinkSubmissionService} to submit processed messages for further actions or
+ * {@link ConnectorLinkSubmitter} to submit processed messages for further actions or
  * routing.
  */
 @Slf4j

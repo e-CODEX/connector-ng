@@ -13,7 +13,6 @@ package eu.ecodex.connector.infrastructure.repository.provider;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
-import java.io.InputStream;
 import java.nio.file.Path;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 /**
@@ -55,5 +55,18 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
         );
 
         return attachment.identifier();
+    }
+
+    @Override
+    public byte[] findByIdentifier(String identifier) {
+        log.info("finding attachment [{}] in s3", identifier);
+
+        var getObjectRequest = GetObjectRequest.builder()
+                                               .bucket(this.s3ProviderProperties.getBucket())
+                                               .key(identifier)
+                                               .build();
+
+       var responseBytes = this.s3Client.getObjectAsBytes(getObjectRequest);
+        return responseBytes.asByteArray();
     }
 }

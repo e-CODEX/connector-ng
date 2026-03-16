@@ -87,6 +87,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Column(name = "CONFIRMED_AT")
     private Instant confirmedAt;
 
+    @Setter
     @Column(name = "DELIVERED_TO_GATEWAY_AT")
     private Instant deliveredToGatewayAt;
 

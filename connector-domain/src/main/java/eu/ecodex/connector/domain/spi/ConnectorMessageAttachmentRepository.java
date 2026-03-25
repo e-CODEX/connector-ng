@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.spi;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -78,4 +79,6 @@ public interface ConnectorMessageAttachmentRepository {
      *                             associated.
      */
     void attachToMessage(@Nonnull String attachmentIdentifier, @Nonnull String messageIdentifier);
+
+    void updateType(@Nonnull String attachmentIdentifier, @Nonnull ConnectorAttachmentType type);
 }

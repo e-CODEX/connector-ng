@@ -99,6 +99,7 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
                 .contentType(attachment.contentType())
                 .description(attachment.description())
                 .storage(attachment.storage())
+                .type(attachment.type())
                 .createdAt(attachment.createdAt())
                 .updatedAt(attachment.updatedAt())
                 .build();

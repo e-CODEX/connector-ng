@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
@@ -83,33 +84,40 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
     private void attachAttachments(
             List<ConnectorMessageAttachment> attachments, String messageIdentifier) {
         if (attachments != null) {
-            attachments.forEach(attachment -> attachAttachment(attachment, messageIdentifier));
+            attachments.forEach(
+                    attachment -> attachAttachment(
+                            attachment, messageIdentifier, ConnectorAttachmentType.ATTACHMENT));
         }
     }
 
-    private void attachAttachment(ConnectorMessageAttachment attachment, String messageIdentifier) {
-        var existingAttachment = attachmentRepository.findByIdentifier(attachment.identifier());
+    private void attachAttachment(
+            ConnectorMessageAttachment attachment, String messageIdentifier,
+            ConnectorAttachmentType attachmentType) {
+        var attachmentIdentifier = attachment.identifier();
+        var existingAttachment = this.attachmentRepository.findByIdentifier(attachmentIdentifier);
 
         if (existingAttachment == null) {
             // TODO send back failed evidence
             throw new IllegalStateException(
                     String.format(
                             "attachment [%s] not found message [%s]",
-                            attachment.identifier(), messageIdentifier
+                            attachmentIdentifier, messageIdentifier
                     )
             );
         }
 
-        attachmentRepository.attachToMessage(
-                attachment.identifier(),
-                messageIdentifier
-        );
+        this.attachmentRepository.attachToMessage(attachmentIdentifier, messageIdentifier);
+        this.attachmentRepository.updateType(attachmentIdentifier, attachmentType);
     }
 
     private void persistBusinessDocument(
             ConnectorMessageBusinessContent businessContent, String messageIdentifier) {
         var businessDocumentAttachment = businessContent.businessDocument().attachment();
-        attachAttachment(businessDocumentAttachment, messageIdentifier);
+        attachAttachment(
+                businessDocumentAttachment,
+                messageIdentifier,
+                ConnectorAttachmentType.BUSINESS_DOCUMENT
+        );
 
         this.businessContentRepository.save(businessContent, messageIdentifier);
     }

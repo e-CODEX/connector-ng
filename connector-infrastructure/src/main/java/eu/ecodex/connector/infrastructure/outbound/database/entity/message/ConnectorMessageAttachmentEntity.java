@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.database.entity.message;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -64,6 +65,11 @@ public class ConnectorMessageAttachmentEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "STORAGE", nullable = false, updatable = false)
     private ConnectorAttachmentStorage storage;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE")
+    private ConnectorAttachmentType type;
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)

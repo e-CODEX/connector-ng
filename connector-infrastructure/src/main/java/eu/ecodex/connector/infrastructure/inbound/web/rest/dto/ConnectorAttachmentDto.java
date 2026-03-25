@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import java.time.Instant;
 import lombok.Builder;
 
@@ -27,6 +28,7 @@ import lombok.Builder;
  * @param size        the size of the attachment in bytes
  * @param description an optional human-readable description of the attachment
  * @param storage     the storage strategy or location used to persist the attachment
+ * @param type        the type of the attachment (e.g. {@code BUSINESS_DOCUMENT})
  * @param createdAt   the timestamp when the attachment was created
  * @param updatedAt   the timestamp when the attachment was last updated
  */
@@ -38,6 +40,7 @@ public record ConnectorAttachmentDto(
         long size,
         String description,
         ConnectorAttachmentStorage storage,
+        ConnectorAttachmentType type,
         Instant createdAt,
         Instant updatedAt
 ) {

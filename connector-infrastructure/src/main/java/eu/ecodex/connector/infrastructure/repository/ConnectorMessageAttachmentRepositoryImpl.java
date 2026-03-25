@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.repository;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -82,6 +83,13 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         jpaRepository.save(attachment);
     }
 
+    @Override
+    public void updateType(@NonNull String attachmentIdentifier, @NonNull ConnectorAttachmentType type) {
+        var attachment = this.jpaRepository.findByIdentifier(attachmentIdentifier);
+        attachment.setType(type);
+        this.jpaRepository.save(attachment);
+    }
+
     private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {
         return ConnectorMessageAttachmentEntity
                 .builder()
@@ -91,6 +99,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
                 .contentType(attachment.contentType())
                 .description(attachment.description())
                 .storage(attachment.storage())
+                .type(attachment.type())
                 .build();
     }
 
@@ -107,6 +116,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
                 .contentType(entity.getContentType())
                 .description(entity.getDescription())
                 .storage(entity.getStorage())
+                .type(entity.getType())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
                 .build();

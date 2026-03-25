@@ -26,6 +26,7 @@ import lombok.Builder;
  * @param size        The size of the attachment
  * @param description A description of the attachment.
  * @param storage     The message storage type.
+ * @param type        The type of the attachment.
  * @param createdAt   The creation date of the attachment.
  * @param updatedAt   The last update date of the attachment.
  */
@@ -37,6 +38,7 @@ public record ConnectorMessageAttachment(
         long size,
         String description,
         ConnectorAttachmentStorage storage,
+        ConnectorAttachmentType type,
         Instant createdAt,
         Instant updatedAt
 ) implements Serializable {

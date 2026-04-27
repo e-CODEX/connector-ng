@@ -23,6 +23,7 @@ narayana = "4.0.0"
 agroal = "3.0"
 messaginghub = "3.2.2"
 # other
+dss-tool = "6.1"
 jackson-databind = "2.21.0"
 lombok = "1.18.42"
 micrometer = "1.6.2"
@@ -61,6 +62,7 @@ narayana = { module = "dev.snowdrop:narayana-spring-boot-starter", version.ref =
 agroal = { module = "io.agroal:agroal-spring-boot-starter", version.ref = "agroal" }
 messaginghub = { module = "org.messaginghub:pooled-jms", version.ref = "messaginghub" }
 # other
+dss-tool = { module = "eu.europa.ec.joinup.sd-dss:dss-bom", version.ref = "dss-tool" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }

@@ -8,20 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.link;
+package eu.ecodex.connector.infrastructure.property.dss;
 
+import eu.europa.esig.dss.service.http.proxy.ProxyProperties;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Configuration properties used to access a private key within a store.
- *
- * <p>This class contains the alias identifying the private key entry and the password required to
- * retrieve the private key from the store.
+ * DSS proxy configuration.
  */
 @Getter
 @Setter
-public class PrivateKeyProperties {
-    private String alias;
-    private String password;
+public class DssProxyProperties {
+    ProxyProperties http;
+    ProxyProperties https;
 }

@@ -8,24 +8,20 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.link;
+package eu.ecodex.connector.infrastructure.property.dss;
 
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
-import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * SOAP security configuration properties.
- *
- * <p>These properties define the key and trust material used for securing SOAP communication,
- * including keystores, private keys, and encryption settings.
+ * Configuration properties for the TL source.
  */
 @Getter
 @Setter
-public class EndpointProperties {
-    private KeystoreProperties keystore;
-    private PrivateKeyProperties privateKey;
-    private KeystoreProperties truststore;
-    private String encryptAlias;
+public class DssTlSourceProperties {
+    @NotBlank
+    private String tlUrl;
+    private KeystoreProperties signingCerts;
 }

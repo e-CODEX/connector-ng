@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.link;
+package eu.ecodex.connector.infrastructure.property.common;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -23,4 +23,10 @@ import lombok.Setter;
 public class KeystoreProperties {
     private String path;
     private String password;
+    private KeystoreType type = KeystoreType.JKS;
+
+    @Override
+    public String toString() {
+        return String.format("{path=%s, type=%s}", path, type);
+    }
 }

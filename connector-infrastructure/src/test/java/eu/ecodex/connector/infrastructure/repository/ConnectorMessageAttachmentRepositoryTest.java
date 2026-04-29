@@ -44,7 +44,7 @@ public class ConnectorMessageAttachmentRepositoryTest {
 
         assertThat(savedAttachment).isNotNull();
         assertThat(savedAttachment.identifier()).contains("_test_attachment");
-        assertThat(savedAttachment.name()).isEqualTo("test_attachment");
+        assertThat(savedAttachment.name()).isEqualTo("test_attachment.txt");
         assertThat(savedAttachment.size()).isEqualTo(100L);
         assertThat(savedAttachment.contentType()).isEqualTo("text/plain");
         assertThat(savedAttachment.description()).isNotBlank();

@@ -1,0 +1,31 @@
+:basepath: ..
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Introduction
+
+== Scope and Objective of this document
+This document is a technical guide to install and configure the new e-Codex **Connector**. It can be used as a “go-through” installation guide. Readers should be able to install and configure the new **Connector** in their own environments without previously built know-how about the software.
+
+A detailed knowledge of your own environment is a precondition.
+
+The structure of this guide is built so that every part can be taken as listed in the document. That means all preconditions for a chapter should be given by the previous chapters.
+
+As an Installation Guide this document does not focus on features and functionalities on the usage of the new **Connector**.
+
+== e-CODEX building blocks
+
+The **Connector** is one building block provided to support the connectivity and functionality of e-CODEX.
+To be fully functional with an e-CODEX use case and to exchange messages with other e-CODEX partners,
+the proper installation of other building blocks is required.
+
+The description of the e-CODEX building blocks and additional information on the e-CODEX system can be found on the link:https://www.ecodex.eu/tech[e-CODEX website].
+
+== Product distribution
+
+There are two ways to install the new **Connector**:
+
+* <<docker-install,Containerized distribution>> – **Recommended.** The containerized service can be installed as an image on any suitable hosting platform. **eu-LISA provides full support**, including regular updates, security patches, assistance with gateway interaction, and access to eu-LISA managed testing services.
+* <<standalone-install,Standalone distribution>> – For specific environments where you manage the services yourself. This is distributed **"as-is"**. The user is fully responsible for hosting, operation, manual updates, and security patching of their instance.

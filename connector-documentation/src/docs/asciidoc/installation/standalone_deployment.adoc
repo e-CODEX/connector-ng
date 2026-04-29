@@ -1,0 +1,195 @@
+:basepath: ..
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+
+[[standalone-install]]
+= Standalone Deployment
+
+Use this option when you already have a database, a message broker, and file storage running separately.
+
+== Who is this for?
+This option is for Member States or organizations with restricted environments where containerization is not an option.
+
+It requires a high level of technical expertise, as the user is responsible for:
+* Hosting and managing their own instance of the service.
+* Performing all software updates and applying security patches manually.
+* Configuring and maintainiifndef::basepath[]
+
+
+== Prerequisites
+
+[cols="1,1,3", options="header"]
+|===
+| Software | Version | Notes
+| Java (JRE) | 21 or later | Only the runtime is needed, not the full JDK
+| Database | MySQL 8, MariaDB, PostgreSQL, or Oracle | An empty database and a dedicated user are required
+| Apache ActiveMQ Classic | 6.x | Used for message queuing between the Connector and the Gateway
+| File storage | Amazon S3 or MinIO | Used to store message attachments
+|===
+
+To check your Java version:
+
+ java -version
+
+The output must show version `21.x.x` or higher.
+
+== Steps
+
+=== Step 1 — Get the JAR file
+
+**Option A — Download:** get `connector-bootstrapper-<version>.jar` from the project releases page.
+
+**Option B — Build from source:**
+
+ ./gradlew :connector-bootstrapper:bootJar
+
+The JAR will be in `connector-bootstrapper/build/libs/`.
+
+=== Step 2 — Create the folder structure
+
+Create the following directory layout in your deployment folder:
+
+----
+connector/
+├── connector-bootstrapper-<version>.jar
+├── config/
+│   ├── application.properties
+│   └── keystores/
+│       ├── gwlink-keystore.jks
+│       ├── gwlink-truststore.jks
+│       ├── backend-keystore.jks
+│       └── backend-truststore.jks
+└── logs/
+----
+
+[NOTE]
+====
+The system user executing the JAR file must have **read permissions** for the `config/` directory and **write permissions** for the `logs/` and `temp/` directories.
+====
+
+=== Step 3 — Create the configuration file
+
+Create `config/application.properties` based on the template below.
+
+[TIP]
+====
+A complete reference of all available properties and business-specific settings can be found in the link:../configuration/index.adoc[configuration page, window=_self].
+====
+
+[source,properties]
+----
+# Application
+spring.application.name=e-CODEX Connector NG
+server.port=30000
+server.address=0.0.0.0
+
+# Database
+spring.datasource.url=jdbc:mysql://<db-host>:3306/connector
+spring.datasource.username=connector
+spring.datasource.password=<your_password>
+spring.datasource.agroal.driver-class-name=com.mysql.cj.jdbc.MysqlXADataSource
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+
+# Message broker (ActiveMQ)
+spring.activemq.broker-url=tcp://<activemq-host>:61616
+spring.activemq.user=<broker_user>
+spring.activemq.password=<broker_password>
+
+# File storage (S3 / MinIO)
+connector.file.storage.s3.enable=true
+connector.file.storage.s3.endpoint=http://<minio-host>:9000
+connector.file.storage.s3.bucket=attachments
+connector.file.storage.s3.region=us-east-1
+connector.file.storage.s3.access-key=<access_key>
+connector.file.storage.s3.secret-key=<secret_key>
+
+# Temporary files
+spring.servlet.multipart.location=<path_to_temp_dir>
+
+# Gateway link — Reference: See configuration.adoc "Gateway link"
+connector.link.gateway.link-config.properties.endpoint.key-store.path=file:./config/keystores/gwlink-keystore.jks
+connector.link.gateway.link-config.properties.endpoint.key-store.password=<your_password>
+connector.link.gateway.link-config.properties.endpoint.private-key.alias=<key_alias>
+connector.link.gateway.link-config.properties.endpoint.private-key.password=<your_password>
+connector.link.gateway.link-config.properties.endpoint.trust-store.path=file:./config/keystores/gwlink-truststore.jks
+connector.link.gateway.link-config.properties.endpoint.trust-store.password=<your_password>
+
+# Backend link — Reference: See configuration.adoc "Backend link"
+connector.link.backend[0].link-config.properties.endpoint.key-store.path=file:./config/keystores/backend-keystore.jks
+connector.link.backend[0].link-config.properties.endpoint.key-store.password=<your_password>
+connector.link.backend[0].link-config.properties.endpoint.private-key.alias=<key_alias>
+connector.link.backend[0].link-config.properties.endpoint.private-key.password=<your_password>
+connector.link.backend[0].link-config.properties.endpoint.trust-store.path=file:./config/keystores/backend-truststore.jks
+connector.link.backend[0].link-config.properties.endpoint.trust-store.password=<your_password>
+----
+
+=== Step 4 — Create the database
+
+The Connector creates its own tables automatically on first start.
+You only need to create an empty database and a user with the right permissions.
+
+Example for MySQL:
+
+[source,sql]
+----
+CREATE DATABASE connector CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'connector'@'%' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON connector.* TO 'connector'@'%';
+FLUSH PRIVILEGES;
+----
+
+=== Step 5 — Start the Connector
+
+Run this command from the deployment folder:
+
+ java -jar connector-bootstrapper-<version>.jar --spring.config.location=./config/application.properties
+
+To run it in the background:
+
+ nohup java -jar connector-bootstrapper-<version>.jar \
+   --spring.config.location=./config/application.properties \
+   > logs/connector.log 2>&1 &
+
+To watch the logs:
+
+ tail -f logs/connector.log
+
+[IMPORTANT]
+====
+Always run the `java -jar` command from the root of the `connector/` deployment folder. This ensures that the relative paths defined in your `application.properties` (like `file:config/keystores/...`) are correctly resolved.
+====
+
+==== Stopping the Connector
+Since the Connector runs in the background via `nohup`, you must manually stop the process:
+
+1. Find the Process ID (PID):
++
+[source,bash]
+----
+ps -ef | grep connector-bootstrapper
+----
+
+2. Terminate the process:
++
+[source,bash]
+----
+kill <PID>
+----
+
+=== Step 6 — Check it's running
+
+ curl http://localhost:30000/actuator/health
+
+Expected response:
+
+[source,json]
+----
+{"status":"UP"}
+----
+
+The REST API and Swagger UI are available at:
+
+ http://localhost:30000/swagger-ui/index.html

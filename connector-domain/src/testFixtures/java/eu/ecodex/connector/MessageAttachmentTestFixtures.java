@@ -21,7 +21,7 @@ public class MessageAttachmentTestFixtures {
         return ConnectorMessageAttachment
                 .builder()
                 .identifier(identifier)
-                .name(name)
+                .name(name + ".txt")
                 .size(100L)
                 .description("test attachment description")
                 .contentType("text/plain")

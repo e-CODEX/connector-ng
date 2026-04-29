@@ -45,13 +45,14 @@ public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachm
         return files.stream()
                     .map(uploadCommand -> {
                         try {
-                            var name = StringUtils.stripFilenameExtension(uploadCommand.filename());
-                            var identifier = String.format("%s_%s", UUID.randomUUID(), name);
+                            var identifier = String.format(
+                                    "%s_%s", UUID.randomUUID(), uploadCommand.filename()
+                            );
 
                             var attachmentToSave = ConnectorMessageAttachment
                                     .builder()
                                     .identifier(identifier)
-                                    .name(name)
+                                    .name(uploadCommand.filename())
                                     .size(uploadCommand.size())
                                     .contentType(uploadCommand.contentType())
                                     .description("Persisting file to S3 bucket")

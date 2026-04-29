@@ -61,7 +61,7 @@ public class ConnectorUploadAttachmentsServiceTest {
         assertThat(attachments).hasSize(1);
         var attachment = attachments.getFirst();
         assertThat(attachment.identifier()).endsWith("test_attachment");
-        assertThat(attachment.name()).isEqualTo("test_attachment");
+        assertThat(attachment.name()).isEqualTo("test_attachment.txt");
         assertThat(attachment.contentType()).isEqualTo("text/plain");
         assertThat(attachment.size()).isEqualTo(100L);
     }

@@ -1,0 +1,102 @@
+
+package oasis.names.tc.saml._2_0.assertion;
+
+import java.util.ArrayList;
+import java.util.List;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlType;
+import org.w3._2001._04.xmlenc_.EncryptedDataType;
+import org.w3._2001._04.xmlenc_.EncryptedKeyType;
+
+
+/**
+ * &lt;p&gt;Java class for EncryptedElementType complex type&lt;/p&gt;.
+ * 
+ * &lt;p&gt;The following schema fragment specifies the expected content contained within this class.&lt;/p&gt;
+ * 
+ * &lt;pre&gt;{&#064;code
+ * &lt;complexType name="EncryptedElementType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element ref="{http://www.w3.org/2001/04/xmlenc#}EncryptedData"/&gt;
+ *         &lt;element ref="{http://www.w3.org/2001/04/xmlenc#}EncryptedKey" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
+ * }&lt;/pre&gt;
+ * 
+ * 
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "EncryptedElementType", propOrder = {
+    "encryptedData",
+    "encryptedKey"
+})
+public class EncryptedElementType {
+
+    @XmlElement(name = "EncryptedData", namespace = "http://www.w3.org/2001/04/xmlenc#", required = true)
+    protected EncryptedDataType encryptedData;
+    @XmlElement(name = "EncryptedKey", namespace = "http://www.w3.org/2001/04/xmlenc#")
+    protected List<EncryptedKeyType> encryptedKey;
+
+    /**
+     * Gets the value of the encryptedData property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link EncryptedDataType }
+     *     
+     */
+    public EncryptedDataType getEncryptedData() {
+        return encryptedData;
+    }
+
+    /**
+     * Sets the value of the encryptedData property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link EncryptedDataType }
+     *     
+     */
+    public void setEncryptedData(EncryptedDataType value) {
+        this.encryptedData = value;
+    }
+
+    /**
+     * Gets the value of the encryptedKey property.
+     * 
+     * <p>This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the Jakarta XML Binding object.
+     * This is why there is not a {@code set} method for the encryptedKey property.</p>
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * </p>
+     * <pre>
+     * getEncryptedKey().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link EncryptedKeyType }
+     * </p>
+     * 
+     * 
+     * @return
+     *     The value of the encryptedKey property.
+     */
+    public List<EncryptedKeyType> getEncryptedKey() {
+        if (encryptedKey == null) {
+            encryptedKey = new ArrayList<>();
+        }
+        return this.encryptedKey;
+    }
+
+}

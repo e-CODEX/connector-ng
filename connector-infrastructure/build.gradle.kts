@@ -60,6 +60,7 @@ dependencies {
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)
+    implementation(libs.jakarta.xml.bind.api)
     // jaxb
     implementation(libs.jaxb.impl)
     // activemq

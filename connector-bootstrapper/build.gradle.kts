@@ -19,6 +19,8 @@ dependencies {
     implementation(platform(libs.spring.boot.bom))
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-log4j2")
+    // embedded broker for spring.profiles.active=local (vm://embedded)
+    runtimeOnly("org.apache.activemq:activemq-broker")
     mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
 

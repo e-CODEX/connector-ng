@@ -1,6 +1,7 @@
 [versions]
 # apache
-apache-commons = "3.20.0"
+apache-commons-lang3 = "3.20.0"
+apache-commons-io = "2.21.0"
 apache-cxf = "4.1.0"
 # jakarta
 jakarta-annotation = "3.0.0"
@@ -11,6 +12,8 @@ jakarta-jws-api = "3.0.0"
 jakarta-mail = "2.0.2"
 jakarta-xml-bind-api = "4.0.2"
 jakarta-xml-ws-api = "4.0.2"
+# jaxb
+jaxb-impl = "4.0.7"
 # spring boot
 spring-boot = "4.0.2"
 spring-doc = "3.0.1"
@@ -24,6 +27,7 @@ agroal = "3.0"
 messaginghub = "3.2.2"
 # other
 dss-tool = "6.1"
+itextpdf = "9.5.0"
 jackson-databind = "2.21.0"
 lombok = "1.18.42"
 micrometer = "1.6.2"
@@ -38,7 +42,8 @@ mockito = "5.21.0"
 
 [libraries]
 # apache
-apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commons" }
+apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commons-lang3" }
+apache-commons-io = { module = "commons-io:commons-io", version.ref = "apache-commons-io" }
 apache-cxf = { module = "org.apache.cxf:cxf-rt-frontend-jaxws", version.ref = "apache-cxf" }
 apache-cxf-spring-boot = { module = "org.apache.cxf:cxf-spring-boot-starter-jaxws", version.ref = "apache-cxf" }
 # jakarta
@@ -50,6 +55,8 @@ jakarta-jws-api = { module = "jakarta.jws:jakarta.jws-api", version.ref = "jakar
 jakarta-mail = { module = "com.sun.mail:jakarta.mail", version.ref = "jakarta-mail" }
 jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind-api" }
 jakarta-xml-ws-api = { module = "jakarta.xml.ws:jakarta.xml.ws-api", version.ref = "jakarta-xml-ws-api" }
+# jaxb
+jaxb-impl = { module = "com.sun.xml.bind:jaxb-impl", version.ref = "jaxb-impl" }
 # spring + boot
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}
@@ -63,6 +70,7 @@ agroal = { module = "io.agroal:agroal-spring-boot-starter", version.ref = "agroa
 messaginghub = { module = "org.messaginghub:pooled-jms", version.ref = "messaginghub" }
 # other
 dss-tool = { module = "eu.europa.ec.joinup.sd-dss:dss-bom", version.ref = "dss-tool" }
+itextpdf = { module = "com.itextpdf:itext7-core", version.ref = "itextpdf" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson-databind" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }

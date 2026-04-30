@@ -40,7 +40,7 @@ public class ConnectorMessageBusinessContentRepositoryTest {
                 MessageContentTestFixtures.createContent()
                                           .toBuilder()
                                           .businessDocument(
-                                                  ConnectorMessageDocumentTestFixtures.createDocumentWithoutDetachedSignature())
+                                                  ConnectorMessageDocumentTestFixtures.createDocumentWithoutSignature())
                                           .build()
         );
     }

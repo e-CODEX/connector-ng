@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+              Id="id-df036a22c401d58a6908b94c6be7778b">
+    <ds:SignedInfo>
+        <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+        <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha512"/>
+        <ds:Reference Id="r-id-df036a22c401d58a6908b94c6be7778b-1">
+            <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/>
+            <ds:DigestValue>
+                XSY3kedIU8VcCCkZNqleimjd4R/8ZJSsa1H9HkqjYwSATBd+HV9zbAwPZU8F+WdMgp/bvots2wZetBm7LytTZw==
+            </ds:DigestValue>
+        </ds:Reference>
+        <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties"
+                      URI="#xades-id-df036a22c401d58a6908b94c6be7778b">
+            <ds:Transforms>
+                <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            </ds:Transforms>
+            <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/>
+            <ds:DigestValue>
+                P6dKpj1s4/tzCUrH5/kq7rfUKVZUx0PgUy74WcRu0D6cRtAvDTnzDtHkN+RDnW/MH5Z+4uqDCZTZXsmaa5U/LA==
+            </ds:DigestValue>
+        </ds:Reference>
+    </ds:SignedInfo>
+    <ds:SignatureValue Id="value-id-df036a22c401d58a6908b94c6be7778b">
+        GFo8hogmVKNqpHoKJoduAsBU043OjuuXKrhMpRQJgFRT7qX4aNK+Aug+n0KLmsc64gsV7eZzdEY6FxBbDoPa35aHq1GWdO13ktgPmuDhxaRX2KEF8xjwwhgCpI6f15PUHNaDzkNtntikVi9reXpEpeY/H+TWMG+fmpVDS+C9sk2EOgR/ovSWPhp6dQ4sWa0gviWM3fvR8JntBwhOYvxya8oBy51s9sSSquncFs3hmh6V+BV2BoV18ZZXFocoXiXlVRv0kymu7w/g+1esb2elATqXcv83Mb4e+GhmAT71o0YQUk4cW8DqO48jO0vk+gRFHx1qu2DL4+IL0F6PMntqUA==
+    </ds:SignatureValue>
+    <ds:KeyInfo>
+        <ds:X509Data>
+            <ds:X509Certificate>
+                MIIC2jCCAcKgAwIBAgIUe30fs8i++GKSAOmoR1kBlxFhTUEwDQYJKoZIhvcNAQELBQAwJjELMAkGA1UEBhMCQkwxFzAVBgNVBAMMDmNvbm5lY3Rvcl9ibHVlMCAXDTI1MDUyNzEwNTQzOFoYDzIxMjUwNTI3MTA1NDM4WjAmMQswCQYDVQQGEwJCTDEXMBUGA1UEAwwOY29ubmVjdG9yX2JsdWUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCPVV8x0Ge+7CJwk1WYQMsFWjB/InBa+jZKfDdnL3FHJsAMHEKyfUqp3jAnV+VaWNPVcpBztVy66tzTgSfDSKRgj2DWQLXU4IDdSbBnl6Gm9Uw3gC+jim/Q73VMr4fAk1hr1f9DxK+9MzAbZ1A1RwOkvlUqSeJdE7wstJ2NLOSZ0VUfnDx+bDY7M6GcK0z7ytCvuQjYKnbavIOvrfh3+CYmmrECdzvX1EtWQRUed5dUmUbp6Um/Dgnj2HkiH0mYOzPxysXrsNgz1fvfslatX7Bwk5DQxtcajNRud7edzEYEI9YVtnvdTOf+bDR+Ubej10Qx1l3I8Tg0+MNhb9V4X6vhAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAH1ovw6xfc02qOVDuUAhn7aoTol9Wsu3Ie1SntOk5IgHgr6YKtg685uJCq3bYtHYVCHuB9aJ3Mt57JngzDdnt9o6Ktm8NndSIn9ICDTCi0w0/rEEdNgsAUbgOQZTzZA1vw/EPOYl0R2vs7jocGzV38iN+QQCNMxN74R5H4wyhLCHOkyn0qi6X7UVqtmtkijv9XRgjxP2oEO5izckA7H9iafV6fNtY7X3MrLQz5dhekiOwZw6dpte537XIxLHD9eUZkb5u5enJdb66u+jBahkm+atT+ue0dHr8puSYEzeu24CDHSUSqmKS5leZzCt4sHa3bMKCelW9KntUkFPuhV8cTw=
+            </ds:X509Certificate>
+        </ds:X509Data>
+    </ds:KeyInfo>
+    <ds:Object>
+        <xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"
+                                    Target="#id-df036a22c401d58a6908b94c6be7778b">
+            <xades:SignedProperties Id="xades-id-df036a22c401d58a6908b94c6be7778b">
+                <xades:SignedSignatureProperties>
+                    <xades:SigningTime>2026-04-29T19:22:51Z</xades:SigningTime>
+                    <xades:SigningCertificateV2>
+                        <xades:Cert>
+                            <xades:CertDigest>
+                                <ds:DigestMethod
+                                        Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/>
+                                <ds:DigestValue>
+                                    PlOjbEgLmLneRpOknxmdyx0pSgWzUqUca6pvI3jfXBrXCzJzFsMgW3TPPxD/Za8GxYI5ymQj3wT+8Qjl2kLbYQ==
+                                </ds:DigestValue>
+                            </xades:CertDigest>
+                            <xades:IssuerSerialV2>
+                                MEIwKqQoMCYxCzAJBgNVBAYTAkJMMRcwFQYDVQQDDA5jb25uZWN0b3JfYmx1ZQIUe30fs8i++GKSAOmoR1kBlxFhTUE=
+                            </xades:IssuerSerialV2>
+                        </xades:Cert>
+                    </xades:SigningCertificateV2>
+                </xades:SignedSignatureProperties>
+                <xades:SignedDataObjectProperties>
+                    <xades:DataObjectFormat
+                            ObjectReference="#r-id-df036a22c401d58a6908b94c6be7778b-1">
+                        <xades:MimeType>application/octet-stream</xades:MimeType>
+                    </xades:DataObjectFormat>
+                </xades:SignedDataObjectProperties>
+            </xades:SignedProperties>
+        </xades:QualifyingProperties>
+    </ds:Object>
+</ds:Signature>

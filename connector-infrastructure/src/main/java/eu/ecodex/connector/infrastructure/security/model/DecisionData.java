@@ -8,13 +8,21 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.dss;
+package eu.ecodex.connector.infrastructure.security.model;
 
-import eu.ecodex.connector.DSSContextConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@ActiveProfiles("dss")
-@SpringBootTest(classes = DSSContextConfiguration.class)
-public class BaseDssTest {
+/**
+ * Represents the data related to the decision of a Connector token.
+ */
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class DecisionData {
+    private DiagnosisData diagnosis;
+    private ValidationData validation;
 }

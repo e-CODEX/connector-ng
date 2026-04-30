@@ -13,6 +13,7 @@ dependencies {
     // apache
     implementation(libs.apache.cxf.spring.boot)
     implementation(libs.apache.commons.lang3)
+    implementation(libs.apache.commons.io)
     // dss tool
     implementation(platform(libs.dss.tool))
     implementation("eu.europa.ec.joinup.sd-dss:dss-document")
@@ -30,6 +31,7 @@ dependencies {
     implementation("eu.europa.ec.joinup.sd-dss:dss-certificate-validation-common")
     implementation("eu.europa.ec.joinup.sd-dss:dss-utils-apache-commons")
     implementation("eu.europa.ec.joinup.sd-dss:dss-pades-openpdf")
+    implementation("eu.europa.ec.joinup.sd-dss:dss-crl-parser-stream")
     // spring boot
     implementation(platform(libs.spring.boot.bom))
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -43,6 +45,8 @@ dependencies {
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)
+    // jaxb
+    implementation(libs.jaxb.impl)
     // activemq
     implementation("org.apache.activemq:activemq-client")
     // jta
@@ -53,6 +57,7 @@ dependencies {
     implementation(libs.spring.doc)
     // other
     implementation(libs.apache.cxf)
+    implementation(libs.itextpdf)
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
     implementation(libs.micrometer)

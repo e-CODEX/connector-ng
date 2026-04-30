@@ -24,7 +24,16 @@ public class ConnectorMessageDocumentTestFixtures {
                 .build();
     }
 
-    public static ConnectorMessageBusinessDocument createDocumentWithoutDetachedSignature() {
+    public static ConnectorMessageBusinessDocument createDocumentWithAuthBasedSignature() {
+        return ConnectorMessageBusinessDocument
+                .builder()
+                .attachment(MessageAttachmentTestFixtures.createAttachment())
+                .aesType(ConnectorBusinessDocumentAESType.AUTHENTICATION_BASED)
+                .detachedSignature(DetachedSignatureTestFixtures.createDetachedSignature())
+                .build();
+    }
+
+    public static ConnectorMessageBusinessDocument createDocumentWithoutSignature() {
         return ConnectorMessageBusinessDocument
                 .builder()
                 .attachment(MessageAttachmentTestFixtures.createAttachment())

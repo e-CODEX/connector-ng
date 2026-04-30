@@ -8,13 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.dss;
+package eu.ecodex.connector.infrastructure.security.exception;
 
-import eu.ecodex.connector.DSSContextConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-@ActiveProfiles("dss")
-@SpringBootTest(classes = DSSContextConfiguration.class)
-public class BaseDssTest {
+/**
+ * Represents an exception thrown when there is an issue related to the trust OK token generation
+ * within the connector.
+ */
+public class ConnectorTrustOKTokenException extends RuntimeException {
+    public ConnectorTrustOKTokenException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

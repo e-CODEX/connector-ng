@@ -8,13 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.dss;
+package eu.ecodex.connector.infrastructure.security.exception;
 
-import eu.ecodex.connector.DSSContextConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+/**
+ * Represents an exception thrown when there is an error specific to token handling within the
+ * connector.
+ */
+public class ConnectorTokenException extends RuntimeException {
+    public ConnectorTokenException(String message) {
+        super(message);
+    }
 
-@ActiveProfiles("dss")
-@SpringBootTest(classes = DSSContextConfiguration.class)
-public class BaseDssTest {
+    public ConnectorTokenException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

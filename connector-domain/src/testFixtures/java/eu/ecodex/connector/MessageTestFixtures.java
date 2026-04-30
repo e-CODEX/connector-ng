@@ -207,7 +207,6 @@ public class MessageTestFixtures {
                 .as4Properties(defaultASProperties().build())
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .evidences(new ArrayList<>())
-                .businessContent(ConnectorMessageBusinessContent.builder().build())
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now());
     }

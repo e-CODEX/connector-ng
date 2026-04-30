@@ -12,14 +12,17 @@ package eu.ecodex.connector.infrastructure.messaging.publisher;
 
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import jakarta.jms.Session;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.jms.core.JmsTemplate;
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Component;
 @Component("connectorGatewayLinkEventPublisher")
 public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublisher {
     private final JmsTemplate jmsTemplate;
+    private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
     private final ConnectorQueueProperties queueProperties;
 
@@ -44,9 +48,11 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
      */
     public ConnectorGatewayLinkEventPublisher(
             JmsTemplate jmsTemplate,
+            ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider,
             ConnectorQueueProperties queueProperties) {
         this.jmsTemplate = jmsTemplate;
+        this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
         this.queueProperties = queueProperties;
     }
@@ -64,11 +70,10 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
     private MapMessage toMapMessage(ConnectorMessage message, Session session) throws JMSException {
         var mapMessage = session.createMapMessage();
 
-        mapMessage.setStringProperty("messageType", "submitMessage");
-        mapMessage.setStringProperty("messageId", message.identifier());
-
         var as4Properties = message.as4Properties();
 
+        mapMessage.setStringProperty("messageType", "submitMessage");
+        mapMessage.setStringProperty("messageId", message.identifier());
         mapMessage.setStringProperty("originalSender", as4Properties.originalSender());
         mapMessage.setStringProperty("finalRecipient", as4Properties.finalRecipient());
 
@@ -83,6 +88,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         mapMessage.setStringProperty("fromPartyId", Objects.requireNonNull(fromParty).identifier());
         mapMessage.setStringProperty("fromPartyType", fromParty.identifierType());
         mapMessage.setStringProperty("fromRole", fromParty.role());
+
         var toParty = as4Properties.toParty();
         mapMessage.setStringProperty("toPartyId", Objects.requireNonNull(toParty).identifier());
         mapMessage.setStringProperty("toPartyType", toParty.identifierType());
@@ -96,38 +102,127 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
             mapMessage.setStringProperty("refToMessageId", as4Properties.referenceToIdentifier());
         }
 
-        buildAttachments(mapMessage, message);
+        var counter = buildAttachments(mapMessage, message);
+
+        mapMessage.setBooleanProperty("putAttachmentInQueue", false);
+        mapMessage.setStringProperty("totalNumberOfPayloads", String.valueOf(counter));
 
         return mapMessage;
     }
 
-    private void buildAttachments(
-            MapMessage mapMessage, ConnectorMessage message) throws JMSException {
-        // TODO with version to 5.2 of the gateway, see how to attach S3 Id instead of byte[]
-        var attachments = new ArrayList<ConnectorMessageAttachment>();
-        attachments.add(Objects.requireNonNull(
-                Objects.requireNonNull(message.businessContent()).businessDocument()).attachment());
-        attachments.addAll(message.attachments());
+    private int buildContent(MapMessage mapMessage, ConnectorMessage message, int counter)
+            throws JMSException {
+        var content = message.businessContent();
+        var evidences = message.transportedEvidences(); // TODO check the evidences
 
-        mapMessage.setStringProperty("totalNumberOfPayloads", attachments.size() + "");
-        mapMessage.setBooleanProperty("putAttachmentInQueue", false);
+        if (content == null) {
+            if (evidences != null && !evidences.isEmpty()) {
+                log.debug(
+                        "Message [{}] has no content but has evidences — "
+                        + "treating as confirmation message", message.identifier()
+                );
+            }
+            return counter; // no content payload to write
+        }
 
-        var counter = 1;
+        counter++;
+
+        writePayload(
+                mapMessage,
+                counter,
+                "text/xml",
+                "messageContent",
+                "messageContent",
+                content.xmlContent().getBytes(StandardCharsets.UTF_8)
+        );
+
+        return counter;
+    }
+
+    private int buildEvidences(MapMessage mapMessage, ConnectorMessage message, int counter)
+            throws JMSException {
+        var evidences = message.transportedEvidences();
+
+        if (evidences == null) {
+            return counter;
+        }
+
+        for (var evidence : evidences) {
+            counter++;
+
+            writePayload(
+                    mapMessage, counter,
+                    "text/xml",
+                    evidence.type().name(),
+                    evidence.type().name(),
+                    evidence.content()
+            );
+        }
+
+        return counter;
+    }
+
+    private int buildAttachments(MapMessage mapMessage, ConnectorMessage message)
+            throws JMSException {
+        // TODO: with gateway v5.2, consider passing S3 identifier instead of byte[]
+        int counter = 0;
+
+        counter = buildContent(mapMessage, message, counter);
+        counter = buildEvidences(mapMessage, message, counter);
+
+        assert message.identifier() != null;
+
+        var attachments = this.attachmentRepository.findByMessageIdentifierAndTypes(
+                message.identifier(),
+                List.of(ConnectorAttachmentType.ASICS, ConnectorAttachmentType.XML_TOKEN)
+        );
 
         for (var attachment : attachments) {
-            mapMessage.setStringProperty(
-                    String.format("payload_%s_mimeContentId", counter), attachment.identifier());
-            mapMessage.setStringProperty(
-                    String.format("payload_%s_mimeType", counter), attachment.contentType());
-            mapMessage.setStringProperty(
-                    String.format("payload_%s_description", counter), attachment.description());
-            mapMessage.setStringProperty(
-                    String.format("payload_%s_fileName", counter), attachment.name());
-
-            var payload = this.fileStorageProvider.findByIdentifier(attachment.identifier());
-            mapMessage.setBytes(String.format("payload_%s", counter), payload);
-
             counter++;
+            var payload = this.fileStorageProvider.findByIdentifier(attachment.identifier());
+            writePayload(
+                    mapMessage,
+                    counter,
+                    attachment.contentType(),
+                    describeAttachment(attachment.type()),
+                    attachment.name(),
+                    payload
+            );
         }
+
+        return counter;
+    }
+
+    private String describeAttachment(ConnectorAttachmentType type) {
+        return switch (type) {
+            case ASICS -> "ASIC-S";
+            case XML_TOKEN -> "tokenXML";
+            default -> "Unknown";
+        };
+    }
+
+    /**
+     * Writes a single payload entry into the MapMessage at the given index. All five payload
+     * properties (mimeContentId, mimeType, description, name, fileName) plus the bytes are written
+     * atomically for this index.
+     */
+    private void writePayload(
+            MapMessage mapMessage,
+            int index,
+            String mimeType,
+            String description,
+            String name,
+            byte[] data) throws JMSException {
+        var prefix = "payload_" + index;
+        mapMessage.setStringProperty(prefix + "_mimeContentId", generateCID());
+        mapMessage.setStringProperty(prefix + "_mimeType", mimeType);
+        mapMessage.setStringProperty(prefix + "_description", description);
+        mapMessage.setStringProperty(prefix + "_name", name);
+        mapMessage.setStringProperty(prefix + "_fileName", name);
+        mapMessage.setBytes(prefix, data);
+    }
+
+    private String generateCID() {
+        return "cid:payload_" + UUID.randomUUID();
     }
 }

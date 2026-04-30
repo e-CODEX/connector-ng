@@ -14,7 +14,6 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
@@ -146,7 +145,9 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
 
     @Override
     public ConnectorMessage findByIdentifier(String identifier) {
-        throw new UnsupportedOperationException("not yet implemented");
+        var message = this.messageJpaRepository.findByIdentifier(identifier);
+
+        return toDomain(message);
     }
 
     @Override
@@ -239,7 +240,10 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     private ConnectorMessage toDomain(ConnectorMessageEntity entity) {
-        // TODO support null case
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorMessage
                 .builder()
                 .businessDomainIdentifier(
@@ -263,7 +267,9 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
                 .deliveredToBackendAt(entity.getDeliveredToBackendAt())
                 .deliveredToGatewayAt(entity.getDeliveredToGatewayAt())
                 .businessContent(
-                        ConnectorMessageBusinessContentRepositoryImpl.toDomain(
+                        entity.getBusinessContent() == null
+                                ? null
+                                : ConnectorMessageBusinessContentRepositoryImpl.toDomain(
                                 entity.getBusinessContent()
                         )
                 )

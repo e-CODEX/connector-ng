@@ -14,7 +14,7 @@ import eu.ecodex.connector.DSSContextConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("infra")
+@ActiveProfiles("dss")
 @SpringBootTest(classes = DSSContextConfiguration.class)
 public class BaseDssTest {
 }

@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.s
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -47,32 +48,35 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorOutboundMessageSecurityStep implements ConnectorMessageStep {
     private final ConnectorSecurityToolkit securityToolkit;
+    private final ConnectorMessageRepository messageRepository;
 
     /**
      * Constructs a new instance of {@code ConnectorOutboundMessageSecurityStep}.
      *
      * <p>This constructor initializes the security step with the provided
-     * {@link ConnectorSecurityToolkit}, which is used to handle the creation of secured
-     * containers for outbound messages.
+     * {@link ConnectorSecurityToolkit}, which is used to handle the creation of secured containers
+     * for outbound messages.
      *
      * @param securityToolkit the {@link ConnectorSecurityToolkit} instance responsible for
      *                        executing security-related operations on {@link ConnectorMessage}
      *                        instances, such as building secured message containers.
      */
-    public ConnectorOutboundMessageSecurityStep(ConnectorSecurityToolkit securityToolkit) {
+    public ConnectorOutboundMessageSecurityStep(
+            ConnectorSecurityToolkit securityToolkit,
+            ConnectorMessageRepository messageRepository) {
         this.securityToolkit = securityToolkit;
+        this.messageRepository = messageRepository;
     }
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
-        log.debug("processing outbound message ASIC-S container for: [{}]", outboundMessage);
+        var updatedMessage = this.messageRepository.findByIdentifier(outboundMessage.identifier());
+        log.debug("Processing outbound message ASIC-S container for: [{}]", updatedMessage);
 
         // create the ASIC-S container
-        var containerMessage = this.securityToolkit.buildContainer(outboundMessage);
+        var containerMessage = this.securityToolkit.buildContainer(updatedMessage);
 
-        // TODO save ASIC-S container as attachment
-
-        log.debug("ASIC-S container created for: [{}]", outboundMessage);
+        log.debug("ASIC-S container created for: [{}]", updatedMessage);
 
         return containerMessage;
     }

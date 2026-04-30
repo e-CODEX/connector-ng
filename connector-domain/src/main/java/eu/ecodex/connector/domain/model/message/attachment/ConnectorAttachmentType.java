@@ -20,5 +20,5 @@ package eu.ecodex.connector.domain.model.message.attachment;
  * </ul>
  */
 public enum ConnectorAttachmentType {
-    ATTACHMENT, BUSINESS_DOCUMENT
+    ATTACHMENT, BUSINESS_DOCUMENT, ASICS, XML_TOKEN
 }

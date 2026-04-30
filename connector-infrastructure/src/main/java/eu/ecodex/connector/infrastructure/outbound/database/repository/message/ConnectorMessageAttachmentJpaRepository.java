@@ -11,8 +11,10 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -21,7 +23,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorMessageAttachmentJpaRepository extends
-        JpaRepository<ConnectorMessageAttachmentEntity, Long> {
+        JpaRepository<ConnectorMessageAttachmentEntity, Long>,
+        JpaSpecificationExecutor<ConnectorMessageAttachmentEntity> {
     @EntityGraph(attributePaths = {"message"})
     ConnectorMessageAttachmentEntity findByIdentifier(String identifier);
+
+    List<ConnectorMessageAttachmentEntity> findAllByMessageIdentifier(String messageIdentifier);
 }

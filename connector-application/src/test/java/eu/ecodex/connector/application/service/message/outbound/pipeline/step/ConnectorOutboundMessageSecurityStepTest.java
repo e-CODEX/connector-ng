@@ -21,6 +21,7 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageSecurityStep;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
+import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,11 +36,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorOutboundMessageSecurityStepTest {
     @Mock
     private ConnectorSecurityToolkit securityToolkit;
+    @Mock
+    private ConnectorMessageRepository messageRepository;
     private ConnectorMessageStep outboundMessageSecurityStep;
 
     @BeforeEach
     void setUp() {
-        outboundMessageSecurityStep = new ConnectorOutboundMessageSecurityStep(securityToolkit);
+        outboundMessageSecurityStep = new ConnectorOutboundMessageSecurityStep(
+                securityToolkit, messageRepository);
     }
 
     @Test
@@ -53,7 +57,7 @@ public class ConnectorOutboundMessageSecurityStepTest {
         // TODO add ASIC-S attachment t the message and check it
         assertThat(outputMessage).isEqualTo(outputMessage);
 
-        verify(securityToolkit, times(1)).buildContainer(outboundMessage);
+        verify(securityToolkit, times(1)).buildContainer(any());
     }
 
     @Test

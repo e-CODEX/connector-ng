@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Repository interface for managing {@link ConnectorMessageAttachment}.
@@ -49,6 +50,9 @@ public interface ConnectorMessageAttachmentRepository {
      *         no such attachment exists.
      */
     ConnectorMessageAttachment findByIdentifier(@Nonnull String identifier);
+
+    List<ConnectorMessageAttachment> findByMessageIdentifierAndTypes(
+            @Nonnull String messageIdentifier, @Nonnull List<ConnectorAttachmentType> types);
 
     /**
      * Retrieves a paginated collection of {@link ConnectorMessageAttachment} entities based on the

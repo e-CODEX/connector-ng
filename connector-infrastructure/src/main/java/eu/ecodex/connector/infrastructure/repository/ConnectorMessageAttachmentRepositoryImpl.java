@@ -18,6 +18,8 @@ import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.AttachmentSpecification;
+import java.util.List;
 import lombok.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,25 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         this.messageJpaRepository = messageJpaRepository;
     }
 
+    static ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorMessageAttachment
+                .builder()
+                .identifier(entity.getIdentifier())
+                .name(entity.getName())
+                .size(entity.getSize())
+                .contentType(entity.getContentType())
+                .description(entity.getDescription())
+                .storage(entity.getStorage())
+                .type(entity.getType())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
     @Override
     public ConnectorMessageAttachment save(ConnectorMessageAttachment attachment) {
         var attachmentToSave = toEntity(attachment);
@@ -51,6 +72,20 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         var attachment = this.jpaRepository.findByIdentifier(identifier);
 
         return toDomain(attachment);
+    }
+
+    @Override
+    public List<ConnectorMessageAttachment> findByMessageIdentifierAndTypes(
+            @NonNull String messageIdentifier,
+            @NonNull List<ConnectorAttachmentType> types) {
+        var specification = AttachmentSpecification.hasMessageIdentifierAndTypeIn(
+                messageIdentifier,
+                types
+        );
+
+        return jpaRepository.findAll(specification)
+                            .stream().map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
+                            .toList();
     }
 
     @Override
@@ -84,7 +119,8 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
     }
 
     @Override
-    public void updateType(@NonNull String attachmentIdentifier, @NonNull ConnectorAttachmentType type) {
+    public void updateType(
+            @NonNull String attachmentIdentifier, @NonNull ConnectorAttachmentType type) {
         var attachment = this.jpaRepository.findByIdentifier(attachmentIdentifier);
         attachment.setType(type);
         this.jpaRepository.save(attachment);
@@ -100,25 +136,6 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
                 .description(attachment.description())
                 .storage(attachment.storage())
                 .type(attachment.type())
-                .build();
-    }
-
-    static ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return ConnectorMessageAttachment
-                .builder()
-                .identifier(entity.getIdentifier())
-                .name(entity.getName())
-                .size(entity.getSize())
-                .contentType(entity.getContentType())
-                .description(entity.getDescription())
-                .storage(entity.getStorage())
-                .type(entity.getType())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 }

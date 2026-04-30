@@ -11,6 +11,7 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
@@ -26,6 +27,7 @@ public class MessageAttachmentTestFixtures {
                 .description("test attachment description")
                 .contentType("text/plain")
                 .storage(ConnectorAttachmentStorage.S3_BUCKET)
+                .type(ConnectorAttachmentType.ATTACHMENT)
                 .build();
     }
 }

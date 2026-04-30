@@ -33,7 +33,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         return ConnectorMessageEvidence
                 .builder()
                 .type(evidenceType)
-                .content(new byte[0])
+                .content("<xml />".getBytes())
                 .build();
     }
 }

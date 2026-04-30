@@ -46,8 +46,8 @@ public record ConnectorMessageAttachment(
     @Nonnull
     public String toString() {
         return String.format(
-                "{identifier=%s, name=%s, contentType=%s, description=%s}",
-                identifier, name, contentType, description
+                "{identifier=%s, name=%s, contentType=%s, description=%s, storage=%s, type=%s}",
+                identifier, name, contentType, description, storage, type
         );
     }
 }

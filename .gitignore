@@ -48,3 +48,6 @@ data/
 
 ### narayana log ###
 transaction-logs/
+
+### docker
+docker/gateway/config/conf/domibus/backups/

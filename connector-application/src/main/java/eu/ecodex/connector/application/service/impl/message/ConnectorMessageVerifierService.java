@@ -37,9 +37,9 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     /**
      * Creates a new {@code ConnectorMessageVerifierService}.
      *
-     * @param partyRepository   repository used to resolve and validate message parties
-     * @param serviceRepository repository used to resolve and validate message services
-     * @param actionRepository  repository used to resolve and validate message actions
+     * @param partyRepository       repository used to resolve and validate message parties
+     * @param serviceRepository     repository used to resolve and validate message services
+     * @param actionRepository      repository used to resolve and validate message actions
      */
     public ConnectorMessageVerifierService(
             ConnectorPartyRepository partyRepository,

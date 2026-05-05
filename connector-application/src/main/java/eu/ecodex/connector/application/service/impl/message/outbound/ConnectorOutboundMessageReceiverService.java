@@ -39,15 +39,13 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
     /**
      * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
      *
-     * @param configurationProvider  provider of the current
-     *                               {@link ConnectorMessageProcessingConfiguration}
-     * @param messageVerifier        verifier used to validate outbound messages
-     * @param stagingEventPublisher  event publisher used to stage messages for further processing;
-     *                               qualified as "connectorOutboundMessageStagingEventPublisher"
-     * @param messageIdGenerator     generator used to assign unique identifiers to outbound
-     *                               messages
-     * @param businessDomainVerifier checker used to assert that the target business domain exists
-     *                               and is enabled
+     * @param configurationProvider provider of the current
+     *                              {@link ConnectorMessageProcessingConfiguration}
+     * @param messageVerifier       verifier used to validate outbound messages
+     * @param stagingEventPublisher event publisher used to stage messages for further processing;
+     *                              qualified as "connectorOutboundMessageStagingEventPublisher"
+     * @param messageIdGenerator    generator used to assign unique identifiers to outbound
+     *                              messages
      */
     public ConnectorOutboundMessageReceiverService(
             ConnectorMessageProcessingConfigurationProvider configurationProvider,

@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
@@ -35,9 +36,9 @@ public class ConnectorAsicContainerBuilderTest extends BaseContainerTest {
     @Test
     void should_create_asics_container_and_sign_it_successfully() {
         when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
+                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
+                .thenReturn(FileTestFixtures.readAsBytes("raw/test-xml.xml"));
 
-        var xmlContent = FileTestFixtures.readAsString("raw/test-xml.xml");
         var message = MessageTestFixtures
                 .createValidOutboundBusinessMessage()
                 .toBuilder()
@@ -45,7 +46,7 @@ public class ConnectorAsicContainerBuilderTest extends BaseContainerTest {
                         MessageContentTestFixtures
                                 .createContent()
                                 .toBuilder()
-                                .xmlContent(xmlContent)
+                                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
                                 .businessDocument(
                                         ConnectorMessageDocumentTestFixtures
                                                 .createDocumentWithoutSignature()

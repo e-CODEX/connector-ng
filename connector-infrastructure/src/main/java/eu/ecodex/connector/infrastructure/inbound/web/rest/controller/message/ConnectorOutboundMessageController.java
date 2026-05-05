@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
+import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
+import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
@@ -32,6 +34,8 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.Conne
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,12 +48,24 @@ import org.springframework.web.multipart.MultipartFile;
 public class ConnectorOutboundMessageController implements ConnectorOutboundMessageApi {
     private final ConnectorOutboundMessageReceiver messageStagingService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
+    private final ConnectorUploadAttachments uploadAttachmentsService;
 
+    /**
+     * Constructs a new instance of ConnectorOutboundMessageController.
+     *
+     * @param messageStagingService        The service responsible for receiving and managing
+     *                                     outbound messages.
+     * @param backendClientVerifierService The service used for verifying backend clients.
+     * @param uploadAttachmentsService     The service for handling file attachments during message
+     *                                     processing.
+     */
     public ConnectorOutboundMessageController(
             ConnectorOutboundMessageReceiver messageStagingService,
-            ConnectorBackendClientVerifier backendClientVerifierService) {
+            ConnectorBackendClientVerifier backendClientVerifierService,
+            ConnectorUploadAttachments uploadAttachmentsService) {
         this.messageStagingService = messageStagingService;
         this.backendClientVerifierService = backendClientVerifierService;
+        this.uploadAttachmentsService = uploadAttachmentsService;
     }
 
     @Override
@@ -153,9 +169,37 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
                 .aesType(business.aesType())
                 .build();
 
+        Path tempLocation;
+
+        try {
+            tempLocation = Files.createTempFile("businessContent", ".xml");
+            Files.writeString(
+                    tempLocation,
+                    new String(xmlBusinessDocument, StandardCharsets.UTF_8)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        String xmlContentIdentifier;
+
+        var uploadCommand = FileUploadCommand.builder()
+                                             .contentType("text/xml")
+                                             .filename("businessContent.xml")
+                                             .tempFileLocation(tempLocation)
+                                             .size(xmlBusinessDocument.length)
+                                             .build();
+
+        try {
+            xmlContentIdentifier = this.uploadAttachmentsService.execute(List.of(uploadCommand))
+                                                                .getFirst().identifier();
+        } finally {
+            uploadCommand.cleanup();
+        }
+
         return ConnectorMessageBusinessContent
                 .builder()
-                .xmlContent(new String(xmlBusinessDocument, StandardCharsets.UTF_8))
+                .xmlContent(toAttachment(xmlContentIdentifier))
                 .businessDocument(businessDocument)
                 .build();
     }

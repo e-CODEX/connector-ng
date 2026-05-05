@@ -17,13 +17,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.JsonTestFixtures;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.MultipartFileTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
+import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message.ConnectorOutboundMessageController;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,6 +49,8 @@ public class ConnectorOutboundMessageControllerTest {
     private ConnectorOutboundMessageReceiver messageStagingService;
     @MockitoBean
     private ConnectorBackendClientVerifier backendClientVerifierService;
+    @MockitoBean
+    private ConnectorUploadAttachments uploadAttachmentsService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -57,6 +62,9 @@ public class ConnectorOutboundMessageControllerTest {
                 .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
         when(backendClientVerifierService.getBackendClient(any()))
                 .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+        when(uploadAttachmentsService.execute(any())).thenReturn(
+                List.of(MessageAttachmentTestFixtures.createAttachment())
+        );
 
         var metadataFile = new MockMultipartFile(
                 "messageMetadata",

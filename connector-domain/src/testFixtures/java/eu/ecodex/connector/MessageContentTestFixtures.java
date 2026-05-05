@@ -17,7 +17,7 @@ public class MessageContentTestFixtures {
     public static ConnectorMessageBusinessContent createContent() {
         return ConnectorMessageBusinessContent
                 .builder()
-                .xmlContent("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
                 .businessDocument(ConnectorMessageDocumentTestFixtures.createDocument())
                 .build();
     }

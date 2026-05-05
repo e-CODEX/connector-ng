@@ -17,6 +17,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
@@ -147,7 +148,9 @@ public class ConnectorMessageServiceTest {
                                          Collections.singletonList(
                                                  EvidenceTestFixtures.createEvidenceTrigger()
                                                                      .toBuilder()
-                                                                     .content(new byte[1])
+                                                                     .attachment(
+                                                                             MessageAttachmentTestFixtures.createEvidenceAttachment()
+                                                                     )
                                                                      .build()
                                          )
                                  )

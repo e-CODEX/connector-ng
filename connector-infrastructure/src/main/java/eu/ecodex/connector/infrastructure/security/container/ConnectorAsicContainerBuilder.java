@@ -179,10 +179,16 @@ public class ConnectorAsicContainerBuilder {
             }
         } else {
             // no business document - make XML to the main document
-            log.warn("No business document content in message [{}]", message.identifier());
-            log.warn("Making the XML content the main document");
+            log.warn("No business document attachment in message [{}]", message.identifier());
+            log.warn("Making the XML attachment the main document");
+
+            var xmlContent = this.fileStorageProvider.findByIdentifier(
+                    businessContent.xmlContent().identifier()
+            );
             dssBusinessDocument = new InMemoryDocument(
-                    businessContent.xmlContent().getBytes(), "mainDocument.xml", MimeTypeEnum.XML
+                    xmlContent,
+                    "mainDocument.xml",
+                    MimeTypeEnum.XML
             );
         }
 

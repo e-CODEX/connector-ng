@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEvidenceEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorEvidenceJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
@@ -26,12 +27,39 @@ import org.springframework.stereotype.Component;
 public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageEvidenceRepository {
     private final ConnectorEvidenceJpaRepository evidenceJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
+    private final ConnectorMessageAttachmentJpaRepository attachmentJpaRepository;
 
+    /**
+     * Constructs an instance of ConnectorMessageEvidenceRepositoryImpl with the necessary JPA
+     * repositories to perform persistence operations.
+     *
+     * @param evidenceJpaRepository   Repository for performing CRUD operations on
+     *                                ConnectorMessageEvidenceEntity instances.
+     * @param messageJpaRepository    Repository for performing CRUD operations on
+     *                                ConnectorMessageEntity instances and finding messages by their
+     *                                identifier.
+     * @param attachmentJpaRepository Repository for performing CRUD operations on
+     *                                ConnectorMessageAttachmentEntity instances and fetching
+     *                                attachments by their identifier.
+     */
     public ConnectorMessageEvidenceRepositoryImpl(
             ConnectorEvidenceJpaRepository evidenceJpaRepository,
-            ConnectorMessageJpaRepository messageJpaRepository) {
+            ConnectorMessageJpaRepository messageJpaRepository,
+            ConnectorMessageAttachmentJpaRepository attachmentJpaRepository) {
         this.evidenceJpaRepository = evidenceJpaRepository;
         this.messageJpaRepository = messageJpaRepository;
+        this.attachmentJpaRepository = attachmentJpaRepository;
+    }
+
+    static ConnectorMessageEvidence toDomain(ConnectorMessageEvidenceEntity entity) {
+        return ConnectorMessageEvidence
+                .builder()
+                .uuid(entity.getUuid())
+                .attachment(ConnectorMessageAttachmentRepositoryImpl.toDomain(entity.getContent()))
+                .type(entity.getType())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
     }
 
     @Override
@@ -45,22 +73,15 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
         return toDomain(savedEvidence);
     }
 
-    static ConnectorMessageEvidence toDomain(ConnectorMessageEvidenceEntity entity) {
-        return ConnectorMessageEvidence
-                .builder()
-                .uuid(entity.getUuid())
-                .content(entity.getContent())
-                .type(entity.getType())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .build();
-    }
-
     private ConnectorMessageEvidenceEntity toEntity(
-            ConnectorMessageEvidence evidence, ConnectorMessageEntity message) {
+            ConnectorMessageEvidence evidence,
+            ConnectorMessageEntity message) {
+        var content = this.attachmentJpaRepository.findByIdentifier(
+                evidence.attachment().identifier());
+
         return ConnectorMessageEvidenceEntity
                 .builder()
-                .content(evidence.content())
+                .content(content)
                 .type(evidence.type())
                 .message(message)
                 .build();

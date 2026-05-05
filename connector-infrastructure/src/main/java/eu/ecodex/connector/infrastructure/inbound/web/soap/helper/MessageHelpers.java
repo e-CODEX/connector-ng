@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.helper;
 
-import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
@@ -38,6 +37,7 @@ public class MessageHelpers {
     public static ConnectorMessage toDomain(
             DomibusConnectorMessageType message,
             List<String> attachments,
+            String businessContentAttachmentIdentifier,
             String businessDocumentAttachmentIdentifier,
             String backendClientName
     ) throws Exception {
@@ -54,6 +54,7 @@ public class MessageHelpers {
                 .as4Properties(toAS4Properties(details))
                 .businessContent(toBusinessContent(
                         incomingBusinessContent,
+                        businessContentAttachmentIdentifier,
                         businessDocumentAttachmentIdentifier
                 ))
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
@@ -102,7 +103,8 @@ public class MessageHelpers {
 
     public static ConnectorMessageBusinessContent toBusinessContent(
             DomibusConnectorMessageContentType content,
-            String businessDocumentAttachmentIdentifier) throws Exception {
+            String businessContentAttachmentIdentifier,
+            String businessDocumentAttachmentIdentifier) {
         var document = content.getDocument();
         var businessDocument = ConnectorMessageBusinessDocument
                 .builder()
@@ -115,7 +117,7 @@ public class MessageHelpers {
 
         return ConnectorMessageBusinessContent
                 .builder()
-                .xmlContent(AttachmentHelpers.sourceToBytes(content.getXmlContent()))
+                .xmlContent(toAttachment(businessContentAttachmentIdentifier))
                 .businessDocument(businessDocument)
                 .build();
     }

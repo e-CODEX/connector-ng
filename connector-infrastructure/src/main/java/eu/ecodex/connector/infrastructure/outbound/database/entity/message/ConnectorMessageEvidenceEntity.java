@@ -22,8 +22,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -55,9 +55,9 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     @Column(name = "TYPE", nullable = false, updatable = false)
     private ConnectorEvidenceType type;
 
-    @Lob
-    @Column(name = "CONTENT", nullable = false)
-    private byte[] content;
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ATTACHMENT_ID", unique = true, nullable = false)
+    private ConnectorMessageAttachmentEntity content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MESSAGE_ID")

@@ -39,5 +39,7 @@ public interface ConnectorFileStorageProvider {
      */
     String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull Path filePath);
 
+    String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull byte[] content);
+
     byte[] findByIdentifier(String identifier);
 }

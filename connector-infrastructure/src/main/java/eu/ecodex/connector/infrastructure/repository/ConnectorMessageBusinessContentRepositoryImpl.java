@@ -79,7 +79,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         return ConnectorMessageBusinessContent
                 .builder()
                 .uuid(entity.getUuid())
-                .xmlContent(entity.getXmlContent())
+                .xmlContent(ConnectorMessageAttachmentRepositoryImpl.toDomain(entity.getXmlContent()))
                 .businessDocument(toDomain(entity.getBusinessDocument()))
                 .build();
     }
@@ -138,9 +138,12 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
 
     private ConnectorMessageBusinessContentEntity toEntity(
             ConnectorMessageBusinessContent content, ConnectorMessageEntity message) {
+        var xmlContent = this.attachmentJpaRepository.findByIdentifier(
+                content.xmlContent().identifier());
+
         return ConnectorMessageBusinessContentEntity
                 .builder()
-                .xmlContent(content.xmlContent())
+                .xmlContent(xmlContent)
                 .message(message)
                 .build();
     }

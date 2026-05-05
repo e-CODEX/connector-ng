@@ -41,17 +41,26 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
     }
 
     @Override
-    public String save(
-            @NonNull ConnectorMessageAttachment attachment, @NonNull Path filePath) {
+    public String save(@NonNull ConnectorMessageAttachment attachment, @NonNull Path filePath) {
         log.info("saving attachment [{}] to s3", attachment.identifier());
 
-        var putObjectRequest = PutObjectRequest.builder()
-                                               .bucket(this.s3ProviderProperties.getBucket())
-                                               .key(attachment.identifier())
-                                               .build();
+        var putObjectRequest = buildObjectRequest(attachment);
+
         this.s3Client.putObject(
                 putObjectRequest,
                 RequestBody.fromFile(filePath)
+        );
+
+        return attachment.identifier();
+    }
+
+    @Override
+    public String save(@NonNull ConnectorMessageAttachment attachment, byte @NonNull [] content) {
+        var putObjectRequest = buildObjectRequest(attachment);
+
+        this.s3Client.putObject(
+                putObjectRequest,
+                RequestBody.fromBytes(content)
         );
 
         return attachment.identifier();
@@ -66,7 +75,14 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
                                                .key(identifier)
                                                .build();
 
-       var responseBytes = this.s3Client.getObjectAsBytes(getObjectRequest);
+        var responseBytes = this.s3Client.getObjectAsBytes(getObjectRequest);
         return responseBytes.asByteArray();
+    }
+
+    private PutObjectRequest buildObjectRequest(ConnectorMessageAttachment attachment) {
+        return PutObjectRequest.builder()
+                               .bucket(this.s3ProviderProperties.getBucket())
+                               .key(attachment.identifier())
+                               .build();
     }
 }

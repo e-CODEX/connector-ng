@@ -112,9 +112,14 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
 
     private void persistBusinessDocument(
             ConnectorMessageBusinessContent businessContent, String messageIdentifier) {
-        var businessDocumentAttachment = businessContent.businessDocument().attachment();
         attachAttachment(
-                businessDocumentAttachment,
+                businessContent.xmlContent(),
+                messageIdentifier,
+                ConnectorAttachmentType.BUSINESS_CONTENT
+        );
+
+        attachAttachment(
+                businessContent.businessDocument().attachment(),
                 messageIdentifier,
                 ConnectorAttachmentType.BUSINESS_DOCUMENT
         );

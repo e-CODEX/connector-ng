@@ -30,12 +30,19 @@ public class ConnectorMessageEvidenceRepositoryImplTest {
     private ConnectorMessageEvidenceRepository repository;
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/message.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/attachment.sql"
+    })
     void should_save_evidence_successfully_to_database() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
-        var saved = repository.save(evidence, "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+
+        var saved = repository.save(
+                evidence,
+                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
+        );
 
         assertThat(saved).isNotNull();
         assertThat(saved.uuid()).isNotNull();

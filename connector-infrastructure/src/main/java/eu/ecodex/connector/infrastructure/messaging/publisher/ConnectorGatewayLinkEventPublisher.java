@@ -19,7 +19,6 @@ import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import jakarta.jms.Session;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -127,13 +126,15 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
 
         counter++;
 
+        var payload = this.fileStorageProvider.findByIdentifier(content.xmlContent().identifier());
+
         writePayload(
                 mapMessage,
                 counter,
                 "text/xml",
                 "messageContent",
                 "messageContent",
-                content.xmlContent().getBytes(StandardCharsets.UTF_8)
+                payload
         );
 
         return counter;
@@ -150,12 +151,15 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         for (var evidence : evidences) {
             counter++;
 
+            var payload = this.fileStorageProvider.findByIdentifier(
+                    evidence.attachment().identifier());
+
             writePayload(
                     mapMessage, counter,
                     "text/xml",
                     evidence.type().name(),
                     evidence.type().name(),
-                    evidence.content()
+                    payload
             );
         }
 

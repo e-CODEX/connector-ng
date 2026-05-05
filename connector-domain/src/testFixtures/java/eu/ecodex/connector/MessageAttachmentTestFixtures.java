@@ -30,4 +30,22 @@ public class MessageAttachmentTestFixtures {
                 .type(ConnectorAttachmentType.ATTACHMENT)
                 .build();
     }
+
+    public static ConnectorMessageAttachment createBusinessContentAttachment() {
+        return createAttachment()
+                .toBuilder()
+                .type(ConnectorAttachmentType.BUSINESS_CONTENT)
+                .contentType("text/xml")
+                .name("businessContent.xml")
+                .build();
+    }
+
+    public static ConnectorMessageAttachment createEvidenceAttachment() {
+        return createAttachment()
+                .toBuilder()
+                .type(ConnectorAttachmentType.EVIDENCE_XML)
+                .contentType("text/xml")
+                .name("evidence.xml")
+                .build();
+    }
 }

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.model.message.evidence;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
@@ -21,13 +22,13 @@ import lombok.Builder;
  *
  * @param uuid    The UUID of the evidence.
  * @param type    The type of the evidence.
- * @param content The businessContent of the evidence.
+ * @param attachment The businessContent of the evidence.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageEvidence(
         @Nullable String uuid,
         @Nonnull ConnectorEvidenceType type,
-        @Nullable byte[] content,
+        @Nullable ConnectorMessageAttachment attachment,
         @Nullable Instant createdAt,
         @Nullable Instant updatedAt
 ) implements Serializable {

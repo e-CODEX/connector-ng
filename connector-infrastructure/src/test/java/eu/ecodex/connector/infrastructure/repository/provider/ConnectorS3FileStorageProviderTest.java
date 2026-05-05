@@ -63,7 +63,7 @@ public class ConnectorS3FileStorageProviderTest {
         var attachment = MessageAttachmentTestFixtures.createAttachment();
         assertThrows(
                 NullPointerException.class,
-                () -> fileStorageProvider.save(attachment, null)
+                () -> fileStorageProvider.save(attachment, (Path) null)
         );
     }
 
@@ -79,7 +79,7 @@ public class ConnectorS3FileStorageProviderTest {
     void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_attachment_and_input_stream_are_null() {
         assertThrows(
                 NullPointerException.class,
-                () -> fileStorageProvider.save(null, null)
+                () -> fileStorageProvider.save(null, (Path) null)
         );
     }
 

@@ -17,6 +17,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageAttachmentType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
@@ -105,11 +106,13 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             var businessDocumentAttachmentIdentifier = persistBusinessDocument(
                     businessContent.getDocument()
             );
+            var businessContentAttachmentIdentifier = persistBusinessContent(businessContent);
             // TODO current cn is fake, retrieve the certificate dn from user principal
             var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
             var parsedMessage = MessageHelpers.toDomain(
                     submitMessageRequest,
                     attachmentIdentifiers,
+                    businessContentAttachmentIdentifier,
                     businessDocumentAttachmentIdentifier,
                     backendClientName
             );
@@ -146,6 +149,18 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         }
     }
 
+    private String persistBusinessContent(DomibusConnectorMessageContentType businessContent) {
+        var fileUploadCommand = toFileUploadCommand(businessContent);
+
+        try {
+            return uploadAttachmentsService.execute(List.of(fileUploadCommand))
+                                           .getFirst()
+                                           .identifier();
+        } finally {
+            fileUploadCommand.cleanup();
+        }
+    }
+
     private String persistBusinessDocument(DomibusConnectorMessageDocumentType pdfBusinessContent) {
         var fileUploadCommand = toFileUploadCommand(pdfBusinessContent);
 
@@ -170,6 +185,24 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                     .builder()
                     .filename(StringUtils.cleanPath(pdfBusinessContent.getDocumentName()))
                     .contentType(contentType)
+                    .size(file.length())
+                    .tempFileLocation(tempFile)
+                    .build();
+        } catch (Exception e) {
+            throw new ConnectorInternalServerException(e.getMessage());
+        }
+    }
+
+    private FileUploadCommand toFileUploadCommand(
+            DomibusConnectorMessageContentType businessContent) {
+        try {
+            var tempFile = AttachmentHelpers.sourceToTempFile(businessContent.getXmlContent());
+            var file = tempFile.toFile();
+
+            return FileUploadCommand
+                    .builder()
+                    .filename("businessContent.xml")
+                    .contentType("text/xml")
                     .size(file.length())
                     .tempFileLocation(tempFile)
                     .build();

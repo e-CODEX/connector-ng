@@ -47,7 +47,7 @@ public class ConnectorUploadAttachmentsServiceTest {
     void should_upload_attachments_successfully() throws IOException {
         var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
         when(attachmentRepository.save(any())).thenReturn(savedAttachment);
-        when(storageProvider.save(any(), any())).thenReturn(savedAttachment.identifier());
+        when(storageProvider.save(any(), (Path) any())).thenReturn(savedAttachment.identifier());
 
         var fileUploadCommand = new FileUploadCommand(
                 "test_attachment.txt",
@@ -70,7 +70,7 @@ public class ConnectorUploadAttachmentsServiceTest {
     void should_throw_attachment_exception_when_uploading_attachment_if_an_io_exception_occurs() throws IOException {
         var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
         when(attachmentRepository.save(any())).thenReturn(savedAttachment);
-        doThrow(RuntimeException.class).when(storageProvider).save(any(), any());
+        doThrow(RuntimeException.class).when(storageProvider).save(any(), (Path) any());
 
         var fileUploadCommand = new FileUploadCommand(
                 "test_attachment.txt",

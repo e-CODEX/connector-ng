@@ -25,6 +25,7 @@ import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,7 +55,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
 
     @Test
     void should_build_asics_container_sign_it_and_push_for_process_successfully() {
-        when(fileStorageProvider.save(any(), any())).thenReturn(UUID.randomUUID().toString());
+        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID().toString());
         when(fileStorageProvider.findByIdentifier(any()))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
 
@@ -68,7 +69,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
     @Test
     void should_build_asics_container_sign_it_and_push_for_process_successfully_2() {
         // message with attachment
-        when(fileStorageProvider.save(any(), any())).thenReturn(UUID.randomUUID().toString());
+        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID().toString());
         when(fileStorageProvider.findByIdentifier(any()))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/attachment/Attachment.png"));
@@ -99,7 +100,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
     @Test
     void should_throw_exception_when_building_asics_container_if_the_s3_provider_is_not_available() {
         // message with attachment
-        doThrow(RuntimeException.class).when(fileStorageProvider).save(any(), any());
+        doThrow(RuntimeException.class).when(fileStorageProvider).save(any(), (Path) any());
         when(fileStorageProvider.findByIdentifier(any()))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
 
@@ -132,7 +133,6 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
     }
 
     private ConnectorMessage createMessage() {
-        var xmlContent = FileTestFixtures.readAsString("raw/test-xml.xml");
         return MessageTestFixtures
                 .createValidOutboundBusinessMessage()
                 .toBuilder()
@@ -140,7 +140,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
                         MessageContentTestFixtures
                                 .createContent()
                                 .toBuilder()
-                                .xmlContent(xmlContent)
+                                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
                                 .businessDocument(
                                         ConnectorMessageDocumentTestFixtures
                                                 .createDocumentWithoutSignature()

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.model.message.content;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -30,7 +31,7 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record ConnectorMessageBusinessContent(
         @Nullable String uuid,
-        @Nonnull String xmlContent,
+        @Nonnull ConnectorMessageAttachment xmlContent,
         @Nullable ConnectorMessageBusinessDocument businessDocument // TODO set as non nullable
 ) implements Serializable {
     @Override

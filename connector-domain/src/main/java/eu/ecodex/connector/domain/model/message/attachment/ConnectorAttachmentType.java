@@ -12,13 +12,7 @@ package eu.ecodex.connector.domain.model.message.attachment;
 
 /**
  * Enum representing the possible types of attachments in the Connector.
- *
- * <ul>
- *     <li>ATTACHMENT: Refers to general-purpose attachments that may be included in a message.
- *     <li>BUSINESS_DOCUMENT: Represents attachments that are classified as business documents,
- *     often containing important information relevant to the message context.
- * </ul>
  */
 public enum ConnectorAttachmentType {
-    ATTACHMENT, BUSINESS_DOCUMENT, ASICS, XML_TOKEN
+    ATTACHMENT, ASICS, BUSINESS_CONTENT, BUSINESS_DOCUMENT, EVIDENCE_XML, XML_TOKEN
 }

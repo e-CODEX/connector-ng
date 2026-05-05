@@ -12,20 +12,12 @@ package eu.ecodex.connector.domain.service;
 
 import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
-import eu.ecodex.connector.domain.exception.ConnectorMessageIdentifierException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.domain.exception.ConnectorMessagePartyException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
-import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * e-Codex Connector message service implementation.
@@ -72,6 +64,6 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
         return message.businessContent() == null
                && message.evidences() != null
                && message.evidences().size() == 1
-               && ArrayUtils.isEmpty(message.evidences().getFirst().content());
+               && message.evidences().getFirst().attachment() == null;
     }
 }

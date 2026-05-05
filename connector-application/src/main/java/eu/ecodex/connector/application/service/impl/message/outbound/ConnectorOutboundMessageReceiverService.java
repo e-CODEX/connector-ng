@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
@@ -33,6 +34,7 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
     private final ConnectorMessageVerifier messageVerifier;
     private final ConnectorEventPublisher stagingEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGenerator;
+    private final ConnectorCheckBusinessDomain checkBusinessDomain;
 
     /**
      * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
@@ -42,24 +44,28 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
      * @param messageVerifier       verifier used to validate outbound messages
      * @param stagingEventPublisher event publisher used to stage messages for further processing;
      *                              qualified as "connectorOutboundMessageStagingEventPublisher"
-     * @param messageIdGenerator    generator used to assign unique identifiers to outbound
-     *                              messages
+     * @param messageIdGenerator    generator used to assign unique identifiers to outbound messages
+     * @param checkBusinessDomain checker used to assert that the target business domain exists
+     *                              and is enabled
      */
     public ConnectorOutboundMessageReceiverService(
             ConnectorMessageProcessingConfigurationProvider configurationProvider,
             ConnectorMessageVerifier messageVerifier,
             @Qualifier("connectorOutboundMessageStagingEventPublisher")
             ConnectorEventPublisher stagingEventPublisher,
-            ConnectorMessageIdGenerator messageIdGenerator) {
+            ConnectorMessageIdGenerator messageIdGenerator,
+            ConnectorCheckBusinessDomain checkBusinessDomain) {
         this.configurationProvider = configurationProvider;
         this.messageVerifier = messageVerifier;
         this.stagingEventPublisher = stagingEventPublisher;
         this.messageIdGenerator = messageIdGenerator;
+        this.checkBusinessDomain = checkBusinessDomain;
     }
 
     @Override
     @Transactional
     public ConnectorMessage register(@NonNull final ConnectorMessage message) {
+        checkBusinessDomain.assertIsEnabled(message.businessDomainIdentifier());
         var configuration = this.configurationProvider.getConfiguration();
         var messageWithId = this.assignIdentifier(message);
         this.messageVerifier.verify(messageWithId, configuration.outboundMessageVerificationMode());

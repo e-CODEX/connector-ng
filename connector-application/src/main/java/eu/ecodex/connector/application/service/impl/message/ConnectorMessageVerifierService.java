@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.impl.message;
 
+import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
@@ -33,21 +34,26 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     private final ConnectorPartyRepository partyRepository;
     private final ConnectorServiceRepository serviceRepository;
     private final ConnectorActionRepository actionRepository;
+    private final ConnectorCheckBusinessDomain checkBusinessDomain;
 
     /**
      * Creates a new {@code ConnectorMessageVerifierService}.
      *
-     * @param partyRepository   repository used to resolve and validate message parties
-     * @param serviceRepository repository used to resolve and validate message services
-     * @param actionRepository  repository used to resolve and validate message actions
+     * @param partyRepository       repository used to resolve and validate message parties
+     * @param serviceRepository     repository used to resolve and validate message services
+     * @param actionRepository      repository used to resolve and validate message actions
+     * @param checkBusinessDomain checker used to assert that the target business domain exists
+     *                              and is enabled
      */
     public ConnectorMessageVerifierService(
             ConnectorPartyRepository partyRepository,
             ConnectorServiceRepository serviceRepository,
-            ConnectorActionRepository actionRepository) {
+            ConnectorActionRepository actionRepository,
+            ConnectorCheckBusinessDomain checkBusinessDomain) {
         this.partyRepository = partyRepository;
         this.serviceRepository = serviceRepository;
         this.actionRepository = actionRepository;
+        this.checkBusinessDomain = checkBusinessDomain;
     }
 
     @Override
@@ -135,6 +141,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
     private void processServiceAndActionVerification(ConnectorMessage message) {
         log.debug("Verifying service and action for message [{}]", message.identifier());
+        checkBusinessDomain.assertIsEnabled(message.businessDomainIdentifier());
 
         try {
             var as4Properties = message.as4Properties();

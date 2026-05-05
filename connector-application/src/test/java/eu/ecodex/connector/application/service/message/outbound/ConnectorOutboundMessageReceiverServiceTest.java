@@ -14,15 +14,19 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageReceiverService;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,12 +45,15 @@ public class ConnectorOutboundMessageReceiverServiceTest {
     private ConnectorMessageProcessingConfigurationProvider messageProcessingConfigurationProvider;
     @Mock
     private ConnectorMessageVerifier messageVerifier;
+    @Mock
+    private ConnectorCheckBusinessDomain checkBusinessDomain;
     @InjectMocks
     private ConnectorOutboundMessageReceiverService messageStagingService;
 
     @Test
     void should_receive_outbound_message_and_submit_it_to_staging_queue_successfully() {
         var generatedIdentifier = "28c86f29-5953-42d5-8336-1a03f7e86951@eu.ecodex.connector";
+        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(messageIdGenerator.generateIdentifier()).thenReturn(generatedIdentifier);
         when(messageProcessingConfigurationProvider.getConfiguration())
                 .thenReturn(
@@ -65,7 +72,32 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         assertThat(outboundMessage.identifier()).isNull();
         assertThat(message.identifier()).isNotNull();
         assertThat(message.identifier()).isEqualTo(generatedIdentifier);
+    }
 
+    @Test
+    void should_throw_exception_when_business_domain_is_not_found() {
+        doThrow(ConnectorBusinessDomainNotFoundException.class)
+                .when(checkBusinessDomain).assertIsEnabled(any());
+
+        var outboundMessage = MessageTestFixtures.createValidOutboundStagingBusinessMessage();
+
+        assertThrows(
+                ConnectorBusinessDomainNotFoundException.class,
+                () -> messageStagingService.register(outboundMessage)
+        );
+    }
+
+    @Test
+    void should_throw_exception_when_business_domain_is_not_enabled() {
+        doThrow(ConnectorBusinessDomainNotEnabledException.class)
+                .when(checkBusinessDomain).assertIsEnabled(any());
+
+        var outboundMessage = MessageTestFixtures.createValidOutboundStagingBusinessMessage();
+
+        assertThrows(
+                ConnectorBusinessDomainNotEnabledException.class,
+                () -> messageStagingService.register(outboundMessage)
+        );
     }
 
     @Test

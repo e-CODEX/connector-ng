@@ -38,7 +38,14 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
- * Creates signed REM evidences (behaviour ported from legacy DomibusConnectorEvidencesToolkitImpl).
+ * Domain implementation that produces signed ETSI REM evidence XML for a {@link ConnectorMessage}.
+ *
+ * <p>Maps each {@link ConnectorEvidenceType} to
+ * the corresponding REM chain step, reuses prior evidences from {@code message.evidences()} where
+ * required, and builds issuer metadata from {@link ConnectorEvidencesProperties}. Submission-level
+ * evidences hash the business payload (when present) using the configured digest.
+ *
+ * <p>Behaviour is aligned with the legacy Domibus connector evidence toolkit.
  */
 @Component
 public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
@@ -49,6 +56,11 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     private final HashValueBuilder hashValueBuilder;
     private final ConnectorEvidencesProperties evidencesProperties;
 
+    /**
+     * @param evidenceBuilder             builds and signs REM XML for each evidence step
+     * @param evidencePayloadHashValueBuilder digest for submission evidences over business payload
+     * @param evidencesProperties          issuer gateway/postal address and signature settings
+     */
     public ConnectorEvidenceToolkitImpl(
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider,
@@ -62,6 +74,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         this.evidencesProperties = evidencesProperties;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ConnectorMessageEvidence create(
             @NonNull ConnectorMessage message,

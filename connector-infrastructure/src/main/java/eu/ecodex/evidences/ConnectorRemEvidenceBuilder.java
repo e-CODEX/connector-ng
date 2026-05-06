@@ -44,17 +44,26 @@ import org.etsi.uri._02640.v2.REMEvidenceType;
 import org.springframework.stereotype.Component;
 
 /**
- * Builds and signs REM evidences using the connector DSS stack (enveloped XAdES).
+ * Spring implementation of {@link EvidenceBuilder}: marshals SPOCS REM evidence objects to XML,
+ * then signs them with an enveloped XAdES-B signature via {@link DssConnectorRemEvidenceXmlSigner}.
+ *
+ * <p>Chain steps that extend a previous evidence parse {@code previousEvidenceInByte} with
+ * {@link RemEvidenceUnmarshaller} to obtain a {@link REMEvidenceType} root before building the
+ * next wrapper.
  */
 @Slf4j
 @Component
 public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
     private final DssConnectorRemEvidenceXmlSigner xmlSigner;
 
+    /**
+     * @param xmlSigner signs unsigned marshalled evidence XML
+     */
     public ConnectorRemEvidenceBuilder(DssConnectorRemEvidenceXmlSigner xmlSigner) {
         this.xmlSigner = xmlSigner;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createSubmissionAcceptanceRejection(
             boolean isAcceptance, REMErrorEvent eventReason,
@@ -70,6 +79,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
                                                    messageDetails);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createSubmissionAcceptanceRejection(
             boolean isAcceptance, EventReasonType eventReason,
@@ -142,6 +152,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
         return signedByteArray;
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createRelayREMMDAcceptanceRejection(
             boolean isAcceptance, REMErrorEvent eventReason,
@@ -157,6 +168,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
                 isAcceptance, reason, evidenceIssuerDetails, previousEvidenceInByte);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createRelayREMMDAcceptanceRejection(
             boolean isAcceptance, EventReasonType eventReason,
@@ -177,6 +189,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
         return signEvidence(evidence, true);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createRelayREMMDFailure(
             REMErrorEvent eventReason, EDeliveryDetails evidenceIssuerDetails,
@@ -190,6 +203,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
         return createRelayREMMDFailure(reason, evidenceIssuerDetails, previousEvidenceInByte);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createRelayREMMDFailure(
             EventReasonType eventReason, EDeliveryDetails evidenceIssuerDetails,
@@ -207,6 +221,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
         return signEvidence(evidence, true);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createDeliveryNonDeliveryToRecipient(
             boolean isDelivery, REMErrorEvent eventReason,
@@ -222,6 +237,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
                 isDelivery, reason, evidenceIssuerDetails, previousEvidenceInByte);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createDeliveryNonDeliveryToRecipient(
             boolean isDelivery, EventReasonType eventReason,
@@ -242,6 +258,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
         return signEvidence(evidence, true);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createRetrievalNonRetrievalByRecipient(
             boolean isRetrieval, REMErrorEvent eventReason,
@@ -257,6 +274,7 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
                 isRetrieval, reason, evidenceIssuerDetails, previousEvidenceInByte);
     }
 
+    /** {@inheritDoc} */
     @Override
     public byte[] createRetrievalNonRetrievalByRecipient(
             boolean isRetrieval, EventReasonType eventReason,
@@ -277,6 +295,10 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
         return signEvidence(evidence, true);
     }
 
+    /**
+     * Marshals {@code evidenceToBeSigned} to XML, optionally clears an existing in-object signature,
+     * then returns {@link DssConnectorRemEvidenceXmlSigner#signUnsignedRemEvidenceXml(byte[])} output.
+     */
     private byte[] signEvidence(Evidence evidenceToBeSigned, boolean removeOldSignature)
             throws ECodexEvidenceBuilderException {
 

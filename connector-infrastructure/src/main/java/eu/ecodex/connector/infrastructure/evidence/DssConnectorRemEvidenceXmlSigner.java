@@ -23,7 +23,13 @@ import org.springframework.stereotype.Component;
 import static eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig.REM_EVIDENCE_SIGNING_TOKEN_BEAN;
 
 /**
- * Signs unsigned REM evidence XML with enveloped XAdES-B (legacy-compatible digest: SHA-1).
+ * Applies an enveloped XAdES-B signature to marshalled REM evidence XML bytes.
+ *
+ * <p>Uses the dedicated REM keystore bean
+ * ({@link eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig}) and SHA-1 as
+ * the reference digest algorithm to stay compatible with legacy evidence signing.
+ *
+ * @see eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig#REM_EVIDENCE_SIGNING_TOKEN_BEAN
  */
 @Slf4j
 @Component
@@ -37,6 +43,10 @@ public class DssConnectorRemEvidenceXmlSigner {
     private final ConnectorDssDocumentSigner documentSigner;
     private final ConnectorDssSigningTokenProvider signingTokenProvider;
 
+    /**
+     * @param documentSigner     shared DSS document signer for XAdES
+     * @param signingTokenProvider keystore-backed token for REM evidence (qualified bean name)
+     */
     public DssConnectorRemEvidenceXmlSigner(
             ConnectorDssDocumentSigner documentSigner,
             @Qualifier(REM_EVIDENCE_SIGNING_TOKEN_BEAN)
@@ -46,9 +56,12 @@ public class DssConnectorRemEvidenceXmlSigner {
     }
 
     /**
-     * @param unsignedXml marshalled REM evidence without signature
+     * Signs marshalled REM evidence XML and returns the full document bytes including
+     * {@code ds:Signature}.
      *
+     * @param unsignedXml marshalled REM evidence without signature
      * @return enveloped signed XML bytes
+     * @throws IllegalStateException if reading signed bytes after DSS processing fails
      */
     public byte[] signUnsignedRemEvidenceXml(byte[] unsignedXml) {
         var doc = new InMemoryDocument(unsignedXml);

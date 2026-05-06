@@ -22,7 +22,8 @@ public interface ConnectorCheckBusinessDomain {
      * Asserts that the business domain identified by {@code identifier} exists and is enabled.
      *
      * @param identifier the business domain identifier to check; must not be null
-     * @throws ConnectorBusinessDomainNotFoundException   if no business domain matches the identifier
+     * @throws ConnectorBusinessDomainNotFoundException   if no business domain matches the
+     *                                                    identifier
      * @throws ConnectorBusinessDomainNotEnabledException if the business domain is disabled
      */
     void assertIsEnabled(ConnectorBusinessDomainIdentifier identifier);

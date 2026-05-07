@@ -82,7 +82,7 @@ public record ConnectorMessage(
         @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
         @Nullable String uuid,
         @Nullable String identifier,
-        @NotBlank String backendMessageIdentifier,
+        @Nullable String backendMessageIdentifier,
         @Nullable String referenceToBackendMessageIdentifier,
         @Nullable String backendName,
         @Nullable String gatewayName,

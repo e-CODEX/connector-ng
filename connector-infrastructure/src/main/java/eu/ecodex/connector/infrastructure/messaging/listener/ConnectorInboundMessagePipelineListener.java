@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
+import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.ConnectorInboundMessagePipeline;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -21,12 +22,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * JMS listener responsible for triggering the outbound message processing pipeline when a
- * {@link ConnectorMessage} processing event is received from the backend.
+ * JMS listener responsible for triggering the inbound message processing pipeline when a
+ * {@link ConnectorMessage} processing event is received from the gateway.
  *
- * <p>This component listens to the configured outbound message processing queue and delegates the
- * received message to the {@code connectorOutboundMessagePipeline}. The pipeline then executes the
- * configured sequence of processing steps for outbound connector messages.
+ * <p>This component listens to the configured inbound message processing queue and delegates the
+ * received message to the {@link  ConnectorInboundMessagePipeline}. The pipeline then executes the
+ * configured sequence of processing steps for inbound connector messages.
  *
  * <p>The listener operates within a transactional context to ensure that message consumption and
  * later processing are handled atomically according to the application's transaction
@@ -34,20 +35,20 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessagePipelineListener implements ConnectorEventHandler {
-    private final ConnectorMessagePipeline outboundMessagePipeline;
+public class ConnectorInboundMessagePipelineListener implements ConnectorEventHandler {
+    private final ConnectorMessagePipeline inboundMessagePipeline;
 
-    public ConnectorOutboundMessagePipelineListener(
-            @Qualifier("connectorOutboundMessagePipeline")
-            ConnectorMessagePipeline outboundMessagePipeline) {
-        this.outboundMessagePipeline = outboundMessagePipeline;
+    public ConnectorInboundMessagePipelineListener(
+            @Qualifier("connectorInboundMessagePipeline")
+            ConnectorMessagePipeline inboundMessagePipeline) {
+        this.inboundMessagePipeline = inboundMessagePipeline;
     }
 
     @Override
     @Transactional
-    @JmsListener(destination = "${connector.queues.outbound-message-processing-queue}")
+    @JmsListener(destination = "${connector.queues.inbound-message-processing-queue}")
     public void handle(@NonNull ConnectorMessage message) {
-        log.info("received outbound message processing event: [{}]", message);
-        this.outboundMessagePipeline.process(message);
+        log.info("received inbound message processing event: [{}]", message);
+        this.inboundMessagePipeline.process(message);
     }
 }

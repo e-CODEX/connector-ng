@@ -88,8 +88,8 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
             this.linkSubmissionStep.execute(inboundMessage);
 
             log.info(
-                    "message with backend id [{}] has been successfully submitted to backend [{}]",
-                    inboundMessage.backendMessageIdentifier(), inboundMessage.backendName()
+                    "message with identifier [{}] has been successfully submitted to backend [{}]",
+                    inboundMessage.identifier(), inboundMessage.backendName()
             );
         } catch (Exception e) { // TODO improve the exception handling (sec or container exc)
             log.warn(

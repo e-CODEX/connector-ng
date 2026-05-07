@@ -51,6 +51,7 @@ public class ConnectorOutboundMessageSecurityStepTest {
         var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
 
         when(securityToolkit.buildContainer(any())).thenReturn(outboundMessage);
+        when(messageRepository.findByIdentifier(any())).thenReturn(outboundMessage);
 
         var outputMessage = outboundMessageSecurityStep.execute(outboundMessage);
 

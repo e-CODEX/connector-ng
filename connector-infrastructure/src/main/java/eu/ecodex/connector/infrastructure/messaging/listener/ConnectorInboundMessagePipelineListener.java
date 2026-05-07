@@ -48,7 +48,7 @@ public class ConnectorInboundMessagePipelineListener implements ConnectorEventHa
     @Transactional
     @JmsListener(destination = "${connector.queues.inbound-message-processing-queue}")
     public void handle(@NonNull ConnectorMessage message) {
-        log.info("received inbound message processing event: [{}]", message);
+        log.info("Entering inbound message [{}] processing pipeline ", message.identifier());
         this.inboundMessagePipeline.process(message);
     }
 }

@@ -48,12 +48,14 @@ public class ConnectorOutboundMessageAcceptanceStep implements ConnectorMessageS
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
         log.debug(
-                "processing outbound message with submission acceptance evidence for: [{}]",
-                outboundMessage
+                "Processing outbound message [{}] with submission acceptance evidence",
+                outboundMessage.identifier()
         );
 
         if (!outboundMessage.isBusinessMessage()) {
-            throw new ConnectorMessageNotBusinessException("message must be a business message");
+            throw new ConnectorMessageNotBusinessException(
+                    "The message must be a business message"
+            );
         }
 
         // persist and attach the submission evidence to the message
@@ -70,8 +72,8 @@ public class ConnectorOutboundMessageAcceptanceStep implements ConnectorMessageS
         this.evidenceVerifier.verify(submissionEvidence.type(), messageWithEvidence);
 
         log.debug(
-                "created submission acceptance evidence: [{}] for message [{}]",
-                submissionEvidence, outboundMessage
+                "Created submission acceptance evidence: [{}] for the message [{}]",
+                submissionEvidence, outboundMessage.identifier()
         );
 
         return messageWithEvidence;

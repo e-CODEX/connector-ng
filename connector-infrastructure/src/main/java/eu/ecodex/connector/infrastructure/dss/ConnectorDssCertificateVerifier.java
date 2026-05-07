@@ -92,7 +92,7 @@ public class ConnectorDssCertificateVerifier {
      */
     public CommonCertificateVerifier createCommonCertificateVerifier(
             ConnectorCertificateVerifierProperties properties) {
-        log.debug("initializing certificate verifier");
+        log.debug("Initializing certificate verifier");
         var commonCertificateVerifier = new CommonCertificateVerifier(true);
 
         configureAia(properties, commonCertificateVerifier);
@@ -108,11 +108,12 @@ public class ConnectorDssCertificateVerifier {
                 trustedCertificateSourcesList.add(certificateSource);
             } else {
                 log.warn(
-                        "there is no TrustedListsCertificateSource with key [{}] configured.",
+                        "There is no TrustedListsCertificateSource with key [{}] configured.",
                         trustedListSourceName
                 );
                 log.warn(
-                        "available are [{}]", trustedListLoader.getAllSourceNames()
+                        "Available TrustedListsCertificateSource are [{}]",
+                        trustedListLoader.getAllSourceNames()
                 );
             }
         }

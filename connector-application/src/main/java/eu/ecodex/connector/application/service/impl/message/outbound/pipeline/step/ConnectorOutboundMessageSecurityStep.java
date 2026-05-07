@@ -71,12 +71,15 @@ public class ConnectorOutboundMessageSecurityStep implements ConnectorMessageSte
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
         var updatedMessage = this.messageRepository.findByIdentifier(outboundMessage.identifier());
-        log.debug("Processing outbound message ASIC-S container for: [{}]", updatedMessage);
+        log.debug(
+                "Processing outbound message [{}] ASIC-S container creation",
+                updatedMessage.identifier()
+        );
 
         // create the ASIC-S container
         var containerMessage = this.securityToolkit.buildContainer(updatedMessage);
 
-        log.debug("ASIC-S container created for: [{}]", updatedMessage);
+        log.debug("ASIC-S container created for the message [{}]", updatedMessage.identifier());
 
         return containerMessage;
     }

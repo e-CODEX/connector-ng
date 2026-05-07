@@ -35,7 +35,6 @@ import jakarta.jms.MapMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -99,8 +98,7 @@ public class ConnectorGatewayMessageListener {
     @Transactional
     @JmsListener(destination = "${connector.queues.gateway-reception-queue}")
     public void handle(@NonNull MapMessage message) throws JMSException {
-        Objects.requireNonNull(message, "JMS message must not be null");
-        log.info("Receiving gateway message");
+        log.info("Receiving message from the gateway");
 
         validateMessageHeader(message);
 
@@ -234,6 +232,7 @@ public class ConnectorGatewayMessageListener {
             }
         }
 
+        // TODO handle situation where the message is an evidence message, but no 'messageContent'
         if (businessContent == null) {
             throw new IllegalStateException(
                     "No 'messageContent' payload found in gateway message"

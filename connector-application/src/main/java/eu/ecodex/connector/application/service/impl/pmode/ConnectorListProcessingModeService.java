@@ -14,13 +14,11 @@ import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProces
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * Implementation of the {@link ConnectorListProcessingMode} service.
  */
-@Slf4j
 @Service
 public class ConnectorListProcessingModeService implements ConnectorListProcessingMode {
     private final ConnectorProcessingModeRepository processingModeRepository;

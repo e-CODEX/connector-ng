@@ -115,13 +115,13 @@ public class ConnectorAsicContainerBuilder {
         var businessContent = toContainerBusinessContent(message);
 
         if (!businessContent.isValid()) {
-            throw new ConnectorContainerException("invalid business content");
+            throw new ConnectorContainerException("Invalid business content");
         }
 
         var issuer = tokenValidationFactory.getTokenIssuer(message);
 
         if (!issuer.isValid()) {
-            throw new ConnectorContainerException("invalid issuer");
+            throw new ConnectorContainerException("Invalid issuer");
         }
 
         var token = this.validationTokenGenerator.createToken(
@@ -147,7 +147,7 @@ public class ConnectorAsicContainerBuilder {
 
         if (businessContent == null) {
             throw new ConnectorContainerException(
-                    "no business content found in message: " + message.identifier());
+                    "No business content found in message: " + message.identifier());
         }
 
         var containerBusinessContent = new ConnectorContainerBusinessContent();

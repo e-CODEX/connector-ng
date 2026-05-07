@@ -19,13 +19,11 @@ import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import jakarta.annotation.Nonnull;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Implementation of the {@link ConnectorEvidenceMessageCreator} service.
  */
-@Slf4j
 @Component
 public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidenceMessageCreator {
     /**
@@ -55,7 +53,9 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
 
     @Override
     public ConnectorMessage create(
-            @Nonnull ConnectorMessage businessMessage, @NonNull ConnectorMessageEvidence evidence) {
+            @Nonnull ConnectorMessage businessMessage,
+            @NonNull ConnectorMessageEvidence evidence) {
+        // TODO check fromParty, toParty, service nullability
 
         var action = getEvidenceAction(evidence.type());
 

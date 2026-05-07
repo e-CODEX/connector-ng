@@ -21,13 +21,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorProcessingModeRepository}.
  */
-@Slf4j
 @Component
 public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessingModeRepository {
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
@@ -59,11 +57,6 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
             @NonNull ConnectorProcessingMode processingMode,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier
     ) {
-        log.debug(
-                "saving processing mode [{}] for business domain [{}]", processingMode,
-                businessDomainIdentifier
-        );
-
         var savedProcessingMode = this.processingModeJpaRepository.save(toEntity(processingMode));
 
         return toDomain(savedProcessingMode);
@@ -72,8 +65,6 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
     @Override
     public ConnectorProcessingMode updateKeystore(
             @NonNull String uuid, @NonNull String keystoreUuid) {
-        log.debug("updating processing mode with uuid: [{}]", uuid);
-
         var existingProcessingMode = processingModeJpaRepository.findByUuid(uuid);
 
         var keystoreEntity = keystoreJpaRepository.findByUuid(keystoreUuid);
@@ -95,8 +86,6 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
     @Override
     public ConnectorProcessingMode findByBusinessDomainIdentifier(
             @NonNull ConnectorBusinessDomainIdentifier identifier) {
-        log.debug("finding processing mode for business domain [{}]", identifier);
-
         var processingMode = processingModeJpaRepository.findByBusinessDomainIdentifier(
                 identifier.messageLaneIdentifier()
         );

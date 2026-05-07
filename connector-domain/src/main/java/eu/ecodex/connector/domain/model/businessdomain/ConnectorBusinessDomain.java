@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import lombok.Builder;
+import lombok.NonNull;
 
 /**
  * Represents a business domain in the connector system.

@@ -37,7 +37,7 @@ public class ConnectorLinkTransportStrategyImpl implements ConnectorLinkTranspor
     @Override
     public void transport(@NonNull ConnectorMessage message) {
         if (message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
-            log.debug("transporting backend to gateway message: [{}]", message.identifier());
+            log.debug("Transporting message [{}] from backend to gateway", message.identifier());
 
             gatewayLinkEventPublisher.publish(message);
         } else {

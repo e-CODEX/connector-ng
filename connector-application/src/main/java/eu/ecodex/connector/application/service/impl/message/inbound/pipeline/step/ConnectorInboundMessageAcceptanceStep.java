@@ -61,7 +61,10 @@ public class ConnectorInboundMessageAcceptanceStep implements ConnectorMessageSt
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
-        log.debug("processing inbound message acceptance creation for: [{}]", inboundMessage);
+        log.debug(
+                "Processing inbound message acceptance creation for: [{}]",
+                inboundMessage.identifier()
+        );
 
         var relayREMMDEvidence = this.evidenceCreator.createSuccess(
                 ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
@@ -80,7 +83,10 @@ public class ConnectorInboundMessageAcceptanceStep implements ConnectorMessageSt
                 inboundMessage, relayREMMDEvidence
         );
 
-        log.debug("created relay REMMD acceptance evidence message: [{}]", confirmationMessage);
+        log.debug(
+                "Created relay REMMD acceptance evidence message: [{}]",
+                confirmationMessage.identifier()
+        );
 
         return confirmationMessage.switchDirection();
     }

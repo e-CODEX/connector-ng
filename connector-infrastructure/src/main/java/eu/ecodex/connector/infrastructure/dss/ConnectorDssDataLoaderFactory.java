@@ -17,6 +17,7 @@ import eu.europa.esig.dss.spi.client.http.DataLoader;
 import eu.europa.esig.dss.spi.client.http.IgnoreDataLoader;
 import java.io.File;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
  *     <li>A cache-only loader that reads exclusively from the local cache
  * </ul>
  */
+@Slf4j
 @Component
 public class ConnectorDssDataLoaderFactory {
     private final ConnectorDssProperties dssProperties;
@@ -60,6 +62,7 @@ public class ConnectorDssDataLoaderFactory {
      * @return a {@link DSSFileLoader} configured for online access with caching
      */
     public DSSFileLoader createOnlineDataLoader() {
+        log.debug("Creating online data loader");
         var loader = new FileCacheDataLoader();
         loader.setCacheExpirationTime(0);
         loader.setFileCacheDirectory(this.cacheDir);
@@ -77,6 +80,7 @@ public class ConnectorDssDataLoaderFactory {
      * @return a {@link DSSFileLoader} configured for cache-only access
      */
     public DSSFileLoader createFileCacheDataLoader() {
+        log.debug("Creating file cache data loader");
         var loader = new FileCacheDataLoader();
         loader.setFileCacheDirectory(this.cacheDir);
         loader.setCacheExpirationTime(
@@ -92,13 +96,13 @@ public class ConnectorDssDataLoaderFactory {
             var dir = properties.getCache().getLocation().getFile();
             if (!dir.exists() && !dir.mkdirs()) {
                 throw new IllegalStateException(
-                        "failed to create DSS cache directory: " + dir.getAbsolutePath()
+                        "Failed to create DSS cache directory: " + dir.getAbsolutePath()
                 );
             }
 
             return dir;
         } catch (IOException e) {
-            throw new IllegalStateException("failed to resolve DSS cache directory", e);
+            throw new IllegalStateException("Failed to resolve DSS cache directory", e);
         }
     }
 }

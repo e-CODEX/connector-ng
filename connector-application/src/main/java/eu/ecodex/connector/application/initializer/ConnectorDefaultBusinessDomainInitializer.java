@@ -50,11 +50,11 @@ public class ConnectorDefaultBusinessDomainInitializer implements ApplicationRun
 
     @Override
     public void run(@Nonnull ApplicationArguments args) {
-        log.debug("initializing default business domain");
-
         if (!businessDomainRepository.findAll().isEmpty()) {
             return;
         }
+
+        log.info("Initializing default business domain");
 
         var configProperties = domainPropertiesProvider.getProperties();
         var defaultDomain = createDefaultDomain(configProperties);
@@ -69,7 +69,7 @@ public class ConnectorDefaultBusinessDomainInitializer implements ApplicationRun
 
         var createdDomain = businessDomainRepository.save(defaultDomain);
 
-        log.info("default business domain created successfully: [{}]", createdDomain);
+        log.info("Default business domain created successfully: [{}]", createdDomain);
     }
 
     private ConnectorBusinessDomain createDefaultDomain(

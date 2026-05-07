@@ -58,14 +58,14 @@ public class ConnectorOutboundMessageEbmsIdStep implements ConnectorMessageStep 
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage message) {
-        log.info("creating EBMS message ID for outbound connector message: [{}]", message);
+        log.info("Creating EBMS ID for outbound message: [{}]", message.identifier());
 
         var configuration = this.processingConfigurationProvider.getConfiguration();
 
         if (configuration.ebmsIdGeneratorEnabled()) {
             log.info(
-                    "EBMS message ID generator enabled, generating new EBMS message ID for "
-                    + "outbound connector message: [{}]", message
+                    "EBMS ID generator enabled, generating new EBMS message ID for "
+                    + "outbound connector message: [{}]", message.identifier()
             );
 
             return this.messageRepository.updateEbmsIdentifier(
@@ -74,9 +74,9 @@ public class ConnectorOutboundMessageEbmsIdStep implements ConnectorMessageStep 
         }
 
         log.info(
-                "EBMS message ID generator disabled, skipping EBMS message ID generation for "
+                "EBMS ID generator disabled, skipping EBMS message ID generation for "
                 + "outbound connector message: [{}]",
-                message
+                message.identifier()
         );
 
         return message;

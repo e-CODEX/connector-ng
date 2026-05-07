@@ -19,6 +19,7 @@ import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -27,6 +28,7 @@ import org.springframework.util.StringUtils;
  * Default implementation of {@link ConnectorUploadAttachments} responsible for handling the upload
  * workflow of connector attachments.
  */
+@Slf4j
 @Service
 @Transactional
 public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachments {
@@ -42,6 +44,7 @@ public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachm
 
     @Override
     public List<ConnectorMessageAttachment> execute(@NonNull List<FileUploadCommand> files) {
+        log.info("Uploading files");
         return files.stream()
                     .map(uploadCommand -> {
                         try {

@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class ConnectorMessagePartiesVerifierService implements ConnectorMessagePartiesVerifier {
     @Override
     public void verify(@NonNull ConnectorMessage message) {
-        log.debug("checking message [{}] parties info", message);
+        log.debug("Checking message [{}] parties info", message.identifier());
 
         final var as4Properties = message.as4Properties();
         final var fromParty = as4Properties.fromParty();

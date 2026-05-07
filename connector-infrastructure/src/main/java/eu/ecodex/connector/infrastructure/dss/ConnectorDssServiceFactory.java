@@ -14,7 +14,6 @@ import eu.europa.esig.dss.asic.xades.signature.ASiCWithXAdESService;
 import eu.europa.esig.dss.pades.signature.PAdESService;
 import eu.europa.esig.dss.spi.validation.CommonCertificateVerifier;
 import eu.europa.esig.dss.xades.signature.XAdESService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
  * verifier, while the other services currently instantiate a default
  * {@link CommonCertificateVerifier}. This may be unified in future revisions.
  */
-@Slf4j
 @Component
 public class ConnectorDssServiceFactory {
     private final ConnectorDssCertificateVerifier certificateVerifier;

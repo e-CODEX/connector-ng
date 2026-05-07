@@ -18,13 +18,11 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.Connect
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorKeystoreJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorProcessingModeJpaRepository;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorKeystoreRepository}.
  */
-@Slf4j
 @Component
 public class ConnectorKeystoreRepositoryImpl implements ConnectorKeystoreRepository {
     private final ConnectorKeystoreJpaRepository keystoreJpaRepository;
@@ -88,11 +86,6 @@ public class ConnectorKeystoreRepositoryImpl implements ConnectorKeystoreReposit
     public ConnectorKeystore save(
             @NonNull ConnectorKeystore keystore,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        log.debug(
-                "saving keystore: [{}] for business domain [{}]",
-                keystore, businessDomainIdentifier
-        );
-
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
                 businessDomainIdentifier.messageLaneIdentifier()
         );

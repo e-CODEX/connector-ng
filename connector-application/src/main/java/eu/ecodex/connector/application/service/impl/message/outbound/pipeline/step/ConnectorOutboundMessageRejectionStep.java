@@ -65,7 +65,10 @@ public class ConnectorOutboundMessageRejectionStep implements ConnectorMessageSt
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
-        log.debug("processing outbound message rejection creation for: [{}]", outboundMessage);
+        log.debug(
+                "Processing outbound message [{}] rejection creation",
+                outboundMessage.identifier()
+        );
 
         // persist and attach the rejection evidence to the message
         var rejectionEvidence = this.evidenceCreator.createFailure(
@@ -87,7 +90,7 @@ public class ConnectorOutboundMessageRejectionStep implements ConnectorMessageSt
                 outboundMessage, rejectionEvidence
         );
 
-        log.debug("created rejection evidence message : [{}]", rejectionMessage);
+        log.debug("Created rejection evidence message [{}]", rejectionMessage.identifier());
 
         return rejectionMessage.switchDirection();
     }

@@ -124,13 +124,13 @@ public class ConnectorDssTrustedListLoader {
         } catch (Exception e) {
             // Offline data still usable; log and continue rather than failing to startup
             log.warn(
-                    "online refresh failed for trust source [{}], falling back to cache: [{}]",
+                    "Online refresh failed for trust source [{}], falling back to cache: [{}]",
                     name, e.getMessage()
             );
         }
 
         log.info(
-                "configured trust source [{}] with {} trusted public keys",
+                "Configured trust source [{}] with {} trusted public keys",
                 name, certificateSource.getNumberOfTrustedPublicKeys()
         );
 

@@ -123,7 +123,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             answer.setMessageId(createdMessage.identifier());
             answer.setResult(true);
         } catch (Exception e) {
-            log.error("error submitting message", e);
+            log.error("error submitting message to the connector via SOAP endpoint", e);
             answer.setResult(false);
             answer.setResultMessage(e.getMessage());
         }

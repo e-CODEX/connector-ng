@@ -88,7 +88,8 @@ public class ConnectorDssTimeStampingProtocol {
         });
 
         servers.forEach((name, tsaProps) -> {
-            log.info("registering TSA [{}] -> {}", name, tsaProps.getUrl());
+            log.info("Registering TSA [{}] -> {}", name, tsaProps.getUrl());
+
             var source = new OnlineTSPSource();
             source.setNonceSource(nonceSource);
             source.setDataLoader(timestampDataLoader);

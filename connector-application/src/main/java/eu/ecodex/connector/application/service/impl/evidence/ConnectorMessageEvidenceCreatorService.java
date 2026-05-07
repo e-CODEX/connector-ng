@@ -41,8 +41,10 @@ public class ConnectorMessageEvidenceCreatorService implements ConnectorMessageE
     public ConnectorMessageEvidence createSuccess(
             @NonNull ConnectorEvidenceType evidenceType,
             @NonNull ConnectorMessage message) {
-        log.debug(
-                "creating success evidence for message [{}] with type [{}]", message, evidenceType);
+        log.info(
+                "Creating success evidence for message [{}] with type [{}]",
+                message.identifier(), evidenceType
+        );
         return this.create(evidenceType, message, null);
     }
 
@@ -51,8 +53,11 @@ public class ConnectorMessageEvidenceCreatorService implements ConnectorMessageE
             @NonNull ConnectorEvidenceType evidenceType,
             @NonNull ConnectorMessage message,
             ConnectorMessageRejectionReason reason) {
-        log.debug(
-                "creating failure evidence for message [{}] with type [{}]", message, evidenceType);
+        log.info(
+                "Creating failure evidence for message [{}] with type [{}]",
+                message.identifier(),
+                evidenceType
+        );
         return this.create(evidenceType, message, reason);
     }
 

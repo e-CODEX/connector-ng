@@ -53,19 +53,21 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
     public void verify(
             @NonNull ConnectorEvidenceType evidenceType,
             @NonNull ConnectorMessage message) {
-        log.debug("processing message [{}] with evidence [{}]", message, evidenceType);
+        log.debug("Processing message [{}] with evidence [{}]", message, evidenceType);
 
         var transportedEvidences = message.transportedEvidences();
 
         if (transportedEvidences == null) {
-            throw new ConnectorEvidenceException("message has no evidences!");
+            throw new ConnectorEvidenceException(
+                    "Message [{" + message.identifier() + "}] has no evidences!"
+            );
         }
 
         int highestPriority = getHighestReceivedEvidencePriority(transportedEvidences);
 
         if (evidenceType.getPriority() < highestPriority) {
             log.info(
-                    "evidence [{}] will not influence the rejected or confirmed state of message "
+                    "Evidence [{}] will not influence the rejected or confirmed state of message "
                     + "[{}] because it has lower priority than the already received evidences. "
                     + "error_code=[{}]",
                     evidenceType,
@@ -79,7 +81,7 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
         }
 
         if (NEGATIVE_EVIDENCE_TYPES.contains(evidenceType)) {
-            log.warn("message [{}] has been rejected by evidence [{}]", message, evidenceType);
+            log.warn("Message [{}] has been rejected by evidence [{}]", message, evidenceType);
 
             this.messageRepository.setAsRejected(message.identifier());
 
@@ -90,7 +92,7 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
             // TODO see if the check should be retrieved from the db
             if (message.isRejected()) {
                 log.warn(
-                        "message [{}] has already been rejected by an negative evidence! "
+                        "Message [{}] has already been rejected by an negative evidence! "
                         + "The positive evidence of type [{}] will be ignored!",
                         message, evidenceType
                 );
@@ -102,7 +104,7 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
 
             this.messageRepository.setAsConfirmed(message.identifier());
 
-            log.info("message [{}] has been confirmed by evidence [{}]", message, evidenceType);
+            log.info("Message [{}] has been confirmed by evidence [{}]", message, evidenceType);
         }
     }
 

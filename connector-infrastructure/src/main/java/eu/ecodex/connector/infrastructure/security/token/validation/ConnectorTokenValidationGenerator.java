@@ -106,12 +106,12 @@ public class ConnectorTokenValidationGenerator {
      *
      * <p>The process includes:
      * <ol>
-     *     <li>Running technical validation</li>
-     *     <li>Validating the technical result structure</li>
-     *     <li>Handling authentication-based validation (if applicable)</li>
-     *     <li>Building token document metadata (digest, filenames)</li>
-     *     <li>Running legal validation</li>
-     *     <li>Validating the legal result structure</li>
+     *     <li>Running technical validation
+     *     <li>Validating the technical result structure
+     *     <li>Handling authentication-based validation (if applicable)
+     *     <li>Building token document metadata (digest, filenames)
+     *     <li>Running legal validation
+     *     <li>Validating the legal result structure
      * </ol>
      *
      * @param message           the connector message driving validation

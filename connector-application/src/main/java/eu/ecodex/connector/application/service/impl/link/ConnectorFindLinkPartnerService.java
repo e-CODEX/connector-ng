@@ -32,12 +32,12 @@ public class ConnectorFindLinkPartnerService implements ConnectorFindLinkPartner
 
     @Override
     public ConnectorLinkPartner findByCertificateDn(@NonNull String certificateDn) {
-        log.debug("retrieving link partner by certificate DN: {}", certificateDn);
+        log.debug("Retrieving link partner by certificate DN: {}", certificateDn);
         var linkPartner = this.linkPartnerRepository.findByCertificateDn(certificateDn);
 
         if (linkPartner == null) {
             throw new ConnectorLinkPartnerException(
-                    "no link partner found for certificateDn: " + certificateDn
+                    "No link partner found for certificateDn: " + certificateDn
             );
         }
 

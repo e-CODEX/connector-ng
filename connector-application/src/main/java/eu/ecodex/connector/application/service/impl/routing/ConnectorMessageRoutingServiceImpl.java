@@ -37,7 +37,7 @@ public class ConnectorMessageRoutingServiceImpl implements ConnectorMessageRouti
     @Override
     public boolean isRoutingEnabled(ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var configuration = this.routingConfigurationProvider.getConfiguration();
-        log.debug("routing config: [{}]", configuration);
+        log.debug("Routing config: [{}]", configuration);
 
         return configuration.enabled();
     }

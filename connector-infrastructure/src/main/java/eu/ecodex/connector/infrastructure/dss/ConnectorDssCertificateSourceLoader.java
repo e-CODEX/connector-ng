@@ -53,8 +53,8 @@ public class ConnectorDssCertificateSourceLoader {
                     keystore.getPassword().toCharArray()
             );
         } catch (IOException e) {
-            log.error("unable to load truststore from [{}]", keystore);
-            throw new IllegalStateException("failed to load application keystore", e);
+            log.error("Unable to load truststore from [{}]", keystore);
+            throw new IllegalStateException("Failed to load application keystore", e);
         }
     }
 
@@ -77,7 +77,7 @@ public class ConnectorDssCertificateSourceLoader {
 
     private InputStream openKeystoreStream(String path) throws IOException {
         if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("keystore path must not be blank");
+            throw new IllegalArgumentException("Keystore path must not be blank");
         }
 
         if (path.startsWith(CLASSPATH_PREFIX)) {
@@ -85,7 +85,7 @@ public class ConnectorDssCertificateSourceLoader {
             var resource = new ClassPathResource(resourcePath);
 
             if (!resource.exists()) {
-                throw new IOException("classpath keystore not found: " + path);
+                throw new IOException("Classpath keystore not found: " + path);
             }
 
             return resource.getInputStream();

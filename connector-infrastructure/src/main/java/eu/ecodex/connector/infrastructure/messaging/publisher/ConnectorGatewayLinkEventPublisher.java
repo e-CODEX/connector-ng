@@ -58,7 +58,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
 
     @Override
     public void publish(@NonNull ConnectorMessage message) {
-        log.info("submitting message [{}] to gateway link", message);
+        log.info("Submitting message [{}] to gateway link processing queue", message.identifier());
 
         this.jmsTemplate.send(
                 queueProperties.getGatewaySubmissionQueue(),

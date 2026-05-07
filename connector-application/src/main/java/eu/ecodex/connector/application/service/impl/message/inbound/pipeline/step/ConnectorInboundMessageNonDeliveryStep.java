@@ -63,7 +63,10 @@ public class ConnectorInboundMessageNonDeliveryStep implements ConnectorMessageS
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
-        log.debug("processing inbound message non delivery creation for: [{}]", inboundMessage);
+        log.debug(
+                "Processing inbound message [{}] non delivery creation",
+                inboundMessage.identifier()
+        );
 
         var nonDeliveryEvidence = this.evidenceCreator.createFailure(
                 ConnectorEvidenceType.NON_DELIVERY,
@@ -84,7 +87,10 @@ public class ConnectorInboundMessageNonDeliveryStep implements ConnectorMessageS
                 inboundMessage, nonDeliveryEvidence
         );
 
-        log.debug("created non delivery evidence message : [{}]", nonDeliveryMessage);
+        log.debug(
+                "Created non delivery evidence for the message : [{}]",
+                nonDeliveryMessage.identifier()
+        );
 
         return nonDeliveryMessage.switchDirection();
     }

@@ -22,6 +22,14 @@ public class MessageContentTestFixtures {
                 .build();
     }
 
+    public static ConnectorMessageBusinessContent createContentWithoutBusinessDocument() {
+        return ConnectorMessageBusinessContent
+                .builder()
+                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
+                .businessDocument(null)
+                .build();
+    }
+
     public static ConnectorMessageBusinessContent createSaveContent() {
         return createContent()
                 .toBuilder()

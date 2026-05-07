@@ -1,21 +1,20 @@
 insert into connector_message_attachments (
-                                           id,
-                                           content_type,
-                                           description,
-                                           identifier,
-                                           name,
-                                           size,
-                                           storage,
-                                           type,
-                                           message_id,
-                                           created_at,
-                                           updated_at
+    identifier,
+    content_type,
+    description,
+    name,
+    size,
+    storage,
+    type,
+    message_id,
+    created_at,
+    updated_at
 )
-values (
-        1,
+values
+    (
+        'd98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file',
         'application/pdf',
         'Persisting file to S3 bucket',
-        'd98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file',
         'fake_file.pdf',
         157286400,
         'S3_BUCKET',
@@ -23,30 +22,76 @@ values (
         null,
         now(),
         now()
-       ),
-       (
-           2,
-           'application/pdf',
-           'Persisting file to S3 bucket',
-           '6aeef356-d580-4b94-a569-250435ac3ec5_fake_file',
-           'fake_file.pdf',
-           200000000,
-           'S3_BUCKET',
-           'ATTACHMENT',
-           1,
-           now(),
-           now()
-       ),
-       (
-           3,
-           'application/pdf',
-           'Persisting file to S3 bucket',
-           'c12f879b-3c9a-4d26-b36c-b6d67a84f0ed_test_attachment',
-           'fake_file.pdf',
-           300000000,
-           'S3_BUCKET',
-           'ATTACHMENT',
-           1,
-           now(),
-           now()
-       );
+    ),
+    (
+        '6aeef356-d580-4b94-a569-250435ac3ec5_fake_file',
+        'application/pdf',
+        'Persisting file to S3 bucket',
+        'fake_file.pdf',
+        200000000,
+        'S3_BUCKET',
+        'ATTACHMENT',
+        1,
+        now(),
+        now()
+    ),
+    (
+        'c12f879b-3c9a-4d26-b36c-b6d67a84f0ed_test_attachment',
+        'application/pdf',
+        'Persisting file to S3 bucket',
+        'fake_file.pdf',
+        300000000,
+        'S3_BUCKET',
+        'ATTACHMENT',
+        1,
+        now(),
+        now()
+    ),
+    (
+        'd9368fda-92f2-498f-95bf-1ca6f4985b85_ASIC-S',
+        'application/vnd.etsi.asic-s+zip',
+        'File from gateway',
+        'ASIC-S.zip',
+        400000000,
+        'S3_BUCKET',
+        'ASICS',
+        2,
+        now(),
+        now()
+    ),
+    (
+        '0f942a85-1e4d-4e36-9432-1625a582b20c_tokenXML',
+        'text/xml',
+        'File from gateway',
+        'tokenXML.xml',
+        5282,
+        'S3_BUCKET',
+        'XML_TOKEN',
+        2,
+        now(),
+        now()
+    ),
+    (
+        'c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE',
+        'text/xml',
+        'File from gateway',
+        'SUBMISSION_ACCEPTANCE.xml',
+        6613,
+        'S3_BUCKET',
+        'EVIDENCE_XML',
+        2,
+        now(),
+        now()
+    ),
+    (
+        '104ebc70-abd5-45da-8c74-940d687501b3_messageContent',
+        'text/xml',
+        'File from gateway',
+        'messageContent.xml',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_CONTENT',
+        2,
+        now(),
+        now()
+    );

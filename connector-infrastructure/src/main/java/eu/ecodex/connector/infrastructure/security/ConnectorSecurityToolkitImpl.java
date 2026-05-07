@@ -18,6 +18,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.security.container.ConnectorAsicContainerBuilder;
+import eu.ecodex.connector.infrastructure.security.container.ConnectorAsicContainerValidator;
 import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.security.model.container.ConnectorContainer;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -38,21 +39,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
     private final ConnectorAsicContainerBuilder asicContainerBuilder;
+    private final ConnectorAsicContainerValidator asicContainerValidator;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
 
     /**
      * Constructor for the ConnectorSecurityToolkitImpl.
      *
-     * @param asicContainerBuilder the builder used for creating ASiC containers
-     * @param attachmentRepository the repository for managing message attachments
-     * @param fileStorageProvider  the provider for handling file storage operations
+     * @param asicContainerBuilder   the builder used for creating ASiC containers
+     * @param asicContainerValidator the validator used for validating ASiC containers
+     * @param attachmentRepository   the repository for managing message attachments
+     * @param fileStorageProvider    the provider for handling file storage operations
      */
     public ConnectorSecurityToolkitImpl(
             ConnectorAsicContainerBuilder asicContainerBuilder,
+            ConnectorAsicContainerValidator asicContainerValidator,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider) {
         this.asicContainerBuilder = asicContainerBuilder;
+        this.asicContainerValidator = asicContainerValidator;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
     }
@@ -60,7 +65,7 @@ public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
     @Override
     public void validateMessage(@NonNull ConnectorMessage message) {
         log.debug("Validating message [{}] ASIC-S container", message.identifier());
-        // TODO fake implementation. to be replaced with real implementation
+        this.asicContainerValidator.validate(message);
     }
 
     @Override

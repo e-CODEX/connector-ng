@@ -1,22 +1,52 @@
-insert into connector_messages (id, backend_message_identifier,
-                                          backend_name, confirmed_at, deleted_at,
-                                          delivered_to_backend_at, delivered_to_gateway_at,
-                                          direction, gateway_name, identifier,
-                                          reference_to_backend_message_identifier, rejected_at,
-                                          business_domain_id, created_at, updated_at)
-values (1,
+insert into connector_messages (
+    id,
+    identifier,
+    backend_message_identifier,
+    reference_to_backend_message_identifier,
+    backend_name,
+    gateway_name,
+    direction,
+    confirmed_at,
+    deleted_at,
+    delivered_to_backend_at,
+    delivered_to_gateway_at,
+    rejected_at,
+    created_at,
+    updated_at,
+    business_domain_id
+)
+values
+    (
+        1,
+        'fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu',
         'ec46d3f2-2efb-4d1c-b357-8bb7b4deb115',
-        null,
-        null,
         null,
         null,
         null,
         'BACKEND_TO_GATEWAY',
         null,
-        'fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu',
         null,
         null,
-        1,
+        null,
+        null,
         now(),
-        now()
-       );
+        now(),
+        1
+    ),
+    (
+        2,
+        '7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu',
+        null,
+        null,
+        null,
+        'default_gateway',
+        'GATEWAY_TO_BACKEND',
+        null,
+        null,
+        null,
+        null,
+        null,
+        now(),
+        now(),
+        1
+    );

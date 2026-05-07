@@ -34,6 +34,7 @@ public class MessageAttachmentTestFixtures {
     public static ConnectorMessageAttachment createBusinessContentAttachment() {
         return createAttachment()
                 .toBuilder()
+                .identifier("104ebc70-abd5-45da-8c74-940d687501b3_messageContent")
                 .type(ConnectorAttachmentType.BUSINESS_CONTENT)
                 .contentType("text/xml")
                 .name("businessContent.xml")
@@ -43,9 +44,30 @@ public class MessageAttachmentTestFixtures {
     public static ConnectorMessageAttachment createEvidenceAttachment() {
         return createAttachment()
                 .toBuilder()
+                .identifier("c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE")
                 .type(ConnectorAttachmentType.EVIDENCE_XML)
                 .contentType("text/xml")
                 .name("evidence.xml")
+                .build();
+    }
+
+    public static ConnectorMessageAttachment createAsicsAttachment() {
+        return createAttachment()
+                .toBuilder()
+                .identifier("d9368fda-92f2-498f-95bf-1ca6f4985b85_ASIC-S")
+                .type(ConnectorAttachmentType.ASICS)
+                .contentType("application/vnd.etsi.asic-s+zip")
+                .name("ASICS.zip")
+                .build();
+    }
+
+    public static ConnectorMessageAttachment createXmlTokenAttachment() {
+        return createAttachment()
+                .toBuilder()
+                .identifier("0f942a85-1e4d-4e36-9432-1625a582b20c_tokenXML")
+                .type(ConnectorAttachmentType.XML_TOKEN)
+                .contentType("text/xml")
+                .name("tokenXML.zip")
                 .build();
     }
 }

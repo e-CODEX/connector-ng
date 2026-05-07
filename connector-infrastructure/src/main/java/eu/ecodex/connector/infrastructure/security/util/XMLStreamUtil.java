@@ -10,14 +10,20 @@
 
 package eu.ecodex.connector.infrastructure.security.util;
 
+import eu.ecodex.connector.infrastructure.security.exception.ConnectorTokenException;
 import eu.ecodex.connector.infrastructure.security.model.token.ConnectorToken;
 import eu.ecodex.connector.infrastructure.security.model.token.ConnectorTokenOriginalValidationReportContainer;
 import eu.ecodex.connector.infrastructure.security.token.trustok.xml.TokenJAXBObjectFactory;
+import eu.europa.esig.dss.model.DSSDocument;
 import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import javax.xml.parsers.DocumentBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
+import org.xml.sax.SAXParseException;
 
 /**
  * Utility class for serializing {@link ConnectorToken} instances into XML streams.
@@ -27,13 +33,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class XMLStreamUtil {
-    // a message to be outputted in case a JAXBException occurs
-    public static final String EXCEPTION_MESSAGE =
-            "A JAXBException occurred; likely caused by non-compliant data in "
-            + ConnectorTokenOriginalValidationReportContainer.class.getSimpleName()
-            + ". Use simple types wrapped in "
-            + ConnectorTokenOriginalValidationReportContainer.SimpleTypeEntry.class.getSimpleName()
-            + ".";
     private static final TokenJAXBObjectFactory FACTORY = new TokenJAXBObjectFactory();
 
     /**
@@ -51,21 +50,64 @@ public class XMLStreamUtil {
      * @throws JAXBException if the token contains non-compliant data
      */
     public static ByteArrayOutputStream encodeXMLStream(final ConnectorToken token)
-            throws Exception {
+            throws JAXBException {
         var marshaller = JAXBContextHolder.INSTANCE.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        var output = new ByteArrayOutputStream();
 
-        final var output = new ByteArrayOutputStream();
+        marshaller.marshal(FACTORY.createTrustOkToken(token), output);
+        return output;
+    }
 
-        try {
-            marshaller.marshal(FACTORY.createTrustOkToken(token), output);
-        } catch (JAXBException e) {
-            log.error(EXCEPTION_MESSAGE);
-            throw e;
+    /**
+     * Unmarshals a {@link ConnectorToken} from an XML input stream.
+     *
+     * @param xmlInputStream the XML stream to decode
+     *
+     * @return the decoded token
+     * @throws JAXBException           if the stream cannot be unmarshalled
+     * @throws ConnectorTokenException if the root element is not a ConnectorToken
+     */
+    public static ConnectorToken decodeXMLStream(InputStream xmlInputStream) throws JAXBException {
+        var unmarshaller = JAXBContextHolder.INSTANCE.createUnmarshaller();
+
+        var result = unmarshaller.unmarshal(xmlInputStream);
+
+        if (!(result instanceof JAXBElement<?> element)
+            || !(element.getValue() instanceof ConnectorToken token)) {
+            throw new ConnectorTokenException(
+                    "XML stream did not unmarshal to a ConnectorToken; got: "
+                    + (result == null ? "null" : result.getClass().getSimpleName()));
         }
 
-        return output;
+        return token;
+    }
+
+    /**
+     * Returns true if {@code document} contains well-formed XML.
+     *
+     * <p>Note: the document is fully parsed to verify well-formedness.
+     * For very large documents consider a short-circuit SAX approach instead.
+     *
+     */
+    public static boolean isXmlFile(DSSDocument document) {
+        try (var inputStream = document.openStream()) {
+            var factory = DocumentBuilderFactory.newInstance();
+            factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            var parser = factory.newDocumentBuilder();
+            parser.parse(inputStream);
+
+            return true;
+        } catch (SAXParseException e) {
+            return false;
+        } catch (Exception e) {
+            log.warn(
+                    "Unexpected error while checking XML validity of '{}': {}",
+                    document.getName(), e.getMessage(), e
+            );
+            return false;
+        }
     }
 
     /**
@@ -73,16 +115,17 @@ public class XMLStreamUtil {
      * JAXBContext creation is expensive; this ensures it happens exactly once.
      */
     private static class JAXBContextHolder {
-        private static final JAXBContext INSTANCE;
+        private static final JAXBContext INSTANCE = createContext();
 
-        static {
+        private static JAXBContext createContext() {
             try {
-                INSTANCE = JAXBContext.newInstance(
+                return JAXBContext.newInstance(
                         TokenJAXBObjectFactory.class,
                         ConnectorTokenOriginalValidationReportContainer.SimpleTypeEntry.class
                 );
-            } catch (final JAXBException e) {
-                log.error("Fatal: JAXBContext could not be created: [{}]", e.getMessage());
+            } catch (JAXBException e) {
+                // Use stderr — logging framework may not be ready during static init
+                log.error("Fatal: JAXBContext could not be created: {}", e.getMessage());
                 throw new ExceptionInInitializerError(e);
             }
         }

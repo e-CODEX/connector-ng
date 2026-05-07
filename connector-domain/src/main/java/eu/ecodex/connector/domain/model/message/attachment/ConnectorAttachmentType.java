@@ -14,5 +14,12 @@ package eu.ecodex.connector.domain.model.message.attachment;
  * Enum representing the possible types of attachments in the Connector.
  */
 public enum ConnectorAttachmentType {
-    ATTACHMENT, ASICS, BUSINESS_CONTENT, BUSINESS_DOCUMENT, EVIDENCE_XML, XML_TOKEN
+    ATTACHMENT,
+    ASICS,
+    BUSINESS_CONTENT,
+    BUSINESS_DOCUMENT,
+    DETACHED_SIGNATURE,
+    EVIDENCE_XML,
+    PDF_TOKEN,
+    XML_TOKEN
 }

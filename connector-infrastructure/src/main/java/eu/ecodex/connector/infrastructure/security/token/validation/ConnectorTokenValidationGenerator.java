@@ -39,6 +39,7 @@ import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.CertificateValidity;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.xmldsig.jaxb.DigestMethodType;
+import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -235,7 +236,7 @@ public class ConnectorTokenValidationGenerator {
      * @return the populated token document descriptor
      */
     private ConnectorTokenDocument createTokenDocument(
-            DSSDocument businessDocument, DSSDocument detachedSignature) {
+            DSSDocument businessDocument, DSSDocument detachedSignature) throws IOException {
         var tokenDocument = new ConnectorTokenDocument();
         tokenDocument.setFilename(businessDocument.getName());
 

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><TrustOkToken xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+    <Issuer>
+        <ServiceProvider>TestProvider</ServiceProvider>
+        <Country>BL</Country>
+        <AdvancedElectronicSystem>Signature-based</AdvancedElectronicSystem>
+    </Issuer>
+    <Document>
+        <Filename>Signed.pdf</Filename>
+        <Type>application/pdf</Type>
+        <ns2:DigestMethod Algorithm="SHA-256"/>
+        <ns2:DigestValue>bTFUL04yVWVhZXRYcHdKTjZSUENlSE1BaFpYOUMrY2Z6enVOVjhOaWJzRT0=</ns2:DigestValue>
+    </Document>
+    <Validation>
+        <VerificationTime>2026-04-24T15:48:31.510+02:00</VerificationTime>
+        <VerificationData>
+            <SignatureData>
+                <SigningTime>2026-04-23T11:50:00.000+02:00</SigningTime>
+                <SignatureInformation>
+                    <SignatureVerification>false</SignatureVerification>
+                    <StructureVerification>true</StructureVerification>
+                    <SignatureFormat>PDF-NOT-ETSI</SignatureFormat>
+                    <SignatureLevel>NA</SignatureLevel>
+                </SignatureInformation>
+                <CertificateInformation>
+                    <Subject>CN=EU-LISA ISSUING CA01, OID.0.9.2342.19200300.100.1.25=eu-LISA, OID.0.9.2342.19200300.100.1.25=EU, OID.0.9.2342.19200300.100.1.25=INT</Subject>
+                    <Issuer>OID.1.2.840.113549.1.9.1=Alberto.ZUGAZAGOITIA@EULISA.EUROPA.EU, CN=ZUGAZAGOITIA Alberto (eu-LISA), OU=PD-PMU-JUPS, OU=eu-LISA 2.0, OU=euLISA-Users, OID.0.9.2342.19200300.100.1.25=eu-LISA, OID.0.9.2342.19200300.100.1.25=EU, OID.0.9.2342.19200300.100.1.25=INT</Issuer>
+                    <CertificateVerification>true</CertificateVerification>
+                    <ValidityAtSigningTime>true</ValidityAtSigningTime>
+                </CertificateInformation>
+                <TechnicalResult>
+                    <TrustLevel>FAIL</TrustLevel>
+                    <Comments>The signature is not mathematically correct.</Comments>
+                </TechnicalResult>
+            </SignatureData>
+        </VerificationData>
+        <TechnicalResult>
+            <TrustLevel>FAIL</TrustLevel>
+            <Comments>The signature is not mathematically correct.</Comments>
+        </TechnicalResult>
+        <LegalResult>
+            <TrustLevel>NOT_SUCCESSFUL</TrustLevel>
+            <Disclaimer>e-CODEX does not approve the validity of the document.</Disclaimer>
+        </LegalResult>
+        <OriginalValidationReport>
+<SimpleReport xmlns="http://dss.esig.europa.eu/validation/simple-report" ValidationTime="2026-04-24T13:48:31Z">
+    <ValidationPolicy>
+        <PolicyName>ECodex-based</PolicyName>
+        <PolicyDescription>eCODEX validation policy</PolicyDescription>
+    </ValidationPolicy>
+    <DocumentName>Signed</DocumentName>
+    <ValidSignaturesCount>0</ValidSignaturesCount>
+    <SignaturesCount>1</SignaturesCount>
+    <Signature Id="S-AE12F5F2DF099D333B38D419A79882151DBCE1393BDA5664F2EFE4ACF10C3C5C" SignatureFormat="PDF-NOT-ETSI">
+        <CertificateChain>
+            <Certificate Id="C-326A4535CF7ECFE6C8CBA7E34571948A19A9CFAAA9170A37C8B8E257C80EC41F">
+                <QualifiedName>ZUGAZAGOITIA Alberto (eu-LISA)</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-6FDC596AAAD81D236C8379C8D7F5EE2DD9642C6C206A3D96F1D4796978F4E048">
+                <QualifiedName>EU-LISA ISSUING CA01</QualifiedName>
+            </Certificate>
+            <Certificate Id="C-80DF08FEA10E26A60739D4D6F8C96B80E37B50B1C0542860AC0959E375A1EB68">
+                <QualifiedName>EU-LISA ROOT CA01</QualifiedName>
+            </Certificate>
+        </CertificateChain>
+        <Indication>INDETERMINATE</Indication>
+        <SubIndication>SIG_CONSTRAINTS_FAILURE</SubIndication>
+        <AdESValidationDetails>
+            <Error Key="BBB_ICS_ISASCP_ANS">The signed attribute: 'signing-certificate' is absent!</Error>
+            <Error Key="ARCH_LTAIVMP_ANS">No long term availability and integrity of validation material is present!</Error>
+            <Warning Key="BBB_XCV_CCCBB_SIG_ANS">The certificate chain for signature is not trusted, it does not contain a trust anchor.</Warning>
+            <Warning Key="BBB_XCV_IRDPFC_ANS">No revocation data found for the certificate!</Warning>
+        </AdESValidationDetails>
+        <QualificationDetails>
+            <Error Key="QUAL_CERT_TRUSTED_LIST_REACHED_ANS">Unable to build a certificate chain up to a trusted list!</Error>
+            <Warning Key="QUAL_IS_ADES_IND">The signature/seal is an INDETERMINATE AdES digital signature!</Warning>
+        </QualificationDetails>
+        <SigningTime>2026-04-23T09:50:00Z</SigningTime>
+        <BestSignatureTime>2026-04-24T13:48:31Z</BestSignatureTime>
+        <SignedBy>ZUGAZAGOITIA Alberto (eu-LISA)</SignedBy>
+        <SignatureLevel description="Not applicable">N/A</SignatureLevel>
+        <SignatureScope Id="D-1A04DA2E9CEA6DDAFC833913727FB4977739806B562C9603B0315E8629F801B0" name="Full PDF" scope="FULL">The document ByteRange : [0, 97946, 120948, 48780]</SignatureScope>
+    </Signature>
+</SimpleReport>
+</OriginalValidationReport>
+    </Validation>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="id-d84210802c2cb1ea8e8d2599ab722ccc"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="r-id-d84210802c2cb1ea8e8d2599ab722ccc-1" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2002/06/xmldsig-filter2"><dsig-filter2:XPath xmlns:dsig-filter2="http://www.w3.org/2002/06/xmldsig-filter2" Filter="subtract">/descendant::ds:Signature</dsig-filter2:XPath></ds:Transform><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>nHJQH3gfuPiB9lEjHA7qQ8HcG70QrXAGlXhwmk5FTos=</ds:DigestValue></ds:Reference><ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#xades-id-d84210802c2cb1ea8e8d2599ab722ccc"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>Qo9PbqULMUO69LexK67tBbUTCDYrzoz52xx3hHzZ1q4=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="value-id-d84210802c2cb1ea8e8d2599ab722ccc">G2XHPo4yDzabe97qdGJ+8AkI9dkEA0dPWYhbMlZfBpQSZWqsULR1vHnaWPBhp+igYWpdWEW0oL0o3Pujlbm1EZf1DdNBpvEelLsQ7QY3yggf0njMium4PeLacmFDMGWxEfSEmKJNveLveHMJ2QlsSK2+xlIlAJlf9bcRGzptjkLGM3fuTjObqFVAg9wmWhTanFaDWv7uakuPcdlCto5bfhmZxwBCHZYTbxKGH1CeRlIfiFyLTTAIxqzbmWFWh7A528CWduKxaU4bjKTtg7jL62a8W19Jy0B1I7fDzbbG53/ZXGeRFUYIpUzdm39dxkcdsMeuKJAlYsVXvOdBQzXYRg==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIC2jCCAcKgAwIBAgIUe30fs8i++GKSAOmoR1kBlxFhTUEwDQYJKoZIhvcNAQELBQAwJjELMAkGA1UEBhMCQkwxFzAVBgNVBAMMDmNvbm5lY3Rvcl9ibHVlMCAXDTI1MDUyNzEwNTQzOFoYDzIxMjUwNTI3MTA1NDM4WjAmMQswCQYDVQQGEwJCTDEXMBUGA1UEAwwOY29ubmVjdG9yX2JsdWUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCPVV8x0Ge+7CJwk1WYQMsFWjB/InBa+jZKfDdnL3FHJsAMHEKyfUqp3jAnV+VaWNPVcpBztVy66tzTgSfDSKRgj2DWQLXU4IDdSbBnl6Gm9Uw3gC+jim/Q73VMr4fAk1hr1f9DxK+9MzAbZ1A1RwOkvlUqSeJdE7wstJ2NLOSZ0VUfnDx+bDY7M6GcK0z7ytCvuQjYKnbavIOvrfh3+CYmmrECdzvX1EtWQRUed5dUmUbp6Um/Dgnj2HkiH0mYOzPxysXrsNgz1fvfslatX7Bwk5DQxtcajNRud7edzEYEI9YVtnvdTOf+bDR+Ubej10Qx1l3I8Tg0+MNhb9V4X6vhAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAH1ovw6xfc02qOVDuUAhn7aoTol9Wsu3Ie1SntOk5IgHgr6YKtg685uJCq3bYtHYVCHuB9aJ3Mt57JngzDdnt9o6Ktm8NndSIn9ICDTCi0w0/rEEdNgsAUbgOQZTzZA1vw/EPOYl0R2vs7jocGzV38iN+QQCNMxN74R5H4wyhLCHOkyn0qi6X7UVqtmtkijv9XRgjxP2oEO5izckA7H9iafV6fNtY7X3MrLQz5dhekiOwZw6dpte537XIxLHD9eUZkb5u5enJdb66u+jBahkm+atT+ue0dHr8puSYEzeu24CDHSUSqmKS5leZzCt4sHa3bMKCelW9KntUkFPuhV8cTw=</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Target="#id-d84210802c2cb1ea8e8d2599ab722ccc"><xades:SignedProperties Id="xades-id-d84210802c2cb1ea8e8d2599ab722ccc"><xades:SignedSignatureProperties><xades:SigningTime>2026-04-24T13:48:31Z</xades:SigningTime><xades:SigningCertificateV2><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha512"/><ds:DigestValue>PlOjbEgLmLneRpOknxmdyx0pSgWzUqUca6pvI3jfXBrXCzJzFsMgW3TPPxD/Za8GxYI5ymQj3wT+8Qjl2kLbYQ==</ds:DigestValue></xades:CertDigest><xades:IssuerSerialV2>MEIwKqQoMCYxCzAJBgNVBAYTAkJMMRcwFQYDVQQDDA5jb25uZWN0b3JfYmx1ZQIUe30fs8i++GKSAOmoR1kBlxFhTUE=</xades:IssuerSerialV2></xades:Cert></xades:SigningCertificateV2></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#r-id-d84210802c2cb1ea8e8d2599ab722ccc-1"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></TrustOkToken>

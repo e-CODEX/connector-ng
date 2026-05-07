@@ -58,7 +58,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Column(name = "IDENTIFIER", nullable = false)
     private String identifier;
 
-    @Column(name = "BACKEND_MESSAGE_IDENTIFIER", nullable = false)
+    @Column(name = "BACKEND_MESSAGE_IDENTIFIER")
     private String backendMessageIdentifier;
 
     @Column(name = "REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER")

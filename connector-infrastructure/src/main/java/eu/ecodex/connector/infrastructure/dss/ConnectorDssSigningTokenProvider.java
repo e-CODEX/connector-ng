@@ -74,10 +74,10 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
         var path = keystore.getPath();
 
         if (!StringUtils.hasText(path)) {
-            throw new IllegalStateException("signing keystore path must not be blank");
+            throw new IllegalStateException("Signing keystore path must not be blank");
         }
 
-        log.info("loading signing keystore from: {}", keystore.getPath());
+        log.debug("Loading signing keystore from: {}", keystore.getPath());
 
         var protection = new KeyStore.PasswordProtection(
                 keystore.getPassword().toCharArray()
@@ -88,7 +88,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
             case JKS -> loadJks(keystore, protection);
         };
 
-        log.info("signing token loaded — {} key(s) available", token.getKeys().size());
+        log.debug("Signing token loaded — {} key(s) available", token.getKeys().size());
 
         return token;
     }
@@ -100,7 +100,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
      */
     public DSSPrivateKeyEntry getSigningKey() {
         if (privateKey == null) {
-            throw new IllegalArgumentException("missing private key configuration");
+            throw new IllegalArgumentException("Missing private key configuration");
         }
 
         var alias = privateKey.getAlias();
@@ -108,7 +108,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
 
         if (key == null) {
             throw new IllegalArgumentException(
-                    "no signing key found for alias [" + alias + "] in keystore"
+                    "No signing key found for alias [" + alias + "] in keystore"
             );
         }
 
@@ -122,7 +122,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
             return new Pkcs12SignatureToken(resolveStream(properties.getPath()), protection);
         } catch (IOException e) {
             throw new IllegalStateException(
-                    "failed to load PKCS12 keystore: " + properties.getPath(), e
+                    "Failed to load PKCS12 keystore: " + properties.getPath(), e
             );
         }
     }
@@ -134,13 +134,13 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
             return new JKSSignatureToken(resolveStream(properties.getPath()), protection);
         } catch (IOException e) {
             throw new IllegalStateException(
-                    "failed to load JKS keystore: " + properties.getPath(), e);
+                    "Failed to load JKS keystore: " + properties.getPath(), e);
         }
     }
 
     private InputStream resolveStream(String path) throws IOException {
         if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("keystore path must not be blank");
+            throw new IllegalArgumentException("Keystore path must not be blank");
         }
 
         if (path.startsWith(CLASSPATH_PREFIX)) {
@@ -148,7 +148,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
             var resource = new ClassPathResource(resourcePath);
 
             if (!resource.exists()) {
-                throw new IllegalStateException("classpath resource not found: " + resource);
+                throw new IllegalStateException("Classpath resource not found: " + resource);
             }
 
             return resource.getInputStream();

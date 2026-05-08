@@ -28,8 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Service
-public class ConnectorOutboundMessageReceiverService implements
-        ConnectorOutboundMessageReceiver {
+public class ConnectorOutboundMessageReceiverService implements ConnectorOutboundMessageReceiver {
     private final ConnectorMessageProcessingConfigurationProvider configurationProvider;
     private final ConnectorMessageVerifier messageVerifier;
     private final ConnectorEventPublisher stagingEventPublisher;
@@ -70,11 +69,9 @@ public class ConnectorOutboundMessageReceiverService implements
     }
 
     private ConnectorMessage assignIdentifier(ConnectorMessage message) {
-        log.debug("assigning identifier to message [{}]", message);
+        log.debug("Assigning identifier to message [{}]", message);
         var identifier = this.messageIdGenerator.generateIdentifier();
-        return message
-                .toBuilder()
-                .identifier(identifier)
-                .build();
+
+        return message.toBuilder().identifier(identifier).build();
     }
 }

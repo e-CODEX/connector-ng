@@ -87,8 +87,8 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
     public ConnectorProcessingMode execute(
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
             @NonNull ConnectorProcessingMode processingMode) {
-        log.debug(
-                "creating new processing mode [{}] for business domain [{}]: ", processingMode,
+        log.info(
+                "Registering a new processing mode for the business domain [{}]: ",
                 businessDomainIdentifier
         );
 
@@ -97,7 +97,7 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
         );
 
         if (foundBusinessDomain == null) {
-            throw new ConnectorBusinessDomainNotFoundException("business domain not found");
+            throw new ConnectorBusinessDomainNotFoundException("Business domain not found");
         }
 
         var existingProcessingMode = this.processingModeRepository.findByBusinessDomainIdentifier(
@@ -106,13 +106,13 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
 
         if (existingProcessingMode != null) {
             throw new ConnectorProcessingModeException(
-                    "the business domain has already a processing mode linked"
+                    "The business domain has already a processing mode linked"
             );
         }
 
         var parsedProcessingMode = parseXmlFile(processingMode);
 
-        log.debug("processing mode parsed successfully [{}]", parsedProcessingMode);
+        log.debug("Processing mode parsed successfully [{}]", parsedProcessingMode);
 
         parsedProcessingMode = parsedProcessingMode
                 .toBuilder()
@@ -151,21 +151,16 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
                 createdProcessingMode.uuid(), createdTruststore.uuid()
         );
 
-        log.debug("processing mode [{}] created successfully", createdProcessingMode);
+        log.debug("Processing mode [{}] created successfully", createdProcessingMode.uuid());
 
         return updatedProcessingMode;
     }
 
     private ConnectorProcessingMode parseXmlFile(ConnectorProcessingMode processingMode) {
-        log.debug("parsing processing mode xml file");
-
         try {
             var document = SecureXmlParserUtil.parseSecurely(processingMode.content());
-
             document.getDocumentElement().normalize();
-
             var root = document.getDocumentElement();
-
             var homePartyName = root.getAttribute("party");
 
             var partiesNode = document.getElementsByTagName("party");
@@ -183,7 +178,7 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
                                    .orElse(null);
 
             if (homeParty == null) {
-                throw new ConnectorProcessingModeException("home party not found");
+                throw new ConnectorProcessingModeException("Home party not found");
             }
 
             var updatedProcessingMode = processingMode
@@ -193,18 +188,16 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
                     .actions(actions)
                     .build();
 
-            log.debug("processing mode parsed successfully");
+            log.debug("Processing mode parsed successfully");
 
             return updatedProcessingMode;
         } catch (Exception e) {
-            log.error("error parsing xml file", e);
-            throw new ConnectorProcessingModeException("error parsing xml file (IOException)", e);
+            log.error("Error parsing processing mode xml file", e);
+            throw new ConnectorProcessingModeException("Error parsing processing mode xml file", e);
         }
     }
 
     private Map<String, String> retrievePartyIdTypes(NodeList partyIdTypesNodeList) {
-        log.debug("retrieving party id types from processing mode xml file");
-
         var partyIdTypes = new HashMap<String, String>();
 
         for (int i = 0; i < partyIdTypesNodeList.getLength(); i++) {
@@ -219,9 +212,9 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
     }
 
     private HashSet<ConnectorParty> retrieveParties(
-            NodeList partiesNodeList, NodeList partyIdTypesNodeList, String homePartyName) {
-        log.debug("retrieving parties from processing mode xml file");
-
+            NodeList partiesNodeList,
+            NodeList partyIdTypesNodeList,
+            String homePartyName) {
         var partyIdTypes = this.retrievePartyIdTypes(partyIdTypesNodeList);
 
         var parties = new HashSet<ConnectorParty>();
@@ -232,8 +225,8 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
             var name = party.getAttribute("name");
 
             var identifier = (Element) party.getElementsByTagName("identifier").item(0);
-            String partyId = identifier.getAttribute("partyId");
-            String partyIdType = identifier.getAttribute("partyIdType");
+            var partyId = identifier.getAttribute("partyId");
+            var partyIdType = identifier.getAttribute("partyIdType");
 
             var connectorParty = ConnectorParty
                     .builder()

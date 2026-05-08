@@ -131,7 +131,6 @@ public class ConnectorAsicContainerValidator {
         var detachedSignatureName = token.getDocument().getSignatureFilename();
 
         var asicsContents = ZipStreamUtil.extract(asicsDocument);
-        // TODO review
         var businessContent = new ConnectorContainerBusinessContent();
         DSSDocument pdfTrustOKToken = null;
 
@@ -292,7 +291,7 @@ public class ConnectorAsicContainerValidator {
     private int documentSize(DSSDocument document) {
         if (!(document instanceof InMemoryDocument inMemory)) {
             throw new ConnectorContainerException(
-                    "documentSize is not yet supported for " + document.getClass().getSimpleName()
+                    "Document size is not yet supported for " + document.getClass().getSimpleName()
                     + " — only InMemoryDocument is currently handled");
         }
         // TODO: adapt to large-file support using an appropriate DSSDocument implementation

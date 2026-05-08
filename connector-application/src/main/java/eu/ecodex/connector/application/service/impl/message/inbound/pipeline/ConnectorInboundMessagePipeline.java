@@ -69,7 +69,7 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
 
     @Override
     public void process(@NonNull ConnectorMessage message) {
-        log.debug("start processing inbound message: [{}]", message);
+        log.info("Start processing inbound message: [{}]", message.identifier());
 
         try {
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(
@@ -88,14 +88,14 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
             this.linkSubmissionStep.execute(inboundMessage);
 
             log.info(
-                    "message with identifier [{}] has been successfully submitted to backend [{}]",
+                    "Message with identifier [{}] has been successfully submitted to backend [{}]",
                     inboundMessage.identifier(), inboundMessage.backendName()
             );
         } catch (Exception e) { // TODO improve the exception handling (sec or container exc)
             log.warn(
-                    "security exception during inbound message [{}] processing! responding with "
+                    "Security exception during inbound message [{}] processing! responding with "
                     + "RelayRemmdRejection confirmation message",
-                    message, e
+                    message.identifier(), e
             );
 
             var relayRemmdRejectionMessage = this.nonDeliveryStep.execute(
@@ -105,9 +105,9 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
             this.linkSubmissionStep.execute(relayRemmdRejectionMessage);
 
             log.warn(
-                    "incoming message [{}] from gateway to backend has been rejected due to "
+                    "Incoming message [{}] from gateway to backend has been rejected due to "
                     + "security exception",
-                    message
+                    message.identifier()
             );
         } finally {
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(null);

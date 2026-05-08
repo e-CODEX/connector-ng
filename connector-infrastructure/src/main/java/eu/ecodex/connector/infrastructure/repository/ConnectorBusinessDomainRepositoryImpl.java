@@ -107,7 +107,8 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
     public List<ConnectorBusinessDomain> findAll() {
         var businessDomains = jpaRepository.findAll();
 
-        return businessDomains.stream().map(
-                ConnectorBusinessDomainRepositoryImpl::toDomain).toList();
+        return businessDomains.stream()
+                              .map(ConnectorBusinessDomainRepositoryImpl::toDomain)
+                              .toList();
     }
 }

@@ -36,16 +36,15 @@ public class ConnectorOutboundMessageStagingEventPublisher implements ConnectorE
     private final ConnectorQueueProperties queueProperties;
 
     public ConnectorOutboundMessageStagingEventPublisher(
-            JmsTemplate jmsTemplate, ConnectorQueueProperties queueProperties) {
+            JmsTemplate jmsTemplate,
+            ConnectorQueueProperties queueProperties) {
         this.jmsTemplate = jmsTemplate;
         this.queueProperties = queueProperties;
     }
 
     @Override
     public void publish(@NonNull ConnectorMessage message) {
-        log.info(
-                "publishing message to outbound message staging queue: [{}]", message.identifier()
-        );
+        log.info("Submitting message [{}] to outbound message staging queue", message.identifier());
 
         this.jmsTemplate.convertAndSend(
                 this.queueProperties.getOutboundMessageStagingQueue(), message

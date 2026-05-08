@@ -36,7 +36,10 @@ public class ConnectorOutboundMessageGatewayNameStep implements ConnectorMessage
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
-        log.debug("processing outbound message gateway name validation for: [{}]", outboundMessage);
+        log.debug(
+                "Processing outbound message [{}] gateway name validation",
+                outboundMessage.identifier()
+        );
 
         if (StringUtils.isNotEmpty(outboundMessage.gatewayName())) {
             return outboundMessage;

@@ -50,18 +50,18 @@ public class ConnectorGatewayMessageReplyListener {
     @Transactional
     @JmsListener(destination = "${connector.queues.gateway-submission-reply-queue}")
     public void handle(@NonNull MapMessage message) {
-        log.info("receiving gateway message submission confirmation");
+        log.info("Receiving gateway message submission confirmation");
 
         try {
             var messageIdentifier = message.getStringProperty("messageId");
 
             if (messageIdentifier == null) {
                 throw new RuntimeException(
-                        "message identifier not found in gateway submission reply");
+                        "Message identifier not found in gateway submission reply");
             }
 
             log.info(
-                    "gateway submission confirmation received for the message: {}",
+                    "Gateway message submission confirmation received for the message: [{}]",
                     messageIdentifier
             );
             this.messageRepository.setDeliveredToGatewayAt(messageIdentifier);

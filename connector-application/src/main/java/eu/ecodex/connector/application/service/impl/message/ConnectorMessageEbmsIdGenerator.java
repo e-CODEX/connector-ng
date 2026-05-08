@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.service.impl.message;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
  * configuration and typically represents the domain or system identifier required by
  * the ebMS specification.
  */
+@Slf4j
 @Component
 public class ConnectorMessageEbmsIdGenerator {
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
@@ -51,6 +53,7 @@ public class ConnectorMessageEbmsIdGenerator {
      * @return a unique message identifier in the format {@code <uuid>@<suffix>}
      */
     public String generateIdentifier() {
+        log.info("Generating new EBMS message identifier");
         var configuration = this.processingConfigurationProvider.getConfiguration();
         return String.format("%s@%s", UUID.randomUUID(), configuration.ebmsIdSuffix());
     }

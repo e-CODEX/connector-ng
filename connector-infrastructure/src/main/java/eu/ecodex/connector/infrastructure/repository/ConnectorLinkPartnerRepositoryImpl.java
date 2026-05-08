@@ -48,7 +48,7 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
      *                   partner configurations required to populate the registry.
      */
     public ConnectorLinkPartnerRepositoryImpl(ConnectorLinkProperties properties) {
-        log.info("initializing link partner registry");
+        log.info("Initializing link partner registry");
 
         Map<ConnectorLinkPartnerName, ConnectorLinkPartner> map = new HashMap<>();
 
@@ -134,7 +134,7 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
     void init() {
         this.partners
                 .forEach((name, partner) ->
-                                 log.info("registered link partner: {} - {}", name, partner)
+                                 log.info("Registered link partner: {} - {}", name, partner)
                 );
     }
 }

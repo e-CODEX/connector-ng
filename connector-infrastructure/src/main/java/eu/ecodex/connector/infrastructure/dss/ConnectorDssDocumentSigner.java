@@ -79,7 +79,7 @@ public class ConnectorDssDocumentSigner {
      * @throws NullPointerException if {@code documentToSign} is null
      */
     public DSSDocument signWithASIC(
-            @NonNull final DSSDocument documentToSign,
+            @NonNull DSSDocument documentToSign,
             ConnectorDssSigningTokenProvider signingTokenProvider) {
         var params = new ASiCWithXAdESSignatureParameters();
         params.setSignatureLevel(SignatureLevel.XAdES_BASELINE_B);
@@ -185,10 +185,10 @@ public class ConnectorDssDocumentSigner {
             return service.signDocument(documentToSign, params, signedData);
         } catch (Exception e) {
             log.error(
-                    "failed to sign document [{}] with params [{}]",
+                    "Failed to sign document [{}] with params [{}]",
                     documentToSign.getName(), params.getSignatureLevel(), e
             );
-            throw new RuntimeException("document signing failed", e);
+            throw new RuntimeException("Document signing failed", e);
         }
     }
 }

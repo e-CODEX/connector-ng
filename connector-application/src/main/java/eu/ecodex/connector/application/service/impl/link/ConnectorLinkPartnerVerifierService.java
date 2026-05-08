@@ -43,17 +43,15 @@ public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartner
 
     @Override
     public void verify(@NonNull ConnectorMessage message) {
-        log.debug("verifying the message link partner: [{}]", message);
+        log.debug("Verifying the message link partner: [{}]", message);
         var linkPartnerName = getLinkPartnerName(message);
 
         var linkPartner = this.linkPartnerRepository.findByName(linkPartnerName);
 
         if (linkPartner == null) {
-            var linksPartners = this.linkPartnerRepository.findAll();
-            log.warn("HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE [{}] could not be found!", linksPartners);
             throw new ConnectorLinkPartnerSubmissionException(
                     String.format(
-                            "the LinkPartner with name [%s] could not be found!",
+                            "The LinkPartner with name [%s] could not be found!",
                             linkPartnerName
                     ));
         }

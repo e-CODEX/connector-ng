@@ -54,13 +54,13 @@ public class ConnectorOutboundMessageConfirmationStep implements ConnectorMessag
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage submissionEvidenceMessage) {
         log.debug(
-                "processing outbound message with submission confirmation message creation for: "
-                + "[{}]", submissionEvidenceMessage
+                "Processing outbound message with submission confirmation message "
+                + "[{}]", submissionEvidenceMessage.identifier()
         );
 
         var transportedEvidences = submissionEvidenceMessage.transportedEvidences();
         if (transportedEvidences == null || transportedEvidences.isEmpty()) {
-            throw new IllegalStateException("message has no transported evidences!");
+            throw new IllegalStateException("Message has no transported evidences!");
         }
 
         var submissionEvidence = submissionEvidenceMessage.transportedEvidences().getFirst();
@@ -68,7 +68,7 @@ public class ConnectorOutboundMessageConfirmationStep implements ConnectorMessag
                 submissionEvidenceMessage, submissionEvidence
         );
 
-        log.debug("created confirmation message: [{}]", confirmationMessage);
+        log.debug("Created confirmation message: [{}]", confirmationMessage);
 
         return confirmationMessage.switchDirection();
     }

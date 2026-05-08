@@ -33,7 +33,7 @@ public class ConnectorRegisterBusinessDomainService implements ConnectorRegister
 
     @Override
     public ConnectorBusinessDomain execute(@NonNull ConnectorBusinessDomain businessDomain) {
-        log.debug("creating new business domain: [{}]", businessDomain);
+        log.debug("Registering new business domain: [{}]", businessDomain.identifier());
 
         var foundBusinessDomain = this.businessDomainRepository.findByIdentifier(
                 businessDomain.identifier()
@@ -41,7 +41,7 @@ public class ConnectorRegisterBusinessDomainService implements ConnectorRegister
 
         if (foundBusinessDomain != null) {
             throw new ConnectorBusinessDomainAlreadyExistsException(
-                    "business domain already exists"
+                    "Business domain already exists"
             );
         }
 

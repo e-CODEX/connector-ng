@@ -84,7 +84,7 @@ public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipelin
 
     @Override
     public void process(@NonNull ConnectorMessage message) {
-        log.info("start processing outbound connector message: [{}]", message);
+        log.info("Start processing outbound connector message: [{}]", message.identifier());
 
         try {
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(
@@ -106,10 +106,10 @@ public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipelin
 
             this.linkSubmissionStep.execute(confirmationMessage);
 
-            log.info("end processing outbound connector message: [{}]", message);
+            log.info("End processing outbound connector message: [{}]", message.identifier());
         } catch (Exception e) {
             log.error(
-                    "evidence [{}] generation for message [{}] failed",
+                    "Evidence [{}] generation for message [{}] failed",
                     ConnectorEvidenceType.SUBMISSION_REJECTION, message.identifier(), e
             );
 
@@ -117,7 +117,7 @@ public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipelin
             this.linkSubmissionStep.execute(rejectionMessage);
 
             throw new ConnectorGatewaySubmissionException(
-                    "message submission to gateway failed", e
+                    "Message submission to gateway failed", e
             );
         } finally {
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(null);

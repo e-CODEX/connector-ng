@@ -262,7 +262,7 @@ public class ConnectorTokenSignatureBasedTechnicalValidationGenerator implements
             );
 
             log.warn(
-                    "Validation failed with exception: result set to [{}] — {}",
+                    "Validation failed with exception: result set to [{}] — [{}]",
                     technicalResult.getTrustLevel(), technicalResult.getComment()
             );
 

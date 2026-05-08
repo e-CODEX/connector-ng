@@ -76,8 +76,6 @@ public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
             throw new ConnectorContainerException("The message identifier is null");
         }
 
-        log.info("Building ASIC-S container for message: [{}]", messageIdentifier);
-
         try {
             this.validateUniqueAttachmentNames(messageIdentifier);
 

@@ -37,11 +37,11 @@ public class ConnectorOutboundMessageValidationStep implements ConnectorMessageS
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
-        log.debug("processing outbound message validation for: [{}]", outboundMessage);
+        log.debug("Processing outbound message [{}] validation", outboundMessage.identifier());
 
         this.partiesVerifierService.verify(outboundMessage);
 
-        log.debug("outbound message validation completed for: [{}]", outboundMessage);
+        log.debug("Outbound message [{}] validation completed", outboundMessage.identifier());
 
         return outboundMessage;
     }

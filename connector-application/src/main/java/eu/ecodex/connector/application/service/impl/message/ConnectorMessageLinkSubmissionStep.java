@@ -39,7 +39,7 @@ public class ConnectorMessageLinkSubmissionStep implements ConnectorMessageStep 
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage message) {
-        log.debug("submitting message [{}] to link partner", message);
+        log.debug("Submitting message [{}] to link partner", message.identifier());
 
         this.linkSubmissionService.submit(message);
 

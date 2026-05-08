@@ -28,7 +28,8 @@ public class ConnectorInboundMessagePipelineEventPublisher implements ConnectorE
     private final ConnectorQueueProperties queueProperties;
 
     public ConnectorInboundMessagePipelineEventPublisher(
-            JmsTemplate jmsTemplate, ConnectorQueueProperties queueProperties) {
+            JmsTemplate jmsTemplate,
+            ConnectorQueueProperties queueProperties) {
         this.jmsTemplate = jmsTemplate;
         this.queueProperties = queueProperties;
     }
@@ -36,7 +37,7 @@ public class ConnectorInboundMessagePipelineEventPublisher implements ConnectorE
     @Override
     public void publish(@NonNull ConnectorMessage message) {
         log.info(
-                "publishing message to inbound message processing queue: [{}]",
+                "Submitting message [{}] to inbound message processing queue",
                 message.identifier()
         );
 

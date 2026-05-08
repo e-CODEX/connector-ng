@@ -42,7 +42,8 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
      * @param actionRepository  repository used to resolve and validate message actions
      */
     public ConnectorMessageVerifierService(
-            ConnectorPartyRepository partyRepository, ConnectorServiceRepository serviceRepository,
+            ConnectorPartyRepository partyRepository,
+            ConnectorServiceRepository serviceRepository,
             ConnectorActionRepository actionRepository) {
         this.partyRepository = partyRepository;
         this.serviceRepository = serviceRepository;
@@ -54,7 +55,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
             @NonNull ConnectorMessage message,
             @NonNull ProcessingModeVerificationMode verificationMode) {
         log.debug(
-                "verifying message [{}] with verification mode [{}]",
+                "Verifying message [{}] with verification mode [{}]",
                 message.identifier(), verificationMode
         );
 
@@ -76,7 +77,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
         if (toParty != null && toParty.identifierType().isBlank()) {
             log.warn(
-                    "message with identifier [{}] verification mode is RELAXED."
+                    "Message with identifier [{}] verification mode is RELAXED."
                     + "Assuming ToParty IdentifierType [{}] as empty!",
                     message.identifier(), toParty.identifierType()
             );
@@ -90,7 +91,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
         if (foundToParty == null) {
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
-                            "message toParty [%s] is not configured on the connector! "
+                            "Message toParty [%s] is not configured on the connector! "
                             + "Check the P-Mode linked to business domain with uuid [%s]",
                             toParty, message.businessDomainIdentifier()
                     )
@@ -101,7 +102,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
         if (fromParty != null && fromParty.identifierType().isBlank()) {
             log.warn(
-                    "message with identifier [{}] verification mode is RELAXED."
+                    "Message with identifier [{}] verification mode is RELAXED."
                     + "Assuming FromParty IdentifierType [{}] as empty!",
                     message.identifier(), fromParty.identifierType()
             );
@@ -114,7 +115,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
         if (foundFromParty == null) {
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
-                            "message fromParty [%s] is not configured on the connector! "
+                            "Message fromParty [%s] is not configured on the connector! "
                             + "Check the P-Mode linked to business domain with uuid [%s]",
                             fromParty, message.businessDomainIdentifier()
                     )
@@ -124,7 +125,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
     private void processCreateVerification(ConnectorMessage message) {
         var warning = String.format(
-                "message with identifier [%s] verification failed because P-Mode CREATE "
+                "Message with identifier [%s] verification failed because P-Mode CREATE "
                 + "verification mode is not supported!",
                 message.identifier()
         );
@@ -133,7 +134,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     }
 
     private void processServiceAndActionVerification(ConnectorMessage message) {
-        log.debug("verifying service and action for message [{}]", message.identifier());
+        log.debug("Verifying service and action for message [{}]", message.identifier());
 
         try {
             var as4Properties = message.as4Properties();
@@ -146,10 +147,12 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
             if (service == null) {
                 log.warn(
-                        "service with name [{}] and business domain [{}] not found",
+                        "Service with name [{}] and business domain [{}] not found",
                         serviceName, businessDomainIdentifier
                 );
-                throw new ConnectorServiceNotFoundException("service not found");
+                throw new ConnectorServiceNotFoundException(
+                        "Service [{" + serviceName + "}] not found"
+                );
             }
 
             var action = this.actionRepository.findByNameAndBusinessDomain(
@@ -160,17 +163,19 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
             if (action == null) {
                 log.warn(
-                        "action with name [{}] and business domain [{}] not found",
+                        "Action with name [{}] and business domain [{}] not found",
                         actionName, businessDomainIdentifier
                 );
 
-                throw new ConnectorActionNotFoundException("action not found");
+                throw new ConnectorActionNotFoundException(
+                        "action [{" + actionName + "}] not found"
+                );
             }
         } catch (NotFoundException e) {
-            log.error("message with identifier [{}] verification failed", message.identifier());
+            log.error("Message with identifier [{}] verification failed", message.identifier());
 
             throw new ConnectorProcessingModeVerificationException(
-                    "message verification failed", e
+                    "Message verification failed", e
             );
         }
     }

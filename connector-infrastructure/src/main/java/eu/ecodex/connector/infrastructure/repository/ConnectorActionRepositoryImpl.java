@@ -19,13 +19,11 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.Connector
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorProcessingModeJpaRepository;
 import java.util.List;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorActionRepository}.
  */
-@Slf4j
 @Component
 public class ConnectorActionRepositoryImpl implements ConnectorActionRepository {
     private final ConnectorActionJpaRepository jpaRepository;
@@ -49,7 +47,8 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
      *         arguments
      */
     public static ConnectorActionEntity toEntity(
-            ConnectorAction action, ConnectorProcessingModeEntity processingMode) {
+            ConnectorAction action,
+            ConnectorProcessingModeEntity processingMode) {
         return ConnectorActionEntity
                 .builder()
                 .name(action.name())
@@ -79,10 +78,6 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
     public List<ConnectorAction> saveAll(
             @NonNull List<ConnectorAction> actions,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        log.debug(
-                "saving actions [{}] for business domain [{}]", actions, businessDomainIdentifier
-        );
-
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
                 businessDomainIdentifier.messageLaneIdentifier()
         );

@@ -40,13 +40,17 @@ public class ConnectorInboundMessageSecurityStep implements ConnectorMessageStep
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
         log.debug(
-                "processing inbound message ASIC-S container verification for: [{}]", inboundMessage
+                "Processing inbound message [{}] ASIC-S container verification: ",
+                inboundMessage.identifier()
         );
 
         // validate the ASIC-S container
         this.securityToolkit.validateMessage(inboundMessage);
 
-        log.debug("ASIC-S container verification completed for: [{}]", inboundMessage);
+        log.debug(
+                "ASIC-S container verification completed for the message: [{}]",
+                inboundMessage.identifier()
+        );
 
         return inboundMessage;
     }

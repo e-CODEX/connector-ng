@@ -45,7 +45,6 @@ public class SecureXmlParserUtil {
      *                          setup.
      */
     public static Document parseSecurely(String xmlString) {
-        log.debug("parsing XML string: {}", xmlString);
         var factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
 
@@ -78,11 +77,8 @@ public class SecureXmlParserUtil {
         DocumentBuilder builder;
         try {
             builder = factory.newDocumentBuilder();
-            var parsedXml = builder.parse(new InputSource(new StringReader(xmlString)));
 
-            log.debug("XML parsed successfully");
-
-            return parsedXml;
+            return builder.parse(new InputSource(new StringReader(xmlString)));
         } catch (ParserConfigurationException | SAXException | IOException e) {
             log.error("error parsing XML string", e);
 

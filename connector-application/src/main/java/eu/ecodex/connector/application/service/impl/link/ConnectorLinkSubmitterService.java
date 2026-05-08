@@ -21,8 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorLinkSubmitter} interface responsible for handling
- * the submission of {@link ConnectorMessage} instances to appropriate connector link partners.
+ * Implementation of the {@link ConnectorLinkSubmitter} interface responsible for handling the
+ * submission of {@link ConnectorMessage} instances to appropriate connector link partners.
  *
  * <p>This service processes connector messages by determining the target link partner based on the
  * message's direction and associated partner information. It retrieves the corresponding
@@ -53,8 +53,7 @@ public class ConnectorLinkSubmitterService implements ConnectorLinkSubmitter {
 
     @Override
     public void submit(@NonNull ConnectorMessage message) {
-        log.debug("submitting connector message to link partner: [{}]", message);
-
+        log.info("Submitting connector message [{}] to link partner", message.identifier());
         this.linkVerifier.verify(message);
         this.linkTransportStrategy.transport(message);
     }

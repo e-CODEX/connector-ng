@@ -63,11 +63,11 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
-        log.debug("processing inbound message backend name validation for: [{}]", inboundMessage);
+        log.debug("Processing inbound message backend name validation for: [{}]", inboundMessage);
 
         if (StringUtils.isNotEmpty(inboundMessage.backendName())) {
             log.debug(
-                    "backend name is already set for the message [{}], skipping the name "
+                    "Backend name is already set for the message [{}], skipping the name "
                     + "validation", inboundMessage
             );
 
@@ -108,8 +108,8 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
         }
 
         log.debug(
-                "conversation uuid is set for the message [{}], setting the correct backend name",
-                inboundMessage
+                "Conversation uuid is set for the message [{}], setting the correct backend name",
+                inboundMessage.identifier()
         );
 
         var conversationIdMessages = messageRepository.findByConversationIdentifier(conversationId);
@@ -123,7 +123,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
 
         if (backendName != null) {
             log.debug(
-                    "found backend name [{}] for the conversation uuid [{}]",
+                    "Found backend name [{}] for the conversation uuid [{}]",
                     backendName,
                     conversationId
             );
@@ -139,13 +139,13 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
     ) {
         if (!messageRoutingService.isRoutingEnabled(businessDomainIdentifier)) {
             log.debug(
-                    "backend routing is disabled, setting default backend name: [{}]",
+                    "Backend routing is disabled, setting default backend name: [{}]",
                     defaultBackendName
             );
             return defaultBackendName;
         }
 
-        log.debug("backend routing is enabled, setting the correct backend name");
+        log.debug("Backend routing is enabled, setting the correct backend name");
 
         var backendRoutingRules =
                 messageRoutingService.getBackendRoutingRule(businessDomainIdentifier);
@@ -159,7 +159,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
                 .findFirst()
                 .map(backendName -> {
                     log.debug(
-                            "found backend name [{}] for the message [{}]", backendName,
+                            "Found backend name [{}] for the message [{}]", backendName,
                             inboundMessage
                     );
                     return backendName;

@@ -100,7 +100,7 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
             // TODO send back failed evidence
             throw new IllegalStateException(
                     String.format(
-                            "attachment [%s] not found message [%s]",
+                            "Attachment [%s] not found for the message [%s]",
                             attachmentIdentifier, messageIdentifier
                     )
             );

@@ -46,9 +46,7 @@ public class ConnectorDssTrustedListFactory {
 
     private TLSource createTrustedListSource(DssTlSourceProperties properties) {
         var source = new TLSource();
-
         source.setUrl(properties.getTlUrl());
-
         var signingCerts = properties.getSigningCerts();
 
         if (signingCerts != null) {

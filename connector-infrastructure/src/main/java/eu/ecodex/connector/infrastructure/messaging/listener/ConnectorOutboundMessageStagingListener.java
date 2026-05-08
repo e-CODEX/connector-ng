@@ -43,7 +43,7 @@ public class ConnectorOutboundMessageStagingListener implements ConnectorEventHa
     @Transactional
     @JmsListener(destination = "${connector.queues.outbound-message-staging-queue}")
     public void handle(@NonNull ConnectorMessage message) {
-        log.info("received outbound message staging event: [{}]", message);
+        log.info("Entering outbound message [{}] staging process", message.identifier());
         messageStager.stage(message);
     }
 }

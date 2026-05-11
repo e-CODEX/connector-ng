@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
@@ -27,6 +28,8 @@ import eu.ecodex.connector.infrastructure.messaging.publisher.ConnectorInboundMe
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -44,6 +47,8 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     @Mock
     private ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher;
     @Mock
+    private ConnectorMessageIdGenerator messageIdGenerator;
+    @Mock
     private MapMessage message;
 
     @Test
@@ -55,27 +60,8 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     }
 
     @Test
-    void should_throw_exception_if_the_message_identifier_is_blank() throws JMSException {
-        when(message.getStringProperty("messageType")).thenReturn("incomingMessage");
-        when(message.getStringProperty("messageId")).thenReturn("  ");
-
-        assertThatThrownBy(() -> listener.handle(message))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void should_throw_exception_if_the_message_identifier_is_null() throws JMSException {
-        when(message.getStringProperty("messageType")).thenReturn("incomingMessage");
-        when(message.getStringProperty("messageId")).thenReturn(null);
-
-        assertThatThrownBy(() -> listener.handle(message))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     void should_throw_exception_if_the_message_has_zero_payload() throws JMSException {
         when(message.getStringProperty("messageType")).thenReturn("incomingMessage");
-        when(message.getStringProperty("messageId")).thenReturn("msg-001");
         when(message.getIntProperty("totalNumberOfPayloads")).thenReturn(0);
 
         assertThatThrownBy(() -> listener.handle(message))
@@ -83,7 +69,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     }
 
     @Test
-    void should_throw_exception_if_the_message_payload_has_business_content() throws JMSException {
+    void should_throw_exception_if_the_message_payload_has_no_business_content_and_no_evidence() throws JMSException {
         stubValidHeader(message, 1);
         stubAS4Properties(message);
         when(message.getStringProperty("payload_1_description")).thenReturn("ASIC-S");
@@ -96,8 +82,52 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
                 .isInstanceOf(IllegalStateException.class);
     }
 
+    @ParameterizedTest
+    @CsvSource({
+            ",,",
+            "BL,,",
+            "BL,urn:oasis:names:tc:ebcore:partyid-type:ecodex,",
+    })
+    void should_throw_exception_if_the_message_from_party_is_invalid(
+            String id, String type, String role) throws JMSException {
+        stubValidHeader(message, 1);
+        when(message.getStringProperty("service")).thenReturn("EPO");
+        when(message.getStringProperty("serviceType")).thenReturn("urn:e-codex:services:");
+        when(message.getStringProperty("action")).thenReturn("Form_A");
+        when(message.getStringProperty("fromPartyId")).thenReturn(id);
+        when(message.getStringProperty("fromPartyType")).thenReturn(type);
+        when(message.getStringProperty("fromRole")).thenReturn(role);
+
+        assertThatThrownBy(() -> listener.handle(message))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            ",,",
+            "RE,,",
+            "RE,urn:oasis:names:tc:ebcore:partyid-type:ecodex,",
+    })
+    void should_throw_exception_if_the_message_to_party_is_invalid(
+            String id, String type, String role) throws JMSException {
+        stubValidHeader(message, 1);
+        when(message.getStringProperty("service")).thenReturn("EPO");
+        when(message.getStringProperty("serviceType")).thenReturn("urn:e-codex:services:");
+        when(message.getStringProperty("action")).thenReturn("Form_A");
+        when(message.getStringProperty("fromPartyId")).thenReturn("BL");
+        when(message.getStringProperty("fromPartyType")).thenReturn("urn:oasis:names:tc:ebcore:partyid-type:ecodex");
+        when(message.getStringProperty("fromRole")).thenReturn("GW");
+
+        when(message.getStringProperty("toPartyId")).thenReturn(id);
+        when(message.getStringProperty("toPartyType")).thenReturn(type);
+        when(message.getStringProperty("toRole")).thenReturn(role);
+
+        assertThatThrownBy(() -> listener.handle(message))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
     @Test
-    void should_handle_message_submission_successfully() throws JMSException {
+    void should_handle_message_submission_successfully_if_the_message_is_a_business_message() throws JMSException {
         stubValidHeader(message, 4);
         stubAS4Properties(message);
         // payload 1: the required messageContent
@@ -112,6 +142,27 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         // payload 4: evidence
         when(message.getStringProperty("payload_4_description")).thenReturn(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE.name());
         when(message.getBytes("payload_4")).thenReturn("<evidence/>".getBytes());
+
+        when(messageIdGenerator.generateIdentifier()).thenReturn("184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu");
+
+        when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
+
+        // Should complete without throwing; the unknown payload is silently skipped
+        assertThatNoException().isThrownBy(() -> listener.handle(message));
+
+        // pipelineEventPublisher was still called — processing continued
+        verify(pipelineEventPublisher).publish(any());
+    }
+
+    @Test
+    void should_handle_message_submission_successfully_if_the_message_is_an_evidence() throws JMSException {
+        stubValidHeader(message, 1);
+        stubAS4Properties(message);
+        // payload 4: evidence
+        when(message.getStringProperty("payload_1_description")).thenReturn(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE.name());
+        when(message.getBytes("payload_1")).thenReturn("<evidence/>".getBytes());
 
         when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -157,7 +208,6 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
 
     private void stubValidHeader(MapMessage msg, int payloadCount) throws JMSException {
         when(msg.getStringProperty("messageType")).thenReturn("incomingMessage");
-        when(msg.getStringProperty("messageId")).thenReturn("msg-001");
         when(msg.getIntProperty("totalNumberOfPayloads")).thenReturn(payloadCount);
     }
 

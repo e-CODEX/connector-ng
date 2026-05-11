@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
+import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -56,14 +57,15 @@ public class ConnectorGatewayMessageListener {
 
     private static final Set<String> EVIDENCE_TYPE_NAMES =
             Arrays.stream(ConnectorEvidenceType.values())
-                  .map(Enum::name)
-                  .collect(Collectors.toUnmodifiableSet());
+                    .map(Enum::name)
+                    .collect(Collectors.toUnmodifiableSet());
 
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
     private final ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher;
+    private final ConnectorMessageIdGenerator messageIdGenerator;
 
     /**
      * Creates a new listener instance.
@@ -75,12 +77,14 @@ public class ConnectorGatewayMessageListener {
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorMessageEvidenceRepository evidenceRepository,
             ConnectorFileStorageProvider fileStorageProvider,
-            ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher) {
+            ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher,
+            ConnectorMessageIdGenerator messageIdGenerator) {
         this.messageRepository = messageRepository;
         this.attachmentRepository = attachmentRepository;
         this.evidenceRepository = evidenceRepository;
         this.fileStorageProvider = fileStorageProvider;
         this.pipelineEventPublisher = pipelineEventPublisher;
+        this.messageIdGenerator = messageIdGenerator;
     }
 
     /**
@@ -91,7 +95,6 @@ public class ConnectorGatewayMessageListener {
      *
      * @param message the JMS MapMessage received from the gateway. It must not be null and must
      *                contain valid message headers and payloads to be correctly processed.
-     *
      * @throws JMSException if an error occurs during processing, such as issues with accessing
      *                      message properties or payloads.
      */
@@ -102,9 +105,23 @@ public class ConnectorGatewayMessageListener {
 
         validateMessageHeader(message);
 
-        var messageIdentifier = message.getStringProperty("messageId");
         var as4Properties = parseAS4Properties(message);
         var payloads = parsePayloads(message);
+
+        if (payloads.businessContent == null && !payloads.evidences.isEmpty()) {
+            log.info("Received message from the gateway is a confirmation message");
+        } else if (payloads.businessContent != null) {
+            log.info("Received message from the gateway is a business message");
+        } else {
+            log.info(
+                    "Received message from the gateway is neither evidence nor a business message"
+            );
+            throw new IllegalStateException(
+                    "Received message from the gateway is neither evidence nor a business message"
+            );
+        }
+
+        var messageIdentifier = messageIdGenerator.generateIdentifier();
 
         var incomingMessage = ConnectorMessage
                 .builder()
@@ -117,7 +134,8 @@ public class ConnectorGatewayMessageListener {
                 .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
                 .businessContent(payloads.businessContent())
                 .attachments(payloads.attachments())
-                .evidences(payloads.evidences())
+                .evidences(null)
+                .transportedEvidences(payloads.evidences())
                 .build();
 
         persistMessage(incomingMessage, payloads, messageIdentifier);
@@ -131,12 +149,8 @@ public class ConnectorGatewayMessageListener {
                     "Invalid Gateway reception messageType: " + messageType);
         }
 
-        var messageId = message.getStringProperty("messageId");
-        if (messageId == null || messageId.isBlank()) {
-            throw new IllegalArgumentException("Missing Gateway reception messageId");
-        }
-
         int total = message.getIntProperty("totalNumberOfPayloads");
+
         if (total <= 0) {
             throw new IllegalArgumentException(
                     "Invalid Gateway reception totalNumberOfPayloads: " + total);
@@ -146,39 +160,57 @@ public class ConnectorGatewayMessageListener {
     private ConnectorMessageAS4Properties parseAS4Properties(MapMessage message)
             throws JMSException {
         var service = ConnectorService.builder()
-                                      .name(message.getStringProperty("service"))
-                                      .type(message.getStringProperty("serviceType"))
-                                      .build();
+                .name(message.getStringProperty("service"))
+                .type(message.getStringProperty("serviceType"))
+                .build();
         var action = ConnectorAction.builder()
-                                    .name(message.getStringProperty("action"))
-                                    .build();
+                .name(message.getStringProperty("action"))
+                .build();
+        var fromPartyId = message.getStringProperty("fromPartyId");
+        var fromPartyType = message.getStringProperty("fromPartyType");
+        var fromRole = message.getStringProperty("fromRole");
+
+        if (!StringUtils.hasText(fromPartyId) || !StringUtils.hasText(fromPartyType)
+                || !StringUtils.hasText(fromRole)) {
+            throw new IllegalArgumentException(" fromParty is not allowed to be null");
+        }
+
         var fromParty = ConnectorParty.builder()
-                                      .identifier(message.getStringProperty("fromPartyId"))
-                                      .identifierType(message.getStringProperty("fromPartyType"))
-                                      .role(message.getStringProperty("fromRole"))
-                                      .roleType(ConnectorPartyRoleType.INITIATOR)
-                                      .build();
+                .identifier(fromPartyId)
+                .identifierType(fromPartyType)
+                .role(fromRole)
+                .roleType(ConnectorPartyRoleType.INITIATOR)
+                .build();
+        var toPartyId = message.getStringProperty("toPartyId");
+        var toPartyType = message.getStringProperty("toPartyType");
+        var toRole = message.getStringProperty("toRole");
+
+        if (!StringUtils.hasText(toPartyId) || !StringUtils.hasText(toPartyType)
+                || !StringUtils.hasText(toRole)) {
+            throw new IllegalArgumentException(" toParty is not allowed to be null");
+        }
+
         var toParty = ConnectorParty.builder()
-                                    .identifier(message.getStringProperty("toPartyId"))
-                                    .identifierType(message.getStringProperty("toPartyType"))
-                                    .role(message.getStringProperty("toRole"))
-                                    .roleType(ConnectorPartyRoleType.RESPONDER)
-                                    .build();
+                .identifier(toPartyId)
+                .identifierType(toPartyType)
+                .role(toRole)
+                .roleType(ConnectorPartyRoleType.RESPONDER)
+                .build();
 
         return ConnectorMessageAS4Properties.builder()
-                                            .service(service)
-                                            .action(action)
-                                            .fromParty(fromParty)
-                                            .toParty(toParty)
-                                            .conversationIdentifier(message.getStringProperty(
-                                                    "conversationId"))
-                                            .referenceToIdentifier(message.getStringProperty(
-                                                    "refToMessageId"))
-                                            .originalSender(message.getStringProperty(
-                                                    "originalSender"))
-                                            .finalRecipient(message.getStringProperty(
-                                                    "finalRecipient"))
-                                            .build();
+                .service(service)
+                .action(action)
+                .fromParty(fromParty)
+                .toParty(toParty)
+                .conversationIdentifier(message.getStringProperty(
+                        "conversationId"))
+                .referenceToIdentifier(message.getStringProperty(
+                        "refToMessageId"))
+                .originalSender(message.getStringProperty(
+                        "originalSender"))
+                .finalRecipient(message.getStringProperty(
+                        "finalRecipient"))
+                .build();
     }
 
     private ParsedPayloads parsePayloads(MapMessage message) throws JMSException {
@@ -204,9 +236,9 @@ public class ConnectorGatewayMessageListener {
                 );
                 // Business document is bundled with ASICS payload
                 businessContent = ConnectorMessageBusinessContent.builder()
-                                                                 .xmlContent(content)
-                                                                 .businessDocument(null)
-                                                                 .build();
+                        .xmlContent(content)
+                        .businessDocument(null)
+                        .build();
             } else if ("ASIC-S".equals(description)) {
                 attachments.add(saveAndUploadAttachment(
                         description, CONTENT_TYPE_ASICS, ConnectorAttachmentType.ASICS, payload
@@ -221,22 +253,15 @@ public class ConnectorGatewayMessageListener {
                 );
                 evidences.add(
                         ConnectorMessageEvidence.builder()
-                                                .type(ConnectorEvidenceType.valueOf(description))
-                                                .attachment(content)
-                                                .build());
+                                .type(ConnectorEvidenceType.valueOf(description))
+                                .attachment(content)
+                                .build());
             } else {
                 log.warn(
                         "Unrecognised payload description '{}' at index {} — skipping",
                         description, i
                 );
             }
-        }
-
-        // TODO handle situation where the message is an evidence message, but no 'messageContent'
-        if (businessContent == null) {
-            throw new IllegalStateException(
-                    "No 'messageContent' payload found in gateway message"
-            );
         }
 
         return new ParsedPayloads(businessContent, attachments, evidences);
@@ -248,10 +273,12 @@ public class ConnectorGatewayMessageListener {
             String messageIdentifier) {
         messageRepository.save(message);
 
-        attachmentRepository.attachToMessage(
-                payloads.businessContent().xmlContent().identifier(),
-                messageIdentifier
-        );
+        if (payloads.businessContent != null) {
+            attachmentRepository.attachToMessage(
+                    payloads.businessContent().xmlContent().identifier(),
+                    messageIdentifier
+            );
+        }
 
         payloads.evidences().forEach(evidence -> {
             evidenceRepository.save(evidence, messageIdentifier);
@@ -273,14 +300,14 @@ public class ConnectorGatewayMessageListener {
             byte[] payload) {
         var identifier = UUID.randomUUID() + "_" + name;
         var attachment = ConnectorMessageAttachment.builder()
-                                                   .identifier(identifier)
-                                                   .name(name)
-                                                   .contentType(contentType)
-                                                   .size(payload.length)
-                                                   .description("File from gateway")
-                                                   .storage(ConnectorAttachmentStorage.S3_BUCKET)
-                                                   .type(type)
-                                                   .build();
+                .identifier(identifier)
+                .name(name)
+                .contentType(contentType)
+                .size(payload.length)
+                .description("File from gateway")
+                .storage(ConnectorAttachmentStorage.S3_BUCKET)
+                .type(type)
+                .build();
 
         fileStorageProvider.save(attachment, payload);
         return attachmentRepository.save(attachment);

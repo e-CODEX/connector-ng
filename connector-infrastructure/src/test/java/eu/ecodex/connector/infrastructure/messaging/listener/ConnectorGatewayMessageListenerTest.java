@@ -22,17 +22,15 @@ import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
 import eu.ecodex.connector.infrastructure.messaging.publisher.ConnectorInboundMessagePipelineEventPublisher;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
-public class ConnectorGatewayMessageListenerTest {
+public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     @InjectMocks
     ConnectorGatewayMessageListener listener;
     @Mock

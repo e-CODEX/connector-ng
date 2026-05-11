@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.evidences;
+package eu.ecodex.connector.infrastructure.util;
 
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import java.security.MessageDigest;

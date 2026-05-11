@@ -20,16 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import static eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig.REM_EVIDENCE_SIGNING_TOKEN_BEAN;
+import static eu.ecodex.connector.infrastructure.config.EvidenceConfig.REM_EVIDENCE_SIGNING_TOKEN_BEAN;
 
 /**
  * Applies an enveloped XAdES-B signature to marshalled REM evidence XML bytes.
  *
  * <p>Uses the dedicated REM keystore bean
- * ({@link eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig}) and SHA-1 as
+ * ({@link eu.ecodex.connector.infrastructure.config.EvidenceConfig}) and SHA-1 as
  * the reference digest algorithm to stay compatible with legacy evidence signing.
  *
- * @see eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig#REM_EVIDENCE_SIGNING_TOKEN_BEAN
+ * @see eu.ecodex.connector.infrastructure.config.EvidenceConfig#REM_EVIDENCE_SIGNING_TOKEN_BEAN
  */
 @Slf4j
 @Component

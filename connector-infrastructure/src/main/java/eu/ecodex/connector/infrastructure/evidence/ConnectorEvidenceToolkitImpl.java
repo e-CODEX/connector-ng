@@ -21,15 +21,14 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.evidences.HashValueBuilder;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
+import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import eu.ecodex.evidences.EvidenceBuilder;
 import eu.ecodex.evidences.exception.ECodexEvidenceBuilderException;
 import eu.ecodex.evidences.types.ECodexMessageDetails;
 import eu.spocseu.edeliverygw.configuration.EDeliveryDetails;
 import eu.spocseu.edeliverygw.configuration.xsd.EDeliveryDetail;
 import java.util.HexFormat;
-import java.util.Objects;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.etsi.uri._02640.v2.EventReasonType;
@@ -166,17 +165,23 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private static void requireRejectionReason(ConnectorMessageRejectionReason rejectionReason) {
         if (rejectionReason == null) {
-            throw new ConnectorEvidenceException(
-                    "rejectionReason may not be null when creating rejection evidence");
+            throw new UnsupportedOperationException("Feature not yet implemented");
         }
+    }
+
+    private byte[] requirePriorEvidence(ConnectorEvidenceType requiredType, ConnectorMessage message) {
+        byte[] prev = findPriorEvidence(requiredType, message);
+        if (prev == null) {
+            throw new ConnectorEvidenceException("prior evidence content is required");
+        }
+        return prev;
     }
 
     private byte[] createRelayRemmdAcceptance(ConnectorMessage message)
             throws ECodexEvidenceBuilderException {
-        var prev = findPriorEvidence(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message);
         return evidenceBuilder.createRelayREMMDAcceptanceRejection(
                 true, (EventReasonType) null, buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message)
         );
     }
 
@@ -184,19 +189,17 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             ConnectorMessageRejectionReason rejectionReason,
             ConnectorMessage message) throws ECodexEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
-        var prev = findPriorEvidence(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message);
         return evidenceBuilder.createRelayREMMDAcceptanceRejection(
                 false, mapRejectionReason(rejectionReason), buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message)
         );
     }
 
     private byte[] createDeliveryEvidence(ConnectorMessage message)
             throws ECodexEvidenceBuilderException {
-        var prev = findPriorEvidence(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE, message);
         return evidenceBuilder.createDeliveryNonDeliveryToRecipient(
                 true, (EventReasonType) null, buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE, message)
         );
     }
 
@@ -204,19 +207,17 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             ConnectorMessageRejectionReason rejectionReason,
             ConnectorMessage message) throws ECodexEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
-        var prev = findPriorEvidence(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE, message);
         return evidenceBuilder.createDeliveryNonDeliveryToRecipient(
                 false, mapRejectionReason(rejectionReason), buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE, message)
         );
     }
 
     private byte[] createRetrievalEvidence(ConnectorMessage message)
             throws ECodexEvidenceBuilderException {
-        var prev = findPriorEvidence(ConnectorEvidenceType.DELIVERY, message);
         return evidenceBuilder.createRetrievalNonRetrievalByRecipient(
                 true, (EventReasonType) null, buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.DELIVERY, message)
         );
     }
 
@@ -224,10 +225,9 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             ConnectorMessageRejectionReason rejectionReason,
             ConnectorMessage message) throws ECodexEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
-        var prev = findPriorEvidence(ConnectorEvidenceType.DELIVERY, message);
         return evidenceBuilder.createRetrievalNonRetrievalByRecipient(
                 false, mapRejectionReason(rejectionReason), buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.DELIVERY, message)
         );
     }
 
@@ -235,10 +235,9 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             ConnectorMessageRejectionReason rejectionReason,
             ConnectorMessage message) throws ECodexEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
-        var prev = findPriorEvidence(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message);
         return evidenceBuilder.createRelayREMMDFailure(
                 mapRejectionReason(rejectionReason), buildEDeliveryDetails(),
-                Objects.requireNonNull(prev)
+                requirePriorEvidence(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message)
         );
     }
 

@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.evidence;
 
 import eu.ecodex.connector.infrastructure.config.DssConfig;
-import eu.ecodex.connector.infrastructure.config.EvidenceInfrastructureConfig;
+import eu.ecodex.connector.infrastructure.config.EvidenceConfig;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Import;
  */
 @SpringBootConfiguration
 @EnableAutoConfiguration
-@Import({DssConfig.class, EvidenceInfrastructureConfig.class})
+@Import({DssConfig.class, EvidenceConfig.class})
 @ComponentScan(
         basePackages = {
                 "eu.ecodex.connector.infrastructure.property",

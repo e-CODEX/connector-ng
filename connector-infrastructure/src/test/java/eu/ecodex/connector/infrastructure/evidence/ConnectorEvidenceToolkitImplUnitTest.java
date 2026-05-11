@@ -27,7 +27,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.evidences.HashValueBuilder;
+import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.evidences.EvidenceBuilder;
 import eu.ecodex.evidences.exception.ECodexEvidenceBuilderException;

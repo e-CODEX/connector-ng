@@ -9,7 +9,7 @@
  */
 
 /**
- * This package provides business logic for the Evidence Toolkit.
+ * REM evidence building for the connector: interfaces and types used with the evidence toolkit.
  *
  * @author komi
  * @version 1.0

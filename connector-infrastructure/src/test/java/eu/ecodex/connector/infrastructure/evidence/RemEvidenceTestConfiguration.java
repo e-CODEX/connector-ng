@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.infrastructure.property",
                 "eu.ecodex.connector.infrastructure.dss",
                 "eu.ecodex.connector.infrastructure.evidence",
-                "eu.ecodex.evidences",
+                "eu.ecodex.connector.evidences",
         }
 )
 @SuppressWarnings("checkstyle:MissingJavadocType")

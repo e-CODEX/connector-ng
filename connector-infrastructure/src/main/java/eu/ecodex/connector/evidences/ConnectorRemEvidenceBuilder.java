@@ -8,12 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.evidences;
+package eu.ecodex.connector.evidences;
 
+import eu.ecodex.connector.evidences.exception.ECodexEvidenceBuilderException;
+import eu.ecodex.connector.evidences.types.ECodexMessageDetails;
 import eu.ecodex.connector.infrastructure.evidence.DssConnectorRemEvidenceXmlSigner;
 import eu.ecodex.connector.infrastructure.evidence.RemEvidenceUnmarshaller;
-import eu.ecodex.evidences.exception.ECodexEvidenceBuilderException;
-import eu.ecodex.evidences.types.ECodexMessageDetails;
 import eu.spocseu.edeliverygw.REMErrorEvent;
 import eu.spocseu.edeliverygw.configuration.EDeliveryDetails;
 import eu.spocseu.edeliverygw.evidences.DeliveryNonDeliveryToRecipient;

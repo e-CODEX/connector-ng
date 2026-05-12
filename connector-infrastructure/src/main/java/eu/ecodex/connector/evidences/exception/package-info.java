@@ -9,11 +9,11 @@
  */
 
 /**
- * This package provides domain model for the evidence.
+ * Exceptions thrown while building REM evidences.
  *
  * @author komi
  * @version 1.0
  * @since 4.4.12
  */
 
-package eu.ecodex.evidences.types;
+package eu.ecodex.connector.evidences.exception;

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.evidences.types;
+package eu.ecodex.connector.evidences.types;
 
 import lombok.Getter;
 import lombok.Setter;

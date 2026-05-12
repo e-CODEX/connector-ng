@@ -19,12 +19,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  * <p>This class initializes and starts the application using the SpringApplication.run method.
  */
-@SpringBootApplication(
-        scanBasePackages = {
-                "eu.ecodex.connector",
-                // REM evidence builder (implements EvidenceBuilder); lives outside connector.* package
-                "eu.ecodex.evidences",
-        })
+@SpringBootApplication(scanBasePackages = "eu.ecodex.connector")
 public class ConnectorApplication {
     public static void main(String[] args) {
         SpringApplication.run(ConnectorApplication.class, args);

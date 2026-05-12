@@ -9,11 +9,11 @@
  */
 
 /**
- * This package provides evidence exception builder classes.
+ * Value types used when constructing REM evidences.
  *
  * @author komi
  * @version 1.0
  * @since 4.4.12
  */
 
-package eu.ecodex.evidences.exception;
+package eu.ecodex.connector.evidences.types;

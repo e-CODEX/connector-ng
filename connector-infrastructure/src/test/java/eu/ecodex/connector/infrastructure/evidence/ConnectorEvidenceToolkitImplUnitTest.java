@@ -29,8 +29,9 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
-import eu.ecodex.evidences.EvidenceBuilder;
-import eu.ecodex.evidences.exception.ECodexEvidenceBuilderException;
+import eu.ecodex.connector.evidences.EvidenceBuilder;
+import eu.ecodex.connector.evidences.exception.ECodexEvidenceBuilderException;
+import eu.ecodex.connector.evidences.types.ECodexMessageDetails;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,7 +129,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
         assertThat(evidence.content()).isEqualTo(STUB_EVIDENCE_BYTES);
 
-        var detailsCaptor = ArgumentCaptor.forClass(eu.ecodex.evidences.types.ECodexMessageDetails.class);
+        var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
         );
@@ -148,7 +149,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var evidence = toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null);
 
         assertThat(evidence.content()).isEqualTo(STUB_EVIDENCE_BYTES);
-        var detailsCaptor = ArgumentCaptor.forClass(eu.ecodex.evidences.types.ECodexMessageDetails.class);
+        var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
         );
@@ -158,7 +159,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     @Test
     void submission_rejection_maps_reason_to_event_and_calls_rejection_builder() throws Exception {
         var message = submissionReadyMessage();
-        var detailsCaptor = ArgumentCaptor.forClass(eu.ecodex.evidences.types.ECodexMessageDetails.class);
+        var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         toolkit.create(message, ConnectorEvidenceType.SUBMISSION_REJECTION,

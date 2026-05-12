@@ -8,10 +8,10 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.evidences;
+package eu.ecodex.connector.evidences;
 
-import eu.ecodex.evidences.exception.ECodexEvidenceBuilderException;
-import eu.ecodex.evidences.types.ECodexMessageDetails;
+import eu.ecodex.connector.evidences.exception.ECodexEvidenceBuilderException;
+import eu.ecodex.connector.evidences.types.ECodexMessageDetails;
 import eu.spocseu.edeliverygw.REMErrorEvent;
 import eu.spocseu.edeliverygw.configuration.EDeliveryDetails;
 import org.etsi.uri._02640.v2.EventReasonType;

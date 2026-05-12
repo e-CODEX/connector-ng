@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.evidences.exception;
+package eu.ecodex.connector.evidences.exception;
 
 /**
  * ECodexEvidenceBuilderException is a custom exception class that extends the Exception class.

@@ -11,27 +11,85 @@
 package eu.ecodex.connector.infrastructure.evidence;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
+import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("infra")
 @SpringBootTest(classes = RemEvidenceTestConfiguration.class)
+@Import(ConnectorEvidenceToolkitImplTest.MockAttachmentBeans.class)
 class ConnectorEvidenceToolkitImplTest {
+
+    @TestConfiguration
+    static class MockAttachmentBeans {
+        @Bean
+        @Primary
+        ConnectorMessageAttachmentRepository attachmentRepository() {
+            return Mockito.mock(ConnectorMessageAttachmentRepository.class);
+        }
+
+        @Bean
+        @Primary
+        ConnectorFileStorageProvider fileStorageProvider() {
+            return Mockito.mock(ConnectorFileStorageProvider.class);
+        }
+    }
 
     @Autowired
     private ConnectorEvidenceToolkit evidenceToolkit;
+
+    @Autowired
+    private ConnectorMessageAttachmentRepository attachmentRepository;
+
+    @Autowired
+    private ConnectorFileStorageProvider fileStorageProvider;
+
+    private final Map<String, byte[]> storedContent = new ConcurrentHashMap<>();
+
+    @BeforeEach
+    void wireAttachmentStorage() {
+        Mockito.reset(attachmentRepository, fileStorageProvider);
+        storedContent.clear();
+        when(attachmentRepository.save(any(ConnectorMessageAttachment.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(fileStorageProvider.save(any(ConnectorMessageAttachment.class), any(byte[].class)))
+                .thenAnswer(invocation -> {
+                    var attachment = invocation.<ConnectorMessageAttachment>getArgument(0);
+                    var bytes = invocation.getArgument(1, byte[].class);
+                    storedContent.put(attachment.identifier(), bytes);
+                    return attachment.identifier();
+                });
+        when(fileStorageProvider.findByIdentifier(any()))
+                .thenAnswer(invocation -> storedContent.get(invocation.getArgument(0)));
+    }
+
+    private byte[] evidenceBytes(ConnectorMessageEvidence evidence) {
+        return fileStorageProvider.findByIdentifier(evidence.attachment().identifier());
+    }
 
     @Test
     void submission_acceptance_contains_enveloped_signature_bytes() {
@@ -47,9 +105,10 @@ class ConnectorEvidenceToolkitImplTest {
                 null
         );
 
-        assertThat(evidence.content()).isNotNull();
-        assertThat(evidence.content().length).isPositive();
-        String asUtf8 = new String(evidence.content(), StandardCharsets.UTF_8);
+        byte[] bytes = evidenceBytes(evidence);
+        assertThat(bytes).isNotNull();
+        assertThat(bytes.length).isPositive();
+        String asUtf8 = new String(bytes, StandardCharsets.UTF_8);
         assertThat(asUtf8).contains("ds:Signature");
     }
 
@@ -67,9 +126,10 @@ class ConnectorEvidenceToolkitImplTest {
                 ConnectorMessageRejectionReason.BACKEND_REJECTION
         );
 
-        assertThat(evidence.content()).isNotNull();
-        assertThat(evidence.content().length).isPositive();
-        assertThat(new String(evidence.content(), StandardCharsets.UTF_8)).contains("ds:Signature");
+        byte[] bytes = evidenceBytes(evidence);
+        assertThat(bytes).isNotNull();
+        assertThat(bytes.length).isPositive();
+        assertThat(new String(bytes, StandardCharsets.UTF_8)).contains("ds:Signature");
     }
 
     @Test
@@ -90,8 +150,9 @@ class ConnectorEvidenceToolkitImplTest {
             var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
             var next = evidenceToolkit.create(withPrior, step, null);
             assertThat(next.type()).isEqualTo(step);
-            assertThat(next.content()).isNotEmpty();
-            assertThat(new String(next.content(), StandardCharsets.UTF_8)).contains("ds:Signature");
+            byte[] bytes = evidenceBytes(next);
+            assertThat(bytes).isNotEmpty();
+            assertThat(new String(bytes, StandardCharsets.UTF_8)).contains("ds:Signature");
             chain.add(next);
         }
     }
@@ -121,6 +182,6 @@ class ConnectorEvidenceToolkitImplTest {
         );
 
         assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.NON_DELIVERY);
-        assertThat(new String(evidence.content(), StandardCharsets.UTF_8)).contains("ds:Signature");
+        assertThat(new String(evidenceBytes(evidence), StandardCharsets.UTF_8)).contains("ds:Signature");
     }
 }

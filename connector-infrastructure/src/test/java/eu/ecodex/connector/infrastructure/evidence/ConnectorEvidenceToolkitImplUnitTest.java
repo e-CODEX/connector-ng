@@ -19,14 +19,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
+import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.connector.evidences.EvidenceBuilder;
@@ -59,12 +63,23 @@ class ConnectorEvidenceToolkitImplUnitTest {
     @Mock
     private HashValueBuilder hashValueBuilder;
 
+    @Mock
+    private ConnectorMessageAttachmentRepository attachmentRepository;
+
+    @Mock
+    private ConnectorFileStorageProvider fileStorageProvider;
+
     private ConnectorEvidencesProperties evidencesProperties;
     private ConnectorEvidenceToolkitImpl toolkit;
 
     private static final byte[] STUB_EVIDENCE_BYTES = {0x01, 0x02};
     private static final byte[] PREV = {0x0e};
     private static final String HASH_HEX = "abab";
+    private static final String PRIOR_EVIDENCE_ATTACHMENT_ID = "prior-attachment-for-test";
+    private static final String BUSINESS_XML_ATTACHMENT_ID =
+            "104ebc70-abd5-45da-8c74-940d687501b3_messageContent";
+    private static final String FIXTURE_SUBMISSION_ACCEPTANCE_ATTACHMENT_ID =
+            "c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE";
 
     @BeforeEach
     void setUp() throws ECodexEvidenceBuilderException {
@@ -79,8 +94,18 @@ class ConnectorEvidenceToolkitImplUnitTest {
         toolkit = new ConnectorEvidenceToolkitImpl(
                 evidenceBuilder,
                 hashValueBuilder,
-                evidencesProperties
+                evidencesProperties,
+                attachmentRepository,
+                fileStorageProvider
         );
+
+        when(attachmentRepository.save(any(ConnectorMessageAttachment.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+        when(fileStorageProvider.findByIdentifier(PRIOR_EVIDENCE_ATTACHMENT_ID)).thenReturn(PREV);
+        when(fileStorageProvider.findByIdentifier(FIXTURE_SUBMISSION_ACCEPTANCE_ATTACHMENT_ID)).thenReturn(
+                PREV);
+        when(fileStorageProvider.findByIdentifier(BUSINESS_XML_ATTACHMENT_ID))
+                .thenReturn("<?xml version=\"1.0\"?><root/>".getBytes(StandardCharsets.UTF_8));
 
         when(hashValueBuilder.getAlgorithm()).thenReturn("SHA-256");
         defaultEvidenceBuilderStubs();
@@ -127,7 +152,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var evidence = toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null);
 
         assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
-        assertThat(evidence.content()).isEqualTo(STUB_EVIDENCE_BYTES);
+        assertThat(evidence.attachment()).isNotNull();
+        verify(fileStorageProvider).save(eq(evidence.attachment()), eq(STUB_EVIDENCE_BYTES));
 
         var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
@@ -148,7 +174,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
 
         var evidence = toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null);
 
-        assertThat(evidence.content()).isEqualTo(STUB_EVIDENCE_BYTES);
+        assertThat(evidence.attachment()).isNotNull();
+        verify(fileStorageProvider).save(eq(evidence.attachment()), eq(STUB_EVIDENCE_BYTES));
         var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
@@ -244,9 +271,14 @@ class ConnectorEvidenceToolkitImplUnitTest {
     @Test
     void hash_builder_failure_is_wrapped() throws Exception {
         var xmlContent = "<?xml version=\"1.0\"?><root/>";
-        var businessContent = ConnectorMessageBusinessContent.builder().xmlContent(xmlContent).build();
+        var xmlAttachment = MessageAttachmentTestFixtures.createBusinessContentAttachment().toBuilder()
+                                                          .identifier("hash-fail-xml-id")
+                                                          .build();
+        var businessContent = ConnectorMessageBusinessContent.builder().xmlContent(xmlAttachment).build();
         var messageWithXml = submissionReadyMessage().toBuilder().businessContent(businessContent).build();
 
+        when(fileStorageProvider.findByIdentifier("hash-fail-xml-id"))
+                .thenReturn(xmlContent.getBytes(StandardCharsets.UTF_8));
         when(hashValueBuilder.buildHashValueAsString(xmlContent.getBytes(StandardCharsets.UTF_8)))
                 .thenThrow(new IllegalStateException("hash boom"));
 
@@ -405,11 +437,9 @@ class ConnectorEvidenceToolkitImplUnitTest {
     void skips_evidence_entries_with_null_content_when_resolving_predecessor() throws Exception {
         var emptyEntry = ConnectorMessageEvidence.builder()
                                         .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
-                                        .content(null)
+                                        .attachment(null)
                                         .build();
-        var good = EvidenceTestFixtures.createSubmissionAcceptanceEvidence().toBuilder()
-                                    .content(PREV)
-                                    .build();
+        var good = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(emptyEntry);
         evidences.add(good);
@@ -423,9 +453,12 @@ class ConnectorEvidenceToolkitImplUnitTest {
     }
 
     private ConnectorMessage messageWithPrior(ConnectorEvidenceType priorType) {
+        var attachment = MessageAttachmentTestFixtures.createEvidenceAttachment().toBuilder()
+                                       .identifier(PRIOR_EVIDENCE_ATTACHMENT_ID)
+                                       .build();
         var evidence = ConnectorMessageEvidence.builder()
                                   .type(priorType)
-                                  .content(PREV)
+                                  .attachment(attachment)
                                   .build();
         return submissionReadyMessage().toBuilder()
                        .evidences(List.of(evidence))

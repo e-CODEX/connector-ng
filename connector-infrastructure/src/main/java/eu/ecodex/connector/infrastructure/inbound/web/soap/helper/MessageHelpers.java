@@ -124,6 +124,10 @@ public class MessageHelpers {
 
     private static DetachedSignature toDetachedSignature(
             DomibusConnectorDetachedSignatureType signature) {
+        if (signature == null) {
+            return null;
+        }
+
         return DetachedSignature
                 .builder()
                 .name(signature.getDetachedSignatureName())

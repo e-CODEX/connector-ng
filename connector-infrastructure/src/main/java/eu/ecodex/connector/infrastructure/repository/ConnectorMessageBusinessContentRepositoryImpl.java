@@ -121,19 +121,45 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         var message = this.messageJpaRepository.findByIdentifier(messageIdentifier);
         var contentToSave = toEntity(businessContent, message);
         var savedContent = this.jpaRepository.save(contentToSave);
-        var businessDocumentToSave = toEntity(businessContent.businessDocument(), savedContent);
-        var savedBusinessDocument = this.businessDocumentJpaRepository.save(businessDocumentToSave);
-        savedContent.setBusinessDocument(savedBusinessDocument);
 
-        var documentDetachedSignature = businessContent.businessDocument().detachedSignature();
+        if (businessContent.businessDocument() != null) {
+            var businessDocumentToSave = toEntity(businessContent.businessDocument(), savedContent);
+            var savedBusinessDocument = this.businessDocumentJpaRepository.save(businessDocumentToSave);
+            savedContent.setBusinessDocument(savedBusinessDocument);
 
-        if (documentDetachedSignature != null) {
-            var savedDetachedSignature = this.detachedSignatureJpaRepository.save(
-                    toEntity(documentDetachedSignature, savedBusinessDocument));
-            savedBusinessDocument.setDetachedSignature(savedDetachedSignature);
+            var documentDetachedSignature = businessContent.businessDocument().detachedSignature();
+
+            if (documentDetachedSignature != null) {
+                var savedDetachedSignature = this.detachedSignatureJpaRepository.save(
+                        toEntity(documentDetachedSignature, savedBusinessDocument));
+                savedBusinessDocument.setDetachedSignature(savedDetachedSignature);
+            }
         }
 
         return toDomain(savedContent);
+    }
+
+    @Override
+    public ConnectorMessageBusinessContent assignBusinessDocument(
+            @NonNull String uuid,
+            @NonNull ConnectorMessageBusinessDocument document) {
+        var content = this.jpaRepository.findByUuid(uuid);
+        var businessDocumentToSave = toEntity(document, content);
+
+        var savedBusinessDocument = this.businessDocumentJpaRepository.save(businessDocumentToSave);
+
+        var detachedSignature = document.detachedSignature();
+
+        if (detachedSignature != null) {
+            var savedDetachedSignature = this.detachedSignatureJpaRepository.save(
+                    toEntity(detachedSignature, savedBusinessDocument)
+            );
+            savedBusinessDocument.setDetachedSignature(savedDetachedSignature);
+        }
+
+        content.setBusinessDocument(savedBusinessDocument);
+
+        return toDomain(content);
     }
 
     private ConnectorMessageBusinessContentEntity toEntity(

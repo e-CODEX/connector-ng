@@ -22,4 +22,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConnectorMessageBusinessContentJpaRepository extends
         JpaRepository<ConnectorMessageBusinessContentEntity, Long> {
+    ConnectorMessageBusinessContentEntity findByUuid(String uuid);
 }

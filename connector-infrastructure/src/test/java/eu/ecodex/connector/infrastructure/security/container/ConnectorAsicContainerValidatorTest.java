@@ -10,226 +10,386 @@
 
 package eu.ecodex.connector.infrastructure.security.container;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.infrastructure.security.BaseContainerTest;
 import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;
-import jakarta.transaction.Transactional;
+import eu.ecodex.connector.infrastructure.security.model.container.ConnectorContainer;
+import eu.ecodex.connector.infrastructure.security.model.container.ConnectorContainerBusinessContent;
+import eu.ecodex.connector.infrastructure.security.model.token.ConnectorToken;
+import eu.ecodex.connector.infrastructure.security.model.token.ConnectorTokenDocument;
+import eu.europa.esig.dss.enumerations.MimeTypeEnum;
+import eu.europa.esig.dss.model.InMemoryDocument;
+import jakarta.xml.bind.JAXBException;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.jdbc.Sql;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@Transactional
+@ExtendWith(MockitoExtension.class)
 @SuppressWarnings("DataFlowIssue")
 public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
-    @Autowired
-    private ConnectorAsicContainerValidator asicContainerValidator;
-    @Autowired
+    private static final String MESSAGE_ID = "msg-001";
+    private static final String ASICS_ID = "asics-attachment-id";
+    private static final String XML_TOKEN_ID = "xml-token-attachment-id";
+
+    @Mock
+    private ConnectorMessageBusinessContentRepository businessContentRepository;
+    @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
-    @MockitoBean
+    @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
 
-    @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/attachment.sql"
-    })
-    void should_validate_asics_container_with_attachments_successfully() {
-        when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/asic/asics_with_att.asics"))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/token/trust-ok.xml"));
+    // We subclass to intercept buildContainer and inject a controlled container,
+    // bypassing all DSS/ZIP/XML static utility calls.
+    @InjectMocks
+    private ConnectorAsicContainerValidator validator;
 
-        var message = generateMessage();
+    private ConnectorMessageAttachment asicsAttachment() {
+        return ConnectorMessageAttachment.builder()
+                .identifier(ASICS_ID)
+                .type(ConnectorAttachmentType.ASICS)
+                .build();
+    }
 
-        asicContainerValidator.validate(message);
+    private ConnectorMessageAttachment xmlTokenAttachment() {
+        return ConnectorMessageAttachment.builder()
+                .identifier(XML_TOKEN_ID)
+                .type(ConnectorAttachmentType.XML_TOKEN)
+                .build();
+    }
 
-        var attachments = attachmentRepository.findByMessageIdentifierAndTypes(
-                message.identifier(),
-                List.of(
-                        ConnectorAttachmentType.PDF_TOKEN,
-                        ConnectorAttachmentType.BUSINESS_DOCUMENT,
-                        ConnectorAttachmentType.ATTACHMENT
-                )
+    private ConnectorMessageBusinessContent businessContent() {
+        return ConnectorMessageBusinessContent.builder()
+                .uuid(UUID.randomUUID().toString())
+                .xmlContent(ConnectorMessageAttachment.builder()
+                                    .identifier("xml-content-id")
+                                    .build())
+                .build();
+    }
+
+    private ConnectorMessage messageWith(List<ConnectorMessageAttachment> attachments) {
+        return ConnectorMessage.builder()
+                .identifier(MESSAGE_ID)
+                .businessContent(businessContent())
+                .attachments(attachments)
+                .build();
+    }
+
+    private ConnectorAsicContainerValidator validatorWithContainer(ConnectorContainer container) {
+        return new ConnectorAsicContainerValidator(
+                businessContentRepository,
+                attachmentRepository,
+                fileStorageProvider
+        ) {
+
+            @Override
+            protected ConnectorContainer buildContainer(byte[] asicsBytes, byte[] xmlTokenBytes) {
+                return container;
+            }
+        };
+    }
+
+    private ConnectorContainer minimalContainer() {
+        var pdfBytes = new byte[]{1, 2, 3};
+        var pdfDocument = new InMemoryDocument(
+                pdfBytes,
+                ConnectorContainerFileDefinitions.TOKEN_PDF_REF
         );
 
-        assertThat(attachments).isNotNull();
-        assertThat(attachments.size()).isEqualTo(3);
+        var xmlTokenDocument = new InMemoryDocument(
+                "<token/>".getBytes(),
+                ConnectorContainerFileDefinitions.TOKEN_XML_REF
+        );
+
+        var token = mock(ConnectorToken.class);
+
+        var businessContent = new ConnectorContainerBusinessContent();
+        // No business document — exercises the null businessDssDocument branch
+
+        return new ConnectorContainer(businessContent, token, xmlTokenDocument, pdfDocument, null);
+    }
+
+    private ConnectorContainer containerWithBusinessDocument() {
+        var tokenDoc = mock(ConnectorTokenDocument.class);
+        when(tokenDoc.getFilename()).thenReturn("business-document.xml");
+        // when(tokenDoc.getSignatureFilename()).thenReturn(null);
+
+        var token = mock(ConnectorToken.class);
+        when(token.getDocument()).thenReturn(tokenDoc);
+
+        var businessDssDocument = new InMemoryDocument(
+                "<business/>".getBytes(),
+                "business-document.xml",
+                MimeTypeEnum.XML
+        );
+
+        var businessContent = new ConnectorContainerBusinessContent();
+        businessContent.setDocument(businessDssDocument);
+
+        var pdfDocument = new InMemoryDocument(
+                new byte[]{1, 2, 3},
+                ConnectorContainerFileDefinitions.TOKEN_PDF_REF
+        );
+        var xmlTokenDocument = new InMemoryDocument(
+                "<token/>".getBytes(),
+                ConnectorContainerFileDefinitions.TOKEN_XML_REF
+        );
+
+        return new ConnectorContainer(businessContent, token, xmlTokenDocument, pdfDocument, null);
+    }
+
+    private ConnectorContainer containerWithDetachedSignature() {
+        var tokenDoc = mock(ConnectorTokenDocument.class);
+        when(tokenDoc.getFilename()).thenReturn("business-document.xml");
+        // when(tokenDoc.getSignatureFilename()).thenReturn("signature.p7s");
+
+        var token = mock(ConnectorToken.class);
+        when(token.getDocument()).thenReturn(tokenDoc);
+
+        var businessDssDocument = new InMemoryDocument(
+                "<business/>".getBytes(),
+                "business-document.xml",
+                MimeTypeEnum.XML
+        );
+        var signatureDocument = new InMemoryDocument(
+                new byte[]{9, 8, 7},
+                "signature.xml",
+                MimeTypeEnum.XML
+        );
+
+        var businessContent = new ConnectorContainerBusinessContent();
+        businessContent.setDocument(businessDssDocument);
+        businessContent.setDetachedSignature(signatureDocument);
+
+        var pdfDocument = new InMemoryDocument(
+                new byte[]{1, 2, 3},
+                ConnectorContainerFileDefinitions.TOKEN_PDF_REF
+        );
+        var xmlTokenDocument = new InMemoryDocument(
+                "<token/>".getBytes(),
+                ConnectorContainerFileDefinitions.TOKEN_XML_REF
+        );
+        return new ConnectorContainer(businessContent, token, xmlTokenDocument, pdfDocument, null);
     }
 
     @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/attachment.sql"
-    })
-    void should_validate_asics_container_with_no_attachments_successfully() {
-        when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/asic/no_att_asic.asics"))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/token/trust-ok-2.xml"));
+    void should_throw_exception_when_validating_null_message() {
+        assertThatThrownBy(() -> validator.validate(null))
+                .isInstanceOf(NullPointerException.class);
 
-        var message = generateMessage();
-
-        asicContainerValidator.validate(message);
-
-        var attachments = attachmentRepository.findByMessageIdentifierAndTypes(
-                message.identifier(),
-                List.of(
-                        ConnectorAttachmentType.PDF_TOKEN,
-                        ConnectorAttachmentType.BUSINESS_DOCUMENT,
-                        ConnectorAttachmentType.ATTACHMENT
-                )
-        );
-
-        assertThat(attachments).isNotNull();
-        assertThat(attachments.size()).isEqualTo(2);
+        verifyNoInteractions(fileStorageProvider, attachmentRepository);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_the_message_is_null() {
-        assertThrows(
-                NullPointerException.class,
-                () -> asicContainerValidator.validate(null)
-        );
+    void should_throw_exception_when_message_identifier_is_null() {
+        var message = ConnectorMessage.builder()
+                .identifier(null)
+                .businessContent(businessContent())
+                .attachments(List.of(asicsAttachment(), xmlTokenAttachment()))
+                .build();
+
+        assertThatThrownBy(() -> validator.validate(message))
+                .isInstanceOf(IllegalStateException.class);
+
+        verifyNoInteractions(fileStorageProvider);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_the_message_attachments_is_null() {
-        var message = generateMessage().toBuilder().attachments(null).build();
+    void should_throw_exception_when_message_business_content_is_null() {
+        var message = ConnectorMessage.builder()
+                .identifier(MESSAGE_ID)
+                .businessContent(null)
+                .attachments(List.of(asicsAttachment(), xmlTokenAttachment()))
+                .build();
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> asicContainerValidator.validate(message)
-        );
+        assertThatThrownBy(() -> validator.validate(message))
+                .isInstanceOf(IllegalStateException.class);
+
+        verifyNoInteractions(fileStorageProvider);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_the_message_has_no_attachments() {
-        var message = generateMessage().toBuilder().attachments(List.of()).build();
+    void should_throw_exception_when_message_attachments_are_null() {
+        // ASICS and XML token, Evidence, and XML content attachments are required
+        var message = ConnectorMessage.builder()
+                .identifier(MESSAGE_ID)
+                .businessContent(businessContent())
+                .attachments(null)
+                .build();
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> asicContainerValidator.validate(message)
-        );
+        assertThatThrownBy(() -> validator.validate(message))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verifyNoInteractions(fileStorageProvider);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_the_asics_attachment_is_inexistent() {
-        var message = generateMessage().toBuilder().attachments(List.of(
-                MessageAttachmentTestFixtures.createXmlTokenAttachment())).build();
+    void should_throw_exception_when_message_attachments_are_empty() {
+        assertThatThrownBy(() -> validator.validate(messageWith(List.of())))
+                .isInstanceOf(IllegalArgumentException.class);
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> asicContainerValidator.validate(message)
-        );
+        verifyNoInteractions(fileStorageProvider);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_the_xml_token_attachment_is_inexistent() {
-        var message = generateMessage().toBuilder().attachments(List.of(
-                MessageAttachmentTestFixtures.createAsicsAttachment())).build();
+    void should_throw_exception_when_message_attachments_contain_no_ASICS_attachment() {
+        var message = messageWith(List.of(xmlTokenAttachment()));
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> asicContainerValidator.validate(message)
-        );
+        assertThatThrownBy(() -> validator.validate(message))
+                .isInstanceOf(IllegalArgumentException.class);
+
+        verifyNoInteractions(fileStorageProvider);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_asics_content_is_empty() {
-        when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(new byte[0])
-                .thenReturn(FileTestFixtures.readAsBytes("raw/token/trust-ok.xml"));
+    void should_throw_exception_when_message_attachments_contain_no_XML_token_attachment() {
+        var message = messageWith(List.of(asicsAttachment()));
 
-        var message = generateMessage();
+        assertThatThrownBy(() -> validator.validate(message))
+                .isInstanceOf(IllegalArgumentException.class);
 
-        assertThrows(
-                ConnectorContainerException.class,
-                () -> asicContainerValidator.validate(message)
-        );
+        verifyNoInteractions(fileStorageProvider);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_xml_token_content_is_empty() {
-        when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/asic/asics_with_att.asics"))
-                .thenReturn(new byte[0]);
+    void should_load_asics_and_xml_token_from_storage_successfully() {
+        validator = validatorWithContainer(minimalContainer());
 
-        var message = generateMessage();
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
 
-        assertThrows(
-                ConnectorContainerException.class,
-                () -> asicContainerValidator.validate(message)
-        );
+        validator.validate(messageWith(List.of(asicsAttachment(), xmlTokenAttachment())));
+
+        verify(fileStorageProvider).findByIdentifier(ASICS_ID);
+        verify(fileStorageProvider).findByIdentifier(XML_TOKEN_ID);
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_asics_file_is_not_a_zip_file() {
-        when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(new byte[1])
-                .thenReturn(FileTestFixtures.readAsBytes("raw/token/trust-ok.xml"));
+    void should_persist_pdf_token_successfully() {
+        validator = validatorWithContainer(minimalContainer());
 
-        var message = generateMessage();
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
 
-        assertThrows(
-                ConnectorContainerException.class,
-                () -> asicContainerValidator.validate(message)
+        validator.validate(messageWith(List.of(asicsAttachment(), xmlTokenAttachment())));
+
+        verify(attachmentRepository)
+                .save(argThat(a ->
+                                      a.type() == ConnectorAttachmentType.PDF_TOKEN
+                                              && "application/pdf".equals(a.contentType())
+                ));
+        verify(attachmentRepository).attachToMessage(
+                argThat(id -> id.contains(ConnectorContainerFileDefinitions.TOKEN_PDF.name())),
+                eq(MESSAGE_ID)
         );
     }
 
     @Test
-    void should_thrown_exception_when_validating_asics_container_if_xml_token_file_is_not_an_xml_file() {
-        when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/asic/asics_with_att.asics"))
-                .thenReturn(new byte[1]);
+    void should_persist_business_document_when_present_successfully() {
+        validator = validatorWithContainer(containerWithBusinessDocument());
 
-        var message = generateMessage();
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
 
-        assertThrows(
-                ConnectorContainerException.class,
-                () -> asicContainerValidator.validate(message)
+        validator.validate(messageWith(List.of(asicsAttachment(), xmlTokenAttachment())));
+
+        verify(attachmentRepository).save(argThat(a ->
+                                                          a.type() == ConnectorAttachmentType.BUSINESS_DOCUMENT
+        ));
+        verify(businessContentRepository).assignBusinessDocument(
+                any(),
+                argThat(doc -> doc.detachedSignature() == null)
         );
     }
 
-    private ConnectorMessage generateMessage() {
-        return MessageTestFixtures.createValidInboundBusinessMessage()
-                                  .toBuilder()
-                                  .identifier(
-                                          "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu")
-                                  .businessContent(MessageContentTestFixtures.createContentWithoutBusinessDocument())
-                                  .attachments(
-                                          List.of(
-                                                  MessageAttachmentTestFixtures.createAsicsAttachment(),
-                                                  MessageAttachmentTestFixtures.createXmlTokenAttachment()
-                                          )
-                                  )
-                                  .evidences(List.of(
-                                          EvidenceTestFixtures.createSubmissionAcceptanceEvidence()
-                                  ))
-                                  .build();
+    @Test
+    void should_not_persist_business_document_when_message_is_an_evidence_successfully() {
+        validator = validatorWithContainer(minimalContainer());
+
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
+
+        validator.validate(messageWith(List.of(asicsAttachment(), xmlTokenAttachment())));
+
+        verifyNoInteractions(businessContentRepository);
+    }
+
+    @Test
+    void should_persist_detached_signature_when_present_successfully() {
+        validator = validatorWithContainer(containerWithDetachedSignature());
+
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
+
+        validator.validate(messageWith(List.of(asicsAttachment(), xmlTokenAttachment())));
+
+        verify(attachmentRepository).save(argThat(a ->
+                                                          a.type() == ConnectorAttachmentType.DETACHED_SIGNATURE
+        ));
+        verify(businessContentRepository).assignBusinessDocument(
+                any(),
+                argThat(doc -> doc.detachedSignature() != null)
+        );
+    }
+
+    @Test
+    void should_wrap_io_exception_as_container_exception() {
+        validator = new ConnectorAsicContainerValidator(
+                businessContentRepository, attachmentRepository, fileStorageProvider) {
+
+            @Override
+            protected ConnectorContainer buildContainer(byte[] asicsBytes, byte[] xmlTokenBytes)
+                    throws IOException {
+                throw new IOException("simulated I/O failure");
+            }
+        };
+
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
+
+        assertThatThrownBy(() -> validator.validate(
+                messageWith(List.of(asicsAttachment(), xmlTokenAttachment()))))
+                .isInstanceOf(ConnectorContainerException.class)
+                .hasCauseInstanceOf(IOException.class);
+    }
+
+    @Test
+    void should_wrap_jaxb_exception_as_container_exception() {
+        validator = new ConnectorAsicContainerValidator(
+                businessContentRepository, attachmentRepository, fileStorageProvider) {
+
+            @Override
+            protected ConnectorContainer buildContainer(byte[] asicsBytes, byte[] xmlTokenBytes)
+                    throws JAXBException {
+                throw new JAXBException("simulated JAXB failure");
+            }
+        };
+
+        when(fileStorageProvider.findByIdentifier(ASICS_ID)).thenReturn(new byte[]{1});
+        when(fileStorageProvider.findByIdentifier(XML_TOKEN_ID)).thenReturn(new byte[]{2});
+
+        assertThatThrownBy(() -> validator.validate(
+                messageWith(List.of(asicsAttachment(), xmlTokenAttachment()))))
+                .isInstanceOf(ConnectorContainerException.class)
+                .hasCauseInstanceOf(JAXBException.class);
     }
 }

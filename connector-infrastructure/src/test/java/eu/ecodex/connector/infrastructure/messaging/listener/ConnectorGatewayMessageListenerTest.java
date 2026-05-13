@@ -21,6 +21,7 @@ import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGe
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
@@ -38,6 +39,8 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     ConnectorGatewayMessageListener listener;
     @Mock
     private ConnectorMessageRepository messageRepository;
+    @Mock
+    private ConnectorMessageBusinessContentRepository businessContentRepository;
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
     @Mock
@@ -146,6 +149,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         when(messageIdGenerator.generateIdentifier()).thenReturn("184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu");
 
         when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(businessContentRepository.save(any(), any())).thenAnswer(i -> i.getArgument(0));
         when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
 

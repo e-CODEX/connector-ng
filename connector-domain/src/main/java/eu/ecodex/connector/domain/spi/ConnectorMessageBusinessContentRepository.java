@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import jakarta.annotation.Nonnull;
 
 /**
@@ -34,4 +35,19 @@ public interface ConnectorMessageBusinessContentRepository {
     ConnectorMessageBusinessContent save(
             @Nonnull ConnectorMessageBusinessContent businessContent,
             @Nonnull String messageIdentifier);
+
+    /**
+     * Assigns a printable business document to a message's business content identified by the given
+     * UUID.
+     *
+     * @param uuid     the unique identifier of the message business content to which the business
+     *                 document will be assigned; must not be null
+     * @param document the business document to be assigned to the message business content; must
+     *                 not be null
+     *
+     * @return the updated {@link ConnectorMessageBusinessContent} instance with the assigned
+     *         business document
+     */
+    ConnectorMessageBusinessContent assignBusinessDocument(
+            @Nonnull String uuid, @Nonnull ConnectorMessageBusinessDocument document);
 }

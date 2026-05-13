@@ -55,6 +55,7 @@ public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     @Column(name = "AES_TYPE", updatable = false)
     private ConnectorBusinessDocumentAESType aesType;
 
+    // TODO remove @UuidGenerator
     @UuidGenerator
     @Column(name = "HASH_VALUE", updatable = false)
     private String hashValue;

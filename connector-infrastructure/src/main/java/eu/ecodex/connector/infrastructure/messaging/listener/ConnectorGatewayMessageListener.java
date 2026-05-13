@@ -28,6 +28,7 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.messaging.publisher.ConnectorInboundMessagePipelineEventPublisher;
@@ -61,6 +62,7 @@ public class ConnectorGatewayMessageListener {
                     .collect(Collectors.toUnmodifiableSet());
 
     private final ConnectorMessageRepository messageRepository;
+    private final ConnectorMessageBusinessContentRepository businessContentRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
@@ -74,12 +76,14 @@ public class ConnectorGatewayMessageListener {
      */
     public ConnectorGatewayMessageListener(
             ConnectorMessageRepository messageRepository,
+            ConnectorMessageBusinessContentRepository businessContentRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorMessageEvidenceRepository evidenceRepository,
             ConnectorFileStorageProvider fileStorageProvider,
             ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher,
             ConnectorMessageIdGenerator messageIdGenerator) {
         this.messageRepository = messageRepository;
+        this.businessContentRepository = businessContentRepository;
         this.attachmentRepository = attachmentRepository;
         this.evidenceRepository = evidenceRepository;
         this.fileStorageProvider = fileStorageProvider;
@@ -123,7 +127,7 @@ public class ConnectorGatewayMessageListener {
 
         var messageIdentifier = messageIdGenerator.generateIdentifier();
 
-        var incomingMessage = ConnectorMessage
+        var inboundMessage = ConnectorMessage
                 .builder()
                 .identifier(messageIdentifier)
                 .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
@@ -138,8 +142,7 @@ public class ConnectorGatewayMessageListener {
                 .transportedEvidences(payloads.evidences())
                 .build();
 
-        persistMessage(incomingMessage, payloads, messageIdentifier);
-        pipelineEventPublisher.publish(incomingMessage);
+        pipelineEventPublisher.publish(persistMessage(inboundMessage, payloads, messageIdentifier));
     }
 
     private void validateMessageHeader(MapMessage message) throws JMSException {
@@ -231,8 +234,11 @@ public class ConnectorGatewayMessageListener {
 
             if ("messageContent".equals(description)) {
                 var content = saveAndUploadAttachment(
-                        description, CONTENT_TYPE_XML,
-                        ConnectorAttachmentType.BUSINESS_CONTENT, payload
+                        description,
+                        CONTENT_TYPE_XML,
+                        "Inbound message business content",
+                        ConnectorAttachmentType.BUSINESS_CONTENT,
+                        payload
                 );
                 // Business document is bundled with ASICS payload
                 businessContent = ConnectorMessageBusinessContent.builder()
@@ -241,15 +247,27 @@ public class ConnectorGatewayMessageListener {
                         .build();
             } else if ("ASIC-S".equals(description)) {
                 attachments.add(saveAndUploadAttachment(
-                        description, CONTENT_TYPE_ASICS, ConnectorAttachmentType.ASICS, payload
+                        description,
+                        CONTENT_TYPE_ASICS,
+                        "Inbound message ASIC-S component",
+                        ConnectorAttachmentType.ASICS,
+                        payload
                 ));
             } else if ("tokenXML".equals(description)) {
                 attachments.add(saveAndUploadAttachment(
-                        description, CONTENT_TYPE_XML, ConnectorAttachmentType.XML_TOKEN, payload
+                        description,
+                        CONTENT_TYPE_XML,
+                        "Inbound message XML Trust OK Token",
+                        ConnectorAttachmentType.XML_TOKEN,
+                        payload
                 ));
             } else if (EVIDENCE_TYPE_NAMES.contains(description)) {
                 var content = saveAndUploadAttachment(
-                        description, CONTENT_TYPE_XML, ConnectorAttachmentType.EVIDENCE_XML, payload
+                        description,
+                        CONTENT_TYPE_XML,
+                        "Inbound message evidence",
+                        ConnectorAttachmentType.EVIDENCE_XML,
+                        payload
                 );
                 evidences.add(
                         ConnectorMessageEvidence.builder()
@@ -267,13 +285,14 @@ public class ConnectorGatewayMessageListener {
         return new ParsedPayloads(businessContent, attachments, evidences);
     }
 
-    private void persistMessage(
+    private ConnectorMessage persistMessage(
             ConnectorMessage message,
             ParsedPayloads payloads,
             String messageIdentifier) {
         messageRepository.save(message);
 
         if (payloads.businessContent != null) {
+            businessContentRepository.save(payloads.businessContent, messageIdentifier);
             attachmentRepository.attachToMessage(
                     payloads.businessContent().xmlContent().identifier(),
                     messageIdentifier
@@ -282,6 +301,13 @@ public class ConnectorGatewayMessageListener {
 
         payloads.evidences().forEach(evidence -> {
             evidenceRepository.save(evidence, messageIdentifier);
+
+            if (evidence.attachment() == null) {
+                throw new IllegalStateException(
+                        "Evidence attachment is null for evidence " + evidence.type()
+                );
+            }
+
             attachmentRepository.attachToMessage(
                     evidence.attachment().identifier(), messageIdentifier
             );
@@ -291,11 +317,14 @@ public class ConnectorGatewayMessageListener {
                                                attachmentRepository.attachToMessage(
                                                        attachment.identifier(), messageIdentifier
                                                ));
+
+        return messageRepository.findByIdentifier(messageIdentifier);
     }
 
     private ConnectorMessageAttachment saveAndUploadAttachment(
             String name,
             String contentType,
+            String description,
             ConnectorAttachmentType type,
             byte[] payload) {
         var identifier = UUID.randomUUID() + "_" + name;
@@ -304,7 +333,7 @@ public class ConnectorGatewayMessageListener {
                 .name(name)
                 .contentType(contentType)
                 .size(payload.length)
-                .description("File from gateway")
+                .description(description)
                 .storage(ConnectorAttachmentStorage.S3_BUCKET)
                 .type(type)
                 .build();

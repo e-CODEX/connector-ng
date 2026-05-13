@@ -14,8 +14,12 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
+import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
+import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.security.model.container.ConnectorContainer;
 import eu.ecodex.connector.infrastructure.security.model.container.ConnectorContainerBusinessContent;
@@ -45,12 +49,25 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Component
 public class ConnectorAsicContainerValidator {
+    private final ConnectorMessageBusinessContentRepository businessContentRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
 
+    /**
+     * Constructor for the ConnectorAsicContainerValidator.
+     *
+     * @param businessContentRepository the repository for managing and querying the business
+     *                                  content of a connector message
+     * @param attachmentRepository      the repository for managing and querying attachments
+     *                                  associated with a connector message
+     * @param fileStorageProvider       the service provider responsible for storage operations
+     *                                  related to attachments and metadata
+     */
     public ConnectorAsicContainerValidator(
+            ConnectorMessageBusinessContentRepository businessContentRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider) {
+        this.businessContentRepository = businessContentRepository;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
     }
@@ -68,6 +85,14 @@ public class ConnectorAsicContainerValidator {
      *                                     as I/O issues or XML parsing errors
      */
     public void validate(@NonNull ConnectorMessage message) {
+        if (message.identifier() == null) {
+            throw new IllegalStateException("Message identifier is null");
+        }
+
+        if (message.businessContent() == null) {
+            throw new IllegalStateException("Message business content is null");
+        }
+
         log.info("Validating ASIC-S container for message {}", message.identifier());
         var attachments = message.attachments();
 
@@ -98,7 +123,7 @@ public class ConnectorAsicContainerValidator {
         }
     }
 
-    private ConnectorContainer buildContainer(byte[] asicsBytes, byte[] xmlTokenBytes)
+    protected ConnectorContainer buildContainer(byte[] asicsBytes, byte[] xmlTokenBytes)
             throws IOException, JAXBException {
         var asicsDocument = new InMemoryDocument(
                 asicsBytes,
@@ -175,10 +200,10 @@ public class ConnectorAsicContainerValidator {
             if (ConnectorContainerFileDefinitions.TOKEN_PDF_REF.equalsIgnoreCase(name)) {
                 pdfToken = entry;
             } else if (StringUtils.hasText(businessDocumentName)
-                       && businessDocumentName.equalsIgnoreCase(name)) {
+                    && businessDocumentName.equalsIgnoreCase(name)) {
                 businessContent.setDocument(entry);
             } else if (StringUtils.hasText(detachedSignatureName)
-                       && detachedSignatureName.equalsIgnoreCase(name)) {
+                    && detachedSignatureName.equalsIgnoreCase(name)) {
                 businessContent.setDetachedSignature(entry);
             } else {
                 businessContent.addAttachment(entry);
@@ -192,17 +217,17 @@ public class ConnectorAsicContainerValidator {
             List<ConnectorMessageAttachment> attachments,
             ConnectorAttachmentType type) {
         return attachments.stream()
-                          .filter(a -> type.equals(a.type()))
-                          .findFirst();
+                .filter(a -> type.equals(a.type()))
+                .findFirst();
     }
 
     private void persistAsicsContent(ConnectorContainer container, ConnectorMessage message)
             throws IOException {
-
         persistAttachment(
                 newAttachmentMetadata(
                         ConnectorContainerFileDefinitions.TOKEN_PDF.name(),
                         "application/pdf",
+                        "PDF Trust OK Token",
                         ConnectorAttachmentType.PDF_TOKEN,
                         documentSize(container.tokenPDF())
                 ),
@@ -210,32 +235,54 @@ public class ConnectorAsicContainerValidator {
                 message.identifier()
         );
 
-        var businessDocument = container.businessContent().getDocument();
-        if (businessDocument != null) {
+        var businessDssDocument = container.businessContent().getDocument();
+        if (businessDssDocument != null) {
+            var businessDocumentAttachment = newAttachmentMetadata(
+                    container.token().getDocument().getFilename(),
+                    businessDssDocument.getMimeType().getMimeTypeString(),
+                    "Business document",
+                    ConnectorAttachmentType.BUSINESS_DOCUMENT,
+                    documentSize(businessDssDocument)
+            );
             persistAttachment(
-                    newAttachmentMetadata(
-                            container.token().getDocument().getFilename(),
-                            businessDocument.getMimeType().getMimeTypeString(),
-                            ConnectorAttachmentType.BUSINESS_DOCUMENT,
-                            documentSize(businessDocument)
-                    ),
-                    businessDocument.openStream(),
+                    businessDocumentAttachment,
+                    businessDssDocument.openStream(),
                     message.identifier()
             );
-        }
 
-        var detachedSignature = container.businessContent().getDetachedSignature();
-        if (detachedSignature != null) {
-            persistAttachment(
-                    newAttachmentMetadata(
-                            detachedSignature.getName(),
-                            // TODO: use BINARY type if getMimeType() returns null
-                            detachedSignature.getMimeType().getMimeTypeString(),
-                            ConnectorAttachmentType.DETACHED_SIGNATURE,
-                            documentSize(detachedSignature)
-                    ),
-                    detachedSignature.openStream(),
-                    message.identifier()
+            var businessDocument = ConnectorMessageBusinessDocument.builder()
+                    .attachment(businessDocumentAttachment);
+
+            var detachedDssSignature = container.businessContent().getDetachedSignature();
+            DetachedSignature detachedSignature;
+            if (detachedDssSignature != null) {
+                var detachedSignatureMimeType = detachedDssSignature.getMimeType() == null
+                        ? null
+                        : detachedDssSignature.getMimeType().getMimeTypeString();
+                persistAttachment(
+                        newAttachmentMetadata(
+                                detachedDssSignature.getName(),
+                                // TODO: use BINARY type if getMimeType() returns null
+                                DetachedSignatureMimeType.fromMimeType(detachedSignatureMimeType)
+                                        .getMimeType(),
+                                "Detached signature",
+                                ConnectorAttachmentType.DETACHED_SIGNATURE,
+                                documentSize(detachedDssSignature)
+                        ),
+                        detachedDssSignature.openStream(),
+                        message.identifier()
+                );
+                detachedSignature = DetachedSignature.builder()
+                        .signature(new byte[1]) // TODO replace with actual signature
+                        .name(detachedDssSignature.getName())
+                        .mimeType(DetachedSignatureMimeType.fromMimeType(detachedSignatureMimeType))
+                        .build();
+                businessDocument.detachedSignature(detachedSignature);
+            }
+
+            this.businessContentRepository.assignBusinessDocument(
+                    message.businessContent().uuid(),
+                    businessDocument.build()
             );
         }
 
@@ -244,6 +291,7 @@ public class ConnectorAsicContainerValidator {
                     newAttachmentMetadata(
                             attachment.getName(),
                             attachment.getMimeType().getMimeTypeString(),
+                            "Attachment",
                             ConnectorAttachmentType.ATTACHMENT,
                             documentSize(attachment)
                     ),
@@ -256,18 +304,19 @@ public class ConnectorAsicContainerValidator {
     private ConnectorMessageAttachment newAttachmentMetadata(
             String name,
             String contentType,
+            String description,
             ConnectorAttachmentType type,
             int size) {
         var identifier = UUID.randomUUID() + "_" + name;
         return ConnectorMessageAttachment.builder()
-                                         .identifier(identifier)
-                                         .name(name)
-                                         .contentType(contentType)
-                                         .size(size)
-                                         .description("Unzipped ASiC-S container data")
-                                         .storage(ConnectorAttachmentStorage.S3_BUCKET)
-                                         .type(type)
-                                         .build();
+                .identifier(identifier)
+                .name(name)
+                .contentType(contentType)
+                .size(size)
+                .description(description)
+                .storage(ConnectorAttachmentStorage.S3_BUCKET)
+                .type(type)
+                .build();
     }
 
     /**
@@ -292,7 +341,7 @@ public class ConnectorAsicContainerValidator {
         if (!(document instanceof InMemoryDocument inMemory)) {
             throw new ConnectorContainerException(
                     "Document size is not yet supported for " + document.getClass().getSimpleName()
-                    + " — only InMemoryDocument is currently handled");
+                            + " — only InMemoryDocument is currently handled");
         }
         // TODO: adapt to large-file support using an appropriate DSSDocument implementation
         return inMemory.getBytes().length;

@@ -11,6 +11,7 @@
 package eu.ecodex.connector.domain.model.message.content;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import lombok.Getter;
 
 /**
@@ -48,5 +49,30 @@ public enum DetachedSignatureMimeType implements Serializable {
 
     DetachedSignatureMimeType(String mimeType) {
         this.mimeType = mimeType;
+    }
+
+    /**
+     * Converts a given MIME type string to its corresponding enum constant of
+     * {@code DetachedSignatureMimeType}.
+     *
+     * @param mimeType the MIME type string to be converted; may be {@code null} or blank to
+     *                 indicate the default value.
+     *
+     * @return the {@code DetachedSignatureMimeType} enum constant that matches the provided MIME
+     *         type string.
+     *
+     * @throws IllegalArgumentException if the MIME type does not match any predefined value.
+     */
+    public static DetachedSignatureMimeType fromMimeType(String mimeType) {
+        if (mimeType == null || mimeType.isBlank()) {
+            return BINARY;
+        }
+
+        return Arrays.stream(values())
+                .filter(value -> value.mimeType.equalsIgnoreCase(mimeType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Unsupported detached signature MIME type: " + mimeType
+                ));
     }
 }

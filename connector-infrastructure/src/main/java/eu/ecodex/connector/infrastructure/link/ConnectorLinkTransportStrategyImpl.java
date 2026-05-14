@@ -27,11 +27,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorLinkTransportStrategyImpl implements ConnectorLinkTransportStrategy {
     private final ConnectorEventPublisher gatewayLinkEventPublisher;
+    private final ConnectorEventPublisher backendLinkEventPublisher;
 
     public ConnectorLinkTransportStrategyImpl(
             @Qualifier("connectorGatewayLinkEventPublisher")
-            ConnectorEventPublisher gatewayLinkEventPublisher) {
+            ConnectorEventPublisher gatewayLinkEventPublisher,
+            @Qualifier("connectorBackendLinkEventPublisher")
+            ConnectorEventPublisher backendLinkEventPublisher) {
         this.gatewayLinkEventPublisher = gatewayLinkEventPublisher;
+        this.backendLinkEventPublisher = backendLinkEventPublisher;
     }
 
     @Override
@@ -42,6 +46,7 @@ public class ConnectorLinkTransportStrategyImpl implements ConnectorLinkTranspor
             gatewayLinkEventPublisher.publish(message);
         } else {
             log.debug("gateway to backend message transport strategy not yet implemented");
+            backendLinkEventPublisher.publish(message);
             // TODO to be implemented. no exception thrown to allow testing
         }
     }

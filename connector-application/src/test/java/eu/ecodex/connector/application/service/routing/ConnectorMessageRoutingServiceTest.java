@@ -83,7 +83,7 @@ public class ConnectorMessageRoutingServiceTest {
         assertThat(backendName).isEqualTo(
                 MessageRoutingConfigurationTestFixtures
                         .getConfiguration()
-                        .businessDomains()
+                        .businessDomainRouting()
                         .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
                         .backend()
                         .defaultName()

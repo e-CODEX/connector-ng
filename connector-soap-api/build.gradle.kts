@@ -33,6 +33,12 @@ tasks {
                 .toPath().toRealPath().toString()
         }
     }
+    register("DomibusConnectorBackendDeliveryWebService", Wsdl2Java::class) {
+        toolOptions {
+            wsdl = file("src/main/resources/wsdl/v1/DomibusConnectorBackendDeliveryWebService.wsdl")
+                .toPath().toRealPath().toString()
+        }
+    }
 }
 
 tasks.withType(Wsdl2Java::class).configureEach {

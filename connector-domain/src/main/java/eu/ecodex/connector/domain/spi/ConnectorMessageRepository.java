@@ -114,4 +114,6 @@ public interface ConnectorMessageRepository {
     ConnectorMessage setAsConfirmed(@Nonnull String identifier);
 
     ConnectorMessage setDeliveredToGatewayAt(@Nonnull String identifier);
+
+    ConnectorMessage setDeliveredToBackendAt(@Nonnull String identifier);
 }

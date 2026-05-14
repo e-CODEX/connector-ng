@@ -11,19 +11,34 @@ dependencies {
     implementation(project(":connector-soap-api"))
     implementation(project(":connector-application"))
     // apache
-    implementation(libs.apache.cxf.spring.boot)
+    // apache cxf
+    implementation(platform(libs.apache.cxf.bom))
+    implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws")
+    implementation("org.apache.cxf:cxf-rt-frontend-jaxws")
+    implementation("org.apache.cxf:cxf-rt-ws-policy")
+    implementation("org.apache.cxf:cxf-rt-ws-security")
+    implementation("org.apache.cxf:cxf-rt-features-logging")
+    // apache web service security
+    implementation(libs.apache.wss4j.common) {
+        exclude(group = "org.apache.santuario", module = "xmlsec")
+    }
+    implementation(libs.apache.wss4j.dom)
+    // xml security
+    implementation(libs.apache.xmlsec)
+    // apache common
     implementation(libs.apache.commons.lang3)
     implementation(libs.apache.commons.io)
     // dss tool
     implementation(platform(libs.dss.tool))
     implementation("eu.europa.ec.joinup.sd-dss:dss-document")
-    implementation("eu.europa.ec.joinup.sd-dss:dss-xades")
+    implementation("eu.europa.ec.joinup.sd-dss:dss-xades") {
+        exclude(group = "org.apache.santuario", module = "xmlsec")
+    }
     implementation("eu.europa.ec.joinup.sd-dss:dss-cades")
     implementation("eu.europa.ec.joinup.sd-dss:dss-pades")
     implementation("eu.europa.ec.joinup.sd-dss:dss-asic-xades")
     implementation("eu.europa.ec.joinup.sd-dss:dss-asic-cades")
     implementation("eu.europa.ec.joinup.sd-dss:dss-token")
-    implementation("eu.europa.ec.joinup.sd-dss:dss-tsl-validation")
     implementation("eu.europa.ec.joinup.sd-dss:dss-service")
     implementation("eu.europa.ec.joinup.sd-dss:dss-policy-jaxb")
     implementation("eu.europa.ec.joinup.sd-dss:dss-validation")
@@ -56,7 +71,6 @@ dependencies {
     // doc
     implementation(libs.spring.doc)
     // other
-    implementation(libs.apache.cxf)
     implementation(libs.itextpdf)
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)

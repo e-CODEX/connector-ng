@@ -99,7 +99,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         when(messageRoutingService.isRoutingEnabled(any())).thenReturn(true);
         var rules = MessageRoutingConfigurationTestFixtures
                 .getRoutingProperties()
-                .businessDomains()
+                .businessDomainRouting()
                 .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
                 .backend().rules();
         when(messageRoutingService.getBackendRoutingRule(any())).thenReturn(rules);
@@ -124,7 +124,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         when(messageRoutingService.isRoutingEnabled(any())).thenReturn(true);
         var rules = MessageRoutingConfigurationTestFixtures
                 .getRoutingProperties()
-                .businessDomains()
+                .businessDomainRouting()
                 .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
                 .backend().rules();
         when(messageRoutingService.getBackendRoutingRule(any())).thenReturn(rules);

@@ -200,6 +200,15 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
         return toDomain(updatedMessage);
     }
 
+    @Override
+    public ConnectorMessage setDeliveredToBackendAt(@NonNull String identifier) {
+        var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
+        foundMessage.setDeliveredToBackendAt(Instant.now());
+        var updatedMessage = this.messageJpaRepository.save(foundMessage);
+
+        return toDomain(updatedMessage);
+    }
+
     private ConnectorMessageEntity toEntity(ConnectorMessage message) {
         var businessDomain = this.businessDomainJpaRepository.findByIdentifier(
                 message.businessDomainIdentifier().messageLaneIdentifier()

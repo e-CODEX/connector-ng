@@ -3,6 +3,8 @@
 apache-commons-lang3 = "3.20.0"
 apache-commons-io = "2.21.0"
 apache-cxf = "4.1.0"
+apache-wss4j = "3.0.5" # do not migrate to 4.x series due to xmlsec 4.x serie clash
+apache-xmlsec = "3.0.5" # keep this due to limitation of DSS library
 # jakarta
 jakarta-annotation = "3.0.0"
 jakarta-activation = "2.1.4"
@@ -44,8 +46,10 @@ mockito = "5.21.0"
 # apache
 apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commons-lang3" }
 apache-commons-io = { module = "commons-io:commons-io", version.ref = "apache-commons-io" }
-apache-cxf = { module = "org.apache.cxf:cxf-rt-frontend-jaxws", version.ref = "apache-cxf" }
-apache-cxf-spring-boot = { module = "org.apache.cxf:cxf-spring-boot-starter-jaxws", version.ref = "apache-cxf" }
+apache-cxf-bom = { module = "org.apache.cxf:cxf-bom", version.ref = "apache-cxf" }
+apache-wss4j-common = { module = "org.apache.wss4j:wss4j-ws-security-common", version.ref = "apache-wss4j"}
+apache-wss4j-dom = { module = "org.apache.wss4j:wss4j-ws-security-dom", version.ref = "apache-wss4j"}
+apache-xmlsec = { module = "org.apache.santuario:xmlsec", version.ref = "apache-xmlsec"}
 # jakarta
 jakarta-annotation = { module = "jakarta.annotation:jakarta.annotation-api", version.ref = "jakarta-annotation" }
 jakarta-activation = { module = "jakarta.activation:jakarta.activation-api", version.ref = "jakarta-activation" }

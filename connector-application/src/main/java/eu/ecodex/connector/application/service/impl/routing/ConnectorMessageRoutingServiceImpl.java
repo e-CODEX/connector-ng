@@ -46,7 +46,8 @@ public class ConnectorMessageRoutingServiceImpl implements ConnectorMessageRouti
     public String getDefaultBackendName(
             ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var configuration = this.routingConfigurationProvider.getConfiguration();
-        var domainRoutingConfig = configuration.businessDomains().get(businessDomainIdentifier);
+        var domainRoutingConfig = configuration.businessDomainRouting()
+                .get(businessDomainIdentifier);
 
         return domainRoutingConfig.backend().defaultName() != null
                 ? domainRoutingConfig.backend().defaultName()
@@ -57,7 +58,8 @@ public class ConnectorMessageRoutingServiceImpl implements ConnectorMessageRouti
     public Map<ConnectorLinkPartnerName, ConnectorMessageRoutingRule> getBackendRoutingRule(
             ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var configuration = this.routingConfigurationProvider.getConfiguration();
-        var domainRoutingConfig = configuration.businessDomains().get(businessDomainIdentifier);
+        var domainRoutingConfig = configuration.businessDomainRouting()
+                .get(businessDomainIdentifier);
 
         return domainRoutingConfig.backend().rules() != null
                 ? domainRoutingConfig.backend().rules()

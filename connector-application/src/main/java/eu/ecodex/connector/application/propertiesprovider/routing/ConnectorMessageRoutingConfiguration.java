@@ -25,15 +25,16 @@ import lombok.Builder;
  * <p>This abstraction allows for a clear separation of routing configurations across different
  * business contexts, ensuring modular and maintainable message routing logic.
  *
- * @param enabled         Indicates whether the message routing functionality is enabled.
- * @param businessDomains A mapping of {@link ConnectorBusinessDomainIdentifier} to their respective
- *                        {@link ConnectorMessageRoutingBusinessDomainProperties}. This map holds
- *                        the routing configurations for individual business domains.
+ * @param enabled               Indicates whether the message routing functionality is enabled.
+ * @param businessDomainRouting A mapping of {@link ConnectorBusinessDomainIdentifier} to their
+ *                              respective {@link ConnectorMessageRoutingBusinessDomainProperties}.
+ *                              This map holds the routing configurations for individual business
+ *                              domains.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageRoutingConfiguration(
         boolean enabled,
         Map<ConnectorBusinessDomainIdentifier, ConnectorMessageRoutingBusinessDomainProperties>
-        businessDomains
+        businessDomainRouting
 ) {
 }

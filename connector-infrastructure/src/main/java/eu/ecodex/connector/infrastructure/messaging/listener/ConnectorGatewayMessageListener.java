@@ -152,6 +152,13 @@ public class ConnectorGatewayMessageListener {
                     "Invalid Gateway reception messageType: " + messageType);
         }
 
+        var ebmsMessageIdentifier = message.getStringProperty("messageId");
+
+        if (!StringUtils.hasText(ebmsMessageIdentifier)) {
+            throw new IllegalArgumentException(
+                    "Invalid Gateway reception messageId: " + ebmsMessageIdentifier);
+        }
+
         int total = message.getIntProperty("totalNumberOfPayloads");
 
         if (total <= 0) {
@@ -207,6 +214,7 @@ public class ConnectorGatewayMessageListener {
                 .toParty(toParty)
                 .conversationIdentifier(message.getStringProperty(
                         "conversationId"))
+                .ebmsMessageIdentifier(message.getStringProperty("messageId"))
                 .referenceToIdentifier(message.getStringProperty(
                         "refToMessageId"))
                 .originalSender(message.getStringProperty(

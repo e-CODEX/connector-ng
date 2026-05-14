@@ -56,7 +56,8 @@ public record ConnectorLinkPartner(
         ConnectorLinkType type,
         ConnectorConfigurationSource source,
         String encryptionAlias,
-        String certificateDn
+        String certificateDn,
+        String pushAddress
 ) {
     @Override
     @Nonnull

@@ -24,4 +24,5 @@ import lombok.Setter;
 public class LinkPartnerDetailProperties {
     private String encryptionAlias;
     private String certificateDn;
+    private String pushAddress;
 }

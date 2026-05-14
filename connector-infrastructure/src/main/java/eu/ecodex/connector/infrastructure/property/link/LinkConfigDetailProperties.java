@@ -24,5 +24,5 @@ import lombok.Setter;
 @Setter
 public class LinkConfigDetailProperties {
     private boolean loggingEnabled;
-    private EndpointProperties endpoint;
+    private LinkEndpointProperties endpoint;
 }

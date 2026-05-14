@@ -73,11 +73,12 @@ public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartner
     }
 
     private void validateDirection(ConnectorMessageDirection direction, ConnectorLinkType type) {
-        boolean invalid =
-                (direction == ConnectorMessageDirection.BACKEND_TO_GATEWAY
-                 && type != ConnectorLinkType.GATEWAY)
-                || (direction == ConnectorMessageDirection.GATEWAY_TO_BACKEND
-                    && type != ConnectorLinkType.BACKEND);
+        boolean invalid = (
+                direction == ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                        && type != ConnectorLinkType.GATEWAY)
+                || (
+                direction == ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                        && type != ConnectorLinkType.BACKEND);
 
         if (invalid) {
             throw new ConnectorLinkPartnerSubmissionException(

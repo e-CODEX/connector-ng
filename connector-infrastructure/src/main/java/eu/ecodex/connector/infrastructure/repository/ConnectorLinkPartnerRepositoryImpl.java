@@ -17,6 +17,7 @@ import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.infrastructure.property.link.ConnectorLinkProperties;
+import eu.ecodex.connector.infrastructure.property.link.LinkConfigProperties;
 import eu.ecodex.connector.infrastructure.property.link.LinkPartnerProperties;
 import jakarta.annotation.PostConstruct;
 import java.util.Collections;
@@ -50,40 +51,33 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
     public ConnectorLinkPartnerRepositoryImpl(ConnectorLinkProperties properties) {
         log.info("Initializing link partner registry");
 
-        Map<ConnectorLinkPartnerName, ConnectorLinkPartner> map = new HashMap<>();
+        var partnersMap = new HashMap<ConnectorLinkPartnerName, ConnectorLinkPartner>();
 
-        // gateway partners
         if (properties.getGateway() != null) {
-            properties.getGateway().getLinkPartners()
-                      .forEach(partnerProperties -> {
-                          var linkPartnerName = ConnectorLinkPartnerName
-                                  .builder()
-                                  .name(partnerProperties.getName())
-                                  .build();
-
-                          map.put(
-                                  linkPartnerName,
-                                  toDomain(partnerProperties, ConnectorLinkType.GATEWAY)
-                          );
-                      });
+            for (var partnerProperties : properties.getGateway().getLinkPartners()) {
+                var name = ConnectorLinkPartnerName.builder()
+                        .name(partnerProperties.getName())
+                        .build();
+                checkNoDuplicateName(partnersMap, name);
+                partnersMap.put(name, toDomain(partnerProperties, ConnectorLinkType.GATEWAY));
+            }
         }
 
         // backend partners
-        properties.getBackend().stream()
-                  .flatMap(b -> b.getLinkPartners().stream())
-                  .forEach(partnerProperties -> {
-                      var linkPartnerName = ConnectorLinkPartnerName
-                              .builder()
-                              .name(partnerProperties.getName())
-                              .build();
+        var backendList = properties.getBackend();
+        if (backendList != null) {
+            for (var backendProperties : backendList) {
+                for (var partnerProperties : backendProperties.getLinkPartners()) {
+                    var name = ConnectorLinkPartnerName.builder()
+                            .name(partnerProperties.getName())
+                            .build();
+                    checkNoDuplicateName(partnersMap, name);
+                    partnersMap.put(name, toDomain(partnerProperties, ConnectorLinkType.BACKEND));
+                }
+            }
+        }
 
-                      map.put(
-                              linkPartnerName,
-                              toDomain(partnerProperties, ConnectorLinkType.BACKEND)
-                      );
-                  });
-
-        this.partners = Collections.unmodifiableMap(map);
+        this.partners = Collections.unmodifiableMap(partnersMap);
     }
 
     @Override
@@ -94,12 +88,24 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
     @Override
     public ConnectorLinkPartner findByCertificateDn(@NonNull String certificateDn) {
         return this.partners.values().stream()
-                            .filter(partner -> Objects.equals(
-                                    partner.certificateDn(), certificateDn))
-                            .findFirst()
-                            .orElse(null);
+                .filter(partner -> Objects.equals(partner.certificateDn(), certificateDn))
+                .findFirst()
+                .orElse(null);
     }
 
+    private void checkNoDuplicateName(
+            Map<ConnectorLinkPartnerName, ?> map,
+            ConnectorLinkPartnerName name) {
+        if (map.containsKey(name)) {
+            throw new IllegalStateException(
+                    "Duplicate link partner name detected during registry initialisation: '"
+                            + name.name() + "'. Each partner name must be unique across gateway "
+                            + "and backend."
+            );
+        }
+    }
+
+    @Override
     public List<ConnectorLinkPartner> findAll() {
         return partners.values().stream().toList();
     }
@@ -124,6 +130,7 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
         if (type == ConnectorLinkType.BACKEND) {
             linkPartnerBuilder
                     .encryptionAlias(properties.getProperties().getEncryptionAlias())
+                    .pushAddress(properties.getProperties().getPushAddress())
                     .certificateDn(properties.getProperties().getCertificateDn());
         }
 

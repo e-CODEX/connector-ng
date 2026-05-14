@@ -63,8 +63,18 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     }
 
     @Test
+    void should_throw_exception_if_the_message_id_is_null_or_empty() throws JMSException {
+        when(message.getStringProperty("messageType")).thenReturn("incomingMessage");
+        when(message.getStringProperty("messageId")).thenReturn("");
+
+        assertThatThrownBy(() -> listener.handle(message))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void should_throw_exception_if_the_message_has_zero_payload() throws JMSException {
         when(message.getStringProperty("messageType")).thenReturn("incomingMessage");
+        when(message.getStringProperty("messageId")).thenReturn("9a855348-4ed7-11f1-815b-c6ceea70fe39@domibus.eu");
         when(message.getIntProperty("totalNumberOfPayloads")).thenReturn(0);
 
         assertThatThrownBy(() -> listener.handle(message))
@@ -212,6 +222,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
 
     private void stubValidHeader(MapMessage msg, int payloadCount) throws JMSException {
         when(msg.getStringProperty("messageType")).thenReturn("incomingMessage");
+        when(message.getStringProperty("messageId")).thenReturn("9a855348-4ed7-11f1-815b-c6ceea70fe39@domibus.eu");
         when(msg.getIntProperty("totalNumberOfPayloads")).thenReturn(payloadCount);
     }
 
@@ -226,6 +237,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         when(msg.getStringProperty("toPartyType")).thenReturn("urn:oasis:names:tc:ebcore:partyid-type:ecodex");
         when(msg.getStringProperty("toRole")).thenReturn("GW");
         when(msg.getStringProperty("conversationId")).thenReturn("669b78ca-652c-40b8-883e-512be910550b");
+        when(msg.getStringProperty("messageId")).thenReturn("9a855348-4ed7-11f1-815b-c6ceea70fe39@domibus.eu");
         when(msg.getStringProperty("refToMessageId")).thenReturn(null);
         when(msg.getStringProperty("originalSender")).thenReturn("alice");
         when(msg.getStringProperty("finalRecipient")).thenReturn("bob");

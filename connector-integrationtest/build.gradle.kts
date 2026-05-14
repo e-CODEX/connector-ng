@@ -40,7 +40,8 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-mysql")
 
     // other
-    testImplementation(libs.apache.cxf)
+    testImplementation(platform(libs.apache.cxf.bom))
+    testImplementation("org.apache.cxf:cxf-rt-frontend-jaxws")
     testImplementation(libs.assertj.core)
     testImplementation(libs.jackson.databind)
     testImplementation(libs.okhttp)

@@ -36,7 +36,7 @@ public class MessageRoutingConfigurationTestFixtures {
         return ConnectorMessageRoutingConfiguration
                 .builder()
                 .enabled(true)
-                .businessDomains(businessDomain)
+                .businessDomainRouting(businessDomain)
                 .build();
     }
 
@@ -74,7 +74,7 @@ public class MessageRoutingConfigurationTestFixtures {
     public static ConnectorMessageRoutingConfiguration getRoutingPropertiesWithNoDefaultBackendName() {
         var routingProperties = routingProperties();
         var backendRoutingRule = routingProperties
-                .businessDomains()
+                .businessDomainRouting()
                 .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
                 .backend();
 
@@ -88,7 +88,7 @@ public class MessageRoutingConfigurationTestFixtures {
                 domainProperties
         );
 
-        return routingProperties.toBuilder().businessDomains(businessDomain).build();
+        return routingProperties.toBuilder().businessDomainRouting(businessDomain).build();
     }
 
     private static ConnectorMessageRoutingConfiguration routingProperties() {
@@ -103,13 +103,13 @@ public class MessageRoutingConfigurationTestFixtures {
         return ConnectorMessageRoutingConfiguration
                 .builder()
                 .enabled(true)
-                .businessDomains(businessDomain)
+                .businessDomainRouting(businessDomain)
                 .build();
     }
 
     public static ConnectorMessageRoutingConfiguration getRoutingPropertiesWithNoDefaultBackendRules() {
         var routingProperties = routingProperties();
-        var backendRoutingRule = routingProperties.businessDomains().get(
+        var backendRoutingRule = routingProperties.businessDomainRouting().get(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         ).backend();
 
@@ -125,7 +125,7 @@ public class MessageRoutingConfigurationTestFixtures {
 
         return routingProperties
                 .toBuilder()
-                .businessDomains(businessDomain)
+                .businessDomainRouting(businessDomain)
                 .build();
     }
 

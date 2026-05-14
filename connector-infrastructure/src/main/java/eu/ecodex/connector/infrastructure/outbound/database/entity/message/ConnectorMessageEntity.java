@@ -91,6 +91,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Column(name = "DELIVERED_TO_GATEWAY_AT")
     private Instant deliveredToGatewayAt;
 
+    @Setter
     @Column(name = "DELIVERED_TO_BACKEND_AT")
     private Instant deliveredToBackendAt;
 

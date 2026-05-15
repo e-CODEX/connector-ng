@@ -81,7 +81,6 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
 
         return ConnectorParty
                 .builder()
-                .uuid(entity.getUuid())
                 .name(entity.getName())
                 .identifier(entity.getIdentifier())
                 .identifierType(entity.getIdentifierType())

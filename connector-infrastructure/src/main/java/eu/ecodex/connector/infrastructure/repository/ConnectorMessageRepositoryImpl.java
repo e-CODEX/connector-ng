@@ -15,6 +15,8 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
@@ -27,9 +29,12 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.Connector
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAS4PropertiesJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.MessageSpecification;
 import java.time.Instant;
 import java.util.List;
 import lombok.NonNull;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -141,6 +146,29 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
         var updated = as4PropertiesJpaRepository.save(as4Properties);
 
         return toDomain(updated.getMessage());
+    }
+
+    @Override
+    public ConnectorPageResult<ConnectorMessage> findAll(
+            ConnectorPageRequest request,
+            String identifier,
+            String backendName) {
+        var pageable = PageRequest.of(
+                request.page(),
+                request.size(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        var specification = MessageSpecification.withFilters(identifier, backendName);
+
+        var result = messageJpaRepository.findAll(specification, pageable);
+
+        return new ConnectorPageResult<>(
+                result.getContent().stream().map(this::toDomain).toList(),
+                result.getTotalElements(),
+                result.getNumber(),
+                result.getSize()
+        );
     }
 
     @Override

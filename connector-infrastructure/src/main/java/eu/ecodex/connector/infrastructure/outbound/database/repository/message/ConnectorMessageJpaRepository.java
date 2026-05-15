@@ -13,13 +13,16 @@ package eu.ecodex.connector.infrastructure.outbound.database.repository.message;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for performing CRUD operations on the {@link ConnectorMessageEntity}.
  */
 @Repository
-public interface ConnectorMessageJpaRepository extends JpaRepository<ConnectorMessageEntity, Long> {
+public interface ConnectorMessageJpaRepository extends
+        JpaRepository<ConnectorMessageEntity, Long>,
+        JpaSpecificationExecutor<ConnectorMessageEntity> {
     ConnectorMessageEntity findByIdentifier(String identifier);
 
     List<ConnectorMessageEntity> findByAs4PropertiesConversationIdentifier(

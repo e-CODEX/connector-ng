@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
@@ -22,12 +23,15 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessDocument;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
@@ -42,34 +46,38 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Defines the REST controller for managing an outbound message within the connector system.
+ * Defines the REST controller for managing messages within the connector system.
  */
 @RestController
-public class ConnectorOutboundMessageController implements ConnectorOutboundMessageApi {
+public class ConnectorMessageController implements ConnectorMessageApi {
     private final ConnectorOutboundMessageReceiver messageStagingService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
+    private final ConnectorListMessages listMessagesService;
 
     /**
-     * Constructs a new instance of ConnectorOutboundMessageController.
+     * Constructs a new instance of ConnectorMessageController.
      *
      * @param messageStagingService        The service responsible for receiving and managing
      *                                     outbound messages.
      * @param backendClientVerifierService The service used for verifying backend clients.
      * @param uploadAttachmentsService     The service for handling file attachments during message
      *                                     processing.
+     * @param listMessagesService          The service for listing messages.
      */
-    public ConnectorOutboundMessageController(
+    public ConnectorMessageController(
             ConnectorOutboundMessageReceiver messageStagingService,
             ConnectorBackendClientVerifier backendClientVerifierService,
-            ConnectorUploadAttachments uploadAttachmentsService) {
+            ConnectorUploadAttachments uploadAttachmentsService,
+            ConnectorListMessages listMessagesService) {
         this.messageStagingService = messageStagingService;
         this.backendClientVerifierService = backendClientVerifierService;
         this.uploadAttachmentsService = uploadAttachmentsService;
+        this.listMessagesService = listMessagesService;
     }
 
     @Override
-    public ConnectorOutboundMessageDto submit(
+    public ConnectorOutboundMessageDto submitOutboundMessage(
             MultipartFile businessXMLDocument,
             ConnectorOutboundMessageRequest messageMetadata) throws IOException {
         var message = toDomain(messageMetadata, businessXMLDocument.getBytes());
@@ -79,6 +87,28 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
         return toDto(processedMessage);
     }
 
+    @Override
+    public ConnectorPageResult<ConnectorMessageDto> listMessages(
+            String identifier,
+            String backendName,
+            int page,
+            int size) {
+        var pageRequest = ConnectorPageRequest
+                .builder()
+                .page(page)
+                .size(size)
+                .build();
+
+        var result = listMessagesService.execute(pageRequest, identifier, backendName);
+
+        return new ConnectorPageResult<>(
+                result.content().stream().map(this::toMessageDto).toList(),
+                result.totalElements(),
+                result.page(),
+                result.size()
+        );
+    }
+
     private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
         return ConnectorOutboundMessageDto
                 .builder()
@@ -86,6 +116,28 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
                 .backendMessageIdentifier(message.backendMessageIdentifier())
                 .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
                 .direction(Objects.requireNonNull(message.direction()))
+                .build();
+    }
+
+    private ConnectorMessageDto toMessageDto(ConnectorMessage message) {
+        return ConnectorMessageDto.builder()
+                .businessDomainIdentifier(
+                        message.businessDomainIdentifier().messageLaneIdentifier())
+                .identifier(message.identifier())
+                .backendMessageIdentifier(message.backendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+                .direction(Objects.requireNonNull(message.direction()))
+                .isBusiness(message.isBusinessMessage())
+                .backendName(message.backendName())
+                .gatewayName(message.gatewayName())
+                .as4Properties(message.as4Properties())
+                .createdAt(message.createdAt())
+                .updatedAt(message.updatedAt())
+                .deletedAt(message.deletedAt())
+                .rejectedAt(message.rejectedAt())
+                .confirmedAt(message.confirmedAt())
+                .deliveredToBackendAt(message.deliveredToBackendAt())
+                .deliveredToGatewayAt(message.deliveredToGatewayAt())
                 .build();
     }
 
@@ -184,15 +236,15 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
         String xmlContentIdentifier;
 
         var uploadCommand = FileUploadCommand.builder()
-                                             .contentType("text/xml")
-                                             .filename("businessContent.xml")
-                                             .tempFileLocation(tempLocation)
-                                             .size(xmlBusinessDocument.length)
-                                             .build();
+                .contentType("text/xml")
+                .filename("businessContent.xml")
+                .tempFileLocation(tempLocation)
+                .size(xmlBusinessDocument.length)
+                .build();
 
         try {
             xmlContentIdentifier = this.uploadAttachmentsService.execute(List.of(uploadCommand))
-                                                                .getFirst().identifier();
+                    .getFirst().identifier();
         } finally {
             uploadCommand.cleanup();
         }
@@ -231,7 +283,7 @@ public class ConnectorOutboundMessageController implements ConnectorOutboundMess
         }
 
         return identifiers.stream()
-                          .map(this::toAttachment)
-                          .toList();
+                .map(this::toAttachment)
+                .toList();
     }
 }

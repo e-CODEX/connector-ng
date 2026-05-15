@@ -12,8 +12,10 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.JsonTestFixtures;
@@ -22,9 +24,11 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.MultipartFileTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message.ConnectorOutboundMessageController;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message.ConnectorMessageController;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.util.List;
 import java.util.stream.Stream;
@@ -43,14 +47,16 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureRestTestClient
 @ContextConfiguration(classes = TestConfiguration.class)
-@WebMvcTest(ConnectorOutboundMessageController.class)
-public class ConnectorOutboundMessageControllerTest {
+@WebMvcTest(ConnectorMessageController.class)
+public class ConnectorMessageControllerTest {
     @MockitoBean
     private ConnectorOutboundMessageReceiver messageStagingService;
     @MockitoBean
     private ConnectorBackendClientVerifier backendClientVerifierService;
     @MockitoBean
     private ConnectorUploadAttachments uploadAttachmentsService;
+    @MockitoBean
+    private ConnectorListMessages listMessagesService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -95,6 +101,27 @@ public class ConnectorOutboundMessageControllerTest {
                                .contentType(MediaType.MULTIPART_FORM_DATA)
                )
                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_200_when_retrieving_messages() throws Exception {
+        var pageResult = new ConnectorPageResult<>(
+                List.of(MessageTestFixtures.createConfirmedMessage()), 1, 0, 20
+        );
+
+        when(listMessagesService.execute(any(), any(), any())).thenReturn(pageResult);
+
+        mockMvc.perform(get("/api/v1/messages")
+                                .param("page", "0")
+                                .param("size", "20")
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1));
     }
 
      private static Stream<String> getMetadataJson() {

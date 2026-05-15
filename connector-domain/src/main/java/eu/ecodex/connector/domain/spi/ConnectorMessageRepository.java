@@ -13,6 +13,8 @@ package eu.ecodex.connector.domain.spi;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
@@ -39,6 +41,34 @@ public interface ConnectorMessageRepository {
 
     ConnectorMessage updateEbmsIdentifier(
             @Nonnull String identifier, @Nonnull String ebmsIdentifier);
+
+    /**
+     * Retrieves a paginated result of {@link ConnectorMessage} objects that match the provided
+     * criteria based on the specified {@code request}, {@code identifier}, and {@code backendName}.
+     * This method facilitates fetching connector messages that match the given filters.
+     *
+     * @param request     the pagination and sorting information for the retrieval operation. This
+     *                    includes details such as page size, page number, and sorting order; must
+     *                    not be null.
+     * @param identifier  a unique identifier to filter {@link ConnectorMessage} objects. This can
+     *                    be used to narrow down the search results to messages associated with a
+     *                    specific identifier; may be null or empty if no filtering by identifier is
+     *                    needed.
+     * @param backendName the name of the backend to filter {@link ConnectorMessage} objects. This
+     *                    allows for scoping the search results to messages associated with a
+     *                    specific backend name; may be null or empty if no backend filtering is
+     *                    required.
+     *
+     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} instances
+     *         that match the specified criteria. The result includes pagination details such as
+     *         total elements and total pages. If no messages match the criteria, an empty result is
+     *         returned.
+     */
+    ConnectorPageResult<ConnectorMessage> findAll(
+            ConnectorPageRequest request,
+            String identifier,
+            String backendName
+    );
 
     /**
      * Finds a {@link ConnectorMessage} by its unique identifier.

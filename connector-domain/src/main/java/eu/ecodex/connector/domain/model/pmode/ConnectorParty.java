@@ -20,7 +20,6 @@ import lombok.Builder;
  * The Party represents a party in the Connector. It contains information about the party's ID, ID
  * type, and role.
  *
- * @param uuid           The UUID of the party.
  * @param name           The name of the party.
  * @param identifier     The ID of the party.
  * @param identifierType The type of the ID of the party.
@@ -30,7 +29,6 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorParty(
-        @Nullable String uuid,
         @Nullable String name,
         @NotBlank String identifier,
         @Nonnull String identifierType,

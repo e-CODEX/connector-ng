@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest;
+package eu.ecodex.connector.rest.message;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -71,7 +71,6 @@ public class ConnectorOutboundMessageIT extends AbstractIntegrationTest {
         jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
     }
-
 
     @Test
     void should_submit_rest_outbound_message_successfully() {

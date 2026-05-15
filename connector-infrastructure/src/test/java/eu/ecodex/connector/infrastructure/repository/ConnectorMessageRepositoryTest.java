@@ -75,7 +75,7 @@ public class ConnectorMessageRepositoryTest {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
         assertThat(message).isNotNull();
-        assertThat(message.getGatewayName()).isNull();
+        assertThat(message.getGatewayName()).isEqualTo("default_gateway");
 
         var update = repository.updateGatewayName(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", "gateway-name");
@@ -123,7 +123,7 @@ public class ConnectorMessageRepositoryTest {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
         assertThat(message).isNotNull();
-        assertThat(message.getBackendName()).isNull();
+        assertThat(message.getGatewayName()).isEqualTo("default_gateway");
 
         var update = repository.updateBackendName(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", "backend-name");

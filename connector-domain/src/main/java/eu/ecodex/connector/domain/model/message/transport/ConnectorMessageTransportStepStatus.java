@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.domain.model.message.transport;
 
-import jakarta.annotation.Nullable;
 import java.io.Serializable;
 import java.time.Instant;
 import lombok.Builder;
@@ -26,13 +25,10 @@ import lombok.Builder;
  *                  {@link ConnectorMessageTransportStatus}.
  * @param createdAt The timestamp indicating when the current status of the transport step was
  *                  recorded.
- * @param details   Additional details or contextual information regarding the transport step's
- *                  status.
  */
 @Builder
 public record ConnectorMessageTransportStepStatus(
         ConnectorMessageTransportStatus status,
-        Instant createdAt,
-        @Nullable String details
+        Instant createdAt
 ) implements Serializable {
 }

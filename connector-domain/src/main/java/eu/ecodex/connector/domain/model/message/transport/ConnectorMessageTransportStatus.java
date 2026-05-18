@@ -35,9 +35,9 @@ import lombok.Getter;
  */
 @Getter
 public enum ConnectorMessageTransportStatus {
-    ACCEPTED(10),
+    SUBMITTED(10),
     FAILED(10),
-    PENDING_DOWNLOADED(2),
+    DOWNLOADED(2),
     PENDING(1);
 
     final int priority;

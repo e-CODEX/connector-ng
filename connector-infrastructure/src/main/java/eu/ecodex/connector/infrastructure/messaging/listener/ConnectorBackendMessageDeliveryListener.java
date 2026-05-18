@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
@@ -17,6 +18,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirectionType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
@@ -49,25 +51,47 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+/**
+ * JMS listener responsible for handling message submission to the backend.
+ */
 @Slf4j
 @Component
 public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHandler {
+    private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
     private final BackendServiceClient backendServiceClient;
 
+    /**
+     * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
+     *
+     * @param messageTransportStep Represents the transport step responsible for processing and
+     *                             executing message delivery within the connector registration
+     *                             process.
+     * @param messageRepository    Repository for handling the persistence and retrieval of
+     *                             connector messages.
+     * @param attachmentRepository Repository for managing message attachments associated with
+     *                             connector messages.
+     * @param fileStorageProvider  Provider for managing file storage operations required for
+     *                             message handling.
+     * @param backendServiceClient Client for interacting with backend services required for message
+     *                             delivery.
+     */
     public ConnectorBackendMessageDeliveryListener(
+            ConnectorRegisterMessageTransportStep messageTransportStep,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider,
             BackendServiceClient backendServiceClient) {
+        this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
         this.backendServiceClient = backendServiceClient;
     }
 
+    @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.backend-delivery-queue}")
     public void handle(@NonNull ConnectorMessage message) {
@@ -92,12 +116,21 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
 
             if (acknowledgment.isResult()) {
                 messageRepository.setDeliveredToBackendAt(identifier);
+                messageTransportStep.execute(
+                        inboundMessage,
+                        ConnectorMessageTransportStatus.SUBMITTED
+                );
             } else {
                 log.error("Failed to deliver message [{}] to the backend system", identifier);
                 messageRepository.setAsRejected(identifier);
+                messageTransportStep.execute(
+                        inboundMessage,
+                        ConnectorMessageTransportStatus.FAILED
+                );
             }
         } catch (Exception e) {
             log.error("Failed to deliver message [{}] to the backend system", identifier, e);
+            messageTransportStep.execute(inboundMessage, ConnectorMessageTransportStatus.FAILED);
         }
     }
 
@@ -233,7 +266,9 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
         if (document.detachedSignature() != null) {
             var detachedSignature = new DomibusConnectorDetachedSignatureType();
             detachedSignature.setMimeType(
-                    DomibusConnectorDetachedSignatureMimeType.fromValue(document.detachedSignature().mimeType().name())
+                    DomibusConnectorDetachedSignatureMimeType.fromValue(document.detachedSignature()
+                                                                                .mimeType()
+                                                                                .name())
             );
             detachedSignature.setDetachedSignatureName(document.detachedSignature().name());
             detachedSignature.setDetachedSignature(document.detachedSignature().signature());
@@ -285,7 +320,9 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
                 );
             }
 
-            var data = this.fileStorageProvider.findByIdentifier(evidence.attachment().identifier());
+            var data = this.fileStorageProvider.findByIdentifier(
+                    evidence.attachment().identifier()
+            );
 
             var confirmation = new DomibusConnectorMessageConfirmationType();
             confirmation.setConfirmationType(

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.repository;
+package eu.ecodex.connector.infrastructure.repository.message;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -30,6 +30,9 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.Connector
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAS4PropertiesJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.MessageSpecification;
+import eu.ecodex.connector.infrastructure.repository.ConnectorActionRepositoryImpl;
+import eu.ecodex.connector.infrastructure.repository.ConnectorPartyRepositoryImpl;
+import eu.ecodex.connector.infrastructure.repository.ConnectorServiceRepositoryImpl;
 import java.time.Instant;
 import java.util.List;
 import lombok.NonNull;
@@ -78,6 +81,95 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
         this.serviceJpaRepository = serviceJpaRepository;
         this.actionJpaRepository = actionJpaRepository;
         this.partyJpaRepository = partyJpaRepository;
+    }
+
+    /**
+     * Converts a {@link ConnectorMessageEntity} object into a {@link ConnectorMessage} object
+     * containing a subset of its properties.
+     *
+     * @param entity the {@link ConnectorMessageEntity} to be converted; can be null
+     *
+     * @return a {@link ConnectorMessage} containing the relevant transformed properties of the
+     *         input entity, or null if the input entity is null
+     */
+    public static ConnectorMessage toShortDomain(ConnectorMessageEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return baseAttribute(entity);
+    }
+
+    private static ConnectorMessageAS4Properties toDomain(
+            ConnectorMessageAS4PropertiesEntity entity) {
+        return ConnectorMessageAS4Properties
+                .builder()
+                .referenceToIdentifier(entity.getReferenceToIdentifier())
+                .conversationIdentifier(entity.getConversationIdentifier())
+                .ebmsMessageIdentifier(entity.getEbmsMessageIdentifier())
+                .originalSender(entity.getOriginalSender())
+                .finalRecipient(entity.getFinalRecipient())
+                .service(ConnectorServiceRepositoryImpl.toDomain(entity.getService()))
+                .action(ConnectorActionRepositoryImpl.toDomain(entity.getAction()))
+                .fromParty(ConnectorPartyRepositoryImpl.toDomain(entity.getFromParty()))
+                .toParty(ConnectorPartyRepositoryImpl.toDomain(entity.getToParty()))
+                .build();
+    }
+
+    private ConnectorMessage toDomain(ConnectorMessageEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return baseAttribute(entity)
+                .toBuilder()
+                .businessContent(
+                        entity.getBusinessContent() == null
+                                ? null
+                                : ConnectorMessageBusinessContentRepositoryImpl
+                                  .toDomain(entity.getBusinessContent())
+                )
+                .evidences(
+                        entity.getEvidences() == null
+                                ? List.of()
+                                : entity.getEvidences().stream()
+                                        .map(ConnectorMessageEvidenceRepositoryImpl::toDomain)
+                                        .toList()
+                )
+                .attachments(
+                        entity.getAttachments() == null
+                                ? List.of()
+                                : entity.getAttachments().stream()
+                                        .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
+                                        .toList())
+                .build();
+    }
+
+    private static ConnectorMessage baseAttribute(ConnectorMessageEntity entity) {
+        return ConnectorMessage
+                .builder()
+                .businessDomainIdentifier(
+                        ConnectorBusinessDomainIdentifier
+                                .builder()
+                                .messageLaneIdentifier(entity.getBusinessDomain().getIdentifier())
+                                .build()
+                )
+                .identifier(entity.getIdentifier())
+                .backendMessageIdentifier(entity.getBackendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(
+                        entity.getReferenceToBackendMessageIdentifier())
+                .backendName(entity.getBackendName())
+                .gatewayName(entity.getGatewayName())
+                .direction(entity.getDirection())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .deletedAt(entity.getDeletedAt())
+                .rejectedAt(entity.getRejectedAt())
+                .confirmedAt(entity.getConfirmedAt())
+                .deliveredToBackendAt(entity.getDeliveredToBackendAt())
+                .deliveredToGatewayAt(entity.getDeliveredToGatewayAt())
+                .as4Properties(toDomain(entity.getAs4Properties()))
+                .build();
     }
 
     @Override
@@ -273,72 +365,6 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
                 .action(action)
                 .fromParty(fromParty)
                 .toParty(toParty)
-                .build();
-    }
-
-    private ConnectorMessage toDomain(ConnectorMessageEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return ConnectorMessage
-                .builder()
-                .businessDomainIdentifier(
-                        ConnectorBusinessDomainIdentifier
-                                .builder()
-                                .messageLaneIdentifier(entity.getBusinessDomain().getIdentifier())
-                                .build()
-                )
-                .identifier(entity.getIdentifier())
-                .backendMessageIdentifier(entity.getBackendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(
-                        entity.getReferenceToBackendMessageIdentifier())
-                .backendName(entity.getBackendName())
-                .gatewayName(entity.getGatewayName())
-                .direction(entity.getDirection())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .deletedAt(entity.getDeletedAt())
-                .rejectedAt(entity.getRejectedAt())
-                .confirmedAt(entity.getConfirmedAt())
-                .deliveredToBackendAt(entity.getDeliveredToBackendAt())
-                .deliveredToGatewayAt(entity.getDeliveredToGatewayAt())
-                .businessContent(
-                        entity.getBusinessContent() == null
-                                ? null
-                                : ConnectorMessageBusinessContentRepositoryImpl.toDomain(
-                                entity.getBusinessContent()
-                        )
-                )
-                .as4Properties(toDomain(entity.getAs4Properties()))
-                .evidences(
-                        entity.getEvidences() == null
-                                ? List.of()
-                                : entity.getEvidences().stream()
-                                        .map(ConnectorMessageEvidenceRepositoryImpl::toDomain)
-                                        .toList()
-                )
-                .attachments(
-                        entity.getAttachments() == null
-                                ? List.of()
-                                : entity.getAttachments().stream()
-                                        .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
-                                        .toList())
-                .build();
-    }
-
-    private ConnectorMessageAS4Properties toDomain(ConnectorMessageAS4PropertiesEntity entity) {
-        return ConnectorMessageAS4Properties
-                .builder()
-                .referenceToIdentifier(entity.getReferenceToIdentifier())
-                .conversationIdentifier(entity.getConversationIdentifier())
-                .ebmsMessageIdentifier(entity.getEbmsMessageIdentifier())
-                .originalSender(entity.getOriginalSender())
-                .finalRecipient(entity.getFinalRecipient())
-                .service(ConnectorServiceRepositoryImpl.toDomain(entity.getService()))
-                .action(ConnectorActionRepositoryImpl.toDomain(entity.getAction()))
-                .fromParty(ConnectorPartyRepositoryImpl.toDomain(entity.getFromParty()))
-                .toParty(ConnectorPartyRepositoryImpl.toDomain(entity.getToParty()))
                 .build();
     }
 }

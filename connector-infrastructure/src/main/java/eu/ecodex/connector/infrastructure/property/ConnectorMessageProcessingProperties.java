@@ -32,6 +32,7 @@ public class ConnectorMessageProcessingProperties implements
     private boolean sendGeneratedEvidencesToBackend = true;
     private final String identifierSuffix = "connector.ecodex.eu";
     private final String ebmsIdSuffix = "connector.ecodex.eu";
+    private final String transportIdSuffix = "connector.ecodex.eu";
     private final ProcessingModeVerificationMode outboundMessageVerificationMode = ProcessingModeVerificationMode.STRICT;
     private final ProcessingModeVerificationMode inboundMessageVerificationMode = ProcessingModeVerificationMode.RELAXED;
 
@@ -41,6 +42,7 @@ public class ConnectorMessageProcessingProperties implements
                 .builder()
                 .ebmsIdSuffix(ebmsIdSuffix)
                 .identifierSuffix(identifierSuffix)
+                .transportIdSuffix(transportIdSuffix)
                 .sendGeneratedEvidencesToBackend(sendGeneratedEvidencesToBackend)
                 .inboundMessageVerificationMode(inboundMessageVerificationMode)
                 .outboundMessageVerificationMode(outboundMessageVerificationMode)

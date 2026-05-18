@@ -24,6 +24,7 @@ import lombok.Builder;
  *                                        enabled.
  * @param identifierSuffix                Suffix to be appended to generated identifiers.
  * @param ebmsIdSuffix                    Suffix to be appended to generated eBMS IDs.
+ * @param transportIdSuffix               Suffix to be appended to generated transport IDs.
  * @param outboundMessageVerificationMode The verification mode to be applied to outgoing messages.
  * @param inboundMessageVerificationMode  The verification mode to be applied to incoming messages.
  */
@@ -33,6 +34,7 @@ public record ConnectorMessageProcessingConfiguration(
         boolean ebmsIdGeneratorEnabled,
         String identifierSuffix,
         String ebmsIdSuffix,
+        String transportIdSuffix,
         ProcessingModeVerificationMode outboundMessageVerificationMode,
         ProcessingModeVerificationMode inboundMessageVerificationMode
 ) {

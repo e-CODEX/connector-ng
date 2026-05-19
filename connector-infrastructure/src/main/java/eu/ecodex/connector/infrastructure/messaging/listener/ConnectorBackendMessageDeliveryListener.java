@@ -12,6 +12,8 @@ package eu.ecodex.connector.infrastructure.messaging.listener;
 
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.domain.api.ConnectorEventHandler;
+import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
+import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirectionType;
@@ -21,6 +23,7 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.transition.DomibusConnectorActionType;
@@ -62,46 +65,71 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
     private final BackendServiceClient backendServiceClient;
+    private final ConnectorLinkPartnerRepository linkPartnerRepository;
 
     /**
      * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
      *
-     * @param messageTransportStep Represents the transport step responsible for processing and
-     *                             executing message delivery within the connector registration
-     *                             process.
-     * @param messageRepository    Repository for handling the persistence and retrieval of
-     *                             connector messages.
-     * @param attachmentRepository Repository for managing message attachments associated with
-     *                             connector messages.
-     * @param fileStorageProvider  Provider for managing file storage operations required for
-     *                             message handling.
-     * @param backendServiceClient Client for interacting with backend services required for message
-     *                             delivery.
+     * @param messageTransportStep  Represents the transport step responsible for processing and
+     *                              executing message delivery within the connector registration
+     *                              process.
+     * @param messageRepository     Repository for handling the persistence and retrieval of
+     *                              connector messages.
+     * @param attachmentRepository  Repository for managing message attachments associated with
+     *                              connector messages.
+     * @param fileStorageProvider   Provider for managing file storage operations required for
+     *                              message handling.
+     * @param backendServiceClient  Client for interacting with backend services required for
+     *                              message delivery.
+     * @param linkPartnerRepository Repository for managing link partners associated with connector
      */
     public ConnectorBackendMessageDeliveryListener(
             ConnectorRegisterMessageTransportStep messageTransportStep,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider,
-            BackendServiceClient backendServiceClient) {
+            BackendServiceClient backendServiceClient,
+            ConnectorLinkPartnerRepository linkPartnerRepository) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
         this.backendServiceClient = backendServiceClient;
+        this.linkPartnerRepository = linkPartnerRepository;
     }
 
     @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.backend-delivery-queue}")
     public void handle(@NonNull ConnectorMessage message) {
-        var identifier = message.identifier();
-
-        if (identifier == null) {
+        if (message.identifier() == null) {
             throw new IllegalArgumentException("Message identifier cannot be null");
         }
 
-        // TODO handle pull mode
+        var partnerName = ConnectorLinkPartnerName.builder().name(message.backendName()).build();
+        var linkPartner = this.linkPartnerRepository.findByName(partnerName);
+
+        if (linkPartner == null) {
+            throw new IllegalStateException("Link partner " + partnerName + " not found");
+        }
+
+        if (linkPartner.senderMode() == ConnectorLinkMode.PUSH) {
+            submitToBackend(message);
+        } else {
+            makeReadyForPull(message);
+        }
+    }
+
+    private void makeReadyForPull(ConnectorMessage message) {
+        messageTransportStep.execute(
+                message,
+                ConnectorMessageTransportStatus.PENDING
+        );
+        log.info("Message [{}] is ready for pull", message.identifier());
+    }
+
+    private void submitToBackend(ConnectorMessage message) {
+        var identifier = message.identifier();
 
         var inboundMessage = this.messageRepository.findByIdentifier(message.identifier());
 
@@ -120,6 +148,7 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
                         inboundMessage,
                         ConnectorMessageTransportStatus.SUBMITTED
                 );
+                log.info("Message [{}] submitted to the backend system", identifier);
             } else {
                 log.error("Failed to deliver message [{}] to the backend system", identifier);
                 messageRepository.setAsRejected(identifier);

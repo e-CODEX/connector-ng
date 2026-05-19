@@ -24,10 +24,9 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
-import tools.jackson.databind.ObjectMapper;
 
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
+        statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 @Sql(
@@ -47,8 +46,6 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private RestTestClient apiClient;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @AfterEach
     void cleanUp() {
@@ -78,8 +75,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                 })
                 .value(result -> {
                     assertThat(result).isNotNull();
-                    assertThat(result.content().size()).isEqualTo(2);
-                    assertThat(result.totalElements()).isEqualTo(2);
+                    assert result != null;
+                    assertThat(result.content().size()).isEqualTo(3);
+                    assertThat(result.totalElements()).isEqualTo(3);
                     assertThat(result.page()).isEqualTo(0);
                     assertThat(result.size()).isEqualTo(20);
                 });
@@ -100,6 +98,7 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                 })
                 .value(result -> {
                     assertThat(result).isNotNull();
+                    assert result != null;
                     assertThat(result.content().size()).isEqualTo(1);
                     assertThat(result.totalElements()).isEqualTo(1);
                     assertThat(result.page()).isEqualTo(0);
@@ -122,6 +121,7 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                 })
                 .value(result -> {
                     assertThat(result).isNotNull();
+                    assert result != null;
                     assertThat(result.content().size()).isEqualTo(1);
                     assertThat(result.totalElements()).isEqualTo(1);
                     assertThat(result.page()).isEqualTo(0);

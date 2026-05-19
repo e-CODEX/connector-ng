@@ -11,4 +11,11 @@ values (
            now(),
            now(),
            1
+       ),
+       (
+           'f17a3575-a79f-4847-9550-aff012cab1c7',
+           'PENDING',
+           now(),
+           now(),
+           2
        );

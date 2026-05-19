@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.spi;
 
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Repository interface for managing {@link ConnectorMessageTransportStep} instances within the
@@ -69,4 +70,20 @@ public interface ConnectorMessageTransportStepRepository {
      *         identifier, or {@code null} if no matching transport step is found
      */
     ConnectorMessageTransportStep findByMessageIdentifier(@Nonnull String messageIdentifier);
+
+    /**
+     * Retrieves a list of pending transport step identifiers associated with the specified backend
+     * system.
+     *
+     * <p>This method queries the underlying persistence mechanism to find all transport steps that
+     * are in a pending state for the provided backend name. Pending transport steps are those that
+     * have not yet been submitted to the backend system for processing.
+     *
+     * @param backendName the name of the backend system for which the pending transport steps are
+     *                    to be retrieved; must not be null or empty.
+     *
+     * @return a list of identifiers for the pending transport steps associated with the specified
+     *         backend. If no pending transport steps are found, an empty list is returned.
+     */
+    List<String> findPendingTransportSteps(@Nonnull String backendName);
 }

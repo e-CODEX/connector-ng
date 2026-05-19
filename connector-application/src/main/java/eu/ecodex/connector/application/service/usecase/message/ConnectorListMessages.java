@@ -30,7 +30,7 @@ public interface ConnectorListMessages {
      *                    page of connector messages. Must not be null.
      * @param identifier  the identifier of the message to be retrieved (id, ebmsMessageId,
      *                    conversationId, etc.)
-     * @param backendName the name of the backend to which the message belongs.
+     * @param backendName the name of the backend to which the message belongs to.
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} objects
      *         and pagination metadata.

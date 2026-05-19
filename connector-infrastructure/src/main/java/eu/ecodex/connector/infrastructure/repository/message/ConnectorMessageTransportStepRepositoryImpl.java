@@ -19,6 +19,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.message.trans
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepStatusJpaRepository;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
@@ -110,6 +111,11 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
         var entity = this.transportStepJpaRepository.findByMessageIdentifier(messageIdentifier);
 
         return toDomain(entity);
+    }
+
+    @Override
+    public List<String> findPendingTransportSteps(@NonNull String backendName) {
+        return transportStepJpaRepository.findAllPendingByMessageBackendName(backendName);
     }
 
     private ConnectorMessageTransportStep toDomain(ConnectorMessageTransportStepEntity entity) {

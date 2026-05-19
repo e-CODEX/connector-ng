@@ -1,5 +1,4 @@
 insert into connector_message_as4_properties (
-    id,
     conversation_identifier,
     ebms_message_identifier,
     reference_to_identifier,
@@ -15,7 +14,6 @@ insert into connector_message_as4_properties (
 )
 values
     (
-        1,
         '5abe51ce-e94a-4df6-8b77-41b10bc47da7',
         null,
         null,
@@ -30,7 +28,6 @@ values
         4
     ),
     (
-        2,
         '9085a015-06f3-4631-96e6-55a216e900ff',
         null,
         null,
@@ -41,6 +38,20 @@ values
         11,
         3,
         2,
+        4,
+        4
+    ),
+    (
+        '9a3f6d38-6235-4f63-a9c6-9f6c63b89463',
+        null,
+        null,
+        'alice',
+        'bob',
+        now(),
+        now(),
+        11,
+        3,
+        3,
         4,
         4
     );

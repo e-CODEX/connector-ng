@@ -11,7 +11,10 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -24,4 +27,16 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     ConnectorMessageTransportStepEntity findByIdentifier(String identifier);
 
     ConnectorMessageTransportStepEntity findByMessageIdentifier(String messageIdentifier);
+
+    @Query(
+            value = """
+                    SELECT DISTINCT MTS.identifier
+                    FROM connector_message_transport_steps MTS, connector_messages MSG
+                    WHERE MTS.message_id = MSG.id
+                    AND MTS.status = 'PENDING'
+                    AND MSG.backend_name = :backendName
+                    """,
+            nativeQuery = true
+    )
+    List<String> findAllPendingByMessageBackendName(@Param("backendName") String backendName);
 }

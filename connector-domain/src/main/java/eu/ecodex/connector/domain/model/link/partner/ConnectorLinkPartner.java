@@ -51,7 +51,7 @@ public record ConnectorLinkPartner(
         ConnectorLinkPartnerName name,
         String description,
         boolean enabled,
-        ConnectorLinkMode receiverMode,
+        ConnectorLinkMode receiverMode, // TODO see if this should be removed or not
         ConnectorLinkMode senderMode,
         ConnectorLinkType type,
         ConnectorConfigurationSource source,

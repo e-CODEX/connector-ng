@@ -13,6 +13,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
+import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -27,6 +29,7 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
@@ -58,6 +61,8 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     private BackendServiceClient backendServiceClient;
     @Mock
     private DomibusConnectorBackendDeliveryWebService deliveryWebService;
+    @Mock
+    private ConnectorLinkPartnerRepository linkPartnerRepository;
 
     @InjectMocks
     private ConnectorBackendMessageDeliveryListener listener;
@@ -67,7 +72,12 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         assertThatThrownBy(() -> listener.handle(null))
                 .isInstanceOf(NullPointerException.class);
 
-        verifyNoInteractions(messageRepository, backendServiceClient, registerMessageTransportStep);
+        verifyNoInteractions(
+                messageRepository,
+                backendServiceClient,
+                registerMessageTransportStep,
+                linkPartnerRepository
+        );
     }
 
     @Test
@@ -77,12 +87,28 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         assertThatThrownBy(() -> listener.handle(message))
                 .isInstanceOf(IllegalArgumentException.class);
 
+        verifyNoInteractions(
+                messageRepository,
+                backendServiceClient,
+                registerMessageTransportStep,
+                linkPartnerRepository
+        );
+    }
+
+    @Test
+    void should_throw_exception_when_handling_message_with_unknown_backend_name() {
+        when(linkPartnerRepository.findByName(any())).thenReturn(null);
+
+        assertThatThrownBy(() -> listener.handle(inboundMessage()))
+                .isInstanceOf(IllegalStateException.class);
+
         verifyNoInteractions(messageRepository, backendServiceClient, registerMessageTransportStep);
     }
 
     @Test
     void should_submit_message_to_backend_and_mark_it_as_rejected_when_unsuccessful() {
         stubHappyPath(inboundMessage());
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         var ack = mock(DomibsConnectorAcknowledgementType.class);
         when(ack.isResult()).thenReturn(false);
         when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
@@ -102,6 +128,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     @Test
     void should_swallow_exception_if_one_occurred_during_the_message_submission() {
         stubHappyPath(inboundMessage());
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(deliveryWebService.deliverMessage(any()))
                 .thenThrow(new RuntimeException());
         when(registerMessageTransportStep.execute(any(), any()))
@@ -122,6 +149,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         var brokenAS4 = as4Properties().toBuilder().service(null).build();
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(registerMessageTransportStep.execute(any(), any()))
                 .thenReturn(any());
@@ -141,6 +169,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         var brokenAS4 = as4Properties().toBuilder().action(null).build();
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(registerMessageTransportStep.execute(any(), any()))
                 .thenReturn(any());
@@ -161,6 +190,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         var brokenAS4 = as4Properties().toBuilder().fromParty(null).build();
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
 
         // IllegalStateException is swallowed
@@ -178,6 +208,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         var brokenAS4 = as4Properties().toBuilder().toParty(null).build();
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(registerMessageTransportStep.execute(any(), any()))
                 .thenReturn(any());
@@ -200,6 +231,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                                                .build();
         var inbound = inboundMessage().toBuilder().evidences(List.of(evidence)).build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
         when(fileStorageProvider.findByIdentifier("xml-content-id"))
@@ -233,6 +265,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                                       .evidences(List.of())
                                       .build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
         when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
@@ -243,9 +276,8 @@ public class ConnectorBackendMessageDeliveryListenerTest {
 
         listener.handle(triggerMessage());
 
-        verify(deliveryWebService)
-                .deliverMessage(argThat(msg -> msg.getMessageContent() == null
-        ));
+        verify(deliveryWebService).deliverMessage(
+                argThat(msg -> msg.getMessageContent() == null));
         verify(registerMessageTransportStep).execute(
                 any(),
                 eq(ConnectorMessageTransportStatus.SUBMITTED)
@@ -256,6 +288,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     @Test
     void should_submit_message_to_backend_and_mark_it_as_delivered_when_successful() {
         stubHappyPath(inboundMessage());
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         var ack = mock(DomibsConnectorAcknowledgementType.class);
         when(ack.isResult()).thenReturn(true);
         when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
@@ -285,6 +318,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                                       .evidences(List.of())
                                       .build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
         when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
@@ -301,9 +335,8 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                 any(),
                 eq(ConnectorMessageTransportStatus.SUBMITTED)
         );
-        verify(deliveryWebService)
-                .deliverMessage(argThat(msg -> msg.getMessageContent() == null
-        ));
+        verify(deliveryWebService).deliverMessage(
+                argThat(msg -> msg.getMessageContent() == null));
         verify(fileStorageProvider, never()).findByIdentifier(any());
     }
 
@@ -318,6 +351,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                                                .build();
         var inbound = inboundMessage().toBuilder().evidences(List.of(evidence)).build();
 
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
         when(fileStorageProvider.findByIdentifier("xml-content-id"))
@@ -348,6 +382,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     @Test
     void should_fetch_attachments_for_message_when_successful() {
         stubHappyPath(inboundMessage());
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         var ack = mock(DomibsConnectorAcknowledgementType.class);
         when(ack.isResult()).thenReturn(true);
         when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
@@ -368,54 +403,68 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         );
     }
 
+    @Test
+    void should_make_message_ready_for_pull_successfully() {
+        var linkPartner = linkPartner().toBuilder().senderMode(ConnectorLinkMode.PULL).build();
+        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner);
+        when(registerMessageTransportStep.execute(any(), any())).thenReturn(any());
+
+        listener.handle(triggerMessage());
+
+        verify(registerMessageTransportStep).execute(
+                any(),
+                eq(ConnectorMessageTransportStatus.PENDING)
+        );
+        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+    }
+
     private ConnectorMessageAS4Properties as4Properties() {
-        return ConnectorMessageAS4Properties.builder()
-                                            .service(ConnectorService.builder()
-                                                                     .name("EPO")
-                                                                     .type("urn:e-codex:services:")
-                                                                     .build())
-                                            .action(ConnectorAction.builder()
-                                                                   .name("Form_A")
-                                                                   .build())
-                                            .fromParty(ConnectorParty.builder()
-                                                                     .identifier("BL")
-                                                                     .identifierType(
-                                                                             "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
-                                                                     .role("GW")
-                                                                     .roleType(
-                                                                             ConnectorPartyRoleType.INITIATOR)
-                                                                     .build())
-                                            .toParty(ConnectorParty.builder()
-                                                                   .identifier("RE")
-                                                                   .identifierType(
-                                                                           "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
-                                                                   .role("GW")
-                                                                   .roleType(ConnectorPartyRoleType.RESPONDER)
-                                                                   .build())
-                                            .conversationIdentifier(
-                                                    "3d5ec775-6602-4bb0-a23c-0311ef8dabc8")
-                                            .ebmsMessageIdentifier(
-                                                    "50ef4a19-916f-4e38-bc86-4f85921e6f0a@domibus.eu")
-                                            .referenceToIdentifier(null)
-                                            .originalSender("bob")
-                                            .finalRecipient("alice")
-                                            .build();
+        return ConnectorMessageAS4Properties
+                .builder()
+                .service(ConnectorService.builder()
+                                         .name("EPO")
+                                         .type("urn:e-codex:services:")
+                                         .build())
+                .action(ConnectorAction.builder()
+                                       .name("Form_A")
+                                       .build())
+                .fromParty(ConnectorParty.builder()
+                                         .identifier("BL")
+                                         .identifierType(
+                                                 "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                         .role("GW")
+                                         .roleType(ConnectorPartyRoleType.INITIATOR)
+                                         .build())
+                .toParty(ConnectorParty.builder()
+                                       .identifier("RE")
+                                       .identifierType(
+                                               "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                       .role("GW")
+                                       .roleType(ConnectorPartyRoleType.RESPONDER)
+                                       .build())
+                .conversationIdentifier("3d5ec775-6602-4bb0-a23c-0311ef8dabc8")
+                .ebmsMessageIdentifier("50ef4a19-916f-4e38-bc86-4f85921e6f0a@domibus.eu")
+                .referenceToIdentifier(null)
+                .originalSender("bob")
+                .finalRecipient("alice")
+                .build();
     }
 
     private ConnectorMessageBusinessContent businessContent() {
-        return ConnectorMessageBusinessContent.builder()
-                                              .uuid(UUID.randomUUID().toString())
-                                              .xmlContent(ConnectorMessageAttachment.builder()
-                                                                                    .identifier(
-                                                                                            "xml-content-id")
-                                                                                    .build())
-                                              .build();
+        return ConnectorMessageBusinessContent
+                .builder()
+                .uuid(UUID.randomUUID().toString())
+                .xmlContent(ConnectorMessageAttachment.builder()
+                                                      .identifier("xml-content-id")
+                                                      .build())
+                .build();
     }
 
     private ConnectorMessage inboundMessage() {
         return ConnectorMessage.builder()
-                               .businessDomainIdentifier(BusinessDomainTestFixtures.createDefaultBusinessDomain()
-                                                                                   .identifier())
+                               .businessDomainIdentifier(
+                                       BusinessDomainTestFixtures.createDefaultBusinessDomain()
+                                                                 .identifier())
                                .identifier(MESSAGE_ID)
                                .backendName(BACKEND_NAME)
                                .backendMessageIdentifier(null)
@@ -431,6 +480,10 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         return ConnectorMessage.builder()
                                .identifier(MESSAGE_ID)
                                .build();
+    }
+
+    private ConnectorLinkPartner linkPartner() {
+        return ConnectorLinkPartner.builder().senderMode(ConnectorLinkMode.PUSH).build();
     }
 
     /**

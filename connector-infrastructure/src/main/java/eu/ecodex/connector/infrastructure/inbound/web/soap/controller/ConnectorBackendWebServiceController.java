@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
@@ -51,6 +52,7 @@ import org.springframework.util.StringUtils;
 @Component
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
     private final ConnectorOutboundMessageReceiver messageStagingService;
+    private final ConnectorListPendingMessageIds listPendingMessageIdsService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
 
@@ -64,9 +66,11 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      */
     public ConnectorBackendWebServiceController(
             ConnectorOutboundMessageReceiver messageStagingService,
+            ConnectorListPendingMessageIds listPendingMessageIdsService,
             ConnectorUploadAttachments uploadAttachmentsService,
             ConnectorBackendClientVerifier backendClientVerifierService) {
         this.messageStagingService = messageStagingService;
+        this.listPendingMessageIdsService = listPendingMessageIdsService;
         this.uploadAttachmentsService = uploadAttachmentsService;
         this.backendClientVerifierService = backendClientVerifierService;
     }
@@ -80,7 +84,14 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     @Override
     public ListPendingMessageIdsResponse listPendingMessageIds(
             EmptyRequestType listPendingMessageIdsRequest) {
-        throw new UnsupportedOperationException("not yet implemented");
+        // TODO current cn is fake, retrieve the certificate dn from user principal
+        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
+        var response = new ListPendingMessageIdsResponse();
+        response.getMessageTransportIds().addAll(
+                listPendingMessageIdsService.execute(backendClientName)
+        );
+
+        return response;
     }
 
     @Override

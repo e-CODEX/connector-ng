@@ -15,4 +15,13 @@ values (
            now(),
            now(),
            2
+       ),
+       (
+           2,
+           'b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice',
+           1,
+           'PENDING',
+           now(),
+           now(),
+           3
        );

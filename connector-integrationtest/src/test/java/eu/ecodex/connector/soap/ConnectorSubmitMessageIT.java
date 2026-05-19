@@ -38,7 +38,7 @@ import org.springframework.test.context.jdbc.Sql;
         },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-public class ConnectorBackendWebServiceControllerIT extends AbstractIntegrationTest {
+public class ConnectorSubmitMessageIT extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @LocalServerPort

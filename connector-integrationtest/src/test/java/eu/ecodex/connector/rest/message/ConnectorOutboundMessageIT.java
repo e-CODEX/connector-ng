@@ -33,7 +33,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import tools.jackson.databind.ObjectMapper;
 
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
+        statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 @Sql(

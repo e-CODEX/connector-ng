@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.impl.message.transport.ConnectorRegisterMessageTransportStepService;
+import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
@@ -44,7 +45,6 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
     private ConnectorMessageTransportStepRepository transportStepRepository;
     @Mock
     private ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
-
     @InjectMocks
     private ConnectorRegisterMessageTransportStepService service;
 
@@ -76,6 +76,23 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
     }
 
     @Test
+    void should_throw_exception_when_updating_existing_message_transport_step_with_invalid_status() {
+        var transportStep = existingStep().toBuilder()
+                                          .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                                          .build();
+        when(transportStepRepository.findByMessageIdentifier(MESSAGE_ID))
+                .thenReturn(transportStep);
+
+        assertThatThrownBy(() -> service.execute(
+                message(),
+                ConnectorMessageTransportStatus.DOWNLOADED
+        ))
+                .isInstanceOf(ConnectorMessageTransportStepException.class);
+
+        verifyNoInteractions(processingConfigurationProvider);
+    }
+
+    @Test
     void should_register_new_message_transport_step_successfully() {
         when(transportStepRepository.findByMessageIdentifier(MESSAGE_ID)).thenReturn(null);
         when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
@@ -104,7 +121,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
         when(transportStepRepository.update(any(), any())).thenAnswer(i -> i.getArgument(1));
 
-        var result = service.execute(message(), ConnectorMessageTransportStatus.PENDING);
+        var result = service.execute(message(), ConnectorMessageTransportStatus.DOWNLOADED);
 
         assertThat(result.numberOfAttempts()).isEqualTo(2);
         verify(transportStepRepository).update(
@@ -131,6 +148,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         return ConnectorMessageTransportStep.builder()
                                             .identifier("existing-step-id")
                                             .numberOfAttempts(1)
+                                            .status(ConnectorMessageTransportStatus.PENDING)
                                             .build();
     }
 }

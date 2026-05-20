@@ -10,8 +10,12 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
@@ -20,27 +24,56 @@ import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
+import eu.ecodex.connector.domain.exception.NotFoundException;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
+import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
+import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
+import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMessageAfterDownload;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
+import jakarta.xml.ws.WebServiceContext;
 import java.util.List;
+import org.apache.cxf.interceptor.InterceptorChain;
+import org.apache.cxf.jaxws.context.WrappedMessageContext;
+import org.apache.cxf.message.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ConnectorBackendWebServiceControllerTest {
+    private static final String TRANSPORT_ID = "2921bed4-5587-488b-93a2-c048bc130a12@connector.ecodex.eu_backend_alice";
     @Mock
     private ConnectorOutboundMessageReceiver messageStagingService;
     @Mock
     private ConnectorListPendingMessageIds listPendingMessageIdsService;
     @Mock
+    private ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
+    @Mock
     private ConnectorUploadAttachments uploadAttachmentsService;
     @Mock
     private ConnectorBackendClientVerifier backendClientVerifierService;
+    @Mock
+    private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    @Mock
+    private LegacyMessageHelper legacyMessageHelper;
+    @Mock
+    private WrappedMessageContext wrappedMessageContext;
+    @Mock
+    private Message cxfMessage;
+    @Mock
+    private InterceptorChain interceptorChain;
+    @Mock
+    private WebServiceContext webServiceContext;
 
     private DomibusConnectorBackendWebService backendWebService;
 
@@ -49,9 +82,14 @@ public class ConnectorBackendWebServiceControllerTest {
         backendWebService = new ConnectorBackendWebServiceController(
                 messageStagingService,
                 listPendingMessageIdsService,
+                retrieveMessageByTransportIdService,
                 uploadAttachmentsService,
-                backendClientVerifierService
+                registerMessageTransportStep,
+                backendClientVerifierService,
+                legacyMessageHelper
         );
+        // Inject @Resource field manually via reflection
+        ReflectionTestUtils.setField(backendWebService, "webServiceContext", webServiceContext);
     }
 
     @Test
@@ -97,7 +135,7 @@ public class ConnectorBackendWebServiceControllerTest {
     void should_list_pending_messages_identifiers_successfully() {
         when(listPendingMessageIdsService.execute(any()))
                 .thenReturn(List.of(
-                        "2921bed4-5587-488b-93a2-c048bc130a12@connector.ecodex.eu_backend_alice"));
+                        TRANSPORT_ID));
 
         var response = backendWebService.listPendingMessageIds(new EmptyRequestType());
 
@@ -105,6 +143,45 @@ public class ConnectorBackendWebServiceControllerTest {
         assertThat(response.getMessageTransportIds()).isNotNull();
         assertThat(response.getMessageTransportIds().size()).isEqualTo(1);
         assertThat(response.getMessageTransportIds().getFirst())
-                .isEqualTo("2921bed4-5587-488b-93a2-c048bc130a12@connector.ecodex.eu_backend_alice");
+                .isEqualTo(TRANSPORT_ID);
+    }
+
+    @Test
+    void should_retrieve_message_by_transport_id_successfully() {
+        var connectorMessage = mock(ConnectorMessage.class);
+        var expectedResult = new DomibusConnectorMessageType();
+
+        when(retrieveMessageByTransportIdService.execute(TRANSPORT_ID)).thenReturn(connectorMessage);
+        when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
+        when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
+        when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
+        when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
+
+        var request = new GetMessageByIdRequest();
+        request.setMessageTransportId(TRANSPORT_ID);
+
+        var response = backendWebService.getMessageById(request);
+
+        assertThat(response).isNotNull();
+        verify(retrieveMessageByTransportIdService).execute(TRANSPORT_ID);
+        verify(legacyMessageHelper).convertMessage(connectorMessage);
+
+        var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessageAfterDownload.class);
+        verify(interceptorChain).add(interceptorCaptor.capture());
+        assertThat(interceptorCaptor.getValue()).isInstanceOf(ProcessMessageAfterDownload.class);
+    }
+
+    @Test
+    void should_throw_exception_when_retrieving_unknown_message_by_transport_id() {
+        var request = new GetMessageByIdRequest();
+        request.setMessageTransportId("UNKNOWN-ID");
+
+        when(retrieveMessageByTransportIdService.execute("UNKNOWN-ID"))
+                .thenThrow(new NotFoundException("not found"));
+
+        assertThatThrownBy(() -> backendWebService.getMessageById(request))
+                .isInstanceOf(NotFoundException.class);
+
+        verifyNoInteractions(webServiceContext, legacyMessageHelper);
     }
 }

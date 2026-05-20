@@ -15,44 +15,16 @@ import eu.ecodex.connector.domain.api.ConnectorEventHandler;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirectionType;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.transition.DomibusConnectorActionType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorConfirmationType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureMimeType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorDocumentAESType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageAttachmentType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageConfirmationType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDetailsType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorPartyType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorServiceType;
+import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.outbound.soap.BackendServiceClient;
-import jakarta.activation.DataHandler;
-import jakarta.mail.util.ByteArrayDataSource;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.xml.transform.stream.StreamSource;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 /**
  * JMS listener responsible for handling message submission to the backend.
@@ -62,10 +34,9 @@ import org.springframework.util.StringUtils;
 public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHandler {
     private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
-    private final ConnectorMessageAttachmentRepository attachmentRepository;
-    private final ConnectorFileStorageProvider fileStorageProvider;
     private final BackendServiceClient backendServiceClient;
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
+    private final LegacyMessageHelper legacyMessageHelper;
 
     /**
      * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
@@ -75,10 +46,6 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
      *                              process.
      * @param messageRepository     Repository for handling the persistence and retrieval of
      *                              connector messages.
-     * @param attachmentRepository  Repository for managing message attachments associated with
-     *                              connector messages.
-     * @param fileStorageProvider   Provider for managing file storage operations required for
-     *                              message handling.
      * @param backendServiceClient  Client for interacting with backend services required for
      *                              message delivery.
      * @param linkPartnerRepository Repository for managing link partners associated with connector
@@ -86,16 +53,14 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     public ConnectorBackendMessageDeliveryListener(
             ConnectorRegisterMessageTransportStep messageTransportStep,
             ConnectorMessageRepository messageRepository,
-            ConnectorMessageAttachmentRepository attachmentRepository,
-            ConnectorFileStorageProvider fileStorageProvider,
             BackendServiceClient backendServiceClient,
-            ConnectorLinkPartnerRepository linkPartnerRepository) {
+            ConnectorLinkPartnerRepository linkPartnerRepository,
+            LegacyMessageHelper legacyMessageHelper) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
-        this.attachmentRepository = attachmentRepository;
-        this.fileStorageProvider = fileStorageProvider;
         this.backendServiceClient = backendServiceClient;
         this.linkPartnerRepository = linkPartnerRepository;
+        this.legacyMessageHelper = legacyMessageHelper;
     }
 
     @Override
@@ -138,7 +103,7 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
         var deliveryWebService = backendServiceClient.createClient(inboundMessage.backendName());
 
         try {
-            var backendMessage = convertMessage(inboundMessage);
+            var backendMessage = legacyMessageHelper.convertMessage(inboundMessage);
 
             var acknowledgment = deliveryWebService.deliverMessage(backendMessage);
 
@@ -161,209 +126,5 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
             log.error("Failed to deliver message [{}] to the backend system", identifier, e);
             messageTransportStep.execute(inboundMessage, ConnectorMessageTransportStatus.FAILED);
         }
-    }
-
-    private DomibusConnectorMessageType convertMessage(ConnectorMessage message) {
-        var details = convertDetails(message);
-        var messageType = new DomibusConnectorMessageType();
-        messageType.setMessageDetails(details);
-
-        if (message.businessContent() != null) {
-            messageType.setMessageContent(toContent(message.businessContent()));
-        }
-
-        messageType.getMessageAttachments().addAll(
-                toAttachments(message.identifier())
-        );
-
-        messageType.getMessageConfirmations().addAll(
-                toConfirmations(message)
-        );
-
-        return messageType;
-    }
-
-    private DomibusConnectorMessageDetailsType convertDetails(ConnectorMessage message) {
-        var as4Properties = message.as4Properties();
-
-        var details = new DomibusConnectorMessageDetailsType();
-        details.setBackendMessageId(message.backendMessageIdentifier());
-        details.setConversationId(as4Properties.conversationIdentifier());
-        details.setEbmsMessageId(as4Properties.ebmsMessageIdentifier());
-        details.setRefToMessageId(as4Properties.referenceToIdentifier());
-        details.setOriginalSender(as4Properties.originalSender());
-        details.setFinalRecipient(as4Properties.finalRecipient());
-        details.setService(toService(as4Properties));
-        details.setAction(toAction(as4Properties));
-        details.setFromParty(getParty(as4Properties.fromParty()));
-        details.setToParty(getParty(as4Properties.toParty()));
-
-        if (message.isEvidenceMessage()) {
-            details.setBackendMessageId(message.referenceToBackendMessageIdentifier());
-
-            if (message.direction().getTarget() == ConnectorMessageDirectionType.BACKEND
-                    && StringUtils.hasLength(message.referenceToBackendMessageIdentifier())) {
-                details.setRefToMessageId(message.referenceToBackendMessageIdentifier());
-            }
-        }
-
-        return details;
-    }
-
-    private DomibusConnectorServiceType toService(ConnectorMessageAS4Properties as4Properties) {
-        if (as4Properties.service() == null) {
-            throw new IllegalStateException("Service is null");
-        }
-
-        var service = new DomibusConnectorServiceType();
-        service.setService(as4Properties.service().name());
-        service.setServiceType(as4Properties.service().type());
-
-        return service;
-    }
-
-    private DomibusConnectorActionType toAction(ConnectorMessageAS4Properties as4Properties) {
-        if (as4Properties.action() == null) {
-            throw new IllegalStateException();
-        }
-
-        if (as4Properties.action().name() == null) {
-            throw new IllegalStateException();
-        }
-
-        var action = new DomibusConnectorActionType();
-        action.setAction(as4Properties.action().name());
-
-        return action;
-    }
-
-    private DomibusConnectorPartyType getParty(ConnectorParty party) {
-        if (party == null) {
-            throw new IllegalStateException("Party cannot be null");
-        }
-
-        var part = new DomibusConnectorPartyType();
-        part.setPartyId(party.identifier());
-        part.setPartyIdType(party.identifierType());
-        part.setRole(party.role());
-
-        return part;
-    }
-
-    private DomibusConnectorMessageContentType toContent(ConnectorMessageBusinessContent content) {
-        if (content == null) {
-            return null;
-        }
-
-        var data = this.fileStorageProvider.findByIdentifier(content.xmlContent().identifier());
-        var contentType = new DomibusConnectorMessageContentType();
-        contentType.setXmlContent(
-                new StreamSource(
-                        new ByteArrayInputStream(Arrays.copyOf(data, data.length))
-                )
-        );
-        contentType.setDocument(toDocument(content.businessDocument()));
-
-        return contentType;
-    }
-
-    private DomibusConnectorMessageDocumentType toDocument(
-            ConnectorMessageBusinessDocument document) {
-        if (document == null) {
-            return null;
-        }
-
-        var data = this.fileStorageProvider.findByIdentifier(document.attachment().identifier());
-
-        var documentType = new DomibusConnectorMessageDocumentType();
-        documentType.setDocumentName(document.attachment().name());
-        documentType.setDocument(
-                new DataHandler(
-                        new ByteArrayDataSource(
-                                Arrays.copyOf(data, data.length),
-                                document.attachment().contentType()
-                        )
-                )
-        );
-
-        if (document.aesType() != null) {
-            documentType.setAesType(
-                    DomibusConnectorDocumentAESType.fromValue(document.aesType().name())
-            );
-        }
-
-        if (document.detachedSignature() != null) {
-            var detachedSignature = new DomibusConnectorDetachedSignatureType();
-            detachedSignature.setMimeType(
-                    DomibusConnectorDetachedSignatureMimeType.fromValue(document.detachedSignature()
-                                                                                .mimeType()
-                                                                                .name())
-            );
-            detachedSignature.setDetachedSignatureName(document.detachedSignature().name());
-            detachedSignature.setDetachedSignature(document.detachedSignature().signature());
-            documentType.setDetachedSignature(detachedSignature);
-        }
-
-        return documentType;
-    }
-
-    private List<DomibusConnectorMessageAttachmentType> toAttachments(String messageIdentifier) {
-        var attachments = this.attachmentRepository.findByMessageIdentifierAndTypes(
-                messageIdentifier,
-                List.of(
-                        ConnectorAttachmentType.ATTACHMENT,
-                        ConnectorAttachmentType.PDF_TOKEN,
-                        ConnectorAttachmentType.XML_TOKEN
-                )
-        );
-
-        return attachments.stream().map((attachment) -> {
-            var data = this.fileStorageProvider.findByIdentifier(attachment.identifier());
-            var attachmentType = new DomibusConnectorMessageAttachmentType();
-            attachmentType.setIdentifier(attachment.identifier());
-            attachmentType.setName(attachment.name());
-            attachmentType.setMimeType(attachment.contentType());
-            attachmentType.setDescription(attachment.description());
-            attachmentType.setAttachment(
-                    new DataHandler(
-                            new ByteArrayDataSource(
-                                    Arrays.copyOf(data, data.length), attachment.contentType()
-                            )
-                    )
-            );
-
-            return attachmentType;
-        }).toList();
-    }
-
-    private List<DomibusConnectorMessageConfirmationType> toConfirmations(
-            ConnectorMessage message) {
-        if (message.evidences() == null || message.evidences().isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        return message.evidences().stream().map(evidence -> {
-            if (evidence.attachment() == null) {
-                throw new IllegalStateException(
-                        "Evidence attachment is null for evidence " + evidence.type()
-                );
-            }
-
-            var data = this.fileStorageProvider.findByIdentifier(
-                    evidence.attachment().identifier()
-            );
-
-            var confirmation = new DomibusConnectorMessageConfirmationType();
-            confirmation.setConfirmationType(
-                    DomibusConnectorConfirmationType.fromValue(evidence.type().name())
-            );
-            confirmation.setConfirmation(
-                    new StreamSource(
-                            new ByteArrayInputStream(Arrays.copyOf(data, data.length))
-                    )
-            );
-
-            return confirmation;
-        }).toList();
     }
 }

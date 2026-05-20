@@ -12,18 +12,23 @@ package eu.ecodex.connector.application.service.impl.message.transport;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.spi.ConnectorMessageTransportStepRepository;
 import java.util.UUID;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the {@link ConnectorRegisterMessageTransportStep} service.
  */
+@Slf4j
 @Service
+@Transactional
 public class ConnectorRegisterMessageTransportStepService
         implements ConnectorRegisterMessageTransportStep {
     private static final int INITIAL_ATTEMPTS = 1;
@@ -46,8 +51,22 @@ public class ConnectorRegisterMessageTransportStepService
             throw new IllegalArgumentException("Message identifier must not be null");
         }
 
+        log.debug(
+                "Registering transport step for message [{}] with status [{}]",
+                message.identifier(),
+                status
+        );
+
         var existingStep = this.transportStepRepository.findByMessageIdentifier(
                 message.identifier());
+
+        if (existingStep != null
+                && existingStep.status() != ConnectorMessageTransportStatus.PENDING) {
+            throw new ConnectorMessageTransportStepException(
+                    "Message with identifier [" + message.identifier() + "] is already in status ["
+                            + existingStep.status() + "]"
+            );
+        }
 
         int attempts = existingStep != null
                 ? existingStep.numberOfAttempts() + 1

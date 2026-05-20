@@ -72,6 +72,18 @@ public interface ConnectorMessageTransportStepRepository {
     ConnectorMessageTransportStep findByMessageIdentifier(@Nonnull String messageIdentifier);
 
     /**
+     * Retrieves a {@link ConnectorMessageTransportStep} instance associated with the given unique
+     * identifier.
+     *
+     * @param identifier the unique identifier of the {@link ConnectorMessageTransportStep} to be
+     *                   retrieved; must not be null.
+     *
+     * @return the {@link ConnectorMessageTransportStep} instance identified by the specified
+     *         identifier, or {@code null} if no matching transport step is found.
+     */
+    ConnectorMessageTransportStep findByIdentifier(@Nonnull String identifier);
+
+    /**
      * Retrieves a list of pending transport step identifiers associated with the specified backend
      * system.
      *

@@ -3,7 +3,6 @@ package eu.ecodex.connector.infrastructure.messaging.listener;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -18,22 +17,19 @@ import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebService;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
+import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.outbound.soap.BackendServiceClient;
 import java.util.List;
 import java.util.UUID;
@@ -54,15 +50,13 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
-    private ConnectorMessageAttachmentRepository attachmentRepository;
-    @Mock
-    private ConnectorFileStorageProvider fileStorageProvider;
-    @Mock
     private BackendServiceClient backendServiceClient;
     @Mock
     private DomibusConnectorBackendDeliveryWebService deliveryWebService;
     @Mock
     private ConnectorLinkPartnerRepository linkPartnerRepository;
+    @Mock
+    private LegacyMessageHelper legacyMessageHelper;
 
     @InjectMocks
     private ConnectorBackendMessageDeliveryListener listener;
@@ -129,10 +123,8 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     void should_swallow_exception_if_one_occurred_during_the_message_submission() {
         stubHappyPath(inboundMessage());
         when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(deliveryWebService.deliverMessage(any()))
-                .thenThrow(new RuntimeException());
-        when(registerMessageTransportStep.execute(any(), any()))
-                .thenReturn(any());
+        when(deliveryWebService.deliverMessage(any())).thenThrow(new RuntimeException());
+        when(registerMessageTransportStep.execute(any(), any())).thenReturn(any());
 
         assertThatNoException().isThrownBy(() -> listener.handle(triggerMessage()));
 
@@ -142,147 +134,6 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         );
         verify(messageRepository, never()).setDeliveredToBackendAt(any());
         verify(messageRepository, never()).setAsRejected(any());
-    }
-
-    @Test
-    void should_throw_and_swallow_exception_if_as4_properties_service_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().service(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(registerMessageTransportStep.execute(any(), any()))
-                .thenReturn(any());
-
-        // IllegalStateException is swallowed
-        assertThatNoException().isThrownBy(() -> listener.handle(triggerMessage()));
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.FAILED)
-        );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
-    }
-
-    @Test
-    void should_throw_and_swallow_exception_if_as4_properties_action_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().action(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(registerMessageTransportStep.execute(any(), any()))
-                .thenReturn(any());
-
-        // IllegalStateException is swallowed
-        assertThatNoException().isThrownBy(() -> listener.handle(triggerMessage()));
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.FAILED)
-        );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
-    }
-
-
-    @Test
-    void should_throw_and_swallow_exception_if_as4_properties_from_party_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().fromParty(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-
-        // IllegalStateException is swallowed
-        assertThatNoException().isThrownBy(() -> listener.handle(triggerMessage()));
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.FAILED)
-        );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
-    }
-
-    @Test
-    void should_throw_exception_and_swallow_if_as4_properties_to_party_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().toParty(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(registerMessageTransportStep.execute(any(), any()))
-                .thenReturn(any());
-
-        // IllegalStateException is swallowed
-        assertThatNoException().isThrownBy(() -> listener.handle(triggerMessage()));
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.FAILED)
-        );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
-    }
-
-    @Test
-    void should_throw_and_swallow_exception_if_evidence_has_no_attachment() {
-        var evidence = ConnectorMessageEvidence.builder()
-                                               .type(ConnectorEvidenceType.values()[0])
-                                               .attachment(null)
-                                               .build();
-        var inbound = inboundMessage().toBuilder().evidences(List.of(evidence)).build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
-        when(fileStorageProvider.findByIdentifier("xml-content-id"))
-                .thenReturn("<xml/>".getBytes());
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
-        when(registerMessageTransportStep.execute(any(), any()))
-                .thenReturn(any());
-
-        // IllegalStateException is swallowed
-        assertThatNoException().isThrownBy(() -> listener.handle(triggerMessage()));
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.FAILED)
-        );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
-        verify(messageRepository, never()).setAsRejected(any());
-    }
-
-    @Test
-    void should_handle_message_without_business_content_successfully() {
-        var inbound = ConnectorMessage.builder()
-                                      .identifier(MESSAGE_ID)
-                                      .backendName(BACKEND_NAME)
-                                      .backendMessageIdentifier(null)
-                                      .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                      .as4Properties(as4Properties())
-                                      .businessContent(null)
-                                      .attachments(List.of())
-                                      .evidences(List.of())
-                                      .build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
-        var ack = mock(DomibsConnectorAcknowledgementType.class);
-        when(ack.isResult()).thenReturn(true);
-        when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
-
-        listener.handle(triggerMessage());
-
-        verify(deliveryWebService).deliverMessage(
-                argThat(msg -> msg.getMessageContent() == null));
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.SUBMITTED)
-        );
-        verify(fileStorageProvider, never()).findByIdentifier(any());
     }
 
     @Test
@@ -303,104 +154,6 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         );
         verify(messageRepository).setDeliveredToBackendAt(MESSAGE_ID);
         verify(messageRepository, never()).setAsRejected(any());
-    }
-
-    @Test
-    void should_submit_message_with_no_business_content_successfully() {
-        var inbound = ConnectorMessage.builder()
-                                      .identifier(MESSAGE_ID)
-                                      .backendName(BACKEND_NAME)
-                                      .backendMessageIdentifier(null)
-                                      .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                      .as4Properties(as4Properties())
-                                      .businessContent(null)
-                                      .attachments(List.of())
-                                      .evidences(List.of())
-                                      .build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
-        var ack = mock(DomibsConnectorAcknowledgementType.class);
-        when(ack.isResult()).thenReturn(true);
-        when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
-        when(registerMessageTransportStep.execute(any(), any()))
-                .thenReturn(any());
-
-        listener.handle(triggerMessage());
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.SUBMITTED)
-        );
-        verify(deliveryWebService).deliverMessage(
-                argThat(msg -> msg.getMessageContent() == null));
-        verify(fileStorageProvider, never()).findByIdentifier(any());
-    }
-
-    @Test
-    void should_submit_evidence_message_successfully() {
-        var evidenceAttachment = ConnectorMessageAttachment.builder()
-                                                           .identifier("evidence-id")
-                                                           .build();
-        var evidence = ConnectorMessageEvidence.builder()
-                                               .type(ConnectorEvidenceType.values()[0])
-                                               .attachment(evidenceAttachment)
-                                               .build();
-        var inbound = inboundMessage().toBuilder().evidences(List.of(evidence)).build();
-
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
-        when(fileStorageProvider.findByIdentifier("xml-content-id"))
-                .thenReturn("<xml/>".getBytes());
-        when(fileStorageProvider.findByIdentifier("evidence-id"))
-                .thenReturn("<ev/>".getBytes());
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
-        var ack = mock(DomibsConnectorAcknowledgementType.class);
-        when(ack.isResult()).thenReturn(true);
-        when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
-
-        listener.handle(triggerMessage());
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.SUBMITTED)
-        );
-        verify(deliveryWebService).deliverMessage(
-                argThat(msg ->
-                                msg.getMessageConfirmations().size() == 1
-                                        && msg.getMessageConfirmations()
-                                              .getFirst()
-                                              .getConfirmationType() != null
-                ));
-    }
-
-    @Test
-    void should_fetch_attachments_for_message_when_successful() {
-        stubHappyPath(inboundMessage());
-        when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
-        var ack = mock(DomibsConnectorAcknowledgementType.class);
-        when(ack.isResult()).thenReturn(true);
-        when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
-
-        listener.handle(triggerMessage());
-
-        verify(registerMessageTransportStep).execute(
-                any(),
-                eq(ConnectorMessageTransportStatus.SUBMITTED)
-        );
-        verify(attachmentRepository).findByMessageIdentifierAndTypes(
-                eq(MESSAGE_ID),
-                argThat(types -> types.containsAll(List.of(
-                        ConnectorAttachmentType.ATTACHMENT,
-                        ConnectorAttachmentType.PDF_TOKEN,
-                        ConnectorAttachmentType.XML_TOKEN
-                )))
-        );
     }
 
     @Test
@@ -492,9 +245,6 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     private void stubHappyPath(ConnectorMessage inbound) {
         when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
         when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
-        when(fileStorageProvider.findByIdentifier("xml-content-id"))
-                .thenReturn("<xml/>".getBytes());
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
+        when(legacyMessageHelper.convertMessage(any())).thenReturn(mock(DomibusConnectorMessageType.class));
     }
 }

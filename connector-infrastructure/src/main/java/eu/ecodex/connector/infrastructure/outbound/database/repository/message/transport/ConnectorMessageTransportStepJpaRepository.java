@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.database.repository.message.
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
 import java.util.List;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConnectorMessageTransportStepJpaRepository extends
         JpaRepository<ConnectorMessageTransportStepEntity, Long> {
+    @EntityGraph(attributePaths = {"message", "statuses"})
     ConnectorMessageTransportStepEntity findByIdentifier(String identifier);
 
     ConnectorMessageTransportStepEntity findByMessageIdentifier(String messageIdentifier);

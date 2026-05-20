@@ -114,6 +114,13 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
     }
 
     @Override
+    public ConnectorMessageTransportStep findByIdentifier(@NonNull String identifier) {
+        var entity = this.transportStepJpaRepository.findByIdentifier(identifier);
+
+        return toDomain(entity);
+    }
+
+    @Override
     public List<String> findPendingTransportSteps(@NonNull String backendName) {
         return transportStepJpaRepository.findAllPendingByMessageBackendName(backendName);
     }

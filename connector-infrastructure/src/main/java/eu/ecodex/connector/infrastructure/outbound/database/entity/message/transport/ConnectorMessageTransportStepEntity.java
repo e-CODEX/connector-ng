@@ -58,7 +58,7 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     private int numberOfAttempts;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATUS", nullable = false, updatable = false)
+    @Column(name = "STATUS", nullable = false)
     private ConnectorMessageTransportStatus status;
 
     @Setter

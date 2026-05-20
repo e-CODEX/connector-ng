@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorGatewayConfirmationMessageProcessor;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -68,6 +69,7 @@ public class ConnectorGatewayMessageListener {
     private final ConnectorFileStorageProvider fileStorageProvider;
     private final ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGenerator;
+    private final ConnectorGatewayConfirmationMessageProcessor confirmationMessageProcessor;
 
     /**
      * Creates a new listener instance.
@@ -81,7 +83,8 @@ public class ConnectorGatewayMessageListener {
             ConnectorMessageEvidenceRepository evidenceRepository,
             ConnectorFileStorageProvider fileStorageProvider,
             ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher,
-            ConnectorMessageIdGenerator messageIdGenerator) {
+            ConnectorMessageIdGenerator messageIdGenerator,
+            ConnectorGatewayConfirmationMessageProcessor confirmationMessageProcessor) {
         this.messageRepository = messageRepository;
         this.businessContentRepository = businessContentRepository;
         this.attachmentRepository = attachmentRepository;
@@ -89,6 +92,7 @@ public class ConnectorGatewayMessageListener {
         this.fileStorageProvider = fileStorageProvider;
         this.pipelineEventPublisher = pipelineEventPublisher;
         this.messageIdGenerator = messageIdGenerator;
+        this.confirmationMessageProcessor = confirmationMessageProcessor;
     }
 
     /**
@@ -111,10 +115,11 @@ public class ConnectorGatewayMessageListener {
 
         var as4Properties = parseAS4Properties(message);
         var payloads = parsePayloads(message);
+        var isConfirmationMessage = payloads.businessContent() == null && !payloads.evidences.isEmpty();
 
-        if (payloads.businessContent == null && !payloads.evidences.isEmpty()) {
+        if (isConfirmationMessage) {
             log.info("Received message from the gateway is a confirmation message");
-        } else if (payloads.businessContent != null) {
+        } else if (payloads.businessContent() != null) {
             log.info("Received message from the gateway is a business message");
         } else {
             log.info(
@@ -142,7 +147,13 @@ public class ConnectorGatewayMessageListener {
                 .transportedEvidences(payloads.evidences())
                 .build();
 
-        pipelineEventPublisher.publish(persistMessage(inboundMessage, payloads, messageIdentifier));
+        var persistedMessage = persistMessage(inboundMessage, payloads, messageIdentifier);
+
+        if (isConfirmationMessage) {
+            confirmationMessageProcessor.process(persistedMessage);
+        } else {
+            pipelineEventPublisher.publish(persistedMessage);
+        }
     }
 
     private void validateMessageHeader(MapMessage message) throws JMSException {

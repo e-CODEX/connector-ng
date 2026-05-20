@@ -14,10 +14,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorGatewayConfirmationMessageProcessor;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
@@ -51,6 +54,8 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
     private ConnectorInboundMessagePipelineEventPublisher pipelineEventPublisher;
     @Mock
     private ConnectorMessageIdGenerator messageIdGenerator;
+    @Mock
+    private ConnectorGatewayConfirmationMessageProcessor confirmationMessageProcessor;
     @Mock
     private MapMessage message;
 
@@ -166,27 +171,32 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         // Should complete without throwing; the unknown payload is silently skipped
         assertThatNoException().isThrownBy(() -> listener.handle(message));
 
-        // pipelineEventPublisher was still called — processing continued
+        verify(confirmationMessageProcessor, never()).process(any());
         verify(pipelineEventPublisher).publish(any());
     }
 
     @Test
-    void should_handle_message_submission_successfully_if_the_message_is_an_evidence() throws JMSException {
+    void should_route_evidence_only_messages_to_confirmation_processor() throws JMSException {
         stubValidHeader(message, 1);
         stubAS4Properties(message);
         // payload 4: evidence
         when(message.getStringProperty("payload_1_description")).thenReturn(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE.name());
         when(message.getBytes("payload_1")).thenReturn("<evidence/>".getBytes());
 
-        when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(messageIdGenerator.generateIdentifier()).thenReturn("184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu");
+        when(messageRepository.save(any())).thenAnswer(invocation -> {
+            var savedMessage = invocation.getArgument(0, ConnectorMessage.class);
+            when(messageRepository.findByIdentifier(savedMessage.identifier())).thenReturn(savedMessage);
+            return savedMessage;
+        });
         when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
 
         // Should complete without throwing; the unknown payload is silently skipped
         assertThatNoException().isThrownBy(() -> listener.handle(message));
 
-        // pipelineEventPublisher was still called — processing continued
-        verify(pipelineEventPublisher).publish(any());
+        verify(confirmationMessageProcessor).process(any());
+        verify(pipelineEventPublisher, never()).publish(any());
     }
 
     @Test
@@ -217,6 +227,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         assertThatNoException().isThrownBy(() -> listener.handle(message));
 
         // pipelineEventPublisher was still called — processing continued
+        verify(confirmationMessageProcessor, never()).process(any());
         verify(pipelineEventPublisher).publish(any());
     }
 

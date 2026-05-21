@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.domain.spi;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import jakarta.annotation.Nonnull;
 import java.util.List;
@@ -60,6 +62,20 @@ public interface ConnectorMessageTransportStepRepository {
             @Nonnull ConnectorMessageTransportStep transportStep);
 
     /**
+     * Updates the status of multiple transport steps identified by their unique identifiers.
+     *
+     * @param identifiers a list of unique identifiers corresponding to the transport steps whose
+     *                    status needs to be updated. The list must not be null and should contain
+     *                    valid, existing identifiers.
+     * @param status      the new status to be assigned to the identified transport steps. Must not
+     *                    be null and must represent a valid instance of
+     *                    {@link ConnectorMessageTransportStatus}.
+     */
+    void updateStatus(
+            @Nonnull List<String> identifiers,
+            @Nonnull ConnectorMessageTransportStatus status);
+
+    /**
      * Retrieves a {@link ConnectorMessageTransportStep} instance associated with the given message
      * identifier.
      *
@@ -98,4 +114,20 @@ public interface ConnectorMessageTransportStepRepository {
      *         backend. If no pending transport steps are found, an empty list is returned.
      */
     List<String> findPendingTransportSteps(@Nonnull String backendName);
+
+    /**
+     * Retrieves a list of pending message identifiers associated with the specified backend
+     * system.
+     *
+     * <p>This method queries the underlying persistence mechanism to find all messages that are in
+     * a pending state for the provided backend name. Pending messages are those that have not yet
+     * been submitted to the backend system for processing.
+     *
+     * @param backendName the name of the backend system for which the pending messages are to be
+     *                    retrieved; must not be null or empty.
+     *
+     * @return a list of identifiers for the pending messages associated with the specified backend.
+     *         If no pending messages are found, an empty list is returned.
+     */
+    List<String> findPendingMessagesIds(@Nonnull String backendName);
 }

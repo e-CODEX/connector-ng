@@ -23,13 +23,13 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.message.Conne
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorBusinessDomainJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAS4PropertiesJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.MessageSpecification;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorActionRepositoryImpl;
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorPartyRepositoryImpl;
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorServiceRepositoryImpl;
@@ -261,6 +261,14 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
                 result.getNumber(),
                 result.getSize()
         );
+    }
+
+    @Override
+    public List<ConnectorMessage> findAllByIdentifier(@NonNull List<String> identifiers) {
+        return this.messageJpaRepository.findByIdentifierIn(identifiers)
+                                        .stream()
+                                        .map(this::toDomain)
+                                        .toList();
     }
 
     @Override

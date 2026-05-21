@@ -11,9 +11,11 @@
 package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
+import eu.ecodex.connector.application.service.impl.message.ConnectorListPendingMessagesService;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -34,6 +36,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorIn
 import eu.ecodex.connector.infrastructure.inbound.web.soap.helper.AttachmentHelpers;
 import eu.ecodex.connector.infrastructure.inbound.web.soap.helper.MessageHelpers;
 import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMessageAfterDownload;
+import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMessagesAfterDownload;
 import jakarta.annotation.Resource;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.soap.MTOM;
@@ -60,9 +63,11 @@ import org.springframework.util.StringUtils;
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
     private final ConnectorOutboundMessageReceiver messageStagingService;
     private final ConnectorListPendingMessageIds listPendingMessageIdsService;
+    private final ConnectorListPendingMessagesService listPendingMessagesService;
     private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
     private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    private final ConnectorChangePendingMessagesStatus changePendingMessagesStatusService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final LegacyMessageHelper legacyMessageHelper;
     private WebServiceContext webServiceContext;
@@ -78,16 +83,20 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     public ConnectorBackendWebServiceController(
             ConnectorOutboundMessageReceiver messageStagingService,
             ConnectorListPendingMessageIds listPendingMessageIdsService,
+            ConnectorListPendingMessagesService listPendingMessagesService,
             ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService,
             ConnectorUploadAttachments uploadAttachmentsService,
             ConnectorRegisterMessageTransportStep registerMessageTransportStep,
+            ConnectorChangePendingMessagesStatus changePendingMessagesStatusService,
             ConnectorBackendClientVerifier backendClientVerifierService,
             LegacyMessageHelper legacyMessageHelper) {
         this.messageStagingService = messageStagingService;
         this.listPendingMessageIdsService = listPendingMessageIdsService;
+        this.listPendingMessagesService = listPendingMessagesService;
         this.retrieveMessageByTransportIdService = retrieveMessageByTransportIdService;
         this.uploadAttachmentsService = uploadAttachmentsService;
         this.registerMessageTransportStep = registerMessageTransportStep;
+        this.changePendingMessagesStatusService = changePendingMessagesStatusService;
         this.backendClientVerifierService = backendClientVerifierService;
         this.legacyMessageHelper = legacyMessageHelper;
     }
@@ -136,7 +145,26 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
     @Override
     public DomibusConnectorMessagesType requestMessages(EmptyRequestType requestMessagesRequest) {
-        throw new UnsupportedOperationException("not yet implemented");
+        // TODO current cn is fake, retrieve the certificate dn from user principal
+        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
+        var messages = this.listPendingMessagesService.execute(backendClientName);
+        var legacyMessages = messages.stream()
+                                     .map(this.legacyMessageHelper::convertMessage)
+                                     .toList();
+        var response = new DomibusConnectorMessagesType();
+        response.getMessages().addAll(legacyMessages);
+
+        // add post invoke message processor
+        var messageContext = webServiceContext.getMessageContext();
+        var wrappedMessageContext = (WrappedMessageContext) messageContext;
+        var interceptor = new ProcessMessagesAfterDownload(
+                backendClientName,
+                changePendingMessagesStatusService
+
+        );
+        wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
+
+        return response;
     }
 
     @Override

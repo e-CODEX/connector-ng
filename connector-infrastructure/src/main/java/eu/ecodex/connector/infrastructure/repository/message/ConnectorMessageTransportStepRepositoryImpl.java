@@ -106,6 +106,18 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
     }
 
     @Override
+    public void updateStatus(
+            @NonNull List<String> identifiers,
+            @NonNull ConnectorMessageTransportStatus status) {
+        this.transportStepJpaRepository.updateStatus(
+                identifiers,
+                status.name()
+        );
+
+        this.stepStatusJpaRepository.insert(identifiers, status.name());
+    }
+
+    @Override
     public ConnectorMessageTransportStep findByMessageIdentifier(
             @NonNull String messageIdentifier) {
         var entity = this.transportStepJpaRepository.findByMessageIdentifier(messageIdentifier);
@@ -123,6 +135,11 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
     @Override
     public List<String> findPendingTransportSteps(@NonNull String backendName) {
         return transportStepJpaRepository.findAllPendingByMessageBackendName(backendName);
+    }
+
+    @Override
+    public List<String> findPendingMessagesIds(@NonNull String backendName) {
+        return transportStepJpaRepository.findAllPendingMessageIdsByBackendName(backendName);
     }
 
     private ConnectorMessageTransportStep toDomain(ConnectorMessageTransportStepEntity entity) {

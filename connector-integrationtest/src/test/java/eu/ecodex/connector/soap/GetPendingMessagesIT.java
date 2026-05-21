@@ -15,6 +15,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
@@ -44,7 +45,7 @@ import org.springframework.test.context.jdbc.Sql;
         },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-public class GetPendingMessageIT extends AbstractIntegrationTest {
+public class GetPendingMessagesIT extends AbstractIntegrationTest {
     private static final String TRANSPORT_MESSAGE_ID = "b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice";
 
     @Autowired
@@ -80,23 +81,12 @@ public class GetPendingMessageIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_retrieve_a_pending_message_by_transport_step_identifier_successfully() {
-        var request = new GetMessageByIdRequest();
-        request.setMessageTransportId(TRANSPORT_MESSAGE_ID);
-        var response = soapClient.getMessageById(request);
+    void should_retrieve_all_pending_messages_successfully() {
+        var response = soapClient.requestMessages(new EmptyRequestType());
 
         assertThat(response).isNotNull();
-        assertThat(response.getMessageDetails().getFinalRecipient()).isEqualTo("alice");
-        assertThat(response.getMessageDetails().getOriginalSender()).isEqualTo("bob");
-    }
-
-    @Test
-    void should_failed_to_retrieve_a_pending_message_by_transport_step_identifier() {
-        var request = new GetMessageByIdRequest();
-        request.setMessageTransportId("unknown-transport-id");
-
-        assertThatThrownBy(() -> soapClient.getMessageById(request))
-                .isInstanceOf(SOAPFaultException.class);
+        assertThat(response.getMessages()).isNotNull();
+        assertThat(response.getMessages().size()).isEqualTo(1);
     }
 
     private DomibusConnectorBackendWebService createClient() {

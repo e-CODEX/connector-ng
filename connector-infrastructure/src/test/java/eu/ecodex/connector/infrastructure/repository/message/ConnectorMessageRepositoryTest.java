@@ -18,6 +18,7 @@ import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +37,13 @@ public class ConnectorMessageRepositoryTest {
 
     // save
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql"
+    })
     void should_save_connector_message_successfully_to_database() {
         var message = MessageTestFixtures.createValidOutboundStagingBusinessMessage()
                                          .toBuilder()
@@ -64,13 +67,15 @@ public class ConnectorMessageRepositoryTest {
     // update gateway name
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_update_connector_message_gateway_name_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
@@ -112,13 +117,15 @@ public class ConnectorMessageRepositoryTest {
     // update backend name
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_update_connector_message_backend_name_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
@@ -160,13 +167,15 @@ public class ConnectorMessageRepositoryTest {
     // update ebms identifier
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_update_connector_message_ebms_identifier_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
@@ -211,13 +220,15 @@ public class ConnectorMessageRepositoryTest {
     // set as rejected
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_set_connector_message_as_rejected_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
@@ -241,13 +252,15 @@ public class ConnectorMessageRepositoryTest {
     // set as confirmed
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_set_connector_message_as_confirmed_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
@@ -271,13 +284,15 @@ public class ConnectorMessageRepositoryTest {
     // set submitted to gateway at
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_set_connector_message_submitted_to_gateway_at_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
@@ -301,13 +316,15 @@ public class ConnectorMessageRepositoryTest {
     // find by conversation identifier
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    @Sql("classpath:sql/service.sql")
-    @Sql("classpath:sql/action.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/message-as4-properties.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
     void should_find_message_by_conversation_identifier_successfully_from_database() {
         var messages = repository.findByConversationIdentifier(
                 "5abe51ce-e94a-4df6-8b77-41b10bc47da7");
@@ -329,5 +346,33 @@ public class ConnectorMessageRepositoryTest {
         assertThrows(
                 NullPointerException.class, () -> repository.findByConversationIdentifier(null)
         );
+    }
+
+    // find all by IDs
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_messages_by_null_identifiers() {
+        assertThrows(
+                NullPointerException.class, () -> repository.findAllByIdentifier(null)
+        );
+    }
+
+    @Test
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
+    void should_find_messages_by_identifiers() {
+        var messages = repository.findAllByIdentifier(
+                List.of("7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu")
+        );
+
+        assertThat(messages).isNotNull();
+        assertThat(messages).hasSize(1);
     }
 }

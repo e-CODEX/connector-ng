@@ -43,15 +43,11 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES")
-public class ConnectorMessageTransportStepStatusEntity extends BaseEntity {
+public class  ConnectorMessageTransportStepStatusEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @UuidGenerator
-    @Column(name = "UUID", nullable = false)
-    private String uuid;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false, updatable = false)

@@ -71,6 +71,19 @@ public interface ConnectorMessageRepository {
     );
 
     /**
+     * Retrieves a list of all {@link ConnectorMessage} instances associated with the provided
+     * identifiers.
+     *
+     * @param identifiers a list of unique identifiers used to filter {@link ConnectorMessage}
+     *                    instances. Each identifier represents a target message; must not be null
+     *                    or empty. If the list is empty or null, no results will be returned.
+     *
+     * @return a list of {@link ConnectorMessage} instances that match one or more of the specified
+     *         identifiers. If no messages match, an empty list is returned.
+     */
+    List<ConnectorMessage> findAllByIdentifier(@Nonnull List<String> identifiers);
+
+    /**
      * Finds a {@link ConnectorMessage} by its unique identifier.
      *
      * @param identifier the unique identifier of the connector message; must not be null or blank.

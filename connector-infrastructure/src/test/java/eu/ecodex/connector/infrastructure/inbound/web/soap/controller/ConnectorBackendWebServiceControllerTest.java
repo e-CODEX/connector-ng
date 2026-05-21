@@ -21,9 +21,11 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
+import eu.ecodex.connector.application.service.impl.message.ConnectorListPendingMessagesService;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.domain.exception.NotFoundException;
@@ -35,6 +37,7 @@ import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMessageAfterDownload;
+import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMessagesAfterDownload;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import jakarta.xml.ws.WebServiceContext;
 import java.util.List;
@@ -57,6 +60,8 @@ public class ConnectorBackendWebServiceControllerTest {
     @Mock
     private ConnectorListPendingMessageIds listPendingMessageIdsService;
     @Mock
+    private ConnectorListPendingMessagesService listPendingMessagesService;
+    @Mock
     private ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
     @Mock
     private ConnectorUploadAttachments uploadAttachmentsService;
@@ -64,6 +69,8 @@ public class ConnectorBackendWebServiceControllerTest {
     private ConnectorBackendClientVerifier backendClientVerifierService;
     @Mock
     private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    @Mock
+    private ConnectorChangePendingMessagesStatus changePendingMessagesStatusService;
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
     @Mock
@@ -82,15 +89,19 @@ public class ConnectorBackendWebServiceControllerTest {
         backendWebService = new ConnectorBackendWebServiceController(
                 messageStagingService,
                 listPendingMessageIdsService,
+                listPendingMessagesService,
                 retrieveMessageByTransportIdService,
                 uploadAttachmentsService,
                 registerMessageTransportStep,
+                changePendingMessagesStatusService,
                 backendClientVerifierService,
                 legacyMessageHelper
         );
         // Inject @Resource field manually via reflection
         ReflectionTestUtils.setField(backendWebService, "webServiceContext", webServiceContext);
     }
+
+    // submit message from backend to the connector
 
     @Test
     void should_return_successful_ack_when_submitting_message_from_backend_to_the_connector() {
@@ -131,6 +142,8 @@ public class ConnectorBackendWebServiceControllerTest {
         assertThat(ack.isResult()).isFalse();
     }
 
+    // list pending messages transport identifiers
+
     @Test
     void should_list_pending_messages_identifiers_successfully() {
         when(listPendingMessageIdsService.execute(any()))
@@ -146,6 +159,7 @@ public class ConnectorBackendWebServiceControllerTest {
                 .isEqualTo(TRANSPORT_ID);
     }
 
+    // get message by transport id
     @Test
     void should_retrieve_message_by_transport_id_successfully() {
         var connectorMessage = mock(ConnectorMessage.class);
@@ -183,5 +197,31 @@ public class ConnectorBackendWebServiceControllerTest {
                 .isInstanceOf(NotFoundException.class);
 
         verifyNoInteractions(webServiceContext, legacyMessageHelper);
+    }
+
+    // list pending messages
+
+    @Test
+    void should_list_pending_messages_successfully() {
+        var connectorMessage = mock(ConnectorMessage.class);
+        var expectedResult = new DomibusConnectorMessageType();
+
+        when(listPendingMessagesService.execute("backend_alice")).thenReturn(List.of(connectorMessage));
+        when(backendClientVerifierService.getBackendClient(any()))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+        when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
+        when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
+        when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
+        when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
+
+        var response = backendWebService.requestMessages(new EmptyRequestType());
+
+        assertThat(response).isNotNull();
+        verify(listPendingMessagesService).execute("backend_alice");
+        verify(legacyMessageHelper).convertMessage(connectorMessage);
+
+        var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessagesAfterDownload.class);
+        verify(interceptorChain).add(interceptorCaptor.capture());
+        assertThat(interceptorCaptor.getValue()).isInstanceOf(ProcessMessagesAfterDownload.class);
     }
 }

@@ -375,4 +375,48 @@ public class ConnectorMessageRepositoryTest {
         assertThat(messages).isNotNull();
         assertThat(messages).hasSize(1);
     }
+
+    // update backend identifier
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_backend_identifier_with_a_null_message_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateBackendIdentifier(null, "backend-identifier")
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_backend_identifier_with_a_null_backend_identifier() {
+        assertThrows(
+                NullPointerException.class,
+                () -> repository.updateBackendIdentifier("message-identifier", null)
+        );
+    }
+
+    @Test
+    void should_throw_null_pointer_exception_when_updating_backend_identifier_with_a_null_message_identifier_and_backend_identifier() {
+        assertThrows(
+                NullPointerException.class, () -> repository.updateBackendIdentifier(null, null)
+        );
+    }
+
+    @Test
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+    })
+    void should_update_backend_identifier_successfully_in_the_database() {
+        var message = this.repository.updateBackendIdentifier(
+                "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu", "backend-identifier"
+        );
+
+        assertThat(message).isNotNull();
+        assertThat(message.backendMessageIdentifier()).isEqualTo("backend-identifier");
+    }
 }

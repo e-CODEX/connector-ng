@@ -66,4 +66,21 @@ values
         now(),
         now(),
         1
+    ),
+    (
+        4,
+        '3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu',
+        null,
+        null,
+        'backend_alice',
+        'default_gateway',
+        'GATEWAY_TO_BACKEND',
+        null,
+        null,
+        null,
+        null,
+        null,
+        now(),
+        now(),
+        1
     );

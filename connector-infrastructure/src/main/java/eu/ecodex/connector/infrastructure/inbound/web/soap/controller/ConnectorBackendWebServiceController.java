@@ -15,15 +15,20 @@ import eu.ecodex.connector.application.service.impl.message.ConnectorListPending
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
+import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageAttachmentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageErrorType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessagesType;
@@ -43,6 +48,7 @@ import jakarta.xml.ws.soap.MTOM;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.jaxws.context.WrappedMessageContext;
@@ -68,6 +74,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     private final ConnectorUploadAttachments uploadAttachmentsService;
     private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
     private final ConnectorChangePendingMessagesStatus changePendingMessagesStatusService;
+    private final ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final LegacyMessageHelper legacyMessageHelper;
     private WebServiceContext webServiceContext;
@@ -88,6 +95,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             ConnectorUploadAttachments uploadAttachmentsService,
             ConnectorRegisterMessageTransportStep registerMessageTransportStep,
             ConnectorChangePendingMessagesStatus changePendingMessagesStatusService,
+            ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService,
             ConnectorBackendClientVerifier backendClientVerifierService,
             LegacyMessageHelper legacyMessageHelper) {
         this.messageStagingService = messageStagingService;
@@ -97,6 +105,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         this.uploadAttachmentsService = uploadAttachmentsService;
         this.registerMessageTransportStep = registerMessageTransportStep;
         this.changePendingMessagesStatusService = changePendingMessagesStatusService;
+        this.updateMessageTransportStepService = updateMessageTransportStepService;
         this.backendClientVerifierService = backendClientVerifierService;
         this.legacyMessageHelper = legacyMessageHelper;
     }
@@ -107,9 +116,24 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     }
 
     @Override
-    public EmptyRequestType acknowledgeMessage(
-            DomibusConnectorMessageResponseType acknowledgeMessageRequest) {
-        throw new UnsupportedOperationException("not yet implemented");
+    public EmptyRequestType acknowledgeMessage(DomibusConnectorMessageResponseType responseType) {
+        var commandBuilder = UpdateMessageTransportCommand
+                .builder()
+                .remoteMessageIdentifier(responseType.getAssignedMessageId());
+        if (responseType.isResult()) {
+            commandBuilder.status(ConnectorMessageTransportStatus.SUBMITTED);
+            commandBuilder.errors(null);
+        } else {
+            commandBuilder.status(ConnectorMessageTransportStatus.FAILED);
+            commandBuilder.errors(toDomainErrors(responseType.getMessageErrors()));
+        }
+
+        updateMessageTransportStepService.execute(
+                responseType.getResponseForMessageId(),
+                commandBuilder.build()
+        );
+
+        return new EmptyRequestType();
     }
 
     @Override
@@ -316,5 +340,19 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var contentType = Files.probeContentType(tempFile);
 
         return contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE;
+    }
+
+    private List<ConnectorMessageError> toDomainErrors(
+            List<DomibusConnectorMessageErrorType> errors) {
+        if (errors == null) {
+            return new ArrayList<>();
+        }
+
+        return errors.stream().map(
+                error -> ConnectorMessageError.builder()
+                                              .label(error.getErrorMessage())
+                                              .details(error.getErrorDetails())
+                                              .source(error.getErrorSource())
+                                              .build()).toList();
     }
 }

@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -25,12 +26,14 @@ import eu.ecodex.connector.application.service.impl.message.ConnectorListPending
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.domain.exception.NotFoundException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
@@ -72,6 +75,8 @@ public class ConnectorBackendWebServiceControllerTest {
     @Mock
     private ConnectorChangePendingMessagesStatus changePendingMessagesStatusService;
     @Mock
+    private ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService;
+    @Mock
     private LegacyMessageHelper legacyMessageHelper;
     @Mock
     private WrappedMessageContext wrappedMessageContext;
@@ -94,6 +99,7 @@ public class ConnectorBackendWebServiceControllerTest {
                 uploadAttachmentsService,
                 registerMessageTransportStep,
                 changePendingMessagesStatusService,
+                updateMessageTransportStepService,
                 backendClientVerifierService,
                 legacyMessageHelper
         );
@@ -206,7 +212,8 @@ public class ConnectorBackendWebServiceControllerTest {
         var connectorMessage = mock(ConnectorMessage.class);
         var expectedResult = new DomibusConnectorMessageType();
 
-        when(listPendingMessagesService.execute("backend_alice")).thenReturn(List.of(connectorMessage));
+        when(listPendingMessagesService.execute("backend_alice")).thenReturn(List.of(
+                connectorMessage));
         when(backendClientVerifierService.getBackendClient(any()))
                 .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
@@ -223,5 +230,34 @@ public class ConnectorBackendWebServiceControllerTest {
         var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessagesAfterDownload.class);
         verify(interceptorChain).add(interceptorCaptor.capture());
         assertThat(interceptorCaptor.getValue()).isInstanceOf(ProcessMessagesAfterDownload.class);
+    }
+
+    // acknowledge message
+
+    @Test
+    void should_acknowledge_message_with_success_status_successfully() {
+        doNothing().when(updateMessageTransportStepService).execute(any(), any());
+
+        var response = backendWebService.acknowledgeMessage(acknowledgeMessage(true));
+
+        assertThat(response).isNotNull();
+    }
+
+    @Test
+    void should_acknowledge_message_with_failed_status_successfully() {
+        doNothing().when(updateMessageTransportStepService).execute(any(), any());
+
+        var response = backendWebService.acknowledgeMessage(acknowledgeMessage(false));
+
+        assertThat(response).isNotNull();
+    }
+
+    private DomibusConnectorMessageResponseType acknowledgeMessage(boolean result) {
+        var ackResponse = new DomibusConnectorMessageResponseType();
+        ackResponse.setResult(result);
+        ackResponse.setAssignedMessageId("12345678-1234-1234-1234-123456789012");
+        ackResponse.setResponseForMessageId("3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+        ackResponse.setResultMessage("Message acknowledged successfully");
+        return ackResponse;
     }
 }

@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
+        statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 @Sql(
@@ -54,6 +54,8 @@ public class ConnectorSubmitMessageIT extends AbstractIntegrationTest {
     @AfterEach
     void cleanUp() {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_step_statuses");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_steps");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_document_signatures");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");

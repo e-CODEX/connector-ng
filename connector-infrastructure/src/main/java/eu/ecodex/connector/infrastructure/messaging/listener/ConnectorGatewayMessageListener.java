@@ -115,7 +115,8 @@ public class ConnectorGatewayMessageListener {
 
         var as4Properties = parseAS4Properties(message);
         var payloads = parsePayloads(message);
-        var isConfirmationMessage = payloads.businessContent() == null && !payloads.evidences.isEmpty();
+        var isConfirmationMessage = payloads.businessContent() == null
+                && !payloads.evidences.isEmpty();
 
         if (isConfirmationMessage) {
             log.info("Received message from the gateway is a confirmation message");

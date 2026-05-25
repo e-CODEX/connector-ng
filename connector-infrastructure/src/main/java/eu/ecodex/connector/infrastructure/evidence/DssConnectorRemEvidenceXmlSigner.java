@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.evidence;
 
+import static eu.ecodex.connector.infrastructure.config.EvidenceConfig.REM_EVIDENCE_SIGNING_TOKEN_BEAN;
+
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssDocumentSigner;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssSigningTokenProvider;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
@@ -19,8 +21,6 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import static eu.ecodex.connector.infrastructure.config.EvidenceConfig.REM_EVIDENCE_SIGNING_TOKEN_BEAN;
 
 /**
  * Applies an enveloped XAdES-B signature to marshalled REM evidence XML bytes.
@@ -44,7 +44,9 @@ public class DssConnectorRemEvidenceXmlSigner {
     private final ConnectorDssSigningTokenProvider signingTokenProvider;
 
     /**
-     * @param documentSigner     shared DSS document signer for XAdES
+     * Creates the signer with shared DSS and REM keystore dependencies.
+     *
+     * @param documentSigner       shared DSS document signer for XAdES
      * @param signingTokenProvider keystore-backed token for REM evidence (qualified bean name)
      */
     public DssConnectorRemEvidenceXmlSigner(

@@ -37,6 +37,14 @@ public class ConnectorGatewayConfirmationMessageProcessorService
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
     private final ConnectorLinkSubmitter linkSubmitter;
 
+    /**
+     * Creates the processor with message, evidence, and backend forwarding dependencies.
+     *
+     * @param messageRepository  persisted connector messages
+     * @param evidenceRepository persisted message evidences
+     * @param evidenceVerifier   validates evidence applicability
+     * @param linkSubmitter      forwards messages to the backend
+     */
     public ConnectorGatewayConfirmationMessageProcessorService(
             ConnectorMessageRepository messageRepository,
             ConnectorMessageEvidenceRepository evidenceRepository,
@@ -52,7 +60,8 @@ public class ConnectorGatewayConfirmationMessageProcessorService
     public void process(@NonNull ConnectorMessage confirmationMessage) {
         if (!isTransportedEvidenceConfirmation(confirmationMessage)) {
             throw new IllegalArgumentException(
-                    "Message [" + confirmationMessage.identifier() + "] is not a gateway confirmation"
+                    "Message [" + confirmationMessage.identifier()
+                            + "] is not a gateway confirmation"
             );
         }
 
@@ -112,8 +121,8 @@ public class ConnectorGatewayConfirmationMessageProcessorService
         evidencesForVerification.add(incomingEvidence);
 
         var messageForVerification = referencedMessage.toBuilder()
-                                                      .transportedEvidences(evidencesForVerification)
-                                                      .build();
+                .transportedEvidences(evidencesForVerification)
+                .build();
 
         try {
             evidenceVerifier.verify(incomingEvidence.type(), messageForVerification);

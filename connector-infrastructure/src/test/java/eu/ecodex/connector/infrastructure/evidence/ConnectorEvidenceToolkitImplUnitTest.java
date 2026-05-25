@@ -31,15 +31,16 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
-import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.connector.evidences.EvidenceBuilder;
 import eu.ecodex.connector.evidences.exception.ECodexEvidenceBuilderException;
 import eu.ecodex.connector.evidences.types.ECodexMessageDetails;
+import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
+import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import org.etsi.uri._02640.v2.EventReasonType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +52,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.etsi.uri._02640.v2.EventReasonType;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

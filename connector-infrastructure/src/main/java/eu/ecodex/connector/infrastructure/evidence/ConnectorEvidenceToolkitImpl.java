@@ -56,6 +56,8 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     private final ConnectorEvidencesProperties evidencesProperties;
 
     /**
+     * Creates the toolkit with evidence builder and storage dependencies.
+     *
      * @param evidenceBuilder             builds and signs REM XML for each evidence step
      * @param evidencePayloadHashValueBuilder digest for submission evidences over business payload
      * @param evidencesProperties          issuer gateway/postal address and signature settings
@@ -169,7 +171,8 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         }
     }
 
-    private byte[] requirePriorEvidence(ConnectorEvidenceType requiredType, ConnectorMessage message) {
+    private byte[] requirePriorEvidence(
+            ConnectorEvidenceType requiredType, ConnectorMessage message) {
         byte[] prev = findPriorEvidence(requiredType, message);
         if (prev == null) {
             throw new ConnectorEvidenceException("prior evidence content is required");

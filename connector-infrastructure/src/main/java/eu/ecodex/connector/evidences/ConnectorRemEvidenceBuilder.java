@@ -57,6 +57,8 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
     private final DssConnectorRemEvidenceXmlSigner xmlSigner;
 
     /**
+     * Creates the builder with the REM XML signer.
+     *
      * @param xmlSigner signs unsigned marshalled evidence XML
      */
     public ConnectorRemEvidenceBuilder(DssConnectorRemEvidenceXmlSigner xmlSigner) {
@@ -296,8 +298,9 @@ public class ConnectorRemEvidenceBuilder implements EvidenceBuilder {
     }
 
     /**
-     * Marshals {@code evidenceToBeSigned} to XML, optionally clears an existing in-object signature,
-     * then returns {@link DssConnectorRemEvidenceXmlSigner#signUnsignedRemEvidenceXml(byte[])} output.
+     * Marshals {@code evidenceToBeSigned} to XML, optionally clears an existing in-object
+     * signature, then returns
+     * {@link DssConnectorRemEvidenceXmlSigner#signUnsignedRemEvidenceXml(byte[])} output.
      */
     private byte[] signEvidence(Evidence evidenceToBeSigned, boolean removeOldSignature)
             throws ECodexEvidenceBuilderException {

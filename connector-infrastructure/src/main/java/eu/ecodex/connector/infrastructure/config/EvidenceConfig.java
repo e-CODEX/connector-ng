@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssSigningTokenProvider;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
+import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +25,8 @@ import org.springframework.context.annotation.Configuration;
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class EvidenceConfig {
 
-    public static final String REM_EVIDENCE_SIGNING_TOKEN_BEAN = "connectorRemEvidenceSigningTokenProvider";
+    public static final String REM_EVIDENCE_SIGNING_TOKEN_BEAN =
+            "connectorRemEvidenceSigningTokenProvider";
 
     @Bean(name = REM_EVIDENCE_SIGNING_TOKEN_BEAN, destroyMethod = "close")
     public ConnectorDssSigningTokenProvider connectorRemEvidenceSigningTokenProvider(

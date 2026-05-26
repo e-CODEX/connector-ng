@@ -13,17 +13,17 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
-import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.content.ConnectorMessageBusinessContentEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.content.ConnectorMessageBusinessDocumentDetachedSignatureEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.content.ConnectorMessageBusinessDocumentEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.content.ConnectorMessageBusinessContentJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.content.ConnectorMessageBusinessDocumentJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.content.ConnectorMessageBusinessDocumentSignatureJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 @SuppressWarnings("checkstyle:LineLength")
 public class ConnectorMessageBusinessContentRepositoryImpl implements
         ConnectorMessageBusinessContentRepository {
-    private final ConnectorMessageBusinessContentJpaRepository jpaRepository;
+    private final ConnectorMessageBusinessContentJpaRepository businessContentJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
     private final ConnectorMessageBusinessDocumentJpaRepository businessDocumentJpaRepository;
     private final ConnectorMessageAttachmentJpaRepository attachmentJpaRepository;
@@ -43,7 +43,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
     /**
      * Constructs a new instance of ConnectorMessageBusinessContentRepositoryImpl.
      *
-     * @param jpaRepository                  the repository for managing
+     * @param businessContentJpaRepository   the repository for managing
      *                                       {@link ConnectorMessageBusinessContentEntity} entities
      * @param messageJpaRepository           the repository for managing
      *                                       {@link ConnectorMessageEntity} entities
@@ -58,12 +58,12 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
      *                                       entities
      */
     public ConnectorMessageBusinessContentRepositoryImpl(
-            ConnectorMessageBusinessContentJpaRepository jpaRepository,
+            ConnectorMessageBusinessContentJpaRepository businessContentJpaRepository,
             ConnectorMessageJpaRepository messageJpaRepository,
             ConnectorMessageBusinessDocumentJpaRepository businessDocumentJpaRepository,
             ConnectorMessageAttachmentJpaRepository attachmentJpaRepository,
             ConnectorMessageBusinessDocumentSignatureJpaRepository detachedSignatureJpaRepository) {
-        this.jpaRepository = jpaRepository;
+        this.businessContentJpaRepository = businessContentJpaRepository;
         this.messageJpaRepository = messageJpaRepository;
         this.businessDocumentJpaRepository = businessDocumentJpaRepository;
         this.attachmentJpaRepository = attachmentJpaRepository;
@@ -120,11 +120,12 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
             @NonNull String messageIdentifier) {
         var message = this.messageJpaRepository.findByIdentifier(messageIdentifier);
         var contentToSave = toEntity(businessContent, message);
-        var savedContent = this.jpaRepository.save(contentToSave);
+        var savedContent = this.businessContentJpaRepository.save(contentToSave);
 
         if (businessContent.businessDocument() != null) {
             var businessDocumentToSave = toEntity(businessContent.businessDocument(), savedContent);
-            var savedBusinessDocument = this.businessDocumentJpaRepository.save(businessDocumentToSave);
+            var savedBusinessDocument = this.businessDocumentJpaRepository.save(
+                    businessDocumentToSave);
             savedContent.setBusinessDocument(savedBusinessDocument);
 
             var documentDetachedSignature = businessContent.businessDocument().detachedSignature();
@@ -143,7 +144,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
     public ConnectorMessageBusinessContent assignBusinessDocument(
             @NonNull String uuid,
             @NonNull ConnectorMessageBusinessDocument document) {
-        var content = this.jpaRepository.findByUuid(uuid);
+        var content = this.businessContentJpaRepository.findByUuid(uuid);
         var businessDocumentToSave = toEntity(document, content);
 
         var savedBusinessDocument = this.businessDocumentJpaRepository.save(businessDocumentToSave);

@@ -16,7 +16,7 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

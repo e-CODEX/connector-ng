@@ -20,7 +20,7 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.link.ConnectorLinkPartnerVerifierService;
 import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkPartnerVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

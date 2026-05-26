@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
-import eu.ecodex.connector.domain.spi.ConnectorMessageErrorRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageErrorRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

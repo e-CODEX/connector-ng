@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
-public class ConnectorGatewayMessageReplyListener {
+public class ConnectorGatewayMessageAcknowledgementListener {
     private final ConnectorMessageRepository messageRepository;
 
     /**
@@ -32,7 +32,8 @@ public class ConnectorGatewayMessageReplyListener {
      *
      * @param messageRepository repository used to update message delivery status
      */
-    public ConnectorGatewayMessageReplyListener(ConnectorMessageRepository messageRepository) {
+    public ConnectorGatewayMessageAcknowledgementListener(
+            ConnectorMessageRepository messageRepository) {
         this.messageRepository = messageRepository;
     }
 

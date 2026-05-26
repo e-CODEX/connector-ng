@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.service.impl.link.ConnectorFindLinkPartnerService;
 import eu.ecodex.connector.application.service.usecase.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerException;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.repository.message;
 
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEvidenceEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorEvidenceJpaRepository;

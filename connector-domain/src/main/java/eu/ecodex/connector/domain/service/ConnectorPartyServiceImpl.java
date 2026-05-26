@@ -14,7 +14,7 @@ import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.service.ConnectorPartyService;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
 import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

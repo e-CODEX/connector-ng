@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.repository.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
-import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
@@ -26,22 +26,22 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepository {
-    private final ConnectorServiceJpaRepository jpaRepository;
+    private final ConnectorServiceJpaRepository serviceJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
     /**
      * Constructs a new instance of {@code ConnectorServiceRepositoryImpl}.
      *
-     * @param jpaRepository               the {@link ConnectorServiceJpaRepository} used to perform
+     * @param serviceJpaRepository        the {@link ConnectorServiceJpaRepository} used to perform
      *                                    CRUD operations on ConnectorService entities.
      * @param processingModeJpaRepository the {@link ConnectorProcessingModeJpaRepository} used to
      *                                    perform CRUD operations on ConnectorProcessingMode
      *                                    entities and retrieve processing mode configurations.
      */
     public ConnectorServiceRepositoryImpl(
-            ConnectorServiceJpaRepository jpaRepository,
+            ConnectorServiceJpaRepository serviceJpaRepository,
             ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
-        this.jpaRepository = jpaRepository;
+        this.serviceJpaRepository = serviceJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
     }
 
@@ -96,7 +96,7 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
                 businessDomainIdentifier.messageLaneIdentifier()
         );
 
-        var savedServices = this.jpaRepository.saveAll(
+        var savedServices = this.serviceJpaRepository.saveAll(
                 services.stream().map(service -> toEntity(service, processingMode)).toList()
         );
 
@@ -107,7 +107,7 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
     public ConnectorService findByNameAndBusinessDomain(
             @NonNull String name,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        var service = this.jpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
+        var service = this.serviceJpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
                 name, businessDomainIdentifier.messageLaneIdentifier()
         );
 

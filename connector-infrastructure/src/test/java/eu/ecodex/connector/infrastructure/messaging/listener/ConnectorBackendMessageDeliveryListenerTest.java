@@ -24,13 +24,13 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
-import eu.ecodex.connector.infrastructure.outbound.soap.BackendServiceClient;
+import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendServiceClient;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
-    private BackendServiceClient backendServiceClient;
+    private ConnectorBackendServiceClient backendServiceClient;
     @Mock
     private DomibusConnectorBackendDeliveryWebService deliveryWebService;
     @Mock

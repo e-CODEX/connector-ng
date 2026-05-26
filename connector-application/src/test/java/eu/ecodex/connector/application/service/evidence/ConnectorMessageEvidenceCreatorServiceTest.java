@@ -22,7 +22,7 @@ import eu.ecodex.connector.application.service.impl.evidence.ConnectorMessageEvi
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -23,7 +23,7 @@ import eu.ecodex.connector.domain.exception.NotFoundException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

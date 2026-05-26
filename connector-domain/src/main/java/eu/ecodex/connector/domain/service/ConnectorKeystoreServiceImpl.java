@@ -14,7 +14,7 @@ import eu.ecodex.connector.domain.annotation.DomainService;
 import eu.ecodex.connector.domain.api.service.ConnectorKeystoreService;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
-import eu.ecodex.connector.domain.spi.ConnectorKeystoreRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorKeystoreRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.KeystoreTestFixtures;
 import eu.ecodex.connector.RepositoryContextConfiguration;
-import eu.ecodex.connector.domain.spi.ConnectorKeystoreRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorKeystoreRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

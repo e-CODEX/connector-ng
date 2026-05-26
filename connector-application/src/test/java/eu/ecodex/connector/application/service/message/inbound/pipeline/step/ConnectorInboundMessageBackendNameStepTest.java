@@ -24,7 +24,7 @@ import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.ste
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRoutingService;
 import eu.ecodex.connector.domain.ConnectorDefaults;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;

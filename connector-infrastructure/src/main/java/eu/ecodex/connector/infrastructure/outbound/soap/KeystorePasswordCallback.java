@@ -4,6 +4,9 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import org.apache.wss4j.common.ext.WSPasswordCallback;
 
+/**
+ * Callback handler for retrieving the keystore password.
+ */
 public class KeystorePasswordCallback implements CallbackHandler {
     private final String privateKeyPassword;
 

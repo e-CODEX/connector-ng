@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.impl.link;
 import eu.ecodex.connector.application.service.usecase.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerException;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

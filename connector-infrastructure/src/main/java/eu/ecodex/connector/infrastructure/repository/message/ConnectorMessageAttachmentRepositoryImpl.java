@@ -14,7 +14,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentTy
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
@@ -30,13 +30,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorMessageAttachmentRepositoryImpl implements
         ConnectorMessageAttachmentRepository {
-    private final ConnectorMessageAttachmentJpaRepository jpaRepository;
+    private final ConnectorMessageAttachmentJpaRepository attachmentJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
 
     public ConnectorMessageAttachmentRepositoryImpl(
-            ConnectorMessageAttachmentJpaRepository jpaRepository,
+            ConnectorMessageAttachmentJpaRepository attachmentJpaRepository,
             ConnectorMessageJpaRepository messageJpaRepository) {
-        this.jpaRepository = jpaRepository;
+        this.attachmentJpaRepository = attachmentJpaRepository;
         this.messageJpaRepository = messageJpaRepository;
     }
 
@@ -62,14 +62,14 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
     @Override
     public ConnectorMessageAttachment save(ConnectorMessageAttachment attachment) {
         var attachmentToSave = toEntity(attachment);
-        var savedAttachment = jpaRepository.save(attachmentToSave);
+        var savedAttachment = attachmentJpaRepository.save(attachmentToSave);
 
         return toDomain(savedAttachment);
     }
 
     @Override
     public ConnectorMessageAttachment findByIdentifier(@NonNull String identifier) {
-        var attachment = this.jpaRepository.findByIdentifier(identifier);
+        var attachment = this.attachmentJpaRepository.findByIdentifier(identifier);
 
         return toDomain(attachment);
     }
@@ -83,16 +83,17 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
                 types
         );
 
-        return jpaRepository.findAll(specification)
-                            .stream().map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
-                            .toList();
+        return attachmentJpaRepository.findAll(specification)
+                                      .stream()
+                                      .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
+                                      .toList();
     }
 
     @Override
     public ConnectorPageResult<ConnectorMessageAttachment> findAll(ConnectorPageRequest request) {
         var pageable = PageRequest.of(request.page(), request.size());
 
-        var result = jpaRepository.findAll(pageable);
+        var result = attachmentJpaRepository.findAll(pageable);
 
         return new ConnectorPageResult<>(
                 result.getContent().stream()
@@ -107,7 +108,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
     public void attachToMessage(
             @NonNull String attachmentIdentifier,
             @NonNull String messageIdentifier) {
-        var attachment = jpaRepository.findByIdentifier(attachmentIdentifier);
+        var attachment = attachmentJpaRepository.findByIdentifier(attachmentIdentifier);
 
         if (attachment.getMessage() != null) {
             throw new IllegalStateException("attachment already assigned to a message");
@@ -115,15 +116,15 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
 
         var message = messageJpaRepository.findByIdentifier(messageIdentifier);
         attachment.setMessage(message);
-        jpaRepository.save(attachment);
+        attachmentJpaRepository.save(attachment);
     }
 
     @Override
     public void updateType(
             @NonNull String attachmentIdentifier, @NonNull ConnectorAttachmentType type) {
-        var attachment = this.jpaRepository.findByIdentifier(attachmentIdentifier);
+        var attachment = this.attachmentJpaRepository.findByIdentifier(attachmentIdentifier);
         attachment.setType(type);
-        this.jpaRepository.save(attachment);
+        this.attachmentJpaRepository.save(attachment);
     }
 
     private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {

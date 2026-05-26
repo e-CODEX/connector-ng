@@ -16,7 +16,7 @@ import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

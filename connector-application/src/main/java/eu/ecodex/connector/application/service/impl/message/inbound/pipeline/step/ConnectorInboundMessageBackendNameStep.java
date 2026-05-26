@@ -15,7 +15,7 @@ import eu.ecodex.connector.application.service.usecase.message.pipeline.Connecto
 import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRoutingService;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

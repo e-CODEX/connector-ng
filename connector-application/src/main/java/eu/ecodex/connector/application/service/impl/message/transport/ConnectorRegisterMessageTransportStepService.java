@@ -16,7 +16,7 @@ import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepExcepti
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
-import eu.ecodex.connector.domain.spi.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.UUID;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,7 @@
 package eu.ecodex.connector.infrastructure.outbound.soap;
 
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebService;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +22,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class BackendServiceClient {
+public class ConnectorBackendServiceClient {
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory;
-    private final MerlinPropertiesFactory merlinPropertiesFactory;
+    private final ConnectorMerlinPropertiesFactory merlinPropertiesFactory;
 
     /**
      * Constructs a new instance of {@code BackendServiceClient}.
@@ -37,10 +37,10 @@ public class BackendServiceClient {
      * @param merlinPropertiesFactory  The factory for providing Merlin-specific configuration
      *                                 properties.
      */
-    public BackendServiceClient(
+    public ConnectorBackendServiceClient(
             ConnectorLinkPartnerRepository linkPartnerRepository,
             ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory,
-            MerlinPropertiesFactory merlinPropertiesFactory) {
+            ConnectorMerlinPropertiesFactory merlinPropertiesFactory) {
         this.linkPartnerRepository = linkPartnerRepository;
         this.linkPartnerConfigFactory = linkPartnerConfigFactory;
         this.merlinPropertiesFactory = merlinPropertiesFactory;
@@ -113,7 +113,7 @@ public class BackendServiceClient {
 
         factory.setProperties(jaxWsFactoryBeanProperties);
 
-        var policyLoader = new WsPolicyLoader(linkEndpointProperties.getWsPolicy());
+        var policyLoader = new ConnectorWsPolicyLoader(linkEndpointProperties.getWsPolicy());
         factory.getFeatures().add(policyLoader.loadPolicyFeature());
 
         return (DomibusConnectorBackendDeliveryWebService) factory.create();

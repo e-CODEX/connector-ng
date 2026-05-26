@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.pmode;
 
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 

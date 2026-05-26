@@ -24,8 +24,8 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentTy
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.domain.spi.ConnectorMessageBusinessContentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.infrastructure.security.BaseContainerTest;
 import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.security.model.container.ConnectorContainer;

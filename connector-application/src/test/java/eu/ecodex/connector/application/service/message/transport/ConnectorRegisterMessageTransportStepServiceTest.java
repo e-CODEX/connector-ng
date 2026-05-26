@@ -27,7 +27,7 @@ import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepExcepti
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
-import eu.ecodex.connector.domain.spi.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

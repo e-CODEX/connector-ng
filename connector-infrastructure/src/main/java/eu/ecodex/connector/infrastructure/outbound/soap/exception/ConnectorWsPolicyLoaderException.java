@@ -12,9 +12,12 @@ package eu.ecodex.connector.infrastructure.outbound.soap.exception;
 
 import lombok.NoArgsConstructor;
 
+/**
+ * Exception thrown when there is an error loading WS-Policy.
+ */
 @NoArgsConstructor
-public class WsPolicyLoaderException extends RuntimeException {
-    public WsPolicyLoaderException(String message, Throwable cause) {
+public class ConnectorWsPolicyLoaderException extends RuntimeException {
+    public ConnectorWsPolicyLoaderException(String message, Throwable cause) {
         super(message, cause);
     }
 }

@@ -23,19 +23,19 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessDomainRepository {
-    private final ConnectorBusinessDomainJpaRepository jpaRepository;
+    private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
 
     /**
      * Constructs a new instance of {@code ConnectorBusinessDomainRepositoryImpl} with the provided
      * JPA repository.
      *
-     * @param jpaRepository the repository used for accessing and managing
-     *                      {@link ConnectorBusinessDomainEntity} entities in the database; must not
-     *                      be null.
+     * @param businessDomainJpaRepository the repository used for accessing and managing
+     *                                    {@link ConnectorBusinessDomainEntity} entities in the
+     *                                    database; must not be null.
      */
     public ConnectorBusinessDomainRepositoryImpl(
-            ConnectorBusinessDomainJpaRepository jpaRepository) {
-        this.jpaRepository = jpaRepository;
+            ConnectorBusinessDomainJpaRepository businessDomainJpaRepository) {
+        this.businessDomainJpaRepository = businessDomainJpaRepository;
     }
 
     /**
@@ -91,21 +91,23 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
     @Override
     public ConnectorBusinessDomain save(ConnectorBusinessDomain businessDomain) {
 
-        var savedEntity = jpaRepository.save(toEntity(businessDomain));
+        var savedEntity = businessDomainJpaRepository.save(toEntity(businessDomain));
 
         return toDomain(savedEntity);
     }
 
     @Override
     public ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier) {
-        var entity = jpaRepository.findByIdentifier(identifier.messageLaneIdentifier());
+        var entity = businessDomainJpaRepository.findByIdentifier(
+                identifier.messageLaneIdentifier()
+        );
 
         return toDomain(entity);
     }
 
     @Override
     public List<ConnectorBusinessDomain> findAll() {
-        var businessDomains = jpaRepository.findAll();
+        var businessDomains = businessDomainJpaRepository.findAll();
 
         return businessDomains.stream()
                               .map(ConnectorBusinessDomainRepositoryImpl::toDomain)

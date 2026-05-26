@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.repository.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
@@ -26,13 +26,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorActionRepositoryImpl implements ConnectorActionRepository {
-    private final ConnectorActionJpaRepository jpaRepository;
+    private final ConnectorActionJpaRepository actionJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
     public ConnectorActionRepositoryImpl(
-            ConnectorActionJpaRepository jpaRepository,
+            ConnectorActionJpaRepository actionJpaRepository,
             ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
-        this.jpaRepository = jpaRepository;
+        this.actionJpaRepository = actionJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
     }
 
@@ -81,7 +81,7 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
                 businessDomainIdentifier.messageLaneIdentifier()
         );
-        var savedActions = this.jpaRepository.saveAll(
+        var savedActions = this.actionJpaRepository.saveAll(
                 actions.stream().map(action -> toEntity(action, processingMode)).toList()
         );
 
@@ -92,7 +92,7 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
     public ConnectorAction findByNameAndBusinessDomain(
             @NonNull String name,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        var action = this.jpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
+        var action = this.actionJpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
                 name, businessDomainIdentifier.messageLaneIdentifier()
         );
 

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
@@ -16,13 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 @SuppressWarnings("DataFlowIssue")
-public class ConnectorGatewayMessageReplyListenerTest extends BaseJmsMessageTest {
+public class ConnectorGatewayMessageAcknowledgementListenerTest extends BaseJmsMessageTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
     private MapMessage mapMessage;
     @InjectMocks
-    private ConnectorGatewayMessageReplyListener listener;
+    private ConnectorGatewayMessageAcknowledgementListener listener;
 
     @Test
     void should_handle_message_submission_to_gateway_reply_successfully() throws JMSException {

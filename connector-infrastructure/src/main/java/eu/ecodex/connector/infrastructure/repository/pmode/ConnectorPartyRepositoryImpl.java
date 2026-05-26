@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.repository.pmode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
@@ -27,13 +27,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
-    private final ConnectorPartyJpaRepository jpaRepository;
+    private final ConnectorPartyJpaRepository partyJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
     public ConnectorPartyRepositoryImpl(
-            ConnectorPartyJpaRepository jpaRepository,
+            ConnectorPartyJpaRepository partyJpaRepository,
             ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
-        this.jpaRepository = jpaRepository;
+        this.partyJpaRepository = partyJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
     }
 
@@ -98,7 +98,7 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
                 businessDomainIdentifier.messageLaneIdentifier()
         );
 
-        var savedParties = this.jpaRepository.saveAll(
+        var savedParties = this.partyJpaRepository.saveAll(
                 parties.stream().map(party -> toEntity(party, processingMode)).toList()
         );
 
@@ -118,7 +118,7 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
             @NonNull String identifier,
             @NonNull ConnectorPartyRoleType roleType,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        var party = this.jpaRepository
+        var party = this.partyJpaRepository
                 .findByIdentifierAndRoleTypeAndProcessingModeBusinessDomainIdentifier(
                         identifier,
                         roleType,

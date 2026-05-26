@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;

@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.repository.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorBusinessDomainJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorKeystoreJpaRepository;

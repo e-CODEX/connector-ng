@@ -19,7 +19,7 @@ import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorActionService;
 import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
-import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

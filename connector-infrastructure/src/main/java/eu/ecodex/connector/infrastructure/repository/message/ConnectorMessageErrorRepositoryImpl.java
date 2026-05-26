@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.repository.message;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
-import eu.ecodex.connector.domain.spi.ConnectorMessageErrorRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageErrorRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageErrorEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageErrorJpaRepository;

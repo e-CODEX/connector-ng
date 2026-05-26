@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorPartyService;
-import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.security.container;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssDocumentSigner;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssSigningTokenProvider;
 import eu.ecodex.connector.infrastructure.property.container.ConnectorContainerProperties;

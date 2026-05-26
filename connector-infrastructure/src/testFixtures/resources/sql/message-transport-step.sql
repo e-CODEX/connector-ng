@@ -24,4 +24,13 @@ values (
            now(),
            now(),
            3
+       ),
+       (
+           3,
+           '6676c97f-7463-43af-a800-ee560e1c3ed0@connector.ecodex.eu_backend_alice',
+           1,
+           'DOWNLOADED',
+           now(),
+           now(),
+           4
        );

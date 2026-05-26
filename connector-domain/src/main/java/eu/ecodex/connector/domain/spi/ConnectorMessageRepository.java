@@ -43,6 +43,20 @@ public interface ConnectorMessageRepository {
             @Nonnull String identifier, @Nonnull String ebmsIdentifier);
 
     /**
+     * Updates the backend identifier of a {@link ConnectorMessage} with the given identifier. This
+     * method modifies the backend-specific identification for the message in the repository.
+     *
+     * @param identifier        the unique identifier of the {@link ConnectorMessage} to be updated;
+     *                          must not be null.
+     * @param backendIdentifier the new backend identifier to associate with the
+     *                          {@link ConnectorMessage}; must not be null.
+     *
+     * @return the updated {@link ConnectorMessage} after the backend identifier has been modified.
+     */
+    ConnectorMessage updateBackendIdentifier(
+            @Nonnull String identifier, @Nonnull String backendIdentifier);
+
+    /**
      * Retrieves a paginated result of {@link ConnectorMessage} objects that match the provided
      * criteria based on the specified {@code request}, {@code identifier}, and {@code backendName}.
      * This method facilitates fetching connector messages that match the given filters.

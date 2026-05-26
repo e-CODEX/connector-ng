@@ -25,7 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
+        statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 @Sql(

@@ -15,4 +15,16 @@ values (
            now(),
            now(),
            2
+       ),
+       (
+           'PENDING',
+           now(),
+           now(),
+           3
+       ),
+       (
+           'DOWNLOADED',
+           now(),
+           now(),
+           3
        );

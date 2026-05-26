@@ -10,11 +10,15 @@
 
 package eu.ecodex.connector.soap;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
-import eu.ecodex.connector.domain.transition.EmptyRequestType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageErrorType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
+import jakarta.xml.ws.soap.SOAPFaultException;
+import java.time.LocalDateTime;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +46,7 @@ import org.springframework.test.context.jdbc.Sql;
         },
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-public class GetPendingMessagesIT extends AbstractIntegrationTest {
+public class AcknowledgeMessageIT extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @LocalServerPort
@@ -76,12 +80,58 @@ public class GetPendingMessagesIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_retrieve_all_pending_messages_successfully() {
-        var response = soapClient.requestMessages(new EmptyRequestType());
+    void should_failed_to_acknowledge_unknown_message() {
+        var request = acknowledgeMessage(true);
+        request.setResponseForMessageId("unknown-transport-id");
+
+        assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
+                .isInstanceOf(SOAPFaultException.class);
+    }
+
+    @Test
+    void should_acknowledge_message_with_success_status_successfully() {
+        var request = acknowledgeMessage(true);
+        var response = soapClient.acknowledgeMessage(request);
+        assertThat(response).isNotNull();
+
+        var deliveredToBackendAt = jdbcTemplate.queryForObject(
+                "SELECT delivered_to_backend_at FROM connector_messages WHERE identifier = ?",
+                LocalDateTime.class,
+                request.getResponseForMessageId()
+        );
+        assertThat(deliveredToBackendAt).isNotNull();
+    }
+
+    @Test
+    void should_failed_to_acknowledge_message_with_failed_status_and_no_error() {
+        var request = acknowledgeMessage(false);
+
+        assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
+                .isInstanceOf(SOAPFaultException.class);
+    }
+
+    @Test
+    void should_acknowledge_message_with_failed_status_successfully() {
+        var error = new DomibusConnectorMessageErrorType();
+        error.setErrorMessage("Error message");
+        error.setErrorDetails("Error details");
+        error.setErrorSource("Error source");
+        var request = acknowledgeMessage(true);
+        request.getMessageErrors().add(error);
+
+        var response = soapClient.acknowledgeMessage(request);
 
         assertThat(response).isNotNull();
-        assertThat(response.getMessages()).isNotNull();
-        assertThat(response.getMessages().size()).isEqualTo(1);
+    }
+
+    private DomibusConnectorMessageResponseType acknowledgeMessage(boolean result) {
+        var ackResponse = new DomibusConnectorMessageResponseType();
+        ackResponse.setResult(result);
+        ackResponse.setAssignedMessageId("ebf72de4-05d2-4a7b-838a-5018923996da");
+        ackResponse.setResponseForMessageId(
+                "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+        ackResponse.setResultMessage("Message acknowledged successfully");
+        return ackResponse;
     }
 
     private DomibusConnectorBackendWebService createClient() {

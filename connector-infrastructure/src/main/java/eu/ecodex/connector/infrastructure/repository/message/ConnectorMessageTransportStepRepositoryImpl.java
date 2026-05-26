@@ -29,8 +29,8 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorMessageTransportStepRepository}.
  */
 @Component
-public class ConnectorMessageTransportStepRepositoryImpl implements
-        ConnectorMessageTransportStepRepository {
+public class ConnectorMessageTransportStepRepositoryImpl
+        implements ConnectorMessageTransportStepRepository {
     private final ConnectorMessageTransportStepJpaRepository transportStepJpaRepository;
     private final ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
@@ -58,14 +58,12 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
     @Override
     public ConnectorMessageTransportStep save(
             @NonNull ConnectorMessageTransportStep transportStep) {
-        var messageEntity = this.messageJpaRepository.findByIdentifier(
-                transportStep.message().identifier()
-        );
+        var messageEntity = this.messageJpaRepository.findByIdentifier(transportStep.message()
+                                                                                    .identifier());
 
         if (messageEntity == null) {
             throw new IllegalArgumentException(
-                    "No message found for identifier: "
-                            + transportStep.message().identifier());
+                    "No message found for identifier: " + transportStep.message().identifier());
         }
 
         var transportStepEntity = toEntity(transportStep);
@@ -109,10 +107,7 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
     public void updateStatus(
             @NonNull List<String> identifiers,
             @NonNull ConnectorMessageTransportStatus status) {
-        this.transportStepJpaRepository.updateStatus(
-                identifiers,
-                status.name()
-        );
+        this.transportStepJpaRepository.updateStatus(identifiers, status.name());
 
         this.stepStatusJpaRepository.insert(identifiers, status.name());
     }
@@ -151,11 +146,8 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
                                             .identifier(entity.getIdentifier())
                                             .numberOfAttempts(entity.getNumberOfAttempts())
                                             .status(entity.getStatus())
-                                            .message(
-                                                    ConnectorMessageRepositoryImpl.toShortDomain(
-                                                            entity.getMessage()
-                                                    )
-                                            )
+                                            .message(ConnectorMessageRepositoryImpl.toShortDomain(
+                                                    entity.getMessage()))
                                             .statuses(toStatuses(entity.getStatuses()))
                                             .createdAt(entity.getCreatedAt())
                                             .updatedAt(entity.getUpdatedAt())
@@ -164,19 +156,17 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
 
     private ConnectorMessageTransportStepEntity toEntity(
             ConnectorMessageTransportStep transportStep) {
-        return ConnectorMessageTransportStepEntity.builder()
-                                                  .identifier(transportStep.identifier())
-                                                  .numberOfAttempts(
-                                                          transportStep.numberOfAttempts())
-                                                  .status(transportStep.status())
-                                                  .build();
+        return ConnectorMessageTransportStepEntity
+                .builder()
+                .identifier(transportStep.identifier())
+                .numberOfAttempts(transportStep.numberOfAttempts())
+                .status(transportStep.status())
+                .build();
     }
 
     private ConnectorMessageTransportStepStatusEntity toEntity(
             ConnectorMessageTransportStatus status) {
-        return ConnectorMessageTransportStepStatusEntity.builder()
-                                                        .status(status)
-                                                        .build();
+        return ConnectorMessageTransportStepStatusEntity.builder().status(status).build();
     }
 
     ConnectorMessageTransportStepEntity updateEntity(
@@ -190,10 +180,12 @@ public class ConnectorMessageTransportStepRepositoryImpl implements
 
     private Set<ConnectorMessageTransportStepStatus> toStatuses(
             Set<ConnectorMessageTransportStepStatusEntity> statuses) {
-        return statuses.stream().map(status -> ConnectorMessageTransportStepStatus
-                .builder()
-                .status(status.getStatus())
-                .createdAt(status.getCreatedAt())
-                .build()).collect(Collectors.toSet());
+        return statuses.stream()
+                       .map(status -> ConnectorMessageTransportStepStatus
+                               .builder()
+                               .status(status.getStatus())
+                               .createdAt(status.getCreatedAt())
+                               .build())
+                       .collect(Collectors.toSet());
     }
 }

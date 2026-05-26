@@ -54,4 +54,18 @@ values
         3,
         4,
         4
+    ),
+    (
+        '7b62367e-bd12-42ea-baba-b7f62288f1ab',
+        null,
+        null,
+        'alice',
+        'bob',
+        now(),
+        now(),
+        11,
+        3,
+        4,
+        4,
+        4
     );

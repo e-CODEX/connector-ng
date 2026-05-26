@@ -50,6 +50,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     @AfterEach
     void cleanUp() {
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_step_statuses");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_steps");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_document_signatures");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
@@ -76,8 +79,8 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                 .value(result -> {
                     assertThat(result).isNotNull();
                     assert result != null;
-                    assertThat(result.content().size()).isEqualTo(3);
-                    assertThat(result.totalElements()).isEqualTo(3);
+                    assertThat(result.content().size()).isEqualTo(4);
+                    assertThat(result.totalElements()).isEqualTo(4);
                     assertThat(result.page()).isEqualTo(0);
                     assertThat(result.size()).isEqualTo(20);
                 });

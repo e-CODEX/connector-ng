@@ -8,18 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.soap;
+package eu.ecodex.connector.soap.backend;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageErrorType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
+import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import java.time.LocalDateTime;
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,23 +29,9 @@ import org.springframework.test.context.jdbc.Sql;
 
 @Sql(
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-@Sql(
-        scripts = {
-                "classpath:sql/business-domain.sql",
-                "classpath:sql/processing-mode.sql",
-                "classpath:sql/party.sql",
-                "classpath:sql/service.sql",
-                "classpath:sql/action.sql",
-                "classpath:sql/message.sql",
-                "classpath:sql/message-as4-properties.sql",
-                "classpath:sql/message-transport-step.sql",
-                "classpath:sql/message-transport-step-statuses.sql",
-        },
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-)
-public class AcknowledgeMessageIT extends AbstractIntegrationTest {
+public class AcknowledgeMessageIT extends BackendServiceTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @LocalServerPort
@@ -56,27 +41,12 @@ public class AcknowledgeMessageIT extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        soapClient = createClient();
+        soapClient = createClient(port);
     }
 
     @AfterEach
     void cleanUp() {
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_step_statuses");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_steps");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_document_signatures");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_as4_properties");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_services");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_actions");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_processing_modes");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_keystores");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+        cleanDb();
     }
 
     @Test
@@ -89,6 +59,17 @@ public class AcknowledgeMessageIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/message-transport-step.sql",
+            "classpath:sql/message-transport-step-statuses.sql",
+    })
     void should_acknowledge_message_with_success_status_successfully() {
         var request = acknowledgeMessage(true);
         var response = soapClient.acknowledgeMessage(request);
@@ -103,6 +84,17 @@ public class AcknowledgeMessageIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/message-transport-step.sql",
+            "classpath:sql/message-transport-step-statuses.sql",
+    })
     void should_failed_to_acknowledge_message_with_failed_status_and_no_error() {
         var request = acknowledgeMessage(false);
 
@@ -111,6 +103,17 @@ public class AcknowledgeMessageIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/message-transport-step.sql",
+            "classpath:sql/message-transport-step-statuses.sql",
+    })
     void should_acknowledge_message_with_failed_status_successfully() {
         var error = new DomibusConnectorMessageErrorType();
         error.setErrorMessage("Error message");
@@ -132,16 +135,5 @@ public class AcknowledgeMessageIT extends AbstractIntegrationTest {
                 "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
         ackResponse.setResultMessage("Message acknowledged successfully");
         return ackResponse;
-    }
-
-    private DomibusConnectorBackendWebService createClient() {
-        var address = "http://localhost:" + port + "/services/backend";
-
-        var factory = new JaxWsProxyFactoryBean();
-        factory.setServiceClass(DomibusConnectorBackendWebService.class);
-        factory.setAddress(address);
-        factory.setWsdlURL("classpath:wsdl/v1/DomibusConnectorBackendWebService.wsdl");
-
-        return (DomibusConnectorBackendWebService) factory.create();
     }
 }

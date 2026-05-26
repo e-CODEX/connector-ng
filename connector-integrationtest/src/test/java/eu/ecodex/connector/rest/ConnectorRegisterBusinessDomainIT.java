@@ -20,25 +20,23 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@Sql(
+        statements = "DELETE FROM connector_business_domains WHERE id > 0",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+)
 public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void cleanUp() {
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+        cleanDb();
     }
 
     @Test
-    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     void should_register_business_domain_successfully() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
@@ -60,7 +58,6 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     @Sql("classpath:sql/business-domain.sql")
     void should_fail_to_register_business_domain_with_existing_identifier() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
@@ -73,7 +70,6 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     @Sql("classpath:sql/business-domain.sql")
     void should_retrieve_business_domains_successfully() {
         var response = apiClient.get()

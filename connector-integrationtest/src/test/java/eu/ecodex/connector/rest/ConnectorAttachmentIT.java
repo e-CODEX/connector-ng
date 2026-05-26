@@ -15,20 +15,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 public class ConnectorAttachmentIT extends AbstractIntegrationTest {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @Autowired
     private RestTestClient apiClient;
 
     @AfterEach
     void cleanUp() {
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+        cleanDb();
     }
 
     @Test

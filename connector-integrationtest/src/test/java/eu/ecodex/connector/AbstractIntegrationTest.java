@@ -15,9 +15,11 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import java.time.Duration;
 import org.junit.jupiter.api.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -56,15 +58,21 @@ public abstract class AbstractIntegrationTest {
                                      .endpoint(minio.getS3URL())
                                      .credentials(minio.getUserName(), minio.getPassword())
                                      .build();
-            createBucketIfNotExists("attachments");
+            createBucketIfNotExists();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MinIO client", e);
         }
     }
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.agroal.driver-class-name", () -> "com.mysql.cj.jdbc.MysqlXADataSource");
+        registry.add(
+                "spring.datasource.agroal.driver-class-name",
+                () -> "com.mysql.cj.jdbc.MysqlXADataSource"
+        );
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);
@@ -79,19 +87,20 @@ public abstract class AbstractIntegrationTest {
         registry.add("connector.file.storage.s3.endpoint", minio::getS3URL);
     }
 
-    private static void createBucketIfNotExists(String bucketName) throws Exception {
+    private static void createBucketIfNotExists() throws Exception {
         boolean exists = minioClient.bucketExists(
-                BucketExistsArgs.builder().bucket(bucketName).build()
+                BucketExistsArgs.builder().bucket("attachments").build()
         );
         if (!exists) {
             minioClient.makeBucket(
-                    MakeBucketArgs.builder().bucket(bucketName).build()
+                    MakeBucketArgs.builder().bucket("attachments").build()
             );
         }
     }
 
-    protected MultiValueMap<String, Object> produceAttachmentPart(MediaType mediaType, int fileSize) {
-
+    protected MultiValueMap<String, Object> produceAttachmentPart(
+            MediaType mediaType,
+            int fileSize) {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
@@ -104,5 +113,24 @@ public abstract class AbstractIntegrationTest {
         );
 
         return parts;
+    }
+
+    protected void cleanDb() {
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_step_statuses");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_steps");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_document_signatures");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_as4_properties");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_services");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_actions");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_processing_modes");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_keystores");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
+        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
     }
 }

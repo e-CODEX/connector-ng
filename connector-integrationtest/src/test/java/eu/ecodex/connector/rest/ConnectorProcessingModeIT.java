@@ -26,13 +26,16 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import tools.jackson.databind.ObjectMapper;
 
+@Sql(
+        statements = "DELETE FROM connector_business_domains WHERE id > 0",
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+)
 public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     private final ConnectorProcessingModeCreationRequest metadata =
             ConnectorProcessingModeCreationRequest
@@ -52,19 +55,10 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     private RestTestClient apiClient;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void cleanUp() {
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_services");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_actions");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_processing_modes");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_keystores");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+        cleanDb();
     }
 
     /*
@@ -73,7 +67,6 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
      */
 
     @Test
-    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
     @Sql("classpath:sql/business-domain.sql")
     void should_succeed_to_create_processing_mode() {
         var parts = producePart();
@@ -104,7 +97,10 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
                 .businessDomainIdentifier("fake_business_domain")
                 .build();
 
-        var metadataPart = new HttpEntity<>(objectMapper.writeValueAsString(updatedMetadata), jsonHeaders);
+        var metadataPart = new HttpEntity<>(
+                objectMapper.writeValueAsString(updatedMetadata),
+                jsonHeaders
+        );
 
         parts.add("metadata", metadataPart);
 
@@ -120,9 +116,10 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql"
+    })
     void should_fail_to_create_a_pmode_if_the_specified_business_domain_has_already_one() {
         var parts = producePart();
 
@@ -144,9 +141,10 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql(statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL")
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql"
+    })
     void should_succeed_to_get_processing_modes() {
         var response = apiClient.get()
                                 .uri("/api/v1/admin/business-domains")

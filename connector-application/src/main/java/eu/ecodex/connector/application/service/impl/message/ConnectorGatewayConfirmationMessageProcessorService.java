@@ -16,8 +16,8 @@ import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageE
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.NonNull;

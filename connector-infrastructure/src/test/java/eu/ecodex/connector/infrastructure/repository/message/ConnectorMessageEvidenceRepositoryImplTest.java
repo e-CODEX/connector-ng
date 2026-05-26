@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.RepositoryContextConfiguration;
-import eu.ecodex.connector.domain.spi.ConnectorMessageEvidenceRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

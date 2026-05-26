@@ -17,7 +17,7 @@ import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.spi.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

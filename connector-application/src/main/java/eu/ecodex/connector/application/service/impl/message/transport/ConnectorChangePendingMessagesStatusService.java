@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.message.transport;
 
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.spi.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

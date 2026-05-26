@@ -24,9 +24,9 @@ import eu.ecodex.connector.application.service.impl.message.ConnectorMessageVeri
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
-import eu.ecodex.connector.domain.spi.ConnectorPartyRepository;
-import eu.ecodex.connector.domain.spi.ConnectorServiceRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.service.usecase.message.ConnectorListMess
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 

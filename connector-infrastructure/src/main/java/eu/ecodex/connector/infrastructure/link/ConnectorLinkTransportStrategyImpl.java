@@ -11,7 +11,6 @@
 package eu.ecodex.connector.infrastructure.link;
 
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.spi.link.ConnectorLinkTransportStrategy;
@@ -42,12 +41,10 @@ public class ConnectorLinkTransportStrategyImpl implements ConnectorLinkTranspor
     public void transport(@NonNull ConnectorMessage message) {
         if (message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
             log.debug("Transporting message [{}] from backend to gateway", message.identifier());
-
             gatewayLinkEventPublisher.publish(message);
         } else {
-            log.debug("gateway to backend message transport strategy not yet implemented");
+            log.debug("Transporting message [{}] from gateway to backend", message.identifier());
             backendLinkEventPublisher.publish(message);
-            // TODO to be implemented. no exception thrown to allow testing
         }
     }
 }

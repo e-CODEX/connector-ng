@@ -15,7 +15,7 @@ import eu.ecodex.connector.domain.api.service.ConnectorActionService;
 import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.spi.ConnectorActionRepository;
+import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
 import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

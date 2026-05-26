@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class MerlinPropertiesFactory {
+public class ConnectorMerlinPropertiesFactory {
     private static final String PROVIDER = "org.apache.wss4j.crypto.provider";
     private static final String KS_TYPE = "org.apache.wss4j.crypto.merlin.keystore.type";
     private static final String KS_PASSWORD = "org.apache.wss4j.crypto.merlin.keystore.password";

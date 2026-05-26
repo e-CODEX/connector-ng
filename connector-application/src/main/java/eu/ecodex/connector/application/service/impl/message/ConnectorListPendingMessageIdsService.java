@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.impl.message;
 
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
-import eu.ecodex.connector.domain.spi.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 

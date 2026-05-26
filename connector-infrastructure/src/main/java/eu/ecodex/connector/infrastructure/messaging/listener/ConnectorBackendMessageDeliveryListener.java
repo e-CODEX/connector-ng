@@ -16,10 +16,10 @@ import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.spi.ConnectorLinkPartnerRepository;
-import eu.ecodex.connector.domain.spi.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
-import eu.ecodex.connector.infrastructure.outbound.soap.BackendServiceClient;
+import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.jms.annotation.JmsListener;
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHandler {
     private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
-    private final BackendServiceClient backendServiceClient;
+    private final ConnectorBackendServiceClient backendServiceClient;
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final LegacyMessageHelper legacyMessageHelper;
 
@@ -53,7 +53,7 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     public ConnectorBackendMessageDeliveryListener(
             ConnectorRegisterMessageTransportStep messageTransportStep,
             ConnectorMessageRepository messageRepository,
-            BackendServiceClient backendServiceClient,
+            ConnectorBackendServiceClient backendServiceClient,
             ConnectorLinkPartnerRepository linkPartnerRepository,
             LegacyMessageHelper legacyMessageHelper) {
         this.messageTransportStep = messageTransportStep;

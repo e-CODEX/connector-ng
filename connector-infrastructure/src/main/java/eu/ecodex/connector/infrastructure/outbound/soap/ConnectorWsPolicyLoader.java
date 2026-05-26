@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.soap;
 
-import eu.ecodex.connector.infrastructure.outbound.soap.exception.WsPolicyLoaderException;
+import eu.ecodex.connector.infrastructure.outbound.soap.exception.ConnectorWsPolicyLoaderException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -29,12 +29,12 @@ import org.springframework.core.io.ClassPathResource;
  * and creating corresponding {@link WSPolicyFeature} objects for use in web service clients.
  */
 @Slf4j
-public class WsPolicyLoader {
+public class ConnectorWsPolicyLoader {
     private static final String CLASSPATH_PREFIX = "classpath:";
 
     private final String wsPolicyPath;
 
-    public WsPolicyLoader(String wsPolicyPath) {
+    public ConnectorWsPolicyLoader(String wsPolicyPath) {
         this.wsPolicyPath = wsPolicyPath;
     }
 
@@ -45,9 +45,9 @@ public class WsPolicyLoader {
      * @return a {@link WSPolicyFeature} object encapsulating the loaded WS-Policy definition, with
      *         its corresponding elements set and enabled.
      *
-     * @throws UncheckedIOException    if the policy file cannot be accessed or read.
-     * @throws WsPolicyLoaderException if parsing the policy file fails, or the parsed document
-     *                                 lacks a valid root element.
+     * @throws UncheckedIOException             if the policy file cannot be accessed or read.
+     * @throws ConnectorWsPolicyLoaderException if parsing the policy file fails, or the parsed
+     *                                          document lacks a valid root element.
      */
     public WSPolicyFeature loadPolicyFeature() {
         log.debug("Loading WS policy from path: {}", wsPolicyPath);
@@ -56,7 +56,7 @@ public class WsPolicyLoader {
             var element = StaxUtils.read(is).getDocumentElement();
 
             if (element == null) {
-                throw new WsPolicyLoaderException(
+                throw new ConnectorWsPolicyLoaderException(
                         "Policy file parsed but produced no document element: " + wsPolicyPath,
                         null
                 );
@@ -71,7 +71,10 @@ public class WsPolicyLoader {
         } catch (IOException e) {
             throw new UncheckedIOException("WS policy '" + wsPolicyPath + "' cannot be read", e);
         } catch (XMLStreamException e) {
-            throw new WsPolicyLoaderException("Cannot parse WS policy '" + wsPolicyPath + "'", e);
+            throw new ConnectorWsPolicyLoaderException(
+                    "Cannot parse WS policy '" + wsPolicyPath + "'",
+                    e
+            );
         }
     }
 

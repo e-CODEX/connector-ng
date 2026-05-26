@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.service.impl.message.transport.ConnectorChangePendingMessagesStatusService;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.spi.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

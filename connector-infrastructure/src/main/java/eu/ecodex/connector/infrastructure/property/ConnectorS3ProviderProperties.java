@@ -16,9 +16,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration properties required to connect to an Amazon S3 (or compatible)
- * object storage service.
- * </p>
+ * Configuration properties required to connect to an Amazon S3 (or compatible) object storage
+ * service.
  */
 @Setter
 @Getter

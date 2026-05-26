@@ -16,7 +16,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentSt
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.security.container.ConnectorAsicContainerBuilder;
 import eu.ecodex.connector.infrastructure.security.container.ConnectorAsicContainerValidator;
 import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;

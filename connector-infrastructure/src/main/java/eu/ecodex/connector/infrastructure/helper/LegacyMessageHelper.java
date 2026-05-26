@@ -18,7 +18,7 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.transition.DomibusConnectorActionType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorConfirmationType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureMimeType;

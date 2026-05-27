@@ -22,6 +22,11 @@ public final class TestDatabaseCleanup {
     private TestDatabaseCleanup() {
     }
 
+    /**
+     * Truncates all connector tables used by SQL-based integration and repository tests.
+     *
+     * @param jdbcTemplate JDBC template bound to the test database
+     */
     public static void truncateAll(JdbcTemplate jdbcTemplate) {
         synchronized (LOCK) {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");

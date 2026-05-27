@@ -299,7 +299,8 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage findByBackendMessageIdentifier(@NonNull String backendMessageIdentifier) {
+    public ConnectorMessage findByBackendMessageIdentifier(
+            @NonNull String backendMessageIdentifier) {
         var message = this.messageJpaRepository.findByBackendMessageIdentifier(
                 backendMessageIdentifier
         );

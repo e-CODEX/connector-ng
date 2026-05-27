@@ -12,9 +12,9 @@ package eu.ecodex.connector.application.service.impl.evidence;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorEvidenceTriggerProcessor;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
 import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
@@ -49,6 +49,18 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
     private final ConnectorLinkSubmitter linkSubmitter;
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
+    /**
+     * Creates the processor with message, evidence, and link submission dependencies.
+     *
+     * @param messageService                    connector message operations
+     * @param evidenceService                   evidence validation operations
+     * @param messageRepository                 persisted connector messages
+     * @param evidenceCreator                   creates evidence records
+     * @param evidenceVerifier                  validates evidence applicability
+     * @param evidenceMessageCreator            builds evidence messages for transport
+     * @param linkSubmitter                     forwards messages to partners
+     * @param processingConfigurationProvider   message processing configuration
+     */
     public ConnectorEvidenceTriggerProcessorService(
             ConnectorMessageService messageService,
             ConnectorEvidenceService evidenceService,
@@ -79,7 +91,9 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
             );
 
             if (!messageService.isEvidenceTriggerMessage(triggerMessage)) {
-                throw new ConnectorEvidenceException("the message is not an evidence trigger message");
+                throw new ConnectorEvidenceException(
+                        "the message is not an evidence trigger message"
+                );
             }
             evidenceService.isEvidenceTriggeringAllowed(triggerMessage);
 
@@ -89,7 +103,8 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
             var businessMessage = findReferencedBusinessMessage(triggerMessage);
             if (businessMessage.direction() != ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
                 throw new ConnectorEvidenceException(
-                        "evidence trigger is only supported for gateway-to-backend business messages"
+                        "evidence trigger is only supported for "
+                                + "gateway-to-backend business messages"
                 );
             }
 
@@ -103,7 +118,8 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
 
             linkSubmitter.submit(evidenceForGateway);
 
-            if (processingConfigurationProvider.getConfiguration().sendGeneratedEvidencesToBackend()) {
+            if (processingConfigurationProvider.getConfiguration()
+                    .sendGeneratedEvidencesToBackend()) {
                 linkSubmitter.submit(evidenceForGateway.switchDirection());
             }
 

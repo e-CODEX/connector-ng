@@ -18,8 +18,8 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import java.util.List;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 

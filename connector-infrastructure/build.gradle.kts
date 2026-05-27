@@ -89,6 +89,7 @@ dependencies {
     testFixturesImplementation(project(":connector-soap-api"))
     testFixturesImplementation(platform(libs.spring.boot.bom))
     testFixturesImplementation("org.springframework:spring-core")
+    testFixturesImplementation("org.springframework:spring-jdbc")
     testFixturesImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testFixturesImplementation(libs.jakarta.activation)
     testFixturesImplementation(libs.jakarta.mail)

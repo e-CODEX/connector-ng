@@ -15,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
@@ -28,6 +30,7 @@ import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,6 +43,8 @@ public class ConnectorOutboundMessageReceiverServiceTest {
     @Mock
     private ConnectorEventPublisher messageStagingEventPublisher;
     @Mock
+    private ConnectorEventPublisher evidenceTriggerEventPublisher;
+    @Mock
     private ConnectorMessageIdGenerator messageIdGenerator;
     @Mock
     private ConnectorMessageProcessingConfigurationProvider messageProcessingConfigurationProvider;
@@ -47,6 +52,8 @@ public class ConnectorOutboundMessageReceiverServiceTest {
     private ConnectorMessageVerifier messageVerifier;
     @Mock
     private ConnectorBusinessDomainVerifier businessDomainVerifier;
+    @Mock
+    private ConnectorMessageRepository messageRepository;
     @InjectMocks
     private ConnectorOutboundMessageReceiverService messageStagingService;
 
@@ -72,6 +79,24 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         assertThat(outboundMessage.identifier()).isNull();
         assertThat(message.identifier()).isNotNull();
         assertThat(message.identifier()).isEqualTo(generatedIdentifier);
+        verify(evidenceTriggerEventPublisher, never()).publish(any());
+
+    }
+
+    @Test
+    void should_route_evidence_trigger_to_trigger_queue() {
+        var generatedIdentifier = "trigger-id@connector";
+        when(messageIdGenerator.generateIdentifier()).thenReturn(generatedIdentifier);
+        doNothing().when(evidenceTriggerEventPublisher).publish(any());
+
+        var trigger = MessageTestFixtures.createEvidenceTriggerMessage();
+
+        var message = messageStagingService.register(trigger);
+
+        assertThat(message.identifier()).isEqualTo(generatedIdentifier);
+        verify(evidenceTriggerEventPublisher).publish(any());
+        verify(messageStagingEventPublisher, never()).publish(any());
+        verify(messageVerifier, never()).verify(any(), any());
     }
 
     @Test

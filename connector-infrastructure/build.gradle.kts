@@ -5,8 +5,12 @@ plugins {
 }
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
+val jaxbTool: Configuration = configurations.create("jaxbTool")
 
 dependencies {
+    jaxbTool("org.glassfish.jaxb:jaxb-xjc:${libs.versions.glassfish.jaxb.get()}")
+    jaxbTool(libs.glassfish.jaxb.runtime)
+    jaxbTool(libs.jakarta.xml.bind.api)
     implementation(project(":connector-domain"))
     implementation(project(":connector-soap-api"))
     implementation(project(":connector-application"))
@@ -92,4 +96,25 @@ dependencies {
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)
     mockitoAgent(libs.mockito.core) { isTransitive = false }
+}
+
+val evidenceJaxbOutputDir = layout.buildDirectory.dir("generated-sources/jaxb")
+
+tasks.register<JavaExec>("generateEvidenceJaxb") {
+    group = "build"
+    description =
+        "Regenerate JAXB classes from REM evidence XSD sources (output to build/, does not replace vendored sources)"
+    classpath = jaxbTool
+    mainClass.set("com.sun.tools.xjc.XJCFacade")
+    val xsdDir = file("src/main/resources/xsd")
+    val xjbFile = file("src/main/resources/xjb/spocseu.xjb")
+    val outDir = evidenceJaxbOutputDir.get().asFile
+    args(
+        "-d", outDir.absolutePath,
+        "-b", xjbFile.absolutePath,
+        file("$xsdDir/eDeliveryDetails.xsd").absolutePath,
+        file("$xsdDir/TS102640_v2.xsd").absolutePath,
+        file("$xsdDir/SPOCS_ts102640_soap_body.xsd").absolutePath,
+    )
+    doFirst { outDir.mkdirs() }
 }

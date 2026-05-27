@@ -154,13 +154,23 @@ public class MessageTestFixtures {
         return builder.build();
     }
 
-    public static ConnectorMessage createEvidenceTriggerMessage() {
-        var evidence = EvidenceTestFixtures.createEvidenceTrigger();
+    public static ConnectorMessage createDeliveryEvidenceMessage() {
+        var evidence = EvidenceTestFixtures.createDeliveryEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
         var builder = backendToGatewayMessage();
         builder.evidences(evidences);
         builder.transportedEvidences(evidences);
+        builder.businessContent(null);
+        return builder.build();
+    }
+
+    public static ConnectorMessage createEvidenceTriggerMessage() {
+        var evidence = EvidenceTestFixtures.createEvidenceTrigger();
+        var transported = new ArrayList<ConnectorMessageEvidence>();
+        transported.add(evidence);
+        var builder = backendToGatewayMessage();
+        builder.transportedEvidences(transported);
         builder.businessContent(null);
         return builder.build();
     }

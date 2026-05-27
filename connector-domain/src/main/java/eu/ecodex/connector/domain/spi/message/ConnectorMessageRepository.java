@@ -117,6 +117,14 @@ public interface ConnectorMessageRepository {
     ConnectorMessage findByEbmsMessageIdentifier(@Nonnull String ebmsMessageIdentifier);
 
     /**
+     * Finds a message by its backend-assigned message identifier.
+     *
+     * @param backendMessageIdentifier backend message id; must not be blank
+     * @return matching message, or null
+     */
+    ConnectorMessage findByBackendMessageIdentifier(@Nonnull String backendMessageIdentifier);
+
+    /**
      * Updates backend routing metadata required to deliver a gateway confirmation message to the
      * originating backend system.
      *

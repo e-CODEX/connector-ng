@@ -17,6 +17,7 @@ import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorB
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
+import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConnectorOutboundMessageReceiverService implements ConnectorOutboundMessageReceiver {
     private final ConnectorMessageProcessingConfigurationProvider configurationProvider;
+    private final ConnectorMessageService messageService;
     private final ConnectorMessageVerifier messageVerifier;
     private final ConnectorEventPublisher stagingEventPublisher;
+    private final ConnectorEventPublisher evidenceTriggerEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGenerator;
     private final ConnectorBusinessDomainVerifier businessDomainVerifier;
 
@@ -41,22 +44,29 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
      *
      * @param configurationProvider provider of the current
      *                              {@link ConnectorMessageProcessingConfiguration}
+     * @param messageService        domain message classification helpers
      * @param messageVerifier       verifier used to validate outbound messages
      * @param stagingEventPublisher event publisher used to stage messages for further processing;
      *                              qualified as "connectorOutboundMessageStagingEventPublisher"
+     * @param evidenceTriggerEventPublisher publisher for backend evidence trigger messages
      * @param messageIdGenerator    generator used to assign unique identifiers to outbound
      *                              messages
      */
     public ConnectorOutboundMessageReceiverService(
             ConnectorMessageProcessingConfigurationProvider configurationProvider,
+            ConnectorMessageService messageService,
             ConnectorMessageVerifier messageVerifier,
             @Qualifier("connectorOutboundMessageStagingEventPublisher")
             ConnectorEventPublisher stagingEventPublisher,
+            @Qualifier("connectorOutboundEvidenceTriggerEventPublisher")
+            ConnectorEventPublisher evidenceTriggerEventPublisher,
             ConnectorMessageIdGenerator messageIdGenerator,
             ConnectorBusinessDomainVerifier businessDomainVerifier) {
         this.configurationProvider = configurationProvider;
+        this.messageService = messageService;
         this.messageVerifier = messageVerifier;
         this.stagingEventPublisher = stagingEventPublisher;
+        this.evidenceTriggerEventPublisher = evidenceTriggerEventPublisher;
         this.messageIdGenerator = messageIdGenerator;
         this.businessDomainVerifier = businessDomainVerifier;
     }
@@ -65,8 +75,14 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
     @Transactional
     public ConnectorMessage register(@NonNull final ConnectorMessage message) {
         businessDomainVerifier.execute(message.businessDomainIdentifier());
-        var configuration = this.configurationProvider.getConfiguration();
         var messageWithId = this.assignIdentifier(message);
+
+        if (messageService.isEvidenceTriggerMessage(messageWithId)) {
+            evidenceTriggerEventPublisher.publish(messageWithId);
+            return messageWithId;
+        }
+
+        var configuration = this.configurationProvider.getConfiguration();
         this.messageVerifier.verify(messageWithId, configuration.outboundMessageVerificationMode());
         stagingEventPublisher.publish(messageWithId);
 

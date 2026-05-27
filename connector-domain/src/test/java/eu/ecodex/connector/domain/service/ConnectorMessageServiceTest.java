@@ -123,6 +123,7 @@ public class ConnectorMessageServiceTest {
         var message = MessageTestFixtures.createEvidenceTriggerMessage()
                 .toBuilder()
                 .evidences(null)
+                .transportedEvidences(null)
                 .build();
         var isEvidenceTrigger = this.connectorMessageService.isEvidenceTriggerMessage(message);
 
@@ -134,6 +135,7 @@ public class ConnectorMessageServiceTest {
         var message = MessageTestFixtures.createEvidenceTriggerMessage()
                                  .toBuilder()
                                  .evidences(Collections.emptyList())
+                                 .transportedEvidences(Collections.emptyList())
                                  .build();
         var isEvidenceTrigger = this.connectorMessageService.isEvidenceTriggerMessage(message);
 
@@ -145,6 +147,16 @@ public class ConnectorMessageServiceTest {
         var message = MessageTestFixtures.createEvidenceTriggerMessage()
                                  .toBuilder()
                                  .evidences(
+                                         Collections.singletonList(
+                                                 EvidenceTestFixtures.createEvidenceTrigger()
+                                                                     .toBuilder()
+                                                                     .attachment(
+                                                                             MessageAttachmentTestFixtures.createEvidenceAttachment()
+                                                                     )
+                                                                     .build()
+                                         )
+                                 )
+                                 .transportedEvidences(
                                          Collections.singletonList(
                                                  EvidenceTestFixtures.createEvidenceTrigger()
                                                                      .toBuilder()

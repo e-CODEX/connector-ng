@@ -20,20 +20,42 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageConfirmationType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDetailsType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
+import java.util.ArrayList;
 import java.util.List;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 public class MessageHelpers {
+
+    /**
+     * Returns true when the SOAP payload is an evidence trigger (no business content, single
+     * confirmation without XML payload).
+     */
+    public static boolean isEvidenceTriggerRequest(DomibusConnectorMessageType message) {
+        if (message.getMessageContent() != null) {
+            return false;
+        }
+        var confirmations = message.getMessageConfirmations();
+        return confirmations != null
+               && confirmations.size() == 1
+               && isEmptyConfirmationPayload(confirmations.getFirst());
+    }
+
     public static ConnectorMessage toDomain(
             DomibusConnectorMessageType message,
             List<String> attachments,
@@ -41,6 +63,10 @@ public class MessageHelpers {
             String businessDocumentAttachmentIdentifier,
             String backendClientName
     ) throws Exception {
+        if (isEvidenceTriggerRequest(message)) {
+            return toEvidenceTriggerDomain(message, backendClientName);
+        }
+
         var details = message.getMessageDetails();
 
         var incomingBusinessContent = message.getMessageContent();
@@ -59,6 +85,39 @@ public class MessageHelpers {
                 ))
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .attachments(toAttachments(attachments))
+                .build();
+    }
+
+    private static ConnectorMessage toEvidenceTriggerDomain(
+            DomibusConnectorMessageType message,
+            String backendClientName) {
+        var details = message.getMessageDetails();
+        var confirmation = message.getMessageConfirmations().getFirst();
+
+        var triggerEvidence = ConnectorMessageEvidence.builder()
+                .type(ConnectorEvidenceType.valueOf(
+                        confirmation.getConfirmationType().value()))
+                .attachment(null)
+                .build();
+
+        var transported = new ArrayList<ConnectorMessageEvidence>();
+        transported.add(triggerEvidence);
+
+        return ConnectorMessage
+                .builder()
+                .backendMessageIdentifier(details.getBackendMessageId())
+                .backendName(backendClientName)
+                .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
+                .as4Properties(toTriggerAS4Properties(details))
+                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                .transportedEvidences(transported)
+                .build();
+    }
+
+    private static ConnectorMessageAS4Properties toTriggerAS4Properties(
+            DomibusConnectorMessageDetailsType details) {
+        return toAS4Properties(details).toBuilder()
+                .referenceToIdentifier(details.getRefToMessageId())
                 .build();
     }
 
@@ -120,6 +179,33 @@ public class MessageHelpers {
                 .xmlContent(toAttachment(businessContentAttachmentIdentifier))
                 .businessDocument(businessDocument)
                 .build();
+    }
+
+    private static boolean isEmptyConfirmationPayload(
+            DomibusConnectorMessageConfirmationType confirmation) {
+        Source source = confirmation.getConfirmation();
+        if (source == null) {
+            return true;
+        }
+        if (source instanceof StreamSource streamSource) {
+            var reader = streamSource.getReader();
+            if (reader != null) {
+                try {
+                    return !reader.ready();
+                } catch (Exception e) {
+                    return true;
+                }
+            }
+            var stream = streamSource.getInputStream();
+            if (stream != null) {
+                try {
+                    return stream.available() == 0;
+                } catch (Exception e) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static DetachedSignature toDetachedSignature(

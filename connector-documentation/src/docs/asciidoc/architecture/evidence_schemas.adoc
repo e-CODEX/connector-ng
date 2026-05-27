@@ -1,0 +1,94 @@
+ifndef::basepath[]
+:basepath: {rootdir}
+endif::basepath[]
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+== REM Evidence XML Schemas
+
+ETSI-REM evidence XML is defined by XSD schemas maintained in the `connector-infrastructure` module.
+The Java model classes used at runtime are JAXB bindings generated from these schemas.
+
+=== Schema source location
+
+[source,text]
+----
+connector-infrastructure/src/main/resources/xsd/
+connector-infrastructure/src/main/resources/xjb/spocseu.xjb
+----
+
+=== Primary schemas (JAXB-generated)
+
+These three schemas drive code generation and define the core evidence structures:
+
+|===
+| File | Namespace | Purpose
+
+| `TS102640_v2.xsd`
+| `http://uri.etsi.org/02640/v2#`
+| Core ETSI TS 102 640 REM evidence types (`SubmissionAcceptanceRejection`, `DeliveryNonDeliveryToRecipient`, etc.)
+
+| `SPOCS_ts102640_soap_body.xsd`
+| `http://uri.etsi.org/02640/soapbinding/v1#`
+| SPOCS-specific SOAP wrapper for REM evidence lists
+
+| `eDeliveryDetails.xsd`
+| `http://uri.eu-spocs.eu/configuration/eDelivery`
+| Issuer and gateway configuration embedded in evidences
+
+|===
+
+=== Supporting schemas (imported at compile/validation time)
+
+|===
+| File | Purpose
+
+| `ts102640_soap_body.xsd`
+| Base ETSI REM SOAP body schema; imported by the SPOCS variant
+
+| `XAdES132.xsd`, `XAdES.xsd`
+| ETSI XAdES signature structures for signed evidences
+
+| `xmldsig-core-schema.xsd`
+| W3C XML Digital Signature core schema
+
+| `saml-schema-assertion-2.0.xsd`
+| OASIS SAML 2.0 assertion schema (authentication details)
+
+| `ts_102231v030102_xsd.xsd`
+| ETSI TS 102 231 trust-service list schema
+
+| `xml.xsd`, `xmlmime.xsd`, `xenc-schema.xsd`, `ws-addr.xsd.xml`
+| W3C XML, MIME, encryption, and WS-Addressing support schemas
+
+|===
+
+=== JAXB bindings
+
+Package mappings are defined in `spocseu.xjb`:
+
+* `eDeliveryDetails.xsd` → `eu.spocseu.edeliverygw.configuration`
+* `TS102640_v2.xsd` → `org.etsi.uri._02640.v2`
+
+The generated Java classes are vendored under `connector-infrastructure/src/main/java/`.
+Namespace-to-class mappings are also recorded in `META-INF/sun-jaxb.episode`.
+
+=== Regenerating JAXB classes
+
+To regenerate bindings from the XSD sources (output goes to `build/generated-sources/jaxb/` and does not replace vendored sources):
+
+[source,bash]
+----
+./gradlew :connector-infrastructure:generateEvidenceJaxb
+----
+
+=== Sample evidence XML
+
+Example REM evidence instances for testing are available at:
+
+[source,text]
+----
+connector-infrastructure/src/testFixtures/resources/evidence/samples/
+----

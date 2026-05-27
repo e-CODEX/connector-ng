@@ -1,0 +1,127 @@
+ifndef::basepath[]
+:basepath: {rootdir}
+endif::basepath[]
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+== Processing of an outgoing evidence message
+
+This chapter describes how evidence is generated and submitted when triggered from the backend or as a side effect of outbound business message processing.
+
+=== Evidence trigger from the backend
+
+The backend can request evidence generation by submitting an evidence trigger message via the backend SOAP API.
+The trigger specifies the evidence type (for example `DELIVERY`) and references the original business message via `refToMessageId`.
+
+[plantuml,outgoing_evidence_1,format=svg]
+----
+@startuml
+
+top to bottom direction
+skinparam monochrome false
+skinparam linetype ortho
+
+interface DomibusConnectorBackendWebService
+
+package connector-infrastructure {
+  component ConnectorBackendWebServiceController
+  component ConnectorOutboundEvidenceTriggerEventPublisher
+}
+
+queue outboundEvidenceTriggerQueue
+
+DomibusConnectorBackendWebService --> ConnectorBackendWebServiceController : submitMessage (trigger)
+ConnectorBackendWebServiceController --> ConnectorOutboundEvidenceTriggerEventPublisher
+ConnectorOutboundEvidenceTriggerEventPublisher --> outboundEvidenceTriggerQueue
+
+@enduml
+----
+
+The message is transformed from the SOAP transition model to the internal `ConnectorMessage` domain model and staged for asynchronous processing.
+
+=== Evidence trigger processing
+
+`ConnectorOutboundEvidenceTriggerListener` consumes trigger messages from the outbound evidence trigger queue and delegates to `ConnectorEvidenceTriggerProcessorService` (aligned with the legacy `EvidenceMessageProcessor` and `EvidenceTriggerStep`).
+
+[plantuml,outgoing_evidence_2,format=svg]
+----
+@startuml
+
+top to bottom direction
+skinparam monochrome false
+skinparam linetype ortho
+
+queue outboundEvidenceTriggerQueue
+
+package connector-infrastructure {
+  component ConnectorOutboundEvidenceTriggerListener
+}
+
+package connector-application {
+  component ConnectorEvidenceTriggerProcessorService
+  component ConnectorMessageEvidenceCreator
+  component ConnectorEvidenceMessageCreator
+  component ConnectorMessageEvidenceVerifier
+  component ConnectorLinkSubmitter
+}
+
+outboundEvidenceTriggerQueue --> ConnectorOutboundEvidenceTriggerListener
+ConnectorOutboundEvidenceTriggerListener --> ConnectorEvidenceTriggerProcessorService
+ConnectorEvidenceTriggerProcessorService --> ConnectorMessageEvidenceCreator : build REM evidence XML
+ConnectorEvidenceTriggerProcessorService --> ConnectorMessageEvidenceVerifier : validate against business message
+ConnectorEvidenceTriggerProcessorService --> ConnectorEvidenceMessageCreator : wrap as confirmation message
+ConnectorEvidenceTriggerProcessorService --> ConnectorLinkSubmitter : submit to gateway
+ConnectorEvidenceTriggerProcessorService --> ConnectorLinkSubmitter : optionally submit to backend
+
+@enduml
+----
+
+Processing steps:
+
+. Validate that the message is an evidence trigger and triggering is allowed.
+. Resolve the referenced gateway-to-backend business message via `refToMessageId`.
+. Build the ETSI-REM evidence XML of the requested type using `ConnectorMessageEvidenceCreator` and `ConnectorEvidenceToolkitImpl`.
+. Verify evidence applicability against previously received evidences.
+. Create a confirmation message and submit it to the gateway via `ConnectorLinkSubmitter`.
+. When `connector.message-processing.send-generated-evidences-to-backend` is enabled, also forward the evidence to the backend.
+
+=== Evidences generated during outbound business processing
+
+When an outbound business message is processed by `ConnectorOutboundMessagePipeline`, evidences are generated automatically:
+
+* `ConnectorOutboundMessageAcceptanceStep` creates `SUBMISSION_ACCEPTANCE` after successful gateway validation.
+* On submission failure, `ConnectorOutboundMessageRejectionStep` creates `SUBMISSION_REJECTION`.
+
+The confirmation message is submitted back to the backend via `ConnectorLinkSubmitter`.
+
+=== Message submitted to the gateway
+
+Evidence confirmation messages destined for the gateway are submitted through the gateway link client.
+
+[plantuml,outgoing_evidence_3,format=svg]
+----
+@startuml
+
+top to bottom direction
+skinparam monochrome false
+skinparam linetype ortho
+
+package connector-application {
+  component ConnectorLinkSubmitter
+}
+
+package connector-infrastructure {
+  component ConnectorGatewayLinkClient
+}
+
+interface DomibusConnectorGatewaySubmissionWebService
+
+ConnectorLinkSubmitter --> ConnectorGatewayLinkClient
+ConnectorGatewayLinkClient --> DomibusConnectorGatewaySubmissionWebService : submitMessage
+
+@enduml
+----
+
+Before submission, the internal domain message is transformed back to the SOAP transition model of the API.

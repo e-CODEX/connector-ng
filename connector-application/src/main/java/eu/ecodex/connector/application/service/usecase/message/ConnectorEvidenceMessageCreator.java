@@ -33,4 +33,18 @@ public interface ConnectorEvidenceMessageCreator {
      */
     ConnectorMessage create(
             @Nonnull ConnectorMessage businessMessage, @Nonnull ConnectorMessageEvidence evidence);
+
+    /**
+     * Builds an outbound evidence message for a backend trigger (parties and recipients swapped
+     * relative to the referenced business message).
+     *
+     * @param businessMessage referenced gateway-to-backend business message
+     * @param evidence        generated signed evidence to transport
+     * @param triggerMessage  original trigger submitted by the backend
+     * @return evidence message ready for gateway submission
+     */
+    ConnectorMessage createForTrigger(
+            @Nonnull ConnectorMessage businessMessage,
+            @Nonnull ConnectorMessageEvidence evidence,
+            @Nonnull ConnectorMessage triggerMessage);
 }

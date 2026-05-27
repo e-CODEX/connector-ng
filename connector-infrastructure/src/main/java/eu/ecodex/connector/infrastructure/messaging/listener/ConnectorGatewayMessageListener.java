@@ -133,10 +133,12 @@ public class ConnectorGatewayMessageListener {
 
         var messageIdentifier = messageIdGenerator.generateIdentifier();
 
+        var ebmsMessageIdentifier = as4Properties.ebmsMessageIdentifier();
         var inboundMessage = ConnectorMessage
                 .builder()
                 .identifier(messageIdentifier)
                 .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
+                .backendMessageIdentifier(ebmsMessageIdentifier)
                 .as4Properties(as4Properties)
                 .direction(
                         ConnectorMessageDirection.GATEWAY_TO_BACKEND

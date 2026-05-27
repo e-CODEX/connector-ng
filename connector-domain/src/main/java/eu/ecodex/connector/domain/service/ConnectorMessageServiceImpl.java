@@ -61,9 +61,12 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
 
     @Override
     public boolean isEvidenceTriggerMessage(@NonNull ConnectorMessage message) {
-        return message.businessContent() == null
-               && message.evidences() != null
-               && message.evidences().size() == 1
-               && message.evidences().getFirst().attachment() == null;
+        if (message.businessContent() != null) {
+            return false;
+        }
+        var transported = message.transportedEvidences();
+        return transported != null
+               && transported.size() == 1
+               && transported.getFirst().attachment() == null;
     }
 }

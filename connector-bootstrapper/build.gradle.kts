@@ -28,6 +28,10 @@ configurations {
     }
 }
 
+bootJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 tasks.named<BootJar>("bootJar") {
     archiveFileName.set("connector-ng.jar")
 }

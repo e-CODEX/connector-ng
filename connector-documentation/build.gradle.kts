@@ -1,7 +1,7 @@
 import org.asciidoctor.gradle.jvm.AsciidoctorTask
 
 plugins {
-    id("org.asciidoctor.jvm.convert") version "4.0.2"
+    id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 // common asciidoctor configuration

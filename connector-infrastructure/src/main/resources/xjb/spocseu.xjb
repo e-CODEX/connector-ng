@@ -3,7 +3,7 @@
     <!--    <jaxb:bindings node="//xsd:schema[@targetNamespace='http://uri.eu-spocs.eu/configuration/eDelivery']">-->
     <jaxb:bindings schemaLocation="../xsd/eDeliveryDetails.xsd">
         <jaxb:schemaBindings>
-            <jaxb:package name="eu.spocseu.edeliverygw.configuration"/>
+            <jaxb:package name="eu.spocseu.edeliverygw.configuration.xsd"/>
             <!--            <jaxb:nameXmlTransform>-->
             <!--                <jaxb:typeName suffix="Response"/>-->
             <!--            </jaxb:nameXmlTransform>-->

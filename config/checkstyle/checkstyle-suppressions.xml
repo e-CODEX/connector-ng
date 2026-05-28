@@ -25,9 +25,6 @@
     <!-- Suppress checks for Gradle-generated sources -->
     <suppress files=".*[/\\]build[/\\]generated[/\\].*\.java$" checks=".*"/>
 
-    <!-- Suppress checks for vendored JAXB schema bindings -->
-    <suppress files=".*[/\\]oasis[/\\].*\.java$" checks=".*"/>
-    <suppress files=".*[/\\]org[/\\]etsi[/\\].*\.java$" checks=".*"/>
-    <suppress files=".*[/\\]org[/\\]w3[/\\].*\.java$" checks=".*"/>
+    <!-- Suppress checks for legacy ported SPOCS sources -->
     <suppress files=".*[/\\]eu[/\\]spocseu[/\\].*\.java$" checks=".*"/>
 </suppressions>

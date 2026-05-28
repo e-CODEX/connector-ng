@@ -109,6 +109,10 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
 
             if (acknowledgment.isResult()) {
                 messageRepository.setDeliveredToBackendAt(identifier);
+                messageRepository.updateBackendIdentifier(
+                        identifier,
+                        acknowledgment.getMessageId()
+                );
                 messageTransportStep.execute(
                         inboundMessage,
                         ConnectorMessageTransportStatus.SUBMITTED

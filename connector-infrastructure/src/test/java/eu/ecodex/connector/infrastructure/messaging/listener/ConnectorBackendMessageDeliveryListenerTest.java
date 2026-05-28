@@ -57,7 +57,6 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     private ConnectorLinkPartnerRepository linkPartnerRepository;
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
-
     @InjectMocks
     private ConnectorBackendMessageDeliveryListener listener;
 
@@ -133,6 +132,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                 eq(ConnectorMessageTransportStatus.FAILED)
         );
         verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).updateBackendIdentifier(any(), any());
         verify(messageRepository, never()).setAsRejected(any());
     }
 
@@ -142,6 +142,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
         var ack = mock(DomibsConnectorAcknowledgementType.class);
         when(ack.isResult()).thenReturn(true);
+        when(ack.getMessageId()).thenReturn("backend-message-id");
         when(deliveryWebService.deliverMessage(any())).thenReturn(ack);
         when(registerMessageTransportStep.execute(any(), any()))
                 .thenReturn(any());
@@ -153,6 +154,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                 eq(ConnectorMessageTransportStatus.SUBMITTED)
         );
         verify(messageRepository).setDeliveredToBackendAt(MESSAGE_ID);
+        verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, "backend-message-id");
         verify(messageRepository, never()).setAsRejected(any());
     }
 
@@ -169,6 +171,8 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                 eq(ConnectorMessageTransportStatus.PENDING)
         );
         verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).updateBackendIdentifier(any(), any());
+        verify(messageRepository, never()).setAsRejected(any());
     }
 
     private ConnectorMessageAS4Properties as4Properties() {

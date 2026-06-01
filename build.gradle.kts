@@ -2,7 +2,7 @@ plugins {
     id("java")
     id("jacoco")
     id("checkstyle")
-    id("org.cyclonedx.bom") version "3.1.0"
+    id("org.cyclonedx.bom") version "3.1.1"
 }
 
 allprojects {
@@ -34,7 +34,7 @@ jacoco {
 }
 
 subprojects {
-    apply(plugin = "checkstyle")
+    pluginManager.apply("checkstyle")
 
     checkstyle {
         toolVersion = "10.17.0"
@@ -49,7 +49,7 @@ subprojects {
         isShowViolations = true
     }
 
-    if (name != "connector-documentation" || name != "connector-distribution") {
+    if (name != "connector-documentation" && name != "connector-distribution") {
         val testTasks = tasks.withType<Test>()
         val jacocoReportTasks = tasks.withType<JacocoReport>()
 

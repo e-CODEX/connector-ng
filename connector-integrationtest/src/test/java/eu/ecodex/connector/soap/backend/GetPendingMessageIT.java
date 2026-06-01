@@ -12,7 +12,12 @@ package eu.ecodex.connector.soap.backend;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
 import eu.ecodex.connector.soap.BackendServiceTest;
@@ -21,6 +26,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @Sql(
@@ -32,6 +38,8 @@ public class GetPendingMessageIT extends BackendServiceTest {
 
     @LocalServerPort
     private int port;
+    @MockitoBean
+    private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
 
     private DomibusConnectorBackendWebService soapClient;
 
@@ -58,6 +66,9 @@ public class GetPendingMessageIT extends BackendServiceTest {
             "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_retrieve_a_pending_message_by_transport_step_identifier_successfully() {
+        when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
+                ConnectorMessageTransportStep.class));
+
         var request = new GetMessageByIdRequest();
         request.setMessageTransportId(TRANSPORT_MESSAGE_ID);
         var response = soapClient.getMessageById(request);
@@ -80,6 +91,9 @@ public class GetPendingMessageIT extends BackendServiceTest {
             "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_failed_to_retrieve_a_pending_message_by_transport_step_identifier() {
+        when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
+                ConnectorMessageTransportStep.class));
+
         var request = new GetMessageByIdRequest();
         request.setMessageTransportId("unknown-transport-id");
 

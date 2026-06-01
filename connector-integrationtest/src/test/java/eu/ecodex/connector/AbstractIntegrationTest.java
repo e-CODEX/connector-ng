@@ -10,6 +10,12 @@
 
 package eu.ecodex.connector;
 
+import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorBackendMessageDeliveryListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorGatewayMessageAcknowledgementListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorGatewayMessageListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorInboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorOutboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorOutboundMessageStagingListener;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -23,6 +29,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.testcontainers.containers.MinIOContainer;
@@ -66,6 +73,19 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @MockitoBean
+    ConnectorBackendMessageDeliveryListener backendMessageDeliveryListener;
+    @MockitoBean
+    ConnectorGatewayMessageAcknowledgementListener gatewayMessageAcknowledgementListener;
+    @MockitoBean
+    ConnectorGatewayMessageListener gatewayMessageListener;
+    @MockitoBean
+    ConnectorInboundMessagePipelineListener inboundMessagePipelineListener;
+    @MockitoBean
+    ConnectorOutboundMessagePipelineListener outboundMessagePipelineListener;
+    @MockitoBean
+    ConnectorOutboundMessageStagingListener outboundMessageStagingListener;
+
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
@@ -77,7 +97,7 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
         registry.add("spring.datasource.username", mysql::getUsername);
         registry.add("spring.datasource.password", mysql::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.defer-datasource-initialization", () -> "true");
 
         registry.add("connector.file.storage.s3.access-key", minio::getUserName);
@@ -123,8 +143,8 @@ public abstract class AbstractIntegrationTest {
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_as4_properties");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
         jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
         jdbcTemplate.execute("TRUNCATE TABLE connector_services");
         jdbcTemplate.execute("TRUNCATE TABLE connector_actions");

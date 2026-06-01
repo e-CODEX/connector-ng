@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.application.service.impl.message;
 
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorActionNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
@@ -34,26 +33,21 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     private final ConnectorPartyRepository partyRepository;
     private final ConnectorServiceRepository serviceRepository;
     private final ConnectorActionRepository actionRepository;
-    private final ConnectorCheckBusinessDomain checkBusinessDomain;
 
     /**
      * Creates a new {@code ConnectorMessageVerifierService}.
      *
-     * @param partyRepository       repository used to resolve and validate message parties
-     * @param serviceRepository     repository used to resolve and validate message services
-     * @param actionRepository      repository used to resolve and validate message actions
-     * @param checkBusinessDomain checker used to assert that the target business domain exists
-     *                              and is enabled
+     * @param partyRepository   repository used to resolve and validate message parties
+     * @param serviceRepository repository used to resolve and validate message services
+     * @param actionRepository  repository used to resolve and validate message actions
      */
     public ConnectorMessageVerifierService(
             ConnectorPartyRepository partyRepository,
             ConnectorServiceRepository serviceRepository,
-            ConnectorActionRepository actionRepository,
-            ConnectorCheckBusinessDomain checkBusinessDomain) {
+            ConnectorActionRepository actionRepository) {
         this.partyRepository = partyRepository;
         this.serviceRepository = serviceRepository;
         this.actionRepository = actionRepository;
-        this.checkBusinessDomain = checkBusinessDomain;
     }
 
     @Override
@@ -84,7 +78,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
         if (toParty != null && toParty.identifierType().isBlank()) {
             log.warn(
                     "Message with identifier [{}] verification mode is RELAXED."
-                    + "Assuming ToParty IdentifierType [{}] as empty!",
+                            + "Assuming ToParty IdentifierType [{}] as empty!",
                     message.identifier(), toParty.identifierType()
             );
         }
@@ -98,7 +92,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
                             "Message toParty [%s] is not configured on the connector! "
-                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                                    + "Check the P-Mode linked to business domain with uuid [%s]",
                             toParty, message.businessDomainIdentifier()
                     )
             );
@@ -109,7 +103,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
         if (fromParty != null && fromParty.identifierType().isBlank()) {
             log.warn(
                     "Message with identifier [{}] verification mode is RELAXED."
-                    + "Assuming FromParty IdentifierType [{}] as empty!",
+                            + "Assuming FromParty IdentifierType [{}] as empty!",
                     message.identifier(), fromParty.identifierType()
             );
         }
@@ -122,7 +116,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
                             "Message fromParty [%s] is not configured on the connector! "
-                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                                    + "Check the P-Mode linked to business domain with uuid [%s]",
                             fromParty, message.businessDomainIdentifier()
                     )
             );
@@ -132,7 +126,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     private void processCreateVerification(ConnectorMessage message) {
         var warning = String.format(
                 "Message with identifier [%s] verification failed because P-Mode CREATE "
-                + "verification mode is not supported!",
+                        + "verification mode is not supported!",
                 message.identifier()
         );
         log.warn(warning);
@@ -141,7 +135,6 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
     private void processServiceAndActionVerification(ConnectorMessage message) {
         log.debug("Verifying service and action for message [{}]", message.identifier());
-        checkBusinessDomain.assertIsEnabled(message.businessDomainIdentifier());
 
         try {
             var as4Properties = message.as4Properties();

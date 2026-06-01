@@ -13,17 +13,13 @@ package eu.ecodex.connector.application.service.message.outbound;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageStagerService;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
@@ -45,14 +41,11 @@ public class ConnectorOutboundMessageStagerServiceTest {
     private ConnectorMessageAttachmentRepository attachmentRepository;
     @Mock
     private ConnectorMessageBusinessContentRepository businessContentRepository;
-    @Mock
-    private ConnectorCheckBusinessDomain checkBusinessDomain;
     @InjectMocks
     private ConnectorOutboundMessageStagerService connectorStageOutboundMessageService;
 
     @Test
     void should_stage_message_successfully_with_attachments() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(messageRepository.save(any())).thenReturn(createMessage());
         when(attachmentRepository.findByIdentifier(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
@@ -66,7 +59,6 @@ public class ConnectorOutboundMessageStagerServiceTest {
 
     @Test
     void should_stage_message_successfully_without_attachments() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(messageRepository.save(any())).thenReturn(
                 createMessage()
                         .toBuilder()
@@ -86,35 +78,12 @@ public class ConnectorOutboundMessageStagerServiceTest {
 
     @Test
     void should_fail_to_stage_message_with_unknown_attachment() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(messageRepository.save(any())).thenReturn(createMessage());
         when(attachmentRepository.findByIdentifier(any()))
                 .thenReturn(null);
 
         assertThrows(
                 IllegalStateException.class,
-                () -> connectorStageOutboundMessageService.stage(createMessage())
-        );
-    }
-
-    @Test
-    void should_throw_exception_when_staging_message_targeting_not_found_business_domain() {
-        doThrow(ConnectorBusinessDomainNotFoundException.class)
-                .when(checkBusinessDomain).assertIsEnabled(any());
-
-        assertThrows(
-                ConnectorBusinessDomainNotFoundException.class,
-                () -> connectorStageOutboundMessageService.stage(createMessage())
-        );
-    }
-
-    @Test
-    void should_throw_exception_when_staging_message_targeting_disabled_business_domain() {
-        doThrow(ConnectorBusinessDomainNotEnabledException.class)
-                .when(checkBusinessDomain).assertIsEnabled(any());
-
-        assertThrows(
-                ConnectorBusinessDomainNotEnabledException.class,
                 () -> connectorStageOutboundMessageService.stage(createMessage())
         );
     }

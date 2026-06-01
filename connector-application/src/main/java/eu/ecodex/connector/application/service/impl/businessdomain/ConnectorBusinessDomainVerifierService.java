@@ -10,33 +10,35 @@
 
 package eu.ecodex.connector.application.service.impl.businessdomain;
 
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
+import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.domain.exception.NotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorCheckBusinessDomain} service.
+ * Implementation of the {@link ConnectorBusinessDomainVerifier} service.
  */
 @Slf4j
 @Service
-public class ConnectorCheckBusinessDomainService implements ConnectorCheckBusinessDomain {
+public class ConnectorBusinessDomainVerifierService implements ConnectorBusinessDomainVerifier {
     private final ConnectorBusinessDomainRepository businessDomainRepository;
 
-    public ConnectorCheckBusinessDomainService(
+    public ConnectorBusinessDomainVerifierService(
             ConnectorBusinessDomainRepository businessDomainRepository) {
         this.businessDomainRepository = businessDomainRepository;
     }
 
     @Override
-    public void assertIsEnabled(ConnectorBusinessDomainIdentifier identifier) {
+    public void execute(@NonNull ConnectorBusinessDomainIdentifier identifier) {
         log.debug("checking business domain [{}] is enabled", identifier);
         var domain = businessDomainRepository.findByIdentifier(identifier);
         if (domain == null) {
-            throw new ConnectorBusinessDomainNotFoundException(
+            throw new NotFoundException(
                     "Business domain not found: " + identifier
             );
         }

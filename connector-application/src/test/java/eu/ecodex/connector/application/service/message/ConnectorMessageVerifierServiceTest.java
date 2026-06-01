@@ -12,8 +12,6 @@ package eu.ecodex.connector.application.service.message;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,10 +20,7 @@ import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageVerifierService;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
@@ -47,15 +42,12 @@ public class ConnectorMessageVerifierServiceTest {
     private ConnectorActionRepository actionRepository;
     @Mock
     private ConnectorPartyRepository partyRepository;
-    @Mock
-    private ConnectorCheckBusinessDomain checkBusinessDomain;
     @InjectMocks
     private ConnectorMessageVerifierService verifierService;
 
     // check message service and action validity against indicated business domain pmode
     @Test
     void should_check_message_validity_in_strict_verification_mode_successfully() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
@@ -67,11 +59,8 @@ public class ConnectorMessageVerifierServiceTest {
 
     @Test
     void should_throw_exception_in_strict_verification_mode_when_business_domain_is_not_found() {
-        doThrow(ConnectorBusinessDomainNotFoundException.class)
-                .when(checkBusinessDomain).assertIsEnabled(any());
-
         assertThrows(
-                ConnectorBusinessDomainNotFoundException.class,
+                ConnectorProcessingModeVerificationException.class,
                 () -> this.verifierService.verify(
                         MessageTestFixtures.createValidOutboundBusinessMessage(),
                         ProcessingModeVerificationMode.STRICT
@@ -81,11 +70,8 @@ public class ConnectorMessageVerifierServiceTest {
 
     @Test
     void should_throw_exception_in_strict_verification_mode_when_business_domain_is_not_enabled() {
-        doThrow(ConnectorBusinessDomainNotEnabledException.class)
-                .when(checkBusinessDomain).assertIsEnabled(any());
-
         assertThrows(
-                ConnectorBusinessDomainNotEnabledException.class,
+                ConnectorProcessingModeVerificationException.class,
                 () -> this.verifierService.verify(
                         MessageTestFixtures.createValidOutboundBusinessMessage(),
                         ProcessingModeVerificationMode.STRICT
@@ -95,7 +81,6 @@ public class ConnectorMessageVerifierServiceTest {
 
     @Test
     void should_throw_exception_in_strict_verification_mode_when_message_is_invalid_due_to_service_not_found() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(null);
         assertThrows(
                 ConnectorProcessingModeVerificationException.class,
@@ -106,12 +91,15 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(0)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
     void should_throw_exception_in_strict_verification_mode_when_message_is_invalid_due_to_action_not_found() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(null);
@@ -124,12 +112,15 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
     void should_check_message_validity_in_relaxed_verification_mode_successfully() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
@@ -141,17 +132,24 @@ public class ConnectorMessageVerifierServiceTest {
 
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
     void should_throw_exception_in_relaxed_verification_mode_when_message_is_invalid_due_to_to_party_not_found() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any())).thenReturn(
+        when(this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        )).thenReturn(
                 null
         );
         assertThrows(
@@ -163,12 +161,15 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
     void should_throw_exception_in_relaxed_verification_mode_when_message_is_invalid_due_to_empty_to_party_identifier_type() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
@@ -184,12 +185,15 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
     void should_throw_exception_in_relaxed_verification_mode_when_message_is_invalid_due_to_from_party_not_found() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
@@ -203,12 +207,15 @@ public class ConnectorMessageVerifierServiceTest {
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
-        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
     void should_throw_exception_in_relaxed_verification_mode_when_message_is_invalid_due_to_empty_from_party_identifier_type() {
-        doNothing().when(checkBusinessDomain).assertIsEnabled(any());
         when(this.serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
@@ -222,7 +229,11 @@ public class ConnectorMessageVerifierServiceTest {
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
-        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test

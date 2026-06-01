@@ -12,8 +12,8 @@ package eu.ecodex.connector.application.service.impl.message.outbound;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
@@ -34,19 +34,20 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
     private final ConnectorMessageVerifier messageVerifier;
     private final ConnectorEventPublisher stagingEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGenerator;
-    private final ConnectorCheckBusinessDomain checkBusinessDomain;
+    private final ConnectorBusinessDomainVerifier businessDomainVerifier;
 
     /**
      * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
      *
-     * @param configurationProvider provider of the current
-     *                              {@link ConnectorMessageProcessingConfiguration}
-     * @param messageVerifier       verifier used to validate outbound messages
-     * @param stagingEventPublisher event publisher used to stage messages for further processing;
-     *                              qualified as "connectorOutboundMessageStagingEventPublisher"
-     * @param messageIdGenerator    generator used to assign unique identifiers to outbound messages
-     * @param checkBusinessDomain checker used to assert that the target business domain exists
-     *                              and is enabled
+     * @param configurationProvider  provider of the current
+     *                               {@link ConnectorMessageProcessingConfiguration}
+     * @param messageVerifier        verifier used to validate outbound messages
+     * @param stagingEventPublisher  event publisher used to stage messages for further processing;
+     *                               qualified as "connectorOutboundMessageStagingEventPublisher"
+     * @param messageIdGenerator     generator used to assign unique identifiers to outbound
+     *                               messages
+     * @param businessDomainVerifier checker used to assert that the target business domain exists
+     *                               and is enabled
      */
     public ConnectorOutboundMessageReceiverService(
             ConnectorMessageProcessingConfigurationProvider configurationProvider,
@@ -54,18 +55,18 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
             @Qualifier("connectorOutboundMessageStagingEventPublisher")
             ConnectorEventPublisher stagingEventPublisher,
             ConnectorMessageIdGenerator messageIdGenerator,
-            ConnectorCheckBusinessDomain checkBusinessDomain) {
+            ConnectorBusinessDomainVerifier businessDomainVerifier) {
         this.configurationProvider = configurationProvider;
         this.messageVerifier = messageVerifier;
         this.stagingEventPublisher = stagingEventPublisher;
         this.messageIdGenerator = messageIdGenerator;
-        this.checkBusinessDomain = checkBusinessDomain;
+        this.businessDomainVerifier = businessDomainVerifier;
     }
 
     @Override
     @Transactional
     public ConnectorMessage register(@NonNull final ConnectorMessage message) {
-        checkBusinessDomain.assertIsEnabled(message.businessDomainIdentifier());
+        businessDomainVerifier.execute(message.businessDomainIdentifier());
         var configuration = this.configurationProvider.getConfiguration();
         var messageWithId = this.assignIdentifier(message);
         this.messageVerifier.verify(messageWithId, configuration.outboundMessageVerificationMode());

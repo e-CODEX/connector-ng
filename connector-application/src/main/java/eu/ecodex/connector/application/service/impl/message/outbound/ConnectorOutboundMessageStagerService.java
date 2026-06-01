@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.application.service.impl.message.outbound;
 
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorCheckBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -48,7 +47,6 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageBusinessContentRepository businessContentRepository;
-    private final ConnectorCheckBusinessDomain checkBusinessDomain;
 
     /**
      * Creates a new {@code ConnectorOutboundMessageStagerService}.
@@ -59,27 +57,22 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
      * @param businessContentRepository repository used to persist
      *                                  {@link ConnectorMessageBusinessContent} entities linked to a
      *                                  message
-     * @param checkBusinessDomain     checker used to assert that the target business domain exists
-     *                                  and is enabled
      */
     public ConnectorOutboundMessageStagerService(
             @Qualifier("connectorOutboundMessagePipelineEventPublisher")
             ConnectorEventPublisher pipelineEventPublisher,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
-            ConnectorMessageBusinessContentRepository businessContentRepository,
-            ConnectorCheckBusinessDomain checkBusinessDomain) {
+            ConnectorMessageBusinessContentRepository businessContentRepository) {
         this.pipelineEventPublisher = pipelineEventPublisher;
         this.messageRepository = messageRepository;
         this.attachmentRepository = attachmentRepository;
         this.businessContentRepository = businessContentRepository;
-        this.checkBusinessDomain = checkBusinessDomain;
     }
 
     @Override
     @Transactional
     public void stage(ConnectorMessage message) {
-        checkBusinessDomain.assertIsEnabled(message.businessDomainIdentifier());
         var createdMessage = this.messageRepository.save(message);
         var messageIdentifier = createdMessage.identifier();
         attachAttachments(message.attachments(), messageIdentifier);

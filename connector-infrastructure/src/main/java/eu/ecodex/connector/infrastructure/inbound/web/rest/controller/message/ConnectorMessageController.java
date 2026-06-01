@@ -50,7 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorMessageController implements ConnectorMessageApi {
-    private final ConnectorOutboundMessageReceiver messageStagingService;
+    private final ConnectorOutboundMessageReceiver outboundMessageReceiver;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
     private final ConnectorListMessages listMessagesService;
@@ -58,7 +58,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     /**
      * Constructs a new instance of ConnectorMessageController.
      *
-     * @param messageStagingService        The service responsible for receiving and managing
+     * @param outboundMessageReceiver        The service responsible for receiving and managing
      *                                     outbound messages.
      * @param backendClientVerifierService The service used for verifying backend clients.
      * @param uploadAttachmentsService     The service for handling file attachments during message
@@ -66,11 +66,11 @@ public class ConnectorMessageController implements ConnectorMessageApi {
      * @param listMessagesService          The service for listing messages.
      */
     public ConnectorMessageController(
-            ConnectorOutboundMessageReceiver messageStagingService,
+            ConnectorOutboundMessageReceiver outboundMessageReceiver,
             ConnectorBackendClientVerifier backendClientVerifierService,
             ConnectorUploadAttachments uploadAttachmentsService,
             ConnectorListMessages listMessagesService) {
-        this.messageStagingService = messageStagingService;
+        this.outboundMessageReceiver = outboundMessageReceiver;
         this.backendClientVerifierService = backendClientVerifierService;
         this.uploadAttachmentsService = uploadAttachmentsService;
         this.listMessagesService = listMessagesService;
@@ -82,7 +82,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             ConnectorOutboundMessageRequest messageMetadata) throws IOException {
         var message = toDomain(messageMetadata, businessXMLDocument.getBytes());
 
-        var processedMessage = messageStagingService.register(message);
+        var processedMessage = outboundMessageReceiver.register(message);
 
         return toDto(processedMessage);
     }

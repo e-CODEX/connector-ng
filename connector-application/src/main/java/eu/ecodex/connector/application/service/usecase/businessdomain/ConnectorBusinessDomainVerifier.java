@@ -13,11 +13,12 @@ package eu.ecodex.connector.application.service.usecase.businessdomain;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import jakarta.annotation.Nonnull;
 
 /**
  * Service interface for checking whether a business domain is active and can accept messages.
  */
-public interface ConnectorCheckBusinessDomain {
+public interface ConnectorBusinessDomainVerifier {
     /**
      * Asserts that the business domain identified by {@code identifier} exists and is enabled.
      *
@@ -26,5 +27,5 @@ public interface ConnectorCheckBusinessDomain {
      *                                                    identifier
      * @throws ConnectorBusinessDomainNotEnabledException if the business domain is disabled
      */
-    void assertIsEnabled(ConnectorBusinessDomainIdentifier identifier);
+    void execute(@Nonnull ConnectorBusinessDomainIdentifier identifier);
 }

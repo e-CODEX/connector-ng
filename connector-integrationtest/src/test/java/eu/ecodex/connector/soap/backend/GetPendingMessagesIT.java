@@ -11,7 +11,10 @@
 package eu.ecodex.connector.soap.backend;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.soap.BackendServiceTest;
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @Sql(
@@ -28,6 +32,8 @@ import org.springframework.test.context.jdbc.Sql;
 public class GetPendingMessagesIT extends BackendServiceTest {
     @LocalServerPort
     private int port;
+    @MockitoBean
+    private ConnectorChangePendingMessagesStatus changePendingMessagesStatus;
 
     private DomibusConnectorBackendWebService soapClient;
 
@@ -54,6 +60,8 @@ public class GetPendingMessagesIT extends BackendServiceTest {
             "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_retrieve_all_pending_messages_successfully() {
+        doNothing().when(changePendingMessagesStatus).execute(any(), any());
+
         var response = soapClient.requestMessages(new EmptyRequestType());
 
         assertThat(response).isNotNull();

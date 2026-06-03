@@ -1,5 +1,4 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
-import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
     id("java")
@@ -31,10 +30,6 @@ configurations {
 
 tasks.named<BootJar>("bootJar") {
     archiveFileName.set("connector-ng.jar")
-}
-
-tasks.named<BootRun>("bootRun") {
-    classpath += files(project(":connector-infrastructure").layout.projectDirectory.dir("src/test/resources"))
 }
 
 tasks.named("build") {

@@ -14,6 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceContextConfiguration;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
@@ -39,36 +40,17 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles("infra")
-@SpringBootTest(classes = RemEvidenceTestConfiguration.class)
+@ActiveProfiles({"evidence", "dss"})
+@SpringBootTest(classes = EvidenceContextConfiguration.class)
 @Import(ConnectorEvidenceToolkitImplTest.MockAttachmentBeans.class)
 class ConnectorEvidenceToolkitImplTest {
-
-    @TestConfiguration
-    static class MockAttachmentBeans {
-        @Bean
-        @Primary
-        ConnectorMessageAttachmentRepository attachmentRepository() {
-            return Mockito.mock(ConnectorMessageAttachmentRepository.class);
-        }
-
-        @Bean
-        @Primary
-        ConnectorFileStorageProvider fileStorageProvider() {
-            return Mockito.mock(ConnectorFileStorageProvider.class);
-        }
-    }
-
+    private final Map<String, byte[]> storedContent = new ConcurrentHashMap<>();
     @Autowired
     private ConnectorEvidenceToolkit evidenceToolkit;
-
     @Autowired
     private ConnectorMessageAttachmentRepository attachmentRepository;
-
     @Autowired
     private ConnectorFileStorageProvider fileStorageProvider;
-
-    private final Map<String, byte[]> storedContent = new ConcurrentHashMap<>();
 
     @BeforeEach
     void wireAttachmentStorage() {
@@ -182,6 +164,22 @@ class ConnectorEvidenceToolkitImplTest {
         );
 
         assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.NON_DELIVERY);
-        assertThat(new String(evidenceBytes(evidence), StandardCharsets.UTF_8)).contains("ds:Signature");
+        assertThat(new String(evidenceBytes(evidence), StandardCharsets.UTF_8)).contains(
+                "ds:Signature");
+    }
+
+    @TestConfiguration
+    static class MockAttachmentBeans {
+        @Bean
+        @Primary
+        ConnectorMessageAttachmentRepository attachmentRepository() {
+            return Mockito.mock(ConnectorMessageAttachmentRepository.class);
+        }
+
+        @Bean
+        @Primary
+        ConnectorFileStorageProvider fileStorageProvider() {
+            return Mockito.mock(ConnectorFileStorageProvider.class);
+        }
     }
 }

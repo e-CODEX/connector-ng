@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound;
 
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
+import eu.ecodex.connector.domain.exception.ConnectorMessageException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -20,6 +21,7 @@ import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentReposito
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,15 +37,17 @@ import org.springframework.transaction.annotation.Transactional;
  * </ol>
  *
  * <p>The staging operation is executed within a transactional boundary to ensure
- * atomicity. If any step fails (e.g. a referenced attachment does not exist),
+ * atomicity. If any step fails (e.g., a referenced attachment does not exist),
  * the entire operation is rolled back.
  *
  * <p>After successful staging, the message is expected to be forwarded to the
  * outbound processing pipeline.
  */
+@Slf4j
 @Service
+@Transactional
 public class ConnectorOutboundMessageStagerService implements ConnectorOutboundMessageStager {
-    private final ConnectorEventPublisher pipelineEventPublisher;
+    private final ConnectorEventPublisher outboundMessagePipelinePublisher;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageBusinessContentRepository businessContentRepository;
@@ -51,7 +55,8 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
     /**
      * Creates a new {@code ConnectorOutboundMessageStagerService}.
      *
-     * @param messageRepository         repository used to persist {@link ConnectorMessage} entities
+     * @param messageRepository         repository used to persist {@link ConnectorMessage}
+     *                                  entities
      * @param attachmentRepository      repository used to resolve and associate
      *                                  {@link ConnectorMessageAttachment} entities
      * @param businessContentRepository repository used to persist
@@ -60,24 +65,31 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
      */
     public ConnectorOutboundMessageStagerService(
             @Qualifier("connectorOutboundMessagePipelineEventPublisher")
-            ConnectorEventPublisher pipelineEventPublisher,
+            ConnectorEventPublisher outboundMessagePipelinePublisher,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorMessageBusinessContentRepository businessContentRepository) {
-        this.pipelineEventPublisher = pipelineEventPublisher;
+        this.outboundMessagePipelinePublisher = outboundMessagePipelinePublisher;
         this.messageRepository = messageRepository;
         this.attachmentRepository = attachmentRepository;
         this.businessContentRepository = businessContentRepository;
     }
 
     @Override
-    @Transactional
     public void stage(ConnectorMessage message) {
+        log.debug("Staging outbound message: [{}]", message);
+
         var createdMessage = this.messageRepository.save(message);
         var messageIdentifier = createdMessage.identifier();
-        attachAttachments(message.attachments(), messageIdentifier);
-        persistBusinessDocument(message.businessContent(), messageIdentifier);
-        this.pipelineEventPublisher.publish(createdMessage);
+        if (message.isBusinessMessage()) {
+            attachAttachments(message.attachments(), messageIdentifier);
+            persistBusinessDocument(message.businessContent(), messageIdentifier);
+            this.outboundMessagePipelinePublisher.publish(createdMessage);
+        } else {
+            throw new ConnectorMessageException(
+                    "Only business messages can be staged."
+            );
+        }
     }
 
     private void attachAttachments(
@@ -111,6 +123,10 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
 
     private void persistBusinessDocument(
             ConnectorMessageBusinessContent businessContent, String messageIdentifier) {
+        if (businessContent == null) {
+            return;
+        }
+
         attachAttachment(
                 businessContent.xmlContent(),
                 messageIdentifier,

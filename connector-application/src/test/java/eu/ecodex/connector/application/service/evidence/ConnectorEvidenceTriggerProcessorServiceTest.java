@@ -28,11 +28,8 @@ import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitt
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
-import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.service.ConnectorEvidenceServiceImpl;
-import eu.ecodex.connector.domain.service.ConnectorMessageServiceImpl;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,17 +55,12 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
-    private ConnectorMessageService messageService;
     private ConnectorEvidenceService evidenceService;
     private ConnectorEvidenceTriggerProcessorService processor;
 
     @BeforeEach
     void setUp() {
-        messageService = new ConnectorMessageServiceImpl(messageRepository);
-        evidenceService = new ConnectorEvidenceServiceImpl(messageService);
         processor = new ConnectorEvidenceTriggerProcessorService(
-                messageService,
-                evidenceService,
                 messageRepository,
                 evidenceCreator,
                 evidenceVerifier,

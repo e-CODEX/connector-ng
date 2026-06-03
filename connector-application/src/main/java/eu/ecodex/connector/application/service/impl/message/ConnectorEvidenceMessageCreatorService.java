@@ -123,7 +123,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
                 .build();
     }
 
-    private static ConnectorParty copyParty(ConnectorParty party) {
+    private ConnectorParty copyParty(ConnectorParty party) {
         return party.toBuilder().build();
     }
 }

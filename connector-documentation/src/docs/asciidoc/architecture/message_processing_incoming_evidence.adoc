@@ -39,7 +39,7 @@ When the message has no business content but contains evidence payloads, it is t
 
 === Confirmation message processing
 
-Confirmation messages are handled by `ConnectorGatewayConfirmationMessageProcessorService` (aligned with the legacy `EvidenceMessageProcessor`).
+Confirmation messages are handled by `ConnectorInboundEvidenceMessageProcessorService` (aligned with the legacy `EvidenceMessageProcessor`).
 
 [plantuml,incoming_evidence_2,format=svg]
 ----
@@ -107,13 +107,21 @@ package connector-application {
 }
 
 package connector-infrastructure {
-  component ConnectorBackendLinkClient
+  component ConnectorBackendLinkEventPublisher
+}
+
+package connector-infrastructure {
+  component ConnectorBackendMessageDeliveryListener
 }
 
 interface DomibusConnectorBackendDeliveryWebService
 
-ConnectorLinkSubmitter --> ConnectorBackendLinkClient
-ConnectorBackendLinkClient --> DomibusConnectorBackendDeliveryWebService : PUSH
+queue backendDeliveryQueue
+
+ConnectorLinkSubmitter --> ConnectorBackendLinkEventPublisher
+ConnectorBackendLinkEventPublisher --> backendDeliveryQueue : PUSH
+backendDeliveryQueue --> ConnectorBackendMessageDeliveryListener
+ConnectorBackendMessageDeliveryListener --> DomibusConnectorBackendDeliveryWebService
 
 @enduml
 ----

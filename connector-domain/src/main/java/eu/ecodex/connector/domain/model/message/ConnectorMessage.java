@@ -125,8 +125,8 @@ public record ConnectorMessage(
      */
     public boolean isEvidenceMessage() {
         return this.businessContent() == null
-               && this.evidences() != null
-               && !this.evidences().isEmpty();
+                && this.transportedEvidences() != null
+                && !this.transportedEvidences().isEmpty();
     }
 
     /**
@@ -140,6 +140,44 @@ public record ConnectorMessage(
      */
     public boolean isBusinessMessage() {
         return !this.isEvidenceMessage();
+    }
+
+    /**
+     * Determines whether the current message is classified as an evidence trigger message.
+     *
+     * <p>A message is defined as an evidence trigger message if:
+     * <ul>
+     *     <li>It has no associated business content (i.e., `businessContent` is null).
+     *     <li>It contains exactly one transported evidence.
+     *     <li>The sole transported evidence has no attachment.
+     * </ul>
+     *
+     * @return {@code true} if the message is an evidence trigger message; {@code false} otherwise.
+     */
+    public boolean isEvidenceTriggerMessage() {
+        if (this.businessContent() != null) {
+            return false;
+        }
+
+        var transported = this.transportedEvidences();
+
+        return transported != null
+                && transported.size() == 1
+                && transported.getFirst().attachment() == null;
+    }
+
+    /**
+     * Determines whether evidence triggering is allowed for the current message.
+     *
+     * <p>A message qualifies for evidence triggering if its direction is set to
+     * {@code ConnectorMessageDirection.BACKEND_TO_GATEWAY}, indicating that the message originates
+     * from the backend system and is directed toward the gateway.
+     *
+     * @return {@code true} if evidence triggering is allowed for the message; {@code false}
+     *         otherwise.
+     */
+    public boolean isEvidenceTriggeringAllowed() {
+        return this.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY;
     }
 
     /**
@@ -191,8 +229,8 @@ public record ConnectorMessage(
     public String toString() {
         return String.format(
                 "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
-                + "referenceToBackendMessageIdentifier=%s,  direction=%s, as4Properties=%s "
-                + "businessContent=%s",
+                        + "referenceToBackendMessageIdentifier=%s,  direction=%s, as4Properties=%s "
+                        + "businessContent=%s",
                 identifier, backendMessageIdentifier, backendName, gatewayName,
                 referenceToBackendMessageIdentifier, direction, as4Properties, businessContent
         );

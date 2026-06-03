@@ -31,9 +31,9 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.evidences.EvidenceBuilder;
-import eu.ecodex.connector.evidences.exception.ECodexEvidenceBuilderException;
-import eu.ecodex.connector.evidences.types.ECodexMessageDetails;
+import eu.ecodex.connector.infrastructure.evidence.builder.ConnectorEvidenceBuilder;
+import eu.ecodex.connector.infrastructure.evidence.exception.ConnectorEvidenceBuilderException;
+import eu.ecodex.connector.infrastructure.evidence.model.ConnectorEvidenceMessageDetails;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import java.nio.charset.StandardCharsets;
@@ -56,20 +56,15 @@ import org.mockito.quality.Strictness;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ConnectorEvidenceToolkitImplUnitTest {
-
     @Mock
-    private EvidenceBuilder evidenceBuilder;
-
+    private ConnectorEvidenceBuilder evidenceBuilder;
     @Mock
     private HashValueBuilder hashValueBuilder;
-
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
-
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
 
-    private ConnectorEvidencesProperties evidencesProperties;
     private ConnectorEvidenceToolkitImpl toolkit;
 
     private static final byte[] STUB_EVIDENCE_BYTES = {0x01, 0x02};
@@ -82,8 +77,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
             "c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE";
 
     @BeforeEach
-    void setUp() throws ECodexEvidenceBuilderException {
-        evidencesProperties = new ConnectorEvidencesProperties();
+    void setUp() throws ConnectorEvidenceBuilderException {
+        ConnectorEvidencesProperties evidencesProperties = new ConnectorEvidencesProperties();
         evidencesProperties.getIssuer().getAs4Party().setName("issuer-gw");
         evidencesProperties.getIssuer().getAs4Party().setEndpointAddress("https://gw.example/rem");
         evidencesProperties.getIssuer().getPostalAddress().setStreet("Main 1");
@@ -92,11 +87,11 @@ class ConnectorEvidenceToolkitImplUnitTest {
         evidencesProperties.getIssuer().getPostalAddress().setCountry("EU");
 
         toolkit = new ConnectorEvidenceToolkitImpl(
+                attachmentRepository,
+                fileStorageProvider,
                 evidenceBuilder,
                 hashValueBuilder,
-                evidencesProperties,
-                attachmentRepository,
-                fileStorageProvider
+                evidencesProperties
         );
 
         when(attachmentRepository.save(any(ConnectorMessageAttachment.class)))
@@ -109,37 +104,6 @@ class ConnectorEvidenceToolkitImplUnitTest {
 
         when(hashValueBuilder.getAlgorithm()).thenReturn("SHA-256");
         defaultEvidenceBuilderStubs();
-    }
-
-    private void defaultEvidenceBuilderStubs() throws ECodexEvidenceBuilderException {
-        when(evidenceBuilder.createSubmissionAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), any()
-        )).thenReturn(STUB_EVIDENCE_BYTES);
-        when(evidenceBuilder.createSubmissionAcceptanceRejection(
-                eq(false), any(EventReasonType.class), any(), any()
-        )).thenReturn(STUB_EVIDENCE_BYTES);
-        when(evidenceBuilder.createRelayREMMDAcceptanceRejection(
-                any(boolean.class), nullable(EventReasonType.class), any(), any()
-        )).thenReturn(STUB_EVIDENCE_BYTES);
-        when(evidenceBuilder.createRelayREMMDFailure(
-                any(EventReasonType.class), any(), any()
-        )).thenReturn(STUB_EVIDENCE_BYTES);
-        when(evidenceBuilder.createDeliveryNonDeliveryToRecipient(
-                any(boolean.class), nullable(EventReasonType.class), any(), any()
-        )).thenReturn(STUB_EVIDENCE_BYTES);
-        when(evidenceBuilder.createRetrievalNonRetrievalByRecipient(
-                any(boolean.class), nullable(EventReasonType.class), any(), any()
-        )).thenReturn(STUB_EVIDENCE_BYTES);
-    }
-
-    private ConnectorMessage submissionReadyMessage() {
-        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
-        var as4 = base.as4Properties().toBuilder()
-                      .ebmsMessageIdentifier("urn:test:ebms")
-                      .originalSender("sender@domain")
-                      .finalRecipient("recipient@domain")
-                      .build();
-        return base.toBuilder().as4Properties(as4).build();
     }
 
     @Test
@@ -155,7 +119,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.attachment()).isNotNull();
         verify(fileStorageProvider).save(eq(evidence.attachment()), eq(STUB_EVIDENCE_BYTES));
 
-        var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
+        var detailsCaptor = ArgumentCaptor.forClass(ConnectorEvidenceMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
         );
@@ -176,7 +140,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
 
         assertThat(evidence.attachment()).isNotNull();
         verify(fileStorageProvider).save(eq(evidence.attachment()), eq(STUB_EVIDENCE_BYTES));
-        var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
+        var detailsCaptor = ArgumentCaptor.forClass(ConnectorEvidenceMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
         );
@@ -186,7 +150,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     @Test
     void submission_rejection_maps_reason_to_event_and_calls_rejection_builder() throws Exception {
         var message = submissionReadyMessage();
-        var detailsCaptor = ArgumentCaptor.forClass(ECodexMessageDetails.class);
+        var detailsCaptor = ArgumentCaptor.forClass(ConnectorEvidenceMessageDetails.class);
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         toolkit.create(message, ConnectorEvidenceType.SUBMISSION_REJECTION,
@@ -218,12 +182,12 @@ class ConnectorEvidenceToolkitImplUnitTest {
 
     @ParameterizedTest
     @MethodSource("rejectionEvidenceTypes")
-    void rejection_evidence_requires_non_null_reason(ConnectorEvidenceType type) throws Exception {
+    void rejection_evidence_requires_non_null_reason(ConnectorEvidenceType type) {
         var message = messageWithPrior(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
 
         assertThatThrownBy(() -> toolkit.create(message, type, null))
                 .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("rejectionReason may not be null");
+                .hasMessageContaining("RejectionReason may not be null");
     }
 
     static Stream<Arguments> rejectionEvidenceTypes() {
@@ -237,7 +201,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     }
 
     @Test
-    void submission_evidence_requires_non_blank_national_message_id() throws Exception {
+    void submission_evidence_requires_non_blank_national_message_id() {
         var message = submissionReadyMessage().toBuilder().backendMessageIdentifier("  ").build();
 
         assertThatThrownBy(
@@ -247,7 +211,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     }
 
     @Test
-    void submission_evidence_requires_non_blank_final_recipient() throws Exception {
+    void submission_evidence_requires_non_blank_final_recipient() {
         var as4 = submissionReadyMessage().as4Properties().toBuilder().finalRecipient("").build();
         var message = submissionReadyMessage().toBuilder().as4Properties(as4).build();
 
@@ -258,7 +222,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     }
 
     @Test
-    void submission_evidence_requires_non_blank_original_sender() throws Exception {
+    void submission_evidence_requires_non_blank_original_sender() {
         var as4 = submissionReadyMessage().as4Properties().toBuilder().originalSender(null).build();
         var message = submissionReadyMessage().toBuilder().as4Properties(as4).build();
 
@@ -269,7 +233,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     }
 
     @Test
-    void hash_builder_failure_is_wrapped() throws Exception {
+    void hash_builder_failure_is_wrapped() {
         var xmlContent = "<?xml version=\"1.0\"?><root/>";
         var xmlAttachment = MessageAttachmentTestFixtures.createBusinessContentAttachment().toBuilder()
                                                           .identifier("hash-fail-xml-id")
@@ -292,17 +256,17 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var message = submissionReadyMessage();
         when(evidenceBuilder.createSubmissionAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), any()
-        )).thenThrow(new ECodexEvidenceBuilderException("x"));
+        )).thenThrow(new ConnectorEvidenceBuilderException("x"));
 
         assertThatThrownBy(() -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
                 .isInstanceOf(ConnectorEvidenceException.class)
                 .hasMessageContaining("evidence could not be created")
-                .hasCauseInstanceOf(ECodexEvidenceBuilderException.class);
+                .hasCauseInstanceOf(ConnectorEvidenceBuilderException.class);
     }
 
     @ParameterizedTest
     @MethodSource("missingPredecessorCases")
-    void missing_predecessor_evidence_throws(ConnectorEvidenceType toCreate, ConnectorEvidenceType present) throws Exception {
+    void missing_predecessor_evidence_throws(ConnectorEvidenceType toCreate, ConnectorEvidenceType present) {
         var message = messageWithPrior(present);
 
         assertThatThrownBy(() -> toolkit.create(
@@ -327,16 +291,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         );
     }
 
-    private static ConnectorMessageRejectionReason rejectionReasonIfNeeded(ConnectorEvidenceType type) {
-        return switch (type) {
-            case SUBMISSION_REJECTION, RELAY_REMMD_REJECTION, RELAY_REMMD_FAILURE,
-                    NON_DELIVERY, NON_RETRIEVAL -> ConnectorMessageRejectionReason.OTHER;
-            default -> null;
-        };
-    }
-
     @Test
-    void null_evidences_list_throws_when_prior_required() throws Exception {
+    void null_evidences_list_throws_when_prior_required() {
         var base = submissionReadyMessage();
         var message = base.toBuilder().evidences(null).build();
 
@@ -407,6 +363,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(reasonCaptor.getValue().getCode()).isEqualTo("E300");
     }
 
+    // relay_remmd
+
     @Test
     void relay_remmd_rejection_maps_reason_and_uses_submission_predecessor() throws Exception {
         var message = messageWithPrior(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
@@ -450,6 +408,45 @@ class ConnectorEvidenceToolkitImplUnitTest {
         verify(evidenceBuilder).createRelayREMMDAcceptanceRejection(
                 eq(true), nullable(EventReasonType.class), any(), eq(PREV)
         );
+    }
+
+    private void defaultEvidenceBuilderStubs() throws ConnectorEvidenceBuilderException {
+        when(evidenceBuilder.createSubmissionAcceptanceRejection(
+                eq(true), nullable(EventReasonType.class), any(), any()
+        )).thenReturn(STUB_EVIDENCE_BYTES);
+        when(evidenceBuilder.createSubmissionAcceptanceRejection(
+                eq(false), any(EventReasonType.class), any(), any()
+        )).thenReturn(STUB_EVIDENCE_BYTES);
+        when(evidenceBuilder.createRelayREMMDAcceptanceRejection(
+                any(boolean.class), nullable(EventReasonType.class), any(), any()
+        )).thenReturn(STUB_EVIDENCE_BYTES);
+        when(evidenceBuilder.createRelayREMMDFailure(
+                any(EventReasonType.class), any(), any()
+        )).thenReturn(STUB_EVIDENCE_BYTES);
+        when(evidenceBuilder.createDeliveryNonDeliveryToRecipient(
+                any(boolean.class), nullable(EventReasonType.class), any(), any()
+        )).thenReturn(STUB_EVIDENCE_BYTES);
+        when(evidenceBuilder.createRetrievalNonRetrievalByRecipient(
+                any(boolean.class), nullable(EventReasonType.class), any(), any()
+        )).thenReturn(STUB_EVIDENCE_BYTES);
+    }
+
+    private ConnectorMessage submissionReadyMessage() {
+        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var as4 = base.as4Properties().toBuilder()
+                      .ebmsMessageIdentifier("urn:test:ebms")
+                      .originalSender("sender@domain")
+                      .finalRecipient("recipient@domain")
+                      .build();
+        return base.toBuilder().as4Properties(as4).build();
+    }
+
+    private ConnectorMessageRejectionReason rejectionReasonIfNeeded(ConnectorEvidenceType type) {
+        return switch (type) {
+            case SUBMISSION_REJECTION, RELAY_REMMD_REJECTION, RELAY_REMMD_FAILURE,
+                 NON_DELIVERY, NON_RETRIEVAL -> ConnectorMessageRejectionReason.OTHER;
+            default -> null;
+        };
     }
 
     private ConnectorMessage messageWithPrior(ConnectorEvidenceType priorType) {

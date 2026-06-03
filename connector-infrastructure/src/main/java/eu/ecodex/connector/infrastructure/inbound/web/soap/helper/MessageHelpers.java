@@ -30,11 +30,9 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureTy
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageConfirmationType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDetailsType;
-import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import lombok.experimental.UtilityClass;
 
@@ -43,8 +41,16 @@ import lombok.experimental.UtilityClass;
 public class MessageHelpers {
 
     /**
-     * Returns true when the SOAP payload is an evidence trigger (no business content, single
-     * confirmation without XML payload).
+     * Determines if the given message is an evidence trigger request. A message qualifies as an
+     * evidence trigger request if it has no message content, contains exactly one message
+     * confirmation, and the confirmation payload is empty.
+     *
+     * @param message The {@link DomibusConnectorMessageType} to check for being an evidence trigger
+     *                request. This parameter should not be null and represents the message whose
+     *                metadata and confirmations are inspected.
+     *
+     * @return {@code true} if the message is an evidence trigger request; otherwise,
+     *         {@code false}.
      */
     public static boolean isEvidenceTriggerRequest(DomibusConnectorMessageType message) {
         if (message.getMessageContent() != null) {
@@ -52,8 +58,8 @@ public class MessageHelpers {
         }
         var confirmations = message.getMessageConfirmations();
         return confirmations != null
-               && confirmations.size() == 1
-               && isEmptyConfirmationPayload(confirmations.getFirst());
+                && confirmations.size() == 1
+                && isEmptyConfirmationPayload(confirmations.getFirst());
     }
 
     public static ConnectorMessage toDomain(
@@ -95,13 +101,14 @@ public class MessageHelpers {
         var confirmation = message.getMessageConfirmations().getFirst();
 
         var triggerEvidence = ConnectorMessageEvidence.builder()
-                .type(ConnectorEvidenceType.valueOf(
-                        confirmation.getConfirmationType().value()))
-                .attachment(null)
-                .build();
+                                                      .type(ConnectorEvidenceType.valueOf(
+                                                              confirmation.getConfirmationType()
+                                                                          .value()))
+                                                      .attachment(null)
+                                                      .build();
 
-        var transported = new ArrayList<ConnectorMessageEvidence>();
-        transported.add(triggerEvidence);
+        var transportedEvidences = new ArrayList<ConnectorMessageEvidence>();
+        transportedEvidences.add(triggerEvidence);
 
         return ConnectorMessage
                 .builder()
@@ -110,15 +117,15 @@ public class MessageHelpers {
                 .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
                 .as4Properties(toTriggerAS4Properties(details))
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .transportedEvidences(transported)
+                .transportedEvidences(transportedEvidences)
                 .build();
     }
 
     private static ConnectorMessageAS4Properties toTriggerAS4Properties(
             DomibusConnectorMessageDetailsType details) {
         return toAS4Properties(details).toBuilder()
-                .referenceToIdentifier(details.getRefToMessageId())
-                .build();
+                                       .referenceToIdentifier(details.getRefToMessageId())
+                                       .build();
     }
 
     public static ConnectorMessageAS4Properties toAS4Properties(
@@ -183,10 +190,12 @@ public class MessageHelpers {
 
     private static boolean isEmptyConfirmationPayload(
             DomibusConnectorMessageConfirmationType confirmation) {
-        Source source = confirmation.getConfirmation();
+        var source = confirmation.getConfirmation();
+
         if (source == null) {
             return true;
         }
+
         if (source instanceof StreamSource streamSource) {
             var reader = streamSource.getReader();
             if (reader != null) {
@@ -205,6 +214,7 @@ public class MessageHelpers {
                 }
             }
         }
+
         return false;
     }
 

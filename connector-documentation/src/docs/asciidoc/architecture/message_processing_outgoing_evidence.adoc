@@ -83,7 +83,7 @@ Processing steps:
 . Validate that the message is an evidence trigger and triggering is allowed.
 . Resolve the referenced gateway-to-backend business message via `refToMessageId`.
 . Build the ETSI-REM evidence XML of the requested type using `ConnectorMessageEvidenceCreator` and `ConnectorEvidenceToolkitImpl`.
-. Verify evidence applicability against previously received evidences.
+. Verify evidence applicability against previously received evidence.
 . Create a confirmation message and submit it to the gateway via `ConnectorLinkSubmitter`.
 . When `connector.message-processing.send-generated-evidences-to-backend` is enabled, also forward the evidence to the backend.
 
@@ -113,13 +113,13 @@ package connector-application {
 }
 
 package connector-infrastructure {
-  component ConnectorGatewayLinkClient
+  component ConnectorGatewayLinkEventPublisher
 }
 
-interface DomibusConnectorGatewaySubmissionWebService
+queue gatewaySubmissionQueue
 
-ConnectorLinkSubmitter --> ConnectorGatewayLinkClient
-ConnectorGatewayLinkClient --> DomibusConnectorGatewaySubmissionWebService : submitMessage
+ConnectorLinkSubmitter --> ConnectorGatewayLinkEventPublisher
+ConnectorGatewayLinkEventPublisher --> gatewaySubmissionQueue : submitMessage
 
 @enduml
 ----

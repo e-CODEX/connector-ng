@@ -16,8 +16,6 @@ import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessage
 import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
-import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
@@ -39,9 +37,8 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Service
+@Transactional
 public class ConnectorEvidenceTriggerProcessorService implements ConnectorEvidenceTriggerProcessor {
-    private final ConnectorMessageService messageService;
-    private final ConnectorEvidenceService evidenceService;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceCreator evidenceCreator;
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
@@ -52,26 +49,20 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
     /**
      * Creates the processor with message, evidence, and link submission dependencies.
      *
-     * @param messageService                    connector message operations
-     * @param evidenceService                   evidence validation operations
-     * @param messageRepository                 persisted connector messages
-     * @param evidenceCreator                   creates evidence records
-     * @param evidenceVerifier                  validates evidence applicability
-     * @param evidenceMessageCreator            builds evidence messages for transport
-     * @param linkSubmitter                     forwards messages to partners
-     * @param processingConfigurationProvider   message processing configuration
+     * @param messageRepository               persisted connector messages
+     * @param evidenceCreator                 creates evidence records
+     * @param evidenceVerifier                validates evidence applicability
+     * @param evidenceMessageCreator          builds evidence messages for transport
+     * @param linkSubmitter                   forwards messages to partners
+     * @param processingConfigurationProvider message processing configuration
      */
     public ConnectorEvidenceTriggerProcessorService(
-            ConnectorMessageService messageService,
-            ConnectorEvidenceService evidenceService,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageEvidenceCreator evidenceCreator,
             ConnectorMessageEvidenceVerifier evidenceVerifier,
             ConnectorEvidenceMessageCreator evidenceMessageCreator,
             ConnectorLinkSubmitter linkSubmitter,
             ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
-        this.messageService = messageService;
-        this.evidenceService = evidenceService;
         this.messageRepository = messageRepository;
         this.evidenceCreator = evidenceCreator;
         this.evidenceVerifier = evidenceVerifier;
@@ -81,26 +72,21 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
     }
 
     @Override
-    @Transactional
     public void process(@NonNull ConnectorMessage triggerMessage) {
-        log.info("Processing evidence trigger message [{}]", triggerMessage.identifier());
+        log.info("Processing outbound evidence trigger message [{}]", triggerMessage.identifier());
 
         try {
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(
                     triggerMessage.businessDomainIdentifier()
             );
 
-            if (!messageService.isEvidenceTriggerMessage(triggerMessage)) {
-                throw new ConnectorEvidenceException(
-                        "the message is not an evidence trigger message"
-                );
-            }
-            evidenceService.isEvidenceTriggeringAllowed(triggerMessage);
+            checkEvidentness(triggerMessage);
 
             var triggerEvidence = triggerMessage.transportedEvidences().getFirst();
             var evidenceType = triggerEvidence.type();
 
             var businessMessage = findReferencedBusinessMessage(triggerMessage);
+
             if (businessMessage.direction() != ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
                 throw new ConnectorEvidenceException(
                         "evidence trigger is only supported for "
@@ -112,15 +98,16 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
 
             applyEvidenceToBusinessMessage(businessMessage, createdEvidence);
 
-            var evidenceForGateway = evidenceMessageCreator.createForTrigger(
+            var evidenceForGatewayMessage = evidenceMessageCreator.createForTrigger(
                     businessMessage, createdEvidence, triggerMessage
             );
 
-            linkSubmitter.submit(evidenceForGateway);
+            linkSubmitter.submit(evidenceForGatewayMessage);
 
             if (processingConfigurationProvider.getConfiguration()
-                    .sendGeneratedEvidencesToBackend()) {
-                linkSubmitter.submit(evidenceForGateway.switchDirection());
+                                               .sendGeneratedEvidencesToBackend()) {
+                log.debug("Sending trigger created evidence message back to the backend");
+                linkSubmitter.submit(evidenceForGatewayMessage.switchDirection());
             }
 
             log.info(
@@ -133,6 +120,20 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
         }
     }
 
+    private void checkEvidentness(ConnectorMessage triggerMessage) {
+        if (!triggerMessage.isEvidenceTriggerMessage()) {
+            log.warn("The message is not an evidence trigger message");
+            throw new ConnectorEvidenceException(
+                    "The message is not an evidence trigger message"
+            );
+        }
+
+        if (!triggerMessage.isEvidenceTriggeringAllowed()) {
+            log.warn("Only backend can generate trigger messages");
+            throw new ConnectorEvidenceException("Only backend can generate trigger messages");
+        }
+    }
+
     private ConnectorMessage findReferencedBusinessMessage(ConnectorMessage triggerMessage) {
         var referenceToMessageId = triggerMessage.as4Properties().referenceToIdentifier();
         if (!StringUtils.hasText(referenceToMessageId)) {
@@ -140,27 +141,30 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
         }
         if (!StringUtils.hasText(referenceToMessageId)) {
             throw new ConnectorEvidenceException(
-                    "evidence trigger must set refToMessageId to the referenced business message"
+                    "Evidence trigger must set refToMessageId to the referenced business message"
             );
         }
 
         var byEbms = messageRepository.findByEbmsMessageIdentifier(referenceToMessageId);
+
         if (byEbms != null) {
             return byEbms;
         }
 
         var byBackendId = messageRepository.findByBackendMessageIdentifier(referenceToMessageId);
+
         if (byBackendId != null) {
             return byBackendId;
         }
 
         var byIdentifier = messageRepository.findByIdentifier(referenceToMessageId);
+
         if (byIdentifier != null) {
             return byIdentifier;
         }
 
         throw new ConnectorMessageNotFoundException(
-                "referenced business message not found for ref [" + referenceToMessageId + "]"
+                "Referenced business message not found for ref [" + referenceToMessageId + "]"
         );
     }
 
@@ -174,8 +178,8 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
         accumulated.add(createdEvidence);
 
         var messageForVerification = reloaded.toBuilder()
-                .transportedEvidences(accumulated)
-                .build();
+                                             .transportedEvidences(accumulated)
+                                             .build();
 
         try {
             evidenceVerifier.verify(createdEvidence.type(), messageForVerification);

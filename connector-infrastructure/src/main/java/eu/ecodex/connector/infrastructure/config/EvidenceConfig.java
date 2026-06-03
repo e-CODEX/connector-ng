@@ -10,10 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.infrastructure.dss.ConnectorDssSigningTokenProvider;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,25 +19,10 @@ import org.springframework.context.annotation.Configuration;
  * Beans for REM evidence signing (keystore-backed DSS token) and payload hashing.
  */
 @Configuration
-@EnableConfigurationProperties(ConnectorEvidencesProperties.class)
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class EvidenceConfig {
-
-    public static final String REM_EVIDENCE_SIGNING_TOKEN_BEAN =
-            "connectorRemEvidenceSigningTokenProvider";
-
-    @Bean(name = REM_EVIDENCE_SIGNING_TOKEN_BEAN, destroyMethod = "close")
-    public ConnectorDssSigningTokenProvider connectorRemEvidenceSigningTokenProvider(
-            ConnectorEvidencesProperties properties) {
-        return new ConnectorDssSigningTokenProvider(
-                properties.getSignature().getKeystore(),
-                properties.getSignature().getPrivateKey()
-        );
-    }
-
     @Bean
-    public HashValueBuilder evidencePayloadHashValueBuilder(
-            ConnectorEvidencesProperties properties) {
-        return new HashValueBuilder(properties.getSignature().getPayloadDigestAlgorithm());
+    public HashValueBuilder payloadHashValueBuilder(ConnectorEvidencesProperties properties) {
+        return new HashValueBuilder(properties.getSignature().getDigestAlgorithm());
     }
 }

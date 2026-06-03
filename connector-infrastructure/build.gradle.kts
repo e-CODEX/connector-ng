@@ -8,8 +8,8 @@ val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 val jaxbTool: Configuration = configurations.create("jaxbTool")
 
 dependencies {
-    jaxbTool("org.glassfish.jaxb:jaxb-xjc:${libs.versions.glassfish.jaxb.get()}")
-    jaxbTool(libs.glassfish.jaxb.runtime)
+    jaxbTool(libs.jaxb.xjc)
+    jaxbTool(libs.jaxb.impl)
     jaxbTool(libs.jakarta.xml.bind.api)
     implementation(project(":connector-domain"))
     implementation(project(":connector-soap-api"))

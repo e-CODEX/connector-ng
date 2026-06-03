@@ -291,7 +291,7 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
 
     @Override
     public ConnectorMessage findByEbmsMessageIdentifier(@NonNull String ebmsMessageIdentifier) {
-        var message = this.messageJpaRepository.findByAs4Properties_EbmsMessageIdentifier(
+        var message = this.messageJpaRepository.findByAs4PropertiesEbmsMessageIdentifier(
                 ebmsMessageIdentifier
         );
 

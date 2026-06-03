@@ -25,9 +25,10 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "connector.queues")
 public class ConnectorQueueProperties {
     private final String outboundMessageStagingQueue = "connector.queues.outbound-message-staging-queue";
-    private String outboundEvidenceTriggerQueue = "connector.queues.outbound-evidence-trigger-queue";
+    private final String outboundEvidenceTriggerQueue = "connector.queues.outbound-evidence-trigger-queue";
     private final String outboundMessageProcessingQueue = "connector.queues.outbound-message-processing-queue";
     private final String inboundMessageProcessingQueue = "connector.queues.inbound-message-processing-queue";
+    private final String inboundEvidenceTriggerQueue = "connector.queues.inbound-evidence-trigger-queue";
     private final String backendDeliveryQueue = "connector.queues.backend-delivery-queue";
     private final String gatewaySubmissionQueue = "domibus.backend.jms.inQueue";
     private final String gatewaySubmissionReplyQueue = "domibus.backend.jms.replyQueue";

@@ -12,7 +12,6 @@ package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.s
 
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -22,19 +21,13 @@ import org.springframework.stereotype.Component;
  * Represents a processing step in the outbound message workflow that creates a submission
  * confirmation message for a given outbound message and switches its direction.
  *
- * <p>This class processes an outbound {@link ConnectorMessage} that has submission evidence and
- * generates a confirmation message by delegating the creation of the message to the
- * {@link ConnectorMessageService}. The generated confirmation message is then modified to switch
- * its direction for further processing in the outbound workflow.
- *
  * <p>Key responsibilities:
  * <ul>
  *     <li> Ensures that the provided {@link ConnectorMessage} contains exactly one business
  *     evidence before processing.
  *     <li> Creates a confirmation message based on the submission evidence contained in the
  *     original message.
- *     <li> Modifies the created confirmation message by switching its direction using
- *     the {@link ConnectorMessageService}.
+ *     <li> Modifies the created confirmation message by switching its direction
  * </ul>
  *
  * <p>Thread-safety:

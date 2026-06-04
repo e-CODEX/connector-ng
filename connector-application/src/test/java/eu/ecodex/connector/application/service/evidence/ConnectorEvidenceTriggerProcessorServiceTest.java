@@ -27,7 +27,6 @@ import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessage
 import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
@@ -55,7 +54,6 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
-    private ConnectorEvidenceService evidenceService;
     private ConnectorEvidenceTriggerProcessorService processor;
 
     @BeforeEach

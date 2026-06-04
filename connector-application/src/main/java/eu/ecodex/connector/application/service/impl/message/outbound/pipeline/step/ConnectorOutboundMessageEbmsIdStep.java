@@ -13,7 +13,6 @@ package eu.ecodex.connector.application.service.impl.message.outbound.pipeline.s
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.api.service.ConnectorMessageService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import lombok.NonNull;
@@ -24,11 +23,6 @@ import org.springframework.stereotype.Component;
  * A processing step in the connector's outbound message workflow that creates and assigns a unique
  * EBMS message ID to the specified {@link ConnectorMessage}, if the EBMS ID generator is enabled in
  * the configuration.
- *
- * <p>This step is responsible for handling the message processing configuration and interacting
- * with the {@link ConnectorMessageService} to manage the assignment of the EBMS message ID. The
- * presence or absence of an EBMS message ID is dictated by the configuration properties, allowing
- * for flexibility in the connector's behaviour.
  */
 @Slf4j
 @Component

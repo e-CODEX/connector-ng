@@ -18,10 +18,9 @@ import jakarta.annotation.Nonnull;
  * system.
  *
  * <p>This interface is responsible for defining the contract for publishing
- * {@link ConnectorMessage}
- * instances to downstream components or systems. It facilitates the communication and propagation
- * of message-related events, allowing for decoupling between the producers and consumers of such
- * events.
+ * {@link ConnectorMessage} instances to downstream components or systems. It facilitates the
+ * communication and propagation of message-related events, allowing for decoupling between the
+ * producers and consumers of such events.
  *
  * <p>Responsibilities:
  * <ul>
@@ -35,12 +34,12 @@ import jakarta.annotation.Nonnull;
  */
 public interface ConnectorEventPublisher {
     /**
-     * Publishes a {@link ConnectorMessage} for downstream processing or distribution
-     * within the connector system.
+     * Publishes a {@link ConnectorMessage} for downstream processing or distribution within the
+     * connector system.
      *
      * <p>Implementations of this method are responsible for broadcasting the provided
-     * message to relevant consumers or systems, ensuring that the message is delivered
-     * to its intended recipients in accordance with the connector's messaging flow.
+     * message to relevant consumers or systems, ensuring that the message is delivered to its
+     * intended recipients in accordance with the connector's messaging flow.
      *
      * @param message The {@link ConnectorMessage} to be published. Must not be null.
      */

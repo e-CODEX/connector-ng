@@ -19,10 +19,8 @@ import jakarta.annotation.Nonnull;
  *
  * <p>Responsibilities:
  * <ul>
- *     <li>
- *         Validating messages to ensure compliance with security policies and system requirements.
- *     </li>
- *     <li>Building secured message containers for transportation or storage.</li>
+ *     <li>Validating messages to ensure compliance with security policies and system requirements.
+ *     <li>Building secured message containers for transportation or storage.
  * </ul>
  */
 public interface ConnectorSecurityToolkit {

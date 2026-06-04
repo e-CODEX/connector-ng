@@ -12,7 +12,7 @@
  * Provides the public API of the domain layer.
  *
  * <p>This package exposes interfaces, data transfer objects, and service contracts that define how
- * external layers (e.g. application or infrastructure) interact with the domain.
+ * external layers (e.g., application or infrastructure) interact with the domain.
  *
  * <p>Backward compatibility should be preserved as much as possible when evolving this package.
  */

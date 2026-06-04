@@ -22,10 +22,6 @@ import jakarta.annotation.Nonnull;
  * perform necessary operations such as validation, transformation, or further distribution within
  * the processing workflow.
  *
- * <p>Responsibilities:
- * - Handling and processing {@link ConnectorMessage} events received from the system. - Enabling
- * customized behaviour for specific message processing needs.
- *
  * <p>Thread Safety:
  * Implementations of this interface should ensure thread safety if instances are expected to be
  * used in a multithreaded environment.

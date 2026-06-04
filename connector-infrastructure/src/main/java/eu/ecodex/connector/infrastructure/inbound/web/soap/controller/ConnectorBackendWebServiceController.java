@@ -20,6 +20,7 @@ import eu.ecodex.connector.application.service.usecase.transport.ConnectorChange
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
@@ -197,24 +198,31 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var answer = new DomibsConnectorAcknowledgementType();
 
         try {
-            var attachmentIdentifiers = persistAttachments(
-                    submitMessageRequest.getMessageAttachments()
-            );
-            var businessContent = submitMessageRequest.getMessageContent();
-            var businessDocumentAttachmentIdentifier = persistBusinessDocument(
-                    businessContent.getDocument()
-            );
-            var businessContentAttachmentIdentifier = persistBusinessContent(businessContent);
             // TODO current cn is fake, retrieve the certificate dn from user principal
             var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
-            var parsedMessage = MessageHelpers.toDomain(
-                    submitMessageRequest,
-                    attachmentIdentifiers,
-                    businessContentAttachmentIdentifier,
-                    businessDocumentAttachmentIdentifier,
-                    backendClientName
-            );
 
+            final ConnectorMessage parsedMessage;
+            if (MessageHelpers.isEvidenceTriggerRequest(submitMessageRequest)) {
+                parsedMessage = MessageHelpers.toDomain(
+                        submitMessageRequest, null, null, null, backendClientName
+                );
+            } else {
+                var attachmentIdentifiers = persistAttachments(
+                        submitMessageRequest.getMessageAttachments()
+                );
+                var businessContent = submitMessageRequest.getMessageContent();
+                var businessDocumentAttachmentIdentifier = persistBusinessDocument(
+                        businessContent.getDocument()
+                );
+                var businessContentAttachmentIdentifier = persistBusinessContent(businessContent);
+                parsedMessage = MessageHelpers.toDomain(
+                        submitMessageRequest,
+                        attachmentIdentifiers,
+                        businessContentAttachmentIdentifier,
+                        businessDocumentAttachmentIdentifier,
+                        backendClientName
+                );
+            }
 
             var createdMessage = this.messageStagingService.register(parsedMessage);
 

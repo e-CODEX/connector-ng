@@ -89,8 +89,8 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
         }
 
         if (POSITIVE_EVIDENCE_TYPES.contains(evidenceType)) {
-            // TODO see if the check should be retrieved from the db
-            if (message.isRejected()) {
+            var currentMessage = this.messageRepository.findByIdentifier(message.identifier());
+            if (currentMessage != null && currentMessage.isRejected()) {
                 log.warn(
                         "Message [{}] has already been rejected by an negative evidence! "
                         + "The positive evidence of type [{}] will be ignored!",

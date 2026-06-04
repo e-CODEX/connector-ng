@@ -1,2 +1,2 @@
-:basepath: src/docs/asciidoc
-:imagesdir: images
+:basepath: {asciidoctorconfigdir}/connector-documentation/src/docs/asciidoc
+:imagesdir: {asciidoctorconfigdir}/connector-documentation/src/docs/resources/images

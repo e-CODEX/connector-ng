@@ -30,6 +30,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Represents the Connector Message Attachment entity used to manage and store information about
@@ -68,7 +70,8 @@ public class ConnectorMessageAttachmentEntity extends BaseEntity {
 
     @Setter
     @Enumerated(EnumType.STRING)
-    @Column(name = "TYPE")
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(name = "TYPE", length = 64)
     private ConnectorAttachmentType type;
 
     @Setter

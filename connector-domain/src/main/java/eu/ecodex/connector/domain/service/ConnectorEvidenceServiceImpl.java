@@ -41,7 +41,7 @@ public class ConnectorEvidenceServiceImpl implements ConnectorEvidenceService {
 
     @Override
     public void isEvidenceTriggeringAllowed(@NonNull ConnectorMessage message) {
-        if (!this.messageService.isEvidenceMessage(message)) {
+        if (!this.messageService.isEvidenceTriggerMessage(message)) {
             throw new ConnectorEvidenceException("the message is not an evidence trigger message!");
         }
 

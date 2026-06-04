@@ -12,6 +12,7 @@ package eu.ecodex.connector.domain.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.domain.api.service.ConnectorEvidenceService;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
@@ -62,6 +63,19 @@ class ConnectorMessageEvidenceServiceTest {
         assertThrows(
                 ConnectorEvidenceException.class,
                 () -> this.evidenceService.isEvidenceTriggeringAllowed(businessMessage)
+        );
+    }
+
+    @Test
+    void should_throw_exception_when_checking_is_evidence_trigger_and_only_evidences_are_set() {
+        var triggerWithLegacyShape = MessageTestFixtures.createEvidenceTriggerMessage()
+                .toBuilder()
+                .transportedEvidences(null)
+                .evidences(java.util.List.of(EvidenceTestFixtures.createEvidenceTrigger()))
+                .build();
+        assertThrows(
+                ConnectorEvidenceException.class,
+                () -> this.evidenceService.isEvidenceTriggeringAllowed(triggerWithLegacyShape)
         );
     }
 

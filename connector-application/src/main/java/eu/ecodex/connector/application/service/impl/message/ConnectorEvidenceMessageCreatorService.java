@@ -17,7 +17,9 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -55,24 +57,22 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
     public ConnectorMessage create(
             @Nonnull ConnectorMessage businessMessage,
             @NonNull ConnectorMessageEvidence evidence) {
-        // TODO check fromParty, toParty, service nullability
-
         var action = getEvidenceAction(evidence.type());
+        var businessAs4 = businessMessage.as4Properties();
 
         var as4Properties = ConnectorMessageAS4Properties
                 .builder()
-                .conversationIdentifier(businessMessage.as4Properties().conversationIdentifier())
-                .ebmsMessageIdentifier(businessMessage.as4Properties().ebmsMessageIdentifier())
-                .finalRecipient(businessMessage.as4Properties().finalRecipient())
-                .originalSender(businessMessage.as4Properties().originalSender())
-                .fromParty(businessMessage.as4Properties().fromParty().toBuilder().build())
-                .toParty(businessMessage.as4Properties().toParty().toBuilder().build())
-                .referenceToIdentifier(businessMessage.as4Properties().ebmsMessageIdentifier())
-                .service(businessMessage.as4Properties().service().toBuilder().build())
+                .conversationIdentifier(businessAs4.conversationIdentifier())
+                .ebmsMessageIdentifier(businessAs4.ebmsMessageIdentifier())
+                .finalRecipient(businessAs4.finalRecipient())
+                .originalSender(businessAs4.originalSender())
+                .fromParty(copyParty(businessAs4.fromParty()))
+                .toParty(copyParty(businessAs4.toParty()))
+                .referenceToIdentifier(businessAs4.ebmsMessageIdentifier())
+                .service(businessAs4.service().toBuilder().build())
                 .action(action)
                 .build();
 
-        // TODO check if caused by should be set to connector message definition
         return ConnectorMessage
                 .builder()
                 .uuid(businessMessage.uuid())
@@ -85,5 +85,45 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
                 .gatewayName(businessMessage.gatewayName())
                 .as4Properties(as4Properties)
                 .build();
+    }
+
+    @Override
+    public ConnectorMessage createForTrigger(
+            @Nonnull ConnectorMessage businessMessage,
+            @NonNull ConnectorMessageEvidence evidence,
+            @NonNull ConnectorMessage triggerMessage) {
+        var action = getEvidenceAction(evidence.type());
+        var businessAs4 = businessMessage.as4Properties();
+        var triggerAs4 = triggerMessage.as4Properties();
+
+        var as4Properties = ConnectorMessageAS4Properties
+                .builder()
+                .conversationIdentifier(businessAs4.conversationIdentifier())
+                .ebmsMessageIdentifier(triggerAs4.ebmsMessageIdentifier())
+                .originalSender(businessAs4.finalRecipient())
+                .finalRecipient(businessAs4.originalSender())
+                .fromParty(copyParty(businessAs4.toParty()))
+                .toParty(copyParty(businessAs4.fromParty()))
+                .referenceToIdentifier(businessAs4.ebmsMessageIdentifier())
+                .service(businessAs4.service().toBuilder().build())
+                .action(action)
+                .build();
+
+        return ConnectorMessage
+                .builder()
+                .identifier(triggerMessage.identifier())
+                .backendMessageIdentifier(triggerMessage.backendMessageIdentifier())
+                .businessDomainIdentifier(triggerMessage.businessDomainIdentifier())
+                .referenceToBackendMessageIdentifier(businessMessage.backendMessageIdentifier())
+                .direction(triggerMessage.direction())
+                .backendName(triggerMessage.backendName())
+                .gatewayName(businessMessage.gatewayName())
+                .as4Properties(as4Properties)
+                .transportedEvidences(List.of(evidence))
+                .build();
+    }
+
+    private ConnectorParty copyParty(ConnectorParty party) {
+        return party.toBuilder().build();
     }
 }

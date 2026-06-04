@@ -10,12 +10,12 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorBackendMessageDeliveryListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorGatewayMessageAcknowledgementListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorGatewayMessageListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorInboundMessagePipelineListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorOutboundMessagePipelineListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.ConnectorOutboundMessageStagingListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageAcknowledgementListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorInboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorBackendMessageDeliveryListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorOutboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorOutboundMessageStagingListener;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -71,8 +71,6 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @MockitoBean
     ConnectorBackendMessageDeliveryListener backendMessageDeliveryListener;
     @MockitoBean
@@ -85,7 +83,8 @@ public abstract class AbstractIntegrationTest {
     ConnectorOutboundMessagePipelineListener outboundMessagePipelineListener;
     @MockitoBean
     ConnectorOutboundMessageStagingListener outboundMessageStagingListener;
-
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {

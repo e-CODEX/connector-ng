@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
+import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageAcknowledgementListener;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import org.junit.jupiter.api.Test;

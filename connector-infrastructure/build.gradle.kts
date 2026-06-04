@@ -5,8 +5,12 @@ plugins {
 }
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
+val jaxbTool: Configuration = configurations.create("jaxbTool")
 
 dependencies {
+    jaxbTool(libs.jaxb.xjc)
+    jaxbTool(libs.jaxb.impl)
+    jaxbTool(libs.jakarta.xml.bind.api)
     implementation(project(":connector-domain"))
     implementation(project(":connector-soap-api"))
     implementation(project(":connector-application"))
@@ -60,6 +64,7 @@ dependencies {
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)
+    implementation(libs.jakarta.xml.bind.api)
     // jaxb
     implementation(libs.jaxb.impl)
     // activemq
@@ -84,6 +89,7 @@ dependencies {
     testFixturesImplementation(project(":connector-soap-api"))
     testFixturesImplementation(platform(libs.spring.boot.bom))
     testFixturesImplementation("org.springframework:spring-core")
+    testFixturesImplementation("org.springframework:spring-jdbc")
     testFixturesImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testFixturesImplementation(libs.jakarta.activation)
     testFixturesImplementation(libs.jakarta.mail)
@@ -91,4 +97,61 @@ dependencies {
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)
     mockitoAgent(libs.mockito.core) { isTransitive = false }
+}
+
+val evidenceJaxbOutputDir = layout.buildDirectory.dir("generated/jaxb")
+val evidenceXsdDir = file("src/main/resources/xsd")
+val evidenceXjbFile = file("src/main/resources/xjb/spocseu.xjb")
+
+sourceSets {
+    main {
+        java {
+            srcDir(evidenceJaxbOutputDir)
+        }
+    }
+}
+
+tasks.register<JavaExec>("generateEvidenceJaxb") {
+    group = "build"
+    description = "Generate JAXB classes from REM evidence XSD sources"
+    classpath = jaxbTool
+    mainClass.set("com.sun.tools.xjc.XJCFacade")
+    val outDir = evidenceJaxbOutputDir.get().asFile
+    args(
+        "-d", outDir.absolutePath,
+        "-b", evidenceXjbFile.absolutePath,
+        file("$evidenceXsdDir/eDeliveryDetails.xsd").absolutePath,
+        file("$evidenceXsdDir/TS102640_v2.xsd").absolutePath,
+        file("$evidenceXsdDir/SPOCS_ts102640_soap_body.xsd").absolutePath,
+    )
+    inputs.files(
+        evidenceXjbFile,
+        file("$evidenceXsdDir/eDeliveryDetails.xsd"),
+        file("$evidenceXsdDir/TS102640_v2.xsd"),
+        file("$evidenceXsdDir/SPOCS_ts102640_soap_body.xsd"),
+        file("$evidenceXsdDir/XAdES.xsd"),
+        file("$evidenceXsdDir/XAdES132.xsd"),
+        file("$evidenceXsdDir/xmldsig-core-schema.xsd"),
+        file("$evidenceXsdDir/xenc-schema.xsd"),
+        file("$evidenceXsdDir/xmlmime.xsd"),
+        file("$evidenceXsdDir/saml-schema-assertion-2.0.xsd"),
+        file("$evidenceXsdDir/ts_102231v030102_xsd.xsd"),
+    )
+    outputs.dir(outDir)
+    doFirst {
+        outDir.deleteRecursively()
+        outDir.mkdirs()
+    }
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    dependsOn(tasks.named("generateEvidenceJaxb"))
+}
+
+tasks.named<JavaCompile>("compileTestJava") {
+    dependsOn(tasks.named("generateEvidenceJaxb"))
+}
+
+tasks.named<JavaCompile>("compileTestFixturesJava") {
+    dependsOn(tasks.named("generateEvidenceJaxb"))
 }

@@ -7,3 +7,5 @@ include::{basepath}/header.adoc[]
 endif::header[]
 
 == e-CODEX Connector Configuration
+
+include::{basepath}/configuration/evidence_configuration.adoc[leveloffset=+1]

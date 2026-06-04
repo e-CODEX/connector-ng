@@ -28,5 +28,9 @@ public interface ConnectorMessageJpaRepository extends
     List<ConnectorMessageEntity> findByAs4PropertiesConversationIdentifier(
             String conversationIdentifier);
 
+    ConnectorMessageEntity findByAs4PropertiesEbmsMessageIdentifier(String ebmsMessageIdentifier);
+
+    ConnectorMessageEntity findByBackendMessageIdentifier(String backendMessageIdentifier);
+
     List<ConnectorMessageEntity> findByIdentifierIn(List<String> identifiers);
 }

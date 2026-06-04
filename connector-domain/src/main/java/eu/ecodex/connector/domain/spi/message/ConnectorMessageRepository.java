@@ -108,6 +108,41 @@ public interface ConnectorMessageRepository {
     ConnectorMessage findByIdentifier(String identifier);
 
     /**
+     * Finds a {@link ConnectorMessage} by its ebMS message identifier.
+     *
+     * @param ebmsMessageIdentifier the ebMS message identifier; must not be null or blank
+     *
+     * @return the matching {@link ConnectorMessage}, or null if no such message exists
+     */
+    ConnectorMessage findByEbmsMessageIdentifier(@Nonnull String ebmsMessageIdentifier);
+
+    /**
+     * Finds a message by its backend-assigned message identifier.
+     *
+     * @param backendMessageIdentifier backend message id; must not be blank
+     * @return matching message, or null
+     */
+    ConnectorMessage findByBackendMessageIdentifier(@Nonnull String backendMessageIdentifier);
+
+    /**
+     * Updates backend routing metadata required to deliver a gateway confirmation message to the
+     * originating backend system.
+     *
+     * @param identifier                            the confirmation message identifier; must not be
+     *                                              null
+     * @param backendName                           the backend link partner name; must not be null
+     * @param referenceToBackendMessageIdentifier   the backend identifier of the referenced
+     *                                              business message; must not be null
+     *
+     * @return the updated {@link ConnectorMessage}
+     */
+    ConnectorMessage updateBackendContext(
+            @Nonnull String identifier,
+            @Nonnull String backendName,
+            @Nonnull String referenceToBackendMessageIdentifier
+    );
+
+    /**
      * Finds a {@link ConnectorMessage} in the repository based on the provided message instance and
      * the specified direction. This method is used to retrieve a connector message that matches
      * both the content of the given {@code message} and the {@code direction}.

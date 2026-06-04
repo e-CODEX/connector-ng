@@ -1,0 +1,127 @@
+ifndef::basepath[]
+:basepath: {rootdir}
+endif::basepath[]
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+== Processing of an incoming evidence message
+
+This chapter describes how an evidence confirmation message delivered by the gateway is processed.
+An incoming evidence message carries REM evidence XML (for example `DELIVERY` or `NON_DELIVERY`) and references the original business message via `refToMessageId`.
+
+=== Message from gateway to the connector
+
+The gateway submits messages to the connector via JMS on the gateway reception queue (`connector.queues.gateway-reception-queue`).
+
+[plantuml,incoming_evidence_1,format=svg]
+----
+@startuml
+
+top to bottom direction
+skinparam monochrome false
+skinparam linetype ortho
+
+queue gatewayReceptionQueue
+
+package connector-infrastructure {
+  component ConnectorGatewayMessageListener
+}
+
+gatewayReceptionQueue --> ConnectorGatewayMessageListener : JMS MapMessage
+
+@enduml
+----
+
+`ConnectorGatewayMessageListener` parses AS4 properties and payloads from the JMS message.
+When the message has no business content but contains evidence payloads, it is treated as a confirmation message.
+
+=== Confirmation message processing
+
+Confirmation messages are handled by `ConnectorInboundEvidenceMessageProcessorService` (aligned with the legacy `EvidenceMessageProcessor`).
+
+[plantuml,incoming_evidence_2,format=svg]
+----
+@startuml
+
+top to bottom direction
+skinparam monochrome false
+skinparam linetype ortho
+
+queue gatewayReceptionQueue
+
+package connector-infrastructure {
+  component ConnectorGatewayMessageListener
+}
+
+package connector-application {
+  component ConnectorGatewayConfirmationMessageProcessorService
+  component ConnectorMessageEvidenceVerifier
+  component ConnectorLinkSubmitter
+}
+
+database ConnectorMessageRepository
+database ConnectorMessageEvidenceRepository
+
+gatewayReceptionQueue --> ConnectorGatewayMessageListener
+ConnectorGatewayMessageListener --> ConnectorGatewayConfirmationMessageProcessorService : confirmation message
+ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageRepository : find referenced business message (refToMessageId)
+ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageEvidenceVerifier : validate evidence priority
+ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageEvidenceRepository : persist evidence
+ConnectorGatewayConfirmationMessageProcessorService --> ConnectorLinkSubmitter : forward to backend
+
+@enduml
+----
+
+Processing steps:
+
+. Load the referenced business message using `refToMessageId` (ebMS message identifier).
+. For each transported evidence, verify applicability via `ConnectorMessageEvidenceVerifier` (priority rules).
+. Persist accepted evidences and update the business message lifecycle (confirmed/rejected).
+. Forward the confirmation message to the backend via `ConnectorLinkSubmitter`.
+
+=== Generated evidences during inbound business processing
+
+When an inbound *business* message is processed, the connector may also generate evidences as side effects:
+
+* `ConnectorInboundMessageAcceptanceStep` creates a `RELAY_REMMD_ACCEPTANCE` evidence and submits it back to the gateway.
+* On security/container errors, `ConnectorInboundMessageNonDeliveryStep` creates a `NON_DELIVERY` evidence.
+
+These are handled by `ConnectorInboundMessagePipeline`, not by the confirmation processor above.
+
+=== Message forwarded to the backend
+
+After processing, the confirmation message is submitted to the backend link partner with the backend routing context of the referenced business message.
+
+[plantuml,incoming_evidence_3,format=svg]
+----
+@startuml
+
+top to bottom direction
+skinparam monochrome false
+skinparam linetype ortho
+
+package connector-application {
+  component ConnectorLinkSubmitter
+}
+
+package connector-infrastructure {
+  component ConnectorBackendLinkEventPublisher
+}
+
+package connector-infrastructure {
+  component ConnectorBackendMessageDeliveryListener
+}
+
+interface DomibusConnectorBackendDeliveryWebService
+
+queue backendDeliveryQueue
+
+ConnectorLinkSubmitter --> ConnectorBackendLinkEventPublisher
+ConnectorBackendLinkEventPublisher --> backendDeliveryQueue : PUSH
+backendDeliveryQueue --> ConnectorBackendMessageDeliveryListener
+ConnectorBackendMessageDeliveryListener --> DomibusConnectorBackendDeliveryWebService
+
+@enduml
+----

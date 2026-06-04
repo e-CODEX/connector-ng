@@ -42,6 +42,7 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
     void should_process_a_message_as_confirmed_successfully_if_its_evidence_is_delivery_or_retrieval(
             ConnectorEvidenceType evidenceType) {
         var message = MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage();
+        when(messageRepository.findByIdentifier(any())).thenReturn(message);
         when(messageRepository.setAsConfirmed(any())).thenReturn(
                 MessageTestFixtures.createConfirmedMessage());
         this.messageEvidenceVerifierService.verify(evidenceType, message);
@@ -65,9 +66,10 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
     void should_throw_exception_when_processing_message_as_delivery_or_retrieval_if_it_has_been_rejected(
             ConnectorEvidenceType evidenceType) {
         var message = MessageTestFixtures.createRejectedMessage();
+        when(messageRepository.findByIdentifier(any())).thenReturn(message);
         var exception = assertThrows(
-                ConnectorEvidenceNotRelevantException.class,
-                () -> this.messageEvidenceVerifierService.verify(evidenceType, message)
+            ConnectorEvidenceNotRelevantException.class,
+            () -> this.messageEvidenceVerifierService.verify(evidenceType, message)
         );
         assertThat(exception.getMessage()).contains(
                 "The processed evidence is ignored, because the business message is already in rejected state");
@@ -76,6 +78,7 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
     @Test
     void should_throw_exception_when_processing_message_as_retrieval_if_it_has_been_rejected() {
         var message = MessageTestFixtures.createRejectedMessage();
+        when(messageRepository.findByIdentifier(any())).thenReturn(message);
         var exception = assertThrows(
                 ConnectorEvidenceNotRelevantException.class,
                 () -> this.messageEvidenceVerifierService.verify(ConnectorEvidenceType.RETRIEVAL, message)

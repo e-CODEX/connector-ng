@@ -290,6 +290,38 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
+    public ConnectorMessage findByEbmsMessageIdentifier(@NonNull String ebmsMessageIdentifier) {
+        var message = this.messageJpaRepository.findByAs4PropertiesEbmsMessageIdentifier(
+                ebmsMessageIdentifier
+        );
+
+        return toDomain(message);
+    }
+
+    @Override
+    public ConnectorMessage findByBackendMessageIdentifier(
+            @NonNull String backendMessageIdentifier) {
+        var message = this.messageJpaRepository.findByBackendMessageIdentifier(
+                backendMessageIdentifier
+        );
+
+        return toDomain(message);
+    }
+
+    @Override
+    public ConnectorMessage updateBackendContext(
+            @NonNull String identifier,
+            @NonNull String backendName,
+            @NonNull String referenceToBackendMessageIdentifier) {
+        var message = this.messageJpaRepository.findByIdentifier(identifier);
+        message.setBackendName(backendName);
+        message.setReferenceToBackendMessageIdentifier(referenceToBackendMessageIdentifier);
+        var updated = this.messageJpaRepository.save(message);
+
+        return toDomain(updated);
+    }
+
+    @Override
     public ConnectorMessage findByIdentifierAndDirection(
             ConnectorMessage message,
             ConnectorMessageDirection direction) {

@@ -35,6 +35,7 @@ fun org.asciidoctor.gradle.jvm.AbstractAsciidoctorTask.commonConfig() {
             "rouge-style" to "github",
             "imagesdir" to "resources",
             "rootdir" to sourceDir.absolutePath
+            // "rootdir" to file("src/docs/asciidoc").absolutePath
         )
     )
 }

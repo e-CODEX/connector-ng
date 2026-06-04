@@ -30,6 +30,7 @@ import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
+import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendServiceClient;
 import java.util.List;
 import java.util.UUID;

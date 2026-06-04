@@ -91,7 +91,7 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
     }
 
     private ConnectorMessage assignIdentifier(ConnectorMessage message) {
-        log.debug("Assigning identifier to message [{}]", message);
+        log.debug("Assigning identifier to message [{}]", message.identifier());
         var identifier = this.messageIdGenerator.generateIdentifier();
 
         return message.toBuilder().identifier(identifier).build();

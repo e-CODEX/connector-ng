@@ -72,13 +72,13 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
     @Override
     public ConnectorProcessingMode updateKeystore(
             @Nonnull String uuid, @Nonnull String keystoreUuid) {
-        log.debug("updating processing mode with uuid: [{}]", uuid);
+        log.debug("Updating processing mode with uuid: [{}]", uuid);
 
         var existingProcessingMode = this.processingModeRepository.findByUuid(uuid);
 
         if (existingProcessingMode == null) {
             throw new ConnectorProcessingModeNotFoundException(
-                    "not found processing mode for business domain");
+                    "Processing mode not found for the business domain");
         }
 
         return this.processingModeRepository.updateKeystore(uuid, keystoreUuid);
@@ -89,7 +89,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
             @NonNull ConnectorMessage message,
             @NonNull ProcessingModeVerificationMode verificationMode) {
         log.debug(
-                "verifying message [{}] with verification mode [{}]",
+                "Verifying message [{}] with verification mode [{}]",
                 message.identifier(), verificationMode
         );
 
@@ -111,7 +111,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
 
         if (toParty != null && toParty.identifierType().isBlank()) {
             log.warn(
-                    "message with uuid [{}] verification mode is RELAXED."
+                    "Message with uuid [{}] verification mode is RELAXED."
                     + "Assuming ToParty IdentifierType [{}] as empty!",
                     message.identifier(), toParty.identifierType()
             );
@@ -120,7 +120,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
         if (!this.partyService.exists(toParty, message.businessDomainIdentifier())) {
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
-                            "message toParty [%s] is not configured on the connector! "
+                            "Message toParty [%s] is not configured on the connector! "
                             + "Check the P-Mode linked to business domain with uuid [%s]",
                             toParty, message.businessDomainIdentifier()
                     )
@@ -131,7 +131,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
 
         if (fromParty != null && fromParty.identifierType().isBlank()) {
             log.warn(
-                    "message with uuid [{}] verification mode is RELAXED."
+                    "Message with uuid [{}] verification mode is RELAXED."
                     + "Assuming FromParty IdentifierType [{}] as empty!",
                     message.identifier(), fromParty.identifierType()
             );
@@ -140,7 +140,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
         if (!this.partyService.exists(fromParty, message.businessDomainIdentifier())) {
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
-                            "message fromParty [%s] is not configured on the connector! "
+                            "Message fromParty [%s] is not configured on the connector! "
                             + "Check the P-Mode linked to business domain with uuid [%s]",
                             fromParty, message.businessDomainIdentifier()
                     )
@@ -150,7 +150,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
 
     private void processCreateVerification(ConnectorMessage message) {
         var warning = String.format(
-                "message with uuid [%s] verification failed because P-Mode CREATE "
+                "Message with uuid [%s] verification failed because P-Mode CREATE "
                 + "verification mode is not supported!",
                 message.identifier()
         );
@@ -159,7 +159,7 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
     }
 
     private void processServiceAndActionVerification(ConnectorMessage message) {
-        log.debug("verifying service and action for message [{}]", message.identifier());
+        log.debug("Verifying service and action for message [{}]", message.identifier());
 
         try {
             var as4Properties = message.as4Properties();
@@ -173,10 +173,10 @@ public class ConnectorProcessingModeServiceImpl implements ConnectorProcessingMo
                     as4Properties.action().name(), message.businessDomainIdentifier()
             );
         } catch (NotFoundException e) {
-            log.error("message with uuid [{}] verification failed", message.identifier());
+            log.error("Message with uuid [{}] verification failed", message.identifier());
 
             throw new ConnectorProcessingModeVerificationException(
-                    "message verification failed", e
+                    "Message verification failed", e
             );
         }
     }

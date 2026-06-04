@@ -37,7 +37,7 @@ public class ConnectorServiceServiceImpl implements ConnectorServiceService {
             @NonNull List<ConnectorService> services,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         log.debug(
-                "saving services [{}] for business domain [{}]", services,
+                "Saving services [{}] for business domain [{}]", services,
                 businessDomainIdentifier
         );
 
@@ -49,7 +49,7 @@ public class ConnectorServiceServiceImpl implements ConnectorServiceService {
             @NonNull String serviceName,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         log.debug(
-                "finding service with name [{}] and business domain [{}]", serviceName,
+                "Finding service with name [{}] and business domain [{}]", serviceName,
                 businessDomainIdentifier
         );
 
@@ -59,10 +59,10 @@ public class ConnectorServiceServiceImpl implements ConnectorServiceService {
 
         if (service == null) {
             log.warn(
-                    "service with name [{}] and business domain [{}] not found",
+                    "Service with name [{}] and business domain [{}] not found",
                     serviceName, businessDomainIdentifier
             );
-            throw new ConnectorServiceNotFoundException("service not found");
+            throw new ConnectorServiceNotFoundException("Service not found");
         }
 
         return service;

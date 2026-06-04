@@ -53,7 +53,7 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
     public void verify(
             @NonNull ConnectorEvidenceType evidenceType,
             @NonNull ConnectorMessage message) {
-        log.debug("Processing message [{}] with evidence [{}]", message, evidenceType);
+        log.debug("Processing message [{}] with evidence [{}]", message.identifier(), evidenceType);
 
         var transportedEvidences = message.transportedEvidences();
 
@@ -71,7 +71,7 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
                     + "[{}] because it has lower priority than the already received evidences. "
                     + "error_code=[{}]",
                     evidenceType,
-                    message,
+                    message.identifier(),
                     ConnectorErrorCode.EVIDENCE_IGNORED_DUE_HIGHER_PRIORITY.getCode()
             );
 

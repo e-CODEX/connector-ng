@@ -45,7 +45,7 @@ public record FileUploadCommand(
         try {
             Files.deleteIfExists(tempFileLocation);
         } catch (IOException e) {
-            log.error("failed to delete temporary file {}", tempFileLocation, e);
+            log.error("Failed to delete temporary file {}", tempFileLocation, e);
         }
     }
 }

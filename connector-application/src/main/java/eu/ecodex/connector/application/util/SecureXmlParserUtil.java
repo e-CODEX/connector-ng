@@ -56,7 +56,7 @@ public class SecureXmlParserUtil {
             factory.setFeature(
                     "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (ParserConfigurationException e) {
-            log.error("error configuring XML parser ", e);
+            log.error("Error configuring XML parser ", e);
             throw new RuntimeException(e);
         }
 
@@ -71,7 +71,7 @@ public class SecureXmlParserUtil {
             factory.setAttribute(
                     "http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", "0");
         } catch (IllegalArgumentException e) {
-            log.warn("entity expansion limit not supported", e);
+            log.warn("Entity expansion limit not supported", e);
         }
 
         DocumentBuilder builder;
@@ -80,7 +80,7 @@ public class SecureXmlParserUtil {
 
             return builder.parse(new InputSource(new StringReader(xmlString)));
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            log.error("error parsing XML string", e);
+            log.error("Error parsing XML string", e);
 
             throw new RuntimeException(e);
         }

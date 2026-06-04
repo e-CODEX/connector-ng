@@ -70,10 +70,10 @@ public class ConnectorRoutingRulePattern {
         if (parser.isPresent()) {
             this.connectorExpression = parser.get();
         } else {
-            log.error("could not parse routing rule pattern: {}", pattern);
+            log.error("Could not parse routing rule pattern: {}", pattern);
 
             throw new ConnectorExpressionParser.ParsingException(
-                    "could not parse routing rule pattern: " + pattern);
+                    "Could not parse routing rule pattern: " + pattern);
         }
     }
 

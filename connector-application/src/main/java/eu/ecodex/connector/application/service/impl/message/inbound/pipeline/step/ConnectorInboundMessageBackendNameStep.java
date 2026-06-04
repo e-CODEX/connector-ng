@@ -63,12 +63,15 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
-        log.debug("Processing inbound message backend name validation for: [{}]", inboundMessage);
+        log.debug(
+                "Processing inbound message [{}] backend name validation ",
+                inboundMessage.identifier()
+        );
 
         if (StringUtils.isNotEmpty(inboundMessage.backendName())) {
             log.debug(
                     "Backend name is already set for the message [{}], skipping the name "
-                    + "validation", inboundMessage
+                    + "validation", inboundMessage.identifier()
             );
 
             return inboundMessage;
@@ -160,7 +163,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
                 .map(backendName -> {
                     log.debug(
                             "Found backend name [{}] for the message [{}]", backendName,
-                            inboundMessage
+                            inboundMessage.identifier()
                     );
                     return backendName;
                 })

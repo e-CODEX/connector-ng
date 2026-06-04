@@ -43,7 +43,7 @@ public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartner
 
     @Override
     public void verify(@NonNull ConnectorMessage message) {
-        log.debug("Verifying the message link partner: [{}]", message);
+        log.debug("Verifying the message [{}] link partner", message.identifier());
         var linkPartnerName = getLinkPartnerName(message);
 
         var linkPartner = this.linkPartnerRepository.findByName(linkPartnerName);

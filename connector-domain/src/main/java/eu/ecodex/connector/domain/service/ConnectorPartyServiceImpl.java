@@ -36,7 +36,7 @@ public class ConnectorPartyServiceImpl implements ConnectorPartyService {
             @NonNull List<ConnectorParty> parties,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         log.debug(
-                "saving parties [{}] for business domain [{}]", parties, businessDomainIdentifier);
+                "Saving parties [{}] for business domain [{}]", parties, businessDomainIdentifier);
 
         return this.partyRepository.saveAll(parties, businessDomainIdentifier);
     }

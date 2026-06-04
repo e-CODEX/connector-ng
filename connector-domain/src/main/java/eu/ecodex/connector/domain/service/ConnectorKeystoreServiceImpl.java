@@ -34,7 +34,7 @@ public class ConnectorKeystoreServiceImpl implements ConnectorKeystoreService {
     public ConnectorKeystore persist(
             @NonNull ConnectorKeystore keystore,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        log.debug("persisting keystore: [{}]", keystore);
+        log.debug("Persisting keystore: [{}]", keystore);
 
         return this.keystoreRepository.save(keystore, businessDomainIdentifier);
     }

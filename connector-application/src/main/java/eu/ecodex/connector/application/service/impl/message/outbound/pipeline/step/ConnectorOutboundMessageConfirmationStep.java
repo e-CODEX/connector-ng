@@ -68,7 +68,7 @@ public class ConnectorOutboundMessageConfirmationStep implements ConnectorMessag
                 submissionEvidenceMessage, submissionEvidence
         );
 
-        log.debug("Created confirmation message: [{}]", confirmationMessage);
+        log.debug("Created confirmation message: [{}]", confirmationMessage.identifier());
 
         return confirmationMessage.switchDirection();
     }

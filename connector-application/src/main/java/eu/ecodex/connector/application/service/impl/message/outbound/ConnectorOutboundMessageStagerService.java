@@ -77,7 +77,7 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
 
     @Override
     public void stage(ConnectorMessage message) {
-        log.debug("Staging outbound message: [{}]", message);
+        log.debug("Staging outbound message: [{}]", message.identifier());
 
         var createdMessage = this.messageRepository.save(message);
         var messageIdentifier = createdMessage.identifier();

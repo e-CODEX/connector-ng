@@ -43,14 +43,14 @@ public class ConnectorBusinessDomainServiceImpl implements ConnectorBusinessDoma
 
     @Override
     public ConnectorBusinessDomain register(@NonNull ConnectorBusinessDomain businessDomain) {
-        log.debug("creating new business domain: [{}]", businessDomain);
+        log.debug("Creating new business domain: [{}]", businessDomain);
 
         var foundBusinessDomain = this.businessDomainRepository.findByIdentifier(
                 businessDomain.identifier()
         );
 
         if (foundBusinessDomain != null) {
-            throw new ConnectorBusinessDomainException("business domain already exists");
+            throw new ConnectorBusinessDomainException("Business domain already exists");
         }
 
         return this.businessDomainRepository.save(businessDomain);
@@ -59,12 +59,12 @@ public class ConnectorBusinessDomainServiceImpl implements ConnectorBusinessDoma
     @Override
     public ConnectorBusinessDomain findByIdentifier(
             @NonNull ConnectorBusinessDomainIdentifier identifier) {
-        log.debug("finding business domain by identifier: [{}]", identifier);
+        log.debug("Finding business domain by identifier: [{}]", identifier);
 
         var businessDomain = this.businessDomainRepository.findByIdentifier(identifier);
 
         if (businessDomain == null) {
-            throw new ConnectorBusinessDomainNotFoundException("business domain not found");
+            throw new ConnectorBusinessDomainNotFoundException("Business domain not found");
         }
 
         return businessDomain;

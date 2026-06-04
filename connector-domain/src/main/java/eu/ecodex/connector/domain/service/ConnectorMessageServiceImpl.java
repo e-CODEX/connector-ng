@@ -41,12 +41,15 @@ public class ConnectorMessageServiceImpl implements ConnectorMessageService {
     @Override
     public ConnectorMessage findByIdentifierAndDirection(
             @NonNull ConnectorMessage message, @NonNull ConnectorMessageDirection direction) {
-        log.debug("finding message with identifier: [{}] and direction: [{}]", message, direction);
+        log.debug(
+                "Finding message with identifier: [{}] and direction: [{}]",
+                message.identifier(), direction
+        );
 
         var foundMessage = this.messageRepository.findByIdentifierAndDirection(message, direction);
 
         if (foundMessage == null) {
-            throw new ConnectorMessageNotFoundException("message not found");
+            throw new ConnectorMessageNotFoundException("Message not found");
         }
 
         return foundMessage;

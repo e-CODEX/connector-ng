@@ -40,7 +40,7 @@ public class ConnectorActionServiceImpl implements ConnectorActionService {
             @NonNull List<ConnectorAction> actions,
             @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         log.debug(
-                "saving actions [{}] for business domain [{}]", actions, businessDomainIdentifier
+                "Saving actions [{}] for business domain [{}]", actions, businessDomainIdentifier
         );
 
         return this.actionRepository.saveAll(actions, businessDomainIdentifier);
@@ -56,11 +56,11 @@ public class ConnectorActionServiceImpl implements ConnectorActionService {
 
         if (action == null) {
             log.warn(
-                    "action with name [{}] and business domain [{}] not found",
+                    "Action with name [{}] and business domain [{}] not found",
                     actionName, businessDomainIdentifier
             );
 
-            throw new ConnectorActionNotFoundException("action not found");
+            throw new ConnectorActionNotFoundException("Action not found");
         }
 
         return action;

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,7 +29,8 @@ public interface ConnectorMessageJpaRepository extends
     List<ConnectorMessageEntity> findByAs4PropertiesConversationIdentifier(
             String conversationIdentifier);
 
-    ConnectorMessageEntity findByAs4PropertiesEbmsMessageIdentifier(String ebmsMessageIdentifier);
+    ConnectorMessageEntity findByAs4PropertiesEbmsMessageIdentifierAndDirection(
+            String ebmsMessageIdentifier, ConnectorMessageDirection direction);
 
     ConnectorMessageEntity findByBackendMessageIdentifier(String backendMessageIdentifier);
 

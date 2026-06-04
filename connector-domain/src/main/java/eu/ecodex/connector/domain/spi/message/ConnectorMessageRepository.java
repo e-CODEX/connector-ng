@@ -111,15 +111,18 @@ public interface ConnectorMessageRepository {
      * Finds a {@link ConnectorMessage} by its ebMS message identifier.
      *
      * @param ebmsMessageIdentifier the ebMS message identifier; must not be null or blank
+     * @param direction             the direction of the message; must not be null
      *
      * @return the matching {@link ConnectorMessage}, or null if no such message exists
      */
-    ConnectorMessage findByEbmsMessageIdentifier(@Nonnull String ebmsMessageIdentifier);
+    ConnectorMessage findByEbmsMessageIdentifierAndDirection(
+            @Nonnull String ebmsMessageIdentifier, @Nonnull ConnectorMessageDirection direction);
 
     /**
      * Finds a message by its backend-assigned message identifier.
      *
      * @param backendMessageIdentifier backend message id; must not be blank
+     *
      * @return matching message, or null
      */
     ConnectorMessage findByBackendMessageIdentifier(@Nonnull String backendMessageIdentifier);
@@ -128,11 +131,11 @@ public interface ConnectorMessageRepository {
      * Updates backend routing metadata required to deliver a gateway confirmation message to the
      * originating backend system.
      *
-     * @param identifier                            the confirmation message identifier; must not be
-     *                                              null
-     * @param backendName                           the backend link partner name; must not be null
-     * @param referenceToBackendMessageIdentifier   the backend identifier of the referenced
-     *                                              business message; must not be null
+     * @param identifier                          the confirmation message identifier; must not be
+     *                                            null
+     * @param backendName                         the backend link partner name; must not be null
+     * @param referenceToBackendMessageIdentifier the backend identifier of the referenced business
+     *                                            message; must not be null
      *
      * @return the updated {@link ConnectorMessage}
      */

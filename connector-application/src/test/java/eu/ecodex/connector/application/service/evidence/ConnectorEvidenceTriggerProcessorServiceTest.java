@@ -102,7 +102,9 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
 
         var gatewayEvidenceMessage = MessageTestFixtures.createDeliveryEvidenceMessage();
 
-        when(messageRepository.findByEbmsMessageIdentifier(EBMS_ID)).thenReturn(businessMessage);
+        when(messageRepository.findByEbmsMessageIdentifierAndDirection(
+                EBMS_ID, ConnectorMessageDirection.revert(gatewayEvidenceMessage.direction())))
+                .thenReturn(businessMessage);
         when(evidenceCreator.createSuccess(ConnectorEvidenceType.DELIVERY, businessMessage))
                 .thenReturn(deliveryEvidence);
         when(messageRepository.findByIdentifier(businessMessage.identifier()))
@@ -136,7 +138,10 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
                 )
                 .build();
 
-        when(messageRepository.findByEbmsMessageIdentifier("missing-ref")).thenReturn(null);
+        when(messageRepository.findByEbmsMessageIdentifierAndDirection(
+                "missing-ref",
+                ConnectorMessageDirection.revert(trigger.direction())))
+                .thenReturn(null);
         when(messageRepository.findByBackendMessageIdentifier(any())).thenReturn(null);
         when(messageRepository.findByIdentifier(any())).thenReturn(null);
 
@@ -179,7 +184,9 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .build();
 
-        when(messageRepository.findByEbmsMessageIdentifier(EBMS_ID)).thenReturn(businessMessage);
+        when(messageRepository.findByEbmsMessageIdentifierAndDirection(
+                EBMS_ID, ConnectorMessageDirection.revert(trigger.direction())))
+                .thenReturn(businessMessage);
         when(evidenceCreator.createSuccess(ConnectorEvidenceType.DELIVERY, businessMessage))
                 .thenReturn(deliveryEvidence);
         when(messageRepository.findByIdentifier(businessMessage.identifier())).thenReturn(businessMessage);

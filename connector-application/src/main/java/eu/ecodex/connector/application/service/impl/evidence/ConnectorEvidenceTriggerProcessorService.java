@@ -136,6 +136,7 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
 
     private ConnectorMessage findReferencedBusinessMessage(ConnectorMessage triggerMessage) {
         var referenceToMessageId = triggerMessage.as4Properties().referenceToIdentifier();
+
         if (!StringUtils.hasText(referenceToMessageId)) {
             referenceToMessageId = triggerMessage.referenceToBackendMessageIdentifier();
         }
@@ -145,7 +146,11 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
             );
         }
 
-        var byEbms = messageRepository.findByEbmsMessageIdentifier(referenceToMessageId);
+        // the sorting by criteria because two messages can have the same ebms identifier
+        var byEbms = messageRepository.findByEbmsMessageIdentifierAndDirection(
+                referenceToMessageId,
+                ConnectorMessageDirection.revert(triggerMessage.direction())
+        );
 
         if (byEbms != null) {
             return byEbms;

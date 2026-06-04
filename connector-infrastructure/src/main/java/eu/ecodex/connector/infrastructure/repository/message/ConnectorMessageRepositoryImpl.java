@@ -290,9 +290,12 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage findByEbmsMessageIdentifier(@NonNull String ebmsMessageIdentifier) {
-        var message = this.messageJpaRepository.findByAs4PropertiesEbmsMessageIdentifier(
-                ebmsMessageIdentifier
+    public ConnectorMessage findByEbmsMessageIdentifierAndDirection(
+            @NonNull String ebmsMessageIdentifier,
+            @NonNull ConnectorMessageDirection direction) {
+        var message = this.messageJpaRepository
+                .findByAs4PropertiesEbmsMessageIdentifierAndDirection(
+                ebmsMessageIdentifier, direction
         );
 
         return toDomain(message);

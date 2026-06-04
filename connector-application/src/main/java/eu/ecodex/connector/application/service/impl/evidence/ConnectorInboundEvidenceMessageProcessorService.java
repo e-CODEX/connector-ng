@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitt
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
@@ -95,7 +96,11 @@ public class ConnectorInboundEvidenceMessageProcessorService
             return null;
         }
 
-        return messageRepository.findByEbmsMessageIdentifier(referenceToMessageId);
+        // the sorting by criteria because two messages can have the same ebms identifier
+        return messageRepository.findByEbmsMessageIdentifierAndDirection(
+                referenceToMessageId,
+                ConnectorMessageDirection.revert(confirmationMessage.direction())
+        );
     }
 
     private void applyEvidencesToReferencedMessage(

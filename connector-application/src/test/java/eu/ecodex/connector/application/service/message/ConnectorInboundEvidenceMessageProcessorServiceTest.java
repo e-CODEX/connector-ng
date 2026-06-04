@@ -73,7 +73,8 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
                                                              BACKEND_MESSAGE_ID)
                                                      .build();
 
-        when(messageRepository.findByEbmsMessageIdentifier(REFERENCED_EBMS_ID))
+        when(messageRepository.findByEbmsMessageIdentifierAndDirection(
+                REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
                 .thenReturn(referencedMessage);
         when(messageRepository.findByIdentifier(REFERENCED_MESSAGE_ID))
                 .thenReturn(referencedMessage);
@@ -101,7 +102,9 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
                 REFERENCED_EBMS_ID,
                 List.of(EvidenceTestFixtures.createDeliveryEvidence())
         );
-        when(messageRepository.findByEbmsMessageIdentifier(REFERENCED_EBMS_ID)).thenReturn(null);
+        when(messageRepository.findByEbmsMessageIdentifierAndDirection(
+                REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction()))
+        ).thenReturn(null);
 
         processor.process(confirmationMessage);
 
@@ -124,7 +127,8 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
                                                              BACKEND_MESSAGE_ID)
                                                      .build();
 
-        when(messageRepository.findByEbmsMessageIdentifier(REFERENCED_EBMS_ID))
+        when(messageRepository.findByEbmsMessageIdentifierAndDirection(
+                REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
                 .thenReturn(referencedMessage);
         doThrow(new ConnectorEvidenceNotRelevantException(
                 ConnectorErrorCode.EVIDENCE_IGNORED_DUE_HIGHER_PRIORITY

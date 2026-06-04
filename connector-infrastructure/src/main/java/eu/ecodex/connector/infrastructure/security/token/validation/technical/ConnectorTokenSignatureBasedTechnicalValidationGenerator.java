@@ -229,7 +229,7 @@ public class ConnectorTokenSignatureBasedTechnicalValidationGenerator implements
             removeSignaturesFromSimpleReport(simpleReport, idsToRemove);
 
             // Add the original report to the token validation
-            log.info("Propagating DSS validation report");
+            log.debug("Propagating DSS validation report");
             var reportContainer = new ConnectorTokenOriginalValidationReportContainer();
             reportContainer.setReports(reports);
             tokenValidation.setOriginalValidationReport(reportContainer);
@@ -311,7 +311,7 @@ public class ConnectorTokenSignatureBasedTechnicalValidationGenerator implements
         var factory = DatatypeFactory.newInstance(); // create once
 
         if (simpleReport.getValidationTime() != null) {
-            log.info("Validation took [{}] ms", simpleReport.getValidationTime());
+            log.debug("Validation took [{}] ms", simpleReport.getValidationTime());
             var gregorianCalendar = new GregorianCalendar();
             gregorianCalendar.setTime(simpleReport.getValidationTime());
 

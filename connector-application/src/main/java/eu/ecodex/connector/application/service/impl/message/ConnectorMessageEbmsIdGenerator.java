@@ -53,7 +53,7 @@ public class ConnectorMessageEbmsIdGenerator {
      * @return a unique message identifier in the format {@code <uuid>@<suffix>}
      */
     public String generateIdentifier() {
-        log.info("Generating new EBMS message identifier");
+        log.debug("Generating new EBMS message identifier");
         var configuration = this.processingConfigurationProvider.getConfiguration();
         return String.format("%s@%s", UUID.randomUUID(), configuration.ebmsIdSuffix());
     }

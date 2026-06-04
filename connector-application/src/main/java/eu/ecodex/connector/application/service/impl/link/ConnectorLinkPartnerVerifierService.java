@@ -59,8 +59,8 @@ public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartner
         validateDirection(message.direction(), linkPartner.type());
 
         log.debug(
-                "Gateway message processed for: [{}] with link partner: [{}]",
-                message, linkPartner
+                "Gateway message [{}] processed for the link partner [{}]",
+                message.identifier(), linkPartner
         );
     }
 

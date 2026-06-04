@@ -42,7 +42,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
 
     @Override
     public String save(@NonNull ConnectorMessageAttachment attachment, @NonNull Path filePath) {
-        log.info("saving attachment [{}] to s3", attachment.identifier());
+        log.debug("Saving attachment [{}] to s3", attachment.identifier());
 
         var putObjectRequest = buildObjectRequest(attachment);
 
@@ -68,7 +68,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
 
     @Override
     public byte[] findByIdentifier(String identifier) {
-        log.info("Downloading attachment [{}] from s3", identifier);
+        log.debug("Downloading attachment [{}] from s3", identifier);
 
         var getObjectRequest = GetObjectRequest.builder()
                                                .bucket(this.s3ProviderProperties.getBucket())

@@ -43,7 +43,7 @@ public class ConnectorPDFTrustOKSignatureSummaryGenerator extends ConnectorPDFTr
         var diagnosticData = reports.getDiagnosticData();
         var simpleReport = reports.getSimpleReport();
 
-        log.info("Creating TrustOK PDF appendix summary");
+        log.debug("Creating TrustOK PDF appendix summary");
 
         var pdfFonts = PDFDocumentFonts.createFonts();
         var outputStream = new ByteArrayOutputStream();

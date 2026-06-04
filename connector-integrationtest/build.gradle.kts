@@ -19,6 +19,7 @@ val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 dependencies {
     // app modules
     testImplementation(project(":connector-domain"))
+    testImplementation(project(":connector-application"))
     testImplementation(project(":connector-soap-api"))
     testImplementation(project(":connector-infrastructure"))
     testImplementation(project(":connector-bootstrapper"))
@@ -94,6 +95,8 @@ tasks.register<Test>("integrationTest") {
     useJUnitPlatform {
         includeTags("integration")
     }
+
+    maxParallelForks = 1
 
     // increase memory for integration tests
     maxHeapSize = "2g"

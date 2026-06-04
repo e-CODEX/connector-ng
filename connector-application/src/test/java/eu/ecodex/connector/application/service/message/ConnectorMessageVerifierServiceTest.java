@@ -58,6 +58,28 @@ public class ConnectorMessageVerifierServiceTest {
     }
 
     @Test
+    void should_throw_exception_in_strict_verification_mode_when_business_domain_is_not_found() {
+        assertThrows(
+                ConnectorProcessingModeVerificationException.class,
+                () -> this.verifierService.verify(
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
+                        ProcessingModeVerificationMode.STRICT
+                )
+        );
+    }
+
+    @Test
+    void should_throw_exception_in_strict_verification_mode_when_business_domain_is_not_enabled() {
+        assertThrows(
+                ConnectorProcessingModeVerificationException.class,
+                () -> this.verifierService.verify(
+                        MessageTestFixtures.createValidOutboundBusinessMessage(),
+                        ProcessingModeVerificationMode.STRICT
+                )
+        );
+    }
+
+    @Test
     void should_throw_exception_in_strict_verification_mode_when_message_is_invalid_due_to_service_not_found() {
         when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(null);
         assertThrows(
@@ -69,7 +91,11 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(0)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -86,7 +112,11 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(0)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -102,7 +132,11 @@ public class ConnectorMessageVerifierServiceTest {
 
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -111,7 +145,11 @@ public class ConnectorMessageVerifierServiceTest {
                 ServiceTestFixtures.createService());
         when(this.actionRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(
                 ActionTestFixtures.createAction());
-        when(this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any())).thenReturn(
+        when(this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        )).thenReturn(
                 null
         );
         assertThrows(
@@ -123,7 +161,11 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -143,7 +185,11 @@ public class ConnectorMessageVerifierServiceTest {
         );
         verify(serviceRepository, times(1)).findByNameAndBusinessDomain(any(), any());
         verify(actionRepository, times(1)).findByNameAndBusinessDomain(any(), any());
-        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(1)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -161,7 +207,11 @@ public class ConnectorMessageVerifierServiceTest {
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
-        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test
@@ -179,7 +229,11 @@ public class ConnectorMessageVerifierServiceTest {
                         ProcessingModeVerificationMode.RELAXED
                 )
         );
-        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any());
+        verify(partyRepository, times(2)).findByIdentifierAndRoleTypeAndBusinessDomain(
+                any(),
+                any(),
+                any()
+        );
     }
 
     @Test

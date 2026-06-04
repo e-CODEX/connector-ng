@@ -20,6 +20,8 @@ import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageStagerService;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;

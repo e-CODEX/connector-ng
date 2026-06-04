@@ -15,7 +15,7 @@ jakarta-mail = "2.0.2"
 jakarta-xml-bind-api = "4.0.2"
 jakarta-xml-ws-api = "4.0.2"
 # jaxb
-jaxb-impl = "4.0.7"
+jaxb-impl = "4.0.6"
 # spring boot
 spring-boot = "4.0.2"
 spring-doc = "3.0.1"
@@ -60,7 +60,7 @@ jakarta-mail = { module = "com.sun.mail:jakarta.mail", version.ref = "jakarta-ma
 jakarta-xml-bind-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jakarta-xml-bind-api" }
 jakarta-xml-ws-api = { module = "jakarta.xml.ws:jakarta.xml.ws-api", version.ref = "jakarta-xml-ws-api" }
 # jaxb
-jaxb-impl = { module = "com.sun.xml.bind:jaxb-impl", version.ref = "jaxb-impl" }
+jaxb-impl = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "jaxb-impl" }
 # spring + boot
 spring-boot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "spring-boot" }
 spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-doc"}

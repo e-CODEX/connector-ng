@@ -51,8 +51,7 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
     /**
      * Creates a new {@code ConnectorOutboundMessageStagerService}.
      *
-     * @param messageRepository         repository used to persist {@link ConnectorMessage}
-     *                                  entities
+     * @param messageRepository         repository used to persist {@link ConnectorMessage} entities
      * @param attachmentRepository      repository used to resolve and associate
      *                                  {@link ConnectorMessageAttachment} entities
      * @param businessContentRepository repository used to persist

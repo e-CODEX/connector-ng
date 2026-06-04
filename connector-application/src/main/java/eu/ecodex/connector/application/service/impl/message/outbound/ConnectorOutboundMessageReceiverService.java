@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.impl.message.outbound;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
@@ -33,6 +34,7 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
     private final ConnectorMessageVerifier messageVerifier;
     private final ConnectorEventPublisher stagingEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGenerator;
+    private final ConnectorBusinessDomainVerifier businessDomainVerifier;
 
     /**
      * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
@@ -50,16 +52,19 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
             ConnectorMessageVerifier messageVerifier,
             @Qualifier("connectorOutboundMessageStagingEventPublisher")
             ConnectorEventPublisher stagingEventPublisher,
-            ConnectorMessageIdGenerator messageIdGenerator) {
+            ConnectorMessageIdGenerator messageIdGenerator,
+            ConnectorBusinessDomainVerifier businessDomainVerifier) {
         this.configurationProvider = configurationProvider;
         this.messageVerifier = messageVerifier;
         this.stagingEventPublisher = stagingEventPublisher;
         this.messageIdGenerator = messageIdGenerator;
+        this.businessDomainVerifier = businessDomainVerifier;
     }
 
     @Override
     @Transactional
     public ConnectorMessage register(@NonNull final ConnectorMessage message) {
+        businessDomainVerifier.execute(message.businessDomainIdentifier());
         var configuration = this.configurationProvider.getConfiguration();
         var messageWithId = this.assignIdentifier(message);
         this.messageVerifier.verify(messageWithId, configuration.outboundMessageVerificationMode());

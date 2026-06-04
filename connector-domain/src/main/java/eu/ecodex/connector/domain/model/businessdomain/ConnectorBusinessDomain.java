@@ -37,7 +37,7 @@ import lombok.NonNull;
  * @param createdAt   The timestamp when the business domain was created.
  * @param updatedAt   The timestamp when the business domain was last updated.
  */
-@Builder
+@Builder(toBuilder = true)
 public record ConnectorBusinessDomain(
         String uuid,
         @NotBlank ConnectorBusinessDomainIdentifier identifier,

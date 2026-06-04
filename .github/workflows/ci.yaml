@@ -104,7 +104,7 @@ jobs:
                 run: chmod +x ./gradlew
 
             -   name: Build with Gradle
-                run: ./gradlew build -x test -x integrationTest
+                run: ./gradlew build --no-configuration-cache -x test -x integrationTest
                 shell: bash
 
             -   name: Verify SBOM exists

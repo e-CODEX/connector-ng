@@ -37,9 +37,9 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     /**
      * Creates a new {@code ConnectorMessageVerifierService}.
      *
-     * @param partyRepository   repository used to resolve and validate message parties
-     * @param serviceRepository repository used to resolve and validate message services
-     * @param actionRepository  repository used to resolve and validate message actions
+     * @param partyRepository       repository used to resolve and validate message parties
+     * @param serviceRepository     repository used to resolve and validate message services
+     * @param actionRepository      repository used to resolve and validate message actions
      */
     public ConnectorMessageVerifierService(
             ConnectorPartyRepository partyRepository,
@@ -78,7 +78,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
         if (toParty != null && toParty.identifierType().isBlank()) {
             log.warn(
                     "Message with identifier [{}] verification mode is RELAXED."
-                    + "Assuming ToParty IdentifierType [{}] as empty!",
+                            + "Assuming ToParty IdentifierType [{}] as empty!",
                     message.identifier(), toParty.identifierType()
             );
         }
@@ -92,7 +92,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
                             "Message toParty [%s] is not configured on the connector! "
-                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                                    + "Check the P-Mode linked to business domain with uuid [%s]",
                             toParty, message.businessDomainIdentifier()
                     )
             );
@@ -103,7 +103,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
         if (fromParty != null && fromParty.identifierType().isBlank()) {
             log.warn(
                     "Message with identifier [{}] verification mode is RELAXED."
-                    + "Assuming FromParty IdentifierType [{}] as empty!",
+                            + "Assuming FromParty IdentifierType [{}] as empty!",
                     message.identifier(), fromParty.identifierType()
             );
         }
@@ -116,7 +116,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
             throw new ConnectorProcessingModeVerificationException(
                     String.format(
                             "Message fromParty [%s] is not configured on the connector! "
-                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                                    + "Check the P-Mode linked to business domain with uuid [%s]",
                             fromParty, message.businessDomainIdentifier()
                     )
             );
@@ -126,7 +126,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     private void processCreateVerification(ConnectorMessage message) {
         var warning = String.format(
                 "Message with identifier [%s] verification failed because P-Mode CREATE "
-                + "verification mode is not supported!",
+                        + "verification mode is not supported!",
                 message.identifier()
         );
         log.warn(warning);

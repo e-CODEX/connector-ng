@@ -84,11 +84,6 @@ subprojects {
                 csv.required.set(true)
             }
         }
-        sonar {
-            properties {
-                property("sonar.sources", "src")
-            }
-        }
     }   
 }
 

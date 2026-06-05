@@ -18,79 +18,70 @@ public class EvidenceTestFixtures {
     public static ConnectorMessageEvidence createSubmissionAcceptanceEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createSubmissionRejectionEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.SUBMISSION_REJECTION)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRelayREMMDAcceptanceEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRelayREMMDRejectionEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RELAY_REMMD_REJECTION)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRelayREMMDFailureEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RELAY_REMMD_FAILURE)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createDeliveryEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.DELIVERY)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createNonDeliveryEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.NON_DELIVERY)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRetrievalEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RETRIEVAL)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createNonRetrievalEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.NON_RETRIEVAL)
-                                       .attachment(
-                                               MessageAttachmentTestFixtures.createEvidenceAttachment())
+                                       .content(new byte[] {1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createEvidenceTrigger() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
-                                       .attachment(null)
+                                       .content(null)
                                        .build();
     }
 }

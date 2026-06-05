@@ -58,7 +58,7 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
 
         assertThat(created).isNotNull();
         assertThat(created.type()).isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
-        assertThat(created.attachment()).isNotNull();
+        assertThat(created.content()).isNotNull();
     }
 
     @Test
@@ -100,7 +100,7 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
 
         assertThat(created).isNotNull();
         assertThat(created.type()).isEqualTo(ConnectorEvidenceType.RELAY_REMMD_REJECTION);
-        assertThat(created.attachment()).isNotNull();
+        assertThat(created.content()).isNotNull();
     }
 
 

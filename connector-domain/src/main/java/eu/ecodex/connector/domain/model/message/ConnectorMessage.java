@@ -163,7 +163,7 @@ public record ConnectorMessage(
 
         return transported != null
                 && transported.size() == 1
-                && transported.getFirst().attachment() == null;
+                && transported.getFirst().content() == null;
     }
 
     /**

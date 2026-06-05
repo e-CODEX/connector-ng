@@ -118,7 +118,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
             if (evidences != null && !evidences.isEmpty()) {
                 log.debug(
                         "Message [{}] has no content but has evidences — "
-                        + "treating as confirmation message", message.identifier()
+                                + "treating as confirmation message", message.identifier()
                 );
             }
             return counter; // no content payload to write
@@ -151,15 +151,12 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         for (var evidence : evidences) {
             counter++;
 
-            var payload = this.fileStorageProvider.findByIdentifier(
-                    evidence.attachment().identifier());
-
             writePayload(
                     mapMessage, counter,
                     "text/xml",
                     evidence.type().name(),
                     evidence.type().name(),
-                    payload
+                    evidence.content()
             );
         }
 

@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransp
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
+import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -60,7 +62,9 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Column(name = "TRANSPORTED_MESSAGE_IDENTIFIER", nullable = false)
     private String transportedMessageIdentifier;
 
-    @Column(name = "TRANSPORTED_MESSAGE", columnDefinition = "TEXT", nullable = false)
+    @Size(max = 5_000_000)
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "TRANSPORTED_MESSAGE", length = 5_000_000, nullable = false)
     private String transportedMessage;
 
     @Column(name = "LINK_PARTNER_NAME")

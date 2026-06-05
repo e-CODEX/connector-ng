@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.domain.model.message.evidence;
 
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
@@ -20,9 +19,11 @@ import lombok.Builder;
 /**
  * The Connector Evidence internally represents the evidences for a message.
  *
- * @param uuid    The UUID of the evidence.
- * @param type    The type of the evidence.
- * @param content The content of the evidence.
+ * @param uuid      The UUID of the evidence.
+ * @param type      The type of the evidence.
+ * @param content   The content of the evidence.
+ * @param createdAt The creation date of the evidence.
+ * @param updatedAt The last update date of the evidence.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageEvidence(

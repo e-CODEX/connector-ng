@@ -232,7 +232,7 @@ public class ConnectorAcknowledgeMessageTransportStepServiceTest {
                                             .identifier(TRANSPORT_STEP_ID)
                                             .status(status)
                                             .numberOfAttempts(1)
-                                            .message(message())
+                                            .transportedMessage(message())
                                             .build();
     }
 }

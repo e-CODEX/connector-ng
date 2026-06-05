@@ -105,7 +105,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
                 .save(argThat(step ->
                                       step.numberOfAttempts() == 1
                                               && step.status() == ConnectorMessageTransportStatus.PENDING
-                                              && step.message()
+                                              && step.transportedMessage()
                                                      .identifier()
                                                      .equals(MESSAGE_ID)
                 ));

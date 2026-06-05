@@ -96,39 +96,43 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     private void submitToBackend(ConnectorMessage message) {
         var identifier = message.identifier();
 
-        var inboundMessage = this.messageRepository.findByIdentifier(message.identifier());
-
         log.info("Submitting message [{}] to the backend system", identifier);
 
-        var deliveryWebService = backendServiceClient.createClient(inboundMessage.backendName());
+        var deliveryWebService = backendServiceClient.createClient(message.backendName());
 
         try {
-            var backendMessage = legacyMessageHelper.convertMessage(inboundMessage);
-
+            var backendMessage = legacyMessageHelper.convertMessage(message);
             var acknowledgment = deliveryWebService.deliverMessage(backendMessage);
 
             if (acknowledgment.isResult()) {
-                messageRepository.setDeliveredToBackendAt(identifier);
-                messageRepository.updateBackendIdentifier(
-                        identifier,
-                        acknowledgment.getMessageId()
-                );
+                if (message.isBusinessMessage()) {
+                    // TODO: also send SUBMISSION_CONFIRMATION back here!
+                    messageRepository.setDeliveredToBackendAt(identifier);
+                    messageRepository.updateBackendIdentifier(
+                            identifier,
+                            acknowledgment.getMessageId()
+                    );
+                }
                 messageTransportStep.execute(
-                        inboundMessage,
+                        message,
                         ConnectorMessageTransportStatus.SUBMITTED
                 );
                 log.info("Message [{}] submitted to the backend system", identifier);
             } else {
                 log.error("Failed to deliver message [{}] to the backend system", identifier);
-                messageRepository.setAsRejected(identifier);
+                if (message.isBusinessMessage()) {
+                    // TODO: if message is a business message and state is failed
+                    // trigger NON_DELIVERY
+                    messageRepository.setAsRejected(identifier);
+                }
                 messageTransportStep.execute(
-                        inboundMessage,
+                        message,
                         ConnectorMessageTransportStatus.FAILED
                 );
             }
         } catch (Exception e) {
             log.error("Failed to deliver message [{}] to the backend system", identifier, e);
-            messageTransportStep.execute(inboundMessage, ConnectorMessageTransportStatus.FAILED);
+            messageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
         }
     }
 }

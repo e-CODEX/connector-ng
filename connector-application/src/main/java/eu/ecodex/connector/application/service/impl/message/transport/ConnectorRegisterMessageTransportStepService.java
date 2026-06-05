@@ -82,7 +82,7 @@ public class ConnectorRegisterMessageTransportStepService
 
         var transportStep = ConnectorMessageTransportStep.builder()
                                                          .identifier(identifier)
-                                                         .message(message)
+                                                         .transportedMessage(message)
                                                          .status(status)
                                                          .numberOfAttempts(attempts)
                                                          .build();

@@ -93,11 +93,11 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
 
         if (command.status() == ConnectorMessageTransportStatus.SUBMITTED) {
             this.updateMessage(
-                    existingStep.message().identifier(),
+                    existingStep.transportedMessage().identifier(),
                     command.remoteMessageIdentifier()
             );
         } else if (command.status() == ConnectorMessageTransportStatus.FAILED) {
-            this.registerErrors(existingStep.message().identifier(), command.errors());
+            this.registerErrors(existingStep.transportedMessage().identifier(), command.errors());
         }
     }
 
@@ -115,6 +115,7 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
             log.info("Message [{}] has been delivered to backend", messageIdentifier);
         }
 
+        // TODO: update evidence status to DELIVERED
         // for backward compatibility,
         // no update for evidence (submitted to backend at) because the main message already has
         // this information.

@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport;
 
-import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -28,30 +27,29 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ConnectorMessageTransportStepJpaRepository extends
         JpaRepository<ConnectorMessageTransportStepEntity, Long> {
-    @EntityGraph(attributePaths = {"message", "statuses"})
+    @EntityGraph(attributePaths = {"statuses"})
     ConnectorMessageTransportStepEntity findByIdentifier(String identifier);
 
-    ConnectorMessageTransportStepEntity findByMessageIdentifier(String messageIdentifier);
+    ConnectorMessageTransportStepEntity findByTransportedMessageIdentifier(
+            String transportedMessageIdentifier);
 
     @Query(
             value = """
                     SELECT DISTINCT MTS.identifier
-                    FROM connector_message_transport_steps MTS, connector_messages MSG
-                    WHERE MTS.message_id = MSG.id
-                    AND MTS.status = 'PENDING'
-                    AND MSG.backend_name = :backendName
+                    FROM connector_message_transport_steps MTS
+                    WHERE MTS.status = 'PENDING'
+                    AND MTS.link_partner_name = :backendName
                     """,
             nativeQuery = true
     )
-    List<String> findAllPendingByMessageBackendName(@Param("backendName") String backendName);
+    List<String> findAllPendingByBackendName(@Param("backendName") String backendName);
 
     @Query(
             value = """
-                    SELECT DISTINCT MSG.identifier
-                    FROM connector_message_transport_steps MTS, connector_messages MSG
-                    WHERE MTS.message_id = MSG.id
-                    AND MTS.status = 'PENDING'
-                    AND MSG.backend_name = :backendName
+                    SELECT DISTINCT MTS.transported_message_identifier
+                    FROM connector_message_transport_steps MTS
+                    WHERE MTS.status = 'PENDING'
+                    AND MTS.link_partner_name = :backendName
                     """,
             nativeQuery = true
     )

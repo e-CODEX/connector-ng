@@ -240,11 +240,11 @@ public class LegacyMessageHelper {
 
     private List<DomibusConnectorMessageConfirmationType> toConfirmations(
             ConnectorMessage message) {
-        if (message.evidences() == null || message.evidences().isEmpty()) {
+        if (message.transportedEvidences() == null || message.transportedEvidences().isEmpty()) {
             return new ArrayList<>();
         }
 
-        return message.evidences().stream().map(evidence -> {
+        return message.transportedEvidences().stream().map(evidence -> {
             if (evidence.attachment() == null) {
                 throw new IllegalStateException(
                         "Evidence attachment is null for evidence " + evidence.type()

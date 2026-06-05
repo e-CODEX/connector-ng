@@ -44,7 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorBackendMessageDeliveryListenerTest {
     private static final String MESSAGE_ID = "msg-001";
-    private static final String BACKEND_NAME = "backend-alice";
+    private static final String BACKEND_NAME = "backend_alice";
 
     @Mock
     private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
@@ -248,8 +248,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
      * Stubs the common happy-path chain up to deliveryWebService.
      */
     private void stubHappyPath(ConnectorMessage inbound) {
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(inbound);
-        when(backendServiceClient.createClient(BACKEND_NAME)).thenReturn(deliveryWebService);
+        when(backendServiceClient.createClient(any())).thenReturn(deliveryWebService);
         when(legacyMessageHelper.convertMessage(any())).thenReturn(mock(DomibusConnectorMessageType.class));
     }
 }

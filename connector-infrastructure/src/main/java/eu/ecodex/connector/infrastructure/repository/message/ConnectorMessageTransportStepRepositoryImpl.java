@@ -10,30 +10,34 @@
 
 package eu.ecodex.connector.infrastructure.repository.message;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepStatusEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepStatusJpaRepository;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * Default Implementation of the {@link ConnectorMessageTransportStepRepository}.
  */
+@Slf4j
 @Component
 public class ConnectorMessageTransportStepRepositoryImpl
         implements ConnectorMessageTransportStepRepository {
     private final ConnectorMessageTransportStepJpaRepository transportStepJpaRepository;
     private final ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository;
-    private final ConnectorMessageJpaRepository messageJpaRepository;
+    private final ObjectMapper objectMapper;
 
     /**
      * Constructs an instance of {@code ConnectorMessageTransportStepRepositoryImpl}.
@@ -43,40 +47,34 @@ public class ConnectorMessageTransportStepRepositoryImpl
      * @param stepStatusJpaRepository    the repository for managing
      *                                   {@code ConnectorMessageTransportStepStatusEntity}
      *                                   instances
-     * @param messageJpaRepository       the repository for managing {@code ConnectorMessageEntity}
-     *                                   instances
      */
     public ConnectorMessageTransportStepRepositoryImpl(
             ConnectorMessageTransportStepJpaRepository transportStepJpaRepository,
             ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository,
-            ConnectorMessageJpaRepository messageJpaRepository) {
+            ObjectMapper objectMapper) {
         this.transportStepJpaRepository = transportStepJpaRepository;
         this.stepStatusJpaRepository = stepStatusJpaRepository;
-        this.messageJpaRepository = messageJpaRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public ConnectorMessageTransportStep save(
             @NonNull ConnectorMessageTransportStep transportStep) {
-        var messageEntity = this.messageJpaRepository.findByIdentifier(transportStep.message()
-                                                                                    .identifier());
+        try {
+            var transportStepEntity = toEntity(transportStep);
 
-        if (messageEntity == null) {
-            throw new IllegalArgumentException(
-                    "No message found for identifier: " + transportStep.message().identifier());
+            var stepStatusEntity = toEntity(transportStep.status());
+            var savedTransportStep = transportStepJpaRepository.save(transportStepEntity);
+            stepStatusEntity.setTransportStep(savedTransportStep);
+            var savedStepStatus = stepStatusJpaRepository.save(stepStatusEntity);
+
+            savedTransportStep.getStatuses().add(savedStepStatus);
+
+            return toDomain(savedTransportStep);
+        } catch (JsonProcessingException e) {
+            log.error("Could not parse transported message", e);
+            throw new IllegalArgumentException("Could not parse transported message", e);
         }
-
-        var transportStepEntity = toEntity(transportStep);
-        transportStepEntity.setMessage(messageEntity);
-
-        var stepStatusEntity = toEntity(transportStep.status());
-        var savedTransportStep = transportStepJpaRepository.save(transportStepEntity);
-        stepStatusEntity.setTransportStep(savedTransportStep);
-        var savedStepStatus = stepStatusJpaRepository.save(stepStatusEntity);
-
-        savedTransportStep.getStatuses().add(savedStepStatus);
-
-        return toDomain(savedTransportStep);
     }
 
     @Override
@@ -115,7 +113,9 @@ public class ConnectorMessageTransportStepRepositoryImpl
     @Override
     public ConnectorMessageTransportStep findByMessageIdentifier(
             @NonNull String messageIdentifier) {
-        var entity = this.transportStepJpaRepository.findByMessageIdentifier(messageIdentifier);
+        var entity = this.transportStepJpaRepository.findByTransportedMessageIdentifier(
+                messageIdentifier
+        );
 
         return toDomain(entity);
     }
@@ -129,7 +129,7 @@ public class ConnectorMessageTransportStepRepositoryImpl
 
     @Override
     public List<String> findPendingTransportSteps(@NonNull String backendName) {
-        return transportStepJpaRepository.findAllPendingByMessageBackendName(backendName);
+        return transportStepJpaRepository.findAllPendingByBackendName(backendName);
     }
 
     @Override
@@ -142,24 +142,38 @@ public class ConnectorMessageTransportStepRepositoryImpl
             return null;
         }
 
-        return ConnectorMessageTransportStep.builder()
-                                            .identifier(entity.getIdentifier())
-                                            .numberOfAttempts(entity.getNumberOfAttempts())
-                                            .status(entity.getStatus())
-                                            .message(ConnectorMessageRepositoryImpl.toShortDomain(
-                                                    entity.getMessage()))
-                                            .statuses(toStatuses(entity.getStatuses()))
-                                            .createdAt(entity.getCreatedAt())
-                                            .updatedAt(entity.getUpdatedAt())
-                                            .build();
+        try {
+            var transportedMessage = objectMapper.readValue(
+                    entity.getTransportedMessage(),
+                    ConnectorMessage.class
+            );
+
+            return ConnectorMessageTransportStep
+                    .builder()
+                    .identifier(entity.getIdentifier())
+                    .numberOfAttempts(entity.getNumberOfAttempts())
+                    .transportedMessage(transportedMessage)
+                    .status(entity.getStatus())
+                    .statuses(toStatuses(entity.getStatuses()))
+                    .createdAt(entity.getCreatedAt())
+                    .updatedAt(entity.getUpdatedAt())
+                    .build();
+        } catch (JsonProcessingException e) {
+            log.error("Could not parse transported message", e);
+            return null;
+        }
     }
 
     private ConnectorMessageTransportStepEntity toEntity(
-            ConnectorMessageTransportStep transportStep) {
+            ConnectorMessageTransportStep transportStep) throws JsonProcessingException {
         return ConnectorMessageTransportStepEntity
                 .builder()
                 .identifier(transportStep.identifier())
                 .numberOfAttempts(transportStep.numberOfAttempts())
+                .linkPartnerName(transportStep.transportedMessage().backendName())
+                .transportedMessageIdentifier(transportStep.transportedMessage().identifier())
+                .transportedMessage(
+                        objectMapper.writeValueAsString(transportStep.transportedMessage()))
                 .status(transportStep.status())
                 .build();
     }

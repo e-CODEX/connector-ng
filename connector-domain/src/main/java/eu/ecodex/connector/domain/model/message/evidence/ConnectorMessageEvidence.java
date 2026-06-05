@@ -22,13 +22,13 @@ import lombok.Builder;
  *
  * @param uuid    The UUID of the evidence.
  * @param type    The type of the evidence.
- * @param attachment The businessContent of the evidence.
+ * @param content The content of the evidence.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageEvidence(
         @Nullable String uuid,
         @Nonnull ConnectorEvidenceType type,
-        @Nullable ConnectorMessageAttachment attachment,
+        @Nullable byte[] content,
         @Nullable Instant createdAt,
         @Nullable Instant updatedAt
 ) implements Serializable {

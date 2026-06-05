@@ -70,7 +70,7 @@ class ConnectorEvidenceToolkitImplTest {
     }
 
     private byte[] evidenceBytes(ConnectorMessageEvidence evidence) {
-        return fileStorageProvider.findByIdentifier(evidence.attachment().identifier());
+        return evidence.content();
     }
 
     @Test

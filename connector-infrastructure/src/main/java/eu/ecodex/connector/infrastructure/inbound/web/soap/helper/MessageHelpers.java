@@ -104,7 +104,7 @@ public class MessageHelpers {
                                                       .type(ConnectorEvidenceType.valueOf(
                                                               confirmation.getConfirmationType()
                                                                           .value()))
-                                                      .attachment(null)
+                                                      .content(null)
                                                       .build();
 
         var transportedEvidences = new ArrayList<ConnectorMessageEvidence>();

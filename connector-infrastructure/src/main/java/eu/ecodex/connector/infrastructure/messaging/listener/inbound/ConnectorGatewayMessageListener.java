@@ -289,17 +289,10 @@ public class ConnectorGatewayMessageListener {
                         payload
                 ));
             } else if (EVIDENCE_TYPE_NAMES.contains(description)) {
-                var content = saveAndUploadAttachment(
-                        description,
-                        CONTENT_TYPE_XML,
-                        "Inbound message evidence",
-                        ConnectorAttachmentType.EVIDENCE_XML,
-                        payload
-                );
                 evidences.add(
                         ConnectorMessageEvidence.builder()
                                                 .type(ConnectorEvidenceType.valueOf(description))
-                                                .attachment(content)
+                                                .content(payload)
                                                 .build());
             } else {
                 log.warn(
@@ -327,17 +320,13 @@ public class ConnectorGatewayMessageListener {
         }
 
         payloads.evidences().forEach(evidence -> {
-            evidenceRepository.save(evidence, messageIdentifier);
-
-            if (evidence.attachment() == null) {
+            if (evidence.content() == null) {
                 throw new IllegalStateException(
                         "Evidence attachment is null for evidence " + evidence.type()
                 );
             }
 
-            attachmentRepository.attachToMessage(
-                    evidence.attachment().identifier(), messageIdentifier
-            );
+            evidenceRepository.save(evidence, messageIdentifier);
         });
 
         payloads.attachments().forEach(attachment ->

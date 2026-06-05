@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.database.entity.message;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,8 +24,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,9 +56,10 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     @Column(name = "TYPE", nullable = false, updatable = false)
     private ConnectorEvidenceType type;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ATTACHMENT_ID", unique = true, nullable = false)
-    private ConnectorMessageAttachmentEntity content;
+    @Size(max = 10_000_000)
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "CONTENT", length = 10_000_000)
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MESSAGE_ID")

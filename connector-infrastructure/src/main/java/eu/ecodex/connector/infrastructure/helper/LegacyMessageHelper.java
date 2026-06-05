@@ -245,15 +245,11 @@ public class LegacyMessageHelper {
         }
 
         return message.transportedEvidences().stream().map(evidence -> {
-            if (evidence.attachment() == null) {
+            if (evidence.content() == null) {
                 throw new IllegalStateException(
-                        "Evidence attachment is null for evidence " + evidence.type()
+                        "Evidence content is null for evidence " + evidence.type()
                 );
             }
-
-            var data = this.fileStorageProvider.findByIdentifier(
-                    evidence.attachment().identifier()
-            );
 
             var confirmation = new DomibusConnectorMessageConfirmationType();
             confirmation.setConfirmationType(
@@ -261,7 +257,10 @@ public class LegacyMessageHelper {
             );
             confirmation.setConfirmation(
                     new StreamSource(
-                            new ByteArrayInputStream(Arrays.copyOf(data, data.length))
+                            new ByteArrayInputStream(Arrays.copyOf(
+                                    evidence.content(),
+                                    evidence.content().length
+                            ))
                     )
             );
 

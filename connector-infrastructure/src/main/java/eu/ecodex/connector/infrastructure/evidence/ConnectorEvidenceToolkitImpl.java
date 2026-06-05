@@ -14,9 +14,6 @@ import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
@@ -29,7 +26,6 @@ import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesPr
 import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import eu.spocseu.edeliverygw.configuration.xsd.EDeliveryDetail;
 import java.util.HexFormat;
-import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.etsi.uri._02640.v2.EventReasonType;
 import org.jspecify.annotations.NonNull;
@@ -79,44 +75,17 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             @NonNull ConnectorMessage message,
             @NonNull ConnectorEvidenceType evidenceType,
             @Nullable ConnectorMessageRejectionReason rejectionReason) {
-        byte[] evidence;
+        byte[] content;
         try {
-            evidence = generateEvidenceBytes(evidenceType, message, rejectionReason);
-            var evidenceContent = addAttachment(evidenceType, evidence);
-            this.attachmentRepository.attachToMessage(
-                    evidenceContent.identifier(),
-                    message.identifier()
-            );
+            content = generateEvidenceBytes(evidenceType, message, rejectionReason);
 
             return ConnectorMessageEvidence.builder()
                                            .type(evidenceType)
-                                           .attachment(evidenceContent)
+                                           .content(content)
                                            .build();
         } catch (ConnectorEvidenceBuilderException e) {
             throw new ConnectorEvidenceException("evidence could not be created", e);
         }
-    }
-
-    private ConnectorMessageAttachment addAttachment(
-            ConnectorEvidenceType evidenceType,
-            byte[] evidenceContent) {
-        var name = evidenceType.name();
-        var identifier = String.format("%s_%s", UUID.randomUUID(), name);
-        var attachment = ConnectorMessageAttachment.builder()
-                                                   .identifier(identifier)
-                                                   .name(name + ".xml")
-                                                   .contentType("text/xml")
-                                                   .size("<xml />".getBytes().length)
-                                                   .description("Evidence of " + name)
-                                                   .storage(ConnectorAttachmentStorage.S3_BUCKET)
-                                                   .type(ConnectorAttachmentType.EVIDENCE_XML)
-                                                   .build();
-
-        var savedEvidence = attachmentRepository.save(attachment);
-
-        this.fileStorageProvider.save(savedEvidence, evidenceContent);
-
-        return savedEvidence;
     }
 
     private byte[] generateEvidenceBytes(
@@ -178,7 +147,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             throws ConnectorEvidenceBuilderException {
         return evidenceBuilder.createRelayREMMDAcceptanceRejection(
                 true,
-                (EventReasonType) null,
+                null,
                 buildEDeliveryDetails(),
                 requirePriorEvidence(
                         ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
@@ -204,7 +173,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             throws ConnectorEvidenceBuilderException {
         return evidenceBuilder.createDeliveryNonDeliveryToRecipient(
                 true,
-                (EventReasonType) null,
+                null,
                 buildEDeliveryDetails(),
                 requirePriorEvidence(
                         ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
@@ -230,7 +199,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
             throws ConnectorEvidenceBuilderException {
         return evidenceBuilder.createRetrievalNonRetrievalByRecipient(
                 true,
-                (EventReasonType) null,
+                null,
                 buildEDeliveryDetails(),
                 requirePriorEvidence(
                         ConnectorEvidenceType.DELIVERY,
@@ -323,8 +292,8 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         }
 
         return evidences.stream()
-                        .filter(e -> e.type() == requiredType && e.attachment() != null)
-                        .map(e -> fileStorageProvider.findByIdentifier(e.attachment().identifier()))
+                        .filter(e -> e.type() == requiredType && e.content() != null)
+                        .map(ConnectorMessageEvidence::content)
                         .findFirst()
                         .orElseThrow(() -> new ConnectorEvidenceException(missingPredecessorMessage(
                                 requiredType,

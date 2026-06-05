@@ -210,8 +210,6 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
                     savedMessage);
             return savedMessage;
         });
-        when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
 
         // Should complete without throwing; the unknown payload is silently skipped
         assertThatNoException().isThrownBy(() -> listener.handle(message));

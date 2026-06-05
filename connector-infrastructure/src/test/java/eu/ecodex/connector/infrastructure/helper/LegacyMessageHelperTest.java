@@ -94,7 +94,7 @@ public class LegacyMessageHelperTest {
     void should_throw_and_swallow_exception_if_evidence_has_no_attachment() {
         var evidence = ConnectorMessageEvidence.builder()
                                                .type(ConnectorEvidenceType.values()[0])
-                                               .attachment(null)
+                                               .content(null)
                                                .build();
         var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
 
@@ -168,17 +168,12 @@ public class LegacyMessageHelperTest {
     @Test
     void should_submit_evidence_message_successfully() {
         stubHappyPath();
-        var evidenceAttachment = ConnectorMessageAttachment.builder()
-                                                           .identifier("evidence-id")
-                                                           .build();
         var evidence = ConnectorMessageEvidence.builder()
                                                .type(ConnectorEvidenceType.values()[0])
-                                               .attachment(evidenceAttachment)
+                                               .content(new byte[1])
                                                .build();
         var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
 
-        when(fileStorageProvider.findByIdentifier("evidence-id"))
-                .thenReturn("<ev/>".getBytes());
         var message = legacyMessageHelper.convertMessage(inbound);
 
         assertThat(message).isNotNull();

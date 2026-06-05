@@ -96,7 +96,7 @@ public class LegacyMessageHelperTest {
                                                .type(ConnectorEvidenceType.values()[0])
                                                .attachment(null)
                                                .build();
-        var inbound = inboundMessage().toBuilder().evidences(List.of(evidence)).build();
+        var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
 
         when(fileStorageProvider.findByIdentifier("xml-content-id"))
                 .thenReturn("<xml/>".getBytes());
@@ -175,7 +175,7 @@ public class LegacyMessageHelperTest {
                                                .type(ConnectorEvidenceType.values()[0])
                                                .attachment(evidenceAttachment)
                                                .build();
-        var inbound = inboundMessage().toBuilder().evidences(List.of(evidence)).build();
+        var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
 
         when(fileStorageProvider.findByIdentifier("evidence-id"))
                 .thenReturn("<ev/>".getBytes());

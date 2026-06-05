@@ -57,14 +57,18 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Column(name = "NUMBER_OF_ATTEMPS", nullable = false)
     private int numberOfAttempts;
 
+    @Column(name = "TRANSPORTED_MESSAGE_IDENTIFIER", nullable = false)
+    private String transportedMessageIdentifier;
+
+    @Column(name = "TRANSPORTED_MESSAGE", columnDefinition = "TEXT", nullable = false)
+    private String transportedMessage;
+
+    @Column(name = "LINK_PARTNER_NAME")
+    private String linkPartnerName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
     private ConnectorMessageTransportStatus status;
-
-    @Setter
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "MESSAGE_ID", unique = true, nullable = false)
-    private ConnectorMessageEntity message;
 
     @Setter
     @Builder.Default

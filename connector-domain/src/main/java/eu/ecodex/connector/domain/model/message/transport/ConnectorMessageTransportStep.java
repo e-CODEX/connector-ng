@@ -27,21 +27,21 @@ import lombok.Builder;
  * <p>The transport step provides a structured representation of progress and
  * status changes in the message transport lifecycle.
  *
- * @param identifier       A unique identifier representing this transport step.
- * @param numberOfAttempts The count of attempts made to process this transport step.
- * @param message          The {@link ConnectorMessage} instance that is being transported in this
- *                         step.
- * @param statuses         A priority queue of {@link ConnectorMessageTransportStepStatus}
- *                         instances, each representing the status history of this step.
- * @param createdAt        The timestamp indicating when this transport step was created.
- * @param updatedAt        The timestamp representing the last time this transport step was
- *                         updated.
+ * @param identifier         A unique identifier representing this transport step.
+ * @param numberOfAttempts   The count of attempts made to process this transport step.
+ * @param transportedMessage The {@link ConnectorMessage} instance that is being transported in this
+ *                           step.
+ * @param statuses           A priority queue of {@link ConnectorMessageTransportStepStatus}
+ *                           instances, each representing the status history of this step.
+ * @param createdAt          The timestamp indicating when this transport step was created.
+ * @param updatedAt          The timestamp representing the last time this transport step was
+ *                           updated.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageTransportStep(
         @Nonnull String identifier,
         int numberOfAttempts,
-        ConnectorMessage message,
+        ConnectorMessage transportedMessage,
         ConnectorMessageTransportStatus status,
         Set<ConnectorMessageTransportStepStatus> statuses,
         Instant createdAt,

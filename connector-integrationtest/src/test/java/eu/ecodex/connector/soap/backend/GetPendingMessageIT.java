@@ -20,6 +20,7 @@ import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegist
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
+import eu.ecodex.connector.infrastructure.repository.provider.ConnectorS3FileStorageProvider;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +41,8 @@ public class GetPendingMessageIT extends BackendServiceTest {
     private int port;
     @MockitoBean
     private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    @MockitoBean
+    private ConnectorS3FileStorageProvider s3FileStorageProvider;
 
     private DomibusConnectorBackendWebService soapClient;
 
@@ -68,6 +71,7 @@ public class GetPendingMessageIT extends BackendServiceTest {
     void should_retrieve_a_pending_message_by_transport_step_identifier_successfully() {
         when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
                 ConnectorMessageTransportStep.class));
+        when(s3FileStorageProvider.findByIdentifier(any())).thenReturn(new byte[] {1, 2, 3});
 
         var request = new GetMessageByIdRequest();
         request.setMessageTransportId(TRANSPORT_MESSAGE_ID);

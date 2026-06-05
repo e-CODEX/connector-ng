@@ -28,6 +28,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidenceMessageCreator {
+    private final ConnectorMessageIdGenerator messageIdGenerator;
+
+    public ConnectorEvidenceMessageCreatorService(ConnectorMessageIdGenerator messageIdGenerator) {
+        this.messageIdGenerator = messageIdGenerator;
+    }
+
     /**
      * Retrieves the corresponding {@code ConnectorAction} for a given
      * {@code ConnectorEvidenceType}.
@@ -76,7 +82,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         return ConnectorMessage
                 .builder()
                 .uuid(businessMessage.uuid())
-                .identifier(businessMessage.identifier())
+                .identifier(messageIdGenerator.generateIdentifier())
                 .backendMessageIdentifier(businessMessage.backendMessageIdentifier())
                 .businessDomainIdentifier(businessMessage.businessDomainIdentifier())
                 .referenceToBackendMessageIdentifier(businessMessage.backendMessageIdentifier())
@@ -84,6 +90,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
                 .backendName(businessMessage.backendName())
                 .gatewayName(businessMessage.gatewayName())
                 .as4Properties(as4Properties)
+                .transportedEvidences(List.of(evidence))
                 .build();
     }
 
@@ -111,7 +118,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
 
         return ConnectorMessage
                 .builder()
-                .identifier(triggerMessage.identifier())
+                .identifier(messageIdGenerator.generateIdentifier())
                 .backendMessageIdentifier(triggerMessage.backendMessageIdentifier())
                 .businessDomainIdentifier(triggerMessage.businessDomainIdentifier())
                 .referenceToBackendMessageIdentifier(businessMessage.backendMessageIdentifier())

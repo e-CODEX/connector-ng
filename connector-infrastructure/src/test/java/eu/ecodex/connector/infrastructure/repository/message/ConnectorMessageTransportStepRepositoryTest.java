@@ -44,14 +44,6 @@ public class ConnectorMessageTransportStepRepositoryTest {
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_saving_if_the_message_is_unknown() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> this.repository.save(generateTransportStep("unknown-message-identifier"))
-        );
-    }
-
-    @Test
     @Sql({
             "classpath:sql/business-domain.sql",
             "classpath:sql/processing-mode.sql",
@@ -213,7 +205,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
                                             .identifier(STEP_IDENTIFIER)
                                             .numberOfAttempts(0)
                                             .status(ConnectorMessageTransportStatus.PENDING)
-                                            .message(
+                                            .transportedMessage(
                                                     ConnectorMessage.builder()
                                                                     .identifier(messageIdentifier)
                                                                     .build()

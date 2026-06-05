@@ -11,28 +11,29 @@
 package eu.ecodex.connector.application.service.message;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.ConnectorEvidenceMessageCreatorService;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
+import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorEvidenceMessageCreatorServiceTest {
-    private ConnectorEvidenceMessageCreator evidenceMessageCreator;
+    @Mock
+    private ConnectorMessageIdGenerator messageIdGenerator;
 
-    @BeforeEach
-    void setUp() {
-        this.evidenceMessageCreator = new ConnectorEvidenceMessageCreatorService();
-    }
+    @InjectMocks
+    private ConnectorEvidenceMessageCreatorService evidenceMessageCreator;
 
     private static Stream<ConnectorMessageEvidence> provideEvidence() {
         return Stream.of(
@@ -51,6 +52,8 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
     @ParameterizedTest
     @MethodSource("provideEvidence")
     void should_create_evidence_message_successfully(ConnectorMessageEvidence evidence) {
+        when(messageIdGenerator.generateIdentifier())
+               .thenReturn("d040fe80-55a6-4d51-85de-9e16280eb503@connector.ecodex.eu");
         var message = MessageTestFixtures.createValidOutboundBusinessMessage();
         var as4Properties = message.as4Properties();
         var action = ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type());
@@ -61,6 +64,7 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
 
         assertThat(evidenceMessage).isNotNull();
         assertThat(evidenceMessage.evidences()).isNullOrEmpty();
+        assertThat(evidenceMessage.identifier()).isNotEqualTo(message.identifier());
         assertThat(evidenceMessage.as4Properties().action().name()).isEqualTo(
                 ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type()).name());
         assertThat(evidenceMessage.as4Properties().service()).isEqualTo(

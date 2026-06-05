@@ -58,6 +58,6 @@ public class ConnectorRetrieveMessageByTransportIdService implements
             );
         }
 
-        return this.messageRepository.findByIdentifier(transportStep.message().identifier());
+        return transportStep.transportedMessage();
     }
 }

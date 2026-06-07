@@ -14,10 +14,12 @@ import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknow
 import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.domain.exception.NotFoundException;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageErrorRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
@@ -37,6 +39,7 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
         ConnectorAcknowledgeMessageTransportStep {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
     private final ConnectorMessageRepository messageRepository;
+    private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorMessageErrorRepository messageErrorRepository;
 
     /**
@@ -50,9 +53,11 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
     public ConnectorAcknowledgeMessageTransportStepService(
             ConnectorMessageTransportStepRepository transportStepRepository,
             ConnectorMessageRepository messageRepository,
+            ConnectorMessageEvidenceRepository evidenceRepository,
             ConnectorMessageErrorRepository messageErrorRepository) {
         this.transportStepRepository = transportStepRepository;
         this.messageRepository = messageRepository;
+        this.evidenceRepository = evidenceRepository;
         this.messageErrorRepository = messageErrorRepository;
     }
 
@@ -93,35 +98,46 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
 
         if (command.status() == ConnectorMessageTransportStatus.SUBMITTED) {
             this.updateMessage(
-                    existingStep.transportedMessage().identifier(),
+                    existingStep.transportedMessage(),
                     command.remoteMessageIdentifier()
             );
         } else if (command.status() == ConnectorMessageTransportStatus.FAILED) {
-            this.registerErrors(existingStep.transportedMessage().identifier(), command.errors());
+            this.registerErrors(existingStep.transportedMessage(), command.errors());
         }
     }
 
-    private void updateMessage(String messageIdentifier, String backendIdentifier) {
-        var message = this.messageRepository.findByIdentifier(messageIdentifier);
+    private void updateMessage(ConnectorMessage transportedMessage, String backendIdentifier) {
+        if (transportedMessage.isBusinessMessage()) {
+            var messageIdentifier = transportedMessage.identifier();
 
-        if (message == null) {
-            log.warn("Message [{}] not found", messageIdentifier);
-            return;
-        }
+            var message = this.messageRepository.findByIdentifier(transportedMessage.identifier());
 
-        if (message.isBusinessMessage()) {
+            if (message == null) {
+                log.warn("Message [{}] not found", messageIdentifier);
+                return;
+            }
+
             this.messageRepository.setDeliveredToBackendAt(messageIdentifier);
             this.messageRepository.updateBackendIdentifier(messageIdentifier, backendIdentifier);
             log.info("Message [{}] has been delivered to backend", messageIdentifier);
-        }
+        } else {
+            var transportedEvidences = transportedMessage.transportedEvidences();
 
-        // TODO: update evidence status to DELIVERED
-        // for backward compatibility,
-        // no update for evidence (submitted to backend at) because the main message already has
-        // this information.
+            if (transportedEvidences == null || transportedEvidences.isEmpty()) {
+                throw new IllegalStateException(
+                        "The evidence message contains no transported evidence"
+                );
+            }
+
+            evidenceRepository.setDeliveredToLinkPartnerAt(
+                    transportedEvidences.getFirst().uuid()
+            );
+        }
     }
 
-    private void registerErrors(String messageIdentifier, List<ConnectorMessageError> errors) {
-        this.messageErrorRepository.save(messageIdentifier, errors);
+    private void registerErrors(ConnectorMessage transportedMessage, List<ConnectorMessageError> errors) {
+        if (transportedMessage.isBusinessMessage()) {
+            this.messageErrorRepository.save(transportedMessage.identifier(), errors);
+        }
     }
 }

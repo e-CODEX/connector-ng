@@ -26,10 +26,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 /**
@@ -60,6 +62,10 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "CONTENT", length = 10_000_000)
     private String content;
+
+    @Setter
+    @Column(name = "DELIVERD_TO_LINK_PARTNER_AT", updatable = false)
+    private Instant deliveredToLinkPartnerAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MESSAGE_ID")

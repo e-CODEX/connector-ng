@@ -21,4 +21,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConnectorEvidenceJpaRepository extends
         JpaRepository<ConnectorMessageEvidenceEntity, Long> {
+    ConnectorMessageEvidenceEntity findByUuid(String uuid);
 }

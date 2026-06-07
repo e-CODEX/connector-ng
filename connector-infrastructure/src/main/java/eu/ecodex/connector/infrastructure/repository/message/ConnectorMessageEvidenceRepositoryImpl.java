@@ -17,6 +17,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.message.Conne
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorEvidenceJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -53,6 +54,7 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
                 .type(entity.getType())
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .deliveredToLinkPartnerAt(entity.getDeliveredToLinkPartnerAt())
                 .build();
     }
 
@@ -65,6 +67,13 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
         var savedEvidence = evidenceJpaRepository.save(evidenceToSave);
 
         return toDomain(savedEvidence);
+    }
+
+    @Override
+    public void setDeliveredToLinkPartnerAt(@NonNull String uuid) {
+        var evidence = evidenceJpaRepository.findByUuid(uuid);
+        evidence.setDeliveredToLinkPartnerAt(Instant.now());
+        evidenceJpaRepository.save(evidence);
     }
 
     private ConnectorMessageEvidenceEntity toEntity(

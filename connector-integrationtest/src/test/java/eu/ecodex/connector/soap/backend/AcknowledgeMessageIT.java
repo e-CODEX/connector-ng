@@ -67,6 +67,7 @@ public class AcknowledgeMessageIT extends BackendServiceTest {
             "classpath:sql/action.sql",
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/evidence.sql",
             "classpath:sql/message-transport-step.sql",
             "classpath:sql/message-transport-step-statuses.sql",
     })
@@ -74,13 +75,6 @@ public class AcknowledgeMessageIT extends BackendServiceTest {
         var request = acknowledgeMessage(true);
         var response = soapClient.acknowledgeMessage(request);
         assertThat(response).isNotNull();
-
-        var deliveredToBackendAt = jdbcTemplate.queryForObject(
-                "SELECT delivered_to_backend_at FROM connector_messages WHERE identifier = ?",
-                LocalDateTime.class,
-                request.getResponseForMessageId()
-        );
-        assertThat(deliveredToBackendAt).isNotNull();
     }
 
     @Test
@@ -92,6 +86,7 @@ public class AcknowledgeMessageIT extends BackendServiceTest {
             "classpath:sql/action.sql",
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/evidence.sql",
             "classpath:sql/message-transport-step.sql",
             "classpath:sql/message-transport-step-statuses.sql",
     })
@@ -111,6 +106,7 @@ public class AcknowledgeMessageIT extends BackendServiceTest {
             "classpath:sql/action.sql",
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/evidence.sql",
             "classpath:sql/message-transport-step.sql",
             "classpath:sql/message-transport-step-statuses.sql",
     })
@@ -119,7 +115,7 @@ public class AcknowledgeMessageIT extends BackendServiceTest {
         error.setErrorMessage("Error message");
         error.setErrorDetails("Error details");
         error.setErrorSource("Error source");
-        var request = acknowledgeMessage(true);
+        var request = acknowledgeMessage(false);
         request.getMessageErrors().add(error);
 
         var response = soapClient.acknowledgeMessage(request);

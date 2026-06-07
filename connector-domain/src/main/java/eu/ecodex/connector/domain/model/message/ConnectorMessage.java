@@ -139,7 +139,7 @@ public record ConnectorMessage(
      * @return {@code true} if the message is a business message, {@code false} otherwise.
      */
     public boolean isBusinessMessage() {
-        return !this.isEvidenceMessage();
+        return !this.isEvidenceMessage() && this.businessContent != null;
     }
 
     /**

@@ -34,4 +34,13 @@ public interface ConnectorMessageEvidenceRepository {
      */
     ConnectorMessageEvidence save(
             @Nonnull ConnectorMessageEvidence evidence, @Nonnull String messageIdentifier);
+
+    /**
+     * Updates the state or metadata of the connector evidence identified by the given identifier to
+     * reflect that it has been delivered to the link partner.
+     *
+     * @param uuid the unique identifier of the connector evidence that has been delivered to
+     *                   the link partner. Must not be null.
+     */
+    void setDeliveredToLinkPartnerAt(@Nonnull String uuid);
 }

@@ -17,11 +17,12 @@ import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendServiceClient;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHandler {
     private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
+    private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorBackendServiceClient backendServiceClient;
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final LegacyMessageHelper legacyMessageHelper;
@@ -53,11 +55,13 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     public ConnectorBackendMessageDeliveryListener(
             ConnectorRegisterMessageTransportStep messageTransportStep,
             ConnectorMessageRepository messageRepository,
+            ConnectorMessageEvidenceRepository evidenceRepository,
             ConnectorBackendServiceClient backendServiceClient,
             ConnectorLinkPartnerRepository linkPartnerRepository,
             LegacyMessageHelper legacyMessageHelper) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
+        this.evidenceRepository = evidenceRepository;
         this.backendServiceClient = backendServiceClient;
         this.linkPartnerRepository = linkPartnerRepository;
         this.legacyMessageHelper = legacyMessageHelper;
@@ -69,6 +73,12 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     public void handle(@NonNull ConnectorMessage message) {
         if (message.identifier() == null) {
             throw new IllegalArgumentException("Message identifier cannot be null");
+        }
+
+        if (!message.isBusinessMessage() && !message.isEvidenceMessage()) {
+            throw new IllegalStateException(
+                    "Received message is neither evidence nor a business message"
+            );
         }
 
         var partnerName = ConnectorLinkPartnerName.builder().name(message.backendName()).build();
@@ -93,7 +103,7 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
         log.info("Message [{}] is ready for pull", message.identifier());
     }
 
-    private void submitToBackend(ConnectorMessage message) {
+    private void submitToBackend(@NonNull ConnectorMessage message) {
         var identifier = message.identifier();
 
         log.info("Submitting message [{}] to the backend system", identifier);
@@ -112,11 +122,24 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
                             identifier,
                             acknowledgment.getMessageId()
                     );
+                } else { // the message is an evidence message
+                    var transportedEvidences = message.transportedEvidences();
+
+                    if (transportedEvidences == null || transportedEvidences.isEmpty()) {
+                        throw new IllegalStateException(
+                                "The evidence message contains no transported evidence"
+                        );
+                    }
+
+                    evidenceRepository.setDeliveredToLinkPartnerAt(
+                            transportedEvidences.getFirst().uuid()
+                    );
                 }
                 messageTransportStep.execute(
                         message,
                         ConnectorMessageTransportStatus.SUBMITTED
                 );
+
                 log.info("Message [{}] submitted to the backend system", identifier);
             } else {
                 log.error("Failed to deliver message [{}] to the backend system", identifier);

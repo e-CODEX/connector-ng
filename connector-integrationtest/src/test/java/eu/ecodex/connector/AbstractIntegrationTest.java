@@ -143,6 +143,7 @@ public abstract class AbstractIntegrationTest {
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_as4_properties");
         jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
+        jdbcTemplate.execute("TRUNCATE TABLE connector_message_evidences");
         jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
         jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
         jdbcTemplate.execute("TRUNCATE TABLE connector_services");

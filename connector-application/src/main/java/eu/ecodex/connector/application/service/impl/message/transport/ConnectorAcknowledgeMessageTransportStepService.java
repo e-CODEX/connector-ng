@@ -135,7 +135,9 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
         }
     }
 
-    private void registerErrors(ConnectorMessage transportedMessage, List<ConnectorMessageError> errors) {
+    private void registerErrors(
+            ConnectorMessage transportedMessage,
+            List<ConnectorMessageError> errors) {
         if (transportedMessage.isBusinessMessage()) {
             this.messageErrorRepository.save(transportedMessage.identifier(), errors);
         }

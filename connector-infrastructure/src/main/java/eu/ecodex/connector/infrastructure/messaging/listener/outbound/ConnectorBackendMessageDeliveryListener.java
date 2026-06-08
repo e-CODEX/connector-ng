@@ -20,7 +20,7 @@ import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
-import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendServiceClient;
+import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendDeliveryServiceClient;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -36,33 +36,34 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
-    private final ConnectorBackendServiceClient backendServiceClient;
+    private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final LegacyMessageHelper legacyMessageHelper;
 
     /**
      * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
      *
-     * @param messageTransportStep  Represents the transport step responsible for processing and
-     *                              executing message delivery within the connector registration
-     *                              process.
-     * @param messageRepository     Repository for handling the persistence and retrieval of
-     *                              connector messages.
-     * @param backendServiceClient  Client for interacting with backend services required for
-     *                              message delivery.
-     * @param linkPartnerRepository Repository for managing link partners associated with connector
+     * @param messageTransportStep         Represents the transport step responsible for processing
+     *                                     and executing message delivery within the connector
+     *                                     registration process.
+     * @param messageRepository            Repository for handling the persistence and retrieval of
+     *                                     connector messages.
+     * @param backendDeliveryServiceClient Client for interacting with backend services required for
+     *                                     message delivery.
+     * @param linkPartnerRepository        Repository for managing link partners associated with
+     *                                     connector
      */
     public ConnectorBackendMessageDeliveryListener(
             ConnectorRegisterMessageTransportStep messageTransportStep,
             ConnectorMessageRepository messageRepository,
             ConnectorMessageEvidenceRepository evidenceRepository,
-            ConnectorBackendServiceClient backendServiceClient,
+            ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
             ConnectorLinkPartnerRepository linkPartnerRepository,
             LegacyMessageHelper legacyMessageHelper) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
         this.evidenceRepository = evidenceRepository;
-        this.backendServiceClient = backendServiceClient;
+        this.backendDeliveryServiceClient = backendDeliveryServiceClient;
         this.linkPartnerRepository = linkPartnerRepository;
         this.legacyMessageHelper = legacyMessageHelper;
     }
@@ -108,7 +109,7 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
 
         log.info("Submitting message [{}] to the backend system", identifier);
 
-        var deliveryWebService = backendServiceClient.createClient(message.backendName());
+        var deliveryWebService = backendDeliveryServiceClient.createClient(message.backendName());
 
         try {
             var backendMessage = legacyMessageHelper.convertMessage(message);
@@ -142,7 +143,11 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
 
                 log.info("Message [{}] submitted to the backend system", identifier);
             } else {
-                log.error("Failed to deliver message [{}] to the backend system", identifier);
+                log.error(
+                        "Failed to deliver message [{}] to the backend system: [{}] ",
+                        identifier,
+                        acknowledgment.getResultMessage()
+                );
                 if (message.isBusinessMessage()) {
                     // TODO: if message is a business message and state is failed
                     // trigger NON_DELIVERY

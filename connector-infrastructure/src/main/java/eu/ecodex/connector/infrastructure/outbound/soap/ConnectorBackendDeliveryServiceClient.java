@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorBackendServiceClient {
+public class ConnectorBackendDeliveryServiceClient {
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory;
     private final ConnectorMerlinPropertiesFactory merlinPropertiesFactory;
@@ -37,7 +37,7 @@ public class ConnectorBackendServiceClient {
      * @param merlinPropertiesFactory  The factory for providing Merlin-specific configuration
      *                                 properties.
      */
-    public ConnectorBackendServiceClient(
+    public ConnectorBackendDeliveryServiceClient(
             ConnectorLinkPartnerRepository linkPartnerRepository,
             ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory,
             ConnectorMerlinPropertiesFactory merlinPropertiesFactory) {

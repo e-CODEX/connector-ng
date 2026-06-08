@@ -34,7 +34,7 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebS
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorBackendMessageDeliveryListener;
-import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendServiceClient;
+import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendDeliveryServiceClient;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -55,7 +55,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
-    private ConnectorBackendServiceClient backendServiceClient;
+    private ConnectorBackendDeliveryServiceClient backendServiceClient;
     @Mock
     private DomibusConnectorBackendDeliveryWebService deliveryWebService;
     @Mock

@@ -30,5 +30,4 @@ public class LinkEndpointProperties {
     private PrivateKeyProperties privateKey;
     private KeystoreProperties truststore;
     private String encryptAlias;
-    private String wsPolicy = "classpath:/policy/backend.policy.xml";
 }

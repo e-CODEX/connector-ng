@@ -10,12 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap;
 
-import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWSService;
-import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.infrastructure.property.link.ConnectorLinkProperties;
 import jakarta.xml.ws.Endpoint;
 import jakarta.xml.ws.WebServiceContext;
-import org.apache.cxf.Bus;
-import org.apache.cxf.jaxws.EndpointImpl;
+import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.jaxws.context.WebServiceContextImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,34 +26,30 @@ import org.springframework.context.annotation.Configuration;
  * It configures the service address, WSDL location, service name, endpoint name, and enables MTOM
  * support for efficient binary data transmission.
  */
+@Slf4j
 @Configuration
-public class SoapWebServiceConfig {
-    private final Bus bus;
-    private final DomibusConnectorBackendWebService backendWebService;
+@SuppressWarnings("checkstyle:MissingJavadocMethod")
+public class BackendSoapWebServiceConfig {
+    private final BackendWebServiceFactory backendWebServiceFactory;
+    private final ConnectorLinkProperties connectorLinkProperties;
 
-    public SoapWebServiceConfig(Bus bus, DomibusConnectorBackendWebService backendWebService) {
-        this.bus = bus;
-        this.backendWebService = backendWebService;
+    public BackendSoapWebServiceConfig(
+            BackendWebServiceFactory backendWebServiceFactory,
+            ConnectorLinkProperties connectorLinkProperties) {
+        this.backendWebServiceFactory = backendWebServiceFactory;
+        this.connectorLinkProperties = connectorLinkProperties;
     }
 
     @Bean
-    Endpoint backendWebServiceEndpoint() {
-        var endpoint = new EndpointImpl(bus, backendWebService);
-
-        endpoint.setAddress("/backend");
-        endpoint.setServiceName(DomibusConnectorBackendWSService.SERVICE);
-        endpoint.setEndpointName(
-                DomibusConnectorBackendWSService.DomibusConnectorBackendWebService);
-        endpoint.setWsdlLocation("classpath:wsdl/v1/DomibusConnectorBackendWebService.wsdl");
-        endpoint.publish();
-
-        endpoint.getProperties().put("mtom-enabled", true);
-
-        return endpoint;
+    public List<Endpoint> backendWebServiceEndpoints() {
+        return connectorLinkProperties.getBackend()
+                                      .stream()
+                                      .map(backendWebServiceFactory::createEndpoint)
+                                      .toList();
     }
 
     @Bean
-    WebServiceContext webServiceContext() {
+    public WebServiceContext webServiceContext() {
         return new WebServiceContextImpl();
     }
 }

@@ -23,6 +23,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LinkConfigDetailProperties {
-    private boolean loggingEnabled;
     private LinkEndpointProperties endpoint;
+    private String publishAddress = "/backend";
+    private boolean loggingEnabled = false;
+    private String wsPolicy = "classpath:/policy/backend.policy.xml";
 }

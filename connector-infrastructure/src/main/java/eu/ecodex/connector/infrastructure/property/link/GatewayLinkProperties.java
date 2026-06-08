@@ -16,14 +16,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Configuration properties for a backend component.
+ * Configuration properties for the gateway component.
  *
- * <p>A backend configuration defines how the application communicates with other systems through a
- * specific link configuration and the associated link partners.
+ * <p>This class groups the gateway-specific configuration, including the link configuration used
+ * for communication and the list of configured link partners.
  */
 @Getter
 @Setter
-public class BackendProperties {
+public class GatewayLinkProperties {
     private LinkConfigProperties linkConfig;
     private List<LinkPartnerProperties> linkPartners = new ArrayList<>();
 }

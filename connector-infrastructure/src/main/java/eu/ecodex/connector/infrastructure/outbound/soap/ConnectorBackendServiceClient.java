@@ -113,7 +113,9 @@ public class ConnectorBackendServiceClient {
 
         factory.setProperties(jaxWsFactoryBeanProperties);
 
-        var policyLoader = new ConnectorWsPolicyLoader(linkEndpointProperties.getWsPolicy());
+        var policyLoader = new ConnectorWsPolicyLoader(
+                linkPartnerConfig.getProperties().getWsPolicy()
+        );
         factory.getFeatures().add(policyLoader.loadPolicyFeature());
 
         return (DomibusConnectorBackendDeliveryWebService) factory.create();

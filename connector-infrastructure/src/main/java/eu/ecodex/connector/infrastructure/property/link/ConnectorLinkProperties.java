@@ -28,6 +28,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "connector.link")
 public class ConnectorLinkProperties {
-    private GatewayProperties gateway;
-    private List<BackendProperties> backend = new ArrayList<>();
+    private GatewayLinkProperties gateway;
+    private List<BackendLinkProperties> backend = new ArrayList<>();
 }

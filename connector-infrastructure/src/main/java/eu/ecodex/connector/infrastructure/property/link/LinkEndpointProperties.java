@@ -14,8 +14,6 @@ import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 
 /**
  * SOAP security configuration properties.
@@ -30,5 +28,4 @@ public class LinkEndpointProperties {
     private PrivateKeyProperties privateKey;
     private KeystoreProperties truststore;
     private String encryptAlias;
-    private String wsPolicy = "classpath:/policy/backend.policy.xml";
 }

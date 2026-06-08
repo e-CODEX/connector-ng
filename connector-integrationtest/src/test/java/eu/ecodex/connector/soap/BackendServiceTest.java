@@ -12,9 +12,26 @@ package eu.ecodex.connector.soap;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorMerlinPropertiesFactory;
+import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorWsPolicyLoader;
+import eu.ecodex.connector.infrastructure.outbound.soap.KeystorePasswordCallback;
+import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
+import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
+import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
+import eu.ecodex.connector.infrastructure.property.link.LinkConfigDetailProperties;
+import eu.ecodex.connector.infrastructure.property.link.LinkEndpointProperties;
+import java.util.HashMap;
+import org.apache.cxf.ext.logging.LoggingFeature;
+import org.apache.cxf.ext.logging.LoggingInInterceptor;
+import org.apache.cxf.ext.logging.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
+import org.apache.cxf.rt.security.SecurityConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class BackendServiceTest extends AbstractIntegrationTest {
+    @Autowired
+    private ConnectorMerlinPropertiesFactory merlinPropertiesFactory;
+
     protected DomibusConnectorBackendWebService createClient(int port) {
         var address = "http://localhost:" + port + "/services/backend";
 
@@ -23,6 +40,78 @@ public class BackendServiceTest extends AbstractIntegrationTest {
         factory.setAddress(address);
         factory.setWsdlURL("classpath:wsdl/v1/DomibusConnectorBackendWebService.wsdl");
 
+        var linkProperties = createLinkProperties();
+
+        if (linkProperties.isLoggingEnabled()) {
+            factory.getFeatures().add(new LoggingFeature());
+        }
+
+        var linkEndpointProperties = linkProperties.getEndpoint();
+
+        var encryptionProperties = merlinPropertiesFactory.createEncryptionProperties(
+                linkEndpointProperties);
+        var sigingProperties = merlinPropertiesFactory.createSigningProperties(
+                linkEndpointProperties);
+
+        var privateKey = linkEndpointProperties.getPrivateKey();
+
+        var properties = new HashMap<String, Object>();
+
+        properties.put(
+                SecurityConstants.ENCRYPT_USERNAME,
+                linkEndpointProperties.getEncryptAlias()
+        );
+        properties.put(SecurityConstants.ENCRYPT_PROPERTIES, encryptionProperties);
+        properties.put(SecurityConstants.SIGNATURE_USERNAME, privateKey.getAlias());
+        properties.put(SecurityConstants.SIGNATURE_PROPERTIES, sigingProperties);
+        properties.put(
+                SecurityConstants.CALLBACK_HANDLER,
+                new KeystorePasswordCallback(privateKey.getPassword())
+        );
+
+        properties.put("mtom-enabled", true);
+        properties.put("security.store.bytes.in.attachment", true);
+        properties.put("security.enable.streaming", true);
+
+        factory.getOutInterceptors().add(new LoggingOutInterceptor());
+        factory.getInInterceptors().add(new LoggingInInterceptor());
+        factory.setProperties(properties);
+
+        var policyLoader = new ConnectorWsPolicyLoader(
+                linkProperties.getWsPolicy()
+        );
+        factory.getFeatures().add(policyLoader.loadPolicyFeature());
+
         return (DomibusConnectorBackendWebService) factory.create();
+    }
+
+    private LinkConfigDetailProperties createLinkProperties() {
+        var keystore = new KeystoreProperties();
+        keystore.setPath("classpath:/keystores/backend-keystore.jks");
+        keystore.setPassword("12345");
+        keystore.setType(KeystoreType.JKS);
+
+        var privateKey = new PrivateKeyProperties();
+        privateKey.setAlias("alice");
+        privateKey.setPassword("12345");
+
+        var truststore = new KeystoreProperties();
+        truststore.setPath("classpath:/keystores/backend-keystore.jks");
+        truststore.setPassword("12345");
+        truststore.setType(KeystoreType.JKS);
+
+        var endpoint = new LinkEndpointProperties();
+        endpoint.setKeystore(keystore);
+        endpoint.setPrivateKey(privateKey);
+        endpoint.setTruststore(truststore);
+        endpoint.setEncryptAlias("connector_blue");
+
+        var properties = new LinkConfigDetailProperties();
+        properties.setEndpoint(endpoint);
+        properties.setPublishAddress("/backend");
+        properties.setLoggingEnabled(false);
+        properties.setWsPolicy("classpath:/policy/backend.policy.xml");
+
+        return properties;
     }
 }

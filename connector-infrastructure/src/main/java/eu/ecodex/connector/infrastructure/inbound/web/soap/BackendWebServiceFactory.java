@@ -18,6 +18,7 @@ import eu.ecodex.connector.infrastructure.property.link.BackendLinkProperties;
 import jakarta.xml.ws.Endpoint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.Bus;
+import org.apache.cxf.ext.logging.LoggingFeature;
 import org.apache.cxf.jaxws.EndpointImpl;
 import org.apache.cxf.rt.security.SecurityConstants;
 import org.springframework.stereotype.Component;
@@ -86,6 +87,10 @@ public class BackendWebServiceFactory {
                 SecurityConstants.CALLBACK_HANDLER,
                 new DefaultWsCallbackHandler()
         );
+
+        if (linkConfigProperties.isLoggingEnabled()) {
+            endpoint.getFeatures().add(new LoggingFeature());
+        }
 
         // apply ws policy
         var policyLoader = new ConnectorWsPolicyLoader(

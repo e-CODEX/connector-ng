@@ -35,6 +35,22 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 
+    // apache
+    // apache cxf
+    testImplementation(platform(libs.apache.cxf.bom))
+    testImplementation("org.apache.cxf:cxf-spring-boot-starter-jaxws")
+    testImplementation("org.apache.cxf:cxf-rt-frontend-jaxws")
+    testImplementation("org.apache.cxf:cxf-rt-ws-policy")
+    testImplementation("org.apache.cxf:cxf-rt-ws-security")
+    testImplementation("org.apache.cxf:cxf-rt-features-logging")
+    // apache web service security
+    implementation(libs.apache.wss4j.common) {
+        exclude(group = "org.apache.santuario", module = "xmlsec")
+    }
+    implementation(libs.apache.wss4j.dom)
+    // xml security
+    implementation(libs.apache.xmlsec)
+
     // testcontainers
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")

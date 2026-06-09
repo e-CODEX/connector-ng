@@ -85,7 +85,7 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
         if (existingStep.status() != ConnectorMessageTransportStatus.DOWNLOADED) {
             throw new ConnectorMessageTransportStepException(
                     "Message with identifier [" + messageIdentifier + "] is already in "
-                            + "transport status [" + command.status() + "]"
+                            + "transport status [" + existingStep.status() + "]"
             );
         }
 

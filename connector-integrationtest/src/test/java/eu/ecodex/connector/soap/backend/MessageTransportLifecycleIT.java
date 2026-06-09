@@ -17,6 +17,7 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorMessageErrorType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
 import eu.ecodex.connector.soap.BackendServiceTest;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,11 +70,11 @@ public class MessageTransportLifecycleIT extends BackendServiceTest {
     void should_transition_from_pending_to_downloaded_when_message_is_retrieved() {
         assertThat(transportStepStatus(PENDING_TRANSPORT_ID)).isEqualTo("PENDING");
 
-        var request = new GetMessageByIdRequest();
-        request.setMessageTransportId(PENDING_TRANSPORT_ID);
-        var response = soapClient.getMessageById(request);
+        var getMessageByIdRequest = new GetMessageByIdRequest();
+        getMessageByIdRequest.setMessageTransportId(PENDING_TRANSPORT_ID);
+        var getMessageByIdResponse = soapClient.getMessageById(getMessageByIdRequest);
 
-        assertThat(response).isNotNull();
+        assertThat(getMessageByIdResponse).isNotNull();
         assertThat(transportStepStatus(PENDING_TRANSPORT_ID)).isEqualTo("DOWNLOADED");
         assertThat(transportStepStatusHistory(PENDING_TRANSPORT_ID))
                 .containsExactly("PENDING", "DOWNLOADED");
@@ -95,9 +96,9 @@ public class MessageTransportLifecycleIT extends BackendServiceTest {
     void should_transition_from_downloaded_to_submitted_when_acknowledged_successfully() {
         assertThat(transportStepStatusByMessageId(DOWNLOADED_MESSAGE_ID)).isEqualTo("DOWNLOADED");
 
-        var response = soapClient.acknowledgeMessage(successfulAcknowledgement());
+        var acknowledgementResponse = soapClient.acknowledgeMessage(successfulAcknowledgement());
 
-        assertThat(response).isNotNull();
+        assertThat(acknowledgementResponse).isNotNull();
         assertThat(transportStepStatusByMessageId(DOWNLOADED_MESSAGE_ID)).isEqualTo("SUBMITTED");
         assertThat(transportStepStatusHistoryByMessageId(DOWNLOADED_MESSAGE_ID))
                 .contains("PENDING", "DOWNLOADED", "SUBMITTED");
@@ -119,58 +120,58 @@ public class MessageTransportLifecycleIT extends BackendServiceTest {
     void should_transition_from_downloaded_to_failed_when_acknowledged_with_errors() {
         assertThat(transportStepStatusByMessageId(DOWNLOADED_MESSAGE_ID)).isEqualTo("DOWNLOADED");
 
-        var response = soapClient.acknowledgeMessage(failedAcknowledgement());
+        var acknowledgementResponse = soapClient.acknowledgeMessage(failedAcknowledgement());
 
-        assertThat(response).isNotNull();
+        assertThat(acknowledgementResponse).isNotNull();
         assertThat(transportStepStatusByMessageId(DOWNLOADED_MESSAGE_ID)).isEqualTo("FAILED");
         assertThat(transportStepStatusHistoryByMessageId(DOWNLOADED_MESSAGE_ID))
                 .contains("PENDING", "DOWNLOADED", "FAILED");
     }
 
     private DomibusConnectorMessageResponseType successfulAcknowledgement() {
-        var ackResponse = new DomibusConnectorMessageResponseType();
-        ackResponse.setResult(true);
-        ackResponse.setAssignedMessageId(ASSIGNED_BACKEND_MESSAGE_ID);
-        ackResponse.setResponseForMessageId(DOWNLOADED_MESSAGE_ID);
-        ackResponse.setResultMessage("Message acknowledged successfully");
-        return ackResponse;
+        var acknowledgementResponse = new DomibusConnectorMessageResponseType();
+        acknowledgementResponse.setResult(true);
+        acknowledgementResponse.setAssignedMessageId(ASSIGNED_BACKEND_MESSAGE_ID);
+        acknowledgementResponse.setResponseForMessageId(DOWNLOADED_MESSAGE_ID);
+        acknowledgementResponse.setResultMessage("Message acknowledged successfully");
+        return acknowledgementResponse;
     }
 
     private DomibusConnectorMessageResponseType failedAcknowledgement() {
-        var error = new DomibusConnectorMessageErrorType();
-        error.setErrorMessage("Error message");
-        error.setErrorDetails("Error details");
-        error.setErrorSource("Error source");
+        var messageError = new DomibusConnectorMessageErrorType();
+        messageError.setErrorMessage("Error message");
+        messageError.setErrorDetails("Error details");
+        messageError.setErrorSource("Error source");
 
-        var ackResponse = new DomibusConnectorMessageResponseType();
-        ackResponse.setResult(false);
-        ackResponse.setAssignedMessageId(ASSIGNED_BACKEND_MESSAGE_ID);
-        ackResponse.setResponseForMessageId(DOWNLOADED_MESSAGE_ID);
-        ackResponse.setResultMessage("Message acknowledgement failed");
-        ackResponse.getMessageErrors().add(error);
-        return ackResponse;
+        var acknowledgementResponse = new DomibusConnectorMessageResponseType();
+        acknowledgementResponse.setResult(false);
+        acknowledgementResponse.setAssignedMessageId(ASSIGNED_BACKEND_MESSAGE_ID);
+        acknowledgementResponse.setResponseForMessageId(DOWNLOADED_MESSAGE_ID);
+        acknowledgementResponse.setResultMessage("Message acknowledgement failed");
+        acknowledgementResponse.getMessageErrors().add(messageError);
+        return acknowledgementResponse;
     }
 
-    private String transportStepStatus(String transportId) {
+    private String transportStepStatus(String transportIdentifier) {
         return jdbcTemplate.queryForObject(
                 "SELECT status FROM connector_message_transport_steps WHERE identifier = ?",
                 String.class,
-                transportId
+                transportIdentifier
         );
     }
 
-    private String transportStepStatusByMessageId(String messageId) {
+    private String transportStepStatusByMessageId(String messageIdentifier) {
         return jdbcTemplate.queryForObject(
                 """
                         SELECT status FROM connector_message_transport_steps
                         WHERE transported_message_identifier = ?
                         """,
                 String.class,
-                messageId
+                messageIdentifier
         );
     }
 
-    private java.util.List<String> transportStepStatusHistory(String transportId) {
+    private List<String> transportStepStatusHistory(String transportIdentifier) {
         return jdbcTemplate.queryForList(
                 """
                         SELECT status FROM connector_message_transport_step_statuses
@@ -180,11 +181,11 @@ public class MessageTransportLifecycleIT extends BackendServiceTest {
                         ORDER BY created_at
                         """,
                 String.class,
-                transportId
+                transportIdentifier
         );
     }
 
-    private java.util.List<String> transportStepStatusHistoryByMessageId(String messageId) {
+    private List<String> transportStepStatusHistoryByMessageId(String messageIdentifier) {
         return jdbcTemplate.queryForList(
                 """
                         SELECT status FROM connector_message_transport_step_statuses
@@ -195,7 +196,7 @@ public class MessageTransportLifecycleIT extends BackendServiceTest {
                         ORDER BY created_at
                         """,
                 String.class,
-                messageId
+                messageIdentifier
         );
     }
 

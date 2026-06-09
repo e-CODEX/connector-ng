@@ -4,35 +4,50 @@ plugins {
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
-var bootstrapperJar = project(":connector-bootstrapper").tasks.named("bootJar")
+var bootstrapperJar: Provider<RegularFile> =
+    project(":connector-bootstrapper")
+        .tasks
+        .named("bootJar")
+        .flatMap { task ->
+            @Suppress("UNCHECKED_CAST")
+            (task as org.gradle.api.tasks.bundling.AbstractArchiveTask).archiveFile
+        }
 
-val prepareDistribution by tasks.registering(Copy::class) {
-    dependsOn(bootstrapperJar)
+val copyBootJar by tasks.registering(Copy::class) {
+    from(bootstrapperJar)
+    into(layout.buildDirectory.dir("connector-distribution/bin"))
+}
 
-    from(bootstrapperJar.map { it.outputs.files }) {
-        include("*.jar")
-        into("bin")
-    }
-    // copy application.properties and log4j2.xml externally
-    from(project(":connector-bootstrapper").file("src/main/resources")) {
+val copyConfig by tasks.registering(Copy::class) {
+    from("src/main/resources/config") {
         include("application.properties", "log4j2.xml", "banner.txt")
-        into("config")
     }
+    into(layout.buildDirectory.dir("connector-distribution/config"))
+}
+
+val copyKeystores by tasks.registering(Copy::class) {
+    from("src/main/resources/config/keystores") {
+        include("*.jks")
+    }
+    into(layout.buildDirectory.dir("connector-distribution/config/keystores"))
+}
+
+val copyScripts by tasks.registering(Copy::class) {
     from("src/main/resources/bin") {
         include("start.sh", "start.bat")
-        eachFile {
-            if (name == "start.sh") {
-                filePermissions {
-                    unix("rwxr-xr-x")
-                }
-            }
+    }
+    eachFile {
+        if (name == "start.sh") {
+            filePermissions { unix("rwxr-xr-x") }
         }
     }
-
     into(layout.buildDirectory.dir("connector-distribution"))
 }
 
-// Task: Build a zip distribution
+val prepareDistribution by tasks.registering {
+    dependsOn(copyBootJar, copyConfig, copyKeystores, copyScripts)
+}
+
 tasks.register<Zip>("distributionZip") {
     dependsOn(prepareDistribution)
     from(layout.buildDirectory.dir("connector-distribution"))

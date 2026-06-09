@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.impl.message;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
@@ -74,7 +75,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
                 .originalSender(businessAs4.originalSender())
                 .fromParty(copyParty(businessAs4.fromParty()))
                 .toParty(copyParty(businessAs4.toParty()))
-                .referenceToIdentifier(businessAs4.ebmsMessageIdentifier())
+                .referenceToIdentifier(extractRefToMessageId(businessMessage))
                 .service(businessAs4.service().toBuilder().build())
                 .action(action)
                 .build();
@@ -132,5 +133,18 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
 
     private ConnectorParty copyParty(ConnectorParty party) {
         return party.toBuilder().build();
+    }
+
+    private String extractRefToMessageId(ConnectorMessage businessMessage) {
+        if (businessMessage.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
+            return businessMessage.backendMessageIdentifier();
+        } else if (businessMessage.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
+            return businessMessage.as4Properties().ebmsMessageIdentifier();
+        } else {
+            throw new IllegalStateException(
+                    "Invalid message direction for the business message : ["
+                            + businessMessage.identifier() + "]"
+            );
+        }
     }
 }

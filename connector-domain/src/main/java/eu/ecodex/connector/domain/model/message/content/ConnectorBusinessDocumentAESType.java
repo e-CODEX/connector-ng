@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.domain.model.message.content;
 
+import java.util.Arrays;
+
 /**
  * Defines the supported AES handling types for a business businessDocument within the connector
  * domain.
@@ -33,5 +35,32 @@ public enum ConnectorBusinessDocumentAESType {
      * AES handling is determined based on the digital signature associated with the business
      * businessDocument.
      */
-    SIGNATURE_BASED
+    SIGNATURE_BASED;
+
+    /**
+     * Converts a string representation of an AES type into its corresponding enum constant of
+     * {@code ConnectorBusinessDocumentAESType}.
+     *
+     * @param type the string representation of an AES handling type. This value is
+     *             case-insensitive; if it is {@code null} or blank, the method will return
+     *             {@code null}.
+     *
+     * @return the {@code ConnectorBusinessDocumentAESType} enum constant that matches the provided
+     *         string. If no match is found, an {@link IllegalArgumentException} is thrown.
+     *
+     * @throws IllegalArgumentException if the provided type does not correspond to any
+     *                                  {@code ConnectorBusinessDocumentAESType}.
+     */
+    public static ConnectorBusinessDocumentAESType from(String type) {
+        if (type == null || type.isBlank()) {
+            return null;
+        }
+
+        return Arrays.stream(values())
+                     .filter(value -> value.name().equalsIgnoreCase(type))
+                     .findFirst()
+                     .orElseThrow(() -> new IllegalArgumentException(
+                             "Unsupported detached signature AES type: " + type
+                     ));
+    }
 }

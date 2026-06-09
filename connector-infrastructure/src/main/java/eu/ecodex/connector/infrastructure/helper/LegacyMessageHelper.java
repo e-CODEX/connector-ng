@@ -12,10 +12,11 @@ package eu.ecodex.connector.infrastructure.helper;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirectionType;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
@@ -29,6 +30,7 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorMessageConfirmation
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDetailsType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
+import eu.ecodex.connector.domain.transition.DomibusConnectorMessageErrorType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorPartyType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorServiceType;
@@ -40,7 +42,6 @@ import java.util.Arrays;
 import java.util.List;
 import javax.xml.transform.stream.StreamSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 /**
  * Helper class for converting {@link ConnectorMessage} instances to legacy message types.
@@ -79,8 +80,10 @@ public class LegacyMessageHelper {
         );
 
         messageType.getMessageConfirmations().addAll(
-                toConfirmations(message)
+                toConfirmations(message.transportedEvidences())
         );
+
+        messageType.getMessageErrors().addAll(toErrors(message.errors()));
 
         return messageType;
     }
@@ -99,15 +102,6 @@ public class LegacyMessageHelper {
         details.setAction(toAction(as4Properties));
         details.setFromParty(getParty(as4Properties.fromParty()));
         details.setToParty(getParty(as4Properties.toParty()));
-
-        if (message.isEvidenceMessage()) {
-            details.setBackendMessageId(message.referenceToBackendMessageIdentifier());
-
-            if (message.direction().getTarget() == ConnectorMessageDirectionType.BACKEND
-                    && StringUtils.hasLength(message.referenceToBackendMessageIdentifier())) {
-                details.setRefToMessageId(message.referenceToBackendMessageIdentifier());
-            }
-        }
 
         return details;
     }
@@ -239,13 +233,16 @@ public class LegacyMessageHelper {
     }
 
     private List<DomibusConnectorMessageConfirmationType> toConfirmations(
-            ConnectorMessage message) {
-        if (message.transportedEvidences() == null || message.transportedEvidences().isEmpty()) {
+            List<ConnectorMessageEvidence> transportedEvidences) {
+
+        if (transportedEvidences == null || transportedEvidences.isEmpty()) {
             return new ArrayList<>();
         }
 
-        return message.transportedEvidences().stream().map(evidence -> {
-            if (evidence.content() == null) {
+        return transportedEvidences.stream().map(evidence -> {
+            byte[] content = evidence.content();
+
+            if (content == null) {
                 throw new IllegalStateException(
                         "Evidence content is null for evidence " + evidence.type()
                 );
@@ -265,6 +262,21 @@ public class LegacyMessageHelper {
             );
 
             return confirmation;
+        }).toList();
+    }
+
+    private List<DomibusConnectorMessageErrorType> toErrors(List<ConnectorMessageError> errors) {
+        if (errors == null || errors.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return errors.stream().map(error -> {
+            var errorType = new DomibusConnectorMessageErrorType();
+            errorType.setErrorSource(error.source());
+            errorType.setErrorMessage(error.label());
+            errorType.setErrorDetails(error.details());
+
+            return errorType;
         }).toList();
     }
 }

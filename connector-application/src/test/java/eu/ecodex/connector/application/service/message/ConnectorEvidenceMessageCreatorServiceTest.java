@@ -69,10 +69,10 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
                 ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type()).name());
         assertThat(evidenceMessage.as4Properties().service()).isEqualTo(
                 message.as4Properties().service());
-        // assertThat(evidenceMessage.referenceToBackendMessageIdentifier()).isEqualTo(
-        //         message.backendMessageIdentifier());
-        assertThat(evidenceMessage.as4Properties().referenceToIdentifier()).isEqualTo(
-                message.as4Properties().ebmsMessageIdentifier());
+        assertThat(evidenceMessage.referenceToBackendMessageIdentifier()).isEqualTo(
+                message.backendMessageIdentifier());
+        assertThat(evidenceMessage.as4Properties().referenceToIdentifier()).isIn(
+                message.as4Properties().ebmsMessageIdentifier(), message.backendMessageIdentifier());
         assertThat(evidenceMessage.as4Properties().ebmsMessageIdentifier()).isEqualTo(
                 message.as4Properties().ebmsMessageIdentifier());
         assertThat(evidenceMessage.as4Properties().conversationIdentifier()).isEqualTo(

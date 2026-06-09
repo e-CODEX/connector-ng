@@ -89,6 +89,11 @@ public class ConnectorBackendDeliveryServiceClient {
             factory.getFeatures().add(new LoggingFeature());
         }
 
+        var policyLoader = new ConnectorWsPolicyLoader(
+                linkPartnerConfig.getProperties().getWsPolicy()
+        );
+        factory.getFeatures().add(policyLoader.loadPolicyFeature());
+
         var linkEndpointProperties = linkPartnerConfig.getProperties().getEndpoint();
 
         var encryptionProperties = merlinPropertiesFactory.createEncryptionProperties(
@@ -112,11 +117,6 @@ public class ConnectorBackendDeliveryServiceClient {
         jaxWsFactoryBeanProperties.put("mtom-enabled", true);
 
         factory.setProperties(jaxWsFactoryBeanProperties);
-
-        var policyLoader = new ConnectorWsPolicyLoader(
-                linkPartnerConfig.getProperties().getWsPolicy()
-        );
-        factory.getFeatures().add(policyLoader.loadPolicyFeature());
 
         return (DomibusConnectorBackendDeliveryWebService) factory.create();
     }

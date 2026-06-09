@@ -39,7 +39,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 public class MessageHelpers {
-
     /**
      * Determines if the given message is an evidence trigger request. A message qualifies as an
      * evidence trigger request if it has no message content, contains exactly one message
@@ -176,8 +175,11 @@ public class MessageHelpers {
                 .builder()
                 .attachment(toAttachment(businessDocumentAttachmentIdentifier))
                 .detachedSignature(toDetachedSignature(document.getDetachedSignature()))
-                .aesType(ConnectorBusinessDocumentAESType.valueOf(
-                        document.getAesType().value())
+                .aesType(ConnectorBusinessDocumentAESType.from(
+                                 document.getAesType() != null
+                                         ? document.getAesType().value()
+                                         : null
+                         )
                 )
                 .build();
 

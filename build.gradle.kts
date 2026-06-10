@@ -2,6 +2,7 @@ plugins {
     id("java")
     id("jacoco")
     id("checkstyle")
+    id("org.sonarqube") version "7.3.0.8198"
     id("org.cyclonedx.bom") version "3.1.1"
 }
 
@@ -83,7 +84,7 @@ subprojects {
                 csv.required.set(true)
             }
         }
-    }
+    }   
 }
 
 tasks.withType<Checkstyle>().configureEach {
@@ -156,4 +157,11 @@ tasks.register<JacocoReport>("jacocoRootReport") {
             fileTree(it) { exclude(jacocoExclusions) }
         })
     )
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "e-CODEX_connector-ng")
+    property("sonar.organization", "e-codex") 
+  }
 }

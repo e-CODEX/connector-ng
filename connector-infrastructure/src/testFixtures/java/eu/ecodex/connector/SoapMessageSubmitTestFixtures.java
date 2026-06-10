@@ -21,10 +21,12 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorPartyType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorServiceType;
+import eu.ecodex.connector.infrastructure.inbound.web.soap.helper.AttachmentHelpers;
 import jakarta.activation.DataHandler;
 import jakarta.mail.util.ByteArrayDataSource;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.file.Files;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
@@ -44,6 +46,27 @@ public class SoapMessageSubmitTestFixtures {
         message.setMessageContent(createMessageContent());
         message.getMessageAttachments();
         return message;
+    }
+
+    public static byte[] resourceBytes(String filename) {
+        try (var is = DomibusConnectorMessageAttachmentType.class
+                .getClassLoader()
+                .getResourceAsStream(filename)) {
+            if (is == null) {
+                throw new IllegalArgumentException("Resource not found: " + filename);
+            }
+            return is.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static byte[] expectedBusinessXmlBytes() {
+        try {
+            return Files.readAllBytes(AttachmentHelpers.sourceToTempFile(xmlSource()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static DomibusConnectorMessageDetailsType createMessageDetails() {

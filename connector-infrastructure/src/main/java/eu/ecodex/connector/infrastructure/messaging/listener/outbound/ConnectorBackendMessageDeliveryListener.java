@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
+@Transactional
 public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHandler {
     private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
@@ -69,7 +70,6 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     }
 
     @Override
-    @Transactional
     @JmsListener(destination = "${connector.queues.backend-delivery-queue}")
     public void handle(@NonNull ConnectorMessage message) {
         if (message.identifier() == null) {
@@ -117,11 +117,20 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
 
             if (acknowledgment.isResult()) {
                 if (message.isBusinessMessage()) {
-                    // TODO: also send SUBMISSION_CONFIRMATION back here!
+                    // TODO: also send SUBMISSION_CONFIRMATION back here ?
                     messageRepository.setDeliveredToBackendAt(identifier);
-                    messageRepository.updateBackendIdentifier(
-                            identifier,
-                            acknowledgment.getMessageId()
+                    if (acknowledgment.getMessageId() != null) {
+                        messageRepository.updateBackendIdentifier(
+                                identifier,
+                                acknowledgment.getMessageId()
+                        );
+                    }
+
+                    // a business message has at least one transported evidence
+                    message.transportedEvidences().forEach(
+                            evidence ->
+                                    evidenceRepository.setDeliveredToLinkPartnerAt(
+                                            evidence.uuid())
                     );
                 } else { // the message is an evidence message
                     var transportedEvidences = message.transportedEvidences();
@@ -132,8 +141,10 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
                         );
                     }
 
+                    var transportedEvidence = transportedEvidences.getFirst();
+
                     evidenceRepository.setDeliveredToLinkPartnerAt(
-                            transportedEvidences.getFirst().uuid()
+                            transportedEvidence.uuid()
                     );
                 }
                 messageTransportStep.execute(

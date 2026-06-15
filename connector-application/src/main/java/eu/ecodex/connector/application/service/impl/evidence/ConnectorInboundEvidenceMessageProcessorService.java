@@ -20,6 +20,7 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -68,11 +69,18 @@ public class ConnectorInboundEvidenceMessageProcessorService
             );
         }
 
-        var referencedMessage = findReferencedMessage(confirmationMessage);
+        var referencedBusinessMessage = findReferencedBusinessMessage(confirmationMessage);
 
-        if (referencedMessage != null) {
-            applyEvidencesToReferencedMessage(confirmationMessage, referencedMessage);
-            forwardToBackend(confirmationMessage, referencedMessage);
+        if (referencedBusinessMessage != null) {
+            var appliedEvidences = applyEvidencesToReferencedBusinessMessage(
+                    confirmationMessage,
+                    referencedBusinessMessage
+            );
+
+            forwardToBackend(
+                    confirmationMessage.toBuilder().transportedEvidences(appliedEvidences).build(),
+                    referencedBusinessMessage
+            );
 
             return;
         }
@@ -82,10 +90,11 @@ public class ConnectorInboundEvidenceMessageProcessorService
                         + "without lifecycle update",
                 confirmationMessage.identifier()
         );
+
         linkSubmitter.submit(confirmationMessage);
     }
 
-    private ConnectorMessage findReferencedMessage(ConnectorMessage confirmationMessage) {
+    private ConnectorMessage findReferencedBusinessMessage(ConnectorMessage confirmationMessage) {
         var referenceToMessageId = confirmationMessage.as4Properties().referenceToIdentifier();
         if (!StringUtils.hasText(referenceToMessageId)) {
             log.warn(
@@ -103,27 +112,41 @@ public class ConnectorInboundEvidenceMessageProcessorService
         );
     }
 
-    private void applyEvidencesToReferencedMessage(
+    private List<ConnectorMessageEvidence> applyEvidencesToReferencedBusinessMessage(
             ConnectorMessage confirmationMessage,
-            ConnectorMessage referencedMessage) {
+            ConnectorMessage referencedBusinessMessage) {
+        var referencedBusinessMessageIdentifier = referencedBusinessMessage.identifier();
         log.info(
                 "Applying transported evidences from confirmation message [{}] to referenced "
                         + "business message [{}]",
                 confirmationMessage.identifier(),
-                referencedMessage.identifier()
+                referencedBusinessMessageIdentifier
         );
 
-        var accumulatedEvidences = referencedMessage.evidences() != null
-                ? new ArrayList<>(referencedMessage.evidences())
+        var accumulatedEvidences = referencedBusinessMessage.evidences() != null
+                ? new ArrayList<>(referencedBusinessMessage.evidences())
                 : new ArrayList<ConnectorMessageEvidence>();
 
+
+        var appliedEvidences = new LinkedList<ConnectorMessageEvidence>();
+
+        // confirmationMessage.transportedEvidences() cannot be null because
+        // of the !confirmationMessage.isEvidenceMessage() in the process method
         for (var incomingEvidence : confirmationMessage.transportedEvidences()) {
-            applyEvidence(referencedMessage, accumulatedEvidences, incomingEvidence);
-            referencedMessage = messageRepository.findByIdentifier(referencedMessage.identifier());
+            var appliedEvidence = applyEvidence(
+                    referencedBusinessMessage,
+                    accumulatedEvidences,
+                    incomingEvidence
+            );
+            appliedEvidences.add(appliedEvidence);
+            referencedBusinessMessage = messageRepository.findByIdentifier(
+                    referencedBusinessMessageIdentifier);
         }
+
+        return appliedEvidences;
     }
 
-    private void applyEvidence(
+    private ConnectorMessageEvidence applyEvidence(
             ConnectorMessage referencedMessage,
             List<ConnectorMessageEvidence> accumulatedEvidences,
             ConnectorMessageEvidence incomingEvidence) {
@@ -137,8 +160,13 @@ public class ConnectorInboundEvidenceMessageProcessorService
 
         try {
             evidenceVerifier.verify(incomingEvidence.type(), messageForVerification);
-            evidenceRepository.save(incomingEvidence, referencedMessage.identifier());
+            var persistedEvidence = evidenceRepository.save(
+                    incomingEvidence,
+                    referencedMessage.identifier()
+            );
             accumulatedEvidences.add(incomingEvidence);
+
+            return persistedEvidence;
         } catch (ConnectorEvidenceNotRelevantException e) {
             log.info(
                     "Evidence [{}] ignored for referenced message [{}]: {}",
@@ -147,6 +175,8 @@ public class ConnectorInboundEvidenceMessageProcessorService
                     e.getMessage()
             );
         }
+
+        return incomingEvidence;
     }
 
     private void forwardToBackend(
@@ -161,11 +191,17 @@ public class ConnectorInboundEvidenceMessageProcessorService
             );
         }
 
-        var messageForBackend = messageRepository.updateBackendContext(
-                confirmationMessage.identifier(),
-                referencedMessage.backendName(),
-                backendMessageIdentifier
-        );
+        var messageForBackend = confirmationMessage
+                .toBuilder()
+                .backendName(referencedMessage.backendName())
+                .referenceToBackendMessageIdentifier(backendMessageIdentifier)
+                .as4Properties(
+                        confirmationMessage.as4Properties()
+                                           .toBuilder()
+                                           .referenceToIdentifier(backendMessageIdentifier)
+                                           .build()
+                )
+                .build();
 
         log.info(
                 "Forwarding confirmation message [{}] to backend [{}]",

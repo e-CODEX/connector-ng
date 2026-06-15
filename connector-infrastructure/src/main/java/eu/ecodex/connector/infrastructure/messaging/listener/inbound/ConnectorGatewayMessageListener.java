@@ -136,12 +136,11 @@ public class ConnectorGatewayMessageListener {
 
         var messageIdentifier = messageIdGenerator.generateIdentifier();
 
-        var ebmsMessageIdentifier = as4Properties.ebmsMessageIdentifier();
         var inboundMessage = ConnectorMessage
                 .builder()
                 .identifier(messageIdentifier)
                 .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
-                .backendMessageIdentifier(ebmsMessageIdentifier)
+                .backendMessageIdentifier(null)
                 .as4Properties(as4Properties)
                 .direction(
                         ConnectorMessageDirection.GATEWAY_TO_BACKEND
@@ -153,18 +152,18 @@ public class ConnectorGatewayMessageListener {
                 .transportedEvidences(payloads.evidences())
                 .build();
 
-        // TODO move to outbound message stager service in the application module
-        var persistedMessage = persistMessage(inboundMessage, payloads, messageIdentifier);
-
         if (isConfirmationMessage) {
-            inboundEvidenceTriggerPublisher.publish(persistedMessage);
+            inboundEvidenceTriggerPublisher.publish(inboundMessage);
         } else {
+            // TODO move to outbound message stager service in the application module
+            var persistedMessage = persistMessage(inboundMessage, payloads, messageIdentifier);
             inboundMessagePipelinePublisher.publish(persistedMessage);
         }
     }
 
     private void validateMessageHeader(MapMessage message) throws JMSException {
         var messageType = message.getStringProperty("messageType");
+
         if (!"incomingMessage".equals(messageType)) {
             throw new IllegalArgumentException(
                     "Invalid Gateway reception messageType: " + messageType);
@@ -319,22 +318,25 @@ public class ConnectorGatewayMessageListener {
             );
         }
 
-        payloads.evidences().forEach(evidence -> {
+        var transportedEvidences = payloads.evidences().stream().map(evidence -> {
             if (evidence.content() == null) {
                 throw new IllegalStateException(
-                        "Evidence attachment is null for evidence " + evidence.type()
+                        "Evidence content is null for evidence " + evidence.type()
                 );
             }
 
-            evidenceRepository.save(evidence, messageIdentifier);
-        });
+            return evidenceRepository.save(evidence, messageIdentifier);
+        }).toList();
 
         payloads.attachments().forEach(attachment ->
                                                attachmentRepository.attachToMessage(
                                                        attachment.identifier(), messageIdentifier
                                                ));
 
-        return messageRepository.findByIdentifier(messageIdentifier);
+        var persistedMessage = messageRepository.findByIdentifier(messageIdentifier);
+
+        return persistedMessage.toBuilder()
+                               .transportedEvidences(transportedEvidences).build();
     }
 
     private ConnectorMessageAttachment saveAndUploadAttachment(

@@ -10,7 +10,10 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener.inbound;
 
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +27,20 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
+@Transactional
 public class ConnectorGatewayMessageAcknowledgementListener {
-    private final ConnectorMessageRepository messageRepository;
+    private final ConnectorMessageTransportStepRepository transportStepRepository;
+    private final ConnectorAcknowledgeMessageTransportStep acknowledgeMessageTransportStep;
 
     /**
      * Creates a new listener instance.
      *
-     * @param messageRepository repository used to update message delivery status
      */
     public ConnectorGatewayMessageAcknowledgementListener(
-            ConnectorMessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
+            ConnectorMessageTransportStepRepository transportStepRepository,
+            ConnectorAcknowledgeMessageTransportStep acknowledgeMessageTransportStep) {
+        this.transportStepRepository = transportStepRepository;
+        this.acknowledgeMessageTransportStep = acknowledgeMessageTransportStep;
     }
 
     /**
@@ -48,24 +54,41 @@ public class ConnectorGatewayMessageAcknowledgementListener {
      *
      * @throws RuntimeException if parsing the JMS message fails
      */
-    @Transactional
     @JmsListener(destination = "${connector.queues.gateway-submission-reply-queue}")
     public void handle(@NonNull MapMessage message) {
         log.info("Receiving gateway message submission confirmation");
 
         try {
-            var messageIdentifier = message.getStringProperty("messageId");
+            var messageOrEbmsIdentifier = message.getStringProperty("messageId");
 
-            if (messageIdentifier == null) {
-                throw new RuntimeException(
-                        "Message identifier not found in gateway submission reply");
+            if (messageOrEbmsIdentifier == null) {
+                throw new IllegalArgumentException(
+                        "Message identifier not found in gateway submission reply"
+                );
             }
 
             log.info(
-                    "Gateway message submission confirmation received for the message: [{}]",
-                    messageIdentifier
+                    "Gateway message submission confirmation received with the messageId: [{}]",
+                    messageOrEbmsIdentifier
             );
-            this.messageRepository.setDeliveredToGatewayAt(messageIdentifier);
+
+            var transportStep = transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
+                    messageOrEbmsIdentifier);
+
+            if (transportStep == null) {
+                throw new IllegalStateException(
+                        "No transport step found for the messageId: " + messageOrEbmsIdentifier
+                );
+            }
+
+            var command = UpdateMessageTransportCommand
+                    .builder()
+                    .remoteMessageIdentifier(messageOrEbmsIdentifier)
+                    .status(ConnectorMessageTransportStatus.SUBMITTED)
+                    .errors(null)
+                    .build();
+
+            acknowledgeMessageTransportStep.execute(messageOrEbmsIdentifier, command);
         } catch (JMSException e) {
             throw new RuntimeException("Failed to parse Domibus reply", e);
         }

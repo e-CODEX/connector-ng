@@ -14,7 +14,6 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
@@ -81,23 +80,6 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
         this.serviceJpaRepository = serviceJpaRepository;
         this.actionJpaRepository = actionJpaRepository;
         this.partyJpaRepository = partyJpaRepository;
-    }
-
-    /**
-     * Converts a {@link ConnectorMessageEntity} object into a {@link ConnectorMessage} object
-     * containing a subset of its properties.
-     *
-     * @param entity the {@link ConnectorMessageEntity} to be converted; can be null
-     *
-     * @return a {@link ConnectorMessage} containing the relevant transformed properties of the
-     *         input entity, or null if the input entity is null
-     */
-    public static ConnectorMessage toShortDomain(ConnectorMessageEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        return baseAttribute(entity);
     }
 
     private static ConnectorMessageAS4Properties toDomain(
@@ -325,13 +307,6 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage findByIdentifierAndDirection(
-            ConnectorMessage message,
-            ConnectorMessageDirection direction) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    @Override
     public List<ConnectorMessage> findByConversationIdentifier(
             @NonNull String conversationIdentifier) {
         var messages = this.messageJpaRepository.findByAs4PropertiesConversationIdentifier(
@@ -339,12 +314,6 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
         );
 
         return messages.stream().map(this::toDomain).toList();
-    }
-
-    @Override
-    public ConnectorMessage addEvidence(
-            ConnectorMessage message, ConnectorMessageEvidence evidence) {
-        throw new UnsupportedOperationException("not yet implemented");
     }
 
     @Override

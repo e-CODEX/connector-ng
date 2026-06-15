@@ -2,12 +2,17 @@ package eu.ecodex.connector.infrastructure.messaging.listener;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
 import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageAcknowledgementListener;
 import jakarta.jms.JMSException;
@@ -18,29 +23,24 @@ import org.mockito.Mock;
 
 @SuppressWarnings("DataFlowIssue")
 public class ConnectorGatewayMessageAcknowledgementListenerTest extends BaseJmsMessageTest {
+    private static final String MESSAGE_ID = "msg-001";
+
     @Mock
-    private ConnectorMessageRepository messageRepository;
+    private ConnectorMessageTransportStepRepository transportStepRepository;
+    @Mock
+    private ConnectorAcknowledgeMessageTransportStep acknowledgeMessageTransportStep;
     @Mock
     private MapMessage mapMessage;
+
     @InjectMocks
     private ConnectorGatewayMessageAcknowledgementListener listener;
-
-    @Test
-    void should_handle_message_submission_to_gateway_reply_successfully() throws JMSException {
-        when(mapMessage.getStringProperty("messageId")).thenReturn("msg-001");
-
-        listener.handle(mapMessage);
-
-        verify(messageRepository).setDeliveredToGatewayAt("msg-001");
-        verifyNoMoreInteractions(messageRepository);
-    }
 
     @Test
     void should_throw_null_pointer_exception_if_the_jms_message_is_null() {
         assertThatThrownBy(() -> listener.handle(null))
                 .isInstanceOf(NullPointerException.class);
 
-        verifyNoInteractions(messageRepository);
+        verifyNoInteractions(transportStepRepository, acknowledgeMessageTransportStep);
     }
 
     @Test
@@ -51,7 +51,20 @@ public class ConnectorGatewayMessageAcknowledgementListenerTest extends BaseJmsM
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Message identifier not found");
 
-        verifyNoInteractions(messageRepository);
+        verifyNoInteractions(transportStepRepository, acknowledgeMessageTransportStep);
+    }
+
+    @Test
+    void should_handle_message_submission_to_gateway_reply_successfully() throws JMSException {
+        when(mapMessage.getStringProperty("messageId")).thenReturn(MESSAGE_ID);
+        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any()))
+                .thenReturn(ConnectorMessageTransportStep.builder().build());
+        doNothing().when(acknowledgeMessageTransportStep).execute(any(), any());
+
+        listener.handle(mapMessage);
+
+        verify(transportStepRepository).findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID);
+        verify(acknowledgeMessageTransportStep).execute(any(), any());
     }
 
     @Test
@@ -64,6 +77,6 @@ public class ConnectorGatewayMessageAcknowledgementListenerTest extends BaseJmsM
                 .hasMessageContaining("Failed to parse Domibus reply")
                 .hasCauseInstanceOf(JMSException.class);
 
-        verifyNoInteractions(messageRepository);
+        verifyNoInteractions(transportStepRepository, acknowledgeMessageTransportStep);
     }
 }

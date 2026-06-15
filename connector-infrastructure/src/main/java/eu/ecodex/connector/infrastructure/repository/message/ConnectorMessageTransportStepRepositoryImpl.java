@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
@@ -111,11 +112,10 @@ public class ConnectorMessageTransportStepRepositoryImpl
     }
 
     @Override
-    public ConnectorMessageTransportStep findByMessageIdentifier(
-            @NonNull String messageIdentifier) {
-        var entity = this.transportStepJpaRepository.findByTransportedMessageIdentifier(
-                messageIdentifier
-        );
+    public ConnectorMessageTransportStep findByMessageIdentifierOrRemoteSystemId(
+            @NonNull String identifier) {
+        var entity = this.transportStepJpaRepository
+                .findByTransportedMessageIdentifierOrRemoteSystemIdentifier(identifier);
 
         return toDomain(entity);
     }
@@ -166,12 +166,19 @@ public class ConnectorMessageTransportStepRepositoryImpl
 
     private ConnectorMessageTransportStepEntity toEntity(
             ConnectorMessageTransportStep transportStep) throws JsonProcessingException {
+        var transportedMessage = transportStep.transportedMessage();
         return ConnectorMessageTransportStepEntity
                 .builder()
                 .identifier(transportStep.identifier())
                 .numberOfAttempts(transportStep.numberOfAttempts())
                 .linkPartnerName(transportStep.transportedMessage().backendName())
                 .transportedMessageIdentifier(transportStep.transportedMessage().identifier())
+                .remoteSystemIdentifier(
+                        transportedMessage.direction()
+                                == ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                                ? transportedMessage.as4Properties().ebmsMessageIdentifier()
+                                : transportedMessage.backendMessageIdentifier()
+                )
                 .transportedMessage(
                         objectMapper.writeValueAsString(transportStep.transportedMessage()))
                 .status(transportStep.status())

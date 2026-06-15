@@ -76,15 +76,16 @@ public interface ConnectorMessageTransportStepRepository {
 
     /**
      * Retrieves a {@link ConnectorMessageTransportStep} instance associated with the given message
-     * identifier.
+     * identifier or remote system identifier (backend ID or ebmsID).
      *
-     * @param messageIdentifier the unique identifier of the message for which the transport step is
-     *                          being retrieved
+     * @param identifier the unique identifier of the message or remote system for which the
+     *                   transport step is being retrieved
      *
-     * @return the {@link ConnectorMessageTransportStep} associated with the specified message
-     *         identifier, or {@code null} if no matching transport step is found
+     * @return the {@link ConnectorMessageTransportStep} associated with the specified message or
+     *         the renote system identifier, or {@code null} if no matching transport step is found
      */
-    ConnectorMessageTransportStep findByMessageIdentifier(@Nonnull String messageIdentifier);
+    ConnectorMessageTransportStep findByMessageIdentifierOrRemoteSystemId(
+            @Nonnull String identifier);
 
     /**
      * Retrieves a {@link ConnectorMessageTransportStep} instance associated with the given unique

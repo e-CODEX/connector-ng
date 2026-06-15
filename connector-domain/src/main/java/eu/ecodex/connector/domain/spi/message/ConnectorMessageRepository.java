@@ -146,22 +146,6 @@ public interface ConnectorMessageRepository {
     );
 
     /**
-     * Finds a {@link ConnectorMessage} in the repository based on the provided message instance and
-     * the specified direction. This method is used to retrieve a connector message that matches
-     * both the content of the given {@code message} and the {@code direction}.
-     *
-     * @param message   the {@link ConnectorMessage} instance containing the identifier or content
-     *                  to search for; must not be null.
-     * @param direction the {@link ConnectorMessageDirection} specifying the direction of the
-     *                  message (such as inbound or outbound); must not be null.
-     *
-     * @return the {@link ConnectorMessage} that matches both the specified {@code message} and
-     *         {@code direction}, or null if no matching message is found in the repository.
-     */
-    ConnectorMessage findByIdentifierAndDirection(
-            ConnectorMessage message, ConnectorMessageDirection direction);
-
-    /**
      * Retrieves a list of {@link ConnectorMessage} objects associated with the specified
      * conversation uuid.
      *
@@ -172,16 +156,6 @@ public interface ConnectorMessageRepository {
      *         uuid, or an empty list if no such messages exist.
      */
     List<ConnectorMessage> findByConversationIdentifier(@Nonnull String conversationIdentifier);
-
-    /**
-     * Adds the specified evidence to the given connector message.
-     *
-     * @param message  the connector message to which the evidence will be added; must not be null.
-     * @param evidence the evidence to be added to the message; must not be null.
-     *
-     * @return the updated connector message after the evidence has been added.
-     */
-    ConnectorMessage addEvidence(ConnectorMessage message, ConnectorMessageEvidence evidence);
 
     /**
      * Marks the provided {@link ConnectorMessage} as rejected. This typically involves updating the

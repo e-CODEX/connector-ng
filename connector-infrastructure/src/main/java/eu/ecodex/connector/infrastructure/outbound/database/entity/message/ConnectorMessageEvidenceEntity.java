@@ -64,7 +64,7 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     private String content;
 
     @Setter
-    @Column(name = "DELIVERD_TO_LINK_PARTNER_AT", updatable = false)
+    @Column(name = "DELIVERED_TO_LINK_PARTNER_AT")
     private Instant deliveredToLinkPartnerAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

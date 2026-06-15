@@ -49,6 +49,9 @@ public class MessageTestFixtures {
     public static ConnectorMessage createValidInboundBusinessMessage() {
         var builder = backendToGatewayMessage();
         builder.direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
+        builder.transportedEvidences(
+                List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
+        );
         return builder.build();
     }
 

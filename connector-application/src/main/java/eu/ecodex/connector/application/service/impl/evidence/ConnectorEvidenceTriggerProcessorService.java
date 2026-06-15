@@ -82,6 +82,7 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
 
             checkEvidentness(triggerMessage);
 
+            // triggerEvidence cannot be null because of the checkEvidentness
             var triggerEvidence = triggerMessage.transportedEvidences().getFirst();
             var evidenceType = triggerEvidence.type();
 
@@ -89,11 +90,12 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
 
             if (businessMessage.direction() != ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
                 throw new ConnectorEvidenceException(
-                        "evidence trigger is only supported for "
+                        "Evidence trigger is only supported for "
                                 + "gateway-to-backend business messages"
                 );
             }
 
+            // TODO check the type of evidence to be generated (success or failure)
             var createdEvidence = evidenceCreator.createSuccess(evidenceType, businessMessage);
 
             applyEvidenceToBusinessMessage(businessMessage, createdEvidence);
@@ -146,7 +148,14 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
             );
         }
 
+        if (triggerMessage.direction() == null) {
+            throw new ConnectorEvidenceException(
+                    "Evidence trigger must set direction to the referenced business message"
+            );
+        }
+
         // the sorting by criteria because two messages can have the same ebms identifier
+
         var byEbms = messageRepository.findByEbmsMessageIdentifierAndDirection(
                 referenceToMessageId,
                 ConnectorMessageDirection.revert(triggerMessage.direction())

@@ -12,7 +12,7 @@ insert into connector_message_evidences (
     uuid,
     type,
     content,
-    deliverd_to_link_partner_at,
+    delivered_to_link_partner_at,
     created_at,
     updated_at,
     message_id

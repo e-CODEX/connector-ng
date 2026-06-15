@@ -57,7 +57,7 @@ public class ConnectorRegisterMessageTransportStepService
                 status
         );
 
-        var existingStep = this.transportStepRepository.findByMessageIdentifier(
+        var existingStep = this.transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
                 message.identifier());
 
         if (existingStep != null

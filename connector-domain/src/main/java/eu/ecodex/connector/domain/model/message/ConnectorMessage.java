@@ -83,7 +83,7 @@ public record ConnectorMessage(
         @Nullable String uuid,
         @Nullable String identifier,
         @Nullable String backendMessageIdentifier,
-        @Nullable String referenceToBackendMessageIdentifier,
+        @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
         @Nullable String backendName,
         @Nullable String gatewayName,
         @Nonnull ConnectorMessageAS4Properties as4Properties,

@@ -26,13 +26,15 @@ public interface ConnectorAcknowledgeMessageTransportStep {
     /**
      * Executes the update of a message's transport status in the connector system. This method
      * processes the specified command to update the transportation details of a message identified
-     * by its unique identifier.
+     * by its unique identifier or Ebms ID.
      *
-     * @param messageIdentifier a unique identifier representing the message within the connector
-     *                          system. Must not be null.
-     * @param command           the {@link UpdateMessageTransportCommand} containing the transport
-     *                          status information and any associated errors for the message. Must
-     *                          not be null.
+     * @param messageOrRemoteSystemIdentifier a unique identifier representing the message or ebms
+     *                                        ID within the connector system. Must not be null.
+     * @param command                         the {@link UpdateMessageTransportCommand} containing
+     *                                        the transport status information and any associated
+     *                                        errors for the message. Must not be null.
      */
-    void execute(@Nonnull String messageIdentifier, @Nonnull UpdateMessageTransportCommand command);
+    void execute(
+            @Nonnull String messageOrRemoteSystemIdentifier,
+            @Nonnull UpdateMessageTransportCommand command);
 }

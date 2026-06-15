@@ -10,9 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.messaging.publisher.outbound;
 
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
@@ -33,9 +35,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component("connectorGatewayLinkEventPublisher")
 public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublisher {
+    // TODO add unit tests
     private final JmsTemplate jmsTemplate;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
+    private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
     private final ConnectorQueueProperties queueProperties;
 
     /**
@@ -49,10 +53,12 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
             JmsTemplate jmsTemplate,
             ConnectorMessageAttachmentRepository attachmentRepository,
             ConnectorFileStorageProvider fileStorageProvider,
+            ConnectorRegisterMessageTransportStep registerMessageTransportStep,
             ConnectorQueueProperties queueProperties) {
         this.jmsTemplate = jmsTemplate;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
+        this.registerMessageTransportStep = registerMessageTransportStep;
         this.queueProperties = queueProperties;
     }
 
@@ -60,10 +66,26 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
     public void publish(@NonNull ConnectorMessage message) {
         log.info("Submitting message [{}] to gateway link processing queue", message.identifier());
 
-        this.jmsTemplate.send(
-                queueProperties.getGatewaySubmissionQueue(),
-                session -> toMapMessage(message, session)
-        );
+        try {
+            registerMessageTransportStep.execute(
+                    message,
+                    ConnectorMessageTransportStatus.PENDING
+            );
+            this.jmsTemplate.send(
+                    queueProperties.getGatewaySubmissionQueue(),
+                    session -> toMapMessage(message, session)
+            );
+            log.info("Message [{}] submitted successfully to the gateway", message.identifier());
+        } catch (Exception e) {
+            log.error(
+                    "Failed to publish message [{}] to gateway link processing queue",
+                    message.identifier(), e
+            );
+            registerMessageTransportStep.execute(
+                    message,
+                    ConnectorMessageTransportStatus.FAILED
+            );
+        }
     }
 
     private MapMessage toMapMessage(ConnectorMessage message, Session session) throws JMSException {
@@ -72,7 +94,12 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         var as4Properties = message.as4Properties();
 
         mapMessage.setStringProperty("messageType", "submitMessage");
-        mapMessage.setStringProperty("messageId", message.identifier());
+        mapMessage.setStringProperty(
+                "messageId",
+                message.as4Properties().ebmsMessageIdentifier() == null
+                        ? message.identifier()
+                        : message.as4Properties().ebmsMessageIdentifier()
+        );
         mapMessage.setStringProperty("originalSender", as4Properties.originalSender());
         mapMessage.setStringProperty("finalRecipient", as4Properties.finalRecipient());
 

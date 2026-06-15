@@ -62,6 +62,9 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Column(name = "TRANSPORTED_MESSAGE_IDENTIFIER", nullable = false)
     private String transportedMessageIdentifier;
 
+    @Column(name = "REMOTE_SYSTEM_IDENTIFIER")
+    private String remoteSystemIdentifier;
+
     @Size(max = 5_000_000)
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "TRANSPORTED_MESSAGE", length = 5_000_000, nullable = false)

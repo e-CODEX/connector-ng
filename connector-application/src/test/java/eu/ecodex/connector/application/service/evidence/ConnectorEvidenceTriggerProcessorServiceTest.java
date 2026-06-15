@@ -27,9 +27,11 @@ import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessage
 import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,39 +73,41 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
     @Test
     void should_create_delivery_evidence_and_submit_to_gateway() {
         var businessMessage = MessageTestFixtures.createValidInboundBusinessMessage()
-                .toBuilder()
-                .as4Properties(
-                        MessageTestFixtures.createValidInboundBusinessMessage()
-                                .as4Properties()
-                                .toBuilder()
-                                .ebmsMessageIdentifier(EBMS_ID)
-                                .build()
-                )
-                .build();
+                                                 .toBuilder()
+                                                 .as4Properties(
+                                                         MessageTestFixtures.createValidInboundBusinessMessage()
+                                                                            .as4Properties()
+                                                                            .toBuilder()
+                                                                            .ebmsMessageIdentifier(
+                                                                                    EBMS_ID)
+                                                                            .build()
+                                                 )
+                                                 .build();
 
         var deliveryEvidence = EvidenceTestFixtures.createDeliveryEvidence();
         var trigger = MessageTestFixtures.createEvidenceTriggerMessage()
-                .toBuilder()
-                .as4Properties(
-                        MessageTestFixtures.createEvidenceTriggerMessage()
-                                .as4Properties()
-                                .toBuilder()
-                                .referenceToIdentifier(EBMS_ID)
-                                .build()
-                )
-                .transportedEvidences(
-                        java.util.List.of(
-                                EvidenceTestFixtures.createEvidenceTrigger().toBuilder()
-                                        .type(ConnectorEvidenceType.DELIVERY)
-                                        .build()
-                        )
-                )
-                .build();
+                                         .toBuilder()
+                                         .as4Properties(
+                                                 MessageTestFixtures.createEvidenceTriggerMessage()
+                                                                    .as4Properties()
+                                                                    .toBuilder()
+                                                                    .referenceToIdentifier(EBMS_ID)
+                                                                    .build()
+                                         )
+                                         .transportedEvidences(
+                                                 List.of(
+                                                         EvidenceTestFixtures.createEvidenceTrigger()
+                                                                             .toBuilder()
+                                                                             .type(ConnectorEvidenceType.DELIVERY)
+                                                                             .build()
+                                                 )
+                                         )
+                                         .build();
 
-        var gatewayEvidenceMessage = MessageTestFixtures.createDeliveryEvidenceMessage();
+        var evidenceMessage = MessageTestFixtures.createDeliveryEvidenceMessage();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
-                EBMS_ID, ConnectorMessageDirection.revert(gatewayEvidenceMessage.direction())))
+                EBMS_ID, ConnectorMessageDirection.revert(evidenceMessage.direction())))
                 .thenReturn(businessMessage);
         when(evidenceCreator.createSuccess(ConnectorEvidenceType.DELIVERY, businessMessage))
                 .thenReturn(deliveryEvidence);
@@ -112,35 +116,49 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
                         EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence()
                 )).build());
         when(evidenceMessageCreator.createForTrigger(businessMessage, deliveryEvidence, trigger))
-                .thenReturn(gatewayEvidenceMessage);
+                .thenReturn(evidenceMessage);
         when(processingConfigurationProvider.getConfiguration())
                 .thenReturn(ConnectorMessageProcessingConfiguration.builder()
-                        .sendGeneratedEvidencesToBackend(false)
-                        .build());
+                                                                   .sendGeneratedEvidencesToBackend(
+                                                                           false)
+                                                                   .build());
 
         processor.process(trigger);
 
-        verify(linkSubmitter).submit(gatewayEvidenceMessage);
-        verify(linkSubmitter, never()).submit(gatewayEvidenceMessage.switchDirection());
+        verify(linkSubmitter).submit(evidenceMessage);
+        verify(linkSubmitter, never()).submit(evidenceMessage.switchDirection());
         verify(evidenceVerifier).verify(eq(ConnectorEvidenceType.DELIVERY), any());
+    }
+
+    @Test
+    void should_throw_exception_if_evidence_message_direction_is_not_set_or_is_null() {
+        var trigger = MessageTestFixtures.createEvidenceTriggerMessage()
+                                         .toBuilder()
+                                         .direction(null)
+                                         .build();
+
+        assertThatThrownBy(() -> processor.process(trigger))
+                .isInstanceOf(ConnectorEvidenceException.class);
     }
 
     @Test
     void should_reject_trigger_when_business_message_not_found() {
         var trigger = MessageTestFixtures.createEvidenceTriggerMessage()
-                .toBuilder()
-                .as4Properties(
-                        MessageTestFixtures.createEvidenceTriggerMessage()
-                                .as4Properties()
-                                .toBuilder()
-                                .referenceToIdentifier("missing-ref")
-                                .build()
-                )
-                .build();
+                                         .toBuilder()
+                                         .as4Properties(
+                                                 MessageTestFixtures.createEvidenceTriggerMessage()
+                                                                    .as4Properties()
+                                                                    .toBuilder()
+                                                                    .referenceToIdentifier(
+                                                                            "missing-ref")
+                                                                    .build()
+                                         )
+                                         .build();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
                 "missing-ref",
-                ConnectorMessageDirection.revert(trigger.direction())))
+                ConnectorMessageDirection.revert(trigger.direction())
+        ))
                 .thenReturn(null);
         when(messageRepository.findByBackendMessageIdentifier(any())).thenReturn(null);
         when(messageRepository.findByIdentifier(any())).thenReturn(null);
@@ -152,50 +170,54 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
     @Test
     void should_send_evidence_back_to_backend_when_configured() {
         var businessMessage = MessageTestFixtures.createValidInboundBusinessMessage()
-                .toBuilder()
-                .as4Properties(
-                        MessageTestFixtures.createValidInboundBusinessMessage()
-                                .as4Properties()
-                                .toBuilder()
-                                .ebmsMessageIdentifier(EBMS_ID)
-                                .build()
-                )
-                .build();
+                                                 .toBuilder()
+                                                 .as4Properties(
+                                                         MessageTestFixtures.createValidInboundBusinessMessage()
+                                                                            .as4Properties()
+                                                                            .toBuilder()
+                                                                            .ebmsMessageIdentifier(
+                                                                                    EBMS_ID)
+                                                                            .build()
+                                                 )
+                                                 .build();
         var deliveryEvidence = EvidenceTestFixtures.createDeliveryEvidence();
         var trigger = MessageTestFixtures.createEvidenceTriggerMessage()
-                .toBuilder()
-                .as4Properties(
-                        MessageTestFixtures.createEvidenceTriggerMessage()
-                                .as4Properties()
-                                .toBuilder()
-                                .referenceToIdentifier(EBMS_ID)
-                                .build()
-                )
-                .transportedEvidences(
-                        java.util.List.of(
-                                EvidenceTestFixtures.createEvidenceTrigger().toBuilder()
-                                        .type(ConnectorEvidenceType.DELIVERY)
-                                        .build()
-                        )
-                )
-                .build();
+                                         .toBuilder()
+                                         .as4Properties(
+                                                 MessageTestFixtures.createEvidenceTriggerMessage()
+                                                                    .as4Properties()
+                                                                    .toBuilder()
+                                                                    .referenceToIdentifier(EBMS_ID)
+                                                                    .build()
+                                         )
+                                         .transportedEvidences(
+                                                 java.util.List.of(
+                                                         EvidenceTestFixtures.createEvidenceTrigger()
+                                                                             .toBuilder()
+                                                                             .type(ConnectorEvidenceType.DELIVERY)
+                                                                             .build()
+                                                 )
+                                         )
+                                         .build();
         var gatewayEvidenceMessage = MessageTestFixtures.createDeliveryEvidenceMessage()
-                .toBuilder()
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .build();
+                                                        .toBuilder()
+                                                        .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                                                        .build();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
                 EBMS_ID, ConnectorMessageDirection.revert(trigger.direction())))
                 .thenReturn(businessMessage);
         when(evidenceCreator.createSuccess(ConnectorEvidenceType.DELIVERY, businessMessage))
                 .thenReturn(deliveryEvidence);
-        when(messageRepository.findByIdentifier(businessMessage.identifier())).thenReturn(businessMessage);
+        when(messageRepository.findByIdentifier(businessMessage.identifier())).thenReturn(
+                businessMessage);
         when(evidenceMessageCreator.createForTrigger(businessMessage, deliveryEvidence, trigger))
                 .thenReturn(gatewayEvidenceMessage);
         when(processingConfigurationProvider.getConfiguration())
                 .thenReturn(ConnectorMessageProcessingConfiguration.builder()
-                        .sendGeneratedEvidencesToBackend(true)
-                        .build());
+                                                                   .sendGeneratedEvidencesToBackend(
+                                                                           true)
+                                                                   .build());
 
         processor.process(trigger);
 

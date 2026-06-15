@@ -62,6 +62,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         assertThat(inboundMessage.backendName()).isNotNull();
         assertThat(outputMessage.backendName()).isNotEmpty();
         assertThat(outputMessage.backendName()).isEqualTo(inboundMessage.backendName());
+        assertThat(outputMessage.transportedEvidences()).isNotEmpty();
 
         verify(messageRepository, times(0)).findByConversationIdentifier(any());
     }
@@ -86,6 +87,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         assertThat(outputMessage.backendName()).isNotEmpty();
         assertThat(outputMessage.backendName()).isEqualTo("backend_client_link");
         assertThat(outputMessage.backendName()).isEqualTo(parentMessage.backendName());
+        assertThat(outputMessage.transportedEvidences()).isNotEmpty();
 
         verify(messageRepository, times(1)).findByConversationIdentifier(any());
     }
@@ -111,6 +113,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
 
         assertThat(inboundMessage.backendName()).isNull();
         assertThat(outputMessage.backendName()).isNotEmpty();
+        assertThat(outputMessage.transportedEvidences()).isNotEmpty();
     }
 
     @Test
@@ -137,6 +140,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         assertThat(inboundMessage.backendName()).isNull();
         assertThat(outputMessage.backendName()).isNotEmpty();
         assertThat(outputMessage.backendName()).isEqualTo("backend_connector_test");
+        assertThat(outputMessage.transportedEvidences()).isNotEmpty();
     }
 
     @Test
@@ -159,6 +163,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         assertThat(inboundMessage.backendName()).isNull();
         assertThat(outputMessage.backendName()).isNotEmpty();
         assertThat(outputMessage.backendName()).isEqualTo(ConnectorDefaults.DEFAULT_BACKEND_NAME);
+        assertThat(outputMessage.transportedEvidences()).isNotEmpty();
     }
 
     @Test
@@ -180,6 +185,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         assertThat(inboundMessage.backendName()).isNull();
         assertThat(outputMessage.backendName()).isNotEmpty();
         assertThat(outputMessage.backendName()).isEqualTo(ConnectorDefaults.DEFAULT_BACKEND_NAME);
+        assertThat(outputMessage.transportedEvidences()).isNotEmpty();
     }
 
     @Test

@@ -17,64 +17,66 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 public class EvidenceTestFixtures {
     public static ConnectorMessageEvidence createSubmissionAcceptanceEvidence() {
         return ConnectorMessageEvidence.builder()
+                                       .uuid("12345678-1234-1234-1234-123456789012")
                                        .type(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createSubmissionRejectionEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.SUBMISSION_REJECTION)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRelayREMMDAcceptanceEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRelayREMMDRejectionEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RELAY_REMMD_REJECTION)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRelayREMMDFailureEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RELAY_REMMD_FAILURE)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createDeliveryEvidence() {
         return ConnectorMessageEvidence.builder()
+                                       .uuid("12345678-1234-1234-1234-123456789012")
                                        .type(ConnectorEvidenceType.DELIVERY)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createNonDeliveryEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.NON_DELIVERY)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createRetrievalEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.RETRIEVAL)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 
     public static ConnectorMessageEvidence createNonRetrievalEvidence() {
         return ConnectorMessageEvidence.builder()
                                        .type(ConnectorEvidenceType.NON_RETRIEVAL)
-                                       .content(new byte[] {1, 2, 3})
+                                       .content(new byte[]{1, 2, 3})
                                        .build();
     }
 

@@ -282,7 +282,8 @@ public class ConnectorBackendMessageDeliveryListenerTest {
                                .as4Properties(as4Properties())
                                .businessContent(businessContent())
                                .attachments(List.of())
-                               .evidences(List.of(EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
+                               .evidences(List.of())
+                               .transportedEvidences(List.of(EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
                                .build();
     }
 

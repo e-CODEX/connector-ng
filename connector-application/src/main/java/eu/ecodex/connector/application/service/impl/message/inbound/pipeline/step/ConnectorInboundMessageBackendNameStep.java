@@ -99,9 +99,13 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
                 defaultBackendName
         );
 
-        return this.messageRepository.updateBackendName(
+        var updatedMessage = this.messageRepository.updateBackendName(
                 inboundMessage.identifier(), resolvedBackendName
         );
+
+        return updatedMessage.toBuilder()
+                .transportedEvidences(inboundMessage.transportedEvidences())
+                .build();
     }
 
     private String resolveBackendNameFromConversation(

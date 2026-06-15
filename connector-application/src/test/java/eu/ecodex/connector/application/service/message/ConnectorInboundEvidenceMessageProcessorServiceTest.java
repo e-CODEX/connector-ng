@@ -29,6 +29,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.List;
@@ -67,33 +68,17 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
                 List.of(deliveryEvidence)
         );
         var referencedMessage = referencedBusinessMessage();
-        var backendReadyMessage = confirmationMessage.toBuilder()
-                                                     .backendName(referencedMessage.backendName())
-                                                     .referenceToBackendMessageIdentifier(
-                                                             BACKEND_MESSAGE_ID)
-                                                     .build();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
                 REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
                 .thenReturn(referencedMessage);
         when(messageRepository.findByIdentifier(REFERENCED_MESSAGE_ID))
                 .thenReturn(referencedMessage);
-        when(messageRepository.updateBackendContext(
-                CONFIRMATION_MESSAGE_ID,
-                referencedMessage.backendName(),
-                BACKEND_MESSAGE_ID
-        )).thenReturn(backendReadyMessage);
 
         processor.process(confirmationMessage);
 
         verify(evidenceVerifier).verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorMessage.class));
         verify(evidenceRepository).save(deliveryEvidence, REFERENCED_MESSAGE_ID);
-        verify(messageRepository).updateBackendContext(
-                CONFIRMATION_MESSAGE_ID,
-                referencedMessage.backendName(),
-                BACKEND_MESSAGE_ID
-        );
-        verify(linkSubmitter).submit(backendReadyMessage);
     }
 
     @Test
@@ -109,7 +94,6 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
         processor.process(confirmationMessage);
 
         verifyNoInteractions(evidenceVerifier, evidenceRepository);
-        verify(messageRepository, never()).updateBackendContext(any(), any(), any());
         verify(linkSubmitter).submit(confirmationMessage);
     }
 
@@ -121,11 +105,6 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
                 List.of(deliveryEvidence)
         );
         var referencedMessage = referencedBusinessMessage();
-        var backendReadyMessage = confirmationMessage.toBuilder()
-                                                     .backendName(referencedMessage.backendName())
-                                                     .referenceToBackendMessageIdentifier(
-                                                             BACKEND_MESSAGE_ID)
-                                                     .build();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
                 REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
@@ -133,16 +112,10 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
         doThrow(new ConnectorEvidenceNotRelevantException(
                 ConnectorErrorCode.EVIDENCE_IGNORED_DUE_HIGHER_PRIORITY
         )).when(evidenceVerifier).verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorMessage.class));
-        when(messageRepository.updateBackendContext(
-                CONFIRMATION_MESSAGE_ID,
-                referencedMessage.backendName(),
-                BACKEND_MESSAGE_ID
-        )).thenReturn(backendReadyMessage);
 
         processor.process(confirmationMessage);
 
         verify(evidenceRepository, never()).save(any(), any());
-        verify(linkSubmitter).submit(backendReadyMessage);
     }
 
     private static ConnectorMessage referencedBusinessMessage() {
@@ -162,7 +135,7 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
 
     private static ConnectorMessage gatewayConfirmationMessage(
             String referenceToMessageId,
-            List<eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence> evidences) {
+            List<ConnectorMessageEvidence> evidences) {
         return ConnectorMessage.builder()
                                .identifier(CONFIRMATION_MESSAGE_ID)
                                .businessDomainIdentifier(

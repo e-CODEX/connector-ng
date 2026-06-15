@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.service.usecase.transport.command.UpdateM
 import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.domain.exception.NotFoundException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
@@ -63,10 +64,11 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
 
     @Override
     public void execute(
-            @NonNull String messageIdentifier,
+            @NonNull String messageOrRemoteSystemIdentifier,
             @NonNull UpdateMessageTransportCommand command) {
-        if (!StringUtils.hasText(messageIdentifier)) {
-            throw new IllegalArgumentException("Transport identifier must not be empty");
+        if (!StringUtils.hasText(messageOrRemoteSystemIdentifier)) {
+            throw new IllegalArgumentException(
+                    "Transport message or remote system identifier must not be empty");
         }
 
         if (command.status() == ConnectorMessageTransportStatus.FAILED
@@ -74,18 +76,20 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
             throw new IllegalArgumentException("Errors must be provided for failed transport");
         }
 
-        var existingStep = this.transportStepRepository.findByMessageIdentifier(messageIdentifier);
+        var existingStep = this.transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
+                messageOrRemoteSystemIdentifier);
 
         if (existingStep == null) {
             throw new NotFoundException(
-                    "No transport step found for identifier: " + messageIdentifier
+                    "No transport step found for identifier: " + messageOrRemoteSystemIdentifier
             );
         }
 
-        if (existingStep.status() != ConnectorMessageTransportStatus.DOWNLOADED) {
+        if (existingStep.status() == ConnectorMessageTransportStatus.FAILED
+                || existingStep.status() == ConnectorMessageTransportStatus.SUBMITTED) {
             throw new ConnectorMessageTransportStepException(
-                    "Message with identifier [" + messageIdentifier + "] is already in "
-                            + "transport status [" + command.status() + "]"
+                    "Message with identifier [" + messageOrRemoteSystemIdentifier + "] is already "
+                            + "in transport status [" + command.status() + "]"
             );
         }
 
@@ -106,20 +110,43 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
         }
     }
 
-    private void updateMessage(ConnectorMessage transportedMessage, String backendIdentifier) {
-        if (transportedMessage.isBusinessMessage()) {
-            var messageIdentifier = transportedMessage.identifier();
+    private void updateMessage(
+            ConnectorMessage transportedMessage,
+            String remoteMessageIdentifier) {
+        var transportedMessageIdentifier = transportedMessage.identifier();
 
+        if (transportedMessageIdentifier == null) {
+            throw new IllegalStateException(
+                    "The message identifier is not set for the transported message"
+            );
+        }
+
+        if (transportedMessage.isBusinessMessage()) {
             var message = this.messageRepository.findByIdentifier(transportedMessage.identifier());
 
             if (message == null) {
-                log.warn("Message [{}] not found", messageIdentifier);
+                log.warn("Message [{}] not found", transportedMessageIdentifier);
                 return;
             }
 
-            this.messageRepository.setDeliveredToBackendAt(messageIdentifier);
-            this.messageRepository.updateBackendIdentifier(messageIdentifier, backendIdentifier);
-            log.info("Message [{}] has been delivered to backend", messageIdentifier);
+            if (transportedMessage.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
+                this.messageRepository.setDeliveredToBackendAt(transportedMessageIdentifier);
+                this.messageRepository.updateBackendIdentifier(
+                        transportedMessageIdentifier,
+                        remoteMessageIdentifier
+                );
+                log.info(
+                        "The message [{}] has been delivered to the backend link partner",
+                        transportedMessageIdentifier
+                );
+            } else {
+                // TODO see if ebms ID should be updated
+                this.messageRepository.setDeliveredToGatewayAt(transportedMessageIdentifier);
+                log.info(
+                        "The message [{}] has been delivered to the gateway link partner",
+                        transportedMessageIdentifier
+                );
+            }
         } else {
             var transportedEvidences = transportedMessage.transportedEvidences();
 
@@ -129,9 +156,9 @@ public class ConnectorAcknowledgeMessageTransportStepService implements
                 );
             }
 
-            evidenceRepository.setDeliveredToLinkPartnerAt(
-                    transportedEvidences.getFirst().uuid()
-            );
+            var transportedEvidence = transportedEvidences.getFirst();
+
+            evidenceRepository.setDeliveredToLinkPartnerAt(transportedEvidence.uuid());
         }
     }
 

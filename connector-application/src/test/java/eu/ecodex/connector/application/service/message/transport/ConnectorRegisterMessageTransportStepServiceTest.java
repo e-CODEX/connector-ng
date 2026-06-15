@@ -80,7 +80,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         var transportStep = existingStep().toBuilder()
                                           .status(ConnectorMessageTransportStatus.DOWNLOADED)
                                           .build();
-        when(transportStepRepository.findByMessageIdentifier(MESSAGE_ID))
+        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
                 .thenReturn(transportStep);
 
         assertThatThrownBy(() -> service.execute(
@@ -94,7 +94,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
     @Test
     void should_register_new_message_transport_step_successfully() {
-        when(transportStepRepository.findByMessageIdentifier(MESSAGE_ID)).thenReturn(null);
+        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(null);
         when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
         when(transportStepRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -116,7 +116,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
     @Test
     void should_update_existing_message_transport_step_successfully() {
-        when(transportStepRepository.findByMessageIdentifier(MESSAGE_ID))
+        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
                 .thenReturn(existingStep());
         when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
         when(transportStepRepository.update(any(), any())).thenAnswer(i -> i.getArgument(1));

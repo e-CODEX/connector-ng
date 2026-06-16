@@ -49,7 +49,7 @@ Apache ActiveMQ Classic **6.x** must be installed, running, and reachable on its
 
 Message attachments are stored in an S3-compatible object store.
 A dedicated bucket must be created and credentials provided to the Connector.
-Both **MinIO** and **Amazon S3** are supported.
+**MinIO** or any S3 storage solution is supported.
 
 === e-CODEX Gateway
 
@@ -72,7 +72,7 @@ Pull the Connector image from the e-CODEX repository:
 
 [source,bash]
 ----
-docker pull scm.ecodex.eu/docker/connector:latest
+docker pull scm.ecodex.eu/docker/connector-ng:latest
 ----
 
 To verify the image is available locally:
@@ -132,14 +132,6 @@ Then create `config/application.properties` to reference the keystores and their
 For a detailed explanation of each variable (defaults, types, and impact), please refer to the `configuration.adoc` file.
 ====
 ----
-# Gateway link
-connector.link.gateway.link-config.properties.endpoint.key-store.path=file:./config/keystores/gwlink-keystore.jks
-connector.link.gateway.link-config.properties.endpoint.key-store.password=<your_password>
-connector.link.gateway.link-config.properties.endpoint.private-key.alias=<key_alias>
-connector.link.gateway.link-config.properties.endpoint.private-key.password=<your_password>
-connector.link.gateway.link-config.properties.endpoint.trust-store.path=file:config/keystores/gwlink-truststore.jks
-connector.link.gateway.link-config.properties.endpoint.trust-store.password=<your_password>
-
 # Backend link
 connector.link.backend[0].link-config.properties.endpoint.key-store.path=file:./config/keystores/backend-keystore.jks
 connector.link.backend[0].link-config.properties.endpoint.key-store.password=<your_password>
@@ -187,130 +179,6 @@ Once running, the following endpoints are available:
 
 ---
 
-== Part 2: Advanced Setup
-
-=== Who is this for?
-The target audience of this part are administrators and technical staff familiar with networking, servers, databases and local infrastructure.
-
-=== Scope
-* **Focus:** Deployment and configuration.
-* **Out of Scope:** Detailed software features and functional usage.
-
-=== Steps
-
-==== Step 1 — Get the project files
-
- git clone <repository-url>
- cd connector
-
-If you don't use Git, unzip the provided archive and open the `connector` folder.
-
-==== Step 2 — Build the Connector image
-
- docker build -t connector:latest .
-
-[NOTE]
-====
-This downloads dependencies and compiles the source code.
-It may take a few minutes the first time.
-====
-
-==== Step 3 — Create the Docker network
-
- docker network create ecodex-docker
-
-[NOTE]
-====
-The network name can be overridden by setting the `ECODEX_DOCKER_NETWORK` environment variable before starting the stack.
-====
-
-==== Step 4 — Set your environment variables
-
-Create a file named `docker.env` in the root of the project with the following content:
-
-.docker.env
-[source,properties]
-----
-# Database
-DB_USERNAME=connector
-DB_PASSWORD=connector                                        # <-- change this
-DB_URL=jdbc:mysql://connector-db:3306/connector
-DB_DRIVER_CLASSNAME=com.mysql.cj.jdbc.MysqlXADataSource
-DB_DIALECT=org.hibernate.dialect.MySQLDialect
-
-# File storage (MinIO)
-S3_ACCESS_KEY=admin
-S3_SECRET_KEY=admin123                                       # <-- change this
-S3_REGION=us-east-1
-S3_BUCKET=attachments
-S3_ENDPOINT=http://minio-s3:9000
-
-# Temporary files
-TEMP_DIR_LOCATION=/app/temp
-
-# Message broker (ActiveMQ)
-BROKER_URL=tcp://activemq:61616
-BROKER_USER=admin
-BROKER_PASSWORD=admin                                        # <-- change this
-----
-
-[WARNING]
-====
-The default values are fine for testing.
-**Change all passwords before using this in production.**
-====
-
-[NOTE]
-====
-These variables can also be set directly in `docker/connector/config/application.properties`.
-====
-
-==== Step 5 — Set your certificates
-
-The certificates are stored in `docker/connector/config/keystores/`.
-
-Make sure the following files are present:
-
-* `gwlink-keystore.jks`
-* `gwlink-truststore.jks`
-* `backend-keystore.jks`
-* `backend-truststore.jks`
-
-Then open `docker/connector/config/application.properties` and replace the `*****` values with your actual keystore passwords:
-
-[source,properties]
-----
-# Gateway link
-connector.link.gateway.link-config.properties.endpoint.key-store.password=YOUR_PASSWORD
-connector.link.gateway.link-config.properties.endpoint.private-key.password=YOUR_PASSWORD
-connector.link.gateway.link-config.properties.endpoint.trust-store.password=YOUR_PASSWORD
-
-# Backend link
-connector.link.backend[0].link-config.properties.endpoint.key-store.password=YOUR_PASSWORD
-connector.link.backend[0].link-config.properties.endpoint.private-key.password=YOUR_PASSWORD
-connector.link.backend[0].link-config.properties.endpoint.trust-store.password=YOUR_PASSWORD
-----
-
-==== Step 6 — Start the stack
-
- docker compose up -d
-
-To watch the Connector logs:
-
- docker compose logs -f connector
-
-==== Step 7 — Check it's running
-
-After a few seconds, run:
-
- curl http://localhost:30000/actuator/health
-
-You should see:
-
-[source,json]
-----
-{"status":"UP"}
-----
 
 Once the full stack is up, the following services are accessible:
 

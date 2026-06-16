@@ -8,4 +8,4 @@ jobs:
     with:
       java-version: 21
       maven-repo-id: 'artifactory'
-      maven-parameters: '-Partifactory.repo.id=artifactory'
+      gradle-parameters: '-Partifactory.repo.id=artifactory'

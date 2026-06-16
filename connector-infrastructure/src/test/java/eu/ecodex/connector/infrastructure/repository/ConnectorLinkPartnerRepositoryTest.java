@@ -59,14 +59,14 @@ public class ConnectorLinkPartnerRepositoryTest {
         var partners = repository.findAll();
 
         assertThat(partners).isNotNull();
-        assertThat(partners).hasSize(2);
+        assertThat(partners).hasSize(1);
     }
 
     // find by name
 
     @Test
     void should_find_link_partner_by_name_successfully() {
-        var name = ConnectorLinkPartnerName.builder().name("default_gateway").build();
+        var name = ConnectorLinkPartnerName.builder().name("backend_alice").build();
 
         var partner = this.repository.findByName(name);
 

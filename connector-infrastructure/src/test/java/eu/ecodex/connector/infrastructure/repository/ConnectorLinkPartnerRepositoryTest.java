@@ -64,8 +64,6 @@ import org.springframework.boot.test.context.SpringBootTest;
                         connector.link.backend[0].link-partners[0].name=backend_alice
                         connector.link.backend[0].link-partners[0].description=backend alice
                         connector.link.backend[0].link-partners[0].enabled=true
-                        # this link partner pushes a message to the connector (connector is passive in receiver receiveMode)
-                        connector.link.backend[0].link-partners[0].receiver-mode=passive
                         #this linkPartner operates in push receiveMode (connector pushes new messages to backend)
                         connector.link.backend[0].link-partners[0].sender-mode=push
                         # this must match the certificate alias within the trust-store

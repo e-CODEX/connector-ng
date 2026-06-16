@@ -23,8 +23,6 @@ public class ConnectorTokenSignatureBasedTechnicalValidationGeneratorTest extend
     @Autowired
     private ConnectorTokenSignatureBasedTechnicalValidationGenerator validationGenerator;
 
-    // TODO find valid certificate to test SUCCESSFUL level validation
-
     @Test
     void should_validate_document_with_no_embedded_or_detached_signature_successfully()
             throws Exception {

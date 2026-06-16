@@ -262,7 +262,6 @@ public class ConnectorAsicContainerValidator {
                 persistAttachment(
                         newAttachmentMetadata(
                                 detachedDssSignature.getName(),
-                                // TODO: use BINARY type if getMimeType() returns null
                                 DetachedSignatureMimeType.fromMimeType(detachedSignatureMimeType)
                                         .getMimeType(),
                                 "Detached signature",
@@ -273,7 +272,7 @@ public class ConnectorAsicContainerValidator {
                         message.identifier()
                 );
                 detachedSignature = DetachedSignature.builder()
-                        .signature(new byte[1]) // TODO replace with actual signature
+                        .signature(detachedDssSignature.openStream().readAllBytes())
                         .name(detachedDssSignature.getName())
                         .mimeType(DetachedSignatureMimeType.fromMimeType(detachedSignatureMimeType))
                         .build();

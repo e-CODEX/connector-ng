@@ -139,7 +139,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
     private int buildContent(MapMessage mapMessage, ConnectorMessage message, int counter)
             throws JMSException {
         var content = message.businessContent();
-        var evidences = message.transportedEvidences(); // TODO check the evidences
+        var evidences = message.transportedEvidences();
 
         if (content == null) {
             if (evidences != null && !evidences.isEmpty()) {

@@ -123,7 +123,6 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
                 .enabled(properties.isEnabled())
                 .type(type)
                 .source(ConnectorConfigurationSource.IMPLEMENTATION)
-                .receiverMode(ConnectorLinkMode.valueOf(properties.getReceiverMode().toUpperCase()))
                 .senderMode(ConnectorLinkMode.valueOf(properties.getSenderMode().toUpperCase()));
 
         if (type == ConnectorLinkType.BACKEND) {

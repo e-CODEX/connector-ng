@@ -30,9 +30,6 @@ import lombok.Builder;
  *                        details.
  * @param enabled         A flag indicating whether the link partner is currently enabled or
  *                        active.
- * @param receiverMode    The interaction receiveMode of the link, defined by
- *                        {@link ConnectorLinkMode}, specifying how communication or data transfer
- *                        is managed.
  * @param senderMode      The interaction receiveMode of the link, defined by
  *                        {@link ConnectorLinkMode}, specifying how communication or data transfer
  *                        is managed.
@@ -51,7 +48,6 @@ public record ConnectorLinkPartner(
         ConnectorLinkPartnerName name,
         String description,
         boolean enabled,
-        ConnectorLinkMode receiverMode, // TODO see if this should be removed or not
         ConnectorLinkMode senderMode,
         ConnectorLinkType type,
         ConnectorConfigurationSource source,
@@ -63,8 +59,8 @@ public record ConnectorLinkPartner(
     @Nonnull
     public String toString() {
         return String.format(
-                "{name=%s, enabled=%s, senderMode=%s, receiverMode=%s, source=%s}",
-                name, enabled, senderMode, receiverMode, source
+                "{name=%s, enabled=%s, senderMode=%s, source=%s}",
+                name, enabled, senderMode, source
         );
     }
 }

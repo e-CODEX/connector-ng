@@ -105,14 +105,6 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
         return savedParties.stream().map(ConnectorPartyRepositoryImpl::toDomain).toList();
     }
 
-    // TODO to be removed
-    @Override
-    public ConnectorParty findByNameAndBusinessDomain(
-            String name,
-            ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
     @Override
     public ConnectorParty findByIdentifierAndRoleTypeAndBusinessDomain(
             @NonNull String identifier,

@@ -26,23 +26,6 @@ public interface ConnectorPartyRepository {
             @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 
     /**
-     * Retrieves a {@link ConnectorParty} based on the specified party and associated business
-     * domain identifier.
-     *
-     * @param name                     the {@link ConnectorParty} representing the party; must not
-     *                                 be null.
-     * @param businessDomainIdentifier the {@link ConnectorBusinessDomainIdentifier} representing
-     *                                 the business domain associated with the party; must not be
-     *                                 null.
-     *
-     * @return the {@link ConnectorParty} matching the specified party and business domain
-     *         identifier, or null if no such party exists.
-     */
-    // TODO to be removed
-    ConnectorParty findByNameAndBusinessDomain(
-            String name, ConnectorBusinessDomainIdentifier businessDomainIdentifier);
-
-    /**
      * Retrieves a {@link ConnectorParty} based on the specified identifier, role type, and
      * associated business domain identifier.
      *

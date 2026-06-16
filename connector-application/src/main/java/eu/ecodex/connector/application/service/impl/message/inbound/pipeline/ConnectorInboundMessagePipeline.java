@@ -75,7 +75,6 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(
                     message.businessDomainIdentifier()
             );
-            // TODO see when the message should be updated in the db
             var inboundMessage = this.backendNameStep.execute(message);
             // TODO: decide if this should maybe generated after msg successfully transported
             //  to backend link?

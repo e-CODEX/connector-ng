@@ -21,7 +21,7 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "connector.ecodex-container")
+@ConfigurationProperties(prefix = "connector.container")
 public class ConnectorContainerProperties {
     private ContainerSignatureProperties signature;
 }

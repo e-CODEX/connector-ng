@@ -1,5 +1,6 @@
 plugins {
     id("base")
+    id("maven-publish")
 }
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
@@ -10,7 +11,7 @@ var bootstrapperJar: Provider<RegularFile> =
         .named("bootJar")
         .flatMap { task ->
             @Suppress("UNCHECKED_CAST")
-            (task as org.gradle.api.tasks.bundling.AbstractArchiveTask).archiveFile
+            (task as AbstractArchiveTask).archiveFile
         }
 
 val copyBootJar by tasks.registering(Copy::class) {
@@ -57,4 +58,29 @@ tasks.register<Zip>("distributionZip") {
 
 tasks.named("assemble") {
     dependsOn("distributionZip")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenDistribution") {
+            artifactId = "connector-distribution"
+            artifact(tasks.named<Zip>("distributionZip"))
+        }
+    }
+    repositories {
+        val releaseRepo = providers.gradleProperty("artifactory.url.release").get()
+        val snapshotRepo = providers.gradleProperty("artifactory.url.snapshot").get()
+        val repoId = providers.gradleProperty("artifactory.repo.id")
+            .orElse(providers.environmentVariable("MAVEN_REPO_ID"))
+            .get()
+
+        maven {
+            name = repoId
+            url = uri(if (version.toString().endsWith("-SNAPSHOT")) snapshotRepo else releaseRepo)
+            credentials {
+                username = System.getenv("MAVEN_REPO_USERNAME")
+                password = System.getenv("MAVEN_REPO_PASSWORD")
+            }
+        }
+    }
 }

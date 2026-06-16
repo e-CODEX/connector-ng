@@ -1,0 +1,11 @@
+on:
+  push:
+    branches:
+      - develop
+jobs:
+  publish:
+    uses: e-CODEX/workflows/.github/workflows/gradle-publish-snapshot.yaml@ae5d86c18f70e8a6971b80354219b330d67258a7
+    with:
+      java-version: 21
+      maven-repo-id: 'artifactory'
+      maven-parameters: '-Partifactory.repo.id=artifactory'

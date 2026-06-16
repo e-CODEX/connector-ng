@@ -1,7 +1,8 @@
 plugins {
-    id("java")
+    id("lifecycle-base")
     id("jacoco")
     id("checkstyle")
+    id("maven-publish")
     id("org.cyclonedx.bom") version "3.1.1"
 }
 
@@ -18,23 +19,25 @@ allprojects {
     }
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-tasks.withType<JavaCompile> {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
-}
-
 jacoco {
     toolVersion = "0.8.14"
 }
 
 subprojects {
     pluginManager.apply("checkstyle")
+
+    plugins.withId("java") {
+        extensions.configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(21))
+            }
+        }
+
+        tasks.withType<JavaCompile> {
+            sourceCompatibility = "21"
+            targetCompatibility = "21"
+        }
+    }
 
     checkstyle {
         toolVersion = "10.17.0"
@@ -49,7 +52,9 @@ subprojects {
         isShowViolations = true
     }
 
-    if (name != "connector-documentation" && name != "connector-distribution") {
+    var excludeFromJacoco = listOf("connector-documentation", "connector-distribution")
+
+    if (!excludeFromJacoco.contains(name)) {
         val testTasks = tasks.withType<Test>()
         val jacocoReportTasks = tasks.withType<JacocoReport>()
 
@@ -81,6 +86,44 @@ subprojects {
                 xml.required.set(true)
                 html.required.set(true)
                 csv.required.set(true)
+            }
+        }
+    }
+
+    // publish to artifactory
+
+    fun RepositoryHandler.artifactoryMaven() {
+        val releaseRepo = providers.gradleProperty("artifactory.url.release").get()
+        val snapshotRepo = providers.gradleProperty("artifactory.url.snapshot").get()
+        val repoId = providers.gradleProperty("artifactory.repo.id")
+            .orElse(providers.environmentVariable("MAVEN_REPO_ID"))
+            .get()
+        maven {
+            name = repoId
+            url = uri(if (version.toString().endsWith("-SNAPSHOT")) snapshotRepo else releaseRepo)
+            credentials {
+                username = System.getenv("MAVEN_REPO_USERNAME")
+                password = System.getenv("MAVEN_REPO_PASSWORD")
+            }
+        }
+    }
+
+    val notToPublish = listOf(
+        "connector-integrationtest",
+        "connector-infrastructure",
+        "connector-documentation"
+    )
+
+    plugins.withId("java") {
+        if (!notToPublish.contains(name)) {
+            pluginManager.apply("maven-publish")
+            extensions.configure<PublishingExtension> {
+                publications {
+                    create<MavenPublication>("maven") {
+                        from(components["java"])
+                    }
+                }
+                repositories { artifactoryMaven() }
             }
         }
     }

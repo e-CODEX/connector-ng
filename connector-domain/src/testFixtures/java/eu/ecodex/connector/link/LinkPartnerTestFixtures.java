@@ -54,7 +54,6 @@ public class LinkPartnerTestFixtures {
                 )
                 .description("linkPartnerDescription")
                 .enabled(true)
-                .receiverMode(ConnectorLinkMode.PASSIVE)
                 .senderMode(ConnectorLinkMode.PUSH)
                 .type(ConnectorLinkType.BACKEND)
                 .source(ConnectorConfigurationSource.IMPLEMENTATION);

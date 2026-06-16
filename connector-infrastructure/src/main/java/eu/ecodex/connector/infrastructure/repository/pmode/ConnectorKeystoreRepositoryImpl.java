@@ -68,7 +68,10 @@ public class ConnectorKeystoreRepositoryImpl implements ConnectorKeystoreReposit
      *         null.
      */
     public static ConnectorKeystore toDomain(ConnectorKeystoreEntity entity) {
-        // TODO handle null entity by returning null
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorKeystore
                 .builder()
                 .uuid(entity.getUuid())

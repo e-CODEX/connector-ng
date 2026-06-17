@@ -11,15 +11,13 @@ LABEL description="e-CODEX connector"
 ARG USERNAME=connector
 ARG USER_UID=1000
 ARG USER_GID=${USER_UID}
-ARG BUILD_OUTPUT_FOLDER=/app/connector-distribution/build/connector-distribution
+ARG BUILD_OUTPUT_FOLDER=/app/connector-distribution/build/connector-distribution/standalone
 
 ARG APP_FOLDER=/app
 
 WORKDIR ${APP_FOLDER}
 
-RUN apt-get update -y \
-    && apt-get upgrade -y \
-    && groupadd -g ${USER_GID} ${USERNAME} \
+RUN groupadd -g ${USER_GID} ${USERNAME} \
     && useradd -u ${USER_UID} -g ${USER_GID} -m ${USERNAME} \
     && mkdir -p data temp transaction-logs \
     && chown -R ${USERNAME}:${USERNAME} ${APP_FOLDER}

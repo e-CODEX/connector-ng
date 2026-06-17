@@ -10,4 +10,4 @@
 # You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
 #
 
-exec java -jar ./bin/connector-ng.jar --spring.config.location=./config/
+exec java -Dloader.path=./lib -jar ./bin/connector-ng.jar --spring.config.location=./config/

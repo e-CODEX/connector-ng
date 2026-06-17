@@ -61,9 +61,32 @@ val copyDocumentation by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("connector-distribution/documentation"))
 }
 
+
+val copyJdbcDrivers by tasks.registering(Copy::class) {
+    description = "Copies JDBC drivers into the distribution lib directory"
+
+    val jdbcDriverNames = setOf("mysql", "mariadb", "postgresql", "ojdbc11")
+
+    var runtimeClasspath =
+        project(":connector-infrastructure").configurations.named("runtimeClasspath")
+    from(
+        runtimeClasspath.map { rc ->
+            rc.filter { file -> jdbcDriverNames.any { name -> file.name.startsWith(name) } }
+        }
+    )
+    into(layout.buildDirectory.dir("$standalonePath/lib"))
+}
+
 val prepareDistribution by tasks.registering {
     description = "Prepares the distribution directory"
-    dependsOn(copyBootJar, copyConfig, copyKeystores, copyScripts, copyDocumentation)
+    dependsOn(
+        copyBootJar,
+        copyConfig,
+        copyKeystores,
+        copyScripts,
+        copyDocumentation,
+        copyJdbcDrivers
+    )
 }
 
 tasks.register<Zip>("distributionZip") {

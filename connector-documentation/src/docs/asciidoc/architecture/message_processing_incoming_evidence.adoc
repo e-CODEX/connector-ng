@@ -1,7 +1,3 @@
-ifndef::basepath[]
-:basepath: {rootdir}
-endif::basepath[]
-
 ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
@@ -15,7 +11,7 @@ An incoming evidence message carries REM evidence XML (for example `DELIVERY` or
 
 The gateway submits messages to the connector via JMS on the gateway reception queue (`connector.queues.gateway-reception-queue`).
 
-[plantuml,incoming_evidence_1,format=svg]
+[plantuml, incoming_evidence_1, format=svg, opts=inline]
 ----
 @startuml
 
@@ -41,7 +37,7 @@ When the message has no business content but contains evidence payloads, it is t
 
 Confirmation messages are handled by `ConnectorInboundEvidenceMessageProcessorService` (aligned with the legacy `EvidenceMessageProcessor`).
 
-[plantuml,incoming_evidence_2,format=svg]
+[plantuml,incoming_evidence_2,format=svg, opts=inline]
 ----
 @startuml
 
@@ -94,7 +90,7 @@ These are handled by `ConnectorInboundMessagePipeline`, not by the confirmation 
 
 After processing, the confirmation message is submitted to the backend link partner with the backend routing context of the referenced business message.
 
-[plantuml,incoming_evidence_3,format=svg]
+[plantuml,incoming_evidence_3,format=svg, opts=inline]
 ----
 @startuml
 

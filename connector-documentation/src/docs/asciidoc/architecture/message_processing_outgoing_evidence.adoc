@@ -1,7 +1,3 @@
-ifndef::basepath[]
-:basepath: {rootdir}
-endif::basepath[]
-
 ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
@@ -15,7 +11,7 @@ This chapter describes how evidence is generated and submitted when triggered fr
 The backend can request evidence generation by submitting an evidence trigger message via the backend SOAP API.
 The trigger specifies the evidence type (for example `DELIVERY`) and references the original business message via `refToMessageId`.
 
-[plantuml,outgoing_evidence_1,format=svg]
+[plantuml,outgoing_evidence_1,format=svg, opts=inline]
 ----
 @startuml
 
@@ -45,7 +41,7 @@ The message is transformed from the SOAP transition model to the internal `Conne
 
 `ConnectorOutboundEvidenceTriggerListener` consumes trigger messages from the outbound evidence trigger queue and delegates to `ConnectorEvidenceTriggerProcessorService` (aligned with the legacy `EvidenceMessageProcessor` and `EvidenceTriggerStep`).
 
-[plantuml,outgoing_evidence_2,format=svg]
+[plantuml,outgoing_evidence_2,format=svg, opts=inline]
 ----
 @startuml
 
@@ -100,7 +96,7 @@ The confirmation message is submitted back to the backend via `ConnectorLinkSubm
 
 Evidence confirmation messages destined for the gateway are submitted through the gateway link client.
 
-[plantuml,outgoing_evidence_3,format=svg]
+[plantuml,outgoing_evidence_3,format=svg, opts=inline]
 ----
 @startuml
 

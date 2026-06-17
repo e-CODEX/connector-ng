@@ -5,6 +5,8 @@ plugins {
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
+val standalonePath = "connector-distribution/standalone"
+
 var bootstrapperJar: Provider<RegularFile> =
     project(":connector-bootstrapper")
         .tasks
@@ -14,26 +16,31 @@ var bootstrapperJar: Provider<RegularFile> =
             (task as AbstractArchiveTask).archiveFile
         }
 
+
 val copyBootJar by tasks.registering(Copy::class) {
+    description = "Copies the connector jar into the distribution directory"
     from(bootstrapperJar)
-    into(layout.buildDirectory.dir("connector-distribution/bin"))
+    into(layout.buildDirectory.dir("$standalonePath/bin"))
 }
 
 val copyConfig by tasks.registering(Copy::class) {
+    description = "Copies the connector configuration into the distribution directory"
     from("src/main/resources/config") {
         include("application.properties", "log4j2.xml", "banner.txt")
     }
-    into(layout.buildDirectory.dir("connector-distribution/config"))
+    into(layout.buildDirectory.dir("$standalonePath/config"))
 }
 
 val copyKeystores by tasks.registering(Copy::class) {
+    description = "Copies the connector sample keystores into the distribution directory"
     from("src/main/resources/config/keystores") {
         include("*.jks")
     }
-    into(layout.buildDirectory.dir("connector-distribution/config/keystores"))
+    into(layout.buildDirectory.dir("$standalonePath/config/keystores"))
 }
 
 val copyScripts by tasks.registering(Copy::class) {
+    description = "Copy the connector startup scripts into the distribution directory"
     from("src/main/resources/bin") {
         include("start.sh", "start.bat")
     }
@@ -42,14 +49,25 @@ val copyScripts by tasks.registering(Copy::class) {
             filePermissions { unix("rwxr-xr-x") }
         }
     }
-    into(layout.buildDirectory.dir("connector-distribution"))
+    into(layout.buildDirectory.dir(standalonePath))
+}
+
+val copyDocumentation by tasks.registering(Copy::class) {
+    description = "Copy the connector documentation into the distribution directory"
+    dependsOn(project(":connector-documentation").tasks.named("build"))
+    from(project(":connector-documentation").layout.buildDirectory.dir("docs")) {
+        exclude("**/.asciidoctor/**")
+    }
+    into(layout.buildDirectory.dir("connector-distribution/documentation"))
 }
 
 val prepareDistribution by tasks.registering {
-    dependsOn(copyBootJar, copyConfig, copyKeystores, copyScripts)
+    description = "Prepares the distribution directory"
+    dependsOn(copyBootJar, copyConfig, copyKeystores, copyScripts, copyDocumentation)
 }
 
 tasks.register<Zip>("distributionZip") {
+    description = "Creates a zip file containing the connector distribution"
     dependsOn(prepareDistribution)
     from(layout.buildDirectory.dir("connector-distribution"))
     archiveFileName.set("connector-distribution-${version}.zip")

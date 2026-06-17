@@ -12,7 +12,6 @@ allprojects {
 
     repositories {
         mavenCentral()
-
         maven {
             url = uri("https://build.shibboleth.net/maven/releases/")
         }

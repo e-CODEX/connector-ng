@@ -1,7 +1,3 @@
-ifndef::basepath[]
-:basepath: {rootdir}
-endif::basepath[]
-
 ifndef::header[]
 :header: header
 :toc: left

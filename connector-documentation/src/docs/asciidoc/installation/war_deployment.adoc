@@ -5,8 +5,8 @@ include::{basepath}/header.adoc[]
 endif::header[]
 
 
-[[standalone-install]]
-= Standalone Deployment
+[[war-install]]
+= WAR Deployment
 
 Use this option when you already have a database, a message broker, and file storage running separately.
 

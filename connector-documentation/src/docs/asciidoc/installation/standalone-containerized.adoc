@@ -1,0 +1,152 @@
+:basepath: ..
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+[[docker-install]]
+= Standalone Deployment — Containerized (Docker)
+
+== Prerequisites
+
+=== Docker Engine and Docker Compose
+The Connector runs as a Docker container, so Docker Engine and Docker Compose must be installed on the host machine.
+
+To verify your installation:
+[source,bash]
+----
+docker --version
+docker compose version
+----
+Supported versions: Docker Engine **24 or later**, Docker Compose **2.x or later**.
+
+=== Connector NG Image
+The Connector NG is distributed as a Docker image hosted on the e-CODEX repository. You must have access to the repository and pull the image before running the stack.
+
+=== Database
+The Connector NG uses a relational database to store message state and processing history. An empty schema and a dedicated database user must be created before the first start — the Connector NG creates its own tables automatically.
+
+Supported DBMS:
+* MySQL 8 or higher
+* MariaDB 10.6 or higher
+* PostgreSQL 14 or higher
+* Oracle 19c or higher
+
+=== Message Broker — Apache ActiveMQ Classic
+The Connector NG exchanges messages with the Gateway through a JMS message broker. Apache ActiveMQ Classic **6.x** must be installed, running, and reachable on its TCP port (default: 61616).
+
+=== File Storage — S3-Compatible
+Message attachments are stored in an S3-compatible object store. A dedicated bucket must be created and credentials provided to the Connector NG. **MinIO** or any enterprise S3 storage solution is supported.
+
+=== e-CODEX Gateway
+The Connector NG acts as a bridge between your backend and an e-CODEX Gateway. The Gateway must be installed, configured, and network-reachable before the Connector is started.
+
+== Steps
+
+=== Step 1 — Pull the Connector Image
+Pull the Connector image from the e-CODEX repository:
+[source,bash]
+----
+docker pull scm.ecodex.eu/docker/connector-ng:latest
+----
+
+To verify the image is available locally:
+[source,bash]
+----
+docker images | grep connector
+----
+
+=== Step 2 — Configure the Environment
+
+[TIP]
+====
+For more information about these variables, check the link:../configuration/index.adoc[configuration page, window=_self].
+====
+
+Create a file named `docker.env` in your working directory. This file provides the Connector with the connection details for each external service.
+
+.docker.env
+[source,properties]
+----
+# Database
+DB_USERNAME=connector
+DB_PASSWORD=<your_password>
+DB_URL=jdbc:mysql://<db-host>:<db-port>/connector
+DB_DRIVER_CLASSNAME=com.mysql.cj.jdbc.MysqlXADataSource
+DB_DIALECT=org.hibernate.dialect.MySQLDialect
+
+# File storage (S3 / MinIO)
+S3_ACCESS_KEY=<access_key>
+S3_SECRET_KEY=<secret_key>
+S3_REGION=us-east-1
+S3_BUCKET=attachments
+S3_ENDPOINT=http://<s3-host>:<s3-port>
+
+# Temporary files
+TEMP_DIR_LOCATION=/app/temp
+
+# Message broker (ActiveMQ)
+BROKER_URL=tcp://<activemq-host>:61616
+BROKER_USER=<broker_user>
+BROKER_PASSWORD=<broker_password>
+----
+
+=== Step 3 — Set up the Certificates
+The Connector communicates with both the Gateway and the backend using mutual TLS. Create a `config/keystores/` folder and place the following files inside:
+
+* `gwlink-keystore.jks` — private key used to sign messages sent to the Gateway
+* `gwlink-truststore.jks` — trusted certificates of the Gateway
+* `backend-keystore.jks` — private key used to sign messages sent to the backend
+* `backend-truststore.jks` — trusted certificates of the backend
+
+Then create `config/application.properties` to reference the keystores and their passwords:
+
+[source,properties]
+----
+# Backend link
+connector.link.backend[0].link-config.properties.endpoint.key-store.path=file:./config/keystores/backend-keystore.jks
+connector.link.backend[0].link-config.properties.endpoint.key-store.password=<your_password>
+connector.link.backend[0].link-config.properties.endpoint.private-key.alias=<key_alias>
+connector.link.backend[0].link-config.properties.endpoint.private-key.password=<your_password>
+connector.link.backend[0].link-config.properties.endpoint.trust-store.path=file:./config/keystores/backend-truststore.jks
+connector.link.backend[0].link-config.properties.endpoint.trust-store.password=<your_password>
+----
+
+=== Step 4 — Run the Containerized Connector
+Run the Docker container by mounting your local configurations directory to the application container:
+
+[source,bash]
+----
+docker run -d \
+  --name connector-ng \
+  --env-file docker.env \
+  -p 30000:30000 \
+  -v ./config:/app/config \
+  scm.ecodex.eu/docker/connector-ng:latest
+----
+
+To watch the live log output stream:
+[source,bash]
+----
+docker logs -f connector-ng
+----
+
+=== Step 5 — Verify Runtime Status
+[source,bash]
+----
+curl http://localhost:30000/actuator/health
+----
+
+Expected payload response:
+[source,json]
+----
+{"status":"UP"}
+----
+
+Once running, the following endpoints are available:
+[cols="2,3", options="header"]
+|===
+| Endpoint | URL
+| REST API | `http://localhost:30000`
+| Swagger UI | `http://localhost:30000/swagger-ui/index.html`
+|===

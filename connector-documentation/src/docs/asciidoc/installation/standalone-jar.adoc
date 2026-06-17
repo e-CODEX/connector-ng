@@ -1,0 +1,150 @@
+:basepath: ..
+
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+[[jar-install]]
+= Standalone Deployment — Non-Containerized (JAR Execution)
+
+Use this installation option when hosting the connector natively outside of any container runtime engine.
+
+== Prerequisites
+
+[cols="1,1,3", options="header"]
+|===
+| Software | Version | Notes
+| Java (JRE) | 21 or later | Only the runtime environment is needed, not the full JDK distribution
+| Database | MySQL 8, MariaDB, PostgreSQL, or Oracle | An empty database schema and a dedicated user role are required
+| Apache ActiveMQ Classic | 6.x | Required for message queuing workflows with the e-CODEX Gateway
+| File storage | Amazon S3 or MinIO | Required to store raw binary message attachments
+|===
+
+To check your target server Java version:
+[source,bash]
+----
+java -version
+----
+The console runtime execution output must yield version `21.x.x` or higher.
+
+== Steps
+
+=== Step 1 — Obtain the Runnable Artifact
+
+* **Option A — Release Download:** Pull down `connector-bootstrapper-<version>.jar` from the project repository releases page.
+* **Option B — Compilation From Source:** Run the following command locally:
++
+[source,bash]
+----
+./gradlew :connector-bootstrapper:bootJar
+----
+The output executable package will be generated inside `connector-bootstrapper/build/libs/`.
+
+=== Step 2 — Create the Target Deployment Directory Structure
+Set up the following layout configuration under your native operational deployment root folder:
+
+----
+bin/
+└── connector-ng.jar
+config/
+├── application.properties
+└── keystores/
+    ├── gwlink-keystore.jks
+    ├── gwlink-truststore.jks
+    ├── backend-keystore.jks
+    └── backend-truststore.jks
+logs/
+----
+
+[IMPORTANT]
+====
+The system daemon user execution process running the application binary must possess **read privileges** for the `./config/` directory structure and **write privileges** for both `./logs/` and runtime `./temp/` file tracks.
+====
+
+=== Step 3 — Provision Spring Boot Configuration Properties
+Populate your configuration template directly inside `./config/application.properties`.
+
+[TIP]
+====
+A complete reference of all available enterprise business parameters can be found inside the link:../configuration/index.adoc[configuration page, window=_self].
+====
+
+.config/application.properties
+[source,properties]
+----
+# Application Context Routing
+spring.application.name=e-CODEX Connector NG
+server.port=30000
+server.address=0.0.0.0
+
+# Enterprise Persistence Layer
+spring.datasource.url=jdbc:mysql://<db-host>:3306/connector
+spring.datasource.username=connector
+spring.datasource.password=<your_password>
+spring.datasource.agroal.driver-class-name=com.mysql.cj.jdbc.MysqlXADataSource
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+
+# ActiveMQ Messaging Middleware Broker
+spring.activemq.broker-url=tcp://<activemq-host>:61616
+spring.activemq.user=<broker_user>
+spring.activemq.password=<broker_password>
+
+# S3 File Attachment Object Storage Provider
+connector.file.storage.s3.enable=true
+connector.file.storage.s3.endpoint=http://<minio-host>:9000
+connector.file.storage.s3.bucket=attachments
+connector.file.storage.s3.region=us-east-1
+connector.file.storage.s3.access-key=<access_key>
+connector.file.storage.s3.secret-key=<secret_key>
+
+# Multi-part Payload I/O Storage
+spring.servlet.multipart.location=<path_to_temp_dir>
+
+# Gateway Mutual TLS Connection Bindings
+connector.link.gateway.link-config.properties.endpoint.key-store.path=file:./config/keystores/gwlink-keystore.jks
+connector.link.gateway.link-config.properties.endpoint.key-store.password=<your_password>
+connector.link.gateway.link-config.properties.endpoint.private-key.alias=<key_alias>
+connector.link.gateway.link-config.properties.endpoint.private-key.password=<your_password>
+connector.link.gateway.link-config.properties.endpoint.trust-store.path=file:./config/keystores/gwlink-truststore.jks
+connector.link.gateway.link-config.properties.endpoint.trust-store.password=<your_password>
+
+# Backend Mutual TLS Connection Bindings
+connector.link.backend[0].link-config.properties.endpoint.key-store.path=file:./config/keystores/backend-keystore.jks
+connector.link.backend[0].link-config.properties.endpoint.key-store.password=<your_password>
+connector.link.backend[0].link-config.properties.endpoint.private-key.alias=<key_alias>
+connector.link.backend[0].link-config.properties.endpoint.private-key.password=<your_password>
+connector.link.backend[0].link-config.properties.endpoint.trust-store.path=file:./config/keystores/backend-truststore.jks
+connector.link.backend[0].link-config.properties.endpoint.trust-store.password=<your_password>
+----
+
+=== Step 4 — Run the Standalone Native App
+To start the application and point explicitly to your Spring context properties directory location, execute the following command:
+
+[source,bash]
+----
+exec java -jar ./bin/connector-ng.jar --spring.config.location=./config/
+----
+
+To spin up the service detached in the background context layer:
+[source,bash]
+----
+nohup java -jar ./bin/connector-ng.jar --spring.config.location=./config/ > logs/connector.log 2>&1 &
+----
+
+To review the rolling console logs output live:
+[source,bash]
+----
+tail -f logs/connector.log
+----
+
+=== Step 5 — Runtime Health Validation
+[source,bash]
+----
+curl http://localhost:30000/actuator/health
+----
+
+Expected health payload return structure:
+[source,json]
+----
+{"status":"UP"}
+----

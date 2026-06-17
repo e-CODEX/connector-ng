@@ -6,6 +6,6 @@ endif::header[]
 
 include::{basepath}/installation/installation_guide.adoc[leveloffset=+1]
 
-include::{basepath}/installation/containerized_deployment.adoc[leveloffset=+1]
-
-include::{basepath}/installation/standalone_deployment.adoc[leveloffset=+1]
+include::{basepath}/installation/standalone-containerized.adoc[leveloffset=+1]
+include::{basepath}/installation/standalone-jar.adoc[leveloffset=+1]
+include::{basepath}/installation/war_deployment.adoc[leveloffset=+1]

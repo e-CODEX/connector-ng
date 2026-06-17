@@ -23,9 +23,15 @@ the proper installation of other building blocks is required.
 
 The description of the e-CODEX building blocks and additional information on the e-CODEX system can be found on the link:https://www.ecodex.eu/tech[e-CODEX website].
 
-== Product distribution
+== Product Distribution
 
-There are two ways to install the new **Connector**:
+There are two main distribution flavors available to install the new **Connector**, depending on your infrastructure architecture:
 
-* <<docker-install,Containerized distribution>> – **Recommended.** The containerized service can be installed as an image on any suitable hosting platform. **eu-LISA provides full support**, including regular updates, security patches, assistance with gateway interaction, and access to eu-LISA managed testing services.
-* <<standalone-install,Standalone distribution>> – For specific environments where you manage the services yourself. This is distributed **"as-is"**. The user is fully responsible for hosting, operation, manual updates, and security patching of their instance.
+=== 1. Standalone Deployment
+The application runs as an autonomous service with an embedded web server. It can be deployed in two ways:
+
+* <<docker-install,Containerized - (Docker)>> – **Recommended.** The containerized service can be installed as an image on any suitable hosting platform. **eu-LISA provides full support**, including regular updates, security patches, assistance with gateway interaction, and access to eu-LISA managed testing services.
+* <<jar-install,Native - (Executable JAR)>> – For restricted environments where containerization is not an option. The user executes the runnable JAR directly on the host machine using Java 21.
+
+=== 2. Application Server Deployment
+* <<war-install,WAR distribution>> – Designed for specific environments where you deploy the application package into an existing external web server (such as Apache Tomcat). This flavor is distributed **"as-is"**. The user is fully responsible for hosting, operation, manual updates, and security patching of their instance.

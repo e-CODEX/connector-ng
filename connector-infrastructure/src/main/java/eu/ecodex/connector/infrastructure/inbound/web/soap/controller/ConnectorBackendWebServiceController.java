@@ -140,14 +140,19 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     @Override
     public ListPendingMessageIdsResponse listPendingMessageIds(
             EmptyRequestType listPendingMessageIdsRequest) {
-        // TODO current cn is fake, retrieve the certificate dn from user principal
-        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
-        var response = new ListPendingMessageIdsResponse();
-        response.getMessageTransportIds().addAll(
-                listPendingMessageIdsService.execute(backendClientName)
-        );
+        try {
+            var backendClientName = getBackendClientName();
+            var response = new ListPendingMessageIdsResponse();
+            response.getMessageTransportIds().addAll(
+                    listPendingMessageIdsService.execute(backendClientName)
+            );
 
-        return response;
+            return response;
+        } catch (Exception e) {
+            log.error("Error listing pending messages from the connector via SOAP endpoint", e);
+
+            throw e;
+        }
     }
 
     @Override
@@ -170,26 +175,32 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
     @Override
     public DomibusConnectorMessagesType requestMessages(EmptyRequestType requestMessagesRequest) {
-        // TODO current cn is fake, retrieve the certificate dn from user principal
-        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
-        var messages = this.listPendingMessagesService.execute(backendClientName);
-        var legacyMessages = messages.stream()
-                                     .map(this.legacyMessageHelper::convertMessage)
-                                     .toList();
-        var response = new DomibusConnectorMessagesType();
-        response.getMessages().addAll(legacyMessages);
+        try {
+            var backendClientName = getBackendClientName();
+            var messages = this.listPendingMessagesService.execute(backendClientName);
+            var legacyMessages = messages.stream()
+                                         .map(this.legacyMessageHelper::convertMessage)
+                                         .toList();
 
-        // add post invoke message processor
-        var messageContext = webServiceContext.getMessageContext();
-        var wrappedMessageContext = (WrappedMessageContext) messageContext;
-        var interceptor = new ProcessMessagesAfterDownload(
-                backendClientName,
-                changePendingMessagesStatusService
+            var response = new DomibusConnectorMessagesType();
+            response.getMessages().addAll(legacyMessages);
 
-        );
-        wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
+            // add post invoke message processor
+            var messageContext = webServiceContext.getMessageContext();
+            var wrappedMessageContext = (WrappedMessageContext) messageContext;
+            var interceptor = new ProcessMessagesAfterDownload(
+                    backendClientName,
+                    changePendingMessagesStatusService
 
-        return response;
+            );
+            wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
+
+            return response;
+        } catch (Exception e) {
+            log.error("Error requesting messages from the connector via SOAP endpoint", e);
+
+            throw e;
+        }
     }
 
     @Override
@@ -198,8 +209,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var answer = new DomibsConnectorAcknowledgementType();
 
         try {
-            // TODO current cn is fake, retrieve the certificate dn from user principal
-            var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
+            var backendClientName = getBackendClientName();
 
             final ConnectorMessage parsedMessage;
             if (MessageHelpers.isEvidenceTriggerRequest(submitMessageRequest)) {
@@ -229,7 +239,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             answer.setMessageId(createdMessage.identifier());
             answer.setResult(true);
         } catch (Exception e) {
-            log.error("error submitting message to the connector via SOAP endpoint", e);
+            log.error("Error submitting message to the connector via SOAP endpoint", e);
             answer.setResult(false);
             answer.setResultMessage(e.getMessage());
         }
@@ -362,5 +372,37 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                                               .details(error.getErrorDetails())
                                               .source(error.getErrorSource())
                                               .build()).toList();
+    }
+
+    private String getBackendClientName() {
+        var userPrincipal = webServiceContext.getUserPrincipal();
+        var certificateDn = userPrincipal != null ? userPrincipal.getName() : null;
+
+        if (userPrincipal == null || !StringUtils.hasLength(certificateDn)) {
+            var error = String.format(
+                    "Cannot handle request because userPrincipal is [%s] the certificate DN "
+                            + "is [%s].",
+                    userPrincipal,
+                    certificateDn
+            );
+            log.error(error);
+            throw new IllegalStateException(error);
+        }
+
+        var backendClientName = this.backendClientVerifierService.getBackendClient(certificateDn);
+
+        if (backendClientName == null) {
+            var error = String.format(
+                    "Cannot handle request because the certificate DN [%s] is not registered as "
+                            + "backend client.",
+                    certificateDn
+            );
+            log.error(error);
+            throw new IllegalStateException(error);
+        }
+
+        log.debug("Link partner name is [{}]", backendClientName);
+
+        return backendClientName;
     }
 }

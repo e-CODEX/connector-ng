@@ -9,3 +9,8 @@ jobs:
       java-version: 21
       maven-repo-id: 'artifactory'
       gradle-parameters: '-Partifactory.repo.id=artifactory'
+  docker:
+    uses: e-CODEX/workflows/.github/workflows/docker-build-push.yaml@main
+    with:
+      image-name: connector-ng
+      registry: scm.ecodex.eu/ecodex-docker-snapshots

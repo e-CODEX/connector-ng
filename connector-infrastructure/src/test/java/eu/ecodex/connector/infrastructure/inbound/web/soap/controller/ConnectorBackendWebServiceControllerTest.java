@@ -43,6 +43,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMe
 import eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor.ProcessMessagesAfterDownload;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import jakarta.xml.ws.WebServiceContext;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
 import org.apache.cxf.interceptor.InterceptorChain;
 import org.apache.cxf.jaxws.context.WrappedMessageContext;
@@ -111,6 +112,9 @@ public class ConnectorBackendWebServiceControllerTest {
 
     @Test
     void should_return_successful_ack_when_submitting_message_from_backend_to_the_connector() {
+        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
+        when(backendClientVerifierService.getBackendClient(any()))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(uploadAttachmentsService.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
         // TODO set appropriate response
@@ -133,6 +137,9 @@ public class ConnectorBackendWebServiceControllerTest {
 
     @Test
     void should_return_failure_ack_when_submitting_message_from_backend_to_the_connector_if_an_exception_occurs() {
+        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
+        when(backendClientVerifierService.getBackendClient(any()))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(uploadAttachmentsService.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
@@ -152,9 +159,10 @@ public class ConnectorBackendWebServiceControllerTest {
 
     @Test
     void should_list_pending_messages_identifiers_successfully() {
-        when(listPendingMessageIdsService.execute(any()))
-                .thenReturn(List.of(
-                        TRANSPORT_ID));
+        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
+        when(backendClientVerifierService.getBackendClient(any()))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+        when(listPendingMessageIdsService.execute(any())).thenReturn(List.of(TRANSPORT_ID));
 
         var response = backendWebService.listPendingMessageIds(new EmptyRequestType());
 
@@ -216,6 +224,7 @@ public class ConnectorBackendWebServiceControllerTest {
                 connectorMessage));
         when(backendClientVerifierService.getBackendClient(any()))
                 .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
         when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
         when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
         when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);

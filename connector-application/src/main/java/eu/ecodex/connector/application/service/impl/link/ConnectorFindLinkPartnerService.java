@@ -33,7 +33,8 @@ public class ConnectorFindLinkPartnerService implements ConnectorFindLinkPartner
     @Override
     public ConnectorLinkPartner findByCertificateDn(@NonNull String certificateDn) {
         log.debug("Retrieving link partner by certificate DN: {}", certificateDn);
-        var linkPartner = this.linkPartnerRepository.findByCertificateDn(certificateDn);
+        var linkPartner = this.linkPartnerRepository.findByCertificateDn(
+                certificateDn.toLowerCase());
 
         if (linkPartner == null) {
             throw new ConnectorLinkPartnerException(

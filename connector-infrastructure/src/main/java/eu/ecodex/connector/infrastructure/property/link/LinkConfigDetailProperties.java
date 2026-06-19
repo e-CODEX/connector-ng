@@ -18,7 +18,7 @@ import lombok.Setter;
  *
  * <p>These properties define implementation-specific settings used by the link implementation.
  * Some settings apply only to gateway deployments, while others configure SOAP communication and
- * logging behaviour.
+ * logging behavior.
  */
 @Getter
 @Setter

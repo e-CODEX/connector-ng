@@ -2,92 +2,133 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-== REM Evidence Configuration
+= REM Evidence Configuration
 
-The connector generates ETSI-REM evidences for message lifecycle events.
+The connector generates ETSI-REM evidence for message lifecycle events.
 Generated evidences are electronically signed (XAdES) and include mandatory issuer metadata.
 
 Configuration is provided via `application.properties` under the `connector.evidences.*` prefix.
 
-=== Signature configuration
+== Signature configuration
 
 Properties under `connector.evidences.signature.*` control how REM evidence XML is signed.
 
 .ETSI-REM Evidences Signature Configuration Properties
+[cols="35,40,10,15"]
 |===
-| Property | Description | Example
+| Property | Description | Optional | Example
 
 | `connector.evidences.signature.payload-digest-algorithm`
 | Digest algorithm used when hashing the business payload referenced by the evidence.
+| No
 | `SHA256`
 
 | `connector.evidences.signature.keystore.path`
 | Classpath or filesystem path to the keystore holding the signing private key.
+| No
 | `classpath:keystores/connector-keystore.jks`
 
 | `connector.evidences.signature.keystore.password`
 | Password for the keystore.
+| No
 | *(secret)*
 
 | `connector.evidences.signature.keystore.type`
 | Keystore type (for example `JKS` or `PKCS12`).
-| `JKS`
+| Yes
+| By default, set to `JKS`
 
 | `connector.evidences.signature.private-key.alias`
 | Alias of the private key within the keystore. The corresponding public key must be shared with communication partners.
+| No
 | `connector_blue`
 
 | `connector.evidences.signature.private-key.password`
 | Password to unlock the private key entry.
+| No
 | *(secret)*
 
 |===
 
-=== Issuer configuration
+.Configuration Example
+[source,properties]
+----
+connector.evidences.signature.keystore.path=classpath:keystores/connector-keystore.jks
+connector.evidences.signature.keystore.password=12345
+connector.evidences.signature.keystore.type=JKS
+connector.evidences.signature.private-key.alias=connector_blue
+connector.evidences.signature.private-key.password=12345
+connector.evidences.signature.payload-digest-algorithm=SHA256
+----
+
+== Issuer configuration
 
 Properties under `connector.evidences.issuer.*` are embedded into generated REM evidences.
 
 .Issuer Configuration Properties
+[cols="35,40,10,15"]
 |===
-| Property | Description | Example
+| Property | Description | Optional | Example
 
 | `connector.evidences.issuer.postal-address.street`
 | Issuer street address (mandatory for evidence building).
+| No
 | `Unknown Street 1`
 
 | `connector.evidences.issuer.postal-address.locality`
 | Issuer locality.
+| No
 | `Unknown`
 
 | `connector.evidences.issuer.postal-address.zip-code`
 | Issuer postal code.
+| No
 | `0000`
 
 | `connector.evidences.issuer.postal-address.country`
 | Issuer country.
+| No
 | `EU`
 
 | `connector.evidences.issuer.as4-party.name`
-| AS4 party name of the gateway over which evidences are sent (home party in PMode configuration).
+| AS4 party name of the gateway through which evidences are sent (home party in PMode configuration).
+| No
 | `Connector Gateway`
 
 | `connector.evidences.issuer.as4-party.endpoint-address`
 | AS4 endpoint address of the evidence issuer gateway.
+| No
 | `mailto:gateway@connector.example`
 
 |===
 
-=== Message processing options
+.Configuration Example
+[source,properties]
+----
+connector.evidences.issuer.as4-party.name=Connector NG
+connector.evidences.issuer.as4-party.endpoint-address=mailto:gateway@connector.example
 
+connector.evidences.issuer.postal-address.street=Unknown Street 1
+connector.evidences.issuer.postal-address.locality=Unknown
+connector.evidences.issuer.postal-address.zip-code=0000
+connector.evidences.issuer.postal-address.country=EU
+----
+
+== Message processing options
+
+.Evidence Message Processing Configuration
+[cols="35,40,10,15"]
 |===
-| Property | Description | Default
+| Property | Description | Optional | Default
 
 | `connector.message-processing.send-generated-evidences-to-backend`
 | When `true`, generated evidences are also forwarded to the backend after submission to the gateway.
+| Yes
 | `true`
 
 | `connector.queues.outbound-evidence-trigger-queue`
-| JMS queue for outbound evidence trigger messages received from the backend.
-| `connector.queues.outbound-evidence-trigger-queue`
+| JMS queue for outbound evidence triggers messages received from the backend.
+| Yes
+| By default, set to `connector.queues.outbound-evidence-trigger-queue`
 
 |===

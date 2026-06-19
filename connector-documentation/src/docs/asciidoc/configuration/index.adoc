@@ -2,6 +2,26 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-== e-CODEX Connector Configuration
+= e-CODEX Connector Configuration
 
-include::{basepath}/configuration/evidence_configuration.adoc[leveloffset=+1]
+include::{basepath}/configuration/message-processing-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/dss-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/container-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/business-document-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/evidence-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/s3-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/link-partner-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/backend-routing-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/connector-queue-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/gateway-queue-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/gateway-configuration.adoc[leveloffset=+1]

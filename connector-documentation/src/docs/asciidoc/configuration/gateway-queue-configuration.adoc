@@ -1,0 +1,53 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Gateway Queue Configuration
+
+This configuration defines the messaging queues used for communication between the connector and the external gateway infrastructure.
+
+These queues are commonly used in JMS-based integrations with gateway platforms such as:
+
+* Domibus
+* AS4 gateways
+* ebMS messaging systems
+* JMS transport middleware
+
+The gateway queues handle:
+
+* Outbound message submission
+* Gateway response handling
+* Inbound message reception
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `connector.queues.*` prefix.
+
+.Gateway Queue Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.queues.gateway-submission-queue`
+| JMS queue used to submit outbound messages into the Domibus gateway for transmission over AS4. Maps to Domibus's standard backend "in" queue.
+| Yes
+| By default, set to `domibus.backend.jms.inQueue`
+
+| `connector.queues.gateway-submission-reply-queue`
+| JMS queue on which the connector receives submission acknowledgements/replies from the gateway (e.g., confirmation that a submitted message was accepted or rejected by Domibus). Maps to Domibus's standard backend "reply" queue.
+| Yes
+| By default, set to `domibus.backend.jms.replyQueue`
+
+| `connector.queues.gateway-reception-queue`
+| JMS queue on which the connector receives inbound messages delivered by the gateway after they arrive over AS4 from a remote party. Maps to Domibus's standard backend "out" queue.
+| Yes
+| By default, set to `domibus.backend.jms.outQueue`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.queues.gateway-submission-queue=domibus.backend.jms.inQueue
+connector.queues.gateway-submission-reply-queue=domibus.backend.jms.replyQueue
+connector.queues.gateway-reception-queue=domibus.backend.jms.outQueue
+----

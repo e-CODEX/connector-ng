@@ -1,0 +1,72 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= S3 File Storage Configuration
+
+This configuration defines the connector file storage server using an S3-compatible object storage service.
+
+The storage configuration is typically used for:
+
+* Message business content
+* Message business document
+* Message attachment (Large files included)
+* ASIC-S container
+* Temporary file storage
+
+The connector supports S3-compatible providers such as:
+
+* Amazon S3
+* MinIO
+* Other compatible object storage services
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `connector.routing.*` prefix.
+
+.S3 File Storage Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.file.storage.s3.enable`
+| Master switch enabling S3-backed file storage. When true, the connector uses S3 as its file storage backend instead of whatever default/local provider would otherwise be used.
+| No
+| `true/false`
+
+| `connector.file.storage.s3.secret-key`
+| S3 secret access key.
+| No
+| `*secret*`
+
+| `connector.file.storage.s3.access-key`
+| S3 access key ID.
+| No
+| `*secret*`
+
+| `connector.file.storage.s3.region`
+| AWS region the bucket lives in.
+| No
+| `eu-west-1`
+
+| `connector.file.storage.s3.bucket`
+| Name of the S3 bucket used to store files.
+| No
+| `attachments`
+
+| `connector.file.storage.s3.endpoint`
+| S3 endpoint URL. Only needed when targeting a non-default AWS endpoint — e.g., a self-hosted S3-compatible service like MinIO or a specific regional/VPC endpoint.
+| No
+| `attachments`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.file.storage.s3.enable=true
+connector.file.storage.s3.secret-key=secret
+connector.file.storage.s3.access-key=key
+connector.file.storage.s3.region=eu-west-1
+connector.file.storage.s3.bucket=attachments
+connector.file.storage.s3.endpoint=https://localhost:port
+----

@@ -1,0 +1,97 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Gateway JMS Broker Configuration
+
+By default, the Domibus Gateway embeds an Apache ActiveMQ broker and uses the provided internal broker configuration for JMS messaging. In this new version of the connector, the Domibus Gateway and the connector are configured to use a shared external JMS broker instead of the embedded one. Consequently, the Domibus Gateway must be explicitly configured with the connection parameters of the external broker( URL, credentials, and related JMS settings) to establish connectivity to the shared messaging infrastructure
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `activeMQ.*` prefix.
+
+.Gateway Queue Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description | Optional | Example
+
+| `activeMQ.broker.host`
+| Hostname (or container/service name) of the ActiveMQ broker the connector/Domibus connects to.
+| No
+| `https://external-active-mq-endpoint`
+
+| `activeMQ.brokerName`
+| Logical name of the JMS broker. Multiple comma-separated names can be defined for a broker network; the count must match the number of JMX service URLs in `activeMQ.JMXURL`. ActiveMQ recommends broker names be unique across the network.
+| No
+| `activemq-domibus`
+
+| `activeMQ.embedded.configurationFile`
+| Path to the embedded ActiveMQ broker's configuration file (XML). Only used when running an *embedded* broker; should be removed/left empty when connecting to an *external* broker, as is the case here (value is empty, host points to a separate `blue-activemq` service).
+| Yes
+| By default, set to `file:///${domibus.config.location}/internal/activemq.xml`
+
+| `activeMQ.JMXURL`
+| Service URL(s) for the JMX MBeanServer(s) exposed by the broker, used for monitoring/management. Built from the broker host and JMX connector port; one or more comma-separated URLs, count must match `activeMQ.brokerName`.
+| No
+| `service:jmx:rmi:///jndi/rmi://${activeMQ.broker.host}:${activeMQ.connectorPort}/jmxrmi`
+
+| `activeMQ.connectorPort`
+| Port the JMX connector listens on for management connections to the broker.
+| No
+| Set By default to: `1099`
+
+| `activeMQ.transportConnector.uri`
+| Connection URI clients use to connect to the broker over TCP for actual message traffic (as opposed to the JMX management port above).
+| No
+| `tcp://${activeMQ.broker.host}:port`
+
+| `activeMQ.username`
+| Username used to authenticate to the ActiveMQ broker.
+| No
+| `*secret*`
+
+| `activeMQ.password`
+| Password for the broker username above.
+| No
+| `*secret*`
+
+| `activeMQ.persistent`
+| Whether message persistence is enabled on the broker (messages survive broker restarts). Disabling improves throughput but risks message loss on restart/crash.
+| No
+| By default, set to `true`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+#The host of the JMS broker
+activeMQ.broker.host=http://blue-activemq
+
+#The name of the JMS broker; one or more names can be defined, comma-separated (must match the number of JMX service URLs,
+#as defined in activeMQ.JMXURL)
+#ActiveMQ recommends that the broker name must be unique in the network
+activeMQ.brokerName=activemq-domibus
+
+#The configuration file of the embedded ActiveMQ broker. In case an external broker is used, this property is not needed, and it should be removed
+#activeMQ.embedded.configurationFile=file:///${domibus.config.location}/internal/activemq.xml
+activeMQ.embedded.configurationFile=
+
+#The service URL of the MBeanServers; one or more URLs can be defined, comma-separated (must match the number of broker names,
+#as defined in activeMQ.brokerName)
+activeMQ.JMXURL=service:jmx:rmi:///jndi/rmi://${activeMQ.broker.host}:${activeMQ.connectorPort}/jmxrmi
+
+#The port that the JMX connector will use for connecting to ActiveMQ
+activeMQ.connectorPort=1099
+
+#The connection URI that the clients can use to connect to an ActiveMQ broker using a TCP socket
+activeMQ.transportConnector.uri=tcp://${activeMQ.broker.host}:61616
+
+#The username that is allowed to connect to the ActiveMQ broker
+activeMQ.username=admin
+
+#THe password of the username defined in the activeMQ.username property
+activeMQ.password=admin
+
+#The persistence enabled flag
+activeMQ.persistent=true
+----

@@ -1,0 +1,180 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= DSS Tools configuration
+
+The connector uses the link:../architecture/dss_tools.html#dss-tools[DSS library]. Which can be configured:
+
+== Trusted list configurations
+
+The connector supports the use of trusted lists as a trust source for certificate validation. Trusted lists can currently **only** be configured via the (spring environment) property file.
+
+=== Basic configuration
+==== Cache configuration
+The basic dss configuration includes the location of tl cache. This cache is a local filesystem cache where DSS persists downloaded/parsed Trusted List (TL) and List of Trusted Lists (LOTL) data, so it doesn't have to re-fetch everything on every application restart.
+
+Configuration is provided via `application.properties` under the `connector.dss.cache.*` prefix.
+
+.DSS Cache Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.dss.cache.location`
+| Local filesystem cache where DSS persists downloaded/parsed Trusted List (TL) and List of Trusted Lists (LOTL) data, so it doesn't have to re-fetch everything on every application restart.
+| Yes
+| `file:./data/tlcache`
+
+| `connector.dss.cache.expiration`
+| Max age of the cached trust data before DSS treats it as stale and re-downloads from the sources configured below.
+Format: Spring Boot duration shorthand (e.g., "1d", "12h", "30m").
+| Yes
+| `1d`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+# cache configuration
+connector.dss.cache.location=file:./data/tlcache
+connector.dss.cache.expiration=1d
+----
+
+==== Proxy configuration
+For every connection by the dss tools a proxy can be configured. This proxy is used to
+
+* validate crl
+* use ocsp
+* download trust lists
+* connect to time stamp servers
+
+Configuration is provided via `application.properties` under the `connector.dss.proxy.*` prefix.
+
+.DSS Proxy Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description | Optional | Example
+
+| `connector.dss.proxy.http.host`
+| Hostname of the HTTP proxy server.
+| Yes
+| `proxy1.example.com`
+
+| `connector.dss.proxy.http.port`
+| Port of the HTTP proxy server.
+| Yes
+| `8080`
+
+| `connector.dss.proxy.https.host`
+| Hostname of the HTTPS proxy server.
+| Yes
+| `proxy1.example.com`
+
+| `connector.dss.proxy.https.port`
+| Port of the HTTPS proxy server.
+| Yes
+| `8080`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+# proxy configuration
+# this proxy is used for downloading tls lists, crl updates, ocsp updates
+connector.dss.proxy.http.host=proxy1.example.com
+connector.dss.proxy.http.port=8080
+connector.dss.proxy.https.host=proxy1.example.com
+connector.dss.proxy.https.port=8080
+----
+
+=== Example configuration of the EU-LOTL
+
+This configuration shows how the EU-LOTL is configured. Keep in mind that at this config **list1** is the name of the trust source: `connector.dss.trust-list-sources.**list1**.lotl-sources[*index*]`
+A trust source can contain multiple Lists of Trusted List (LOTL) or trusted lists (TL). The name of the trust source can be used for the business document validation configuration
+
+Configuration is provided via `application.properties` under the `connector.dss.trust-list-sources.*` prefix.
+
+.DSS EU-LOTL Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description | Optional | Example
+
+| `connector.dss.trust-list-sources.*key*.lotl-sources[*index*].lotl-url`
+| LOTL source: the EU master list that points to each member state's national Trusted List.
+| Yes
+| `https://ec.europa.eu/tools/lotl/eu-lotl.xml`
+
+| `connector.dss.trust-list-sources.*key*.lotl-sources[*index*].signing-certificates-announcement-uri`
+| URL of the Official Journal notice announcing the certificates used to verify the LOTL's own signature (the trust anchor for the LOTL).
+| Yes
+| `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG`
+
+| `connector.dss.trust-list-sources.eu.lotl-sources[0].pivot-support`
+| Enables pivot support, so DSS can follow historical LOTL "pivot" versions and keep trust anchors valid as the EU rotates LOTL signing certificates over time.
+| Yes
+| `true`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.dss.trust-list-sources.eu.lotl-sources[0].lotl-url=https://ec.europa.eu/tools/lotl/eu-lotl.xml
+connector.dss.trust-list-sources.eu.lotl-sources[0].signing-certificates-announcement-uri=https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG
+connector.dss.trust-list-sources.eu.lotl-sources[0].pivot-support=true
+----
+
+WARNING: Currently, the connector only updates the Trusted Lists during startup!
+
+=== Example configuration of the Time Stamp Servers
+Configuration is provided via `application.properties` under the `connector.dss.time-stamp-servers.*` prefix.
+
+.DSS Time Stamp Servers Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.dss.time-stamp-servers.*key*.url`
+| The actual TSA endpoint.
+| Yes
+| `http://dss.nowina.lu/pki-factory/tsa/good-tsa`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.dss.time-stamp-servers.t1.url=http://dss.nowina.lu/pki-factory/tsa/good-tsa
+connector.dss.time-stamp-servers.ee-good-tsa.url=http://dss.nowina.lu/pki-factory/tsa/ee-good-tsa
+----
+
+NOTE: Currently, timestamping is not used by the connector.
+
+== Full configuration example
+
+.Full Configuration Example
+[source,properties]
+----
+# Cache configuration
+connector.dss.cache.location=file:./data/tlcache
+connector.dss.cache.expiration=1d
+
+# Proxy configuration
+connector.dss.proxy.http.host=proxy1.example.com
+connector.dss.proxy.http.port=8080
+connector.dss.proxy.https.host=proxy1.example.com
+connector.dss.proxy.https.port=8080
+
+# LOTL source
+connector.dss.trust-list-sources.eu.lotl-sources[0].lotl-url=https://ec.europa.eu/tools/lotl/eu-lotl.xml
+connector.dss.trust-list-sources.eu.lotl-sources[0].signing-certificates-announcement-uri=https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG
+connector.dss.trust-list-sources.eu.lotl-sources[0].pivot-support=true
+connector.dss.trust-list-sources.eu.tl-sources[0].tl-url=https://www.signatur.rtr.at/currenttl.xml
+
+# Timestamp (TSA) servers
+connector.dss.time-stamp-servers.t1.url=http://dss.nowina.lu/pki-factory/tsa/good-tsa
+connector.dss.time-stamp-servers.ee-good-tsa.url=http://dss.nowina.lu/pki-factory/tsa/ee-good-tsa
+----

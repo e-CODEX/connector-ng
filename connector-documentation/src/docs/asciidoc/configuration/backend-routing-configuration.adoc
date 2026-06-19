@@ -1,0 +1,67 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Routing Rule Configuration
+
+This configuration defines the routing behavior used by the connector to determine to which backend system a message should be transported.
+
+Routing rules allow dynamic selection of backend destinations based on message metadata or content attributes.
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `connector.routing.*` prefix.
+
+.Backend Routing Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.routing.enabled`
+| Master switch for message routing logic. When false, routing rules below are ignored and messages may fall back to a single static destination
+| No
+| `true/false`
+
+| `connector.routing.default-backend-name`
+| Defines the default backend destination used when no routing rule matches.
+| No
+| `backend_alice`
+
+| `connector.routing.backend-rules[*index*].link-name`
+| Password protecting the keystore file itself.
+| No
+| `backend_alice`
+
+| `connector.routing.backend-rules[*index*].match-clause`
+| Expression used to evaluate the message
+| No
+| `equals(ServiceName, 'Test')`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.routing.enabled=true
+connector.routing.default-backend-name=backend_alice
+connector.routing.backend-rules[0].link-name=backend_alice
+# Will match if the serviceName equals 'Test'
+connector.routing.backend-rules[0].match-clause=equals(ServiceName, 'Test')
+connector.routing.backend-rules[1].link-name=backend_abc
+# Will match if the serviceName equals 'abc' or the serviceType equals 'type2' (case-sensitive!)
+connector.routing.backend-rules[1].match-clause=|(equals(ServiceName, 'abc'),equals(ServiceType, 'type2'))
+----
+
+.Routing Pattern Example
+[source]
+----
+<ROUTING_RULE_PATTERN> ::= <BOOLEAN_EXPRESSION> | <COMPARE_EXPRESSION> | <NOT_EXPRESSION>
+<BOOLEAN_EXPRESSION> ::= <OPERAND>(<ROUTING_RULE_PATTERN>, <ROUTING_RULE_PATTERN>)
+<COMPARE_EXPRESSION> ::= equals(<AS4_TYPE>, '<VALUE>') | startswith(<AS4_TYPE>, '<VALUE>')
+<NOT_EXPRESSION> ::= not(<ROUTING_RULE_PATTERN>)
+<OPERAND> ::= "&" | "|"
+<AS4_TYPE> ::= ServiceType | ServiceName | FinalRecipient | Action | FromPartyId | FromPartyRole
+| FromPartyIdType
+<VALUE> ::= <VALUE><LETTER> | <LETTER>
+<LETTER> can be every letter [a-z][A-Z][0-9] other printable characters might work, but
+they untested! ['\|&)( will definitiv not work!]
+----

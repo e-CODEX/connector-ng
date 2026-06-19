@@ -1,2 +1,3 @@
 :basepath: {asciidoctorconfigdir}/connector-documentation/src/docs/asciidoc
 :imagesdir: {asciidoctorconfigdir}/connector-documentation/src/docs/resources/images
+:distributiondir: {asciidoctorconfigdir}/connector-distribution

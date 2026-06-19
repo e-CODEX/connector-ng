@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.repository;
 
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
@@ -66,6 +67,9 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
             }
         }
 
+        var gatewayPartner = createDefaultGatewayLinkPartner();
+        partnersMap.put(gatewayPartner.name(), gatewayPartner);
+
         this.partners = Collections.unmodifiableMap(partnersMap);
     }
 
@@ -101,8 +105,25 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
         return partners.values().stream().toList();
     }
 
-    private ConnectorLinkPartner toDomain(
-            LinkPartnerProperties properties) {
+    private ConnectorLinkPartner createDefaultGatewayLinkPartner() {
+        var partnerName = ConnectorLinkPartnerName.builder()
+                                                  .name(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
+                                                  .build();
+        return ConnectorLinkPartner
+                .builder()
+                .name(partnerName)
+                .description("Default gateway")
+                .enabled(true)
+                .type(ConnectorLinkType.GATEWAY)
+                .source(ConnectorConfigurationSource.APPLICATION)
+                .senderMode(null)
+                .encryptionAlias(null)
+                .pushAddress(null)
+                .certificateDn(null)
+                .build();
+    }
+
+    private ConnectorLinkPartner toDomain(LinkPartnerProperties properties) {
         var linkPartnerName = ConnectorLinkPartnerName
                 .builder()
                 .name(properties.getName())

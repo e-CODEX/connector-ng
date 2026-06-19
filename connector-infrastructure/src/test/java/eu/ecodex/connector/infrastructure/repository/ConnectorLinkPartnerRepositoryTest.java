@@ -59,7 +59,7 @@ public class ConnectorLinkPartnerRepositoryTest {
         var partners = repository.findAll();
 
         assertThat(partners).isNotNull();
-        assertThat(partners).hasSize(1);
+        assertThat(partners).hasSize(2);
     }
 
     // find by name

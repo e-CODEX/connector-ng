@@ -24,6 +24,7 @@ s3 = "2.41.30"
 # dbms
 h2 = "2.4.240"
 mysql = "8.0.33"
+mariadb = "3.5.9"
 # jta
 narayana = "4.0.0"
 agroal = "3.0"
@@ -70,6 +71,7 @@ s3 = { module = "software.amazon.awssdk:s3", version.ref = "s3"}
 # dbms
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mariadb" }
 # narayana
 narayana = { module = "dev.snowdrop:narayana-spring-boot-starter", version.ref = "narayana" }
 agroal = { module = "io.agroal:agroal-spring-boot-starter", version.ref = "agroal" }

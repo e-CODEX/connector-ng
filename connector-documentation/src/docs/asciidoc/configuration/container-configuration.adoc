@@ -1,0 +1,55 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Container configuration
+
+This configuration defines the cryptographic settings used by the connector security library for:
+
+* Token generation (PDF and XML)
+* ASIC-S container signing
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `connector.container.*` prefix.
+
+.Container Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.container.signature.keystore.path`
+| Path to the Java KeyStore holding the private key/certificate used to SIGN containers
+| No
+| `file:./config/keystores/connector-keystore.jks`
+
+| `connector.container.signature.keystore.password`
+| Password protecting the keystore file itself.
+| No
+| `*(secret)*`
+
+| `connector.container.signature.keystore.type`
+| Keystore format. JKS is the legacy Java format; PKCS12 is also supported
+| No
+| By default, set to `JKS`
+
+| `connector.container.signature.private-key.alias`
+|Alias identifying which key entry inside the keystore to use for signing
+| No
+| `connector_blue`
+
+| `connector.container.signature.private-key.password`
+| Password protecting that specific private key entry
+| No
+| `*(secret)*`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.container.signature.keystore.path=file:./config/keystores/connector-keystore.jks
+connector.container.signature.keystore.password=12345
+connector.container.signature.keystore.type=JKS
+connector.container.signature.private-key.alias=connector_blue
+connector.container.signature.private-key.password=12345
+----

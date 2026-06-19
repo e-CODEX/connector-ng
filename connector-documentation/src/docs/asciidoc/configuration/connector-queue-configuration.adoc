@@ -1,0 +1,72 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Connector Queue Configuration
+
+This configuration defines the internal messaging queues used by the connector platform for asynchronous message processing.
+
+The queues coordinate the processing lifecycle for:
+
+* Outbound messages
+* Inbound messages
+* Evidence generation
+* Backend delivery
+* Message staging and transport
+
+These queues are typically implemented using a messaging system such as:
+
+* JMS
+* ActiveMQ
+* Spring Messaging infrastructure
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `connector.queues.*` prefix.
+
+.Connector Queue Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.queues.outbound-message-staging-queue`
+| JMS queue name where outbound messages are first staged/buffered before being picked up for further processing (e.g., signing, AS4 packaging) on their way out to the gateway.
+| Yes
+| By default, set to `connector.queues.outbound-message-staging-queue`
+
+| `connector.queues.outbound-message-processing-queue`
+| JMS queue name used for the main outbound message processing step — messages move here from the staging queue to be processed and sent toward the gateway partner.
+| Yes
+| By default, set to `connector.queues.outbound-message-processing-queue`
+
+| `connector.queues.outbound-evidence-trigger-queue`
+| JMS queue name that triggers generation of REM evidence (e.g., submission acceptance) for outbound messages.
+| Yes
+| By default, set to `connector.queues.outbound-evidence-trigger-queue`
+
+| `connector.queues.inbound-message-processing-queue`
+| JMS queue name used to process incoming messages received from the gateway before delivery to the backend.
+| Yes
+| By default, set to `connector.queues.inbound-message-processing-queue`
+
+| `connector.queues.inbound-evidence-trigger-queue`
+| JMS queue name that triggers generation of REM evidence (e.g., delivery/non-delivery) for inbound messages.
+| Yes
+| By default, set to `connector.queues.inbound-evidence-trigger-queue`
+
+| `connector.queues.backend-delivery-queue`
+| JMS queue name used for the final delivery hop — pushing processed inbound messages onward to the backend partner's endpoint.
+| Yes
+| By default, set to `connector.queues.backend-delivery-queue`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.queues.outbound-message-staging-queue=connector.queues.outbound-message-staging-queue
+connector.queues.outbound-message-processing-queue=connector.queues.outbound-message-processing-queue
+connector.queues.outbound-evidence-trigger-queue=connector.queues.outbound-evidence-trigger-queue
+connector.queues.inbound-message-processing-queue=connector.queues.inbound-message-processing-queue
+connector.queues.inbound-evidence-trigger-queue=connector.queues.inbound-evidence-trigger-queue
+connector.queues.backend-delivery-queue=connector.queues.backend-delivery-queue
+----

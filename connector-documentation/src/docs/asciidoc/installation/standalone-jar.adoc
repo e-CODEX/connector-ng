@@ -1,0 +1,106 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+ifndef::distributiondir[]
+:distributiondir: {basepath}/../../../../connector-distribution
+endif::distributiondir[]
+
+[[jar-install]]
+= Standalone Deployment — JAR Execution
+
+Use this installation option when hosting the connector natively outside any container runtime engine.
+
+== Prerequisites
+
+[cols="1,1,3", options="header"]
+|===
+| Software | Version | Notes
+| Java (JRE) | 21 or later | Only the runtime environment is needed, not the full JDK distribution
+| Database | MySQL 8, MariaDB | An empty database schema and a dedicated user role are required
+| Apache ActiveMQ Classic | 6.x | Required for message queuing workflows with the e-CODEX Gateway
+| Amazon S3 or MinIO File storage |  | Required to store message attachments
+|===
+
+To check your target server Java version:
+[source,bash]
+----
+java -version
+----
+The console runtime execution output must yield version `21.x.x` or higher.
+
+== Steps
+
+=== Step 1 — Obtain the Runnable Artifact
+
+* **Option A — Release Download:** Pull down link:https://scm.ecodex.eu/ui/repos/tree/General/libs-snapshot/eu/ecodex/connector/connector-distribution/7.0.0-SNAPSHOT[a Snapshot distribution version] from the e-CODEX project artifactory.
+* **Option B — Compilation From Source:** Run the following command locally:
++
+[source,bash]
+----
+./gradlew build
+----
+The output executable package will be generated inside `connector-distribution/build/connector-distribution/standalone`.
+
+=== Step 2 — Create the Target Deployment Directory Structure
+By default, the following layout configuration is provided in the distribution package:
+
+----
+bin/
+└── connector-ng.jar
+config/
+├── application.properties
+└── keystores/
+    ├── connector-keystore.jks
+    ├── connector-truststore.jks
+    ├── backend-keystore.jks
+    └── backend-truststore.jks
+lib/
+start.sh
+----
+
+=== Step 3 — Provision Spring Boot Configuration Properties
+Populate your configuration template directly inside `./config/application.properties`.
+
+[TIP]
+====
+A complete reference of all available enterprise business parameters can be found on the link:../configuration/index.adoc[configuration page,window=_self].
+====
+
+.config/application.properties Sample
+[source,properties]
+----
+include::{distributiondir}/src/main/resources/config/application.properties[]
+----
+
+=== Step 4 — Run the Standalone Native App
+To start the application and point explicitly to your Spring context properties directory location, execute the following command:
+
+[source,bash]
+----
+include::{distributiondir}/src/main/resources/bin/start.sh[]
+----
+
+To spin up the service detached in the background context layer:
+[source,bash]
+----
+nohup java -Dloader.path=./lib -jar ./bin/connector-ng.jar --spring.config.location=./config/ > logs/connector.log 2>&1 &
+----
+
+To review the rolling console logs output live:
+[source,bash]
+----
+tail -f logs/connector.log
+----
+
+=== Step 5 — Runtime Health Validation
+[source,bash]
+----
+curl http://localhost:30000/actuator/health
+----
+
+Expected health payload return structure:
+[source,json]
+----
+{"status":"UP"}
+----

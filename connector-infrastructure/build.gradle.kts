@@ -61,6 +61,7 @@ dependencies {
     // databases
     implementation(libs.h2)
     runtimeOnly(libs.mysql)
+    runtimeOnly(libs.mariadb)
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)

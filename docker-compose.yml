@@ -125,6 +125,24 @@ services:
             # copy and place them in sql folder
             # - ./sql/:/docker-entrypoint-initdb.d/
             - ng-mysql-data:/var/lib/mysql
+    connector-ng-postgres-db:
+        image: postgres:18
+        container_name: postgres
+        restart: always
+        environment:
+            POSTGRES_USER: connector
+            POSTGRES_PASSWORD: connector
+            POSTGRES_DB: connector
+        command:
+            - "postgres"
+            - "-c"
+            - "max_prepared_transactions=100"
+        expose:
+            - "5432"
+        ports:
+            - "30032:5432"
+        volumes:
+            - ng-postgres-data:/var/lib/postgresql/data
     connector-ng:
         container_name: connector-ng
         # uncomment the bellow section if you want to build your connector image during the launch of docker-compose
@@ -157,6 +175,7 @@ networks:
                 - subnet: 172.20.0.0/16
 volumes:
     ng-mysql-data:
+    ng-postgres-data:
     gateway-mysql-data:
     gateway-attachments:
     minio_data:

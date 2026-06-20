@@ -17,12 +17,14 @@ import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the {@link ConnectorRegisterBusinessDomain} service.
  */
 @Slf4j
 @Service
+@Transactional
 public class ConnectorRegisterBusinessDomainService implements ConnectorRegisterBusinessDomain {
     private final ConnectorBusinessDomainRepository businessDomainRepository;
 

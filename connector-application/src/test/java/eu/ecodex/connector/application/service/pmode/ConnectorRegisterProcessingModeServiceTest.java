@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.KeystoreTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
@@ -28,7 +27,6 @@ import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundExcep
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorKeystoreRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
@@ -52,8 +50,6 @@ public class ConnectorRegisterProcessingModeServiceTest {
     private ConnectorPartyRepository partyRepository;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
-    @Mock
-    private ConnectorKeystoreRepository keystoreRepository;
     @InjectMocks
     private ConnectorRegisterProcessingModeService registerProcessingModeService;
 
@@ -66,8 +62,6 @@ public class ConnectorRegisterProcessingModeServiceTest {
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
         when(processingModeRepository.findByBusinessDomainIdentifier(any()))
                 .thenReturn(null);
-        when(processingModeRepository.updateKeystore(any(), any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
         when(actionRepository.saveAll(any(), any()))
                 .thenReturn(List.of(ActionTestFixtures.createAction()));
@@ -75,8 +69,6 @@ public class ConnectorRegisterProcessingModeServiceTest {
                 .thenReturn(List.of(ServiceTestFixtures.createService()));
         when(partyRepository.saveAll(any(), any()))
                 .thenReturn(List.of(PartyTestFixtures.createToParty()));
-        when(keystoreRepository.save(any(), any()))
-                .thenReturn(KeystoreTestFixtures.createKeystore());
 
         var createdProcessingMode = this.registerProcessingModeService.execute(
                 businessDomain.identifier(), processingMode);

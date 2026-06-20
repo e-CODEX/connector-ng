@@ -5,7 +5,6 @@ INSERT INTO connector_processing_modes (
     content,
     filename,
     business_domain_id,
-    truststore_id,
     created_at,
     updated_at
 )
@@ -16,7 +15,6 @@ VALUES (
            '<?xml version="1.0" encoding="UTF-8"?>',
            'pmode.xml',
            (SELECT id FROM connector_business_domains WHERE identifier = 'default_business_domain'),
-           null,
            now(),
            now()
        );

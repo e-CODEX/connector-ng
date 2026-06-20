@@ -16,7 +16,6 @@ import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundExcep
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
@@ -24,7 +23,6 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorKeystoreRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
@@ -48,7 +46,6 @@ import org.w3c.dom.NodeList;
 public class ConnectorRegisterProcessingModeService implements ConnectorRegisterProcessingMode {
     private final ConnectorProcessingModeRepository processingModeRepository;
     private final ConnectorBusinessDomainRepository businessDomainRepository;
-    private final ConnectorKeystoreRepository keystoreRepository;
     private final ConnectorPartyRepository partyRepository;
     private final ConnectorActionRepository actionRepository;
     private final ConnectorServiceRepository serviceRepository;
@@ -60,8 +57,6 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
      *                                 {@link ConnectorProcessingMode} entities.
      * @param businessDomainRepository The repository used for managing
      *                                 {@link ConnectorBusinessDomain} entities.
-     * @param keystoreRepository       The repository used for managing {@link ConnectorKeystore}
-     *                                 entities.
      * @param partyRepository          The repository used for managing {@link ConnectorParty}
      *                                 entities.
      * @param actionRepository         The repository used for managing {@link ConnectorAction}
@@ -72,12 +67,10 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
     public ConnectorRegisterProcessingModeService(
             ConnectorProcessingModeRepository processingModeRepository,
             ConnectorBusinessDomainRepository businessDomainRepository,
-            ConnectorKeystoreRepository keystoreRepository,
             ConnectorPartyRepository partyRepository, ConnectorActionRepository actionRepository,
             ConnectorServiceRepository serviceRepository) {
         this.processingModeRepository = processingModeRepository;
         this.businessDomainRepository = businessDomainRepository;
-        this.keystoreRepository = keystoreRepository;
         this.partyRepository = partyRepository;
         this.actionRepository = actionRepository;
         this.serviceRepository = serviceRepository;
@@ -124,15 +117,10 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
                 businessDomainIdentifier
         );
 
-        var createdTruststore = this.keystoreRepository.save(
-                Objects.requireNonNull(parsedProcessingMode.truststore()),
-                businessDomainIdentifier
+        log.debug(
+                "Processing mode created successfully [{}]. will add parties, services and actions",
+                createdProcessingMode
         );
-
-        createdProcessingMode = createdProcessingMode
-                .toBuilder()
-                .truststore(createdTruststore)
-                .build();
 
         this.partyRepository.saveAll(
                 Objects.requireNonNull(parsedProcessingMode.parties()).stream().toList(),
@@ -147,13 +135,9 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
                 businessDomainIdentifier
         );
 
-        var updatedProcessingMode = this.processingModeRepository.updateKeystore(
-                createdProcessingMode.uuid(), createdTruststore.uuid()
-        );
+        log.info("Processing mode [{}] created successfully", createdProcessingMode.uuid());
 
-        log.debug("Processing mode [{}] created successfully", createdProcessingMode.uuid());
-
-        return updatedProcessingMode;
+        return createdProcessingMode;
     }
 
     private ConnectorProcessingMode parseXmlFile(ConnectorProcessingMode processingMode) {

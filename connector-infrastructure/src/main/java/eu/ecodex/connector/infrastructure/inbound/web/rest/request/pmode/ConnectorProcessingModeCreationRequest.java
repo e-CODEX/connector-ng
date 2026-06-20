@@ -11,7 +11,6 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
@@ -22,16 +21,12 @@ import lombok.Builder;
  * @param description              A brief description of the processing mode.
  * @param businessDomainIdentifier The identifier of the business domain associated with the
  *                                 processing mode.
- * @param truststore               The truststore configuration required for the processing mode,
- *                                 encapsulated in a {@link ConnectorKeystoreCreationRequest}.
  */
 @Builder(toBuilder = true)
 public record ConnectorProcessingModeCreationRequest(
         @NotBlank(message = "Processing mode description must not be blank.")
         String description,
         @NotBlank(message = "Business domain identifier must not be blank.")
-        String businessDomainIdentifier,
-        @NotNull(message = "Truststore configuration must not be null.")
-        ConnectorKeystoreCreationRequest truststore
+        String businessDomainIdentifier
 ) {
 }

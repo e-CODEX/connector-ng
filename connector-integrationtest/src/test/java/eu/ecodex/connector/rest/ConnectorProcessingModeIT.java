@@ -15,9 +15,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorKeystoreCreationRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -42,14 +40,6 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
                     .builder()
                     .description("test processing mode")
                     .businessDomainIdentifier("default_business_domain")
-                    .truststore(
-                            ConnectorKeystoreCreationRequest
-                                    .builder()
-                                    .description("test truststore")
-                                    .password("12345")
-                                    .type(ConnectorKeystoreType.JKS)
-                                    .build()
-                    )
                     .build();
     @Autowired
     private RestTestClient apiClient;
@@ -166,14 +156,6 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
                         "pmode.xml",
                         FileTestFixtures.readAsString("pmode/pmode.xml").getBytes(),
                         MediaType.APPLICATION_XML
-                )
-        );
-        parts.add(
-                "truststoreFile",
-                FilePartTestFixtures.filePart(
-                        "truststore.jks",
-                        FileTestFixtures.readAsBytes("pmode/truststore.jks"),
-                        MediaType.APPLICATION_OCTET_STREAM
                 )
         );
 

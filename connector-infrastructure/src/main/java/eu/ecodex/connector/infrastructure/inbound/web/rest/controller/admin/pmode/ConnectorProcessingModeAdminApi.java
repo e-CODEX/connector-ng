@@ -43,7 +43,6 @@ public interface ConnectorProcessingModeAdminApi {
     )
     ConnectorProcessingModeDto create(
             @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
-            @RequestParam("truststoreFile") MultipartFile truststoreFile,
             @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
             throws IOException;
 

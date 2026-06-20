@@ -13,7 +13,6 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmo
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
@@ -47,7 +46,6 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     @Override
     public ConnectorProcessingModeDto create(
             @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
-            @RequestParam("truststoreFile") MultipartFile truststoreFile,
             @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
             throws IOException {
         var businessDomainIdentifier = ConnectorBusinessDomainIdentifier
@@ -56,7 +54,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                 .build();
 
         var processingMode = processCreationRequest(
-                metadata, processingModeXmlFile, truststoreFile
+                metadata, processingModeXmlFile
         );
 
         var created = this.registerProcessingMode.execute(
@@ -75,25 +73,13 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
 
     private ConnectorProcessingMode processCreationRequest(
             ConnectorProcessingModeCreationRequest metadata,
-            MultipartFile processingModeXmlFile,
-            MultipartFile truststoreFile) throws IOException {
+            MultipartFile processingModeXmlFile) throws IOException {
         var xmlFileContentType = processingModeXmlFile.getContentType();
 
         if (!Objects.equals(xmlFileContentType, MediaType.APPLICATION_XML_VALUE)
             && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
             throw new ConnectorBadRequestException("pmode file must be XML");
         }
-
-        var truststore = ConnectorKeystore
-                .builder()
-                .description(metadata.truststore().description())
-                .content(truststoreFile.getBytes())
-                .password(metadata.truststore().password())
-                .type(metadata.truststore().type())
-                .filename(StringUtils.cleanPath(
-                        Objects.requireNonNull(truststoreFile.getOriginalFilename()))
-                )
-                .build();
 
         return ConnectorProcessingMode
                 .builder()
@@ -102,7 +88,6 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                 .filename(StringUtils.cleanPath(
                         Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
                 )
-                .truststore(truststore)
                 .build();
     }
 

@@ -31,7 +31,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 /**
@@ -68,11 +67,6 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "BUSINESS_DOMAIN_ID", nullable = false)
     private ConnectorBusinessDomainEntity businessDomain;
-
-    @Setter
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TRUSTSTORE_ID")
-    private ConnectorKeystoreEntity truststore;
 
     @Builder.Default
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)

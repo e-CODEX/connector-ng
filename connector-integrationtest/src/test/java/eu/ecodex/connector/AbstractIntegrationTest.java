@@ -149,7 +149,6 @@ public abstract class AbstractIntegrationTest {
         jdbcTemplate.execute("TRUNCATE TABLE connector_services");
         jdbcTemplate.execute("TRUNCATE TABLE connector_actions");
         jdbcTemplate.execute("TRUNCATE TABLE connector_processing_modes");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_keystores");
         jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
         jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
     }

@@ -93,7 +93,6 @@ public class ProcessingModeTestFixtures {
                 .parties(Set.of(PartyTestFixtures.createFromParty()))
                 .content(pmodeString)
                 .filename("pmode.xml")
-                .truststore(KeystoreTestFixtures.createKeystore())
                 .build();
     }
 
@@ -115,7 +114,6 @@ public class ProcessingModeTestFixtures {
                 .parties(Set.of(PartyTestFixtures.createFromParty()))
                 .content(pmodeString)
                 .filename("pmode.xml")
-                .truststore(KeystoreTestFixtures.createKeystore())
                 .build();
     }
 }

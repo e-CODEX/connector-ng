@@ -69,43 +69,6 @@ public class ConnectorProcessingModeRepositoryTest {
         );
     }
 
-    // update
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/keystore.sql")
-    void should_update_Keystore_an_existing_pmode_successfully_from_database() {
-        var updatedProcessingMode = repository.updateKeystore(
-                "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf",
-                "f81647fc-d870-4275-bdbd-982f32e5235f"
-        );
-
-        assertThat(updatedProcessingMode).isNotNull();
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_updating_pmode_with_a_null_pmode() {
-        assertThrows(
-                NullPointerException.class, () -> repository.updateKeystore(null, null)
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_updating_pmode_with_a_null_uuid() {
-        assertThrows(
-                NullPointerException.class,
-                () -> repository.updateKeystore(null, "f81647fc-d870-4275-bdbd-982f32e5235f")
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_updating_pmode_with_a_null_keystore_uuid() {
-        assertThrows(
-                NullPointerException.class,
-                () -> repository.updateKeystore("4f10aed9-2e5f-4780-87f7-5fe1070d5ccf", null)
-        );
-    }
-
     // find by uuid
     @Test
     @Sql("classpath:sql/business-domain.sql")

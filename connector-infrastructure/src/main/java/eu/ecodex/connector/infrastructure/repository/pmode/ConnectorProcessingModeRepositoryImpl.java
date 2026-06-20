@@ -15,7 +15,6 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorBusinessDomainJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorKeystoreJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
 import eu.ecodex.connector.infrastructure.repository.ConnectorBusinessDomainRepositoryImpl;
 import java.util.List;
@@ -31,7 +30,6 @@ import org.springframework.stereotype.Component;
 public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessingModeRepository {
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
     private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
-    private final ConnectorKeystoreJpaRepository keystoreJpaRepository;
 
     /**
      * Constructs an instance of {@code ConnectorProcessingModeRepositoryImpl} with the specified
@@ -41,16 +39,12 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
      *                                    {@code ConnectorProcessingModeEntity}.
      * @param businessDomainJpaRepository the repository for performing operations on
      *                                    {@code ConnectorBusinessDomainEntity}.
-     * @param keystoreJpaRepository       the repository for performing operations on
-     *                                    {@code ConnectorKeystoreEntity}.
      */
     public ConnectorProcessingModeRepositoryImpl(
             ConnectorProcessingModeJpaRepository processingModeJpaRepository,
-            ConnectorBusinessDomainJpaRepository businessDomainJpaRepository,
-            ConnectorKeystoreJpaRepository keystoreJpaRepository) {
+            ConnectorBusinessDomainJpaRepository businessDomainJpaRepository) {
         this.processingModeJpaRepository = processingModeJpaRepository;
         this.businessDomainJpaRepository = businessDomainJpaRepository;
-        this.keystoreJpaRepository = keystoreJpaRepository;
     }
 
     @Override
@@ -61,20 +55,6 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
         var savedProcessingMode = this.processingModeJpaRepository.save(toEntity(processingMode));
 
         return toDomain(savedProcessingMode);
-    }
-
-    @Override
-    public ConnectorProcessingMode updateKeystore(
-            @NonNull String uuid, @NonNull String keystoreUuid) {
-        var existingProcessingMode = processingModeJpaRepository.findByUuid(uuid);
-
-        var keystoreEntity = keystoreJpaRepository.findByUuid(keystoreUuid);
-
-        existingProcessingMode.setTruststore(keystoreEntity);
-
-        var updatedProcessingMode = processingModeJpaRepository.save(existingProcessingMode);
-
-        return toDomain(updatedProcessingMode);
     }
 
     @Override

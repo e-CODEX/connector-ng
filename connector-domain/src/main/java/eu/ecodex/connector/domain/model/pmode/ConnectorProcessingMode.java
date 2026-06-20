@@ -11,7 +11,6 @@
 package eu.ecodex.connector.domain.model.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
-import eu.ecodex.connector.domain.model.keystore.ConnectorKeystore;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
@@ -27,7 +26,6 @@ import lombok.Builder;
  * @param content                  The businessContent of the PMode.
  * @param filename                 The filename of the PMode.
  * @param businessDomain The business domain of the PMode.
- * @param truststore               The truststore of the PMode.
  * @param parties                  The parties of the PMode.
  * @param services                 The services of the PMode.
  * @param actions                  The actions of the PMode.
@@ -41,7 +39,6 @@ public record ConnectorProcessingMode(
         @Nonnull String content,
         @Nonnull String filename,
         @Nullable ConnectorBusinessDomain businessDomain,
-        @Nullable ConnectorKeystore truststore,
         @Nullable Set<ConnectorParty> parties,
         @Nullable Set<ConnectorService> services,
         @Nullable Set<ConnectorAction> actions,
@@ -61,8 +58,7 @@ public record ConnectorProcessingMode(
     @Nonnull
     public String toString() {
         return String.format(
-                "{uuid=%s, description=%s, truststore=%s}",
-                uuid, description, truststore
+                "{uuid=%s, description=%s}", uuid, description
         );
     }
 }

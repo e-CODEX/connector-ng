@@ -21,11 +21,8 @@ import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
-import eu.ecodex.connector.domain.model.keystore.ConnectorKeystoreType;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorKeystoreCreationRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,13 +63,6 @@ public class ConnectorProcessingModeAdminControllerTest {
                 "<processingMode>test content</processingMode>".getBytes()
         );
 
-        var truststore = new MockMultipartFile(
-                "truststoreFile",
-                "truststore.jks",
-                MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                "truststore-content".getBytes()
-        );
-
         var metadataFile = new MockMultipartFile(
                 "metadata",
                 "",
@@ -82,7 +72,6 @@ public class ConnectorProcessingModeAdminControllerTest {
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
                                 .file(processingModeXml)
-                                .file(truststore)
                                 .file(metadataFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isCreated());
@@ -100,13 +89,6 @@ public class ConnectorProcessingModeAdminControllerTest {
                 "<processingMode>test content</processingMode>".getBytes()
         );
 
-        var truststore = new MockMultipartFile(
-                "truststoreFile",
-                "truststore.jks",
-                MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                "truststore-content".getBytes()
-        );
-
         var metadataFile = new MockMultipartFile(
                 "metadata",
                 "",
@@ -116,7 +98,6 @@ public class ConnectorProcessingModeAdminControllerTest {
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
                                 .file(processingModeXml)
-                                .file(truststore)
                                 .file(metadataFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isCreated());
@@ -134,13 +115,6 @@ public class ConnectorProcessingModeAdminControllerTest {
                 "<processingMode>test content</processingMode>".getBytes()
         );
 
-        var truststore = new MockMultipartFile(
-                "truststoreFile",
-                "truststore.jks",
-                MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                "truststore-content".getBytes()
-        );
-
         var metadataFile = new MockMultipartFile(
                 "metadata",
                 "",
@@ -150,7 +124,6 @@ public class ConnectorProcessingModeAdminControllerTest {
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
                                 .file(processingModeXml)
-                                .file(truststore)
                                 .file(metadataFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isBadRequest());

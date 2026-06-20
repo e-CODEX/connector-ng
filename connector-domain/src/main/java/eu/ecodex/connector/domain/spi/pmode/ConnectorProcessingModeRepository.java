@@ -38,19 +38,6 @@ public interface ConnectorProcessingModeRepository {
     );
 
     /**
-     * Updates the keystore associated with the specified Connector processing mode.
-     *
-     * @param uuid         the unique identifier of the Connector processing mode to be updated;
-     *                     must not be null.
-     * @param keystoreUuid the unique identifier of the keystore to associate with the specified
-     *                     processing mode; must not be null.
-     *
-     * @return the updated {@link ConnectorProcessingMode} with the new keystore association.
-     */
-    ConnectorProcessingMode updateKeystore(
-            @Nonnull String uuid, @Nonnull String keystoreUuid);
-
-    /**
      * Retrieves a {@link ConnectorProcessingMode} identified by its unique UUID.
      *
      * @param uuid the unique identifier of the {@link ConnectorProcessingMode} to retrieve; must

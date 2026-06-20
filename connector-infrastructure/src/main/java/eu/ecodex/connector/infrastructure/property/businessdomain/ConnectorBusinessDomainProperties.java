@@ -10,8 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.property.businessdomain;
 
-import eu.ecodex.connector.domain.model.property.ConnectorBusinessDomainProperties;
-import eu.ecodex.connector.domain.spi.property.ConnectorBusinessDomainPropertiesProvider;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,14 +21,10 @@ import org.springframework.context.annotation.Configuration;
  * to configure the identifier, description, enabled status, and source of the business domain
  * through externalized configuration.
  */
+@Getter
+@Setter
 @Configuration
 @ConfigurationProperties(prefix = "connector.business-domains")
-public class ConnectorBusinessDomainConfigProperties implements
-        ConnectorBusinessDomainPropertiesProvider {
-    private ConnectorBusinessDomainProperties initial;
-
-    @Override
-    public ConnectorBusinessDomainProperties getProperties() {
-        return initial;
-    }
+public class ConnectorBusinessDomainProperties {
+    private List<DefaultBusinessDomainProperties> defaults;
 }

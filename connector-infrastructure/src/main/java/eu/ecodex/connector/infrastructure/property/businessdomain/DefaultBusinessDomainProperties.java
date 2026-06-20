@@ -8,10 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
+package eu.ecodex.connector.infrastructure.property.businessdomain;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /**
- * Provides application startup initializers for preparing connector runtime defaults.
- *
- * <p>Classes in this package are responsible for initializing application-level state and
- * default configuration required before the connector starts processing business operations.
+ * Default business domain properties.
  */
-package eu.ecodex.connector.application.initializer;
+@Setter
+@Getter
+public class DefaultBusinessDomainProperties {
+    private String identifier;
+    private String description;
+    private boolean enabled;
+}

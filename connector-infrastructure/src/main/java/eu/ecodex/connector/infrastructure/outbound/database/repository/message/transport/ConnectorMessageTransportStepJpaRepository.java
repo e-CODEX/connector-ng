@@ -72,7 +72,7 @@ public interface ConnectorMessageTransportStepJpaRepository extends
                     UPDATE connector_message_transport_steps MTS
                     SET
                         MTS.status = :status,
-                        MTS.number_of_attemps = MTS.number_of_attemps + 1,
+                        MTS.number_of_attempts = MTS.number_of_attempts + 1,
                         MTS.updated_at = now()
                     WHERE MTS.identifier IN :identifiers
                     """,

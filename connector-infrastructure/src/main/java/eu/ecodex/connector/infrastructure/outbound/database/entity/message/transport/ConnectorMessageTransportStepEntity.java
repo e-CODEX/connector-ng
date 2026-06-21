@@ -13,7 +13,6 @@ package eu.ecodex.connector.infrastructure.outbound.database.entity.message.tran
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -24,9 +23,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import java.util.HashSet;
@@ -56,7 +53,7 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Column(name = "IDENTIFIER", nullable = false)
     private String identifier;
 
-    @Column(name = "NUMBER_OF_ATTEMPS", nullable = false)
+    @Column(name = "NUMBER_OF_ATTEMPTS", nullable = false)
     private int numberOfAttempts;
 
     @Column(name = "TRANSPORTED_MESSAGE_IDENTIFIER", nullable = false)

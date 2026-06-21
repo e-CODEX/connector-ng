@@ -1,7 +1,7 @@
 insert into connector_message_transport_steps (
     id,
     identifier,
-    number_of_attemps,
+    number_of_attempts,
     status,
     created_at,
     updated_at,

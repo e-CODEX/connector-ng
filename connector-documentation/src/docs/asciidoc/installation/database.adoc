@@ -8,11 +8,13 @@ The application has been tested against the following database versions:
 
 [cols="1,1"]
 |===
-|Database |Version
 
-|MySQL |8.4.9
-|MariaDB |12.3.2
-|PostgresSQL |18.0
+| Database | Version
+
+| MySQL | 8.4.9
+| MariaDB | 12.3.2
+| PostgresSQL | 18.0
+
 |===
 
 == Create a database user with appropriate privileges

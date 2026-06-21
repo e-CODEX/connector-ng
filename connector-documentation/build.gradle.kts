@@ -24,7 +24,8 @@ fun AbstractAsciidoctorTask.commonConfig(version: String) {
             "architecture/index.adoc",
             "configuration/index.adoc",
             "installation/index.adoc",
-            "changelog/index.adoc"
+            "changelog/index.adoc",
+            "compatibility/index.adoc"
         )
     }
     // configure resources (images, etc.)

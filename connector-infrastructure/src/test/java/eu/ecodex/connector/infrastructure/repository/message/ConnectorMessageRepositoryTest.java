@@ -45,7 +45,7 @@ public class ConnectorMessageRepositoryTest {
             "classpath:sql/action.sql"
     })
     void should_save_connector_message_successfully_to_database() {
-        var message = MessageTestFixtures.createValidOutboundStagingBusinessMessage()
+        var message = MessageTestFixtures.createOutboundStagingBusinessMessage()
                                          .toBuilder()
                                          .identifier(
                                                  "2adede33-41cf-4509-b0c1-0c83ad96eed7@connector.ecodex.eu")
@@ -296,6 +296,7 @@ public class ConnectorMessageRepositoryTest {
     void should_set_connector_message_submitted_to_gateway_at_successfully_in_the_database() {
         var message = jpaRepository.findByIdentifier(
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu");
+
         assertThat(message).isNotNull();
         assertThat(message.getDeliveredToGatewayAt()).isNull();
 

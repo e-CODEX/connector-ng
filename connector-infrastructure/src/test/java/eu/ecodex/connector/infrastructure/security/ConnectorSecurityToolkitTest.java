@@ -122,7 +122,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
 
     @Test
     void should_throw_exception_when_building_asics_container_if_the_message_identifier_is_null() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage()
+        var message = MessageTestFixtures.createOutboundBusinessMessage()
                                          .toBuilder()
                                          .identifier(null)
                                          .build();
@@ -134,7 +134,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
 
     private ConnectorMessage createMessage() {
         return MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .businessContent(
                         MessageContentTestFixtures

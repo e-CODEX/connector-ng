@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorListProcessingModeServiceTest {
     @Mock
     private ConnectorProcessingModeRepository processingModeRepository;
+
     @InjectMocks
     private ConnectorListProcessingModeService processingModeService;
 
@@ -34,7 +35,9 @@ public class ConnectorListProcessingModeServiceTest {
     void should_return_all_processing_modes_successfully() {
         when(processingModeRepository.findAll())
                 .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
+
         var foundProcessingModes = this.processingModeService.execute();
+
         assertThat(foundProcessingModes).isNotEmpty();
         assertThat(foundProcessingModes).hasSize(1);
     }

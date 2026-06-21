@@ -24,11 +24,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorMessagePartiesVerifierServiceTest {
-    private final ConnectorMessagePartiesVerifier partiesVerifierService = new ConnectorMessagePartiesVerifierService();
+    private final ConnectorMessagePartiesVerifier partiesVerifierService =
+            new ConnectorMessagePartiesVerifierService();
 
     @Test
     void should_check_outgoing_message_parties_info_successfully() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         // no thrown exception mean from and to parties are set correctly
         this.partiesVerifierService.verify(message);
     }
@@ -71,7 +72,7 @@ public class ConnectorMessagePartiesVerifierServiceTest {
 
     @Test
     void should_throw_exception_when_outbound_message_direction_is_incorrect() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage()
+        var message = MessageTestFixtures.createOutboundBusinessMessage()
                                          .toBuilder()
                                          .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
                                          .build();

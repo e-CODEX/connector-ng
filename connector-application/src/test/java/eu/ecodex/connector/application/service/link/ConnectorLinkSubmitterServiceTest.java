@@ -19,11 +19,10 @@ import static org.mockito.Mockito.verify;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.link.ConnectorLinkSubmitterService;
 import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkPartnerVerifier;
-import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.domain.spi.link.ConnectorLinkTransportStrategy;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,21 +37,15 @@ class ConnectorLinkSubmitterServiceTest {
     @Mock
     private ConnectorLinkTransportStrategy transportStrategy;
 
-    private ConnectorLinkSubmitter linkSubmissionService;
-
-    @BeforeEach
-    void setUp() {
-        this.linkSubmissionService = new ConnectorLinkSubmitterService(
-                linkVerifier, transportStrategy
-        );
-    }
+    @InjectMocks
+    private ConnectorLinkSubmitterService linkSubmissionService;
 
     @Test
     void should_submit_message_to_link_successfully() {
         doNothing().when(linkVerifier).verify(any());
         doNothing().when(transportStrategy).transport(any());
 
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         linkSubmissionService.submit(message);
 
         verify(linkVerifier, times(1)).verify(any());

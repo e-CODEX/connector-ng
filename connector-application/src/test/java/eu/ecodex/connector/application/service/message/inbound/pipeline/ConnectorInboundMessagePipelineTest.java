@@ -58,7 +58,7 @@ public class ConnectorInboundMessagePipelineTest {
 
     @Test
     void should_process_inbound_message_pipeline_successfully() {
-        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
 
         when(backendNameStep.execute(any())).thenReturn(inboundMessage);
         when(acceptanceStep.execute(any())).thenReturn(inboundMessage);
@@ -76,7 +76,7 @@ public class ConnectorInboundMessagePipelineTest {
 
     @Test
     void should_send_back_successfully_non_delivery_evidence_message_when_security_error_occurs_during_inbound_message_processing() {
-        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
 
         when(backendNameStep.execute(any())).thenReturn(inboundMessage);
         when(acceptanceStep.execute(any())).thenReturn(inboundMessage);

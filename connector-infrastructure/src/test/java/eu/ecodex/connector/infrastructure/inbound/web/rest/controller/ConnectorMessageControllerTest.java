@@ -65,7 +65,7 @@ public class ConnectorMessageControllerTest {
     void should_send_201_response_when_submitting_outbound_message(String jsonBody) throws Exception {
         // TODO set appropriate response
         when(messageStagingService.register(any()))
-                .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
+                .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
         when(backendClientVerifierService.getBackendClient(any()))
                 .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(uploadAttachmentsService.execute(any())).thenReturn(

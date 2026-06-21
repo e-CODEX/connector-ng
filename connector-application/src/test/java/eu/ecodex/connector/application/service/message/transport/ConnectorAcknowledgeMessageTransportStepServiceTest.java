@@ -274,14 +274,14 @@ public class ConnectorAcknowledgeMessageTransportStepServiceTest {
     }
 
     private ConnectorMessage businessMessage() {
-        return MessageTestFixtures.createValidInboundBusinessMessage()
+        return MessageTestFixtures.createInboundBusinessMessage()
                                   .toBuilder()
                                   .identifier(MESSAGE_ID)
                                   .build();
     }
 
     private ConnectorMessage evidenceMessage() {
-        return MessageTestFixtures.createValidEvidenceMessage()
+        return MessageTestFixtures.createEvidenceMessage()
                                   .toBuilder()
                                   .identifier(MESSAGE_ID)
                                   .build();

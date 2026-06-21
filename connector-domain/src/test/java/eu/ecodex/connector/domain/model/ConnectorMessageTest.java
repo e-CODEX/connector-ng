@@ -26,7 +26,7 @@ public class ConnectorMessageTest {
 
     @Test
     void should_return_true_if_message_is_business_message() {
-        var message = MessageTestFixtures.createValidInboundBusinessMessage();
+        var message = MessageTestFixtures.createInboundBusinessMessage();
         assertThat(message.isBusinessMessage()).isTrue();
     }
 
@@ -46,7 +46,7 @@ public class ConnectorMessageTest {
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_message() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         assertThat(message.isEvidenceMessage()).isFalse();
     }
 
@@ -60,7 +60,7 @@ public class ConnectorMessageTest {
 
     @Test
     void should_return_false_if_message_is_not_an_evidence_trigger_message() {
-        var message = MessageTestFixtures.createValidInboundBusinessMessage();
+        var message = MessageTestFixtures.createInboundBusinessMessage();
         assertThat(message.isEvidenceTriggerMessage()).isFalse();
     }
 

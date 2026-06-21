@@ -28,7 +28,7 @@ public class ConnectorTokenAuthBasedTechnicalValidationGeneratorTest extends Bas
     @Test
     void should_build_validation_successfully() throws Exception {
         var message = MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .businessContent(
                         MessageContentTestFixtures

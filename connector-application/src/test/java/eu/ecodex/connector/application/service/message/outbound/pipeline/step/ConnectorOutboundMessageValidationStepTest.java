@@ -18,10 +18,9 @@ import static org.mockito.Mockito.doNothing;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageValidationStep;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessagePartiesVerifier;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -33,17 +32,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorOutboundMessageValidationStepTest {
     @Mock
     private ConnectorMessagePartiesVerifier partiesVerifierService;
-    private ConnectorMessageStep outboundMessageValidationStep;
 
-    @BeforeEach
-    void setUp() {
-        outboundMessageValidationStep =
-                new ConnectorOutboundMessageValidationStep(partiesVerifierService);
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageValidationStep outboundMessageValidationStep;
 
     @Test
     void should_execute_outbound_message_validation_successfully() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         doNothing().when(partiesVerifierService).verify(any());
 

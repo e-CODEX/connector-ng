@@ -38,17 +38,17 @@ public class ConnectorMessageRoutingRulePatternTest {
                 Arguments.of(
                         "&(equals(ServiceName, 'Connector-TEST'), |(equals(FromPartyId, 'BL'), "
                         + "equals(FromPartyId, 'gw02')))",
-                        MessageTestFixtures.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createOutboundBusinessMessage()
                 ),
                 Arguments.of(
                         "&(&(equals(Action, 'ConTest_Form'), equals(ServiceName, "
                         + "'Connector-TEST')), equals(ServiceType, 'urn:e-codex:services:'))",
-                        MessageTestFixtures.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createOutboundBusinessMessage()
                 ),
                 Arguments.of(
                         "&(startswith(ServiceName, 'Connector-'), &(equals(FromPartyId, 'BL'), "
                         + "equals(ServiceType, 'urn:e-codex:services:')))",
-                        MessageTestFixtures.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createOutboundBusinessMessage()
                 )
         );
     }
@@ -66,12 +66,12 @@ public class ConnectorMessageRoutingRulePatternTest {
                 Arguments.of(
                         "not(&(equals(ServiceName, 'Connector-TEST'), |(equals(FromPartyId, "
                         + "'gw01'), equals(FromPartyId, 'BL'))))",
-                        MessageTestFixtures.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createOutboundBusinessMessage()
                 ),
                 Arguments.of(
                         "&(&(equals(Action, 'ConTest_Form2'), equals(ServiceName, "
                         + "'Connector-TEST')), equals(ServiceType, 'urn:e-codex:services:'))",
-                        MessageTestFixtures.createValidOutboundBusinessMessage()
+                        MessageTestFixtures.createOutboundBusinessMessage()
                 )
 
         );
@@ -81,7 +81,7 @@ public class ConnectorMessageRoutingRulePatternTest {
     void should_throw_exception_if_routing_pattern_contains_illegal_token() {
         var expression = "&(equals(ServiceName, 'Connector-TEST'), |(equalss(FromPartyId, 'BL'), "
                          + "equals(FromPartyId, 'gw02')))";
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         Assertions.assertThrows(
                 ConnectorExpressionParser.ParsingException.class,
                 () -> {

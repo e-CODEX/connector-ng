@@ -18,37 +18,31 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.MessageRoutingConfigurationTestFixtures;
 import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingConfigurationProvider;
-import eu.ecodex.connector.application.service.impl.routing.ConnectorMessageRoutingServiceImpl;
-import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRoutingService;
+import eu.ecodex.connector.application.service.impl.routing.ConnectorMessageRouterService;
 import eu.ecodex.connector.domain.ConnectorDefaults;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
- * Unit tests for the {@code ConnectorMessageRoutingService} implementation.
+ * Unit tests for the {@code ConnectorMessageRouterService} implementation.
  */
 @ExtendWith(MockitoExtension.class)
-public class ConnectorMessageRoutingServiceTest {
+public class ConnectorMessageRouterTest {
     @Mock
     private ConnectorMessageRoutingConfigurationProvider routingConfigurationProvider;
-    private ConnectorMessageRoutingService connectorMessageRoutingService;
 
-    @BeforeEach
-    void setUp() {
-        connectorMessageRoutingService = new ConnectorMessageRoutingServiceImpl(
-                routingConfigurationProvider
-        );
-    }
+    @InjectMocks
+    private ConnectorMessageRouterService connectorMessageRouterService;
 
     @Test
     void should_return_true_if_routing_is_enabled() {
         when(routingConfigurationProvider.getConfiguration())
                 .thenReturn(MessageRoutingConfigurationTestFixtures.getConfiguration());
 
-        var isRoutingEnabled = connectorMessageRoutingService.isRoutingEnabled(
+        var isRoutingEnabled = connectorMessageRouterService.isRoutingEnabled(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
@@ -62,7 +56,7 @@ public class ConnectorMessageRoutingServiceTest {
         when(routingConfigurationProvider.getConfiguration())
                 .thenReturn(MessageRoutingConfigurationTestFixtures.getDisabledRoutingProperties());
 
-        var isRoutingEnabled = connectorMessageRoutingService.isRoutingEnabled(
+        var isRoutingEnabled = connectorMessageRouterService.isRoutingEnabled(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
@@ -76,7 +70,7 @@ public class ConnectorMessageRoutingServiceTest {
         when(routingConfigurationProvider.getConfiguration())
                 .thenReturn(MessageRoutingConfigurationTestFixtures.getConfiguration());
 
-        var backendName = connectorMessageRoutingService.getDefaultBackendName(
+        var backendName = connectorMessageRouterService.getDefaultBackendName(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
@@ -95,7 +89,7 @@ public class ConnectorMessageRoutingServiceTest {
         when(routingConfigurationProvider.getConfiguration())
                 .thenReturn(MessageRoutingConfigurationTestFixtures.getRoutingPropertiesWithNoDefaultBackendName());
 
-        var backendName = connectorMessageRoutingService.getDefaultBackendName(
+        var backendName = connectorMessageRouterService.getDefaultBackendName(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
@@ -107,7 +101,7 @@ public class ConnectorMessageRoutingServiceTest {
         when(routingConfigurationProvider.getConfiguration())
                 .thenReturn(MessageRoutingConfigurationTestFixtures.getConfiguration());
 
-        var backendRoutingRule = connectorMessageRoutingService.getBackendRoutingRule(
+        var backendRoutingRule = connectorMessageRouterService.getBackendRoutingRule(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
@@ -119,7 +113,7 @@ public class ConnectorMessageRoutingServiceTest {
         when(routingConfigurationProvider.getConfiguration())
                 .thenReturn(MessageRoutingConfigurationTestFixtures.getRoutingPropertiesWithNoDefaultBackendRules());
 
-        var backendRoutingRule = connectorMessageRoutingService.getBackendRoutingRule(
+        var backendRoutingRule = connectorMessageRouterService.getBackendRoutingRule(
                 BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 

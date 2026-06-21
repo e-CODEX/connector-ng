@@ -64,6 +64,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
             "104ebc70-abd5-45da-8c74-940d687501b3_messageContent";
     private static final String FIXTURE_SUBMISSION_ACCEPTANCE_ATTACHMENT_ID =
             "c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE";
+
     @Mock
     private ConnectorEvidenceBuilder evidenceBuilder;
     @Mock
@@ -72,6 +73,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     private ConnectorMessageAttachmentRepository attachmentRepository;
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
+
     private ConnectorEvidenceToolkitImpl toolkit;
 
     static Stream<Arguments> rejectionEvidenceTypes() {
@@ -508,7 +510,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
     }
 
     private ConnectorMessage submissionReadyMessage() {
-        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var base = MessageTestFixtures.createOutboundBusinessMessage();
         var as4 = base.as4Properties().toBuilder()
                       .ebmsMessageIdentifier("urn:test:ebms")
                       .originalSender("sender@domain")

@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.routing;
 
 import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingConfigurationProvider;
 import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
-import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRoutingService;
+import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRouter;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
@@ -25,10 +25,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorMessageRoutingServiceImpl implements ConnectorMessageRoutingService {
+public class ConnectorMessageRouterService implements ConnectorMessageRouter {
     private final ConnectorMessageRoutingConfigurationProvider routingConfigurationProvider;
 
-    public ConnectorMessageRoutingServiceImpl(
+    public ConnectorMessageRouterService(
             ConnectorMessageRoutingConfigurationProvider routingConfigurationProvider) {
         this.routingConfigurationProvider = routingConfigurationProvider;
     }

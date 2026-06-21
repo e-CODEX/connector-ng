@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 public class ConnectorEqualsExpressionTest {
     @Test
     void should_successfully_check_if_as4_attribute_matches_with_the_given_value() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form");
         var evaluationResult = equalsExpression.evaluate(message);
         assertThat(evaluationResult).isTrue();
@@ -29,7 +29,7 @@ public class ConnectorEqualsExpressionTest {
 
     @Test
     void should_fail_to_check_if_as4_attribute_matches_with_the_given_value() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form2");
         var evaluationResult = equalsExpression.evaluate(message);
         assertThat(evaluationResult).isFalse();

@@ -41,7 +41,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorOutboundMessageReceiverServiceTest {
-    private static final String MESSAGE_ID = "28c86f29-5953-42d5-8336-1a03f7e86951@eu.ecodex.connector";
+    private static final String MESSAGE_ID
+            = "28c86f29-5953-42d5-8336-1a03f7e86951@eu.ecodex.connector";
+
     @Mock
     private ConnectorEventPublisher evidenceTriggerEventPublisher;
     @Mock
@@ -84,7 +86,7 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         doThrow(ConnectorBusinessDomainNotFoundException.class)
                 .when(businessDomainVerifier).execute(any());
 
-        var outboundMessage = MessageTestFixtures.createValidOutboundStagingBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundStagingBusinessMessage();
 
         assertThrows(
                 ConnectorBusinessDomainNotFoundException.class,
@@ -99,7 +101,7 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         doThrow(ConnectorBusinessDomainNotEnabledException.class)
                 .when(businessDomainVerifier).execute(any());
 
-        var outboundMessage = MessageTestFixtures.createValidOutboundStagingBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundStagingBusinessMessage();
 
         assertThrows(
                 ConnectorBusinessDomainNotEnabledException.class,
@@ -113,7 +115,7 @@ public class ConnectorOutboundMessageReceiverServiceTest {
     void should_throw_exception_when_message_is_neither_business_nor_evidence() {
         doNothing().when(businessDomainVerifier).execute(any());
 
-        var outboundMessage = MessageTestFixtures.createValidEvidenceMessage();
+        var outboundMessage = MessageTestFixtures.createEvidenceMessage();
 
         assertThrows(
                 ConnectorMessageException.class,
@@ -136,13 +138,14 @@ public class ConnectorOutboundMessageReceiverServiceTest {
                 );
         doNothing().when(messageVerifier).verify(any(), any());
 
-        var outboundMessage = MessageTestFixtures.createValidOutboundStagingBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundStagingBusinessMessage();
 
         var message = messageReceiverService.register(outboundMessage);
 
         assertThat(outboundMessage.identifier()).isNull();
         assertThat(message.identifier()).isNotNull();
         assertThat(message.identifier()).isEqualTo(MESSAGE_ID);
+
         verifyNoInteractions(evidenceTriggerEventPublisher);
         verify(stagingEventPublisher).publish(any());
     }

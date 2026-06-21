@@ -62,6 +62,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
     private ConnectorLinkPartnerRepository linkPartnerRepository;
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
+
     @InjectMocks
     private ConnectorBackendMessageDeliveryListener listener;
 

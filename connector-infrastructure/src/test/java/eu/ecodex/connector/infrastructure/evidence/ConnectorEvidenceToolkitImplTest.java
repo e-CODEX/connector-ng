@@ -75,7 +75,7 @@ class ConnectorEvidenceToolkitImplTest {
 
     @Test
     void submission_acceptance_contains_enveloped_signature_bytes() {
-        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var base = MessageTestFixtures.createOutboundBusinessMessage();
         var as4 = base.as4Properties().toBuilder()
                       .ebmsMessageIdentifier("urn:test:ebms:001")
                       .build();
@@ -96,7 +96,7 @@ class ConnectorEvidenceToolkitImplTest {
 
     @Test
     void submission_rejection_contains_enveloped_signature_bytes() {
-        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var base = MessageTestFixtures.createOutboundBusinessMessage();
         var as4 = base.as4Properties().toBuilder()
                       .ebmsMessageIdentifier("urn:test:ebms:002")
                       .build();
@@ -116,7 +116,7 @@ class ConnectorEvidenceToolkitImplTest {
 
     @Test
     void each_step_in_submission_relay_delivery_retrieval_chain_produces_signed_evidence() {
-        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var base = MessageTestFixtures.createOutboundBusinessMessage();
         var as4 = base.as4Properties().toBuilder()
                       .ebmsMessageIdentifier("urn:test:ebms:chain")
                       .build();
@@ -141,7 +141,7 @@ class ConnectorEvidenceToolkitImplTest {
 
     @Test
     void non_delivery_after_relay_chain_contains_enveloped_signature_bytes() {
-        var base = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var base = MessageTestFixtures.createOutboundBusinessMessage();
         var as4 = base.as4Properties().toBuilder()
                       .ebmsMessageIdentifier("urn:test:ebms:reject-chain")
                       .build();

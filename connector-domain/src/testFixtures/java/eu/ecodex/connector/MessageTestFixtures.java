@@ -10,12 +10,12 @@ import java.util.List;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "LineLength"})
 public class MessageTestFixtures {
-    public static ConnectorMessage createValidOutboundBusinessMessage() {
+    public static ConnectorMessage createOutboundBusinessMessage() {
         var builder = backendToGatewayMessage();
         return builder.build();
     }
 
-    public static ConnectorMessage createValidEvidenceMessage() {
+    public static ConnectorMessage createEvidenceMessage() {
         var builder = backendToGatewayMessage();
         return builder
                 .businessContent(null)
@@ -26,9 +26,8 @@ public class MessageTestFixtures {
                 .build();
     }
 
-    public static ConnectorMessage createValidOutboundStagingBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        return builder
+    public static ConnectorMessage createOutboundStagingBusinessMessage() {
+        return backendToGatewayMessage()
                 .identifier(null)
                 .uuid(null)
                 .backendName(null)
@@ -46,178 +45,173 @@ public class MessageTestFixtures {
                 .build();
     }
 
-    public static ConnectorMessage createValidInboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
-        builder.transportedEvidences(
-                List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
-        );
-        return builder.build();
+    public static ConnectorMessage createInboundBusinessMessage() {
+        return backendToGatewayMessage()
+                .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                .transportedEvidences(
+                        List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
+                ).build();
     }
 
-    public static ConnectorMessage createValidInboundBusinessMessageWithoutBackendName() {
-        var builder = createValidInboundBusinessMessage().toBuilder();
-        builder.backendName(null);
-        return builder.build();
+    public static ConnectorMessage createInboundBusinessMessageWithoutBackendName() {
+        return createInboundBusinessMessage().toBuilder()
+                                             .backendName(null)
+                                             .build();
     }
 
-    public static ConnectorMessage createValidInboundBusinessMessageWithoutBackendNameAndConversationIdentifier() {
-        var builder = createValidInboundBusinessMessageWithoutBackendName().toBuilder();
-        builder.backendName(null);
-        builder.as4Properties(defaultASProperties().conversationIdentifier(null).build());
-        return builder.build();
+    public static ConnectorMessage createInboundBusinessMessageWithoutBackendNameAndConversationIdentifier() {
+        return createInboundBusinessMessageWithoutBackendName()
+                .toBuilder()
+                .backendName(null)
+                .as4Properties(defaultASProperties().conversationIdentifier(null).build())
+                .build();
     }
 
     public static ConnectorMessage createValidOutboundBusinessMessageWithoutGatewayName() {
-        var builder = backendToGatewayMessage();
-        builder.gatewayName(null);
-        return builder.build();
+        return backendToGatewayMessage().gatewayName(null).build();
     }
 
     public static ConnectorMessage createNullFromPartyOutboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.as4Properties(
-                defaultASProperties()
-                        .fromParty(null)
-                        .build()
-        );
-        return builder.build();
+        return backendToGatewayMessage()
+                .as4Properties(defaultASProperties().fromParty(null).build())
+                .build();
     }
 
     public static ConnectorMessage createEmptyFromPartyOutboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.as4Properties(
-                defaultASProperties()
-                        .fromParty(
-                                PartyTestFixtures.createFromParty()
-                                                 .toBuilder()
-                                                 .identifierType("")
-                                                 .build())
-                        .build()
-        );
-        return builder.build();
+        return backendToGatewayMessage()
+                .as4Properties(
+                        defaultASProperties()
+                                .fromParty(
+                                        PartyTestFixtures.createFromParty()
+                                                         .toBuilder()
+                                                         .identifierType("")
+                                                         .build())
+                                .build()
+                )
+                .build();
     }
 
     public static ConnectorMessage createNullToPartyOutboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.as4Properties(
-                defaultASProperties()
-                        .toParty(null)
-                        .build()
-        );
-        return builder.build();
+        return backendToGatewayMessage()
+                .as4Properties(defaultASProperties().toParty(null).build())
+                .build();
     }
 
     public static ConnectorMessage createEmptyToPartyOutboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.as4Properties(
-                defaultASProperties()
-                        .toParty(PartyTestFixtures.createToParty()
-                                                  .toBuilder()
-                                                  .identifierType("")
-                                                  .build())
-                        .build()
-        );
-        return builder.build();
+        return backendToGatewayMessage()
+                .as4Properties(
+                        defaultASProperties()
+                                .toParty(PartyTestFixtures.createToParty()
+                                                          .toBuilder()
+                                                          .identifierType("")
+                                                          .build())
+                                .build()
+                )
+                .build();
     }
 
     public static ConnectorMessage createInvalidFromPartyOutboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.as4Properties(
-                defaultASProperties()
-                        .fromParty(PartyTestFixtures.createToParty())
-                        .build()
-        );
-        return builder.build();
+        return backendToGatewayMessage()
+                .as4Properties(
+                        defaultASProperties()
+                                .fromParty(PartyTestFixtures.createToParty())
+                                .build()
+                )
+                .build();
     }
 
     public static ConnectorMessage createInvalidToPartyOutboundBusinessMessage() {
-        var builder = backendToGatewayMessage();
-        builder.as4Properties(
-                defaultASProperties()
-                        .toParty(PartyTestFixtures.createFromParty())
-                        .build()
-        );
-        return builder.build();
+        return backendToGatewayMessage()
+                .as4Properties(
+                        defaultASProperties()
+                                .toParty(PartyTestFixtures.createFromParty())
+                                .build()
+                ).build();
     }
 
     public static ConnectorMessage createSubmissionAcceptanceEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
-        var builder = createValidOutboundBusinessMessage().toBuilder();
-        builder.evidences(evidences);
-        builder.transportedEvidences(evidences);
-        builder.businessContent(null);
-        return builder.build();
+
+        return createOutboundBusinessMessage().toBuilder()
+                                              .evidences(evidences)
+                                              .transportedEvidences(evidences)
+                                              .businessContent(null)
+                                              .build();
     }
 
     public static ConnectorMessage createRelayRMMDAcceptanceEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
-        var builder = createValidInboundBusinessMessage().toBuilder();
-        builder.evidences(evidences);
-        builder.transportedEvidences(evidences);
-        builder.businessContent(null);
-        return builder.build();
+
+        return createInboundBusinessMessage().toBuilder()
+                                             .evidences(evidences)
+                                             .transportedEvidences(evidences)
+                                             .businessContent(null)
+                                             .build();
     }
 
     public static ConnectorMessage createNonDeliveryEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createNonDeliveryEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
-        var builder = createValidInboundBusinessMessage().toBuilder();
-        builder.evidences(evidences);
-        builder.transportedEvidences(evidences);
-        builder.businessContent(null);
-        return builder.build();
+
+        return createInboundBusinessMessage().toBuilder()
+                                             .evidences(evidences)
+                                             .transportedEvidences(evidences)
+                                             .businessContent(null)
+                                             .build();
     }
 
     public static ConnectorMessage createDeliveryEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createDeliveryEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
-        var builder = backendToGatewayMessage();
-        builder.evidences(evidences);
-        builder.transportedEvidences(evidences);
-        builder.businessContent(null);
-        return builder.build();
+
+        return backendToGatewayMessage()
+                .evidences(evidences)
+                .transportedEvidences(evidences)
+                .businessContent(null)
+                .build();
     }
 
     public static ConnectorMessage createEvidenceTriggerMessage() {
         var evidence = EvidenceTestFixtures.createEvidenceTrigger();
         var transported = new ArrayList<ConnectorMessageEvidence>();
         transported.add(evidence);
-        var builder = evidencesMessage();
-        builder.transportedEvidences(transported);
-        builder.businessContent(null);
 
-        return builder.build();
+        return evidencesMessage()
+                .transportedEvidences(transported)
+                .businessContent(null)
+                .build();
     }
 
     public static ConnectorMessage createRejectedMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionRejectionEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
-        var builder = backendToGatewayMessage();
-        builder.evidences(evidences);
-        builder.transportedEvidences(evidences);
-        builder.businessContent(null);
-        builder.rejectedAt(Instant.now());
-        return builder.build();
+
+        return backendToGatewayMessage()
+                .evidences(evidences)
+                .transportedEvidences(evidences)
+                .businessContent(null)
+                .rejectedAt(Instant.now())
+                .build();
     }
 
     public static ConnectorMessage createConfirmedMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
-        var builder = backendToGatewayMessage();
-        builder.evidences(evidences);
-        builder.transportedEvidences(evidences);
-        builder.businessContent(null);
-        builder.confirmedAt(Instant.now());
-        return builder.build();
+
+        return backendToGatewayMessage()
+                .evidences(evidences)
+                .transportedEvidences(evidences)
+                .businessContent(null)
+                .confirmedAt(Instant.now())
+                .build();
     }
 
     private static ConnectorMessage.ConnectorMessageBuilder evidencesMessage() {
@@ -235,7 +229,8 @@ public class MessageTestFixtures {
                         ConnectorMessageAS4Properties
                                 .builder()
                                 .conversationIdentifier(null)
-                                .referenceToIdentifier("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
+                                .referenceToIdentifier(
+                                        "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
                                 .ebmsMessageIdentifier(null)
                                 .originalSender(null)
                                 .finalRecipient(null)

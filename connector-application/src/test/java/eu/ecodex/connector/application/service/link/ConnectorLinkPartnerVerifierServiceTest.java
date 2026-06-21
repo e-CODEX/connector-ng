@@ -18,13 +18,12 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.link.ConnectorLinkPartnerVerifierService;
-import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkPartnerVerifier;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
 import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -37,21 +36,16 @@ public class ConnectorLinkPartnerVerifierServiceTest {
     @Mock
     private ConnectorLinkPartnerRepository linkPartnerRepository;
 
-    private ConnectorLinkPartnerVerifier gatewayLinkEventHandler;
-
-    @BeforeEach
-    void setUp() {
-        gatewayLinkEventHandler = new ConnectorLinkPartnerVerifierService(
-                linkPartnerRepository
-        );
-    }
+    @InjectMocks
+    private ConnectorLinkPartnerVerifierService gatewayLinkEventHandler;
 
     @Test
     void should_submit_outbound_message_successfully_to_gateway_if_link_partner_is_valid() {
         when(linkPartnerRepository.findByName(any()))
                 .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
 
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
+
         gatewayLinkEventHandler.verify(message);
 
         verify(linkPartnerRepository, times(1)).findByName(any());
@@ -64,7 +58,8 @@ public class ConnectorLinkPartnerVerifierServiceTest {
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
                 () -> gatewayLinkEventHandler.verify(
-                        MessageTestFixtures.createValidOutboundBusinessMessage())
+                        MessageTestFixtures.createOutboundBusinessMessage()
+                )
         );
 
         verify(linkPartnerRepository, times(1)).findByName(any());
@@ -85,7 +80,7 @@ public class ConnectorLinkPartnerVerifierServiceTest {
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
                 () -> gatewayLinkEventHandler.verify(
-                        MessageTestFixtures.createValidOutboundBusinessMessage())
+                        MessageTestFixtures.createOutboundBusinessMessage())
         );
     }
 
@@ -97,7 +92,7 @@ public class ConnectorLinkPartnerVerifierServiceTest {
         assertThrows(
                 ConnectorLinkPartnerSubmissionException.class,
                 () -> gatewayLinkEventHandler.verify(
-                        MessageTestFixtures.createValidInboundBusinessMessage())
+                        MessageTestFixtures.createInboundBusinessMessage())
         );
     }
 }

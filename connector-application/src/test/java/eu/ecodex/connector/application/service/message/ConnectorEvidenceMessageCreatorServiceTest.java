@@ -54,7 +54,7 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
     void should_create_evidence_message_successfully(ConnectorMessageEvidence evidence) {
         when(messageIdGenerator.generateIdentifier())
                .thenReturn("d040fe80-55a6-4d51-85de-9e16280eb503@connector.ecodex.eu");
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var as4Properties = message.as4Properties();
         var action = ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type());
         as4Properties = as4Properties.toBuilder().action(action).build();

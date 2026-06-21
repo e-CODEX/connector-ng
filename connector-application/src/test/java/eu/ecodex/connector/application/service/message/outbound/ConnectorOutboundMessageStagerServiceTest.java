@@ -23,7 +23,6 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageStagerService;
-import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageStager;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.exception.ConnectorMessageException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -31,9 +30,9 @@ import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentReposito
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -48,17 +47,8 @@ public class ConnectorOutboundMessageStagerServiceTest {
     @Mock
     private ConnectorMessageBusinessContentRepository businessContentRepository;
 
-    private ConnectorOutboundMessageStager outboundMessageStagerService;
-
-    @BeforeEach
-    void setUp() {
-        outboundMessageStagerService = new ConnectorOutboundMessageStagerService(
-                outboundMessagePipelinePublisher,
-                messageRepository,
-                attachmentRepository,
-                businessContentRepository
-        );
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageStagerService outboundMessageStagerService;
 
     @Test
     void should_stage_message_successfully_with_attachments() {
@@ -75,7 +65,6 @@ public class ConnectorOutboundMessageStagerServiceTest {
         verify(attachmentRepository, times(3)).findByIdentifier(any());
         verify(attachmentRepository, times(3)).attachToMessage(any(), any());
         verify(attachmentRepository, times(3)).updateType(any(), any());
-
         verify(outboundMessagePipelinePublisher).publish(any());
     }
 
@@ -111,7 +100,7 @@ public class ConnectorOutboundMessageStagerServiceTest {
         assertThrows(
                 ConnectorMessageException.class,
                 () -> outboundMessageStagerService.stage(
-                        MessageTestFixtures.createValidEvidenceMessage()
+                        MessageTestFixtures.createEvidenceMessage()
                 )
         );
 
@@ -141,7 +130,7 @@ public class ConnectorOutboundMessageStagerServiceTest {
     }
 
     private ConnectorMessage createMessage() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
 
         return message
                 .toBuilder()

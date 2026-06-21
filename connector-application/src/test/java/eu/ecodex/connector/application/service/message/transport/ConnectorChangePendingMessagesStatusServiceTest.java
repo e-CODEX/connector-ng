@@ -29,6 +29,7 @@ public class ConnectorChangePendingMessagesStatusServiceTest {
     private static final String BACKEND_NAME = "backend_alice";
     @Mock
     private ConnectorMessageTransportStepRepository transportStepRepository;
+
     @InjectMocks
     private ConnectorChangePendingMessagesStatusService changePendingMessagesStatusService;
 

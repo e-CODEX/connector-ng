@@ -19,7 +19,7 @@ import java.util.Map;
  * Defines an interface to manage and retrieve message routing configurations within the connector
  * system for specific business domains.
  */
-public interface ConnectorMessageRoutingService {
+public interface ConnectorMessageRouter {
     /**
      * Checks if routing is enabled for the specified business domain within the connector system.
      *
@@ -27,8 +27,8 @@ public interface ConnectorMessageRoutingService {
      * {@code businessDomainIdentifier}. If routing is enabled, the system routes messages according
      * to the associated configuration; otherwise, routing is inactive for the domain.
      *
-     * @param businessDomainIdentifier The uuid representing the business domain for which
-     *                                 routing status needs to be determined. Must not be null.
+     * @param businessDomainIdentifier The uuid representing the business domain for which routing
+     *                                 status needs to be determined. Must not be null.
      *
      * @return {@code true} if routing is enabled for the specified business domain; {@code false}
      *         otherwise.

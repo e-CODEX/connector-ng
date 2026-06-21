@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 public class ConnectorRoutingRulePatternTest {
     @Test
     void should_throw_exception_when_attribute_to_extract_is_not_an_as4_attribute() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
 
         Assertions.assertThrows(
                 RuntimeException.class,

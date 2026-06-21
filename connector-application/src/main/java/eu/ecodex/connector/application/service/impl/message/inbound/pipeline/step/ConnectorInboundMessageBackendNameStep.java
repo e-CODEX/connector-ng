@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.message.inbound.pipeline.st
 
 import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
 import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRoutingService;
+import eu.ecodex.connector.application.service.usecase.routing.ConnectorMessageRouter;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageStep {
     private final ConnectorMessageRepository messageRepository;
-    private final ConnectorMessageRoutingService messageRoutingService;
+    private final ConnectorMessageRouter messageRoutingService;
 
     /**
      * Creates a new backend name resolution step.
@@ -56,7 +56,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
      */
     public ConnectorInboundMessageBackendNameStep(
             ConnectorMessageRepository messageRepository,
-            ConnectorMessageRoutingService messageRoutingService) {
+            ConnectorMessageRouter messageRoutingService) {
         this.messageRepository = messageRepository;
         this.messageRoutingService = messageRoutingService;
     }

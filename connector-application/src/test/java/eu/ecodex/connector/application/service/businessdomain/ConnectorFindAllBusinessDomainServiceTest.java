@@ -27,12 +27,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorFindAllBusinessDomainServiceTest {
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
+
     @InjectMocks
     private ConnectorListBusinessDomainService connectorBusinessDomainService;
 
     @Test
     void should_find_all_business_domains_successfully() {
-        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+        var businessDomain = BusinessDomainTestFixtures.createdDefaultBusinessDomain();
 
         when(businessDomainRepository.findAll()).thenReturn(List.of(businessDomain));
 

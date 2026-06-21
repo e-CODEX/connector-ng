@@ -23,13 +23,18 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
+import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.infrastructure.property.businessdomain.ConnectorBusinessDomainProperties;
 import eu.ecodex.connector.infrastructure.property.businessdomain.DefaultBusinessDomainProperties;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,6 +46,8 @@ public class ConnectorBusinessDomainInitializerTest {
     private ConnectorRegisterBusinessDomain registerBusinessDomainService;
     @Mock
     private ConnectorListBusinessDomain listBusinessDomainService;
+    @Mock
+    private ConnectorRegisterProcessingMode registerProcessingModeService;
     @Mock
     private ConnectorBusinessDomainProperties domainProperties;
     @Mock
@@ -106,8 +113,8 @@ public class ConnectorBusinessDomainInitializerTest {
 
     @Test
     void should_register_each_configured_default_business_domains_successfully() throws Exception {
-        var props1 = defaultDomainProperties("domain-a", "Domain A", true);
-        var props2 = defaultDomainProperties("domain-b", "Domain B", false);
+        var props1 = defaultDomainProperties("domain-a", "Domain A", true, null);
+        var props2 = defaultDomainProperties("domain-b", "Domain B", false, null);
         when(domainProperties.getDefaults()).thenReturn(List.of(props1, props2));
 
         initializer.run(applicationArguments);
@@ -133,9 +140,9 @@ public class ConnectorBusinessDomainInitializerTest {
 
     @Test
     void should_register_each_configured_default_business_domains_even_if_one_already_exists_successfully() {
-        var props1 = defaultDomainProperties("domain-a", "Domain A", true);
-        var props2 = defaultDomainProperties("domain-b", "Domain B", true);
-        var props3 = defaultDomainProperties("domain-c", "Domain C", true);
+        var props1 = defaultDomainProperties("domain-a", "Domain A", true, null);
+        var props2 = defaultDomainProperties("domain-b", "Domain B", true, null);
+        var props3 = defaultDomainProperties("domain-c", "Domain C", true, null);
         when(domainProperties.getDefaults()).thenReturn(List.of(props1, props2, props3));
 
         doThrow(new RuntimeException("duplicate identifier"))
@@ -158,13 +165,78 @@ public class ConnectorBusinessDomainInitializerTest {
         verify(registerBusinessDomainService, times(3)).execute(any());
     }
 
+    // P-mode file — file: prefix
+
+    @Test
+    void should_register_each_configured_default_business_domains_with_its_pmode_successfully(@TempDir Path tempDir)
+            throws Exception {
+        var pmodeFile = tempDir.resolve("pmode.xml");
+        Files.writeString(pmodeFile, "<pmode>config</pmode>");
+
+        var props = defaultDomainProperties(
+                "domain-a", "Domain A", true, "file:" + pmodeFile
+        );
+        when(domainProperties.getDefaults()).thenReturn(List.of(props));
+
+        initializer.run(applicationArguments);
+
+        verify(registerProcessingModeService).execute(
+                argThat(id -> "domain-a".equals(id.messageLaneIdentifier())),
+                argThat(pmode ->
+                                "<pmode>config</pmode>".equals(pmode.content())
+                                        && ("file:" + pmodeFile).equals(pmode.filename())
+                                        && pmode.description().contains("domain-a")
+                )
+        );
+    }
+
+    @Test
+    void should_register_each_configured_default_business_domains_log_warning_for_invalid_pmode_successfully(
+            @TempDir Path tempDir) {
+        var missingFile = tempDir.resolve("does-not-exist.xml");
+        var props = defaultDomainProperties(
+                "domain-a", "Domain A", true, "file:" + missingFile
+        );
+        when(domainProperties.getDefaults()).thenReturn(List.of(props));
+
+        assertThatNoException().isThrownBy(() -> initializer.run(applicationArguments));
+
+        verify(registerBusinessDomainService).execute(any());
+        verifyNoInteractions(registerProcessingModeService);
+    }
+
+    // -------------------------------------------------------------------------
+    // P-mode registration failure is isolated from domain registration
+    // -------------------------------------------------------------------------
+
+    @Test
+    void should_register_each_configured_default_business_domains_log_warning_if_error_occurs_during_pmode_registration_successfully(
+            @TempDir Path tempDir)
+            throws Exception {
+        var pmodeFile = tempDir.resolve("pmode.xml");
+        Files.writeString(pmodeFile, "<pmode>config</pmode>");
+
+        var props = defaultDomainProperties(
+                "domain-a", "Domain A", true, "file:" + pmodeFile
+        );
+        when(domainProperties.getDefaults()).thenReturn(List.of(props));
+
+        doThrow(new ConnectorProcessingModeException("Error parsing processing mode xml file"))
+                .when(registerProcessingModeService).execute(any(), any());
+
+        assertThatNoException().isThrownBy(() -> initializer.run(applicationArguments));
+
+        verify(registerBusinessDomainService).execute(any());
+        verify(registerProcessingModeService).execute(any(), any());
+    }
 
     private DefaultBusinessDomainProperties defaultDomainProperties(
-            String identifier, String description, boolean enabled) {
+            String identifier, String description, boolean enabled, String pmodeFile) {
         var props = mock(DefaultBusinessDomainProperties.class);
         when(props.getIdentifier()).thenReturn(identifier);
         when(props.getDescription()).thenReturn(description);
         when(props.isEnabled()).thenReturn(enabled);
+        when(props.getPmodeFile()).thenReturn(pmodeFile);
 
         return props;
     }

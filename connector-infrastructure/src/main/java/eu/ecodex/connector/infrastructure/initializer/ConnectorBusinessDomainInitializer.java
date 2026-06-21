@@ -12,15 +12,22 @@ package eu.ecodex.connector.infrastructure.initializer;
 
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
+import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.infrastructure.property.businessdomain.ConnectorBusinessDomainProperties;
 import eu.ecodex.connector.infrastructure.property.businessdomain.DefaultBusinessDomainProperties;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,8 +36,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
+    private static final String FILE_PREFIX = "file:";
     private final ConnectorRegisterBusinessDomain registerBusinessDomainService;
     private final ConnectorListBusinessDomain listBusinessDomainService;
+    private final ConnectorRegisterProcessingMode registerProcessingModeService;
     private final ConnectorBusinessDomainProperties domainProperties;
 
     /**
@@ -42,15 +51,19 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
      *                                      domains into the system.
      * @param listBusinessDomainService     the service responsible for listing all existing
      *                                      business domains in the system.
+     * @param registerProcessingModeService the service responsible for registering new processing
+     *                                      modes
      * @param domainProperties              the configuration properties containing default business
      *                                      domain information.
      */
     public ConnectorBusinessDomainInitializer(
             ConnectorRegisterBusinessDomain registerBusinessDomainService,
             ConnectorListBusinessDomain listBusinessDomainService,
+            ConnectorRegisterProcessingMode registerProcessingModeService,
             ConnectorBusinessDomainProperties domainProperties) {
         this.registerBusinessDomainService = registerBusinessDomainService;
         this.listBusinessDomainService = listBusinessDomainService;
+        this.registerProcessingModeService = registerProcessingModeService;
         this.domainProperties = domainProperties;
     }
 
@@ -76,14 +89,30 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
         log.info("Found {} default business domains", defaultBusinessDomains.size());
 
         for (var properties : defaultBusinessDomains) {
+            var businessDomain = toBusinessDomain(properties);
             try {
-                var businessDomain = toBusinessDomain(properties);
                 registerBusinessDomainService.execute(businessDomain);
             } catch (Exception e) {
                 log.warn(
                         "Could not register business domain [{}]: Reason: [{}]",
                         properties.getIdentifier(), e.getMessage(), e
                 );
+            }
+
+            if (properties.getPmodeFile() != null) {
+                log.info("Found p-mode file for domain [{}]", properties.getIdentifier());
+
+                try {
+                    var processingMode = toProcessingMode(properties);
+                    registerProcessingModeService.execute(
+                            businessDomain.identifier(), processingMode
+                    );
+                } catch (Exception e) {
+                    log.warn(
+                            "Could not register configured p-mode for domain [{}]: Reason: [{}]",
+                            properties.getIdentifier(), e.getMessage(), e
+                    );
+                }
             }
         }
     }
@@ -100,5 +129,31 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
                 .enabled(properties.isEnabled())
                 .source(ConnectorConfigurationSource.IMPLEMENTATION)
                 .build();
+    }
+
+    private ConnectorProcessingMode toProcessingMode(DefaultBusinessDomainProperties properties)
+            throws IOException {
+        return ConnectorProcessingMode.builder()
+                                      .description(String.format(
+                                              "Default processing mode for %s",
+                                              properties.getIdentifier()
+                                      ))
+                                      .filename(properties.getPmodeFile())
+                                      .content(getPmodeFile(properties.getPmodeFile()))
+                                      .build();
+    }
+
+    private String getPmodeFile(String path) throws IOException {
+        if (path.startsWith(FILE_PREFIX)) {
+            var resourcePath = path.substring(FILE_PREFIX.length());
+
+            return Files.readString(Path.of(resourcePath));
+        }
+
+        try (var stream = URI.create(path).toURL().openStream()) {
+            return stream.toString();
+        } catch (Exception e) {
+            return Files.readString(Path.of(path));
+        }
     }
 }

@@ -22,4 +22,5 @@ public class DefaultBusinessDomainProperties {
     private String identifier;
     private String description;
     private boolean enabled;
+    private String pmodeFile;
 }

@@ -95,7 +95,7 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
             } catch (Exception e) {
                 log.warn(
                         "Could not register business domain [{}]: Reason: [{}]",
-                        properties.getIdentifier(), e.getMessage(), e
+                        properties.getIdentifier(), e.getMessage()
                 );
             }
 
@@ -110,7 +110,7 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
                 } catch (Exception e) {
                     log.warn(
                             "Could not register configured p-mode for domain [{}]: Reason: [{}]",
-                            properties.getIdentifier(), e.getMessage(), e
+                            properties.getIdentifier(), e.getMessage()
                     );
                 }
             }

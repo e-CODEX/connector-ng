@@ -15,13 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.service.impl.link.ConnectorFindLinkPartnerService;
-import eu.ecodex.connector.application.service.usecase.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerException;
 import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -30,12 +29,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorFindLinkPartnerServiceTest {
     @Mock
     private ConnectorLinkPartnerRepository linkPartnerRepository;
-    private ConnectorFindLinkPartner findLinkPartnerService;
 
-    @BeforeEach
-    void setUp() {
-        findLinkPartnerService = new ConnectorFindLinkPartnerService(linkPartnerRepository);
-    }
+    @InjectMocks
+    private ConnectorFindLinkPartnerService findLinkPartnerService;
 
     @Test
     void should_find_link_partner_by_certificate_dn_successfully() {

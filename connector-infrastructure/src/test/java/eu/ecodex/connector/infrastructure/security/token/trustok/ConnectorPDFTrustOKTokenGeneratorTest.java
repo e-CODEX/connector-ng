@@ -37,7 +37,7 @@ public class ConnectorPDFTrustOKTokenGeneratorTest extends BaseTokenTest {
 
     @Test
     void should_create_pdf_trust_ok_token_for_signature_based_document_and_sign_it_successfully() throws IOException {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);
@@ -61,7 +61,7 @@ public class ConnectorPDFTrustOKTokenGeneratorTest extends BaseTokenTest {
 
     @Test
     void should_create_pdf_trust_ok_token_with_appendix_for_signature_based_document_and_sign_it_successfully() throws IOException {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/Signed_Visible.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);
@@ -85,7 +85,7 @@ public class ConnectorPDFTrustOKTokenGeneratorTest extends BaseTokenTest {
 
     @Test
     void should_create_pdf_trust_ok_token_for_signature_based_document_with_two_signatures_and_sign_it_successfully() throws IOException {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/Two_Signatures.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);
@@ -110,7 +110,7 @@ public class ConnectorPDFTrustOKTokenGeneratorTest extends BaseTokenTest {
     @Test
     void should_create_pdf_trust_ok_token_for_auth_based_document_and_sign_it_successfully() throws IOException {
         var message = MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .businessContent(
                         MessageContentTestFixtures

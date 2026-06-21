@@ -22,12 +22,11 @@ import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.ste
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,18 +43,12 @@ public class ConnectorInboundMessageAcceptanceStepTest {
     @Mock
     private ConnectorMessageEvidenceVerifier evidenceVerifierService;
 
-    private ConnectorMessageStep acceptanceCreationStep;
-
-    @BeforeEach
-    void setUp() {
-        acceptanceCreationStep = new ConnectorInboundMessageAcceptanceStep(
-                evidenceMessageCreatorService, evidenceCreatorService, evidenceVerifierService
-        );
-    }
+    @InjectMocks
+    private ConnectorInboundMessageAcceptanceStep acceptanceCreationStep;
 
     @Test
     void should_create_inbound_message_execute_relay_remmd_acceptance_evidence() {
-        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
         var evidence = EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence();
 
         when(evidenceCreatorService.createSuccess(any(), any())).thenReturn(evidence);

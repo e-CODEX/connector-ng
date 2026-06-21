@@ -55,14 +55,20 @@ public class ConnectorOutboundMessagePipelineTest {
     @BeforeEach
     void setUp() {
         outboundMessagePipeline = new ConnectorOutboundMessagePipeline(
-                validationStep, securityStep, gatewayNameStep, ebmsIdStep, acceptanceStep,
-                confirmationStep, rejectionStep, linkSubmissionStep
+                validationStep,
+                securityStep,
+                gatewayNameStep,
+                ebmsIdStep,
+                acceptanceStep,
+                confirmationStep,
+                rejectionStep,
+                linkSubmissionStep
         );
     }
 
     @Test
     void should_process_outbound_message_pipeline_successfully() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         when(validationStep.execute(any())).thenReturn(outboundMessage);
         when(securityStep.execute(any())).thenReturn(outboundMessage);
@@ -86,7 +92,7 @@ public class ConnectorOutboundMessagePipelineTest {
 
     @Test
     void should_send_back_successfully_submission_rejection_evidence_when_security_error_occurs_during_outbound_message_processing() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         when(validationStep.execute(any())).thenReturn(outboundMessage);
         doThrow(RuntimeException.class).when(securityStep).execute(any());

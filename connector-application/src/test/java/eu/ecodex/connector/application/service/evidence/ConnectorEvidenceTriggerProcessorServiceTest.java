@@ -32,10 +32,10 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -56,26 +56,15 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
+    @InjectMocks
     private ConnectorEvidenceTriggerProcessorService processor;
-
-    @BeforeEach
-    void setUp() {
-        processor = new ConnectorEvidenceTriggerProcessorService(
-                messageRepository,
-                evidenceCreator,
-                evidenceVerifier,
-                evidenceMessageCreator,
-                linkSubmitter,
-                processingConfigurationProvider
-        );
-    }
 
     @Test
     void should_create_delivery_evidence_and_submit_to_gateway() {
-        var businessMessage = MessageTestFixtures.createValidInboundBusinessMessage()
+        var businessMessage = MessageTestFixtures.createInboundBusinessMessage()
                                                  .toBuilder()
                                                  .as4Properties(
-                                                         MessageTestFixtures.createValidInboundBusinessMessage()
+                                                         MessageTestFixtures.createInboundBusinessMessage()
                                                                             .as4Properties()
                                                                             .toBuilder()
                                                                             .ebmsMessageIdentifier(
@@ -169,10 +158,10 @@ class ConnectorEvidenceTriggerProcessorServiceTest {
 
     @Test
     void should_send_evidence_back_to_backend_when_configured() {
-        var businessMessage = MessageTestFixtures.createValidInboundBusinessMessage()
+        var businessMessage = MessageTestFixtures.createInboundBusinessMessage()
                                                  .toBuilder()
                                                  .as4Properties(
-                                                         MessageTestFixtures.createValidInboundBusinessMessage()
+                                                         MessageTestFixtures.createInboundBusinessMessage()
                                                                             .as4Properties()
                                                                             .toBuilder()
                                                                             .ebmsMessageIdentifier(

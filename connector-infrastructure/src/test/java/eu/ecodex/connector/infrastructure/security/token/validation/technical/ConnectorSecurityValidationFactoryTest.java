@@ -25,7 +25,7 @@ public class ConnectorSecurityValidationFactoryTest extends BaseTokenTest {
 
     @Test
     void should_provide_default_technical_validation_generator_if_business_document_has_detached_signature() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var validator = validationFactory.createTechnicalValidation(message);
 
         assertThat(validator.supportsAuthenticationBased()).isFalse();
@@ -34,7 +34,7 @@ public class ConnectorSecurityValidationFactoryTest extends BaseTokenTest {
     @Test
     void should_provide_aes_technical_validation_generator_if_business_document_has_auth_based_signature() {
         var message = MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .businessContent(
                         MessageContentTestFixtures
@@ -42,7 +42,7 @@ public class ConnectorSecurityValidationFactoryTest extends BaseTokenTest {
                                 .toBuilder()
                                 .businessDocument(
                                         ConnectorMessageDocumentTestFixtures
-                                                .createDocumentWithAuthBasedSignature()
+                                                .createAuthenticationBasedDocument()
                                 )
                                 .build()
                 )
@@ -56,7 +56,7 @@ public class ConnectorSecurityValidationFactoryTest extends BaseTokenTest {
     void should_provide_aes_technical_validation_generator_if_no_signature_is_present() {
         // default AES type is set to AUTHENTICATION_BASED in the application.properties
         var message = MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .businessContent(
                         MessageContentTestFixtures

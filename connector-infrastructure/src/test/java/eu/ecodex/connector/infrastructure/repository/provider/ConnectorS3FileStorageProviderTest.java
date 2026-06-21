@@ -41,6 +41,7 @@ public class ConnectorS3FileStorageProviderTest {
     private S3Client s3Client;
     @Mock
     private ConnectorS3ProviderProperties s3ProviderProperties;
+
     @InjectMocks
     private ConnectorS3FileStorageProvider fileStorageProvider;
 

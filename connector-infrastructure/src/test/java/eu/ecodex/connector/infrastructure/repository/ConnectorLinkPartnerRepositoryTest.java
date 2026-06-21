@@ -27,12 +27,12 @@ import org.springframework.boot.test.context.SpringBootTest;
                 """
                     # backends
                     connector.link.backend[0].link-config.name=default_backend_config
-                    connector.link.backend[0].link-config.properties.endpoint.key-store.path=file:config/keystores/backend-keystore.jks
-                    connector.link.backend[0].link-config.properties.endpoint.key-store.password=*****
+                    connector.link.backend[0].link-config.properties.endpoint.keystore.path=file:config/keystores/backend-keystore.jks
+                    connector.link.backend[0].link-config.properties.endpoint.keystore.password=*****
                     connector.link.backend[0].link-config.properties.endpoint.private-key.alias=connector_blue
                     connector.link.backend[0].link-config.properties.endpoint.private-key.password=*****
-                    connector.link.backend[0].link-config.properties.endpoint.trust-store.path=file:config/keystores/backend-truststore.jks
-                    connector.link.backend[0].link-config.properties.endpoint.trust-store.password=*****
+                    connector.link.backend[0].link-config.properties.endpoint.truststore.path=file:config/keystores/backend-truststore.jks
+                    connector.link.backend[0].link-config.properties.endpoint.truststore.password=*****
                     connector.link.backend[0].link-config.properties.endpoint.encrypt-alias=alice
                     connector.link.backend[0].link-config.properties.logging-enabled=true
                     # link partner 0 specific configuration

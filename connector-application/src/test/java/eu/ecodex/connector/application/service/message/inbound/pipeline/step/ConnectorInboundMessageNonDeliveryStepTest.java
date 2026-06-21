@@ -22,12 +22,11 @@ import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.ste
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,18 +43,12 @@ public class ConnectorInboundMessageNonDeliveryStepTest {
     @Mock
     private ConnectorMessageEvidenceVerifier evidenceVerifierService;
 
-    private ConnectorMessageStep nonDeliveryCreationStep;
-
-    @BeforeEach
-    void setUp() {
-        nonDeliveryCreationStep = new ConnectorInboundMessageNonDeliveryStep(
-                evidenceMessageCreatorService, evidenceCreatorService, evidenceVerifierService
-        );
-    }
+    @InjectMocks
+    private ConnectorInboundMessageNonDeliveryStep nonDeliveryCreationStep;
 
     @Test
     void should_create_inbound_message_non_delivery_evidence_successfully() {
-        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
         var evidence = EvidenceTestFixtures.createNonDeliveryEvidence();
 
         when(evidenceCreatorService.createFailure(any(), any(), any())).thenReturn(evidence);

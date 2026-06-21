@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -19,14 +20,12 @@ import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageConfirmationStep;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.Collections;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -39,19 +38,13 @@ public class ConnectorOutboundMessageConfirmationStepTest {
     @Mock
     ConnectorEvidenceMessageCreator messageCreator;
 
-    private ConnectorMessageStep outboundMessageConfirmationCreationStep;
-
-    @BeforeEach
-    void setUp() {
-        outboundMessageConfirmationCreationStep = new ConnectorOutboundMessageConfirmationStep(
-                messageCreator
-        );
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageConfirmationStep outboundMessageConfirmationCreationStep;
 
     @Test
     void should_execute_outbound_message_confirmation_successfully() {
         var outboundMessage = MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .evidences(Collections.singletonList(
                         EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
@@ -68,7 +61,7 @@ public class ConnectorOutboundMessageConfirmationStepTest {
         assertThat(outputMessage.isEvidenceMessage()).isTrue();
         assertThat(outputMessage.evidences()).isNotEmpty();
         assertThat(outputMessage.evidences()).hasSize(1);
-        Assertions.assertNotNull(outputMessage.evidences());
+        assertNotNull(outputMessage.evidences());
         assertThat(outputMessage.evidences().getFirst().type())
                 .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
         assertThat(outputMessage.direction()).isNotEqualTo(outboundMessage.direction());
@@ -78,7 +71,7 @@ public class ConnectorOutboundMessageConfirmationStepTest {
 
     @Test
     void should_throw_exception_executing_outbound_message_confirmation_when_transported_evidences_is_null() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage()
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
                                          .toBuilder()
                                          .transportedEvidences(null)
                                          .build();
@@ -91,7 +84,7 @@ public class ConnectorOutboundMessageConfirmationStepTest {
 
     @Test
     void should_throw_exception_executing_outbound_message_confirmation_when_transported_evidences_is_empty() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage()
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
                                          .toBuilder()
                                          .evidences(Collections.emptyList())
                                          .transportedEvidences(Collections.emptyList())

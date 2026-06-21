@@ -45,7 +45,7 @@ public class ConnectorUploadAttachmentsServiceTest {
 
     @Test
     void should_upload_attachments_successfully() throws IOException {
-        var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
+        var savedAttachment = MessageAttachmentTestFixtures.createdAttachment();
         when(attachmentRepository.save(any())).thenReturn(savedAttachment);
         when(storageProvider.save(any(), (Path) any())).thenReturn(savedAttachment.identifier());
 
@@ -64,6 +64,8 @@ public class ConnectorUploadAttachmentsServiceTest {
         assertThat(attachment.name()).isEqualTo("test_attachment.txt");
         assertThat(attachment.contentType()).isEqualTo("text/plain");
         assertThat(attachment.size()).isEqualTo(100L);
+        assertThat(attachment.createdAt()).isNotNull();
+        assertThat(attachment.updatedAt()).isNotNull();
     }
 
     @Test

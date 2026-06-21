@@ -17,12 +17,11 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageGatewayNameStep;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -34,14 +33,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorOutboundMessageGatewayNameStepTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
-    private ConnectorMessageStep outboundMessageGatewayNameValidationStep;
 
-    @BeforeEach
-    void setUp() {
-        outboundMessageGatewayNameValidationStep = new ConnectorOutboundMessageGatewayNameStep(
-                messageRepository
-        );
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageGatewayNameStep outboundMessageGatewayNameValidationStep;
 
     @Test
     void should_execute_outbound_message_gateway_name_validation_successfully() {
@@ -60,7 +54,7 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
 
     @Test
     void should_execute_outbound_message_gateway_name_validation_successfully_by_sending_back_message_if_name_already_set() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         var outputMessage = outboundMessageGatewayNameValidationStep.execute(outboundMessage);
 

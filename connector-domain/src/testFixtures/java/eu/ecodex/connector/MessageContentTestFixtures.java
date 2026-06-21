@@ -18,23 +18,8 @@ public class MessageContentTestFixtures {
         return ConnectorMessageBusinessContent
                 .builder()
                 .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
-                .businessDocument(ConnectorMessageDocumentTestFixtures.createDocument())
-                .build();
-    }
-
-    public static ConnectorMessageBusinessContent createContentWithoutBusinessDocument() {
-        return ConnectorMessageBusinessContent
-                .builder()
-                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
-                .businessDocument(null)
-                .build();
-    }
-
-    public static ConnectorMessageBusinessContent createSaveContent() {
-        return createContent()
-                .toBuilder()
-                .uuid("96a818f9-606a-4ff5-abc0-3ab31fa90ac3")
-                .businessDocument(ConnectorMessageDocumentTestFixtures.createSavedDocument())
+                .businessDocument(
+                        ConnectorMessageDocumentTestFixtures.createSignatureBasedDocument())
                 .build();
     }
 }

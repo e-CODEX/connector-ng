@@ -15,7 +15,7 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ConnectorMessageDocumentTestFixtures {
-    public static ConnectorMessageBusinessDocument createDocument() {
+    public static ConnectorMessageBusinessDocument createSignatureBasedDocument() {
         return ConnectorMessageBusinessDocument
                 .builder()
                 .attachment(MessageAttachmentTestFixtures.createAttachment())
@@ -24,7 +24,7 @@ public class ConnectorMessageDocumentTestFixtures {
                 .build();
     }
 
-    public static ConnectorMessageBusinessDocument createDocumentWithAuthBasedSignature() {
+    public static ConnectorMessageBusinessDocument createAuthenticationBasedDocument() {
         return ConnectorMessageBusinessDocument
                 .builder()
                 .attachment(MessageAttachmentTestFixtures.createAttachment())
@@ -41,7 +41,7 @@ public class ConnectorMessageDocumentTestFixtures {
     }
 
     public static ConnectorMessageBusinessDocument createSavedDocument() {
-        return createDocument()
+        return createSignatureBasedDocument()
                 .toBuilder()
                 .uuid("05768e36-dc7d-48e4-a403-1eceeecc1788")
                 .build();

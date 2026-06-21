@@ -25,7 +25,7 @@ public class ConnectorNotExpressionTest {
         var notExpression = new ConnectorNotExpression(equalsExpression, null);
 
         var evaluationResult = notExpression.evaluate(
-                MessageTestFixtures.createValidOutboundBusinessMessage()
+                MessageTestFixtures.createOutboundBusinessMessage()
         );
 
         assertThat(evaluationResult).isTrue();
@@ -37,7 +37,7 @@ public class ConnectorNotExpressionTest {
         var notExpression = new ConnectorNotExpression(equalsExpression, null);
 
         var evaluationResult = notExpression.evaluate(
-                MessageTestFixtures.createValidOutboundBusinessMessage()
+                MessageTestFixtures.createOutboundBusinessMessage()
         );
 
         assertThat(evaluationResult).isFalse();

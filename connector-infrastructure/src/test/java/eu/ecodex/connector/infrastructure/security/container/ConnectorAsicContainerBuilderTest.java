@@ -40,7 +40,7 @@ public class ConnectorAsicContainerBuilderTest extends BaseContainerTest {
                 .thenReturn(FileTestFixtures.readAsBytes("raw/test-xml.xml"));
 
         var message = MessageTestFixtures
-                .createValidOutboundBusinessMessage()
+                .createOutboundBusinessMessage()
                 .toBuilder()
                 .businessContent(
                         MessageContentTestFixtures

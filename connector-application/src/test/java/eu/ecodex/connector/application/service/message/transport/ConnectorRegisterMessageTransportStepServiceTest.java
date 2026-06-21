@@ -45,6 +45,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
     private ConnectorMessageTransportStepRepository transportStepRepository;
     @Mock
     private ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
+
     @InjectMocks
     private ConnectorRegisterMessageTransportStepService service;
 
@@ -101,6 +102,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         var result = service.execute(message(), ConnectorMessageTransportStatus.PENDING);
 
         assertThat(result.numberOfAttempts()).isEqualTo(1);
+
         verify(transportStepRepository)
                 .save(argThat(step ->
                                       step.numberOfAttempts() == 1
@@ -124,6 +126,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         var result = service.execute(message(), ConnectorMessageTransportStatus.DOWNLOADED);
 
         assertThat(result.numberOfAttempts()).isEqualTo(2);
+
         verify(transportStepRepository).update(
                 eq("existing-step-id"),
                 argThat(step -> step.numberOfAttempts() == 2)

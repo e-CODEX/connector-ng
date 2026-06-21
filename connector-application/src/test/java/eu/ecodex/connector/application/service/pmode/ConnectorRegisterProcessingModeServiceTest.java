@@ -50,6 +50,7 @@ public class ConnectorRegisterProcessingModeServiceTest {
     private ConnectorPartyRepository partyRepository;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
+
     @InjectMocks
     private ConnectorRegisterProcessingModeService registerProcessingModeService;
 

@@ -33,10 +33,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorBusinessDomainVerifierServiceTest {
     private static final ConnectorBusinessDomainIdentifier BUSINESS_DOMAIN_IDENTIFIER =
             BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
-    @InjectMocks
-    protected ConnectorBusinessDomainVerifierService businessDomainVerifierService;
+
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
+
+    @InjectMocks
+    protected ConnectorBusinessDomainVerifierService businessDomainVerifierService;
 
     @Test
     void should_throw_exception_if_business_domain_is_null() {
@@ -74,7 +76,9 @@ public class ConnectorBusinessDomainVerifierServiceTest {
     void should_verify_business_domain_successfully() {
         var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
+
         businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER);
+
         assertThatNoException().isThrownBy(() -> businessDomainVerifierService.execute(
                 BUSINESS_DOMAIN_IDENTIFIER));
     }

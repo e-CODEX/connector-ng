@@ -51,6 +51,7 @@ public class LegacyMessageHelperTest {
     private ConnectorMessageAttachmentRepository attachmentRepository;
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
+
     @InjectMocks
     private LegacyMessageHelper legacyMessageHelper;
 
@@ -58,6 +59,7 @@ public class LegacyMessageHelperTest {
     void should_throw_an_exception_if_as4_properties_service_is_missing() {
         var brokenAS4 = as4Properties().toBuilder().service(null).build();
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
+
         assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
                 .isInstanceOf(IllegalStateException.class);
     }
@@ -168,6 +170,7 @@ public class LegacyMessageHelperTest {
     @Test
     void should_submit_evidence_message_successfully() {
         stubHappyPath();
+
         var evidence = ConnectorMessageEvidence.builder()
                                                .type(ConnectorEvidenceType.values()[0])
                                                .content(new byte[1])

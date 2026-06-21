@@ -16,13 +16,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
@@ -185,7 +183,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
                 "184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu");
 
         when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(messageRepository.findByIdentifier(any())).thenReturn(MessageTestFixtures.createValidInboundBusinessMessage());
+        when(messageRepository.findByIdentifier(any())).thenReturn(MessageTestFixtures.createInboundBusinessMessage());
         when(businessContentRepository.save(any(), any())).thenAnswer(i -> i.getArgument(0));
         when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
@@ -238,7 +236,7 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         when(message.getBytes("payload_5")).thenReturn(new byte[]{9});
 
         when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(messageRepository.findByIdentifier(any())).thenReturn(MessageTestFixtures.createValidInboundBusinessMessage());
+        when(messageRepository.findByIdentifier(any())).thenReturn(MessageTestFixtures.createInboundBusinessMessage());
         when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
 

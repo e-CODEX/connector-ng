@@ -20,12 +20,11 @@ import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProces
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageEbmsIdStep;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -42,16 +41,8 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
-    private ConnectorMessageStep outboundMessageEbmsIdCreationStep;
-
-    @BeforeEach
-    void setUp() {
-        outboundMessageEbmsIdCreationStep = new ConnectorOutboundMessageEbmsIdStep(
-                messageEbmsIdGenerator,
-                messageRepository,
-                processingConfigurationProvider
-        );
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageEbmsIdStep outboundMessageEbmsIdCreationStep;
 
     @Test
     void should_execute_outbound_message_and_set_ebms_id_successfully() {
@@ -61,7 +52,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
                 .ebmsIdSuffix("connector.ecodex.eu")
                 .build();
         var ebmsIdentifier = String.format("%s@%s", UUID.randomUUID(), configuration);
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
         var as4Properties = outboundMessage.as4Properties();
         as4Properties = as4Properties.toBuilder().ebmsMessageIdentifier(ebmsIdentifier).build();
 
@@ -81,7 +72,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
 
     @Test
     void should_execute_outbound_message_and_not_set_ebms_id_if_disabled() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         when(processingConfigurationProvider.getConfiguration())
                 .thenReturn(

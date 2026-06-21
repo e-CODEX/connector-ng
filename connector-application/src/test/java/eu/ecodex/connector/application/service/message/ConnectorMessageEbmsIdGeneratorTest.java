@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.service.message;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
@@ -19,19 +20,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class ConnectorMessageEbmsIdGeneratorTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider messageProcessingConfigProvider;
+
     @InjectMocks
     private ConnectorMessageEbmsIdGenerator ebmsIdGenerator;
 
     @Test
     void should_generate_message_identifier_successfully() {
-        Mockito.when(messageProcessingConfigProvider.getConfiguration())
+        when(messageProcessingConfigProvider.getConfiguration())
                 .thenReturn(
                         ConnectorMessageProcessingConfiguration
                                 .builder()

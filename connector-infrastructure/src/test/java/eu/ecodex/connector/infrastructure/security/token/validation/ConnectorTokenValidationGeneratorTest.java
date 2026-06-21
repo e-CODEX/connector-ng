@@ -28,7 +28,7 @@ public class ConnectorTokenValidationGeneratorTest extends BaseTokenTest {
 
     @Test
     void should_generate_token_successfully() {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);

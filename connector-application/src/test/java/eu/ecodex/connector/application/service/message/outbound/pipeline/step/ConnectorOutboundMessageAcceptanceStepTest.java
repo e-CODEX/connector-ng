@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -21,13 +22,11 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageAcceptanceStep;
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -42,31 +41,25 @@ public class ConnectorOutboundMessageAcceptanceStepTest {
     @Mock
     private ConnectorMessageEvidenceVerifier evidenceVerifier;
 
-    private ConnectorMessageStep outboundMessageSubmissionAcceptanceCreationStep;
-
-    @BeforeEach
-    void setUp() {
-        outboundMessageSubmissionAcceptanceCreationStep = new ConnectorOutboundMessageAcceptanceStep(
-                evidenceCreator, evidenceVerifier
-        );
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageAcceptanceStep outboundMessageSubmissionAcceptanceCreationStep;
 
     @Test
     void should_create_outbound_message_execute_relay_remmd_acceptance_evidence() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
+
         when(evidenceCreator.createSuccess(any(), any())).thenReturn(evidence);
         doNothing().when(evidenceVerifier).verify(any(), any());
 
-        var outputMessage = outboundMessageSubmissionAcceptanceCreationStep.execute(
-                outboundMessage);
+        var outputMessage = outboundMessageSubmissionAcceptanceCreationStep.execute(outboundMessage);
 
         assertThat(outputMessage).isNotNull();
         assertThat(outputMessage.isBusinessMessage()).isTrue();
         assertThat(outputMessage.evidences()).isNotEmpty();
         assertThat(outputMessage.evidences()).hasSize(1);
-        Assertions.assertNotNull(outputMessage.evidences());
+        assertNotNull(outputMessage.evidences());
         assertThat(outputMessage.evidences().getFirst().type())
                 .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
         assertThat(outputMessage.direction()).isEqualTo(outboundMessage.direction());

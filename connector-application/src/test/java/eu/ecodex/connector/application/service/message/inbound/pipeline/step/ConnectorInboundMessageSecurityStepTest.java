@@ -17,11 +17,10 @@ import static org.mockito.Mockito.doNothing;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.step.ConnectorInboundMessageSecurityStep;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -33,16 +32,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorInboundMessageSecurityStepTest {
     @Mock
     private ConnectorSecurityToolkit securityToolkit;
-    private ConnectorMessageStep securityStep;
 
-    @BeforeEach
-    void setUp() {
-        securityStep = new ConnectorInboundMessageSecurityStep(securityToolkit);
-    }
+    @InjectMocks
+    private ConnectorInboundMessageSecurityStep securityStep;
 
     @Test
     void should_execute_inbound_message_security_check_successfully() {
-        var inboundMessage = MessageTestFixtures.createValidInboundBusinessMessage();
+        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
 
         doNothing().when(securityToolkit).validateMessage(any());
 

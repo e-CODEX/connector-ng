@@ -19,12 +19,11 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageSecurityStep;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -38,17 +37,13 @@ public class ConnectorOutboundMessageSecurityStepTest {
     private ConnectorSecurityToolkit securityToolkit;
     @Mock
     private ConnectorMessageRepository messageRepository;
-    private ConnectorMessageStep outboundMessageSecurityStep;
 
-    @BeforeEach
-    void setUp() {
-        outboundMessageSecurityStep = new ConnectorOutboundMessageSecurityStep(
-                securityToolkit, messageRepository);
-    }
+    @InjectMocks
+    private ConnectorOutboundMessageSecurityStep outboundMessageSecurityStep;
 
     @Test
     void should_execute_outbound_message_security_successfully() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         when(securityToolkit.buildContainer(any())).thenReturn(outboundMessage);
         when(messageRepository.findByIdentifier(any())).thenReturn(outboundMessage);

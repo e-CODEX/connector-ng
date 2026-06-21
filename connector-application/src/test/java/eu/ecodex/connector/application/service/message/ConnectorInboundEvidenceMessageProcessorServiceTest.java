@@ -57,6 +57,7 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     private ConnectorMessageEvidenceVerifier evidenceVerifier;
     @Mock
     private ConnectorLinkSubmitter linkSubmitter;
+
     @InjectMocks
     private ConnectorInboundEvidenceMessageProcessorService processor;
 
@@ -64,7 +65,6 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     void should_apply_delivery_evidence_and_forward_confirmation_message_to_backend() {
         var deliveryEvidence = EvidenceTestFixtures.createDeliveryEvidence();
         var confirmationMessage = gatewayConfirmationMessage(
-                REFERENCED_EBMS_ID,
                 List.of(deliveryEvidence)
         );
         var referencedMessage = referencedBusinessMessage();
@@ -84,7 +84,6 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     @Test
     void should_forward_confirmation_message_without_lifecycle_update_when_reference_is_missing() {
         var confirmationMessage = gatewayConfirmationMessage(
-                REFERENCED_EBMS_ID,
                 List.of(EvidenceTestFixtures.createDeliveryEvidence())
         );
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
@@ -101,7 +100,6 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     void should_ignore_irrelevant_evidence_but_still_forward_confirmation_message() {
         var deliveryEvidence = EvidenceTestFixtures.createDeliveryEvidence();
         var confirmationMessage = gatewayConfirmationMessage(
-                REFERENCED_EBMS_ID,
                 List.of(deliveryEvidence)
         );
         var referencedMessage = referencedBusinessMessage();
@@ -119,12 +117,12 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     }
 
     private static ConnectorMessage referencedBusinessMessage() {
-        return MessageTestFixtures.createValidOutboundBusinessMessage()
+        return MessageTestFixtures.createOutboundBusinessMessage()
                                   .toBuilder()
                                   .identifier(REFERENCED_MESSAGE_ID)
                                   .backendMessageIdentifier(BACKEND_MESSAGE_ID)
                                   .as4Properties(
-                                          MessageTestFixtures.createValidOutboundBusinessMessage()
+                                          MessageTestFixtures.createOutboundBusinessMessage()
                                                              .as4Properties()
                                                              .toBuilder()
                                                              .ebmsMessageIdentifier(REFERENCED_EBMS_ID)
@@ -134,19 +132,18 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     }
 
     private static ConnectorMessage gatewayConfirmationMessage(
-            String referenceToMessageId,
             List<ConnectorMessageEvidence> evidences) {
         return ConnectorMessage.builder()
                                .identifier(CONFIRMATION_MESSAGE_ID)
                                .businessDomainIdentifier(
-                                       MessageTestFixtures.createValidOutboundBusinessMessage()
+                                       MessageTestFixtures.createOutboundBusinessMessage()
                                                           .businessDomainIdentifier()
                                )
                                .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
                                .as4Properties(
                                        ConnectorMessageAS4Properties.builder()
                                                                     .referenceToIdentifier(
-                                                                            referenceToMessageId)
+                                                                            ConnectorInboundEvidenceMessageProcessorServiceTest.REFERENCED_EBMS_ID)
                                                                     .ebmsMessageIdentifier(
                                                                             "evidence-ebms@domibus.eu")
                                                                     .build()

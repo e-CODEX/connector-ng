@@ -55,8 +55,10 @@ public class ConnectorMessageAttachmentRepositoryTest {
     @Test
     void should_find_attachment_by_identifier_successfully_from_database() {
         var attachment = MessageAttachmentTestFixtures.createAttachment();
+
         this.repository.save(attachment);
         var foundAttachment = this.repository.findByIdentifier(attachment.identifier());
+
         assertThat(foundAttachment).isNotNull();
         assertThat(foundAttachment.identifier()).isEqualTo(attachment.identifier());
     }
@@ -64,7 +66,9 @@ public class ConnectorMessageAttachmentRepositoryTest {
     @Test
     void should_return_null_when_searching_unknown_attachment_by_identifier_from_database() {
         var attachment = MessageAttachmentTestFixtures.createAttachment();
+
         var foundAttachment = this.repository.findByIdentifier(attachment.identifier());
+
         assertThat(foundAttachment).isNull();
     }
 

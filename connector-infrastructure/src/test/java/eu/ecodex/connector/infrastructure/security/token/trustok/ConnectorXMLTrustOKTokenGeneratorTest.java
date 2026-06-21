@@ -35,7 +35,7 @@ public class ConnectorXMLTrustOKTokenGeneratorTest extends BaseTokenTest {
 
     @Test
     void should_create_xml_trust_ok_token_and_sign_it_successfully() throws IOException {
-        var message = MessageTestFixtures.createValidOutboundBusinessMessage();
+        var message = MessageTestFixtures.createOutboundBusinessMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);

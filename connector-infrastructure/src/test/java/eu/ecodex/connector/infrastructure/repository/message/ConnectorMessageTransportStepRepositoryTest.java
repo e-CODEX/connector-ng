@@ -54,8 +54,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
             "classpath:sql/message-as4-properties.sql",
     })
     void should_create_a_new_transport_step_successfully() {
-        var transportStep = this.repository.save(
-                generateTransportStep(MESSAGE_IDENTIFIER));
+        var transportStep = this.repository.save(generateTransportStep(MESSAGE_IDENTIFIER));
 
         assertThat(transportStep).isNotNull();
         assertThat(transportStep.identifier()).isEqualTo(STEP_IDENTIFIER);
@@ -76,8 +75,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
                 NullPointerException.class,
                 () -> this.repository.update(
                         null,
-                        generateTransportStep(
-                                MESSAGE_IDENTIFIER)
+                        generateTransportStep(MESSAGE_IDENTIFIER)
                 )
         );
     }

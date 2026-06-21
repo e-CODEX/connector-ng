@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorListAttachmentsServiceTest {
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
+
     @InjectMocks
     private ConnectorListAttachmentsService connectorListAttachmentsService;
 

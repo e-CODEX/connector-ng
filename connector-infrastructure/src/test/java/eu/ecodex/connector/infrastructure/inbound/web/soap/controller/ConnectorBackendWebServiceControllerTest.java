@@ -119,7 +119,7 @@ public class ConnectorBackendWebServiceControllerTest {
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
         // TODO set appropriate response
         when(messageStagingService.register(any()))
-                .thenReturn(MessageTestFixtures.createValidOutboundBusinessMessage());
+                .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
         when(backendClientVerifierService.getBackendClient(any()))
                 .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
 

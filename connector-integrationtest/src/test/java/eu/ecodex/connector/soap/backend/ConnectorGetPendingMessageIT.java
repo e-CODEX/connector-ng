@@ -34,7 +34,7 @@ import org.springframework.test.context.jdbc.Sql;
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class GetPendingMessageIT extends BackendServiceTest {
+public class ConnectorGetPendingMessageIT extends BackendServiceTest {
     private static final String TRANSPORT_MESSAGE_ID = "b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice";
 
     @LocalServerPort

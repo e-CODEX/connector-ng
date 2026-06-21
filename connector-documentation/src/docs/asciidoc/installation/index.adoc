@@ -6,6 +6,8 @@ endif::header[]
 
 include::{basepath}/installation/introduction.adoc[leveloffset=+1]
 
+include::{basepath}/installation/database.adoc[leveloffset=+1]
+
 include::{basepath}/installation/standalone-jar.adoc[leveloffset=+1]
 
 include::{basepath}/installation/standalone-containerized.adoc[leveloffset=+1]

@@ -1,0 +1,54 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Database Configuration
+
+The application has been tested against the following database versions:
+
+[cols="1,1"]
+|===
+|Database |Version
+
+|MySQL |8.4.9
+|MariaDB |12.3.2
+|PostgresSQL |18.0
+|===
+
+== Create a database user with appropriate privileges
+
+Because the application relies on distributed transactions (XA), the database user used to connect to the dedicated database must be granted the privileges required to execute and recover XA transactions.
+The exact grant differs by vendor (e.g. `XA_RECOVER_ADMIN` on MySQL).
+
+NOTE: Some managed database offerings do not expose root/superadmin access and therefore cannot grant full XA recovery privileges (this is the case for some managed MariaDB instances).
+In that situation, the application falls back to alternative transaction-handling strategies;
+
+== Database initialization
+
+To initialize the connector database, two options are available:
+
+* Let the application initialize the database at startup
+* Run the provided initialization scripts manually
+
+=== Let the application initialize the database
+
+Set the following property and launch the application:
+
+[source,properties]
+----
+spring.jpa.hibernate.ddl-auto=update
+----
+
+The connector will automatically create the necessary tables on startup.
+
+WARNING: This option is intended for development and testing only.
+For production deployments, use the manual initialization scripts described below — `ddl-auto=update` is not a reliable mechanism for managing schema evolution over time.
+
+=== Run the initialization scripts
+
+Initialization scripts for each supported database are provided in the distribution package, under:
+
+`dbscripts/initial`
+
+Each supported vendor has its own script (e.g. `mysql.sql`, `mariadb.sql`,
+`postgres.sql`) containing the SQL scripts to execute against the target database before starting the application for the first time.

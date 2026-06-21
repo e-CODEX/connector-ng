@@ -77,6 +77,12 @@ val copyJdbcDrivers by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("$standalonePath/lib"))
 }
 
+val copyDbScripts by tasks.registering(Copy::class) {
+    description = "Copy the connector database scripts into the distribution directory"
+    from("src/main/resources/dbscripts")
+    into(layout.buildDirectory.dir("connector-distribution/dbscripts"))
+}
+
 val prepareDistribution by tasks.registering {
     description = "Prepares the distribution directory"
     dependsOn(
@@ -85,7 +91,8 @@ val prepareDistribution by tasks.registering {
         copyKeystores,
         copyScripts,
         copyDocumentation,
-        copyJdbcDrivers
+        copyJdbcDrivers,
+        copyDbScripts
     )
 }
 

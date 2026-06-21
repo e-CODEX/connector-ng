@@ -33,7 +33,6 @@ public class MessageAttachmentTestFixtures {
     }
 
     public static ConnectorMessageAttachment createdAttachment() {
-        var name = "test_attachment";
         return createAttachment().toBuilder()
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())

@@ -11,7 +11,10 @@
 package eu.ecodex.connector.soap.backend;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.soap.BackendServiceTest;
@@ -19,15 +22,18 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @Sql(
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ListPendingMessageIDsIT extends BackendServiceTest {
+public class ConnectorGetPendingMessagesIT extends BackendServiceTest {
     @LocalServerPort
     private int port;
+    @MockitoBean
+    private ConnectorChangePendingMessagesStatus changePendingMessagesStatus;
 
     private DomibusConnectorBackendWebService soapClient;
 
@@ -53,13 +59,13 @@ public class ListPendingMessageIDsIT extends BackendServiceTest {
             "classpath:sql/message-transport-step.sql",
             "classpath:sql/message-transport-step-statuses.sql",
     })
-    void should_list_pending_messages_identifiers_successfully() {
-        var response = soapClient.listPendingMessageIds(new EmptyRequestType());
+    void should_retrieve_all_pending_messages_successfully() {
+        doNothing().when(changePendingMessagesStatus).execute(any(), any());
+
+        var response = soapClient.requestMessages(new EmptyRequestType());
 
         assertThat(response).isNotNull();
-        assertThat(response.getMessageTransportIds()).isNotNull();
-        assertThat(response.getMessageTransportIds().size()).isEqualTo(1);
-        assertThat(response.getMessageTransportIds().getFirst())
-                .isEqualTo("b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice");
+        assertThat(response.getMessages()).isNotNull();
+        assertThat(response.getMessages().size()).isEqualTo(1);
     }
 }

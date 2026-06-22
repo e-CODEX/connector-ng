@@ -63,7 +63,7 @@ Again, we assume that Docker Compose is installed on your local machine. If it i
 ```
 
 You can also run the connector container and its database as a service (avoiding DBMS and MiniIO (S3 bucket) installation and configuration).
-To achieve this goal, we have provided a `docker-compose` configuration file. In our example, we are using MySQL as the DBMS service, so feel free to customize the `docker-compose.yml` file with your preferred DBMS (Postgres, MariaDB and Oracle will be supported in the future).
+To achieve this goal, we have provided a `docker-compose` configuration file. In our example, we are using MySQL as the DBMS service, so feel free to customize the `docker-compose.yml` file with your preferred DBMS (Oracle will be supported in the future).
 
 ```
 **NOTE**
@@ -71,7 +71,23 @@ The gateway docker image should be built before running the docker-compose file.
 To build the gateway docker image, please follow the instructions provided in the README.md file on this repository: https://github.com/e-CODEX/gw-container/.
 ```
 
-once done, run the following command:
+The connector requires configuration files to be present before the container
+starts. A sample configuration is provided in the distribution package at:
+
+`connector-distribution/src/main/resources/config`
+
+Copy its contents into the target directory:
+
+`docker/connector/config`
+
+Then edit `application.properties` to match your environment.
+
+[!WARNING]
+Pay particular attention to database connection settings, JMS broker
+credentials, S3 storage parameters, and truststore/keystore configuration
+(paths, passwords, and alias entries) — these are required for secure TLS and WS-Security communication, ASICS signing, business documents verification, and other features.
+
+Once done, run the following command:
 
 ```shell
 docker-compose up -d

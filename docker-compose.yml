@@ -99,7 +99,6 @@ services:
             - gateway-attachments:/app/attachments
     connector-ng-db:
         container_name: mysql
-        # can be replaced with the appropriate database image. e.g. postgres
         image: mysql:8
         restart: always
         environment:
@@ -121,10 +120,28 @@ services:
         networks:
             ecodex:
         volumes:
-            # based on your DBMS, initial scripts can be found in documentation/database-scripts/initial
+            # based on your DBMS, initial scripts can be found in connector-distribution/src/main/dbscripts/initial
             # copy and place them in sql folder
             # - ./sql/:/docker-entrypoint-initdb.d/
             - ng-mysql-data:/var/lib/mysql
+    connector-ng-maria-db:
+        image: mariadb:12.3.2
+        container_name: mariadb
+        restart: always
+        environment:
+            MARIADB_DATABASE: connector
+            MARIADB_USER: connector
+            MARIADB_PASSWORD: connector
+            MARIADB_ROOT_PASSWORD: connector
+            MARIADB_TCP_PORT: 3306
+        ports:
+            - "30008:3306"
+        expose:
+            - "3306"
+        networks:
+            ecodex:
+        volumes:
+            - ng-mariadb-data:/var/lib/mysql
     connector-ng-postgres-db:
         image: postgres:18
         container_name: postgres
@@ -175,6 +192,7 @@ networks:
                 - subnet: 172.20.0.0/16
 volumes:
     ng-mysql-data:
+    ng-mariadb-data:
     ng-postgres-data:
     gateway-mysql-data:
     gateway-attachments:

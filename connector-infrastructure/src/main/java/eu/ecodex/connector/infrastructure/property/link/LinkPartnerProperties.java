@@ -27,7 +27,7 @@ public class LinkPartnerProperties {
     private String name;
     private String description;
     private boolean enabled;
-    private String receiverMode;
+    private String receiverMode; // TODO: remove
     private String senderMode;
     private LinkPartnerDetailProperties properties; // backend only
 }

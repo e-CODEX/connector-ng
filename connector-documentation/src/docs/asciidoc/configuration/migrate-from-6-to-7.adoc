@@ -1,0 +1,733 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Migrate Configuration From 6.x to 7.x
+
+== Overview
+Brief summary of what changed in the configuration file.
+
+== Step-by-step Migration
+
+NOTE: Across all sections, hyphenated store property segments (`key-store`, `trust-store`)
+have been normalised to their unhyphenated equivalents (`keystore`, `truststore`) in 7.x.
+
+=== Business Domain Configuration
+
+NOTE: Business domain configuration is new in 7.x. In 6.x, the connector operated
+with a single implicit domain. You can now define one or more named domains explicitly.
+
+IMPORTANT: If none of the properties below are set, the connector will automatically
+create a default domain on startup. Set them explicitly if you need to control
+the domain identifier, description, or PMode location.
+
+.New Business Domain Configuration Properties (7.x)
+|===
+| Property | Default | Required | Notes
+
+| `connector.business-domains.defaults[0].identifier`
+| `default_business_domain`
+| No
+| Logical name of the default business domain
+
+| `connector.business-domains.defaults[0].description`
+| `default business domain`
+| No
+| Human-readable description of the domain
+
+| `connector.business-domains.defaults[0].enabled`
+| `true`
+| No
+| Set to `false` to disable this domain at startup
+
+| `connector.business-domains.defaults[0].pmode`
+| _(none)_
+| *No*
+| Path to the PMode file for this domain. Supports `file:` prefix for filesystem paths.
+|===
+
+.Minimal configuration example (7.x)
+[source,properties]
+----
+connector.business-domains.defaults[0].identifier=default_business_domain
+connector.business-domains.defaults[0].description=default business domain
+connector.business-domains.defaults[0].enabled=true
+connector.business-domains.defaults[0].pmode=file:./config/pmode/pmode-blue.xml
+----
+
+TIP: Additional domains can be configured by incrementing the index:
+`connector.business-domains.defaults[1]`, `connector.business-domains.defaults[2]`, etc.
+
+=== Message Processing Configuration
+
+All properties in this section are *new in 7.x*. There are no equivalent properties
+in 6.x — these behaviours were either hardcoded or not configurable in previous versions.
+
+.New Message Processing Properties (7.x)
+|===
+| Property | Default | Required | Notes
+
+| `connector.message-processing.send-generated-evidences-to-backend`
+| `true`
+| No
+| Whether REM evidences (submission acceptance/rejection, delivery/non-delivery)
+are forwarded to the backend in addition to the gateway side
+
+| `connector.message-processing.ebms-id-generator-enabled`
+| `true`
+| No
+| When `true`, the connector generates ebMS message IDs itself rather than
+relying on IDs supplied by the backend or gateway
+
+| `connector.message-processing.ebms-id-suffix`
+| _(none)_
+| No
+| Domain suffix appended to generated ebMS message IDs
+(format: `<uuid>@<suffix>`). Only effective when the generator is enabled.
+
+| `connector.message-processing.identifier-suffix`
+| _(none)_
+| No
+| Domain suffix used when generating conversation IDs and other AS4 identifier fields
+
+| `connector.message-processing.transport-id-suffix`
+| _(none)_
+| No
+| Domain suffix used for transport-level identifiers,
+following the same `<value>@<suffix>` convention
+
+| `connector.message-processing.outbound-verification-mode`
+| `STRICT`
+| No
+| Validation strictness for outbound messages (connector → gateway).
+`STRICT` enforces full validation before sending.
+
+| `connector.message-processing.inbound-verification-mode`
+| `RELAXED`
+| No
+| Validation strictness for inbound messages (gateway → connector).
+`RELAXED` tolerates non-critical issues on receipt.
+|===
+
+NOTE: The three suffix properties (`ebms-id-suffix`, `identifier-suffix`,
+`transport-id-suffix`) all follow the same `<value>@<suffix>` convention and
+default to `connector.ecodex.eu` in the reference configuration. Set them to
+a domain you control if you need generated IDs to be traceable to your deployment.
+
+TIP: If migrating from 6.x where ebMS IDs were supplied externally, set
+`ebms-id-generator-enabled=false` to preserve the previous behaviour until
+you have confirmed your backend and gateway are compatible with connector-generated IDs.
+
+.Configuration example (7.x)
+[source,properties]
+----
+connector.message-processing.send-generated-evidences-to-backend=true
+connector.message-processing.ebms-id-generator-enabled=true
+connector.message-processing.ebms-id-suffix=connector.ecodex.eu
+connector.message-processing.identifier-suffix=connector.ecodex.eu
+connector.message-processing.transport-id-suffix=connector.ecodex.eu
+connector.message-processing.outbound-verification-mode=STRICT
+connector.message-processing.inbound-verification-mode=RELAXED
+----
+
+=== File Storage Configuration
+
+All properties in this section are *new in 7.x*. In 6.x, the connector used local
+filesystem storage only. S3-compatible object storage is now supported as an alternative
+backend.
+
+IMPORTANT: When `connector.file.storage.s3.enable=true`, all five remaining properties
+are effectively required — the connector cannot connect to S3 without credentials,
+region, bucket, and endpoint.
+
+.New File Storage Properties (7.x)
+|===
+| Property | Default | Required | Notes
+
+| `connector.file.storage.s3.enable`
+| `false`
+| Yes
+| Master switch for S3 storage. When `false`, the connector falls back
+to local filesystem storage.
+
+| `connector.file.storage.s3.access-key`
+| _(none)_
+| *Yes (if S3 enabled)*
+| S3 access key ID.
+
+| `connector.file.storage.s3.secret-key`
+| _(none)_
+| *Yes (if S3 enabled)*
+| S3 secret access key.
+
+| `connector.file.storage.s3.region`
+| _(none)_
+| *Yes (if S3 enabled)*
+| AWS region (e.g. `eu-west-1`). For non-AWS providers this may be an
+arbitrary placeholder value required by the S3 client.
+
+| `connector.file.storage.s3.bucket`
+| _(none)_
+| *Yes (if S3 enabled)*
+| Name of the S3 bucket used to store connector files.
+
+| `connector.file.storage.s3.endpoint`
+| _(none)_
+| *Yes (if S3 enabled)*
+| S3 endpoint URL. Required for non-AWS providers (MinIO, OVH Object Storage, etc.)
+or when targeting a specific regional/VPC endpoint.
+
+|===
+
+.Configuration example (7.x)
+[source,properties]
+----
+connector.file.storage.s3.enable=true
+connector.file.storage.s3.access-key=admin
+connector.file.storage.s3.secret-key=******
+connector.file.storage.s3.region=us-east-1
+connector.file.storage.s3.bucket=attachments
+connector.file.storage.s3.endpoint=http://localhost:port
+----
+
+=== DSS (Digital Signature Service) Configuration
+
+Two property groups have been renamed in 7.x:
+
+* Cache properties: `connector.dss.tl-cache-*` → `connector.dss.cache.*`
+* Proxy properties: `connector.dss.http-proxy` / `connector.dss.https-proxy`
+→ `connector.dss.proxy.http` / `connector.dss.proxy.https`
+
+The LOTL/TL sources and timestamp server properties are *unchanged*.
+
+.DSS Configuration Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `connector.dss.tl-cache-location`
+| `connector.dss.cache.location`
+| Renamed — now a dedicated `cache` sub-prefix
+
+| `connector.dss.tl-cache-expiration`
+| `connector.dss.cache.expiration`
+| Renamed — now a dedicated `cache` sub-prefix
+
+| `connector.dss.http-proxy.host`
+| `connector.dss.proxy.http.host`
+| Renamed — segments reordered (`http-proxy` → `proxy.http`)
+
+| `connector.dss.http-proxy.port`
+| `connector.dss.proxy.http.port`
+| Renamed — segments reordered
+
+| `connector.dss.https-proxy.host`
+| `connector.dss.proxy.https.host`
+| Renamed — segments reordered (`https-proxy` → `proxy.https`)
+
+| `connector.dss.https-proxy.port`
+| `connector.dss.proxy.https.port`
+| Renamed — segments reordered
+
+| `connector.dss.trust-list-sources.*`
+| `connector.dss.trust-list-sources.*`
+| No change
+
+| `connector.dss.time-stamp-servers.*`
+| `connector.dss.time-stamp-servers.*`
+| No change
+|===
+
+NOTE: Proxy configuration is optional. Only set these properties if your environment
+routes outbound DSS traffic (LOTL downloads, CRL and OCSP updates) through a proxy.
+
+.Configuration example (7.x)
+[source,properties]
+----
+# Cache
+connector.dss.cache.location=file:./data/tlcache
+connector.dss.cache.expiration=1d
+
+# Proxy (optional)
+connector.dss.proxy.http.host=proxy1.example.com
+connector.dss.proxy.http.port=8080
+connector.dss.proxy.https.host=proxy1.example.com
+connector.dss.proxy.https.port=8080
+
+# LOTL source (optional)
+connector.dss.trust-list-sources.eu.lotl-sources[0].lotl-url=https://ec.europa.eu/tools/lotl/eu-lotl.xml
+connector.dss.trust-list-sources.eu.lotl-sources[0].signing-certificates-announcement-uri=https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG
+connector.dss.trust-list-sources.eu.lotl-sources[0].pivot-support=true
+
+# Direct TL source (optional)
+connector.dss.trust-list-sources.eu.tl-sources[0].tl-url=https://www.signatur.rtr.at/currenttl.xml
+
+# Timestamp servers (optional)
+connector.dss.time-stamp-servers.t1.url=http://dss.nowina.lu/pki-factory/tsa/good-tsa
+connector.dss.time-stamp-servers.ee-good-tsa.url=http://dss.nowina.lu/pki-factory/tsa/ee-good-tsa
+----
+
+=== REM Evidence Configuration
+
+Two property prefixes have been renamed in 7.x:
+
+* `connector.evidences.signature.key-store` → `connector.evidences.signature.keystore` (hyphen removed)
+* `connector.evidences.issuer-info` → `connector.evidences.issuer` (`-info` suffix dropped)
+
+.REM Evidence Configuration Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `connector.evidences.signature.key-store.path`
+| `connector.evidences.signature.keystore.path`
+| Renamed — also note the `./` prefix is now required in the `file:` path
+
+| `connector.evidences.signature.key-store.password`
+| `connector.evidences.signature.keystore.password`
+| Renamed
+
+| `connector.evidences.signature.key-store.type`
+| `connector.evidences.signature.keystore.type`
+| Renamed
+
+| `connector.evidences.signature.private-key.alias`
+| `connector.evidences.signature.private-key.alias`
+| No change
+
+| `connector.evidences.signature.private-key.password`
+| `connector.evidences.signature.private-key.password`
+| No change
+
+| _(none)_
+| `connector.evidences.signature.payload-digest-algorithm`
+| *New* — defaults to `SHA256`
+
+| `connector.evidences.issuer-info.as4-party.name`
+| `connector.evidences.issuer.as4-party.name`
+| Renamed
+
+| `connector.evidences.issuer-info.as4-party.endpoint-address`
+| `connector.evidences.issuer.as4-party.endpoint-address`
+| Renamed
+
+| `connector.evidences.issuer-info.postal-address.street`
+| `connector.evidences.issuer.postal-address.street`
+| Renamed
+
+| `connector.evidences.issuer-info.postal-address.locality`
+| `connector.evidences.issuer.postal-address.locality`
+| Renamed
+
+| `connector.evidences.issuer-info.postal-address.zip-code`
+| `connector.evidences.issuer.postal-address.zip-code`
+| Renamed
+
+| `connector.evidences.issuer-info.postal-address.country`
+| `connector.evidences.issuer.postal-address.country`
+| Renamed
+|===
+
+WARNING: Keeping the old `key-store` or `issuer-info` property names in 7.x will result
+in the properties being silently ignored. Ensure all references are updated before startup.
+
+.Configuration example (7.x)
+[source,properties]
+----
+# Keystore
+connector.evidences.signature.keystore.path=file:./config/keystores/connector-keystore.jks
+connector.evidences.signature.keystore.password=12345
+connector.evidences.signature.keystore.type=JKS
+
+# Private key
+connector.evidences.signature.private-key.alias=connector_blue
+connector.evidences.signature.private-key.password=12345
+
+# Digest algorithm
+connector.evidences.signature.payload-digest-algorithm=SHA256
+
+# Issuer identity
+connector.evidences.issuer.as4-party.name=Connector NG
+connector.evidences.issuer.as4-party.endpoint-address=mailto:gateway@connector.example
+
+# Issuer postal address
+connector.evidences.issuer.postal-address.street=Unknown Street 1
+connector.evidences.issuer.postal-address.locality=Unknown
+connector.evidences.issuer.postal-address.zip-code=0000
+connector.evidences.issuer.postal-address.country=EU
+----
+
+=== Container Configuration
+
+The property prefix has been shortened in 7.x:
+
+* `connector.ecodex-container` → `connector.container`
+
+Additionally, the validation constraints property has been reorganized under the
+`signature.validation` sub-prefix and the redundant `validation-` word has been dropped.
+
+.Container Configuration Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `connector.ecodex-container.signature.keystore.path`
+| `connector.container.signature.keystore.path`
+| Renamed (prefix only)
+
+| `connector.ecodex-container.signature.keystore.password`
+| `connector.container.signature.keystore.password`
+| Renamed (prefix only)
+
+| _(none)_
+| `connector.container.signature.keystore.type`
+| *New* — defaults to `JKS`
+
+| `connector.ecodex-container.signature.private-key.alias`
+| `connector.container.signature.private-key.alias`
+| Renamed (prefix only)
+
+| `connector.ecodex-container.signature.private-key.password`
+| `connector.container.signature.private-key.password`
+| Renamed (prefix only)
+
+| `connector.ecodex-container.signature-validation.validation-constraints-xml`
+| `connector.container.signature.validation.constraints-xml`
+| Renamed — prefix and sub-path both changed
+|===
+
+WARNING: The `connector.ecodex-container` prefix is no longer recognized in 7.x.
+All properties under this prefix must be renamed, or they will be silently ignored at startup.
+
+.Configuration example (7.x)
+[source,properties]
+----
+# Keystore
+connector.container.signature.keystore.path=file:./config/keystores/connector-keystore.jks
+connector.container.signature.keystore.password=12345
+connector.container.signature.keystore.type=JKS
+
+# Private key
+connector.container.signature.private-key.alias=connector_blue
+connector.container.signature.private-key.password=12345
+
+# Validation
+connector.container.signature.validation.constraints-xml=classpath:/102853/constraint.xml
+----
+
+=== Business Document Validation Configuration
+
+Two changes apply to this section in 7.x:
+
+* The prefix has been shortened: `connector.business-document-sent` → `connector.business-document`
+* The signature validation sub-path has been restructured:
+`signature-validation.trust-store` → `signature.validation.truststore`
+(segment split, hyphen removed from `trust-store`)
+
+.Business Document Validation Configuration Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `connector.business-document-sent.service-provider`
+| `connector.business-document.service-provider`
+| Renamed (prefix only)
+
+| `connector.business-document-sent.country`
+| `connector.business-document.country`
+| Renamed (prefix only)
+
+| `connector.business-document-sent.default-advanced-system-type`
+| `connector.business-document.default-advanced-system-type`
+| Renamed (prefix only)
+
+| `connector.business-document-sent.signature-validation.trust-store.path`
+| `connector.business-document.signature.validation.truststore.path`
+| Renamed — prefix and sub-path both changed
+
+| `connector.business-document-sent.signature-validation.trust-store.password`
+| `connector.business-document.signature.validation.truststore.password`
+| Renamed — prefix and sub-path both changed
+
+| _(none)_
+| `connector.business-document.signature.validation.truststore.type`
+| *New* — defaults to `JKS`
+
+| `connector.business-document-sent.signature-validation.validation-constraints-xml`
+| `connector.business-document.signature.validation.constraints-xml`
+| Renamed — prefix and sub-path both changed
+
+| `connector.business-document-sent.authentication-validation.identity-provider`
+| `connector.business-document.authentication-validation.identity-provider`
+| Renamed (prefix only)
+|===
+
+WARNING: The `connector.business-document-sent` prefix is no longer recognized in 7.x.
+All properties under this prefix must be renamed, or they will be silently ignored at startup.
+
+.Configuration example (7.x)
+[source,properties]
+----
+# Identity
+connector.business-document.service-provider=TestProvider
+connector.business-document.country=BL
+connector.business-document.default-advanced-system-type=SIGNATURE_BASED
+
+# Truststore
+connector.business-document.signature.validation.truststore.path=file:./config/keystores/connector-truststore.jks
+connector.business-document.signature.validation.truststore.password=12345
+connector.business-document.signature.validation.truststore.type=JKS
+
+# Validation policy
+connector.business-document.signature.validation.constraints-xml=classpath:/102853/constraint.xml
+
+# Authentication
+connector.business-document.authentication-validation.identity-provider=ERV
+----
+
+=== Link Partner Configuration
+
+This section has two major structural changes in 7.x:
+
+* The entire `connector.link.gateway` block (both `link-config` and `link-partners`) has been
+*removed*.
+* The backend `properties.soap` sub-prefix has been replaced by `properties.endpoint`,
+and `cxf-logging-enabled` has been simplified to `logging-enabled`.
+
+==== Gateway Configuration
+
+IMPORTANT: The `connector.link.gateway` prefix and all properties beneath it are no longer
+recognized in 7.x. Remove the entire gateway block from your configuration file.
+
+.Removed Gateway Properties (6.x only)
+|===
+| Removed property | Replacement
+
+| `connector.link.gateway.link-config.config-name`
+| _(none — removed)_
+
+| `connector.link.gateway.link-config.link-impl`
+| _(none — removed)_
+
+| `connector.link.gateway.link-config.properties.gw-address`
+| _(none — configured via PMode)_
+
+| `connector.link.gateway.link-config.properties.soap.*`
+| _(none — removed)_
+
+| `connector.link.gateway.link-config.properties.cxf-logging-enabled`
+| _(none — removed)_
+
+| `connector.link.gateway.link-config.properties.ws-policy`
+| _(none — removed)_
+
+| `connector.link.gateway.link-partners[n].*`
+| _(none — removed)_
+|===
+
+==== Backend Configuration
+
+The `soap` sub-prefix under `properties` has been replaced by `endpoint`, and
+store property names follow the same `keystore`/`truststore` normalisation
+applied across all sections in 7.x.
+
+.Backend Configuration Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `connector.link.backend[0].link-config.config-name`
+| `connector.link.backend[0].link-config.name`
+| Renamed (`config-name` → `name`)
+
+| `connector.link.backend[0].link-config.link-impl`
+| _(removed)_
+| Plugin implementation is no longer selectable via property
+
+| `connector.link.backend[0].link-config.properties.soap.key-store.path`
+| `connector.link.backend[0].link-config.properties.endpoint.keystore.path`
+| `soap` → `endpoint`, `key-store` → `keystore`
+
+| `connector.link.backend[0].link-config.properties.soap.key-store.password`
+| `connector.link.backend[0].link-config.properties.endpoint.keystore.password`
+| `soap` → `endpoint`, `key-store` → `keystore`
+
+| _(none)_
+| `connector.link.backend[0].link-config.properties.endpoint.keystore.type`
+| *New* — defaults to `JKS`
+
+| `connector.link.backend[0].link-config.properties.soap.private-key.alias`
+| `connector.link.backend[0].link-config.properties.endpoint.private-key.alias`
+| `soap` → `endpoint`
+
+| `connector.link.backend[0].link-config.properties.soap.private-key.password`
+| `connector.link.backend[0].link-config.properties.endpoint.private-key.password`
+| `soap` → `endpoint`
+
+| `connector.link.backend[0].link-config.properties.soap.trust-store.path`
+| `connector.link.backend[0].link-config.properties.endpoint.truststore.path`
+| `soap` → `endpoint`, `trust-store` → `truststore`
+
+| `connector.link.backend[0].link-config.properties.soap.trust-store.password`
+| `connector.link.backend[0].link-config.properties.endpoint.truststore.password`
+| `soap` → `endpoint`, `trust-store` → `truststore`
+
+| _(none)_
+| `connector.link.backend[0].link-config.properties.endpoint.truststore.type`
+| *New* — defaults to `JKS`
+
+| `connector.link.backend[0].link-config.properties.soap.encrypt-alias`
+| `connector.link.backend[0].link-config.properties.endpoint.encrypt-alias`
+| `soap` → `endpoint`
+
+| `connector.link.backend[0].link-config.properties.cxf-logging-enabled`
+| `connector.link.backend[0].link-config.properties.logging-enabled`
+| `cxf-` prefix dropped
+
+| `connector.link.backend[0].link-config.properties.ws-policy`
+| `connector.link.backend[0].link-config.properties.ws-policy`
+| No change
+
+| connector.link.backend[0].link-config.properties.publish-address
+| `connector.link.backend[0].link-config.properties.publish-address`
+| No change
+|===
+
+WARNING: The `properties.soap` sub-prefix is no longer recognized in 7.x.
+Any backend keystore, truststore, or key properties still using `soap` will be
+silently ignored at startup.
+
+.Configuration example (7.x)
+[source,properties]
+----
+connector.link.backend[0].link-config.name=default_backend
+connector.link.backend[0].link-config.properties.publish-address=/backend
+connector.link.backend[0].link-config.properties.ws-policy=classpath:/policy/backend.policy.xml
+connector.link.backend[0].link-config.properties.logging-enabled=true
+
+# Endpoint keystore
+connector.link.backend[0].link-config.properties.endpoint.keystore.path=file:./config/keystores/backend-keystore.jks
+connector.link.backend[0].link-config.properties.endpoint.keystore.password=12345
+
+# Endpoint private key
+connector.link.backend[0].link-config.properties.endpoint.private-key.alias=connector_blue
+connector.link.backend[0].link-config.properties.endpoint.private-key.password=12345
+
+# Endpoint truststore
+connector.link.backend[0].link-config.properties.endpoint.truststore.path=file:./config/keystores/backend-truststore.jks
+connector.link.backend[0].link-config.properties.endpoint.truststore.password=12345
+connector.link.backend[0].link-config.properties.endpoint.encrypt-alias=alice
+----
+
+==== Backend Link Partners
+
+The link partner configuration is simplified in 7.x.
+
+.Backend Link Partner Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `connector.link.backend[0].link-partners[0].link-partner-name`
+| `connector.link.backend[0].link-partners[0].name`
+| Renamed (`link-partner-name` → `name`)
+
+| `connector.link.backend[0].link-partners[0].description`
+| `connector.link.backend[0].link-partners[0].description`
+| No change
+
+| `connector.link.backend[0].link-partners[0].enabled`
+| `connector.link.backend[0].link-partners[0].enabled`
+| No change
+
+| `connector.link.backend[0].link-partners[0].rcv-link-mode`
+| _(removed)_
+| No longer applicable
+
+| `connector.link.backend[0].link-partners[0].send-link-mode`
+| `connector.link.backend[0].link-partners[0].sender-mode`
+| Renamed and consolidated — see below
+
+| `connector.link.backend[0].link-partners[0].properties.push-address`
+| `connector.link.backend[0].link-partners[0].properties.push-address`
+| No change
+
+| `connector.link.backend[0].link-partners[0].properties.encryption-alias`
+| `connector.link.backend[0].link-partners[0].properties.encryption-alias`
+| No change
+
+| `connector.link.backend[0].link-partners[0].properties.certificate-dn`
+| `connector.link.backend[0].link-partners[0].properties.certificate-dn`
+| No change
+|===
+
+.Configuration example (7.x)
+[source,properties]
+----
+connector.link.backend[0].link-partners[0].name=backend_alice
+connector.link.backend[0].link-partners[0].description=backend alice
+connector.link.backend[0].link-partners[0].enabled=true
+connector.link.backend[0].link-partners[0].sender-mode=push
+connector.link.backend[0].link-partners[0].properties.push-address=http://localhost:port/services/domibusConnectorDeliveryWebservice
+connector.link.backend[0].link-partners[0].properties.encryption-alias=alice
+connector.link.backend[0].link-partners[0].properties.certificate-dn=cn=alice
+----
+
+=== Message Routing
+
+NOTE: Message routing configuration is unchanged from 6.x. No migration action required.
+
+Configuration Example (7.x)
+[source,properties]
+----
+connector.routing.enabled=true
+connector.routing.default-backend-name=backend_alice
+connector.routing.backend-rules[0].link-name=backend_alice
+connector.routing.backend-rules[0].match-clause=equals(ServiceName, 'Test')
+----
+
+=== Message Broker Configuration
+
+IMPORTANT: The embedded Apache Artemis broker used in 6.x has been replaced by an
+external Apache ActiveMQ broker in 7.x. This is an *infrastructure change*, not just
+a property rename — a running ActiveMQ broker must be provisioned and reachable before
+starting the connector.
+
+.Message Broker Configuration Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `spring.artemis.mode`
+| _(removed)_
+| Embedded broker is no longer supported
+
+| `spring.artemis.embedded.enabled`
+| _(removed)_
+| Embedded broker is no longer supported
+
+| `spring.artemis.embedded.persistent`
+| _(removed)_
+| Persistence is now managed by the external broker
+
+| `spring.artemis.embedded.data-directory`
+| _(removed)_
+| Data directory is now managed by the external broker
+
+| _(none)_
+| `spring.activemq.broker-url`
+| *New — Required.* Connection URL of the external ActiveMQ broker
+
+| _(none)_
+| `spring.activemq.user`
+| *New — Required.* Broker authentication username
+
+| _(none)_
+| `spring.activemq.password`
+| *New — Required.* Broker authentication password
+|===
+
+WARNING: Remove the entire `spring.artemis.*` block from your configuration before
+starting 7.x. The embedded Artemis data directory (`./data/artemis/`) is no longer
+used and can be archived or deleted after a successful migration.
+
+.Configuration example (7.x)
+[source,properties]
+----
+spring.activemq.broker-url=tcp://localhost:port
+spring.activemq.user=admin
+spring.activemq.password=******
+----

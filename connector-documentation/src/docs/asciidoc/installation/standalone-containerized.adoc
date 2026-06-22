@@ -139,16 +139,6 @@ docker logs -f connector-ng
 ----
 
 === Step 5 — Verify Runtime Status
-[source,bash]
-----
-curl http://localhost:30000/actuator/health
-----
-
-Expected payload response:
-[source,json]
-----
-{"status":"UP"}
-----
 
 Once running, the following endpoints are available:
 [cols="2,3", options="header"]

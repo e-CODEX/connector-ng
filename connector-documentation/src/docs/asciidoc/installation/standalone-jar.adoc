@@ -74,33 +74,28 @@ include::{distributiondir}/src/main/resources/config/application.properties[]
 ----
 
 === Step 4 — Run the Standalone Native App
-To start the application and point explicitly to your Spring context properties directory location, execute the following command:
+
+Before launching the application, ensure `start.sh` has execute permission:
 
 [source,bash]
 ----
-include::{distributiondir}/src/main/resources/bin/start.sh[]
+sudo chmod +x start.sh
 ----
 
-To spin up the service detached in the background context layer:
+Then start the application:
+
 [source,bash]
 ----
-nohup java -Dloader.path=./lib -jar ./bin/connector-ng.jar --spring.config.location=./config/ > logs/connector.log 2>&1 &
+./start.sh
 ----
 
-To review the rolling console logs output live:
-[source,bash]
-----
-tail -f logs/connector.log
-----
+=== Step 5 — Verify Runtime Status
 
-=== Step 5 — Runtime Health Validation
-[source,bash]
-----
-curl http://localhost:30000/actuator/health
-----
+Once running, the following endpoints are available:
 
-Expected health payload return structure:
-[source,json]
-----
-{"status":"UP"}
-----
+[cols="2,3", options="header"]
+|===
+| Endpoint | URL
+| Root URL | `http://localhost:30000`
+| Swagger UI | `http://localhost:30000/swagger-ui/index.html`
+|===

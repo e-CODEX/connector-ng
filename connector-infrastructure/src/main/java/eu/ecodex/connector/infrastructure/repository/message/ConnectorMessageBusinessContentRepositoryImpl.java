@@ -96,7 +96,6 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
                 .aesType(entity.getAesType())
                 .attachment(ConnectorMessageAttachmentRepositoryImpl.toDomain(entity.getAttachment()))
                 .detachedSignature(toDomain(entity.getDetachedSignature()))
-                .hashValue(entity.getHashValue())
                 .build();
     }
 
@@ -184,7 +183,6 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         return ConnectorMessageBusinessDocumentEntity
                 .builder()
                 .aesType(document.aesType())
-                .hashValue(document.hashValue())
                 .businessContent(content)
                 .attachment(attachment)
                 .build();

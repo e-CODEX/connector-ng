@@ -28,15 +28,13 @@ import lombok.Builder;
  * @param aesType           the optional AES encryption type applied to the businessDocument; may be
  *                          {@code null} if the businessDocument is unsigned may be {@code null} if
  *                          the businessDocument is not encrypted
- * @param hashValue         The hash value of the businessDocument.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageBusinessDocument(
         @Nullable String uuid,
         @Nonnull ConnectorMessageAttachment attachment,
         @Nullable DetachedSignature detachedSignature,
-        @Nullable ConnectorBusinessDocumentAESType aesType,
-        @Nullable String hashValue
+        @Nullable ConnectorBusinessDocumentAESType aesType
 ) implements Serializable {
     @Override
     @Nonnull

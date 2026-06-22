@@ -112,7 +112,6 @@ create table connector_message_business_documents
     created_at          datetime(6)                                      null,
     updated_at          datetime(6)                                      null,
     aes_type            enum ('AUTHENTICATION_BASED', 'SIGNATURE_BASED') null,
-    hash_value          varchar(255)                                     null,
     uuid                varchar(255)                                     not null,
     attachment_id       bigint                                           not null,
     business_content_id bigint                                           not null,

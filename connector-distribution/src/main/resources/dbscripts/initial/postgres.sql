@@ -173,7 +173,6 @@ create table connector_message_business_documents
         constraint connector_message_business_documents_aes_type_check
             check ((aes_type)::text = ANY
                    ((ARRAY ['AUTHENTICATION_BASED'::character varying, 'SIGNATURE_BASED'::character varying])::text[])),
-    hash_value          varchar(255),
     uuid                varchar(255) not null
         constraint uke3edkhmc1qbmtwx4c5ggclvah
             unique,

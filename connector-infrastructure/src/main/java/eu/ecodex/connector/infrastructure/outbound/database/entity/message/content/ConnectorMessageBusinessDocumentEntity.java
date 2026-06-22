@@ -56,11 +56,6 @@ public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     @Column(name = "AES_TYPE", updatable = false)
     private ConnectorBusinessDocumentAESType aesType;
 
-    // TODO remove @UuidGenerator
-    @UuidGenerator
-    @Column(name = "HASH_VALUE", updatable = false)
-    private String hashValue;
-
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "BUSINESS_CONTENT_ID", unique = true, nullable = false)
     private ConnectorMessageBusinessContentEntity businessContent;

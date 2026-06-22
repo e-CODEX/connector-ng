@@ -27,3 +27,5 @@ include::{basepath}/configuration/connector-queue-configuration.adoc[leveloffset
 include::{basepath}/configuration/gateway-queue-configuration.adoc[leveloffset=+1]
 
 include::{basepath}/configuration/gateway-configuration.adoc[leveloffset=+1]
+
+include::{basepath}/configuration/migrate-from-6-to-7.adoc[leveloffset=+1]

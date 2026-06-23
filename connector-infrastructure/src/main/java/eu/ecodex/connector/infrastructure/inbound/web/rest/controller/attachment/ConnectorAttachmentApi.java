@@ -8,10 +8,8 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachement;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachment;
 
-import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,10 +17,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,11 +36,4 @@ public interface ConnectorAttachmentApi {
             @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     List<String> upload(@RequestPart("attachments") List<MultipartFile> attachments);
-
-    @GetMapping
-    @Operation(summary = "Get paginated list of message attachments.")
-    ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size
-    );
 }

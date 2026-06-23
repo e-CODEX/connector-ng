@@ -10,12 +10,14 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import lombok.Builder;
 
 /**
@@ -75,4 +77,51 @@ public record ConnectorMessageDetailDto(
         List<ConnectorMessageEvidenceDto> evidences,
         List<ConnectorMessageError> errors
 ) {
+    /**
+     * Converts a {@link ConnectorMessage} object into a {@link ConnectorMessageDetailDto}.
+     *
+     * @param message the {@link ConnectorMessage} object to be converted
+     *
+     * @return a newly created {@link ConnectorMessageDetailDto} based on the values of the provided
+     *         {@link ConnectorMessage}
+     */
+    public static ConnectorMessageDetailDto from(ConnectorMessage message) {
+        return ConnectorMessageDetailDto
+                .builder()
+                .businessDomainIdentifier(
+                        message.businessDomainIdentifier().messageLaneIdentifier())
+                .identifier(message.identifier())
+                .backendMessageIdentifier(message.backendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+                .direction(Objects.requireNonNull(message.direction()))
+                .isBusiness(message.isBusinessMessage())
+                .backendName(message.backendName())
+                .gatewayName(message.gatewayName())
+                .as4Properties(message.as4Properties())
+                .createdAt(message.createdAt())
+                .updatedAt(message.updatedAt())
+                .deletedAt(message.deletedAt())
+                .rejectedAt(message.rejectedAt())
+                .confirmedAt(message.confirmedAt())
+                .deliveredToBackendAt(message.deliveredToBackendAt())
+                .deliveredToGatewayAt(message.deliveredToGatewayAt())
+                .errors(message.errors())
+                .attachments(message.attachments())
+                .evidences(
+                        message.evidences()
+                               .stream()
+                               .map(evidence ->
+                                            ConnectorMessageEvidenceDto
+                                                    .builder()
+                                                    .uuid(evidence.uuid())
+                                                    .type(evidence.type())
+                                                    .createdAt(evidence.createdAt())
+                                                    .updatedAt(evidence.updatedAt())
+                                                    .deliveredToLinkPartnerAt(
+                                                            evidence.deliveredToLinkPartnerAt())
+                                                    .build()
+                               ).toList()
+                )
+                .build();
+    }
 }

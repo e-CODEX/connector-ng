@@ -41,28 +41,14 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
             @Valid @RequestBody ConnectorBusinessDomainCreationRequest request) {
         var created = this.registerBusinessDomain.execute(toDomain(request));
 
-        return toDto(created);
+        return ConnectorBusinessDomainDto.from(created);
     }
 
     @Override
-    public List<ConnectorBusinessDomainDto> getAll() {
+    public List<ConnectorBusinessDomainDto> getBusinessDomains() {
         var businessDomains = this.listBusinessDomain.execute();
 
-        return businessDomains.stream().map(this::toDto).toList();
-    }
-
-    private ConnectorBusinessDomainDto toDto(ConnectorBusinessDomain businessDomain) {
-        return ConnectorBusinessDomainDto.builder()
-                                         .uuid(businessDomain.uuid())
-                                         .identifier(
-                                                 businessDomain.identifier().messageLaneIdentifier()
-                                         )
-                                         .description(businessDomain.description())
-                                         .enabled(businessDomain.enabled())
-                                         .source(businessDomain.source())
-                                         .createdAt(businessDomain.createdAt())
-                                         .updatedAt(businessDomain.updatedAt())
-                                         .build();
+        return businessDomains.stream().map(ConnectorBusinessDomainDto::from).toList();
     }
 
     private ConnectorBusinessDomain toDomain(ConnectorBusinessDomainCreationRequest request) {

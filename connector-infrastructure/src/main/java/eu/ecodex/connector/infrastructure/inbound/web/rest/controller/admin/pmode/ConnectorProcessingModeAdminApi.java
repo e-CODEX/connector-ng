@@ -32,17 +32,25 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Defines the API for managing processing modes within the connector system for administrative.
+ * Defines the API for managing processing modes within the connector system for administrative
+ * purposes.
+ *
+ * <p>The base URI for the endpoints defined in this interface is:
+ * {@code /api/v1/admin/processing-modes}.
  */
-@Tag(name = "ProcessingModeAdministration", description = "API for managing processing modes.")
+@Tag(
+        name = "ProcessingModeAdmin",
+        description = "API for managing processing modes for administrative purposes"
+)
 @RequestMapping("/api/v1/admin/processing-modes")
 public interface ConnectorProcessingModeAdminApi {
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new processing mode.")
-    @ApiResponses(
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = "Bad Request")
-    )
+    })
     ConnectorProcessingModeDto create(
             @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
             @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)

@@ -12,10 +12,8 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.JsonTestFixtures;
@@ -24,10 +22,7 @@ import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.MultipartFileTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message.ConnectorMessageController;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
@@ -56,16 +51,22 @@ public class ConnectorMessageControllerTest {
     private ConnectorBackendClientVerifier backendClientVerifierService;
     @MockitoBean
     private ConnectorUploadAttachments uploadAttachmentsService;
-    @MockitoBean
-    private ConnectorListMessages listMessagesService;
-    @MockitoBean
-    private ConnectorRetrieveMessage retrieveMessageService;
     @Autowired
     private MockMvc mockMvc;
 
+    private static Stream<String> getMetadataJson() {
+        return Stream.of(
+                "json/message/outbound/creation.json",
+                "json/message/outbound/creation-without-attachments.json",
+                "json/message/outbound/creation-without-business-domain.json",
+                "json/message/outbound/creation-without-detached-signature.json"
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("getMetadataJson")
-    void should_send_201_response_when_submitting_outbound_message(String jsonBody) throws Exception {
+    void should_send_201_response_when_submitting_outbound_message(String jsonBody)
+            throws Exception {
         // TODO set appropriate response
         when(messageStagingService.register(any()))
                 .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
@@ -85,7 +86,11 @@ public class ConnectorMessageControllerTest {
         mockMvc.perform(
                        multipart(HttpMethod.POST, "/api/v1/messages/outbound")
                                .file(MultipartFileTestFixtures.createPart(
-                                       "businessXMLDocument", MediaType.TEXT_XML_VALUE, "raw/Form_A.xml", "Form_A.xml"))
+                                       "businessXMLDocument",
+                                       MediaType.TEXT_XML_VALUE,
+                                       "raw/Form_A.xml",
+                                       "Form_A.xml"
+                               ))
                                .file(metadataFile)
                                .contentType(MediaType.MULTIPART_FORM_DATA)
                )
@@ -98,41 +103,19 @@ public class ConnectorMessageControllerTest {
         mockMvc.perform(
                        multipart(HttpMethod.POST, "/api/v1/messages/outbound")
                                .file(MultipartFileTestFixtures.createPart(
-                                       "businessXMLDocument", MediaType.TEXT_XML_VALUE, "raw/Form_A.xml", "Form_A.xml"))
+                                       "businessXMLDocument",
+                                       MediaType.TEXT_XML_VALUE,
+                                       "raw/Form_A.xml",
+                                       "Form_A.xml"
+                               ))
                                .file(MultipartFileTestFixtures.createPart(
-                                       "businessPDFDocument", MediaType.APPLICATION_PDF_VALUE, "raw/Form_A.pdf", "Form_A.pdf"))
+                                       "businessPDFDocument",
+                                       MediaType.APPLICATION_PDF_VALUE,
+                                       "raw/Form_A.pdf",
+                                       "Form_A.pdf"
+                               ))
                                .contentType(MediaType.MULTIPART_FORM_DATA)
                )
                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void should_return_200_when_retrieving_messages() throws Exception {
-        var pageResult = new ConnectorPageResult<>(
-                List.of(MessageTestFixtures.createConfirmedMessage()), 1, 1, 1
-        );
-
-        when(listMessagesService.execute(any(), any(), any())).thenReturn(pageResult);
-
-        mockMvc.perform(get("/api/v1/messages")
-                                .param("page", "0")
-                                .param("size", "20")
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.totalPages").value(1))
-                .andExpect(jsonPath("$.size").value(1))
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(1));
-    }
-
-     private static Stream<String> getMetadataJson() {
-        return Stream.of(
-                "json/message/outbound/creation.json",
-                "json/message/outbound/creation-without-attachments.json",
-                "json/message/outbound/creation-without-business-domain.json",
-                "json/message/outbound/creation-without-detached-signature.json"
-        );
     }
 }

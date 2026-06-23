@@ -13,8 +13,10 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.Set;
 import lombok.Builder;
 
@@ -54,4 +56,31 @@ public record ConnectorProcessingModeDetailDto(
         Instant createdAt,
         Instant updatedAt
 ) {
+    /**
+     * Converts a {@link ConnectorProcessingMode} object into a
+     * {@link ConnectorProcessingModeDetailDto}.
+     *
+     * @param processingMode The {@link ConnectorProcessingMode} to be converted. Must not be null.
+     *
+     * @return A {@link ConnectorProcessingModeDetailDto} representing the details of the provided
+     *         processing mode.
+     */
+    public static ConnectorProcessingModeDetailDto from(ConnectorProcessingMode processingMode) {
+        return ConnectorProcessingModeDetailDto
+                .builder()
+                .uuid(processingMode.uuid())
+                .description(processingMode.description())
+                .content(processingMode.content())
+                .filename(processingMode.filename())
+                .businessDomainIdentifier(
+                        Objects.requireNonNull(processingMode.businessDomain())
+                               .identifier().messageLaneIdentifier()
+                )
+                .parties(processingMode.parties())
+                .services(processingMode.services())
+                .actions(processingMode.actions())
+                .createdAt(processingMode.createdAt())
+                .updatedAt(processingMode.updatedAt())
+                .build();
+    }
 }

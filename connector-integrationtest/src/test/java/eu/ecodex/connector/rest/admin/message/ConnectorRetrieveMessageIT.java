@@ -8,15 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest.message;
+package eu.ecodex.connector.rest.admin.message;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +50,7 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
     void should_retrieve_a_connector_messages_successfully() {
         var messageId = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
         apiClient.get()
-                 .uri("/api/v1/messages/" + messageId)
+                 .uri(buildUrl(messageId))
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<ConnectorMessageDetailDto>() {
@@ -84,8 +82,12 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
     void should_throw_404_not_found_when_retrieving_a_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient.get()
-                 .uri("/api/v1/messages/" + messageId)
+                 .uri(buildUrl(messageId))
                  .exchange()
                  .expectStatus().isNotFound();
+    }
+
+    private String buildUrl(String identifier) {
+        return "/api/v1/admin/messages/" + identifier;
     }
 }

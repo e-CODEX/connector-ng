@@ -10,9 +10,12 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
 import java.time.Instant;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Builder;
 
 /**
@@ -53,4 +56,44 @@ public record ConnectorMessageTransportStepDto(
         Instant createdAt,
         Instant updatedAt
 ) {
+    /**
+     * Converts a {@link ConnectorMessageTransportStep} object into a
+     * {@link ConnectorMessageTransportStepDto}.
+     *
+     * @param step The {@link ConnectorMessageTransportStep} instance to be converted.
+     *
+     * @return A {@link ConnectorMessageTransportStepDto} instance containing the data from the
+     *         given {@link ConnectorMessageTransportStep}.
+     */
+    public static ConnectorMessageTransportStepDto from(ConnectorMessageTransportStep step) {
+        return ConnectorMessageTransportStepDto
+                .builder()
+                .identifier(step.identifier())
+                .remoteSystemIdentifier(step.remoteSystemIdentifier())
+                .transportedMessageIdentifier(step.transportedMessageIdentifier())
+                .numberOfAttempts(step.numberOfAttempts())
+                .linkPartnerName(step.linkPartnerName())
+                .status(step.status().name())
+                .statuses(toStatuses(step.statuses()))
+                .messageType(getTransportedMessageType(step.transportedMessage()))
+                .createdAt(step.createdAt())
+                .updatedAt(step.updatedAt())
+                .build();
+    }
+
+    private static String getTransportedMessageType(ConnectorMessage transportedMessage) {
+        return transportedMessage.isBusinessMessage() ? "BUSINESS" : "EVIDENCE";
+    }
+
+    private static Set<ConnectorMessageTransportStepStatusDto> toStatuses(
+            Set<ConnectorMessageTransportStepStatus> statuses) {
+        return statuses.stream()
+                       .map(status ->
+                                    ConnectorMessageTransportStepStatusDto
+                                            .builder()
+                                            .status(status.status().name())
+                                            .createdAt(status.createdAt())
+                                            .build())
+                       .collect(Collectors.toSet());
+    }
 }

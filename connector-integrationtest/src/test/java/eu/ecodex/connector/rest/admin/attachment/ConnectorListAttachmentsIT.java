@@ -8,12 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest.pmode;
+package eu.ecodex.connector.rest.admin.attachment;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorRetrieveProcessingModeIT extends AbstractIntegrationTest {
+public class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
@@ -40,34 +42,25 @@ public class ConnectorRetrieveProcessingModeIT extends AbstractIntegrationTest {
             "classpath:sql/processing-mode.sql",
             "classpath:sql/party.sql",
             "classpath:sql/service.sql",
-            "classpath:sql/action.sql"
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/attachment.sql",
     })
-    void should_retrieve_a_connector_p_mode_successfully() {
-        var uuid = "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf";
+    void should_list_connector_messages_transport_steps_successfully() {
         apiClient.get()
-                 .uri("/api/v1/admin/processing-modes/" + uuid)
+                 .uri("/api/v1/admin/attachments")
                  .exchange()
                  .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorProcessingModeDetailDto>() {
+                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
                  })
-                 .value(pmode -> {
-                     assertThat(pmode).isNotNull();
-                     assert pmode != null;
-                     assertThat(pmode.uuid()).isEqualTo(uuid);
-                     assertThat(pmode.description()).isNotNull();
-                     assertThat(pmode.content()).isNotEmpty();
-                     assertThat(pmode.parties()).isNotNull();
-                     assertThat(pmode.services()).isNotNull();
-                     assertThat(pmode.actions()).isNotNull();
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assert result != null;
+                     assertThat(result.content().size()).isEqualTo(7);
+                     assertThat(result.size()).isEqualTo(7);
+                     assertThat(result.totalElements()).isEqualTo(7);
+                     assertThat(result.totalPages()).isEqualTo(1);
                  });
-    }
-
-    @Test
-    void should_throw_404_not_found_when_retrieving_a_non_existing_p_mode() {
-        var uuid = "ccafa470-c32b-4d69-be24-dbbf1b9fcad1";
-        apiClient.get()
-                 .uri("/api/v1/admin/processing-modes/" + uuid)
-                 .exchange()
-                 .expectStatus().isNotFound();
     }
 }

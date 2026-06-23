@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +23,7 @@ import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRetrieveProcessingMode;
+import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.util.List;
@@ -42,6 +44,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorProcessingModeAdminController.class)
 public class ConnectorProcessingModeAdminControllerTest {
+    private static final String URL = "/api/v1/admin/processing-modes";
+
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -55,7 +59,8 @@ public class ConnectorProcessingModeAdminControllerTest {
 
     // save processing mode
     @Test
-    void should_send_201_response_when_creating_processing_mode_with_application_xml() throws Exception {
+    void should_send_201_response_when_creating_processing_mode_with_application_xml()
+            throws Exception {
         when(registerProcessingModeService.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
@@ -73,7 +78,7 @@ public class ConnectorProcessingModeAdminControllerTest {
                 JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
-        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
+        mockMvc.perform(multipart(HttpMethod.POST, URL)
                                 .file(processingModeXml)
                                 .file(metadataFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -81,7 +86,8 @@ public class ConnectorProcessingModeAdminControllerTest {
     }
 
     @Test
-    void should_send_201_response_when_creating_processing_mode_with_text_xml_file() throws Exception {
+    void should_send_201_response_when_creating_processing_mode_with_text_xml_file()
+            throws Exception {
         when(registerProcessingModeService.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
@@ -99,7 +105,7 @@ public class ConnectorProcessingModeAdminControllerTest {
                 JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
-        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
+        mockMvc.perform(multipart(HttpMethod.POST, URL)
                                 .file(processingModeXml)
                                 .file(metadataFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -107,7 +113,8 @@ public class ConnectorProcessingModeAdminControllerTest {
     }
 
     @Test
-    void should_send_400_response_when_creating_processing_mode_if_pmode_file_type_is_not_xml() throws Exception {
+    void should_send_400_response_when_creating_processing_mode_if_pmode_file_type_is_not_xml()
+            throws Exception {
         when(registerProcessingModeService.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
@@ -125,7 +132,7 @@ public class ConnectorProcessingModeAdminControllerTest {
                 JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
-        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/admin/processing-modes")
+        mockMvc.perform(multipart(HttpMethod.POST, URL)
                                 .file(processingModeXml)
                                 .file(metadataFile)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -135,21 +142,22 @@ public class ConnectorProcessingModeAdminControllerTest {
     @Test
     void should_send_400_response_when_creating_processing_mode_if_request_body_is_invalid() {
         apiClient.post()
-                 .uri("/api/v1/admin/processing-modes")
+                 .uri(URL)
                  .contentType(MediaType.MULTIPART_FORM_DATA)
                  .body("{}")
                  .exchange()
                  .expectStatus().isBadRequest();
     }
 
-    // find all
+    // list all
+
     @Test
-    void should_find_all_processing_modes_successfully() {
+    void should_list_processing_modes_successfully() {
         when(listProcessingModeService.execute())
                 .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
 
         var response = apiClient.get()
-                                .uri("/api/v1/admin/processing-modes")
+                                .uri(URL)
                                 .exchange()
                                 .expectStatus()
                                 .isOk()
@@ -159,5 +167,33 @@ public class ConnectorProcessingModeAdminControllerTest {
 
         assertThat(responseBody).isNotNull();
         assertThat(responseBody).hasSize(1);
+    }
+
+    // retrieve processing mode
+
+    @Test
+    void should_retrieve_a_processing_mode_successfully() {
+        when(retrieveProcessingModeService.execute(any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+
+        var response = apiClient.get()
+                                .uri(URL + "/{identifier}", "test-identifier")
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .returnResult(ConnectorProcessingModeDto.class);
+
+        assertThat(response.getResponseBody()).isNotNull();
+    }
+
+    @Test
+    void should_return_404_not_found_when_retrieving_a_processing_mode_with_unknown_identifier() {
+        doThrow(ConnectorProcessingModeNotFoundException.class).when(retrieveProcessingModeService)
+                                                               .execute(any());
+        apiClient.get()
+                 .uri(URL + "/unknown-identifier")
+                 .exchange()
+                 .expectStatus()
+                 .isNotFound();
     }
 }

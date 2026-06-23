@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest.pmode;
+package eu.ecodex.connector.rest.admin.pmode;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -34,7 +34,8 @@ import tools.jackson.databind.ObjectMapper;
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
+public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
+    private static final String URL = "/api/v1/admin/processing-modes";
     private final ConnectorProcessingModeCreationRequest metadata =
             ConnectorProcessingModeCreationRequest
                     .builder()
@@ -68,7 +69,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
         parts.add("metadata", metadataPart);
 
         apiClient.post()
-                 .uri("/api/v1/admin/processing-modes")
+                 .uri(URL)
                  .contentType(MediaType.MULTIPART_FORM_DATA)
                  .body(parts)
                  .exchange()
@@ -95,7 +96,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
         parts.add("metadata", metadataPart);
 
         var response = apiClient.post()
-                                .uri("/api/v1/admin/processing-modes")
+                                .uri(URL)
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
                                 .body(parts)
                                 .exchange()
@@ -120,7 +121,7 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
         parts.add("metadata", metadataPart);
 
         var response = apiClient.post()
-                                .uri("/api/v1/admin/processing-modes")
+                                .uri(URL)
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
                                 .body(parts)
                                 .exchange()
@@ -128,23 +129,6 @@ public class ConnectorProcessingModeIT extends AbstractIntegrationTest {
                                 .returnResult(ConnectorProcessingModeDto.class);
 
         assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT);
-    }
-
-    @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql"
-    })
-    void should_succeed_to_get_processing_modes() {
-        var response = apiClient.get()
-                                .uri("/api/v1/admin/business-domains")
-                                .exchange()
-                                .expectStatus().isOk()
-                                .returnResult(ConnectorProcessingModeDto[].class);
-
-        var responseBody = response.getResponseBody();
-        assertThat(responseBody).isNotNull();
-        assertThat(responseBody).hasSize(1);
     }
 
     private MultiValueMap<String, Object> producePart() {

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest;
+package eu.ecodex.connector.rest.admin.businessdomain;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
+    private static final String URL = "/api/v1/admin/business-domains";
     @Autowired
     private RestTestClient apiClient;
 
@@ -40,7 +41,7 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     void should_register_business_domain_successfully() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
-                                .uri("/api/v1/admin/business-domains")
+                                .uri(URL)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .body(body)
                                 .exchange()
@@ -62,7 +63,7 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     void should_fail_to_register_business_domain_with_existing_identifier() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         apiClient.post()
-                 .uri("/api/v1/admin/business-domains")
+                 .uri(URL)
                  .contentType(MediaType.APPLICATION_JSON)
                  .body(body)
                  .exchange()
@@ -73,7 +74,7 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     @Sql("classpath:sql/business-domain.sql")
     void should_retrieve_business_domains_successfully() {
         var response = apiClient.get()
-                                .uri("/api/v1/admin/business-domains")
+                                .uri(URL)
                                 .exchange()
                                 .expectStatus().isOk()
                                 .returnResult(ConnectorBusinessDomainDto[].class);

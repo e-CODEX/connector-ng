@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.time.Instant;
 import lombok.Builder;
 
@@ -44,4 +45,28 @@ public record ConnectorAttachmentDto(
         Instant createdAt,
         Instant updatedAt
 ) {
+    /**
+     * Creates an instance of {@code ConnectorAttachmentDto} from a given
+     * {@code ConnectorMessageAttachment}.
+     *
+     * @param attachment the {@code ConnectorMessageAttachment} containing the details to populate
+     *                   the DTO
+     *
+     * @return a new instance of {@code ConnectorAttachmentDto} populated with the properties from
+     *         the provided attachment
+     */
+    public static ConnectorAttachmentDto from(ConnectorMessageAttachment attachment) {
+        return ConnectorAttachmentDto
+                .builder()
+                .identifier(attachment.identifier())
+                .name(attachment.name())
+                .size(attachment.size())
+                .contentType(attachment.contentType())
+                .description(attachment.description())
+                .storage(attachment.storage())
+                .type(attachment.type())
+                .createdAt(attachment.createdAt())
+                .updatedAt(attachment.updatedAt())
+                .build();
+    }
 }

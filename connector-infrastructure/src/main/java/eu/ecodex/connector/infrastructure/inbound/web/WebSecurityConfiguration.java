@@ -45,6 +45,7 @@ public class WebSecurityConfiguration {
                                    "/api/v1/messages",
                                    "/api/v1/messages/**",
                                    "/api/v1/messages/outbound",
+                                   "/api/v1/transport-steps",
                                    // SOAP
                                    "/services/backend",
                                    // swagger ui

@@ -17,11 +17,15 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepStatusEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepStatusJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.specification.TransportStepSpecification;
+import eu.ecodex.connector.infrastructure.repository.PaginationMapper;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,6 +42,7 @@ public class ConnectorMessageTransportStepRepositoryImpl
         implements ConnectorMessageTransportStepRepository {
     private final ConnectorMessageTransportStepJpaRepository transportStepJpaRepository;
     private final ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository;
+    private final PaginationMapper paginationMapper;
     private final ObjectMapper objectMapper;
 
     /**
@@ -52,9 +57,11 @@ public class ConnectorMessageTransportStepRepositoryImpl
     public ConnectorMessageTransportStepRepositoryImpl(
             ConnectorMessageTransportStepJpaRepository transportStepJpaRepository,
             ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository,
+            PaginationMapper paginationMapper,
             ObjectMapper objectMapper) {
         this.transportStepJpaRepository = transportStepJpaRepository;
         this.stepStatusJpaRepository = stepStatusJpaRepository;
+        this.paginationMapper = paginationMapper;
         this.objectMapper = objectMapper;
     }
 
@@ -137,6 +144,22 @@ public class ConnectorMessageTransportStepRepositoryImpl
         return transportStepJpaRepository.findAllPendingMessageIdsByBackendName(backendName);
     }
 
+    @Override
+    public ConnectorPageResult<ConnectorMessageTransportStep> findAll(
+            @NonNull ConnectorPageRequest request,
+            String messageOrRemoteSystemIdentifier,
+            String linkPartnerName) {
+        var pageable = paginationMapper.toPageable(request);
+        var specification = TransportStepSpecification.withFilters(
+                messageOrRemoteSystemIdentifier,
+                linkPartnerName
+        );
+        var transportSteps = transportStepJpaRepository.findAll(specification, pageable)
+                                                       .map(this::toDomain);
+
+        return paginationMapper.toPageResult(transportSteps);
+    }
+
     private ConnectorMessageTransportStep toDomain(ConnectorMessageTransportStepEntity entity) {
         if (entity == null) {
             return null;
@@ -151,7 +174,10 @@ public class ConnectorMessageTransportStepRepositoryImpl
             return ConnectorMessageTransportStep
                     .builder()
                     .identifier(entity.getIdentifier())
+                    .remoteSystemIdentifier(entity.getRemoteSystemIdentifier())
+                    .transportedMessageIdentifier(entity.getTransportedMessageIdentifier())
                     .numberOfAttempts(entity.getNumberOfAttempts())
+                    .linkPartnerName(entity.getLinkPartnerName())
                     .transportedMessage(transportedMessage)
                     .status(entity.getStatus())
                     .statuses(toStatuses(entity.getStatuses()))

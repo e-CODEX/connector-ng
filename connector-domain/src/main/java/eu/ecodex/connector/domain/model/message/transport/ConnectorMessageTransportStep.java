@@ -27,20 +27,30 @@ import lombok.Builder;
  * <p>The transport step provides a structured representation of progress and
  * status changes in the message transport lifecycle.
  *
- * @param identifier         A unique identifier representing this transport step.
- * @param numberOfAttempts   The count of attempts made to process this transport step.
- * @param transportedMessage The {@link ConnectorMessage} instance that is being transported in this
- *                           step.
- * @param statuses           A priority queue of {@link ConnectorMessageTransportStepStatus}
- *                           instances, each representing the status history of this step.
- * @param createdAt          The timestamp indicating when this transport step was created.
- * @param updatedAt          The timestamp representing the last time this transport step was
- *                           updated.
+ * @param identifier                   A unique identifier representing this transport step.
+ * @param remoteSystemIdentifier       The identifier of the remote system involved in this
+ *                                     transport (Gateway EBMSID or backend system identifier).
+ * @param transportedMessageIdentifier The identifier of the message being transported in this
+ *                                     step.
+ * @param numberOfAttempts             The count of attempts made to process this transport step.
+ * @param linkPartnerName              The name of the link partner involved in this transport
+ * @param transportedMessage           The {@link ConnectorMessage} instance that is being
+ *                                     transported in this step.
+ * @param statuses                     A priority queue of
+ *                                     {@link ConnectorMessageTransportStepStatus} instances, each
+ *                                     representing the status history of this step.
+ * @param createdAt                    The timestamp indicating when this transport step was
+ *                                     created.
+ * @param updatedAt                    The timestamp representing the last time this transport step
+ *                                     was updated.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageTransportStep(
         @Nonnull String identifier,
+        String remoteSystemIdentifier,
+        String transportedMessageIdentifier,
         int numberOfAttempts,
+        String linkPartnerName,
         ConnectorMessage transportedMessage,
         ConnectorMessageTransportStatus status,
         Set<ConnectorMessageTransportStepStatus> statuses,

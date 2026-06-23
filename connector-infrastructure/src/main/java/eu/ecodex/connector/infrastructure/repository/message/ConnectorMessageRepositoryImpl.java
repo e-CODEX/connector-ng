@@ -14,11 +14,18 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageErrorEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEvidenceEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
@@ -34,6 +41,7 @@ import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorPartyReposit
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorServiceRepositoryImpl;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import lombok.NonNull;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -103,27 +111,22 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
             return null;
         }
 
+        var businessContent = entity.getBusinessContent();
+        var evidences = entity.getEvidences();
+        var attachments = entity.getAttachments();
+        var errors = entity.getErrors();
+
         return baseAttribute(entity)
                 .toBuilder()
                 .businessContent(
-                        entity.getBusinessContent() == null
+                        businessContent == null
                                 ? null
                                 : ConnectorMessageBusinessContentRepositoryImpl
                                   .toDomain(entity.getBusinessContent())
                 )
-                .evidences(
-                        entity.getEvidences() == null
-                                ? List.of()
-                                : entity.getEvidences().stream()
-                                        .map(ConnectorMessageEvidenceRepositoryImpl::toDomain)
-                                        .toList()
-                )
-                .attachments(
-                        entity.getAttachments() == null
-                                ? List.of()
-                                : entity.getAttachments().stream()
-                                        .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
-                                        .toList())
+                .evidences(toEvidence(evidences))
+                .attachments(toAttachment(attachments))
+                .errors(toError(errors))
                 .build();
     }
 
@@ -277,8 +280,8 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
             @NonNull ConnectorMessageDirection direction) {
         var message = this.messageJpaRepository
                 .findByAs4PropertiesEbmsMessageIdentifierAndDirection(
-                ebmsMessageIdentifier, direction
-        );
+                        ebmsMessageIdentifier, direction
+                );
 
         return toDomain(message);
     }
@@ -389,5 +392,34 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
                 .fromParty(fromParty)
                 .toParty(toParty)
                 .build();
+    }
+
+    private List<ConnectorMessageAttachment> toAttachment(
+            List<ConnectorMessageAttachmentEntity> attachments) {
+        return attachments == null
+                ? List.of()
+                : attachments.stream()
+                             .filter(attachment ->
+                                             attachment.getType()
+                                                       .equals(ConnectorAttachmentType.ATTACHMENT))
+                             .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
+                             .toList();
+    }
+
+    private List<ConnectorMessageError> toError(List<ConnectorMessageErrorEntity> errors) {
+        return errors == null
+                ? List.of()
+                : errors.stream()
+                        .map(ConnectorMessageErrorRepositoryImpl::toDomain)
+                        .toList();
+    }
+
+    private List<ConnectorMessageEvidence> toEvidence(
+            Set<ConnectorMessageEvidenceEntity> evidences) {
+        return evidences == null
+                ? List.of()
+                : evidences.stream()
+                           .map(ConnectorMessageEvidenceRepositoryImpl::toDomain)
+                           .toList();
     }
 }

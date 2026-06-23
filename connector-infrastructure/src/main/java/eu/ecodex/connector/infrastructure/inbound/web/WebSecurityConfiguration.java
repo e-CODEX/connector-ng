@@ -43,6 +43,7 @@ public class WebSecurityConfiguration {
                                    "/api/v1/attachments",
                                    "/api/v1/attachments/upload",
                                    "/api/v1/messages",
+                                   "/api/v1/messages/**",
                                    "/api/v1/messages/outbound",
                                    // SOAP
                                    "/services/backend",

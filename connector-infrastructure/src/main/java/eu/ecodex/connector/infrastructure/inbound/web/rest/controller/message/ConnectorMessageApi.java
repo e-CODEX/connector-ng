@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -56,4 +58,13 @@ public interface ConnectorMessageApi {
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size
     );
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{identifier}")
+    @Operation(summary = "Get a message by identifier.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Message found"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    ConnectorMessageDetailDto retrieveMessage(@PathVariable("identifier") String identifier);
 }

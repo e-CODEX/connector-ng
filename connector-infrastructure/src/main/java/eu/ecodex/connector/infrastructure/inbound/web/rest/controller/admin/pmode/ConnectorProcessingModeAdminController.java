@@ -12,9 +12,11 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmo
 
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import jakarta.validation.Valid;
@@ -33,14 +35,25 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorProcessingModeAdminController implements ConnectorProcessingModeAdminApi {
-    private final ConnectorRegisterProcessingMode registerProcessingMode;
-    private final ConnectorListProcessingMode listProcessingMode;
+    private final ConnectorRegisterProcessingMode registerProcessingModeService;
+    private final ConnectorListProcessingMode listProcessingModeService;
+    private final ConnectorRetrieveProcessingMode retrieveProcessingModeService;
 
+    /**
+     * Constructs an instance of {@code ConnectorProcessingModeAdminController}.
+     *
+     * @param registerProcessingModeService the service responsible for registering processing
+     *                                      modes
+     * @param listProcessingModeService     the service used to list processing modes
+     * @param retrieveProcessingModeService the service for retrieving specific processing modes
+     */
     public ConnectorProcessingModeAdminController(
-            ConnectorRegisterProcessingMode registerProcessingMode,
-            ConnectorListProcessingMode listProcessingMode) {
-        this.registerProcessingMode = registerProcessingMode;
-        this.listProcessingMode = listProcessingMode;
+            ConnectorRegisterProcessingMode registerProcessingModeService,
+            ConnectorListProcessingMode listProcessingModeService,
+            ConnectorRetrieveProcessingMode retrieveProcessingModeService) {
+        this.registerProcessingModeService = registerProcessingModeService;
+        this.listProcessingModeService = listProcessingModeService;
+        this.retrieveProcessingModeService = retrieveProcessingModeService;
     }
 
     @Override
@@ -57,7 +70,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                 metadata, processingModeXmlFile
         );
 
-        var created = this.registerProcessingMode.execute(
+        var created = this.registerProcessingModeService.execute(
                 businessDomainIdentifier, processingMode
         );
 
@@ -65,10 +78,16 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     @Override
-    public List<ConnectorProcessingModeDto> getAll() {
-        var processingModes = listProcessingMode.execute();
+    public List<ConnectorProcessingModeDto> listPmodes() {
+        var processingModes = listProcessingModeService.execute();
 
         return processingModes.stream().map(this::toDto).toList();
+    }
+
+    @Override
+    public ConnectorProcessingModeDetailDto getPmode(String uuid) {
+        var processingMode = retrieveProcessingModeService.execute(uuid);
+        return toDetailDto(processingMode);
     }
 
     private ConnectorProcessingMode processCreationRequest(
@@ -77,7 +96,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
         var xmlFileContentType = processingModeXmlFile.getContentType();
 
         if (!Objects.equals(xmlFileContentType, MediaType.APPLICATION_XML_VALUE)
-            && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
+                && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
             throw new ConnectorBadRequestException("pmode file must be XML");
         }
 
@@ -102,6 +121,25 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                         Objects.requireNonNull(processingMode.businessDomain())
                                .identifier().messageLaneIdentifier()
                 )
+                .createdAt(processingMode.createdAt())
+                .updatedAt(processingMode.updatedAt())
+                .build();
+    }
+
+    private ConnectorProcessingModeDetailDto toDetailDto(ConnectorProcessingMode processingMode) {
+        return ConnectorProcessingModeDetailDto
+                .builder()
+                .uuid(processingMode.uuid())
+                .description(processingMode.description())
+                .content(processingMode.content())
+                .filename(processingMode.filename())
+                .businessDomainIdentifier(
+                        Objects.requireNonNull(processingMode.businessDomain())
+                               .identifier().messageLaneIdentifier()
+                )
+                .parties(processingMode.parties())
+                .services(processingMode.services())
+                .actions(processingMode.actions())
                 .createdAt(processingMode.createdAt())
                 .updatedAt(processingMode.updatedAt())
                 .build();

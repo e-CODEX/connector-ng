@@ -8,14 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest;
+package eu.ecodex.connector.rest.pmode;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

@@ -66,5 +66,5 @@ public interface ConnectorMessageApi {
             @ApiResponse(responseCode = "200", description = "Message found"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorMessageDetailDto retrieveMessage(@PathVariable("identifier") String identifier);
+    ConnectorMessageDetailDto retrieveMessage(@PathVariable String identifier);
 }

@@ -21,8 +21,9 @@ import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,14 +47,16 @@ public class ConnectorProcessingModeAdminControllerTest {
     @Autowired
     private RestTestClient apiClient;
     @MockitoBean
-    private ConnectorRegisterProcessingMode registerProcessingMode;
+    private ConnectorRegisterProcessingMode registerProcessingModeService;
     @MockitoBean
-    private ConnectorListProcessingMode listProcessingMode;
+    private ConnectorListProcessingMode listProcessingModeService;
+    @MockitoBean
+    private ConnectorRetrieveProcessingMode retrieveProcessingModeService;
 
     // save processing mode
     @Test
     void should_send_201_response_when_creating_processing_mode_with_application_xml() throws Exception {
-        when(registerProcessingMode.execute(any(), any()))
+        when(registerProcessingModeService.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var processingModeXml = new MockMultipartFile(
@@ -79,7 +82,7 @@ public class ConnectorProcessingModeAdminControllerTest {
 
     @Test
     void should_send_201_response_when_creating_processing_mode_with_text_xml_file() throws Exception {
-        when(registerProcessingMode.execute(any(), any()))
+        when(registerProcessingModeService.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var processingModeXml = new MockMultipartFile(
@@ -105,7 +108,7 @@ public class ConnectorProcessingModeAdminControllerTest {
 
     @Test
     void should_send_400_response_when_creating_processing_mode_if_pmode_file_type_is_not_xml() throws Exception {
-        when(registerProcessingMode.execute(any(), any()))
+        when(registerProcessingModeService.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var processingModeXml = new MockMultipartFile(
@@ -142,7 +145,7 @@ public class ConnectorProcessingModeAdminControllerTest {
     // find all
     @Test
     void should_find_all_processing_modes_successfully() {
-        when(listProcessingMode.execute())
+        when(listProcessingModeService.execute())
                 .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
 
         var response = apiClient.get()

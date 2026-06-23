@@ -116,4 +116,8 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConnectorMessageEvidenceEntity> evidences = new HashSet<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ConnectorMessageErrorEntity> errors = new ArrayList<>();
 }

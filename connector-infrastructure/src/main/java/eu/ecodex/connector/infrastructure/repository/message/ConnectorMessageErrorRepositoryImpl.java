@@ -35,6 +35,27 @@ public class ConnectorMessageErrorRepositoryImpl implements ConnectorMessageErro
         this.messageJpaRepository = messageJpaRepository;
     }
 
+    /**
+     * Converts a {@link ConnectorMessageErrorEntity} instance to a {@link ConnectorMessageError}
+     * domain object.
+     *
+     * @param entity The {@link ConnectorMessageErrorEntity} to be converted. Must not be null and
+     *               should contain valid error information.
+     *
+     * @return A {@link ConnectorMessageError} object built from the provided entity. This includes
+     *         the label, details, source, and timestamps (createdAt, updatedAt) extracted from the
+     *         entity.
+     */
+    public static ConnectorMessageError toDomain(ConnectorMessageErrorEntity entity) {
+        return ConnectorMessageError.builder()
+                                    .label(entity.getLabel())
+                                    .details(entity.getDetails())
+                                    .source(entity.getSource())
+                                    .createdAt(entity.getCreatedAt())
+                                    .updatedAt(entity.getUpdatedAt())
+                                    .build();
+    }
+
     @Override
     public List<ConnectorMessageError> save(
             @NonNull String messageIdentifier,
@@ -47,10 +68,10 @@ public class ConnectorMessageErrorRepositoryImpl implements ConnectorMessageErro
         var entities = toEntities(errors, message);
         var savedErrors = errorJpaRepository.saveAll(entities);
 
-        return savedErrors.stream().map(this::toDomain).toList();
+        return savedErrors.stream().map(ConnectorMessageErrorRepositoryImpl::toDomain).toList();
     }
 
-    ConnectorMessageErrorEntity toEntity(ConnectorMessageError error) {
+    private ConnectorMessageErrorEntity toEntity(ConnectorMessageError error) {
         return ConnectorMessageErrorEntity.builder()
                                           .label(error.label())
                                           .details(error.details())
@@ -58,7 +79,7 @@ public class ConnectorMessageErrorRepositoryImpl implements ConnectorMessageErro
                                           .build();
     }
 
-    List<ConnectorMessageErrorEntity> toEntities(
+    private List<ConnectorMessageErrorEntity> toEntities(
             List<ConnectorMessageError> errors,
             ConnectorMessageEntity message) {
         return errors.stream().map(error -> {
@@ -67,15 +88,5 @@ public class ConnectorMessageErrorRepositoryImpl implements ConnectorMessageErro
 
             return entity;
         }).toList();
-    }
-
-    ConnectorMessageError toDomain(ConnectorMessageErrorEntity entity) {
-        return ConnectorMessageError.builder()
-                                    .label(entity.getLabel())
-                                    .details(entity.getDetails())
-                                    .source(entity.getSource())
-                                    .createdAt(entity.getCreatedAt())
-                                    .updatedAt(entity.getUpdatedAt())
-                                    .build();
     }
 }

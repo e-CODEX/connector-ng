@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
@@ -31,7 +32,9 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageEvidenceDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessDocument;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
@@ -54,26 +57,30 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
     private final ConnectorListMessages listMessagesService;
+    private final ConnectorRetrieveMessage retrieveMessageService;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
      *
-     * @param outboundMessageReceiver        The service responsible for receiving and managing
+     * @param outboundMessageReceiver      The service responsible for receiving and managing
      *                                     outbound messages.
      * @param backendClientVerifierService The service used for verifying backend clients.
      * @param uploadAttachmentsService     The service for handling file attachments during message
      *                                     processing.
      * @param listMessagesService          The service for listing messages.
+     * @param retrieveMessageService       The service for retrieving a specific message.
      */
     public ConnectorMessageController(
             ConnectorOutboundMessageReceiver outboundMessageReceiver,
             ConnectorBackendClientVerifier backendClientVerifierService,
             ConnectorUploadAttachments uploadAttachmentsService,
-            ConnectorListMessages listMessagesService) {
+            ConnectorListMessages listMessagesService,
+            ConnectorRetrieveMessage retrieveMessageService) {
         this.outboundMessageReceiver = outboundMessageReceiver;
         this.backendClientVerifierService = backendClientVerifierService;
         this.uploadAttachmentsService = uploadAttachmentsService;
         this.listMessagesService = listMessagesService;
+        this.retrieveMessageService = retrieveMessageService;
     }
 
     @Override
@@ -109,6 +116,13 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         );
     }
 
+    @Override
+    public ConnectorMessageDetailDto retrieveMessage(String identifier) {
+        var message = retrieveMessageService.execute(identifier);
+
+        return connectorMessageDetailDto(message);
+    }
+
     private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
         return ConnectorOutboundMessageDto
                 .builder()
@@ -120,7 +134,8 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     }
 
     private ConnectorMessageDto toMessageDto(ConnectorMessage message) {
-        return ConnectorMessageDto.builder()
+        return ConnectorMessageDto
+                .builder()
                 .businessDomainIdentifier(
                         message.businessDomainIdentifier().messageLaneIdentifier())
                 .identifier(message.identifier())
@@ -138,6 +153,46 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .confirmedAt(message.confirmedAt())
                 .deliveredToBackendAt(message.deliveredToBackendAt())
                 .deliveredToGatewayAt(message.deliveredToGatewayAt())
+                .build();
+    }
+
+    private ConnectorMessageDetailDto connectorMessageDetailDto(ConnectorMessage message) {
+        return ConnectorMessageDetailDto
+                .builder()
+                .businessDomainIdentifier(
+                        message.businessDomainIdentifier().messageLaneIdentifier())
+                .identifier(message.identifier())
+                .backendMessageIdentifier(message.backendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+                .direction(Objects.requireNonNull(message.direction()))
+                .isBusiness(message.isBusinessMessage())
+                .backendName(message.backendName())
+                .gatewayName(message.gatewayName())
+                .as4Properties(message.as4Properties())
+                .createdAt(message.createdAt())
+                .updatedAt(message.updatedAt())
+                .deletedAt(message.deletedAt())
+                .rejectedAt(message.rejectedAt())
+                .confirmedAt(message.confirmedAt())
+                .deliveredToBackendAt(message.deliveredToBackendAt())
+                .deliveredToGatewayAt(message.deliveredToGatewayAt())
+                .errors(message.errors())
+                .attachments(message.attachments())
+                .evidences(
+                        message.evidences()
+                               .stream()
+                               .map(evidence ->
+                                            ConnectorMessageEvidenceDto
+                                                    .builder()
+                                                    .uuid(evidence.uuid())
+                                                    .type(evidence.type())
+                                                    .createdAt(evidence.createdAt())
+                                                    .updatedAt(evidence.updatedAt())
+                                                    .deliveredToLinkPartnerAt(
+                                                            evidence.deliveredToLinkPartnerAt())
+                                                    .build()
+                               ).toList()
+                )
                 .build();
     }
 
@@ -236,15 +291,15 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         String xmlContentIdentifier;
 
         var uploadCommand = FileUploadCommand.builder()
-                .contentType("text/xml")
-                .filename("businessContent.xml")
-                .tempFileLocation(tempLocation)
-                .size(xmlBusinessDocument.length)
-                .build();
+                                             .contentType("text/xml")
+                                             .filename("businessContent.xml")
+                                             .tempFileLocation(tempLocation)
+                                             .size(xmlBusinessDocument.length)
+                                             .build();
 
         try {
             xmlContentIdentifier = this.uploadAttachmentsService.execute(List.of(uploadCommand))
-                    .getFirst().identifier();
+                                                                .getFirst().identifier();
         } finally {
             uploadCommand.cleanup();
         }
@@ -283,7 +338,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         }
 
         return identifiers.stream()
-                .map(this::toAttachment)
-                .toList();
+                          .map(this::toAttachment)
+                          .toList();
     }
 }

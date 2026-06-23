@@ -25,6 +25,7 @@ import eu.ecodex.connector.MultipartFileTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
@@ -57,6 +58,8 @@ public class ConnectorMessageControllerTest {
     private ConnectorUploadAttachments uploadAttachmentsService;
     @MockitoBean
     private ConnectorListMessages listMessagesService;
+    @MockitoBean
+    private ConnectorRetrieveMessage retrieveMessageService;
     @Autowired
     private MockMvc mockMvc;
 

@@ -109,7 +109,7 @@ public class ConnectorMessageControllerTest {
     @Test
     void should_return_200_when_retrieving_messages() throws Exception {
         var pageResult = new ConnectorPageResult<>(
-                List.of(MessageTestFixtures.createConfirmedMessage()), 1, 0, 20
+                List.of(MessageTestFixtures.createConfirmedMessage()), 1, 1, 1
         );
 
         when(listMessagesService.execute(any(), any(), any())).thenReturn(pageResult);
@@ -121,8 +121,8 @@ public class ConnectorMessageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.page").value(0))
-                .andExpect(jsonPath("$.size").value(20))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(1));
     }

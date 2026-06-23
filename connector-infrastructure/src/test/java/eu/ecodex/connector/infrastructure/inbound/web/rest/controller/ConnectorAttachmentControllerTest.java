@@ -67,7 +67,7 @@ public class ConnectorAttachmentControllerTest {
     @Test
     void should_return_200_when_retrieving_attachments() throws Exception {
         var pageResult = new ConnectorPageResult<>(
-                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 0, 20
+                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
         );
 
         when(listAttachmentsService.execute(any())).thenReturn(pageResult);
@@ -79,8 +79,8 @@ public class ConnectorAttachmentControllerTest {
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$.totalElements").value(1))
-               .andExpect(jsonPath("$.page").value(0))
-               .andExpect(jsonPath("$.size").value(20))
+               .andExpect(jsonPath("$.totalPages").value(1))
+               .andExpect(jsonPath("$.size").value(1))
                .andExpect(jsonPath("$.content").isArray())
                .andExpect(jsonPath("$.content.length()").value(1));
     }

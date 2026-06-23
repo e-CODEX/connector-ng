@@ -19,9 +19,9 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.message.Conne
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.AttachmentSpecification;
+import eu.ecodex.connector.infrastructure.repository.PaginationMapper;
 import java.util.List;
 import lombok.NonNull;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,12 +32,24 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         ConnectorMessageAttachmentRepository {
     private final ConnectorMessageAttachmentJpaRepository attachmentJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
+    private final PaginationMapper paginationMapper;
 
+    /**
+     * Constructs an instance of {@code ConnectorMessageAttachmentRepositoryImpl} with the specified
+     * dependencies.
+     *
+     * @param attachmentJpaRepository the repository for performing CRUD operations on
+     *                                {@code ConnectorMessageAttachmentEntity}
+     * @param messageJpaRepository    the repository for performing CRUD operations on
+     *                                {@code ConnectorMessageEntity}
+     * @param paginationMapper        the utility for mapping between page requests and results
+     */
     public ConnectorMessageAttachmentRepositoryImpl(
             ConnectorMessageAttachmentJpaRepository attachmentJpaRepository,
-            ConnectorMessageJpaRepository messageJpaRepository) {
+            ConnectorMessageJpaRepository messageJpaRepository, PaginationMapper paginationMapper) {
         this.attachmentJpaRepository = attachmentJpaRepository;
         this.messageJpaRepository = messageJpaRepository;
+        this.paginationMapper = paginationMapper;
     }
 
     static ConnectorMessageAttachment toDomain(ConnectorMessageAttachmentEntity entity) {
@@ -91,17 +103,13 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
 
     @Override
     public ConnectorPageResult<ConnectorMessageAttachment> findAll(ConnectorPageRequest request) {
-        var pageable = PageRequest.of(request.page(), request.size());
+        var pageable = paginationMapper.toPageable(request);
 
-        var result = attachmentJpaRepository.findAll(pageable);
+        var attachments = attachmentJpaRepository.findAll(pageable)
+                                                 .map(ConnectorMessageAttachmentRepositoryImpl
+                                                              ::toDomain);
 
-        return new ConnectorPageResult<>(
-                result.getContent().stream()
-                      .map(ConnectorMessageAttachmentRepositoryImpl::toDomain).toList(),
-                result.getTotalElements(),
-                result.getNumber(),
-                result.getSize()
-        );
+        return paginationMapper.toPageResult(attachments);
     }
 
     @Override

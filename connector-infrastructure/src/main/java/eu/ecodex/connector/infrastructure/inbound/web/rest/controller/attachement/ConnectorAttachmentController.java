@@ -16,6 +16,7 @@ import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploa
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import java.io.IOException;
@@ -73,20 +74,16 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
     }
 
     @Override
-    public ConnectorPageResult<ConnectorAttachmentDto> getAll(int page, int size) {
-        var pageRequest = ConnectorPageRequest
-                .builder()
-                .page(page)
-                .size(size)
-                .build();
+    public ConnectorPageResult<ConnectorAttachmentDto> listAttachments(int page, int size) {
+        var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
-        var result = listAttachmentsService.execute(pageRequest);
+        var attachments = listAttachmentsService.execute(pageRequest);
 
-        return new ConnectorPageResult<>(
-                result.content().stream().map(this::toDto).toList(),
-                result.totalElements(),
-                result.page(),
-                result.size()
+        return ConnectorPageResult.of(
+                attachments.content().stream().map(this::toDto).toList(),
+                attachments.size(),
+                attachments.totalElements(),
+                attachments.totalPages()
         );
     }
 

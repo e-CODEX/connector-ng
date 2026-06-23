@@ -36,6 +36,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.message.s
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
+import eu.ecodex.connector.infrastructure.repository.PaginationMapper;
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorActionRepositoryImpl;
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorPartyRepositoryImpl;
 import eu.ecodex.connector.infrastructure.repository.pmode.ConnectorServiceRepositoryImpl;
@@ -43,8 +44,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -58,6 +57,7 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     private final ConnectorServiceJpaRepository serviceJpaRepository;
     private final ConnectorActionJpaRepository actionJpaRepository;
     private final ConnectorPartyJpaRepository partyJpaRepository;
+    private final PaginationMapper paginationMapper;
 
     /**
      * Creates a new {@code ConnectorMessageRepositoryImpl}.
@@ -74,6 +74,7 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
      *                                    {@code ConnectorAction} entities.
      * @param partyJpaRepository          JPA repository responsible for managing
      *                                    {@code ConnectorParty} entities.
+     * @param paginationMapper            Mapper for pagination.
      */
     public ConnectorMessageRepositoryImpl(
             ConnectorMessageJpaRepository messageJpaRepository,
@@ -81,13 +82,14 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
             ConnectorBusinessDomainJpaRepository businessDomainJpaRepository,
             ConnectorServiceJpaRepository serviceJpaRepository,
             ConnectorActionJpaRepository actionJpaRepository,
-            ConnectorPartyJpaRepository partyJpaRepository) {
+            ConnectorPartyJpaRepository partyJpaRepository, PaginationMapper paginationMapper) {
         this.messageJpaRepository = messageJpaRepository;
         this.as4PropertiesJpaRepository = as4PropertiesJpaRepository;
         this.businessDomainJpaRepository = businessDomainJpaRepository;
         this.serviceJpaRepository = serviceJpaRepository;
         this.actionJpaRepository = actionJpaRepository;
         this.partyJpaRepository = partyJpaRepository;
+        this.paginationMapper = paginationMapper;
     }
 
     private static ConnectorMessageAS4Properties toDomain(
@@ -241,22 +243,13 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
             ConnectorPageRequest request,
             String identifier,
             String backendName) {
-        var pageable = PageRequest.of(
-                request.page(),
-                request.size(),
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
+        var pageable = paginationMapper.toPageable(request);
 
         var specification = MessageSpecification.withFilters(identifier, backendName);
 
-        var result = messageJpaRepository.findAll(specification, pageable);
+        var messages = messageJpaRepository.findAll(specification, pageable).map(this::toDomain);
 
-        return new ConnectorPageResult<>(
-                result.getContent().stream().map(this::toDomain).toList(),
-                result.getTotalElements(),
-                result.getNumber(),
-                result.getSize()
-        );
+        return paginationMapper.toPageResult(messages);
     }
 
     @Override

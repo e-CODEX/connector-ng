@@ -38,8 +38,8 @@ public class ConnectorListAttachmentsServiceTest {
 
     @Test
     void should_retrieve_attachments_successfully() {
-        var pageResult = new ConnectorPageResult<>(
-                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 0, 20
+        var pageResult = ConnectorPageResult.of(
+                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
         );
         when(attachmentRepository.findAll(any())).thenReturn(pageResult);
 
@@ -49,8 +49,8 @@ public class ConnectorListAttachmentsServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.content()).isNotEmpty();
         assertThat(result.totalElements()).isEqualTo(1L);
-        assertThat(result.page()).isEqualTo(0);
-        assertThat(result.size()).isEqualTo(20);
+        assertThat(result.totalPages()).isEqualTo(1);
+        assertThat(result.size()).isEqualTo(1);
     }
 
     @Test

@@ -12,6 +12,8 @@ package eu.ecodex.connector.domain.spi.message;
 
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
@@ -130,4 +132,24 @@ public interface ConnectorMessageTransportStepRepository {
      *         If no pending messages are found, an empty list is returned.
      */
     List<String> findPendingMessagesIds(@Nonnull String backendName);
+
+    /**
+     * Retrieves all {@link ConnectorMessageTransportStep} entities that match the given criteria.
+     *
+     * @param request                         the {@link ConnectorPageRequest} containing pagination
+     *                                        and sorting details; must not be null.
+     * @param messageOrRemoteSystemIdentifier an optional identifier for filtering results based on
+     *                                        a specific message or remote system; can be null or
+     *                                        empty.
+     * @param linkPartnerName                 an optional name of the link partner for filtering
+     *                                        results; can be null or empty.
+     *
+     * @return a {@link ConnectorPageResult} containing the paginated list of matching
+     *         {@link ConnectorMessageTransportStep} entities. If no matching entities are found,
+     *         returns an empty result.
+     */
+    ConnectorPageResult<ConnectorMessageTransportStep> findAll(
+            @Nonnull ConnectorPageRequest request,
+            String messageOrRemoteSystemIdentifier,
+            String linkPartnerName);
 }

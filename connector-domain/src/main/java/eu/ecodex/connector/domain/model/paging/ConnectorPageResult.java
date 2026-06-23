@@ -21,7 +21,7 @@ import lombok.Builder;
  * size.
  *
  * @param <T>           the type of elements contained in the page
- * @param content       the list of elements in the current page
+ * @param content       the list of elements on the current page
  * @param totalElements the total number of elements across all pages
  * @param page          the zero-based index of the current page
  * @param size          the number of elements per page
@@ -33,4 +33,12 @@ public record ConnectorPageResult<T>(
         int page,
         int size
 ) {
+    public static <T> ConnectorPageResult<T> of(
+            List<T> content,
+            long totalElements,
+            int page,
+            int size
+    ) {
+        return new ConnectorPageResult<>(content, totalElements, page, size);
+    }
 }

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Defines the API for managing connector messages.
+ * Defines the REST API for managing connector messages.
  */
 @Tag(name = "Message", description = "API for managing message.")
 @RequestMapping("/api/v1/messages")

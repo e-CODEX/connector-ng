@@ -108,7 +108,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
         var result = listMessagesService.execute(pageRequest, identifier, backendName);
 
-        return new ConnectorPageResult<>(
+        return ConnectorPageResult.of(
                 result.content().stream().map(this::toMessageDto).toList(),
                 result.totalElements(),
                 result.page(),

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 
 import java.time.Instant;
 import lombok.Builder;

@@ -10,7 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
 
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -22,6 +23,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,5 +51,14 @@ public interface ConnectorProcessingModeAdminApi {
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all processing modes.")
-    List<ConnectorProcessingModeDto> getAll();
+    List<ConnectorProcessingModeDto> listPmodes();
+
+    @GetMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get a processing mode by identifier.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Pmode found"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    ConnectorProcessingModeDetailDto getPmode(@PathVariable String uuid);
 }

@@ -87,6 +87,7 @@ public class ProcessingModeTestFixtures {
     public static ConnectorProcessingMode createWithNoBusinessDomain() {
         return ConnectorProcessingMode
                 .builder()
+                .uuid("7b79a71b-ce4c-4e18-9f82-7fa072a29e7e")
                 .description("test processing mode")
                 .services(Set.of(ServiceTestFixtures.createService()))
                 .actions(Set.of(ActionTestFixtures.createAction()))
@@ -105,15 +106,9 @@ public class ProcessingModeTestFixtures {
     }
 
     public static ConnectorProcessingMode createWithBusinessDomain() {
-        return ConnectorProcessingMode
-                .builder()
+        return createWithNoBusinessDomain()
+                .toBuilder()
                 .businessDomain(BusinessDomainTestFixtures.createDefaultBusinessDomain())
-                .description("test processing mode")
-                .services(Set.of(ServiceTestFixtures.createService()))
-                .actions(Set.of(ActionTestFixtures.createAction()))
-                .parties(Set.of(PartyTestFixtures.createFromParty()))
-                .content(pmodeString)
-                .filename("pmode.xml")
                 .build();
     }
 }

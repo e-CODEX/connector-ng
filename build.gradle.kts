@@ -38,6 +38,10 @@ subprojects {
         }
     }
 
+    tasks.withType<JavaCompile>().configureEach {
+        options.compilerArgs.add("-parameters")
+    }
+
     checkstyle {
         toolVersion = "10.17.0"
 

@@ -58,9 +58,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                      assertThat(result).isNotNull();
                      assert result != null;
                      assertThat(result.content().size()).isEqualTo(4);
+                     assertThat(result.size()).isEqualTo(4);
                      assertThat(result.totalElements()).isEqualTo(4);
-                     assertThat(result.page()).isEqualTo(0);
-                     assertThat(result.size()).isEqualTo(20);
+                     assertThat(result.totalPages()).isEqualTo(1);
                  });
     }
 
@@ -90,9 +90,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                      assertThat(result).isNotNull();
                      assert result != null;
                      assertThat(result.content().size()).isEqualTo(1);
+                     assertThat(result.size()).isEqualTo(1);
                      assertThat(result.totalElements()).isEqualTo(1);
-                     assertThat(result.page()).isEqualTo(0);
-                     assertThat(result.size()).isEqualTo(20);
+                     assertThat(result.totalPages()).isEqualTo(1);
                  });
     }
 
@@ -131,9 +131,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                      assertThat(result).isNotNull();
                      assert result != null;
                      assertThat(result.content().size()).isEqualTo(1);
+                     assertThat(result.size()).isEqualTo(1);
                      assertThat(result.totalElements()).isEqualTo(1);
-                     assertThat(result.page()).isEqualTo(0);
-                     assertThat(result.size()).isEqualTo(20);
+                     assertThat(result.totalPages()).isEqualTo(1);
                  });
     }
 }

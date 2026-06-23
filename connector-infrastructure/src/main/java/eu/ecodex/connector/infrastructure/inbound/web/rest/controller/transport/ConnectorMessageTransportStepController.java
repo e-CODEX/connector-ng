@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransp
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepStatusDto;
 import java.util.Set;
@@ -40,11 +41,7 @@ public class ConnectorMessageTransportStepController implements ConnectorMessage
             String linkPartnerName,
             int page,
             int size) {
-        var pageRequest = ConnectorPageRequest
-                .builder()
-                .page(page)
-                .size(size)
-                .build();
+        var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
         var transportSteps = listTransportStepsService.execute(
                 pageRequest,
                 messageOrRemoteSystemIdentifier,
@@ -53,9 +50,9 @@ public class ConnectorMessageTransportStepController implements ConnectorMessage
 
         return ConnectorPageResult.of(
                 transportSteps.content().stream().map(this::toDto).toList(),
+                transportSteps.size(),
                 transportSteps.totalElements(),
-                transportSteps.page(),
-                transportSteps.size()
+                transportSteps.totalPages()
         );
     }
 

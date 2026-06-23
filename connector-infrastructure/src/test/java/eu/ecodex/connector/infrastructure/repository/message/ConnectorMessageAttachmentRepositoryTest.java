@@ -91,9 +91,9 @@ public class ConnectorMessageAttachmentRepositoryTest {
 
         assertThat(attachments).isNotNull();
         assertThat(attachments.content()).hasSize(1);
+        assertThat(attachments.size()).isEqualTo(1);
         assertThat(attachments.totalElements()).isEqualTo(1L);
-        assertThat(attachments.page()).isEqualTo(0);
-        assertThat(attachments.size()).isEqualTo(20);
+        assertThat(attachments.totalPages()).isEqualTo(1);
     }
 
     // attach to message

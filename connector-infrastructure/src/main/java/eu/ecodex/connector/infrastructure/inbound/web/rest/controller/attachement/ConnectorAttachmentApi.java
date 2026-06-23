@@ -43,7 +43,7 @@ public interface ConnectorAttachmentApi {
 
     @GetMapping
     @Operation(summary = "Get paginated list of message attachments.")
-    ConnectorPageResult<ConnectorAttachmentDto> getAll(
+    ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size
     );

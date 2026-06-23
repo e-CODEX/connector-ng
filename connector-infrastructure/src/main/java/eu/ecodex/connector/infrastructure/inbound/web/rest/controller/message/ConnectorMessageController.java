@@ -26,6 +26,7 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
@@ -100,19 +101,15 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             String backendName,
             int page,
             int size) {
-        var pageRequest = ConnectorPageRequest
-                .builder()
-                .page(page)
-                .size(size)
-                .build();
+        var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
-        var result = listMessagesService.execute(pageRequest, identifier, backendName);
+        var messages = listMessagesService.execute(pageRequest, identifier, backendName);
 
         return ConnectorPageResult.of(
-                result.content().stream().map(this::toMessageDto).toList(),
-                result.totalElements(),
-                result.page(),
-                result.size()
+                messages.content().stream().map(this::toMessageDto).toList(),
+                messages.size(),
+                messages.totalElements(),
+                messages.totalPages()
         );
     }
 

@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.repository;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.paging.SortDirection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,10 +32,26 @@ public class PaginationMapper {
      * @return a Pageable instance configured with the page index, page size, and sort order
      */
     public Pageable toPageable(ConnectorPageRequest request) {
+        if (request.sortBy() == null) {
+            return PageRequest.of(
+                    request.page(),
+                    request.size(),
+                    Sort.by(Sort.Direction.DESC, "createdAt")
+            );
+        }
+
+        Sort.Direction sortDirection;
+
+        if (request.sortDirection() == null) {
+            sortDirection = Sort.Direction.fromString(SortDirection.DESC.name());
+        } else {
+            sortDirection = Sort.Direction.fromString(request.sortDirection().name());
+        }
+
         return PageRequest.of(
                 request.page(),
                 request.size(),
-                Sort.by(Sort.Direction.DESC, "createdAt")
+                Sort.by(sortDirection, request.sortBy())
         );
     }
 
@@ -50,9 +67,9 @@ public class PaginationMapper {
     public <T> ConnectorPageResult<T> toPageResult(Page<T> page) {
         return new ConnectorPageResult<>(
                 page.getContent(),
+                page.getNumberOfElements(),
                 page.getTotalElements(),
-                page.getNumber(),
-                page.getSize()
+                page.getTotalPages()
         );
     }
 }

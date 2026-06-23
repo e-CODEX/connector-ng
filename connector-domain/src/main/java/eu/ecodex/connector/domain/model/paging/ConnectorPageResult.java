@@ -22,23 +22,23 @@ import lombok.Builder;
  *
  * @param <T>           the type of elements contained in the page
  * @param content       the list of elements on the current page
- * @param totalElements the total number of elements across all pages
- * @param page          the zero-based index of the current page
  * @param size          the number of elements per page
+ * @param totalElements the total number of elements across all pages
+ * @param totalPages    the total number of pages
  */
 @Builder
 public record ConnectorPageResult<T>(
         List<T> content,
+        int size,
         long totalElements,
-        int page,
-        int size
+        int totalPages
 ) {
     public static <T> ConnectorPageResult<T> of(
             List<T> content,
+            int size,
             long totalElements,
-            int page,
-            int size
+            int totalPages
     ) {
-        return new ConnectorPageResult<>(content, totalElements, page, size);
+        return new ConnectorPageResult<>(content, size, totalElements, totalPages);
     }
 }

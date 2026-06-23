@@ -10,9 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import java.time.Instant;
+import java.util.Objects;
 import lombok.Builder;
 
 /**
@@ -70,4 +72,33 @@ public record ConnectorMessageDto(
         Instant deliveredToGatewayAt,
         Instant deliveredToBackendAt
 ) {
+    /**
+     * Converts a {@link ConnectorMessage} instance into a {@link ConnectorMessageDto} instance.
+     *
+     * @param message the {@link ConnectorMessage} to be converted
+     *
+     * @return a new {@link ConnectorMessageDto} instance containing the mapped values
+     */
+    public static ConnectorMessageDto from(ConnectorMessage message) {
+        return ConnectorMessageDto
+                .builder()
+                .businessDomainIdentifier(
+                        message.businessDomainIdentifier().messageLaneIdentifier())
+                .identifier(message.identifier())
+                .backendMessageIdentifier(message.backendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+                .direction(Objects.requireNonNull(message.direction()))
+                .isBusiness(message.isBusinessMessage())
+                .backendName(message.backendName())
+                .gatewayName(message.gatewayName())
+                .as4Properties(message.as4Properties())
+                .createdAt(message.createdAt())
+                .updatedAt(message.updatedAt())
+                .deletedAt(message.deletedAt())
+                .rejectedAt(message.rejectedAt())
+                .confirmedAt(message.confirmedAt())
+                .deliveredToBackendAt(message.deliveredToBackendAt())
+                .deliveredToGatewayAt(message.deliveredToGatewayAt())
+                .build();
+    }
 }

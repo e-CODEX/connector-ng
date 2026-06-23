@@ -12,8 +12,6 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
@@ -24,18 +22,12 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageEvidenceDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessDocument;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
@@ -57,8 +49,6 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     private final ConnectorOutboundMessageReceiver outboundMessageReceiver;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
-    private final ConnectorListMessages listMessagesService;
-    private final ConnectorRetrieveMessage retrieveMessageService;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
@@ -68,20 +58,14 @@ public class ConnectorMessageController implements ConnectorMessageApi {
      * @param backendClientVerifierService The service used for verifying backend clients.
      * @param uploadAttachmentsService     The service for handling file attachments during message
      *                                     processing.
-     * @param listMessagesService          The service for listing messages.
-     * @param retrieveMessageService       The service for retrieving a specific message.
      */
     public ConnectorMessageController(
             ConnectorOutboundMessageReceiver outboundMessageReceiver,
             ConnectorBackendClientVerifier backendClientVerifierService,
-            ConnectorUploadAttachments uploadAttachmentsService,
-            ConnectorListMessages listMessagesService,
-            ConnectorRetrieveMessage retrieveMessageService) {
+            ConnectorUploadAttachments uploadAttachmentsService) {
         this.outboundMessageReceiver = outboundMessageReceiver;
         this.backendClientVerifierService = backendClientVerifierService;
         this.uploadAttachmentsService = uploadAttachmentsService;
-        this.listMessagesService = listMessagesService;
-        this.retrieveMessageService = retrieveMessageService;
     }
 
     @Override
@@ -95,31 +79,6 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         return toDto(processedMessage);
     }
 
-    @Override
-    public ConnectorPageResult<ConnectorMessageDto> listMessages(
-            String identifier,
-            String backendName,
-            int page,
-            int size) {
-        var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
-
-        var messages = listMessagesService.execute(pageRequest, identifier, backendName);
-
-        return ConnectorPageResult.of(
-                messages.content().stream().map(this::toMessageDto).toList(),
-                messages.size(),
-                messages.totalElements(),
-                messages.totalPages()
-        );
-    }
-
-    @Override
-    public ConnectorMessageDetailDto retrieveMessage(String identifier) {
-        var message = retrieveMessageService.execute(identifier);
-
-        return connectorMessageDetailDto(message);
-    }
-
     private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
         return ConnectorOutboundMessageDto
                 .builder()
@@ -127,69 +86,6 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .backendMessageIdentifier(message.backendMessageIdentifier())
                 .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
                 .direction(Objects.requireNonNull(message.direction()))
-                .build();
-    }
-
-    private ConnectorMessageDto toMessageDto(ConnectorMessage message) {
-        return ConnectorMessageDto
-                .builder()
-                .businessDomainIdentifier(
-                        message.businessDomainIdentifier().messageLaneIdentifier())
-                .identifier(message.identifier())
-                .backendMessageIdentifier(message.backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
-                .direction(Objects.requireNonNull(message.direction()))
-                .isBusiness(message.isBusinessMessage())
-                .backendName(message.backendName())
-                .gatewayName(message.gatewayName())
-                .as4Properties(message.as4Properties())
-                .createdAt(message.createdAt())
-                .updatedAt(message.updatedAt())
-                .deletedAt(message.deletedAt())
-                .rejectedAt(message.rejectedAt())
-                .confirmedAt(message.confirmedAt())
-                .deliveredToBackendAt(message.deliveredToBackendAt())
-                .deliveredToGatewayAt(message.deliveredToGatewayAt())
-                .build();
-    }
-
-    private ConnectorMessageDetailDto connectorMessageDetailDto(ConnectorMessage message) {
-        return ConnectorMessageDetailDto
-                .builder()
-                .businessDomainIdentifier(
-                        message.businessDomainIdentifier().messageLaneIdentifier())
-                .identifier(message.identifier())
-                .backendMessageIdentifier(message.backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
-                .direction(Objects.requireNonNull(message.direction()))
-                .isBusiness(message.isBusinessMessage())
-                .backendName(message.backendName())
-                .gatewayName(message.gatewayName())
-                .as4Properties(message.as4Properties())
-                .createdAt(message.createdAt())
-                .updatedAt(message.updatedAt())
-                .deletedAt(message.deletedAt())
-                .rejectedAt(message.rejectedAt())
-                .confirmedAt(message.confirmedAt())
-                .deliveredToBackendAt(message.deliveredToBackendAt())
-                .deliveredToGatewayAt(message.deliveredToGatewayAt())
-                .errors(message.errors())
-                .attachments(message.attachments())
-                .evidences(
-                        message.evidences()
-                               .stream()
-                               .map(evidence ->
-                                            ConnectorMessageEvidenceDto
-                                                    .builder()
-                                                    .uuid(evidence.uuid())
-                                                    .type(evidence.type())
-                                                    .createdAt(evidence.createdAt())
-                                                    .updatedAt(evidence.updatedAt())
-                                                    .deliveredToLinkPartnerAt(
-                                                            evidence.deliveredToLinkPartnerAt())
-                                                    .build()
-                               ).toList()
-                )
                 .build();
     }
 

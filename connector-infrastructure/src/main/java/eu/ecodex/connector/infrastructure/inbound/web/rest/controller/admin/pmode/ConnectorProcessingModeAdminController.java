@@ -74,20 +74,20 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                 businessDomainIdentifier, processingMode
         );
 
-        return toDto(created);
+        return ConnectorProcessingModeDto.from(created);
     }
 
     @Override
     public List<ConnectorProcessingModeDto> listPmodes() {
         var processingModes = listProcessingModeService.execute();
 
-        return processingModes.stream().map(this::toDto).toList();
+        return processingModes.stream().map(ConnectorProcessingModeDto::from).toList();
     }
 
     @Override
     public ConnectorProcessingModeDetailDto getPmode(String uuid) {
         var processingMode = retrieveProcessingModeService.execute(uuid);
-        return toDetailDto(processingMode);
+        return ConnectorProcessingModeDetailDto.from(processingMode);
     }
 
     private ConnectorProcessingMode processCreationRequest(
@@ -107,41 +107,6 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                 .filename(StringUtils.cleanPath(
                         Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
                 )
-                .build();
-    }
-
-    private ConnectorProcessingModeDto toDto(ConnectorProcessingMode processingMode) {
-        return ConnectorProcessingModeDto
-                .builder()
-                .uuid(processingMode.uuid())
-                .description(processingMode.description())
-                .content(processingMode.content())
-                .filename(processingMode.filename())
-                .businessDomainIdentifier(
-                        Objects.requireNonNull(processingMode.businessDomain())
-                               .identifier().messageLaneIdentifier()
-                )
-                .createdAt(processingMode.createdAt())
-                .updatedAt(processingMode.updatedAt())
-                .build();
-    }
-
-    private ConnectorProcessingModeDetailDto toDetailDto(ConnectorProcessingMode processingMode) {
-        return ConnectorProcessingModeDetailDto
-                .builder()
-                .uuid(processingMode.uuid())
-                .description(processingMode.description())
-                .content(processingMode.content())
-                .filename(processingMode.filename())
-                .businessDomainIdentifier(
-                        Objects.requireNonNull(processingMode.businessDomain())
-                               .identifier().messageLaneIdentifier()
-                )
-                .parties(processingMode.parties())
-                .services(processingMode.services())
-                .actions(processingMode.actions())
-                .createdAt(processingMode.createdAt())
-                .updatedAt(processingMode.updatedAt())
                 .build();
     }
 }

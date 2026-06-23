@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest;
+package eu.ecodex.connector.rest.attachment;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import org.junit.jupiter.api.AfterEach;

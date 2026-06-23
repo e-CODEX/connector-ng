@@ -8,31 +8,31 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.transport;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.attachment;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Defines the REST API for managing message transport steps.
+ * Defines the API for managing message attachments for administrative purposes.
+ *
+ * <p>The base URI for the endpoints defined in this interface is:
+ * {@code /api/v1/admin/attachments}.
  */
-@Tag(name = "MessageTransportStep", description = "API for managing message transport steps.")
-@RequestMapping("/api/v1/transport-steps")
-public interface ConnectorMessageTransportStepApi {
-    @ResponseStatus(HttpStatus.OK)
+@RequestMapping("/api/v1/admin/attachments")
+@Tag(
+        name = "MessageAttachmentAdmin",
+        description = "Defines the API for managing message attachments for administrative purposes"
+)
+public interface ConnectorAttachmentAdminApi {
     @GetMapping
-    @Operation(summary = "Get paginated list of messages transport steps.")
-    ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
-            @RequestParam(name = "messageOrRemoteSystemIdentifier", required = false)
-            String messageOrRemoteSystemIdentifier,
-            @RequestParam(name = "linkPartnerName", required = false) String linkPartnerName,
+    @Operation(summary = "Get paginated list of message attachments.")
+    ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size
     );

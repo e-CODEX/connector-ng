@@ -12,13 +12,22 @@ package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
 import java.time.Instant;
+import java.util.HashSet;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "LineLength"})
 public class TransportStepFixtures {
     private static final String TRANSPORT_STEP_ID = "1c544c2e-7e60-4647-a4b2-c3c89958b2a7@connector.ecodex.eu";
 
     public static ConnectorMessageTransportStep createTransportStep() {
+        var statuses = new HashSet<ConnectorMessageTransportStepStatus>();
+        statuses.add(
+                ConnectorMessageTransportStepStatus.builder()
+                                                   .status(ConnectorMessageTransportStatus.SUBMITTED)
+                                                   .createdAt(Instant.now())
+                                                   .build()
+        );
         return ConnectorMessageTransportStep
                 .builder()
                 .identifier(TRANSPORT_STEP_ID)
@@ -30,6 +39,7 @@ public class TransportStepFixtures {
                 )
                 .numberOfAttempts(0)
                 .status(ConnectorMessageTransportStatus.SUBMITTED)
+                .statuses(statuses)
                 .linkPartnerName("backend_alice")
                 .transportedMessage(MessageTestFixtures.createEvidenceMessage())
                 .createdAt(Instant.now())

@@ -41,6 +41,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @WebMvcTest(ConnectorBusinessDomainAdminController.class)
 @ContextConfiguration(classes = TestConfiguration.class)
 public class ConnectorBusinessDomainAdminControllerTest {
+    private static final String URL = "/api/v1/admin/business-domains";
+
     @Autowired
     private RestTestClient apiClient;
     @MockitoBean
@@ -55,7 +57,7 @@ public class ConnectorBusinessDomainAdminControllerTest {
 
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
-                                .uri("/api/v1/admin/business-domains")
+                                .uri(URL)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .body(body)
                                 .exchange()
@@ -80,7 +82,7 @@ public class ConnectorBusinessDomainAdminControllerTest {
 
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
-                                .uri("/api/v1/admin/business-domains")
+                                .uri(URL)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .body(body)
                                 .exchange()
@@ -97,7 +99,7 @@ public class ConnectorBusinessDomainAdminControllerTest {
     @Test
     void should_send_400_response_if_request_body_is_invalid_when_creating_business_domain() {
         apiClient.post()
-                .uri("/api/v1/admin/business-domains")
+                .uri(URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body("{}")
                 .exchange()
@@ -107,7 +109,7 @@ public class ConnectorBusinessDomainAdminControllerTest {
     @Test
     void should_send_200_response_when_retrieving_business_domains() {
         apiClient.get()
-                .uri("/api/v1/admin/business-domains")
+                .uri(URL)
                 .exchange()
                 .expectStatus().isOk();
     }

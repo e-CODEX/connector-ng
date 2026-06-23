@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest;
+package eu.ecodex.connector.rest.admin.transportstep;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
+    private static final String URL = "/api/v1/admin/transport-steps";
     @Autowired
     private RestTestClient apiClient;
 
@@ -51,7 +52,7 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     })
     void should_list_connector_messages_transport_steps_successfully() {
         apiClient.get()
-                 .uri("/api/v1/transport-steps")
+                 .uri(URL)
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
@@ -87,7 +88,8 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     void should_list_connector_messages_applying_identifier_filter_successfully(String identifier) {
         apiClient.get()
                  .uri(String.format(
-                         "/api/v1/transport-steps?messageOrRemoteSystemIdentifier=%s",
+                         "%s?messageOrRemoteSystemIdentifier=%s",
+                         URL,
                          identifier
                  ))
                  .exchange()
@@ -127,7 +129,8 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
             String backendName) {
         apiClient.get()
                  .uri(String.format(
-                         "/api/v1/transport-steps?messageOrRemoteSystemIdentifier=%s&linkPartnerName=%s",
+                         "%s?messageOrRemoteSystemIdentifier=%s&linkPartnerName=%s",
+                         URL,
                          identifier,
                          backendName
                  ))

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import java.time.Instant;
 import lombok.Builder;
@@ -38,4 +39,26 @@ public record ConnectorBusinessDomainDto(
         Instant createdAt,
         Instant updatedAt
 ) {
+    /**
+     * Converts a {@link ConnectorBusinessDomain} instance into a
+     * {@link ConnectorBusinessDomainDto}.
+     *
+     * @param businessDomain the {@link ConnectorBusinessDomain} instance to be converted.
+     *
+     * @return a new {@link ConnectorBusinessDomainDto} instance built with values from the provided
+     *         {@link ConnectorBusinessDomain}.
+     */
+    public static ConnectorBusinessDomainDto from(ConnectorBusinessDomain businessDomain) {
+        return ConnectorBusinessDomainDto.builder()
+                                         .uuid(businessDomain.uuid())
+                                         .identifier(
+                                                 businessDomain.identifier().messageLaneIdentifier()
+                                         )
+                                         .description(businessDomain.description())
+                                         .enabled(businessDomain.enabled())
+                                         .source(businessDomain.source())
+                                         .createdAt(businessDomain.createdAt())
+                                         .updatedAt(businessDomain.updatedAt())
+                                         .build();
+    }
 }

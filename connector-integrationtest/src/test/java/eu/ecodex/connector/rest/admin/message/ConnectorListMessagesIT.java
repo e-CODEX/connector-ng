@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest.message;
+package eu.ecodex.connector.rest.admin.message;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -29,6 +29,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorListMessagesIT extends AbstractIntegrationTest {
+    private static final String URL = "/api/v1/admin/messages";
+
     @Autowired
     private RestTestClient apiClient;
 
@@ -49,7 +51,7 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     })
     void should_list_connector_messages_successfully() {
         apiClient.get()
-                 .uri("/api/v1/messages")
+                 .uri(URL)
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
@@ -81,7 +83,7 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     })
     void should_list_connector_messages_applying_identifier_filter_successfully(String identifier) {
         apiClient.get()
-                 .uri(String.format("/api/v1/messages?identifier=%s", identifier))
+                 .uri(String.format("%s?identifier=%s", URL, identifier))
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
@@ -119,7 +121,8 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
             String backendName) {
         apiClient.get()
                  .uri(String.format(
-                         "/api/v1/messages?identifier=%s&backendName=%s",
+                         "%s?identifier=%s&backendName=%s",
+                         URL,
                          identifier,
                          backendName
                  ))

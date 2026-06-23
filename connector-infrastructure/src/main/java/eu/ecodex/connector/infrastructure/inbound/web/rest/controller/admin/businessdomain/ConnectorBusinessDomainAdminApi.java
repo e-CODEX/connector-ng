@@ -29,14 +29,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Defines the API for managing business domains within the connector system for administrative
  * purposes.
  *
- * <p>This interface provides operations for performing administrative tasks related to business
- * domains. The API is intended to be used by system administrators to manage domain-specific
- * settings.
- *
  * <p>The base URI for the endpoints defined in this interface is:
  * {@code /api/v1/admin/business-domains}.
  */
-@Tag(name = "BusinessDomainsAdministration", description = "API for managing business domains.")
+@Tag(
+        name = "BusinessDomainsAdmin",
+        description = "API for managing business domains within the connector system for "
+                + "administrative purposes."
+)
 @RequestMapping(value = "/api/v1/admin/business-domains")
 public interface ConnectorBusinessDomainAdminApi {
     @PostMapping("")
@@ -51,5 +51,5 @@ public interface ConnectorBusinessDomainAdminApi {
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all business domains.")
-    List<ConnectorBusinessDomainDto> getAll();
+    List<ConnectorBusinessDomainDto> getBusinessDomains();
 }

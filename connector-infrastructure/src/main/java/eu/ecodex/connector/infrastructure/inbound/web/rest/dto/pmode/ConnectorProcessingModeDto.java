@@ -10,7 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import java.time.Instant;
+import java.util.Objects;
 import lombok.Builder;
 
 /**
@@ -37,4 +39,28 @@ public record ConnectorProcessingModeDto(
         Instant createdAt,
         Instant updatedAt
 ) {
+    /**
+     * Converts a ConnectorProcessingMode entity into a ConnectorProcessingModeDto.
+     *
+     * @param processingMode the ConnectorProcessingMode instance containing the data to be
+     *                       converted
+     *
+     * @return a ConnectorProcessingModeDto instance built from the provided
+     *         ConnectorProcessingMode
+     */
+    public static ConnectorProcessingModeDto from(ConnectorProcessingMode processingMode) {
+        return ConnectorProcessingModeDto
+                .builder()
+                .uuid(processingMode.uuid())
+                .description(processingMode.description())
+                .content(processingMode.content())
+                .filename(processingMode.filename())
+                .businessDomainIdentifier(
+                        Objects.requireNonNull(processingMode.businessDomain())
+                               .identifier().messageLaneIdentifier()
+                )
+                .createdAt(processingMode.createdAt())
+                .updatedAt(processingMode.updatedAt())
+                .build();
+    }
 }

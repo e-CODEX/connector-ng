@@ -41,12 +41,12 @@ public class WebSecurityConfiguration {
                                    "/api/v1/admin/business-domains",
                                    "/api/v1/admin/processing-modes",
                                    "/api/v1/admin/processing-modes/{uuid}",
-                                   "/api/v1/attachments",
+                                   "/api/v1/admin/attachments",
                                    "/api/v1/attachments/upload",
-                                   "/api/v1/messages",
-                                   "/api/v1/messages/**",
+                                   "/api/v1/admin/messages",
+                                   "/api/v1/admin/messages/{identifier}",
                                    "/api/v1/messages/outbound",
-                                   "/api/v1/transport-steps",
+                                   "/api/v1/admin/transport-steps",
                                    // SOAP
                                    "/services/backend",
                                    // swagger ui

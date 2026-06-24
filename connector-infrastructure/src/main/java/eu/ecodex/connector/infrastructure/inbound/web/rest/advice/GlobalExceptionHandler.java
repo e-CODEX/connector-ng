@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -99,6 +100,15 @@ public class GlobalExceptionHandler {
             ConnectorMessageAttachmentException exception) {
         return new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(ConnectorAttachmentUploadException.class)
+    public ErrorResponse handleAttachmentUploadException(ConnectorAttachmentUploadException e) {
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()
         );
     }
 

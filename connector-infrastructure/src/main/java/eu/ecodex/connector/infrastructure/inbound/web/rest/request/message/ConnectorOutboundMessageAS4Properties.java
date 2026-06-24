@@ -24,9 +24,9 @@ import lombok.Builder;
  * message header and routing information, including sender/receiver details, service and action
  * definitions, and conversation tracking identifiers.</p>
  *
- * @param referenceToIdentifier  the identifier of the message this outbound message references
- *                               (e.g. in case of a reply); may be {@code null} if the message is
- *                               not a response
+ * @param ebmsIdentifier         the EBMS identifier set by the backend system; in case the
+ *                               connector is configured to generate EBMS identifiers, this value is
+ *                               ignored
  * @param conversationIdentifier the unique identifier used to correlate messages belonging to the
  *                               same business conversation; may be {@code null} if conversation
  *                               tracking is not required
@@ -45,13 +45,19 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageAS4Properties(
-        String referenceToIdentifier,
+        String ebmsIdentifier,
         String conversationIdentifier,
-        @NotBlank String originalSender,
-        @NotBlank String finalRecipient,
-        @NotNull ConnectorOutboundMessageService service,
-        @NotNull ConnectorOutboundMessageAction action,
-        @NotNull ConnectorOutboundMessageParty fromParty,
-        @NotNull ConnectorOutboundMessageParty toParty
+        @NotBlank(message = "The original sender must not be blank.")
+        String originalSender,
+        @NotBlank(message = "The final recipient must not be blank.")
+        String finalRecipient,
+        @NotNull(message = "The service must not be null.")
+        ConnectorOutboundMessageService service,
+        @NotNull(message = "The action must not be null.")
+        ConnectorOutboundMessageAction action,
+        @NotNull(message = "The from party must not be null.")
+        ConnectorOutboundMessageParty fromParty,
+        @NotNull(message = "The to party must not be null.")
+        ConnectorOutboundMessageParty toParty
 ) {
 }

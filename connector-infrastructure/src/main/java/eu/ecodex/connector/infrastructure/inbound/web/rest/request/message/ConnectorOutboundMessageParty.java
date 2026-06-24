@@ -22,11 +22,11 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorOutboundMessageParty(
-        @NotBlank(message = "Identifier must not be empty")
+        @NotBlank(message = "Party identifier must not be empty")
         String identifier,
-        @NotBlank(message = "Identifier type must not be empty")
+        @NotBlank(message = "Party identifier type must not be empty")
         String identifierType,
-        @NotBlank(message = "Role must not be empty")
+        @NotBlank(message = "Party role must not be empty")
         String role
 ) {
 }

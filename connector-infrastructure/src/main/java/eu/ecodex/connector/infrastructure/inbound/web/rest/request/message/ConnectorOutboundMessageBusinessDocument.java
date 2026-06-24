@@ -11,24 +11,24 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
 
 import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Represents a request for attaching a business document to an outbound message.
  *
- * @param attachmentIdentifier the identifier of the attachment representing the business document;
- *                             must not be blank
- * @param detachedSignature    optional detached signature information for the business document;
- *                             may be {@code null} if no signature is provided
- * @param aesType              the AES encryption type to apply to the business document; may be
- *                             {@code null} if encryption is not required or determined elsewhere
+ * @param document          the business document to attach; must not be {@code null}
+ * @param detachedSignature optional detached signature information for the business document; may
+ *                          be {@code null} if no signature is provided
+ * @param aesType           the AES encryption type to apply to the business document; may be
+ *                          {@code null} if encryption is not required or determined elsewhere
  */
 @Builder(toBuilder = true)
 @SuppressWarnings("checkstyle:LineLength")
 public record ConnectorOutboundMessageBusinessDocument(
-        @NotBlank(message = "The business business document attachment identifier must not be blank.")
-        String attachmentIdentifier,
+        @NotNull(message = "The business business document must not be null.")
+        MultipartFile document,
         ConnectorOutboundMessageDetachedSignature detachedSignature,
         ConnectorBusinessDocumentAESType aesType
 ) {

@@ -28,14 +28,14 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessDocument;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessContent;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.web.bind.annotation.RestController;
@@ -70,13 +70,11 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
     @Override
     public ConnectorOutboundMessageDto submitOutboundMessage(
-            MultipartFile businessXMLDocument,
-            ConnectorOutboundMessageRequest messageMetadata) throws IOException {
-        var message = toDomain(messageMetadata, businessXMLDocument.getBytes());
+            ConnectorOutboundMessageRequest request) throws IOException {
+        var message = toDomain(request);
+        var registeredMessage = outboundMessageReceiver.register(message);
 
-        var processedMessage = outboundMessageReceiver.register(message);
-
-        return toDto(processedMessage);
+        return toDto(registeredMessage);
     }
 
     private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
@@ -89,23 +87,22 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .build();
     }
 
-    private ConnectorMessage toDomain(
-            ConnectorOutboundMessageRequest request, byte[] xmlBusinessDocument) {
+    private ConnectorMessage toDomain(ConnectorOutboundMessageRequest request) throws IOException {
         // TODO current cn is fake, retrieve the certificate dn from user principal
         var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
         return ConnectorMessage
                 .builder()
                 .businessDomainIdentifier(
-                        setBusinessDomainIdentifier(request.businessDomainIdentifier())
+                        resolveBusinessDomainIdentifier(request.businessDomainIdentifier())
                 )
                 .backendMessageIdentifier(request.backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(request.referenceToBackendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(null)
                 .backendName(backendClientName)
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .as4Properties(
                         toDomainAS4Properties(request.as4Properties())
                 )
-                .businessContent(toBusinessContent(request.businessContent(), xmlBusinessDocument))
+                .businessContent(toBusinessContent(request.businessContent()))
                 .attachments(toAttachments(request.attachments()))
                 .build();
     }
@@ -140,7 +137,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .builder()
                 .originalSender(as4Properties.originalSender())
                 .finalRecipient(as4Properties.finalRecipient())
-                .referenceToIdentifier(as4Properties.referenceToIdentifier())
+                .ebmsMessageIdentifier(as4Properties.ebmsIdentifier())
                 .conversationIdentifier(as4Properties.conversationIdentifier())
                 .service(service)
                 .action(action)
@@ -149,7 +146,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .build();
     }
 
-    private ConnectorBusinessDomainIdentifier setBusinessDomainIdentifier(String identifier) {
+    private ConnectorBusinessDomainIdentifier resolveBusinessDomainIdentifier(String identifier) {
         if (identifier == null) {
             return ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID;
         }
@@ -161,59 +158,32 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     }
 
     private ConnectorMessageBusinessContent toBusinessContent(
-            ConnectorOutboundMessageBusinessDocument business, byte[] xmlBusinessDocument) {
+            ConnectorOutboundMessageBusinessContent businessContent) throws IOException {
+        var businessDocumentRequest = businessContent.businessDocument();
         var businessDocument = ConnectorMessageBusinessDocument
                 .builder()
-                .attachment(toAttachment(business.attachmentIdentifier()))
-                .detachedSignature(toDetachedSignature(business.detachedSignature()))
-                .aesType(business.aesType())
+                .attachment(toAttachment(businessContent.businessDocument().document()))
+                .detachedSignature(toDetachedSignature(businessDocumentRequest.detachedSignature()))
+                .aesType(businessDocumentRequest.aesType())
                 .build();
-
-        Path tempLocation;
-
-        try {
-            tempLocation = Files.createTempFile("businessContent", ".xml");
-            Files.writeString(
-                    tempLocation,
-                    new String(xmlBusinessDocument, StandardCharsets.UTF_8)
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        String xmlContentIdentifier;
-
-        var uploadCommand = FileUploadCommand.builder()
-                                             .contentType("text/xml")
-                                             .filename("businessContent.xml")
-                                             .tempFileLocation(tempLocation)
-                                             .size(xmlBusinessDocument.length)
-                                             .build();
-
-        try {
-            xmlContentIdentifier = this.uploadAttachmentsService.execute(List.of(uploadCommand))
-                                                                .getFirst().identifier();
-        } finally {
-            uploadCommand.cleanup();
-        }
 
         return ConnectorMessageBusinessContent
                 .builder()
-                .xmlContent(toAttachment(xmlContentIdentifier))
+                .xmlContent(toAttachment(businessContent.contentFile()))
                 .businessDocument(businessDocument)
                 .build();
     }
 
     private DetachedSignature toDetachedSignature(
-            ConnectorOutboundMessageDetachedSignature detachedSignature) {
-        if (detachedSignature == null) {
+            ConnectorOutboundMessageDetachedSignature detachedSignature) throws IOException {
+        if (detachedSignature == null || detachedSignature.signature() == null) {
             return null;
         }
 
         return DetachedSignature
                 .builder()
-                .name(detachedSignature.name())
-                .signature(detachedSignature.signature())
+                .name(detachedSignature.signature().getName())
+                .signature(detachedSignature.signature().getBytes())
                 .mimeType(detachedSignature.mimeType())
                 .build();
     }
@@ -225,9 +195,30 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .build();
     }
 
+    private ConnectorMessageAttachment toAttachment(MultipartFile file) throws IOException {
+        var tempLocation = Files.createTempFile("upload_", file.getName());
+
+        try {
+            file.transferTo(tempLocation);
+            var uploadCommand = FileUploadCommand.builder()
+                                                 .contentType(file.getContentType())
+                                                 .filename(file.getName())
+                                                 .tempFileLocation(tempLocation)
+                                                 .size(file.getSize())
+                                                 .build();
+            return uploadAttachmentsService.execute(List.of(uploadCommand)).getFirst();
+        } catch (Exception e) {
+            throw new ConnectorAttachmentUploadException(
+                    "Failed to upload attachment: " + file.getName(), e);
+        } finally {
+            // Always runs — covers both success and failure paths
+            Files.deleteIfExists(tempLocation);
+        }
+    }
+
     private List<ConnectorMessageAttachment> toAttachments(List<String> identifiers) {
         if (identifiers == null) {
-            return null;
+            return new ArrayList<>();
         }
 
         return identifiers.stream()

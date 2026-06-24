@@ -20,11 +20,10 @@ import jakarta.validation.Valid;
 import java.io.IOException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Defines the REST API for managing connector messages.
@@ -39,7 +38,6 @@ public interface ConnectorMessageApi {
             @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     ConnectorOutboundMessageDto submitOutboundMessage(
-            @RequestPart("businessXMLDocument") MultipartFile businessXMLDocument,
-            @Valid @RequestPart("messageMetadata") ConnectorOutboundMessageRequest messageMetadata
+            @Valid @ModelAttribute ConnectorOutboundMessageRequest request
     ) throws IOException;
 }

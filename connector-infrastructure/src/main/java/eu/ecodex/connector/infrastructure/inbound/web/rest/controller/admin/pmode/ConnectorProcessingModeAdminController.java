@@ -105,7 +105,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                 .description(metadata.description())
                 .content(new String(processingModeXmlFile.getBytes()))
                 .filename(StringUtils.cleanPath(
-                        Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
+                        Objects.requireNonNull(processingModeXmlFile.getName()))
                 )
                 .build();
     }

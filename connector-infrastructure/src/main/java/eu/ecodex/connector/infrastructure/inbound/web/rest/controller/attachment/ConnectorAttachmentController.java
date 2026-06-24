@@ -39,12 +39,12 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
                 .map(attachment -> {
                          try {
                              var tempPath = Files.createTempFile(
-                                     "upload_", attachment.getOriginalFilename()
+                                     "upload_", attachment.getName()
                              );
                              attachment.transferTo(tempPath);
 
                              return new FileUploadCommand(
-                                     attachment.getOriginalFilename(),
+                                     attachment.getName(),
                                      attachment.getSize(),
                                      attachment.getContentType(),
                                      tempPath

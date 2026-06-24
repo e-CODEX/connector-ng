@@ -13,23 +13,22 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
 import java.io.Serializable;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /**
  * Represents a detached signature associated with an outbound message business document.
  *
  * <p>A detached signature contains the raw signature bytes and metadata describing the signature
- * artefact. The signature is not embedded within the business document itself but is transmitted or
+ * artifact. The signature is not embedded within the business document itself but is transmitted or
  * stored separately.
  *
  * @param signature the raw signature bytes; may be {@code null} depending on validation rules
- * @param name      the name of the signature artefact (e.g. file name); may be {@code null}
  * @param mimeType  the MIME type describing the signature format; may be {@code null}
  */
 @Builder
 public record ConnectorOutboundMessageDetachedSignature(
-        byte[] signature,
-        String name,
+        MultipartFile signature,
         DetachedSignatureMimeType mimeType
 ) implements Serializable {
 }

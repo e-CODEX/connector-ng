@@ -25,32 +25,28 @@ import lombok.Builder;
  * <p>Bean Validation annotations define mandatory fields and are expected
  * to be enforced during request validation.</p>
  *
- * @param businessDomainIdentifier            the identifier of the business domain associated with
- *                                            the message; may be null
- * @param backendMessageIdentifier            the unique identifier of the message in the backend
- *                                            system; must not be blank
- * @param referenceToBackendMessageIdentifier an optional reference to a related backend message
- *                                            identifier (e.g. for replies or correlation purposes);
- *                                            may be null
- * @param businessContent                     the {@link ConnectorOutboundMessageBusinessDocument}
- *                                            containing the primary business businessDocument and
- *                                            related metadata; must not be null
- * @param attachments                         a list of attachment identifiers associated with the
- *                                            message; may be null or empty
- * @param as4Properties                       the {@link ConnectorOutboundMessageAS4Properties}
- *                                            defining the AS4 messaging parameters; must not be
- *                                            null
+ * @param businessDomainIdentifier the identifier of the business domain associated with the
+ *                                 message; may be null
+ * @param backendMessageIdentifier the unique identifier of the message in the backend system; must
+ *                                 not be blank
+ * @param businessContent          the {@link ConnectorOutboundMessageBusinessDocument} containing
+ *                                 the primary business businessDocument and related metadata; must
+ *                                 not be null
+ * @param as4Properties            the {@link ConnectorOutboundMessageAS4Properties} defining the
+ *                                 AS4 messaging parameters; must not be null
+ * @param attachments              a list of attachment identifiers associated with the message; may
+ *                                 be null or empty
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageRequest(
+        @NotBlank(message = "The business domain identifier must not be blank.")
         String businessDomainIdentifier,
         @NotBlank(message = "The backend identifier must not be blank.")
         String backendMessageIdentifier,
-        String referenceToBackendMessageIdentifier,
-        @NotNull(message = "The business businessDocument must not be null.")
-        ConnectorOutboundMessageBusinessDocument businessContent,
-        List<String> attachments,
+        @NotNull(message = "The business content must not be null.")
+        ConnectorOutboundMessageBusinessContent businessContent,
         @NotNull(message = "The as4 properties must not be null")
-        ConnectorOutboundMessageAS4Properties as4Properties
+        ConnectorOutboundMessageAS4Properties as4Properties,
+        List<String> attachments
 ) {
 }

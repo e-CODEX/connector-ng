@@ -96,7 +96,7 @@ public class ConnectorConfigurationAdminControllerTest extends AbstractIntegrati
     @Test
     void should_list_evidence_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/evidences")
+                 .uri(BASE_URL + "/evidence")
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<ConnectorEvidencesPropertiesDto>() {

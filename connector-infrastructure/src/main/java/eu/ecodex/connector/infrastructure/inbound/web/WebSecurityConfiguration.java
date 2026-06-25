@@ -51,7 +51,7 @@ public class WebSecurityConfiguration {
                                    "/api/v1/admin/configurations/business-domains",
                                    "/api/v1/admin/configurations/container",
                                    "/api/v1/admin/configurations/business-document",
-                                   "/api/v1/admin/configurations/evidences",
+                                   "/api/v1/admin/configurations/evidence",
                                    "/api/v1/admin/configurations/routing",
                                    "/api/v1/admin/configurations/backend-link-partners",
                                    "/api/v1/admin/configurations/queues",

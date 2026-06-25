@@ -52,7 +52,7 @@ public interface ConnectorConfigurationAdminApi {
     @Operation(summary = "List message processing configurations")
     ConnectorMessageProcessingPropertiesDto listMessageProcessing();
 
-    @GetMapping("/evidences")
+    @GetMapping("/evidence")
     @Operation(summary = "List evidences configurations")
     ConnectorEvidencesPropertiesDto listEvidences();
 

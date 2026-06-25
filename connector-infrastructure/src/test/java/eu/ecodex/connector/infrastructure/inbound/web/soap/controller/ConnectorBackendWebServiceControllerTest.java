@@ -118,7 +118,7 @@ public class ConnectorBackendWebServiceControllerTest {
         when(uploadAttachmentsService.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
         // TODO set appropriate response
-        when(messageStagingService.register(any()))
+        when(messageStagingService.execute(any()))
                 .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
         when(backendClientVerifierService.getBackendClient(any()))
                 .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
@@ -143,7 +143,7 @@ public class ConnectorBackendWebServiceControllerTest {
         when(uploadAttachmentsService.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
-        when(messageStagingService.register(any()))
+        when(messageStagingService.execute(any()))
                 .thenThrow(new RuntimeException("Error"));
 
         var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();

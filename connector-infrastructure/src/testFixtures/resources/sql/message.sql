@@ -36,7 +36,7 @@ values
     (
         2,
         '7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu',
-        null,
+        '1f30e203-f89c-4568-a076-469c4f8b35a5',
         null,
         'backend_alice',
         'default_gateway',

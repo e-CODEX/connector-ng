@@ -38,7 +38,7 @@ public class ConnectorBusinessDomainVerifierService implements ConnectorBusiness
         log.debug("checking business domain [{}] is enabled", identifier);
         var domain = businessDomainRepository.findByIdentifier(identifier);
         if (domain == null) {
-            throw new NotFoundException(
+            throw new ConnectorBusinessDomainNotFoundException(
                     "Business domain not found: " + identifier
             );
         }

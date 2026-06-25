@@ -29,5 +29,5 @@ import jakarta.annotation.Nonnull;
  * processed {@link ConnectorMessage} instance depending on the implementation.
  */
 public interface ConnectorOutboundMessageReceiver {
-    ConnectorMessage register(@Nonnull ConnectorMessage message);
+    ConnectorMessage execute(@Nonnull ConnectorMessage message);
 }

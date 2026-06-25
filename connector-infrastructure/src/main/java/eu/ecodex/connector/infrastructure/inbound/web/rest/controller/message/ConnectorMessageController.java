@@ -22,17 +22,20 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorEvidenceMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessContent;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -72,9 +75,45 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     public ConnectorOutboundMessageDto submitOutboundMessage(
             ConnectorOutboundMessageRequest request) throws IOException {
         var message = toDomain(request);
-        var registeredMessage = outboundMessageReceiver.register(message);
+        var registeredMessage = outboundMessageReceiver.execute(message);
 
         return toDto(registeredMessage);
+    }
+
+    @Override
+    public ConnectorEvidenceMessageDto submitEvidenceTriggerMessage(
+            ConnectorEvidenceTriggerMessageRequest request) {
+        // TODO current cn is fake, retrieve the certificate dn from user principal
+        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
+        var transportedEvidences = List.of(
+                ConnectorMessageEvidence.builder()
+                                        .type(request.evidenceType())
+                                        .build()
+        );
+        var message = ConnectorMessage
+                .builder()
+                .backendMessageIdentifier(request.identifiers().backendMessageIdentifier())
+                .referenceToBackendMessageIdentifier(
+                        request.identifiers().backendMessageIdentifier()
+                )
+                .backendName(backendClientName)
+                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                .as4Properties(
+                        ConnectorMessageAS4Properties
+                                .builder()
+                                .referenceToIdentifier(
+                                        request.identifiers().referenceToIdentifier()
+                                )
+                                .build()
+                )
+                .businessContent(null)
+                .attachments(null)
+                .transportedEvidences(transportedEvidences)
+                .build();
+
+        var registeredMessage = outboundMessageReceiver.execute(message);
+
+        return ConnectorEvidenceMessageDto.of(registeredMessage.identifier());
     }
 
     private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
@@ -99,9 +138,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 .referenceToBackendMessageIdentifier(null)
                 .backendName(backendClientName)
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .as4Properties(
-                        toDomainAS4Properties(request.as4Properties())
-                )
+                .as4Properties(toDomainAS4Properties(request.as4Properties()))
                 .businessContent(toBusinessContent(request.businessContent()))
                 .attachments(toAttachments(request.attachments()))
                 .build();

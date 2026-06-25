@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProces
 import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
+import eu.ecodex.connector.application.service.usecase.message.ConnectorVerifyTriggeredEvidence;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
 import eu.ecodex.connector.domain.exception.ConnectorMessageException;
@@ -32,53 +33,61 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConnectorOutboundMessageReceiverService implements ConnectorOutboundMessageReceiver {
     private final ConnectorMessageProcessingConfigurationProvider configurationProvider;
-    private final ConnectorMessageVerifier messageVerifier;
+    private final ConnectorMessageVerifier messageVerifierService;
     private final ConnectorEventPublisher stagingEventPublisher;
     private final ConnectorEventPublisher evidenceTriggerPublisher;
-    private final ConnectorMessageIdGenerator messageIdGenerator;
-    private final ConnectorBusinessDomainVerifier businessDomainVerifier;
+    private final ConnectorMessageIdGenerator messageIdGeneratorService;
+    private final ConnectorBusinessDomainVerifier businessDomainVerifierService;
+    private final ConnectorVerifyTriggeredEvidence verifyTriggeredEvidenceService;
 
     /**
      * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
      *
-     * @param configurationProvider         provider of the current
-     *                                      {@link ConnectorMessageProcessingConfiguration}
-     * @param messageVerifier               verifier used to validate outbound messages
-     * @param stagingEventPublisher         event publisher used to stage messages for further
-     *                                      processing; qualified as
-     *                                      "connectorOutboundMessageStagingEventPublisher"
-     * @param messageIdGenerator            generator used to assign unique identifiers to outbound
-     *                                      messages
+     * @param configurationProvider          provider of the current
+     *                                       {@link ConnectorMessageProcessingConfiguration}
+     * @param messageVerifierService         verifier used to validate outbound messages
+     * @param stagingEventPublisher          event publisher used to stage messages for further
+     *                                       processing; qualified as
+     *                                       "connectorOutboundMessageStagingEventPublisher"
+     * @param messageIdGeneratorService      generator used to assign unique identifiers to outbound
+     *                                       messages param businessDomainVerifier verifier used to
+     *                                       validate business domains of outbound messages
+     * @param businessDomainVerifierService  verifier used to validate business domains of outbound
+     *                                       messages
+     * @param verifyTriggeredEvidenceService service used to verify triggered evidence messages
      */
     public ConnectorOutboundMessageReceiverService(
             ConnectorMessageProcessingConfigurationProvider configurationProvider,
-            ConnectorMessageVerifier messageVerifier,
+            ConnectorMessageVerifier messageVerifierService,
             @Qualifier("connectorOutboundMessageStagingEventPublisher")
             ConnectorEventPublisher stagingEventPublisher,
             @Qualifier("connectorOutboundEvidenceTriggerEventPublisher")
             ConnectorEventPublisher evidenceTriggerPublisher,
-            ConnectorMessageIdGenerator messageIdGenerator,
-            ConnectorBusinessDomainVerifier businessDomainVerifier) {
+            ConnectorMessageIdGenerator messageIdGeneratorService,
+            ConnectorBusinessDomainVerifier businessDomainVerifierService,
+            ConnectorVerifyTriggeredEvidence verifyTriggeredEvidenceService) {
         this.configurationProvider = configurationProvider;
-        this.messageVerifier = messageVerifier;
+        this.messageVerifierService = messageVerifierService;
         this.stagingEventPublisher = stagingEventPublisher;
         this.evidenceTriggerPublisher = evidenceTriggerPublisher;
-        this.messageIdGenerator = messageIdGenerator;
-        this.businessDomainVerifier = businessDomainVerifier;
+        this.messageIdGeneratorService = messageIdGeneratorService;
+        this.businessDomainVerifierService = businessDomainVerifierService;
+        this.verifyTriggeredEvidenceService = verifyTriggeredEvidenceService;
     }
 
     @Override
     @Transactional
-    public ConnectorMessage register(@NonNull final ConnectorMessage message) {
-        businessDomainVerifier.execute(message.businessDomainIdentifier());
+    public ConnectorMessage execute(@NonNull final ConnectorMessage message) {
         var messageWithId = this.assignIdentifier(message);
 
         if (messageWithId.isBusinessMessage()) {
+            businessDomainVerifierService.execute(message.businessDomainIdentifier());
             var configuration = this.configurationProvider.getConfiguration();
-            this.messageVerifier.verify(
+            this.messageVerifierService.verify(
                     messageWithId, configuration.outboundMessageVerificationMode());
             stagingEventPublisher.publish(messageWithId);
         } else if (messageWithId.isEvidenceTriggerMessage()) {
+            verifyTriggeredEvidenceService.verify(messageWithId);
             evidenceTriggerPublisher.publish(messageWithId);
         } else {
             throw new ConnectorMessageException(
@@ -92,7 +101,7 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
 
     private ConnectorMessage assignIdentifier(ConnectorMessage message) {
         log.debug("Assigning identifier to message [{}]", message.identifier());
-        var identifier = this.messageIdGenerator.generateIdentifier();
+        var identifier = this.messageIdGeneratorService.generateIdentifier();
 
         return message.toBuilder().identifier(identifier).build();
     }

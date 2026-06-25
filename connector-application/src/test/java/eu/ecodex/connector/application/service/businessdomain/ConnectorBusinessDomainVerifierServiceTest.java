@@ -19,6 +19,7 @@ import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.application.service.impl.businessdomain.ConnectorBusinessDomainVerifierService;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.exception.NotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
@@ -53,7 +54,7 @@ public class ConnectorBusinessDomainVerifierServiceTest {
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(null);
 
         assertThrows(
-                NotFoundException.class,
+                ConnectorBusinessDomainNotFoundException.class,
                 () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
         );
     }

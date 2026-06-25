@@ -1,0 +1,160 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.rest.admin.configuration;
+
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
+import eu.ecodex.connector.AbstractIntegrationTest;
+import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorBusinessDocumentPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorBusinessDomainPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorContainerPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorEvidencesPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorLinkPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorMessageProcessingPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorMessageRoutingPropertiesDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorQueuePropertiesDto;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.test.web.servlet.client.RestTestClient;
+
+public class ConnectorConfigurationAdminControllerTest extends AbstractIntegrationTest {
+    private static final String BASE_URL = "/api/v1/admin/configurations";
+
+    @Autowired
+    private RestTestClient apiClient;
+
+    @Test
+    void should_list_business_domains_configurations_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/business-domains")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorBusinessDomainPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     var defaults = result.defaults();
+                     assertThat(defaults).isNotEmpty();
+                 });
+    }
+
+    @Test
+    void should_list_container_configurations_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/container")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorContainerPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     var signature = result.signature();
+                     assertThat(signature).isNotNull();
+                     assertThat(signature.getPrivateKey()).isNotNull();
+                     assertThat(signature.getKeystore()).isNotNull();
+                 });
+    }
+
+    @Test
+    void should_list_queues_configuration_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/queues")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorQueuePropertiesDto>() {
+                 })
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assertThat(result.outboundEvidenceTriggerQueue()).isNotNull();
+                 });
+    }
+
+    @Test
+    void should_list_message_processing_configuration_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/message-procesing")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorMessageProcessingPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assertThat(result.identifierSuffix()).isNotNull();
+                     assertThat(result.ebmsIdGeneratorEnabled()).isTrue();
+                 });
+    }
+
+    @Test
+    void should_list_evidence_configuration_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/evidences")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorEvidencesPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assertThat(result.signature()).isNotNull();
+                     assertThat(result.issuer()).isNotNull();
+                 });
+    }
+
+    @Test
+    void should_list_business_document_configuration_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/business-document")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorBusinessDocumentPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     assertThat(result.country()).isEqualTo("BL");
+                     assertThat(result.serviceProvider()).isEqualTo("TestProvider");
+                     assertThat(result.signature()).isNotNull();
+                     assertThat(result.defaultAdvancedSystemType()).isEqualTo(
+                             ConnectorBusinessDocumentAESType.SIGNATURE_BASED);
+                     assertThat(result.authenticationValidation()).isNotNull();
+                     assertThat(result.signature()).isNotNull();
+                 });
+    }
+
+    @Test
+    void should_list_message_routing_configuration_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/routing")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorMessageRoutingPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assertThat(result.enabled()).isTrue();
+                     assertThat(result.defaultBackendName()).isEqualTo("backend_alice");
+                     assertThat(result.backendRules()).isNotEmpty();
+                 });
+    }
+
+    @Test
+    void should_list_backend_link_partners_configuration_successfully() {
+        apiClient.get()
+                 .uri(BASE_URL + "/backend-link-partners")
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorLinkPropertiesDto>() {
+                 })
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assertThat(result.backend()).isNotEmpty();
+                     assertThat(result.backend().getFirst().getLinkConfig()).isNotNull();
+                 });
+    }
+}

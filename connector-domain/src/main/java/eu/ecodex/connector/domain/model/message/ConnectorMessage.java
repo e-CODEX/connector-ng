@@ -79,7 +79,7 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record ConnectorMessage(
         // TODO check if caused by should be set to connector message definition
-        @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
+        @Nullable ConnectorBusinessDomainIdentifier businessDomainIdentifier,
         @Nullable String uuid,
         @Nullable String identifier,
         @Nullable String backendMessageIdentifier,

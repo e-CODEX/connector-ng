@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
@@ -20,7 +21,10 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAt
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import io.swagger.v3.oas.annotations.Hidden;
+import java.util.stream.Collectors;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -85,6 +89,15 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorEvidenceException.class)
+    public ErrorResponse handleConnectorEvidenceException(ConnectorEvidenceException exception) {
+        return new ErrorResponse(
+                HttpStatus.CONFLICT.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConnectorBadRequestException.class)
     public ErrorResponse handleBadRequestException(ConnectorBadRequestException exception) {
@@ -119,5 +132,17 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
+        String message = exception.getBindingResult()
+                                  .getAllErrors()
+                                  .stream()
+                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                  .collect(Collectors.joining(", "));
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

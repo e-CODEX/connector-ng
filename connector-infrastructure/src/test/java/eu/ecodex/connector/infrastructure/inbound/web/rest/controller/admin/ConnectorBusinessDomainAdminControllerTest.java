@@ -21,7 +21,6 @@ import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainException;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain.ConnectorBusinessDomainAdminController;

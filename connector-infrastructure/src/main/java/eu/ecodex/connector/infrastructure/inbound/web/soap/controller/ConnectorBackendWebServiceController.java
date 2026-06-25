@@ -234,7 +234,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 );
             }
 
-            var createdMessage = this.messageStagingService.register(parsedMessage);
+            var createdMessage = this.messageStagingService.execute(parsedMessage);
 
             answer.setMessageId(createdMessage.identifier());
             answer.setResult(true);

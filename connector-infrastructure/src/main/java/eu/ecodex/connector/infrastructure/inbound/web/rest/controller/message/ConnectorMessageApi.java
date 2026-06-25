@@ -11,7 +11,9 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorEvidenceMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -40,4 +43,15 @@ public interface ConnectorMessageApi {
     ConnectorOutboundMessageDto submitOutboundMessage(
             @Valid @ModelAttribute ConnectorOutboundMessageRequest request
     ) throws IOException;
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/evidence-trigger")
+    @Operation(summary = "Submit an evidence trigger message from the backend to the connector")
+    @ApiResponses({
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "409", description = "Conflict")
+    })
+    ConnectorEvidenceMessageDto submitEvidenceTriggerMessage(
+            @Valid @RequestBody ConnectorEvidenceTriggerMessageRequest request);
 }

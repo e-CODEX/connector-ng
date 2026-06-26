@@ -168,15 +168,19 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         stubAS4Properties(message);
         // payload 1: the required messageContent
         when(message.getStringProperty("payload_1_description")).thenReturn("messageContent");
+        when(message.getStringProperty("payload_1_name")).thenReturn("Form_A.xml");
         when(message.getBytes("payload_1")).thenReturn("<xml/>".getBytes());
         // payload 2: ASIC-S
         when(message.getStringProperty("payload_2_description")).thenReturn("ASIC-S");
+        when(message.getStringProperty("payload_2_name")).thenReturn("container.asics");
         when(message.getBytes("payload_2")).thenReturn(new byte[]{1, 2, 3});
         // payload 3: xml trust token
         when(message.getStringProperty("payload_3_description")).thenReturn("tokenXML");
+        when(message.getStringProperty("payload_3_name")).thenReturn("tokenXML.xml");
         when(message.getBytes("payload_3")).thenReturn("<xml/>".getBytes());
         // payload 4: evidence
         when(message.getStringProperty("payload_4_description")).thenReturn(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE.name());
+        when(message.getStringProperty("payload_4_name")).thenReturn("submission_acceptance.xml");
         when(message.getBytes("payload_4")).thenReturn("<evidence/>".getBytes());
 
         when(messageIdGenerator.generateIdentifier()).thenReturn(
@@ -221,18 +225,23 @@ public class ConnectorGatewayMessageListenerTest extends BaseJmsMessageTest {
         stubAS4Properties(message);
         // payload 1: the required messageContent
         when(message.getStringProperty("payload_1_description")).thenReturn("messageContent");
+        when(message.getStringProperty("payload_1_name")).thenReturn("Form_A.xml");
         when(message.getBytes("payload_1")).thenReturn("<xml/>".getBytes());
         // payload 2: ASIC-S
         when(message.getStringProperty("payload_2_description")).thenReturn("ASIC-S");
+        when(message.getStringProperty("payload_2_name")).thenReturn("container.asics");
         when(message.getBytes("payload_2")).thenReturn(new byte[]{1, 2, 3});
         // payload 3: xml trust token
         when(message.getStringProperty("payload_3_description")).thenReturn("tokenXML");
+        when(message.getStringProperty("payload_3_name")).thenReturn("tokenXML.xml");
         when(message.getBytes("payload_3")).thenReturn("<xml/>".getBytes());
         // payload 4: evidence
         when(message.getStringProperty("payload_4_description")).thenReturn(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE.name());
+        when(message.getStringProperty("payload_4_name")).thenReturn("submission_acceptance.xml");
         when(message.getBytes("payload_4")).thenReturn("<evidence/>".getBytes());
         // payload 3: completely unknown
         when(message.getStringProperty("payload_5_description")).thenReturn("weirdPayload");
+        when(message.getStringProperty("payload_5_name")).thenReturn("weird.xml");
         when(message.getBytes("payload_5")).thenReturn(new byte[]{9});
 
         when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));

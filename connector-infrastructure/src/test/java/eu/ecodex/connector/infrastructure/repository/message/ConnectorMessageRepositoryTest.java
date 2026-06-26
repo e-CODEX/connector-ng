@@ -377,6 +377,44 @@ public class ConnectorMessageRepositoryTest {
         assertThat(messages).hasSize(1);
     }
 
+    // find by identifier
+
+    @Test
+    void should_throw_null_pointer_exception_when_searching_messages_by_null_identifier() {
+        assertThrows(
+                NullPointerException.class, () -> repository.findByIdentifier(null)
+        );
+    }
+
+    @Test
+    void should_return_null_when_searching_message_by_unknown_identifier_from_database() {
+        var message = repository.findByIdentifier("unknown-identifier");
+        assertThat(message).isNull();
+    }
+
+    @Test
+    @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/party.sql",
+            "classpath:sql/service.sql",
+            "classpath:sql/action.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/attachment.sql",
+            "classpath:sql/evidence.sql",
+    })
+    void should_find_a_message_by_its_identifier_successfully() {
+        var message = repository.findByIdentifier("7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
+
+        assertThat(message).isNotNull();
+        assertThat(message.identifier()).isEqualTo("7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
+        assertThat(message.direction()).isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
+        assertThat(message.attachments()).isNotEmpty();
+        assertThat(message.evidences()).isNotEmpty();
+        assertThat(message.errors()).isEmpty();
+    }
+
     // update backend identifier
 
     @Test

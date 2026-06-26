@@ -41,6 +41,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -219,7 +221,11 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
         return DetachedSignature
                 .builder()
-                .name(detachedSignature.signature().getName())
+                .name(
+                        StringUtils.cleanPath(
+                                Objects.requireNonNull(detachedSignature.signature()
+                                                                        .getOriginalFilename()))
+                )
                 .signature(detachedSignature.signature().getBytes())
                 .mimeType(detachedSignature.mimeType())
                 .build();
@@ -233,16 +239,24 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     }
 
     private ConnectorMessageAttachment toAttachment(MultipartFile file) throws IOException {
-        var tempLocation = Files.createTempFile("upload_", file.getName());
+        var filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+
+        var tempLocation = Files.createTempFile(
+                "upload-%s".formatted(UUID.randomUUID()),
+                filename
+        );
 
         try {
             file.transferTo(tempLocation);
-            var uploadCommand = FileUploadCommand.builder()
-                                                 .contentType(file.getContentType())
-                                                 .filename(file.getName())
-                                                 .tempFileLocation(tempLocation)
-                                                 .size(file.getSize())
-                                                 .build();
+            var uploadCommand = FileUploadCommand
+                    .builder()
+                    .contentType(Objects.requireNonNull(file.getContentType()))
+                    .filename(filename)
+                    .tempFileLocation(tempLocation)
+                    .size(file.getSize())
+                    .description("Registered business content/document")
+                    .build();
+
             return uploadAttachmentsService.execute(List.of(uploadCommand)).getFirst();
         } catch (Exception e) {
             throw new ConnectorAttachmentUploadException(

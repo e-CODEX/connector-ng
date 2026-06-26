@@ -229,10 +229,11 @@ public record ConnectorMessage(
     public String toString() {
         return String.format(
                 "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
-                        + "referenceToBackendMessageIdentifier=%s,  direction=%s, as4Properties=%s "
-                        + "businessContent=%s",
+                        + "referenceToBackendMessageIdentifier=%s, direction=%s, as4Properties=%s "
+                        + "businessContent=%s, attachments=%s, errors=%s, evidences=%s",
                 identifier, backendMessageIdentifier, backendName, gatewayName,
-                referenceToBackendMessageIdentifier, direction, as4Properties, businessContent
+                referenceToBackendMessageIdentifier, direction, as4Properties, businessContent,
+                attachments, errors, evidences
         );
     }
 }

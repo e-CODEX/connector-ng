@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.spi;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
@@ -42,4 +43,6 @@ public interface ConnectorFileStorageProvider {
     String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull byte[] content);
 
     byte[] findByIdentifier(String identifier);
+
+    ConnectorAttachmentStorage getStorage();
 }

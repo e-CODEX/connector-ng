@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.impl.attachement;
 
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
@@ -43,12 +43,13 @@ public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachm
 
     @Override
     public List<ConnectorMessageAttachment> execute(@NonNull List<FileUploadCommand> files) {
-        log.info("Uploading files");
+        log.info("Uploading attachments");
+
         return files.stream()
                     .map(uploadCommand -> {
                         try {
-                            var identifier = String.format(
-                                    "%s_%s", UUID.randomUUID(), uploadCommand.filename()
+                            var identifier = "%s-%s".formatted(
+                                    UUID.randomUUID(), uploadCommand.filename()
                             );
 
                             var attachmentToSave = ConnectorMessageAttachment
@@ -57,14 +58,16 @@ public class ConnectorUploadAttachmentsService implements ConnectorUploadAttachm
                                     .name(uploadCommand.filename())
                                     .size(uploadCommand.size())
                                     .contentType(uploadCommand.contentType())
-                                    .description("Persisting file to S3 bucket")
-                                    .storage(ConnectorAttachmentStorage.S3_BUCKET)
+                                    .description(uploadCommand.description())
+                                    .storage(storageProvider.getStorage())
+                                    .type(ConnectorAttachmentType.ATTACHMENT)
                                     .build();
 
                             var savedAttachments = this.attachmentRepository.save(attachmentToSave);
 
                             this.storageProvider.save(
-                                    attachmentToSave, uploadCommand.tempFileLocation()
+                                    attachmentToSave,
+                                    uploadCommand.tempFileLocation()
                             );
 
                             return savedAttachments;

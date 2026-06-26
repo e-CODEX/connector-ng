@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.impl.attachement;
 
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,16 +28,19 @@ import lombok.extern.slf4j.Slf4j;
  * @param filename         the original name of the file; must not be {@code null}
  * @param size             the size of the file in bytes; must be greater than or equal to zero
  * @param contentType      the MIME type of the file (e.g. {@code "application/pdf"},
- *                         {@code "image/png"}); may be {@code null} if unknown
- * @param tempFileLocation the {@link Path} pointing to the temporary file location
+ *                         {@code "image/png"}); may not be {@code null}
+ * @param tempFileLocation the {@link Path} pointing to the temporary file location; may not be
+ *                         {@code null}
+ * @param description      a description of the file content or purpose; may not be {@code null}
  */
 @Slf4j
 @Builder
 public record FileUploadCommand(
-        String filename,
+        @Nonnull String filename,
         long size,
-        String contentType,
-        Path tempFileLocation
+        @Nonnull String contentType,
+        @Nonnull Path tempFileLocation,
+        @Nonnull String description
 ) {
     /**
      * Deletes the temporary file.

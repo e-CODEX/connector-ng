@@ -86,9 +86,8 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
             persistBusinessDocument(message.businessContent(), messageIdentifier);
             this.outboundMessagePipelinePublisher.publish(createdMessage);
         } else {
-            throw new ConnectorMessageException(
-                    "Only business messages can be staged."
-            );
+            log.error("Only business messages can be staged.");
+            throw new ConnectorMessageException("Only business messages can be staged.");
         }
     }
 
@@ -110,9 +109,9 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
         if (existingAttachment == null) {
             // TODO send back failed evidence
             throw new IllegalStateException(
-                    String.format(
-                            "Attachment [%s] not found for the message [%s]",
-                            attachmentIdentifier, messageIdentifier
+                    "Attachment [%s] not found for the message [%s]".formatted(
+                            attachmentIdentifier,
+                            messageIdentifier
                     )
             );
         }

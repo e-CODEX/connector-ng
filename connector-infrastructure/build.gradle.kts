@@ -32,6 +32,8 @@ dependencies {
     // apache common
     implementation(libs.apache.commons.lang3)
     implementation(libs.apache.commons.io)
+    // apache tika
+    implementation(libs.apache.tika)
     // dss tool
     implementation(platform(libs.dss.tool))
     implementation("eu.europa.ec.joinup.sd-dss:dss-document")

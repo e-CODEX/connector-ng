@@ -17,6 +17,9 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorIn
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,16 +41,22 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
                 .stream()
                 .map(attachment -> {
                          try {
-                             var tempPath = Files.createTempFile(
-                                     "upload_", attachment.getName()
+                             var filename = StringUtils.cleanPath(
+                                     Objects.requireNonNull(attachment.getOriginalFilename())
                              );
-                             attachment.transferTo(tempPath);
+
+                             var tempLocation = Files.createTempFile(
+                                     "upload-attachment-%s-".formatted(UUID.randomUUID()),
+                                     filename
+                             );
+                             attachment.transferTo(tempLocation);
 
                              return new FileUploadCommand(
-                                     attachment.getName(),
+                                     filename,
                                      attachment.getSize(),
                                      attachment.getContentType(),
-                                     tempPath
+                                     tempLocation,
+                                     "Uploaded attachment"
                              );
                          } catch (IOException e) {
                              throw new ConnectorInternalServerException(e.getMessage());

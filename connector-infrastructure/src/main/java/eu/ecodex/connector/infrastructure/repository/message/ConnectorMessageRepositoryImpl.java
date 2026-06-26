@@ -261,7 +261,7 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage findByIdentifier(String identifier) {
+    public ConnectorMessage findByIdentifier(@NonNull String identifier) {
         var message = this.messageJpaRepository.findByIdentifier(identifier);
 
         return toDomain(message);
@@ -392,9 +392,6 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
         return attachments == null
                 ? List.of()
                 : attachments.stream()
-                             .filter(attachment ->
-                                             attachment.getType()
-                                                       .equals(ConnectorAttachmentType.ATTACHMENT))
                              .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
                              .toList();
     }

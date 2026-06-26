@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.repository.provider;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
@@ -77,6 +78,11 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
 
         var responseBytes = this.s3Client.getObjectAsBytes(getObjectRequest);
         return responseBytes.asByteArray();
+    }
+
+    @Override
+    public ConnectorAttachmentStorage getStorage() {
+        return ConnectorAttachmentStorage.S3_BUCKET;
     }
 
     private PutObjectRequest buildObjectRequest(ConnectorMessageAttachment attachment) {

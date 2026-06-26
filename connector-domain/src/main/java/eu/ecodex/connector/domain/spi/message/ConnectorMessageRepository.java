@@ -105,7 +105,7 @@ public interface ConnectorMessageRepository {
      * @return the {@link ConnectorMessage} matching the specified identifier, or null if no such
      *         message exists in the repository.
      */
-    ConnectorMessage findByIdentifier(String identifier);
+    ConnectorMessage findByIdentifier(@Nonnull String identifier);
 
     /**
      * Finds a {@link ConnectorMessage} by its ebMS message identifier.

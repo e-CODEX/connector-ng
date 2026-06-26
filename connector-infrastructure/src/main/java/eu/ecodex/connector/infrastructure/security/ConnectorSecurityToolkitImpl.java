@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -147,7 +148,7 @@ public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
                 .builder()
                 .identifier(String.format("message-%s-trustok-token.xml", messageIdentifier))
                 .name("Token.xml")
-                .contentType("text/xml")
+                .contentType(MediaType.APPLICATION_XML_VALUE)
                 .size(getDssFileSize(container.tokenXML()))
                 .description(String.format("XML TrustOK Token for message: %s", messageIdentifier))
                 .storage(ConnectorAttachmentStorage.S3_BUCKET)

@@ -53,7 +53,8 @@ public class ConnectorUploadAttachmentsServiceTest {
                 "test_attachment.txt",
                 100L,
                 "text/plain",
-                provideTemporaryPath()
+                provideTemporaryPath(),
+                "test_message"
         );
         var attachments = uploadAttachmentsService.execute(List.of(fileUploadCommand));
 
@@ -78,7 +79,8 @@ public class ConnectorUploadAttachmentsServiceTest {
                 "test_attachment.txt",
                 100L,
                 "text/plain",
-                provideTemporaryPath()
+                provideTemporaryPath(),
+                "test_message"
         );
 
         assertThrows(

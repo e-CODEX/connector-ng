@@ -35,6 +35,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component("connectorGatewayLinkEventPublisher")
 public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublisher {
+    private static final String CONTENT_TYPE_XML = "application/xml";
+    private static final String GATEWAY_MESSAGE_TYPE = "submitMessage";
+
     // TODO add unit tests
     private final JmsTemplate jmsTemplate;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
@@ -75,7 +78,6 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
                     queueProperties.getGatewaySubmissionQueue(),
                     session -> toMapMessage(message, session)
             );
-            log.info("Message [{}] submitted successfully to the gateway", message.identifier());
         } catch (Exception e) {
             log.error(
                     "Failed to publish message [{}] to gateway link processing queue",
@@ -93,7 +95,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
 
         var as4Properties = message.as4Properties();
 
-        mapMessage.setStringProperty("messageType", "submitMessage");
+        mapMessage.setStringProperty("messageType", GATEWAY_MESSAGE_TYPE);
         mapMessage.setStringProperty(
                 "messageId",
                 message.as4Properties().ebmsMessageIdentifier() == null
@@ -158,9 +160,9 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         writePayload(
                 mapMessage,
                 counter,
-                "text/xml",
+                CONTENT_TYPE_XML,
                 "messageContent",
-                "messageContent",
+                content.xmlContent().name(),
                 payload
         );
 
@@ -178,11 +180,14 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         for (var evidence : evidences) {
             counter++;
 
+            var evidenceName = evidence.type().name().toLowerCase();
+
             writePayload(
-                    mapMessage, counter,
-                    "text/xml",
-                    evidence.type().name(),
-                    evidence.type().name(),
+                    mapMessage,
+                    counter,
+                    CONTENT_TYPE_XML,
+                    evidenceName,
+                    evidenceName.toLowerCase(),
                     evidence.content()
             );
         }

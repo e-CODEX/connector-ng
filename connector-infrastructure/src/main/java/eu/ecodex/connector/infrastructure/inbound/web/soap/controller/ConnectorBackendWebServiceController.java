@@ -47,12 +47,12 @@ import jakarta.annotation.Resource;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.soap.MTOM;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.jaxws.context.WrappedMessageContext;
+import org.apache.tika.Tika;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -78,6 +78,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     private final ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final LegacyMessageHelper legacyMessageHelper;
+    private final Tika tika;
     private WebServiceContext webServiceContext;
 
     /**
@@ -109,6 +110,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         this.updateMessageTransportStepService = updateMessageTransportStepService;
         this.backendClientVerifierService = backendClientVerifierService;
         this.legacyMessageHelper = legacyMessageHelper;
+        this.tika = new Tika();
     }
 
     @Resource
@@ -303,6 +305,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                     .contentType(contentType)
                     .size(file.length())
                     .tempFileLocation(tempFile)
+                    .description("Registered business document")
                     .build();
         } catch (Exception e) {
             throw new ConnectorInternalServerException(e.getMessage());
@@ -313,14 +316,16 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             DomibusConnectorMessageContentType businessContent) {
         try {
             var tempFile = AttachmentHelpers.sourceToTempFile(businessContent.getXmlContent());
+            var filename = tempFile.getFileName().toString();
             var file = tempFile.toFile();
 
             return FileUploadCommand
                     .builder()
-                    .filename("businessContent.xml")
-                    .contentType("text/xml")
+                    .filename(filename.endsWith("default.tmp") ? "businessContent.xml" : filename)
+                    .contentType(MediaType.APPLICATION_XML_VALUE)
                     .size(file.length())
                     .tempFileLocation(tempFile)
+                    .description("Registered business content")
                     .build();
         } catch (Exception e) {
             throw new ConnectorInternalServerException(e.getMessage());
@@ -345,6 +350,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                                              AttachmentHelpers.dataHandlerToTempFile(
                                                      attachment.getAttachment())
                                      )
+                                     .description("Registered attachment")
                                      .build();
                          } catch (Exception e) {
                              throw new ConnectorInternalServerException(e.getMessage());
@@ -355,7 +361,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     }
 
     private String getContentType(Path tempFile) throws IOException {
-        var contentType = Files.probeContentType(tempFile);
+        var contentType = tika.detect(tempFile);
 
         return contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM_VALUE;
     }

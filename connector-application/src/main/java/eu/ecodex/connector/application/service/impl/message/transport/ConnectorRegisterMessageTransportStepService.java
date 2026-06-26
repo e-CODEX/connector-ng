@@ -14,6 +14,7 @@ import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProces
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
@@ -73,11 +74,15 @@ public class ConnectorRegisterMessageTransportStepService
                 : INITIAL_ATTEMPTS;
 
         var configuration = this.processingConfigurationProvider.getConfiguration();
+        var linkPartnerName = message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                ? message.gatewayName()
+                : message.backendName();
+
         var identifier = String.format(
                 "%s@%s_%s",
                 UUID.randomUUID(),
                 configuration.transportIdSuffix(),
-                message.backendName()
+                linkPartnerName
         );
 
         var transportStep = ConnectorMessageTransportStep.builder()
@@ -85,6 +90,7 @@ public class ConnectorRegisterMessageTransportStepService
                                                          .transportedMessage(message)
                                                          .status(status)
                                                          .numberOfAttempts(attempts)
+                                                         .linkPartnerName(linkPartnerName)
                                                          .build();
 
         return existingStep != null

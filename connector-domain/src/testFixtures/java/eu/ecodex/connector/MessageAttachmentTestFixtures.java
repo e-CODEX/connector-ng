@@ -44,7 +44,7 @@ public class MessageAttachmentTestFixtures {
                 .toBuilder()
                 .identifier("104ebc70-abd5-45da-8c74-940d687501b3_messageContent")
                 .type(ConnectorAttachmentType.BUSINESS_CONTENT)
-                .contentType("text/xml")
+                .contentType("application/xml")
                 .name("businessContent.xml")
                 .build();
     }

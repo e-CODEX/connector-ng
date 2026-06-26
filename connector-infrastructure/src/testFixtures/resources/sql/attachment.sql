@@ -61,7 +61,7 @@ values
     ),
     (
         '0f942a85-1e4d-4e36-9432-1625a582b20c_tokenXML',
-        'text/xml',
+        'application/xml',
         'File from gateway',
         'tokenXML.xml',
         5282,
@@ -73,7 +73,7 @@ values
     ),
     (
         'c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE',
-        'text/xml',
+        'application/xml',
         'File from gateway',
         'SUBMISSION_ACCEPTANCE.xml',
         6613,
@@ -85,7 +85,7 @@ values
     ),
     (
         '104ebc70-abd5-45da-8c74-940d687501b3_messageContent',
-        'text/xml',
+        'application/xml',
         'File from gateway',
         'messageContent.xml',
         6613,

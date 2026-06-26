@@ -54,8 +54,12 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Component
 public class ConnectorGatewayMessageListener {
-    private static final String CONTENT_TYPE_XML = "text/xml";
+    private static final String CONTENT_TYPE_XML = "application/xml";
     private static final String CONTENT_TYPE_ASICS = "application/vnd.etsi.asic-s+zip";
+    private static final String MESSAGE_CONTENT_DESCRIPTION = "messageContent";
+    private static final String ASICS_DESCRIPTION = "ASIC-S";
+    private static final String XML_TOKEN_DESCRIPTION = "tokenXML";
+    private static final String GATEWAY_MESSAGE_TYPE = "incomingMessage";
 
     private static final Set<String> EVIDENCE_TYPE_NAMES =
             Arrays.stream(ConnectorEvidenceType.values())
@@ -164,7 +168,7 @@ public class ConnectorGatewayMessageListener {
     private void validateMessageHeader(MapMessage message) throws JMSException {
         var messageType = message.getStringProperty("messageType");
 
-        if (!"incomingMessage".equals(messageType)) {
+        if (!GATEWAY_MESSAGE_TYPE.equals(messageType)) {
             throw new IllegalArgumentException(
                     "Invalid Gateway reception messageType: " + messageType);
         }
@@ -197,9 +201,10 @@ public class ConnectorGatewayMessageListener {
         var fromPartyType = message.getStringProperty("fromPartyType");
         var fromRole = message.getStringProperty("fromRole");
 
-        if (!StringUtils.hasText(fromPartyId) || !StringUtils.hasText(fromPartyType)
+        if (!StringUtils.hasText(fromPartyId)
+                || !StringUtils.hasText(fromPartyType)
                 || !StringUtils.hasText(fromRole)) {
-            throw new IllegalArgumentException(" fromParty is not allowed to be null");
+            throw new IllegalArgumentException("[fromParty] is not allowed to be null");
         }
 
         var fromParty = ConnectorParty.builder()
@@ -212,9 +217,10 @@ public class ConnectorGatewayMessageListener {
         var toPartyType = message.getStringProperty("toPartyType");
         var toRole = message.getStringProperty("toRole");
 
-        if (!StringUtils.hasText(toPartyId) || !StringUtils.hasText(toPartyType)
+        if (!StringUtils.hasText(toPartyId)
+                || !StringUtils.hasText(toPartyType)
                 || !StringUtils.hasText(toRole)) {
-            throw new IllegalArgumentException(" toParty is not allowed to be null");
+            throw new IllegalArgumentException("[toParty] is not allowed to be null");
         }
 
         var toParty = ConnectorParty.builder()
@@ -224,22 +230,18 @@ public class ConnectorGatewayMessageListener {
                                     .roleType(ConnectorPartyRoleType.RESPONDER)
                                     .build();
 
-        return ConnectorMessageAS4Properties.builder()
-                                            .service(service)
-                                            .action(action)
-                                            .fromParty(fromParty)
-                                            .toParty(toParty)
-                                            .conversationIdentifier(message.getStringProperty(
-                                                    "conversationId"))
-                                            .ebmsMessageIdentifier(message.getStringProperty(
-                                                    "messageId"))
-                                            .referenceToIdentifier(message.getStringProperty(
-                                                    "refToMessageId"))
-                                            .originalSender(message.getStringProperty(
-                                                    "originalSender"))
-                                            .finalRecipient(message.getStringProperty(
-                                                    "finalRecipient"))
-                                            .build();
+        return ConnectorMessageAS4Properties
+                .builder()
+                .service(service)
+                .action(action)
+                .fromParty(fromParty)
+                .toParty(toParty)
+                .conversationIdentifier(message.getStringProperty("conversationId"))
+                .ebmsMessageIdentifier(message.getStringProperty("messageId"))
+                .referenceToIdentifier(message.getStringProperty("refToMessageId"))
+                .originalSender(message.getStringProperty("originalSender"))
+                .finalRecipient(message.getStringProperty("finalRecipient"))
+                .build();
     }
 
     private ParsedPayloads parsePayloads(MapMessage message) throws JMSException {
@@ -251,16 +253,21 @@ public class ConnectorGatewayMessageListener {
         for (int i = 1; i <= total; i++) {
             var prefix = "payload_" + i;
             var description = message.getStringProperty(prefix + "_description");
+            var name = message.getStringProperty(prefix + "_name");
             var payload = message.getBytes(prefix);
+
+
+            var resolvedName = StringUtils.hasText(name) ? name : description.toLowerCase();
 
             if (!StringUtils.hasText(description)) {
                 throw new IllegalArgumentException(
-                        "Missing description for payload at index " + i);
+                        "Missing description for payload at index %d".formatted(i)
+                );
             }
 
-            if ("messageContent".equals(description)) {
+            if (MESSAGE_CONTENT_DESCRIPTION.equals(description)) {
                 var content = saveAndUploadAttachment(
-                        description,
+                        resolvedName,
                         CONTENT_TYPE_XML,
                         "Inbound message business content",
                         ConnectorAttachmentType.BUSINESS_CONTENT,
@@ -271,17 +278,17 @@ public class ConnectorGatewayMessageListener {
                                                                  .xmlContent(content)
                                                                  .businessDocument(null)
                                                                  .build();
-            } else if ("ASIC-S".equals(description)) {
+            } else if (ASICS_DESCRIPTION.equals(description)) {
                 attachments.add(saveAndUploadAttachment(
-                        description,
+                        resolvedName,
                         CONTENT_TYPE_ASICS,
                         "Inbound message ASIC-S component",
                         ConnectorAttachmentType.ASICS,
                         payload
                 ));
-            } else if ("tokenXML".equals(description)) {
+            } else if (XML_TOKEN_DESCRIPTION.equals(description)) {
                 attachments.add(saveAndUploadAttachment(
-                        description,
+                        resolvedName,
                         CONTENT_TYPE_XML,
                         "Inbound message XML Trust OK Token",
                         ConnectorAttachmentType.XML_TOKEN,
@@ -321,7 +328,7 @@ public class ConnectorGatewayMessageListener {
         var transportedEvidences = payloads.evidences().stream().map(evidence -> {
             if (evidence.content() == null) {
                 throw new IllegalStateException(
-                        "Evidence content is null for evidence " + evidence.type()
+                        "Evidence content is null for evidence %s".formatted(evidence.type())
                 );
             }
 

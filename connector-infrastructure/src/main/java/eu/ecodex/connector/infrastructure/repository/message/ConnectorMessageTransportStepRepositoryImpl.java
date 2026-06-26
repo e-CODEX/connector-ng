@@ -197,7 +197,7 @@ public class ConnectorMessageTransportStepRepositoryImpl
                 .builder()
                 .identifier(transportStep.identifier())
                 .numberOfAttempts(transportStep.numberOfAttempts())
-                .linkPartnerName(transportStep.transportedMessage().backendName())
+                .linkPartnerName(transportStep.linkPartnerName())
                 .transportedMessageIdentifier(transportStep.transportedMessage().identifier())
                 .remoteSystemIdentifier(
                         transportedMessage.direction()

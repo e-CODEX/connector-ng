@@ -15,10 +15,9 @@ import eu.ecodex.connector.application.service.impl.message.ConnectorListPending
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -73,21 +72,34 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     private final ConnectorListPendingMessagesService listPendingMessagesService;
     private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
-    private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
-    private final ConnectorChangePendingMessagesStatus changePendingMessagesStatusService;
-    private final ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService;
+    private final ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService;
+    private final ConnectorAckMessageTransportStep ackMessageTransportStepService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final LegacyMessageHelper legacyMessageHelper;
     private final Tika tika;
     private WebServiceContext webServiceContext;
 
     /**
-     * Creates a new backend web service controller.
+     * Controller class for handling backend web service operations related to message
+     * transportation, management, and interaction with external services.
      *
-     * @param messageStagingService    the service responsible for staging outbound and inbound
-     *                                 messages (must not be null)
-     * @param uploadAttachmentsService the service responsible for handling attachment uploads (must
-     *                                 not be null)
+     * @param messageStagingService               Service for handling outbound message processing
+     *                                            before dispatch.
+     * @param listPendingMessageIdsService        Service for retrieving a list of pending message
+     *                                            IDs.
+     * @param listPendingMessagesService          Service for retrieving a list of pending
+     *                                            messages.
+     * @param retrieveMessageByTransportIdService Service for retrieving a message by its transport
+     *                                            ID.
+     * @param uploadAttachmentsService            Service for handling the upload of message
+     *                                            attachments.
+     * @param changePendingMessagesStatusService  Service for changing the status of pending
+     *                                            messages.
+     * @param ackMessageTransportStepService      Service for updating message transport steps.
+     * @param backendClientVerifierService        Service for verifying client requests directed to
+     *                                            the backend.
+     * @param legacyMessageHelper                 Helper for managing operations specific to legacy
+     *                                            message formats.
      */
     public ConnectorBackendWebServiceController(
             ConnectorOutboundMessageReceiver messageStagingService,
@@ -95,9 +107,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             ConnectorListPendingMessagesService listPendingMessagesService,
             ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService,
             ConnectorUploadAttachments uploadAttachmentsService,
-            ConnectorRegisterMessageTransportStep registerMessageTransportStep,
-            ConnectorChangePendingMessagesStatus changePendingMessagesStatusService,
-            ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService,
+            ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService,
+            ConnectorAckMessageTransportStep ackMessageTransportStepService,
             ConnectorBackendClientVerifier backendClientVerifierService,
             LegacyMessageHelper legacyMessageHelper) {
         this.messageStagingService = messageStagingService;
@@ -105,9 +116,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         this.listPendingMessagesService = listPendingMessagesService;
         this.retrieveMessageByTransportIdService = retrieveMessageByTransportIdService;
         this.uploadAttachmentsService = uploadAttachmentsService;
-        this.registerMessageTransportStep = registerMessageTransportStep;
         this.changePendingMessagesStatusService = changePendingMessagesStatusService;
-        this.updateMessageTransportStepService = updateMessageTransportStepService;
+        this.ackMessageTransportStepService = ackMessageTransportStepService;
         this.backendClientVerifierService = backendClientVerifierService;
         this.legacyMessageHelper = legacyMessageHelper;
         this.tika = new Tika();
@@ -124,14 +134,14 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 .builder()
                 .remoteMessageIdentifier(responseType.getAssignedMessageId());
         if (responseType.isResult()) {
-            commandBuilder.status(ConnectorMessageTransportStatus.SUBMITTED);
+            commandBuilder.status(ConnectorMessageTransportStatus.DELIVERED);
             commandBuilder.errors(null);
         } else {
             commandBuilder.status(ConnectorMessageTransportStatus.FAILED);
             commandBuilder.errors(toDomainErrors(responseType.getMessageErrors()));
         }
 
-        updateMessageTransportStepService.execute(
+        ackMessageTransportStepService.execute(
                 responseType.getResponseForMessageId(),
                 commandBuilder.build()
         );
@@ -167,7 +177,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var wrappedMessageContext = (WrappedMessageContext) messageContext;
         var interceptor = new ProcessMessageAfterDownload(
                 message,
-                registerMessageTransportStep
+                ackMessageTransportStepService
 
         );
         wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);

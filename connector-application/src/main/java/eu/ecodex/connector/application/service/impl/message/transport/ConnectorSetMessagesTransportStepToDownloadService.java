@@ -10,38 +10,35 @@
 
 package eu.ecodex.connector.application.service.impl.message.transport;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
-import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorChangePendingMessagesStatus} service.
+ * Implementation of the {@link ConnectorSetMessagesTransportStepToDownload} service.
  */
 @Slf4j
 @Service
 @Transactional
-public class ConnectorChangePendingMessagesStatusService
-        implements ConnectorChangePendingMessagesStatus {
+public class ConnectorSetMessagesTransportStepToDownloadService
+        implements ConnectorSetMessagesTransportStepToDownload {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
 
-    public ConnectorChangePendingMessagesStatusService(
+    public ConnectorSetMessagesTransportStepToDownloadService(
             ConnectorMessageTransportStepRepository transportStepRepository) {
         this.transportStepRepository = transportStepRepository;
     }
 
     @Override
-    public void execute(
-            @NonNull String backendName,
-            @Nonnull ConnectorMessageTransportStatus status) {
+    public void execute(@NonNull String backendName) {
         var identifiers = this.transportStepRepository.findPendingTransportSteps(backendName);
         this.transportStepRepository.updateStatus(
                 identifiers,
-                status
+                ConnectorMessageTransportStatus.DOWNLOADED
         );
     }
 }

@@ -30,9 +30,10 @@ import lombok.Getter;
 @Getter
 @MappedSuperclass
 public abstract class BaseEntity {
-    @Column(name = "CREATED_AT")
+    @Column(name = "CREATED_AT", updatable = false, nullable = false)
     private Instant createdAt;
-    @Column(name = "UPDATED_AT")
+
+    @Column(name = "UPDATED_AT", nullable = false)
     private Instant updatedAt;
 
     @PrePersist

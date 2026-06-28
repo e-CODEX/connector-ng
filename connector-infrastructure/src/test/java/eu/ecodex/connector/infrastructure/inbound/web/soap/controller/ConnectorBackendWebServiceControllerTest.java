@@ -26,10 +26,9 @@ import eu.ecodex.connector.application.service.impl.message.ConnectorListPending
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.domain.exception.NotFoundException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
@@ -72,11 +71,9 @@ public class ConnectorBackendWebServiceControllerTest {
     @Mock
     private ConnectorBackendClientVerifier backendClientVerifierService;
     @Mock
-    private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    private ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService;
     @Mock
-    private ConnectorChangePendingMessagesStatus changePendingMessagesStatusService;
-    @Mock
-    private ConnectorAcknowledgeMessageTransportStep updateMessageTransportStepService;
+    private ConnectorAckMessageTransportStep acknowledgeMessageTransportStepService;
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
     @Mock
@@ -98,9 +95,8 @@ public class ConnectorBackendWebServiceControllerTest {
                 listPendingMessagesService,
                 retrieveMessageByTransportIdService,
                 uploadAttachmentsService,
-                registerMessageTransportStep,
                 changePendingMessagesStatusService,
-                updateMessageTransportStepService,
+                acknowledgeMessageTransportStepService,
                 backendClientVerifierService,
                 legacyMessageHelper
         );
@@ -245,7 +241,7 @@ public class ConnectorBackendWebServiceControllerTest {
 
     @Test
     void should_acknowledge_message_with_success_status_successfully() {
-        doNothing().when(updateMessageTransportStepService).execute(any(), any());
+        doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
 
         var response = backendWebService.acknowledgeMessage(acknowledgeMessage(true));
 
@@ -254,7 +250,7 @@ public class ConnectorBackendWebServiceControllerTest {
 
     @Test
     void should_acknowledge_message_with_failed_status_successfully() {
-        doNothing().when(updateMessageTransportStepService).execute(any(), any());
+        doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
 
         var response = backendWebService.acknowledgeMessage(acknowledgeMessage(false));
 
@@ -265,7 +261,8 @@ public class ConnectorBackendWebServiceControllerTest {
         var ackResponse = new DomibusConnectorMessageResponseType();
         ackResponse.setResult(result);
         ackResponse.setAssignedMessageId("12345678-1234-1234-1234-123456789012");
-        ackResponse.setResponseForMessageId("3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+        ackResponse.setResponseForMessageId(
+                "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
         ackResponse.setResultMessage("Message acknowledged successfully");
         return ackResponse;
     }

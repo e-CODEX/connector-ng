@@ -2,8 +2,8 @@ create table connector_business_domains
 (
     id          bigint auto_increment
         primary key,
-    created_at  datetime(6)                                                       null,
-    updated_at  datetime(6)                                                       null,
+    created_at  datetime(6)                                                       not null,
+    updated_at  datetime(6)                                                       not null,
     description varchar(255)                                                      null,
     enabled     bit                                                               null,
     identifier  varchar(255)                                                      not null,
@@ -19,25 +19,25 @@ create table connector_message_transport_steps
 (
     id                             bigint auto_increment
         primary key,
-    created_at                     datetime(6)                                           null,
-    updated_at                     datetime(6)                                           null,
-    number_of_attempts             int                                                   not null,
-    status                         enum ('DOWNLOADED', 'FAILED', 'PENDING', 'SUBMITTED') not null,
-    identifier                     varchar(255)                                          not null,
-    link_partner_name              varchar(255)                                          null,
-    transported_message            text                                                  not null,
-    transported_message_identifier varchar(255)                                          not null,
-    remote_system_identifier       varchar(255)                                          null
+    created_at                     datetime(6)                                                                   not null,
+    updated_at                     datetime(6)                                                                   not null,
+    identifier                     varchar(255)                                                                  not null,
+    link_partner_name              varchar(255)                                                                  null,
+    number_of_attempts             int                                                                           not null,
+    remote_system_identifier       varchar(255)                                                                  null,
+    status                         enum ('DELIVERED', 'DOWNLOADED', 'FAILED', 'READY_FOR_DOWNLOAD', 'SUBMITTED') not null,
+    transported_message            mediumtext                                                                    not null,
+    transported_message_identifier varchar(255)                                                                  not null
 );
 
 create table connector_message_transport_step_statuses
 (
     id                bigint auto_increment
         primary key,
-    created_at        datetime(6)                                           null,
-    updated_at        datetime(6)                                           null,
-    status            enum ('DOWNLOADED', 'FAILED', 'PENDING', 'SUBMITTED') not null,
-    transport_step_id bigint                                                null,
+    created_at        datetime(6)                                                                   not null,
+    updated_at        datetime(6)                                                                   not null,
+    status            enum ('DELIVERED', 'DOWNLOADED', 'FAILED', 'READY_FOR_DOWNLOAD', 'SUBMITTED') not null,
+    transport_step_id bigint                                                                        null,
     constraint FK6ke4gt642ivtvi0f6c53hmuoo
         foreign key (transport_step_id) references connector_message_transport_steps (id)
 );
@@ -46,8 +46,8 @@ create table connector_messages
 (
     id                                      bigint auto_increment
         primary key,
-    created_at                              datetime(6)                                       null,
-    updated_at                              datetime(6)                                       null,
+    created_at                              datetime(6)                                       not null,
+    updated_at                              datetime(6)                                       not null,
     backend_message_identifier              varchar(255)                                      null,
     backend_name                            varchar(255)                                      null,
     confirmed_at                            datetime(6)                                       null,
@@ -68,16 +68,16 @@ create table connector_message_attachments
 (
     id           bigint auto_increment
         primary key,
-    created_at   datetime(6)        null,
-    updated_at   datetime(6)        null,
-    content_type varchar(255)       not null,
-    description  varchar(255)       not null,
-    identifier   varchar(255)       not null,
-    name         varchar(255)       not null,
-    size         bigint             not null,
-    storage      enum ('S3_BUCKET') not null,
-    type         varchar(64)        null,
-    message_id   bigint             null,
+    created_at   datetime(6)                                                                                                                           not null,
+    updated_at   datetime(6)                                                                                                                           not null,
+    content_type varchar(255)                                                                                                                          not null,
+    description  varchar(255)                                                                                                                          not null,
+    identifier   varchar(255)                                                                                                                          not null,
+    name         varchar(255)                                                                                                                          not null,
+    size         bigint                                                                                                                                not null,
+    storage      enum ('S3_BUCKET')                                                                                                                    not null,
+    type         enum ('ASICS', 'ATTACHMENT', 'BUSINESS_CONTENT', 'BUSINESS_DOCUMENT', 'DETACHED_SIGNATURE', 'EVIDENCE_XML', 'PDF_TOKEN', 'XML_TOKEN') null,
+    message_id   bigint                                                                                                                                null,
     constraint UKqkwekyau6mx7fqymuavj4bkqw
         unique (identifier),
     constraint FK2p3mqcv3o24e94ngrm3lgppm1
@@ -88,8 +88,8 @@ create table connector_message_business_contents
 (
     id            bigint auto_increment
         primary key,
-    created_at    datetime(6)  null,
-    updated_at    datetime(6)  null,
+    created_at    datetime(6)  not null,
+    updated_at    datetime(6)  not null,
     uuid          varchar(255) not null,
     message_id    bigint       not null,
     attachment_id bigint       not null,
@@ -109,8 +109,8 @@ create table connector_message_business_documents
 (
     id                  bigint auto_increment
         primary key,
-    created_at          datetime(6)                                      null,
-    updated_at          datetime(6)                                      null,
+    created_at          datetime(6)                                      not null,
+    updated_at          datetime(6)                                      not null,
     aes_type            enum ('AUTHENTICATION_BASED', 'SIGNATURE_BASED') null,
     uuid                varchar(255)                                     not null,
     attachment_id       bigint                                           not null,
@@ -131,8 +131,8 @@ create table connector_message_business_document_signatures
 (
     id                   bigint auto_increment
         primary key,
-    created_at           datetime(6)                     null,
-    updated_at           datetime(6)                     null,
+    created_at           datetime(6)                     not null,
+    updated_at           datetime(6)                     not null,
     mime_type            enum ('BINARY', 'PKCS7', 'XML') not null,
     name                 varchar(255)                    not null,
     signature            varbinary(32600)                not null,
@@ -150,8 +150,8 @@ create table connector_message_errors
 (
     id         bigint auto_increment
         primary key,
-    created_at datetime(6)  null,
-    updated_at datetime(6)  null,
+    created_at datetime(6)  not null,
+    updated_at datetime(6)  not null,
     details    varchar(255) null,
     label      varchar(255) null,
     source     varchar(255) not null,
@@ -166,13 +166,13 @@ create table connector_message_evidences
 (
     id                           bigint auto_increment
         primary key,
-    created_at                   datetime(6)                                                                                                                                                                                null,
-    updated_at                   datetime(6)                                                                                                                                                                                null,
+    created_at                   datetime(6)                                                                                                                                                                                not null,
+    updated_at                   datetime(6)                                                                                                                                                                                not null,
+    content                      mediumtext                                                                                                                                                                                 null,
+    delivered_to_link_partner_at datetime(6)                                                                                                                                                                                null,
     type                         enum ('DELIVERY', 'NON_DELIVERY', 'NON_RETRIEVAL', 'RELAY_REMMD_ACCEPTANCE', 'RELAY_REMMD_FAILURE', 'RELAY_REMMD_REJECTION', 'RETRIEVAL', 'SUBMISSION_ACCEPTANCE', 'SUBMISSION_REJECTION') not null,
     uuid                         varchar(255)                                                                                                                                                                               not null,
     message_id                   bigint                                                                                                                                                                                     null,
-    content                      mediumtext                                                                                                                                                                                 null,
-    delivered_to_link_partner_at datetime(6)                                                                                                                                                                                null,
     constraint UKelxrnuc4ssw3t7phloahld1ty
         unique (uuid),
     constraint FKp2bdwb4xr1kc9ibgv7dkrtimf
@@ -183,8 +183,8 @@ create table connector_processing_modes
 (
     id                 bigint auto_increment
         primary key,
-    created_at         datetime(6)  null,
-    updated_at         datetime(6)  null,
+    created_at         datetime(6)  not null,
+    updated_at         datetime(6)  not null,
     content            mediumtext   not null,
     description        varchar(255) not null,
     filename           varchar(255) not null,
@@ -200,8 +200,8 @@ create table connector_actions
 (
     id                 bigint auto_increment
         primary key,
-    created_at         datetime(6)  null,
-    updated_at         datetime(6)  null,
+    created_at         datetime(6)  not null,
+    updated_at         datetime(6)  not null,
     name               varchar(255) not null,
     uuid               varchar(255) not null,
     processing_mode_id bigint       not null,
@@ -215,8 +215,8 @@ create table connector_parties
 (
     id                 bigint auto_increment
         primary key,
-    created_at         datetime(6)                     null,
-    updated_at         datetime(6)                     null,
+    created_at         datetime(6)                     not null,
+    updated_at         datetime(6)                     not null,
     identifier         varchar(255)                    not null,
     identifier_type    varchar(255)                    not null,
     is_home            bit                             null,
@@ -235,8 +235,8 @@ create table connector_services
 (
     id                 bigint auto_increment
         primary key,
-    created_at         datetime(6)  null,
-    updated_at         datetime(6)  null,
+    created_at         datetime(6)  not null,
+    updated_at         datetime(6)  not null,
     name               varchar(255) not null,
     type               varchar(255) not null,
     uuid               varchar(255) not null,
@@ -251,8 +251,8 @@ create table connector_message_as4_properties
 (
     id                      bigint auto_increment
         primary key,
-    created_at              datetime(6)  null,
-    updated_at              datetime(6)  null,
+    created_at              datetime(6)  not null,
+    updated_at              datetime(6)  not null,
     conversation_identifier varchar(255) null,
     ebms_message_identifier varchar(255) null,
     final_recipient         varchar(255) not null,

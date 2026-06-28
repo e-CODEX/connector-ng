@@ -72,7 +72,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         try {
             registerMessageTransportStep.execute(
                     message,
-                    ConnectorMessageTransportStatus.PENDING
+                    ConnectorMessageTransportStatus.SUBMITTED
             );
             this.jmsTemplate.send(
                     queueProperties.getGatewaySubmissionQueue(),

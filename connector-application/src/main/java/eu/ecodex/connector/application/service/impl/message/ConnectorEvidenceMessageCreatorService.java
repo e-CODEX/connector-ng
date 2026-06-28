@@ -30,9 +30,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidenceMessageCreator {
     private final ConnectorMessageIdGenerator messageIdGenerator;
+    private final ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator;
 
-    public ConnectorEvidenceMessageCreatorService(ConnectorMessageIdGenerator messageIdGenerator) {
+    public ConnectorEvidenceMessageCreatorService(
+            ConnectorMessageIdGenerator messageIdGenerator,
+            ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator) {
         this.messageIdGenerator = messageIdGenerator;
+        this.messageEbmsIdGenerator = messageEbmsIdGenerator;
     }
 
     /**
@@ -70,7 +74,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         var as4Properties = ConnectorMessageAS4Properties
                 .builder()
                 .conversationIdentifier(businessAs4.conversationIdentifier())
-                .ebmsMessageIdentifier(businessAs4.ebmsMessageIdentifier())
+                .ebmsMessageIdentifier(resolveEbmsIdentifier(businessMessage))
                 .finalRecipient(businessAs4.finalRecipient())
                 .originalSender(businessAs4.originalSender())
                 .fromParty(copyParty(businessAs4.fromParty()))
@@ -107,7 +111,8 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         var as4Properties = ConnectorMessageAS4Properties
                 .builder()
                 .conversationIdentifier(businessAs4.conversationIdentifier())
-                .ebmsMessageIdentifier(triggerAs4.ebmsMessageIdentifier())
+                // will cross the gateway, so we need to generate a new ebms identifier
+                .ebmsMessageIdentifier(messageEbmsIdGenerator.generateIdentifier())
                 .originalSender(businessAs4.finalRecipient())
                 .finalRecipient(businessAs4.originalSender())
                 .fromParty(copyParty(businessAs4.toParty()))
@@ -144,6 +149,22 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             throw new IllegalStateException(
                     "Invalid message direction for the business message : ["
                             + businessMessage.identifier() + "]"
+            );
+        }
+    }
+
+    private String resolveEbmsIdentifier(ConnectorMessage businessMessage) {
+        if (businessMessage.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
+            return null;
+        } else if (businessMessage.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
+            // generating evidence will cross the gateway, so we need to generate a new ebms
+            // identifier
+            return messageEbmsIdGenerator.generateIdentifier();
+        } else {
+            throw new IllegalStateException(
+                    "Invalid message direction for the business message : [%s]".formatted(
+                            businessMessage.identifier()
+                    )
             );
         }
     }

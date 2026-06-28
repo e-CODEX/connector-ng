@@ -31,7 +31,7 @@ import lombok.Builder;
  *                                issues encountered during the transport process. This is used for
  *                                error tracking and diagnostic purposes.
  */
-@Builder
+@Builder(toBuilder = true)
 public record UpdateMessageTransportCommand(
         // ex: backend system message id
         String remoteMessageIdentifier,

@@ -10,7 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -25,24 +26,24 @@ import org.apache.cxf.phase.Phase;
 @Slf4j
 public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Message> {
     private final ConnectorMessage connectorMessage;
-    private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    private final ConnectorAckMessageTransportStep ackMessageTransportStep;
 
     /**
      * Constructs a ProcessMessageAfterDownload instance which processes a message after it has been
      * downloaded. This class is intended to handle the post-invoke phase of message processing.
      *
-     * @param connectorMessage             the connector message that contains details of the
-     *                                     message to be processed
-     * @param registerMessageTransportStep the transport step responsible for registering the status
-     *                                     of the downloaded message
+     * @param connectorMessage        the connector message that contains details of the message to
+     *                                be processed
+     * @param ackMessageTransportStep the service responsible for updating the status of the message
+     *                                transport step
      */
     public ProcessMessageAfterDownload(
             ConnectorMessage connectorMessage,
-            ConnectorRegisterMessageTransportStep registerMessageTransportStep) {
+            ConnectorAckMessageTransportStep ackMessageTransportStep) {
         super(Phase.POST_INVOKE);
 
         this.connectorMessage = connectorMessage;
-        this.registerMessageTransportStep = registerMessageTransportStep;
+        this.ackMessageTransportStep = ackMessageTransportStep;
     }
 
     @Override
@@ -52,15 +53,17 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
                 this.connectorMessage.identifier()
         );
         try {
-            registerMessageTransportStep.execute(
-                    this.connectorMessage,
-                    ConnectorMessageTransportStatus.DOWNLOADED
-            );
+            var command = UpdateMessageTransportCommand
+                    .builder()
+                    .remoteMessageIdentifier(this.connectorMessage.identifier())
+                    .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                    .errors(null)
+                    .build();
+            ackMessageTransportStep.execute(this.connectorMessage.identifier(), command);
         } catch (Exception e) {
             log.error(
                     "Failed to update the transport step status for the me message [{}]",
-                    this.connectorMessage.identifier(),
-                    e
+                    this.connectorMessage.identifier(), e
             );
             throw new Fault(e);
         }

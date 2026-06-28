@@ -13,32 +13,36 @@ package eu.ecodex.connector.domain.model.message.transport;
 import lombok.Getter;
 
 /**
- * Represents the different states that a connector message transport process can have.
+ * Represents the various states of the message transport process within the connector system.
  *
- * <p>This enum defines various states, each associated with a priority value
- * that determines its importance or execution order. The states are typically used to monitor and
- * manage the lifecycle of a transport operation in the context of the connector system.
+ * <p>Each enumerated value corresponds to a specific phase or outcome of a message's journey
+ * through the transport lifecycle. These statuses enable tracking and auditing of messages as they
+ * are processed within the system.
  *
  * <ul>
- *     <li>ACCEPTED: Indicates that the transport process has been accepted and is ready
- *     to proceed.</li>
- *     <li>FAILED: Indicates that the transport process has encountered an error or
- *     failure and cannot proceed further.</li>
- *     <li>PENDING_DOWNLOADED: Indicates that the transport process is in a pending
- *     state and is marked as downloaded but not processed yet.</li>
- *     <li>PENDING: Indicates that the transport process is awaiting processing
- *     or a specific action.</li>
+ * <li><strong>DELIVERED</strong>: Indicates that the message has successfully been delivered
+ * to the recipient (e.g., backend or gateway).</li>
+ * <li><strong>FAILED</strong>: Indicates that the message could not be delivered due to
+ * an error or system failure.</li>
+ * <li><strong>SUBMITTED</strong>: Indicates that the message has been submitted to the gateway
+ * system for further processing.</li>
+ * <li><strong>DOWNLOADED</strong>: Indicates that the recipient or backend system has retrieved
+ * or pulled the message.</li>
+ * <li><strong>READY_FOR_DOWNLOAD</strong>: Indicates that the message is available for the
+ * recipient or backend system to download.</li>
  * </ul>
  *
- * <p>Each state is assigned a priority value, encapsulated within the state itself, to
- * represent the relative importance or operational precedence of that state.
+ * <p>Each status is associated with a predefined priority, represented as an integer value.
+ * This priority can be used to determine the relative importance or order of processing
+ * between different statuses.
  */
 @Getter
 public enum ConnectorMessageTransportStatus {
-    SUBMITTED(10),
-    FAILED(10),
-    DOWNLOADED(2),
-    PENDING(1);
+    DELIVERED(10), // when the message has been delivered to the recipient (backend/gateway)
+    FAILED(10), // when the message could not be delivered
+    SUBMITTED(9), // when the message has been submitted to the gateway system
+    DOWNLOADED(9), // when the backend system has pulled the message
+    READY_FOR_DOWNLOAD(1); // when the message is ready to be downloaded by the backend system
 
     final int priority;
 

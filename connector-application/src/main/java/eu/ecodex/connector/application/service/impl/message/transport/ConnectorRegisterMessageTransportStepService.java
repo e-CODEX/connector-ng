@@ -12,12 +12,12 @@ package eu.ecodex.connector.application.service.impl.message.transport;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
-import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
+import java.util.Set;
 import java.util.UUID;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ConnectorRegisterMessageTransportStepService
         implements ConnectorRegisterMessageTransportStep {
-    private static final int INITIAL_ATTEMPTS = 1;
+    private static final String TRANSPORT_ID_FORMAT = "%s@%s_%s";
+
+    private static final Set<ConnectorMessageTransportStatus> ALLOWED_STATUSES = Set.of(
+            ConnectorMessageTransportStatus.SUBMITTED,
+            ConnectorMessageTransportStatus.DELIVERED,
+            ConnectorMessageTransportStatus.FAILED
+    );
 
     private final ConnectorMessageTransportStepRepository transportStepRepository;
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
@@ -48,53 +54,46 @@ public class ConnectorRegisterMessageTransportStepService
     public ConnectorMessageTransportStep execute(
             @NonNull ConnectorMessage message,
             @NonNull ConnectorMessageTransportStatus status) {
+
         if (message.identifier() == null) {
             throw new IllegalArgumentException("Message identifier must not be null");
         }
 
-        log.debug(
-                "Registering transport step for message [{}] with status [{}]",
-                message.identifier(),
-                status
-        );
-
-        var existingStep = this.transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
-                message.identifier());
-
-        if (existingStep != null
-                && existingStep.status() != ConnectorMessageTransportStatus.PENDING) {
-            throw new ConnectorMessageTransportStepException(
-                    "Message with identifier [" + message.identifier() + "] is already in status ["
-                            + existingStep.status() + "]"
+        if (!ALLOWED_STATUSES.contains(status)) {
+            throw new IllegalArgumentException(
+                    "Status must be one of [%s]".formatted(ALLOWED_STATUSES)
             );
         }
 
-        int attempts = existingStep != null
-                ? existingStep.numberOfAttempts() + 1
-                : INITIAL_ATTEMPTS;
-
-        var configuration = this.processingConfigurationProvider.getConfiguration();
-        var linkPartnerName = message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
-                ? message.gatewayName()
-                : message.backendName();
-
-        var identifier = String.format(
-                "%s@%s_%s",
-                UUID.randomUUID(),
-                configuration.transportIdSuffix(),
-                linkPartnerName
+        log.debug(
+                "Registering transport step for message [{}] with status [{}]",
+                message.identifier(), status
         );
 
-        var transportStep = ConnectorMessageTransportStep.builder()
-                                                         .identifier(identifier)
-                                                         .transportedMessage(message)
-                                                         .status(status)
-                                                         .numberOfAttempts(attempts)
-                                                         .linkPartnerName(linkPartnerName)
-                                                         .build();
+        var transportStep = ConnectorMessageTransportStep
+                .builder()
+                .identifier(buildIdentifier(message))
+                .transportedMessage(message)
+                .status(status)
+                .numberOfAttempts(ALLOWED_STATUSES.contains(status) ? 1 : 0)
+                .linkPartnerName(resolveLinkPartnerName(message))
+                .build();
 
-        return existingStep != null
-                ? transportStepRepository.update(existingStep.identifier(), transportStep)
-                : transportStepRepository.save(transportStep);
+        return transportStepRepository.save(transportStep);
+    }
+
+    private String buildIdentifier(ConnectorMessage message) {
+        var config = processingConfigurationProvider.getConfiguration();
+        return TRANSPORT_ID_FORMAT.formatted(
+                UUID.randomUUID(),
+                config.transportIdSuffix(),
+                resolveLinkPartnerName(message)
+        );
+    }
+
+    private String resolveLinkPartnerName(ConnectorMessage message) {
+        return message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                ? message.gatewayName()
+                : message.backendName();
     }
 }

@@ -10,20 +10,18 @@
 
 package eu.ecodex.connector.application.service.usecase.transport;
 
-import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for changing the status of pending connector messages.
+ * Service interface for changing the transport status of connector messages from
+ * {@code READY_FOR_DOWNLOAD} to {@code DOWNLOADED}.
  */
-public interface ConnectorChangePendingMessagesStatus {
+public interface ConnectorSetMessagesTransportStepToDownload {
     /**
      * Changes the status of pending connector messages for a specified backend system.
      *
      * @param backendName the name of the backend system for which the status of pending messages
      *                    needs to be updated. Must not be null.
-     * @param status      the new {@link ConnectorMessageTransportStatus} to apply to the pending
-     *                    connector messages. Must not be null.
      */
-    void execute(@Nonnull String backendName, @Nonnull ConnectorMessageTransportStatus status);
+    void execute(@Nonnull String backendName);
 }

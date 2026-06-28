@@ -182,7 +182,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
 
         verify(registerMessageTransportStep).execute(
                 any(),
-                eq(ConnectorMessageTransportStatus.SUBMITTED)
+                eq(ConnectorMessageTransportStatus.DELIVERED)
         );
         verify(messageRepository).setDeliveredToBackendAt(MESSAGE_ID);
         verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, "backend-message-id");
@@ -204,7 +204,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
         verify(evidenceRepository).setDeliveredToLinkPartnerAt(any());
         verify(registerMessageTransportStep).execute(
                 any(),
-                eq(ConnectorMessageTransportStatus.SUBMITTED)
+                eq(ConnectorMessageTransportStatus.DELIVERED)
         );
         verify(messageRepository, never()).setDeliveredToBackendAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
@@ -221,7 +221,7 @@ public class ConnectorBackendMessageDeliveryListenerTest {
 
         verify(registerMessageTransportStep).execute(
                 any(),
-                eq(ConnectorMessageTransportStatus.PENDING)
+                eq(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
         );
         verify(messageRepository, never()).setDeliveredToBackendAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());

@@ -10,8 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
-import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
@@ -25,25 +24,24 @@ import org.apache.cxf.phase.Phase;
 @Slf4j
 public class ProcessMessagesAfterDownload extends AbstractPhaseInterceptor<Message> {
     private final String backendClient;
-    private final ConnectorChangePendingMessagesStatus changePendingMessagesStatus;
+    private final ConnectorSetMessagesTransportStepToDownload setTransportStepsToDownloadService;
 
     /**
      * Constructs a ProcessMessagesAfterDownload instance to process all connector messages after
      * they have been downloaded. This interceptor is executed in the post-invoke phase to update
      * the transport step status of connector messages for a specific backend client.
      *
-     * @param backendClient               the name of the backend client for which the connector
-     *                                    messages are being processed
-     * @param changePendingMessagesStatus the service responsible for updating the status of pending
-     *                                    connector messages
+     * @param backendClient                      the name of the backend client for which the
+     *                                           connector messages are being processed
+     * @param setTransportStepsToDownloadService the service responsible for updating the status of
+     *                                           pending connector messages
      */
     public ProcessMessagesAfterDownload(
             String backendClient,
-            ConnectorChangePendingMessagesStatus changePendingMessagesStatus) {
+            ConnectorSetMessagesTransportStepToDownload setTransportStepsToDownloadService) {
         super(Phase.POST_INVOKE);
-
         this.backendClient = backendClient;
-        this.changePendingMessagesStatus = changePendingMessagesStatus;
+        this.setTransportStepsToDownloadService = setTransportStepsToDownloadService;
     }
 
     @Override
@@ -53,16 +51,14 @@ public class ProcessMessagesAfterDownload extends AbstractPhaseInterceptor<Messa
                 this.backendClient
         );
         try {
-            changePendingMessagesStatus.execute(
-                    this.backendClient,
-                    ConnectorMessageTransportStatus.DOWNLOADED
-            );
+            setTransportStepsToDownloadService.execute(this.backendClient);
         } catch (Exception e) {
             log.error(
                     "Failed to update the transport steps statuses for the backend client [{}]",
                     this.backendClient,
                     e
             );
+
             throw new Fault(e);
         }
     }

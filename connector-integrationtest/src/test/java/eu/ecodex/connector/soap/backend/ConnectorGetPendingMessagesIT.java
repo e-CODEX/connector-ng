@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorChangePendingMessagesStatus;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.soap.BackendServiceTest;
@@ -33,7 +33,7 @@ public class ConnectorGetPendingMessagesIT extends BackendServiceTest {
     @LocalServerPort
     private int port;
     @MockitoBean
-    private ConnectorChangePendingMessagesStatus changePendingMessagesStatus;
+    private ConnectorSetMessagesTransportStepToDownload setMessagesTransportStepToDownloadService;
 
     private DomibusConnectorBackendWebService soapClient;
 
@@ -60,7 +60,7 @@ public class ConnectorGetPendingMessagesIT extends BackendServiceTest {
             "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_retrieve_all_pending_messages_successfully() {
-        doNothing().when(changePendingMessagesStatus).execute(any(), any());
+        doNothing().when(setMessagesTransportStepToDownloadService).execute(any());
 
         var response = soapClient.requestMessages(new EmptyRequestType());
 

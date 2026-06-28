@@ -99,7 +99,7 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
     private void makeReadyForPull(ConnectorMessage message) {
         messageTransportStep.execute(
                 message,
-                ConnectorMessageTransportStatus.PENDING
+                ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
         );
         log.info("Message [{}] is ready for pull", message.identifier());
     }
@@ -149,10 +149,10 @@ public class ConnectorBackendMessageDeliveryListener implements ConnectorEventHa
                 }
                 messageTransportStep.execute(
                         message,
-                        ConnectorMessageTransportStatus.SUBMITTED
+                        ConnectorMessageTransportStatus.DELIVERED
                 );
 
-                log.info("Message [{}] submitted to the backend system", identifier);
+                log.info("Message [{}] delivered to the backend system", identifier);
             } else {
                 log.error(
                         "Failed to deliver message [{}] to the backend system: [{}] ",

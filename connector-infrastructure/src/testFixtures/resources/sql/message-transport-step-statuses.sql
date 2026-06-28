@@ -11,13 +11,13 @@ values (
            1
        ),
        (
-           'PENDING',
+           'READY_FOR_DOWNLOAD',
            now(),
            now(),
            2
        ),
        (
-           'PENDING',
+           'READY_FOR_DOWNLOAD',
            now(),
            now(),
            3

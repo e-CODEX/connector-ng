@@ -22,7 +22,7 @@ import jakarta.annotation.Nonnull;
  * for ensuring that the transport status and any associated errors are accurately recorded and
  * processed within the connector system.
  */
-public interface ConnectorAcknowledgeMessageTransportStep {
+public interface ConnectorAckMessageTransportStep {
     /**
      * Executes the update of a message's transport status in the connector system. This method
      * processes the specified command to update the transportation details of a message identified

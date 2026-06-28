@@ -70,8 +70,7 @@ public class ConnectorMessageAttachmentEntity extends BaseEntity {
 
     @Setter
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.VARCHAR)
-    @Column(name = "TYPE", length = 64)
+    @Column(name = "TYPE")
     private ConnectorAttachmentType type;
 
     @Setter

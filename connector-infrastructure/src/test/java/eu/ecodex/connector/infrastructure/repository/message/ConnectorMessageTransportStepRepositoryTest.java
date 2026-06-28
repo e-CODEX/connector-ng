@@ -163,7 +163,8 @@ public class ConnectorMessageTransportStepRepositoryTest {
                 ConnectorMessageTransportStatus.DOWNLOADED
         );
 
-        var updatedTransportStep = this.repository.findByIdentifier("b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice");
+        var updatedTransportStep = this.repository.findByIdentifier(
+                "b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice");
         assertThat(updatedTransportStep).isNotNull();
         assertThat(updatedTransportStep.status()).isEqualTo(ConnectorMessageTransportStatus.DOWNLOADED);
         assertThat(updatedTransportStep.statuses().size()).isEqualTo(2);
@@ -202,7 +203,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
         return ConnectorMessageTransportStep.builder()
                                             .identifier(STEP_IDENTIFIER)
                                             .numberOfAttempts(0)
-                                            .status(ConnectorMessageTransportStatus.PENDING)
+                                            .status(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
                                             .transportedMessage(
                                                     ConnectorMessage.builder()
                                                                     .identifier(messageIdentifier)

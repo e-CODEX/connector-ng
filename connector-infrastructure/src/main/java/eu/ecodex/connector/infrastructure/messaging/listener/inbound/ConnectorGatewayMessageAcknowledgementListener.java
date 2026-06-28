@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener.inbound;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ConnectorGatewayMessageAcknowledgementListener {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
-    private final ConnectorAcknowledgeMessageTransportStep acknowledgeMessageTransportStep;
+    private final ConnectorAckMessageTransportStep ackMessageTransportStep;
 
     /**
      * Creates a new listener instance.
@@ -38,9 +38,9 @@ public class ConnectorGatewayMessageAcknowledgementListener {
      */
     public ConnectorGatewayMessageAcknowledgementListener(
             ConnectorMessageTransportStepRepository transportStepRepository,
-            ConnectorAcknowledgeMessageTransportStep acknowledgeMessageTransportStep) {
+            ConnectorAckMessageTransportStep ackMessageTransportStep) {
         this.transportStepRepository = transportStepRepository;
-        this.acknowledgeMessageTransportStep = acknowledgeMessageTransportStep;
+        this.ackMessageTransportStep = ackMessageTransportStep;
     }
 
     /**
@@ -84,11 +84,11 @@ public class ConnectorGatewayMessageAcknowledgementListener {
             var command = UpdateMessageTransportCommand
                     .builder()
                     .remoteMessageIdentifier(messageOrEbmsIdentifier)
-                    .status(ConnectorMessageTransportStatus.SUBMITTED)
+                    .status(ConnectorMessageTransportStatus.DELIVERED)
                     .errors(null)
                     .build();
 
-            acknowledgeMessageTransportStep.execute(messageOrEbmsIdentifier, command);
+            ackMessageTransportStep.execute(messageOrEbmsIdentifier, command);
         } catch (JMSException e) {
             throw new RuntimeException("Failed to parse Domibus reply", e);
         }

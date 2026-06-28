@@ -48,7 +48,7 @@ public interface ConnectorMessageTransportStepJpaRepository extends
             value = """
                     SELECT DISTINCT MTS.identifier
                     FROM connector_message_transport_steps MTS
-                    WHERE MTS.status = 'PENDING'
+                    WHERE MTS.status = 'READY_FOR_DOWNLOAD'
                     AND MTS.link_partner_name = :backendName
                     """,
             nativeQuery = true
@@ -59,7 +59,7 @@ public interface ConnectorMessageTransportStepJpaRepository extends
             value = """
                     SELECT DISTINCT MTS.transported_message_identifier
                     FROM connector_message_transport_steps MTS
-                    WHERE MTS.status = 'PENDING'
+                    WHERE MTS.status = 'READY_FOR_DOWNLOAD'
                     AND MTS.link_partner_name = :backendName
                     """,
             nativeQuery = true

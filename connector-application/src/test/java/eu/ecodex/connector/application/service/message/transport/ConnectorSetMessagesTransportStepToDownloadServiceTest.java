@@ -14,7 +14,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.impl.message.transport.ConnectorChangePendingMessagesStatusService;
+import eu.ecodex.connector.application.service.impl.message.transport.ConnectorSetMessagesTransportStepToDownloadService;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
@@ -25,13 +25,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ConnectorChangePendingMessagesStatusServiceTest {
+public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
     private static final String BACKEND_NAME = "backend_alice";
     @Mock
     private ConnectorMessageTransportStepRepository transportStepRepository;
 
     @InjectMocks
-    private ConnectorChangePendingMessagesStatusService changePendingMessagesStatusService;
+    private ConnectorSetMessagesTransportStepToDownloadService changePendingMessagesStatusService;
 
     @Test
     void should_change_pending_messages_status_successfully() {
@@ -42,8 +42,7 @@ public class ConnectorChangePendingMessagesStatusServiceTest {
                    .updateStatus(pendingMessagesIds, ConnectorMessageTransportStatus.DOWNLOADED);
 
         changePendingMessagesStatusService.execute(
-                BACKEND_NAME,
-                ConnectorMessageTransportStatus.DOWNLOADED
+                BACKEND_NAME
         );
 
         verify(transportStepRepository).findPendingTransportSteps(BACKEND_NAME);

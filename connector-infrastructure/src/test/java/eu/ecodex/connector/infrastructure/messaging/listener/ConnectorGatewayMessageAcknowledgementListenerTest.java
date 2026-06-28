@@ -6,12 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAcknowledgeMessageTransportStep;
+import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
 import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageAcknowledgementListener;
@@ -28,7 +26,7 @@ public class ConnectorGatewayMessageAcknowledgementListenerTest extends BaseJmsM
     @Mock
     private ConnectorMessageTransportStepRepository transportStepRepository;
     @Mock
-    private ConnectorAcknowledgeMessageTransportStep acknowledgeMessageTransportStep;
+    private ConnectorAckMessageTransportStep acknowledgeMessageTransportStep;
     @Mock
     private MapMessage mapMessage;
 

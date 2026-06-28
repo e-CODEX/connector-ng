@@ -33,7 +33,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 | Adopt Open JDK 21.0.11
 | Tomcat 11.0.15
 | Postgres Connector 42.7.11
-| Postgresql 18.0
+| Postgresql 17.0
 | App init, DB Scripts
 
 |===

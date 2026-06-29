@@ -180,7 +180,7 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         for (var evidence : evidences) {
             counter++;
 
-            var evidenceName = evidence.type().name().toLowerCase();
+            var evidenceName = evidence.type().name();
 
             writePayload(
                     mapMessage,

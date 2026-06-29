@@ -41,8 +41,8 @@ import lombok.Builder;
  * @param as4Properties                       AS4-specific properties associated with this message.
  * @param direction                           The direction of the message flow, either from the
  *                                            backend to the gateway or vice versa.
- * @param isBusiness                          A flag indicating whether this message is a business
- *                                            message.
+ * @param delivered                           A flag indicating whether the message has been
+ *                                            delivered
  * @param createdAt                           The creation timestamp for the message.
  * @param updatedAt                           The timestamp when the message was last updated.
  * @param deletedAt                           The timestamp when the message was deleted.
@@ -63,7 +63,7 @@ public record ConnectorMessageDto(
         String gatewayName,
         ConnectorMessageAS4Properties as4Properties,
         ConnectorMessageDirection direction,
-        boolean isBusiness,
+        boolean delivered,
         Instant createdAt,
         Instant updatedAt,
         Instant deletedAt,
@@ -88,7 +88,7 @@ public record ConnectorMessageDto(
                 .backendMessageIdentifier(message.backendMessageIdentifier())
                 .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
                 .direction(Objects.requireNonNull(message.direction()))
-                .isBusiness(message.isBusinessMessage())
+                .delivered(isDelivered(message))
                 .backendName(message.backendName())
                 .gatewayName(message.gatewayName())
                 .as4Properties(message.as4Properties())
@@ -100,5 +100,9 @@ public record ConnectorMessageDto(
                 .deliveredToBackendAt(message.deliveredToBackendAt())
                 .deliveredToGatewayAt(message.deliveredToGatewayAt())
                 .build();
+    }
+
+    private static boolean isDelivered(ConnectorMessage message) {
+        return message.deliveredToGatewayAt() != null || message.deliveredToBackendAt() != null;
     }
 }

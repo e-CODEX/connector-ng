@@ -22,6 +22,7 @@ import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import jakarta.jms.Session;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -249,7 +250,8 @@ public class ConnectorGatewayLinkEventPublisher implements ConnectorEventPublish
         var prefix = "payload_" + index;
         mapMessage.setStringProperty(prefix + "_mimeContentId", generateCID());
         mapMessage.setStringProperty(prefix + "_mimeType", mimeType);
-        mapMessage.setStringProperty(prefix + "_description", description);
+        mapMessage.setStringProperty(
+                prefix + "_description", description.toUpperCase(Locale.ROOT));
         mapMessage.setStringProperty(prefix + "_name", name);
         mapMessage.setStringProperty(prefix + "_fileName", name);
         mapMessage.setBytes(prefix, data);

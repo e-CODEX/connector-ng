@@ -37,6 +37,7 @@ import jakarta.jms.MapMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -257,7 +258,9 @@ public class ConnectorGatewayMessageListener {
             var payload = message.getBytes(prefix);
 
 
-            var resolvedName = StringUtils.hasText(name) ? name : description.toLowerCase();
+            var resolvedName = StringUtils.hasText(name)
+                    ? name
+                    : description.toLowerCase(Locale.ROOT);
 
             if (!StringUtils.hasText(description)) {
                 throw new IllegalArgumentException(
@@ -294,7 +297,7 @@ public class ConnectorGatewayMessageListener {
                         ConnectorAttachmentType.XML_TOKEN,
                         payload
                 ));
-            } else if (EVIDENCE_TYPE_NAMES.contains(description)) {
+            } else if (EVIDENCE_TYPE_NAMES.contains(description.toUpperCase(Locale.ROOT))) {
                 evidences.add(
                         ConnectorMessageEvidence.builder()
                                                 .type(ConnectorEvidenceType.valueOf(description))

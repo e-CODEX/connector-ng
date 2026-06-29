@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -55,4 +56,12 @@ public interface ConnectorMessageAdminApi {
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorMessageDetailDto retrieveMessage(@PathVariable String identifier);
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{identifier}/transport-steps")
+    @Operation(summary = "Get a message transport step by identifier.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+    })
+    ConnectorMessageTransportStepDto retrieveMessageTransportStep(@PathVariable String identifier);
 }

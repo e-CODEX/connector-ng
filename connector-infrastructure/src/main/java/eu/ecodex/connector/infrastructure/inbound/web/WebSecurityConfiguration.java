@@ -45,6 +45,7 @@ public class WebSecurityConfiguration {
                                    "/api/v1/attachments/upload",
                                    "/api/v1/admin/messages",
                                    "/api/v1/admin/messages/{identifier}",
+                                   "/api/v1/admin/messages/{identifier}/transport-steps",
                                    "/api/v1/messages/outbound",
                                    "/api/v1/messages/evidence-trigger",
                                    "/api/v1/admin/transport-steps",

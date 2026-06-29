@@ -15,6 +15,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
+public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
@@ -45,30 +46,30 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql",
             "classpath:sql/attachment.sql",
-            "classpath:sql/evidence.sql"
+            "classpath:sql/message-transport-step.sql",
+            "classpath:sql/message-transport-step-statuses.sql"
     })
-    void should_retrieve_a_connector_messages_successfully() {
-        var messageId = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+    void should_retrieve_a_connector_messages_transport_steps_successfully() {
+        var messageId = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
         apiClient.get()
                  .uri(buildUrl(messageId))
                  .exchange()
                  .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageDetailDto>() {
+                 .expectBody(new ParameterizedTypeReference<ConnectorMessageTransportStepDto>() {
                  })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.identifier()).isNotNull();
-                     assertThat(result.identifier()).isEqualTo(messageId);
-                     assertThat(result.direction()).isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
-                     assertThat(!result.attachments().isEmpty()).isTrue();
-                     assertThat(!result.evidences().isEmpty()).isTrue();
-                     assertThat(result.errors().isEmpty()).isTrue();
+                 .value(step -> {
+                     assertThat(step).isNotNull();
+                     assert step != null;
+                     assertThat(step.identifier()).isNotNull();
+                     assertThat(step.transportedMessageIdentifier()).isEqualTo(messageId);
+                     assertThat(step.numberOfAttempts()).isEqualTo(1);
+                     assertThat(step.status()).isEqualTo("SUBMITTED");
+                     assertThat(step.messageType()).isEqualTo("EVIDENCE");
                  });
     }
 
     @Test
-    void should_throw_404_not_found_when_retrieving_a_non_existing_connector_message() {
+    void should_throw_404_not_found_when_retrieving_a_non_existing_connector_message_transport_steps() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient.get()
                  .uri(buildUrl(messageId))
@@ -77,6 +78,6 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
     }
 
     private String buildUrl(String identifier) {
-        return "/api/v1/admin/messages/" + identifier;
+        return "/api/v1/admin/messages/%s/transport-steps".formatted(identifier);
     }
 }

@@ -300,7 +300,8 @@ public class ConnectorGatewayMessageListener {
             } else if (EVIDENCE_TYPE_NAMES.contains(description.toUpperCase(Locale.ROOT))) {
                 evidences.add(
                         ConnectorMessageEvidence.builder()
-                                                .type(ConnectorEvidenceType.valueOf(description))
+                                                .type(ConnectorEvidenceType.valueOf(
+                                                        description.toUpperCase(Locale.ROOT)))
                                                 .content(payload)
                                                 .build());
             } else {

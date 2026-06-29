@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundExcep
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
@@ -74,6 +75,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorMessageNotFoundException.class)
     public ErrorResponse handleMessageNotFoundException(
             ConnectorMessageNotFoundException exception) {
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ConnectorMessageTransportStepNotFoundException.class)
+    public ErrorResponse handleMessageTransportStepsNotFoundException(
+            ConnectorMessageTransportStepNotFoundException exception) {
         return new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );

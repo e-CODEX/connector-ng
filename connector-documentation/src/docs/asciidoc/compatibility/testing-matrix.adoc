@@ -12,7 +12,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 |===
 | Connector Version | OS | Java | Application Server | JDBC Driver | Database | Database creation
 
-| 7.0.0-SNAPSHOT
+| {project-version}
 | Ubuntu 26.04 LTS
 | Adopt Open JDK 21.0.11
 | Tomcat 11.0.15
@@ -20,7 +20,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 | Mysql 8.4.9
 | App init, DB Scripts
 
-| 7.0.0-SNAPSHOT
+| {project-version}
 | Ubuntu 26.04 LTS
 | Adopt Open JDK 21.0.11
 | Tomcat 11.0.15
@@ -28,7 +28,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 | MariaDB 12.3.2
 | App init, DB Scripts
 
-| 7.0.0-SNAPSHOT
+| {project-version}
 | Ubuntu 26.04 LTS
 | Adopt Open JDK 21.0.11
 | Tomcat 11.0.15
@@ -44,7 +44,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 |===
 | Connector Version | Gateway Version | Active MQ Version | Minio Version
 
-| 7.0.0-SNAPSHOT
+| {project-version}
 | 5.1.9
 | 6.2.0
 | RELEASE.2025-09-07T16-13-09Z (go1.24.6 linux/amd64)

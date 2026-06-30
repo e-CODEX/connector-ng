@@ -33,7 +33,9 @@ The console runtime execution output must yield version `21.x.x` or higher.
 
 === Step 1 — Obtain the Runnable Artifact
 
-* **Option A — Release Download:** Pull down link:https://scm.ecodex.eu/ui/repos/tree/General/libs-snapshot/eu/ecodex/connector/connector-distribution/7.0.0-SNAPSHOT[a Snapshot distribution version] from the e-CODEX project artifactory.
+* **Option A — Release Download:**
+    ** Pull down link:https://scm.ecodex.eu/ui/repos/tree/General/libs-snapshot/eu/ecodex/connector/connector-distribution/{project-version}-SNAPSHOT[a Snapshot distribution version] from the e-CODEX project artifactory.
+    ** Or pull down link:https://scm.ecodex.eu/ui/repos/tree/General/libs-release/eu/ecodex/connector/connector-distribution/{project-version}[a Release distribution version] from the e-CODEX project artifactory.
 * **Option B — Compilation From Source:** Run the following command locally:
 +
 [source,bash]

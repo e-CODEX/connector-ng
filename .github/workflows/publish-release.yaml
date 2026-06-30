@@ -26,8 +26,8 @@ jobs:
         needs: tag-version
         with:
             java-version: 21
-            maven-repo-id: 'artifactory'
-            gradle-parameters: '-Partifactory.repo.id=artifactory'
+            maven-repo-id: 'releases'
+            gradle-parameters: '-Partifactory.repo.id=releases'
             tag: ${{ needs.tag-version.outputs.tag }}
             environment: ${{ inputs.environment }}
     docker:

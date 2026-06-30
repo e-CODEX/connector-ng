@@ -25,7 +25,8 @@ Supported versions: Docker Engine **24 or later**, Docker Compose **2.x or later
 === Connector NG Image
 The Connector NG is distributed as a Docker image hosted on the e-CODEX repository. You must have access to the repository and pull the image before running the stack.
 
-The Snapshot version of the connector is available at: link:https://scm.ecodex.eu/artifactory/ecodex-docker-snapshots/connector-ng/edge[https://scm.ecodex.eu/artifactory/ecodex-docker-snapshots/connector-ng/edge]
+* The Snapshot version of the connector is available at: link:https://scm.ecodex.eu/artifactory/ecodex-docker-snapshots/connector-ng/edge[https://scm.ecodex.eu/artifactory/ecodex-docker-snapshots/connector-ng/edge]
+* The Production version of the connector is available at: link:https://scm.ecodex.eu/artifactory/docker/connector-ng/latest[https://scm.ecodex.eu/artifactory/docker/connector-ng/latest]
 
 === Database
 The Connector NG uses a relational database to store message state and processing history. An empty schema and a dedicated database user must be created before the first start — the Connector NG creates its own tables automatically.

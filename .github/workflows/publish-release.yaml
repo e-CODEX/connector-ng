@@ -1,0 +1,38 @@
+name: Manual Release Workflow
+
+on:
+    workflow_dispatch:
+        inputs:
+            environment:
+                description: 'Environment to deploy to'
+                required: true
+                default: 'production'
+                type: choice
+                options:
+                    - production
+jobs:
+    check-version:
+        name: Check the current release version
+        uses: e-CODEX/workflows/.github/workflows/gradle-validate-release-version.yaml@e4e1b3febd5e15d934382713dfc066734d1e2f90
+    tag-version:
+        name: Tag the current release version
+        needs: check-version
+        uses: e-CODEX/workflows/.github/workflows/gradle-tag-release-version.yaml@e4e1b3febd5e15d934382713dfc066734d1e2f90
+        with:
+            environment: ${{ inputs.environment }}
+    publish:
+        name: Publish the current release version
+        uses: e-CODEX/workflows/.github/workflows/gradle-publish-release.yaml@f21a9d5adb4130a371112856ef9bfbc21fc46f28
+        needs: tag-version
+        with:
+            java-version: 21
+            maven-repo-id: 'artifactory'
+            gradle-parameters: '-Partifactory.repo.id=artifactory'
+            tag: ${{ needs.tag-version.outputs.tag }}
+            environment: ${{ inputs.environment }}
+    docker:
+        uses: e-CODEX/workflows/.github/workflows/docker-build-push.yaml@main
+        with:
+            image-name: connector-ng
+            tag: ${{ needs.tag-version.outputs.tag }}
+            environment: ${{ inputs.environment }}

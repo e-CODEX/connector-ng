@@ -10,6 +10,7 @@ jobs:
       maven-repo-id: 'artifactory'
       gradle-parameters: '-Partifactory.repo.id=artifactory'
   docker:
+    name: Docker build and push
     uses: e-CODEX/workflows/.github/workflows/docker-build-push.yaml@main
     with:
       image-name: connector-ng

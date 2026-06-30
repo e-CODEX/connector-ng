@@ -22,7 +22,7 @@ jobs:
             environment: ${{ inputs.environment }}
     publish:
         name: Publish the current release version
-        uses: e-CODEX/workflows/.github/workflows/gradle-publish-release.yaml@f21a9d5adb4130a371112856ef9bfbc21fc46f28
+        uses: e-CODEX/workflows/.github/workflows/gradle-publish-release.yaml@19748c663d7b7fd2d20b85509145e93ff39c91bb
         needs: tag-version
         with:
             java-version: 21
@@ -31,6 +31,8 @@ jobs:
             tag: ${{ needs.tag-version.outputs.tag }}
             environment: ${{ inputs.environment }}
     docker:
+        name: Build and push the docker image
+        needs: tag-version
         uses: e-CODEX/workflows/.github/workflows/docker-build-push.yaml@main
         with:
             image-name: connector-ng

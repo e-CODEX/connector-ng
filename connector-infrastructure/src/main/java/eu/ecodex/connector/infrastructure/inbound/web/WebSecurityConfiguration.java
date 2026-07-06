@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web;
 
+import eu.ecodex.connector.infrastructure.property.ConnectorCorsProperties;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,6 +19,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
  * Configures the security settings for the application. The security settings are configured using
@@ -36,8 +41,8 @@ public class WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         return http.csrf(AbstractHttpConfigurer::disable)
-                   .httpBasic(Customizer.withDefaults())
-                   .cors(AbstractHttpConfigurer::disable)
+                   .httpBasic(AbstractHttpConfigurer::disable)
+                   .cors(Customizer.withDefaults())
                    .authorizeHttpRequests(request -> request
                            .requestMatchers(
                                    "/api/v1/admin/business-domains",
@@ -69,5 +74,21 @@ public class WebSecurityConfiguration {
                            .anyRequest().authenticated()
                    )
                    .build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource(ConnectorCorsProperties corsProperties) {
+        var configuration = new CorsConfiguration();
+
+        configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
+        configuration.setAllowedMethods(corsProperties.getAllowedMethods());
+        configuration.setAllowedHeaders(corsProperties.getAllowedHeaders());
+        configuration.setAllowCredentials(corsProperties.isAllowCredentials());
+        configuration.setMaxAge(corsProperties.getMaxAge());
+
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }

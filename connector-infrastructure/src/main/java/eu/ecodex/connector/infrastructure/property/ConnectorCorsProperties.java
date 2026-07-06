@@ -16,10 +16,12 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration properties for specifying Cross-Origin Resource Sharing (CORS) settings.
+ */
 @Getter
 @Setter
 @Configuration
-@SuppressWarnings("checkstyle:LineLength")
 @ConfigurationProperties(prefix = "connector.cors")
 public class ConnectorCorsProperties {
     List<String> allowedOrigins = List.of("*");

@@ -18,7 +18,7 @@ package eu.ecodex.connector.domain.exception;
  * issues.
  *
  * <p>It is a {@link RuntimeException} to allow propagation without mandatory catching, typically
- * handled at the application boundary (e.g. service layer, REST controller, or global exception
+ * handled at the application boundary (e.g. service layer, REST controller, or all exception
  * handler).
  */
 public class ConnectorMessageAttachmentException extends RuntimeException {

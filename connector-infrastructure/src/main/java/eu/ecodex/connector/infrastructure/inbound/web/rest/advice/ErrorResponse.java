@@ -18,7 +18,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
  * client about application-specific errors or violations, such as invalid input, business rule
  * breaches, or other runtime exceptions.
  *
- * <p>Instances of this record are returned by global exception handlers or API operations
+ * <p>Instances of this record are returned by all exception handlers or API operations
  * when an error response is required.
  *
  * @param status  The HTTP status code representing the type of error encountered.

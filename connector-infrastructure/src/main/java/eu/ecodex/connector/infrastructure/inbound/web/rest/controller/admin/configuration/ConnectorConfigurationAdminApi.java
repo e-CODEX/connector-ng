@@ -48,7 +48,7 @@ public interface ConnectorConfigurationAdminApi {
     @Operation(summary = "List queues configurations")
     ConnectorQueuePropertiesDto listQueues();
 
-    @GetMapping("/message-procesing")
+    @GetMapping("/message-processing")
     @Operation(summary = "List message processing configurations")
     ConnectorMessageProcessingPropertiesDto listMessageProcessing();
 

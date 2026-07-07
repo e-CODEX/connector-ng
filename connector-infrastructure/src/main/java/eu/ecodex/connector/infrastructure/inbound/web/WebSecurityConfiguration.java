@@ -64,7 +64,7 @@ public class WebSecurityConfiguration {
                                    "/api/v1/admin/configurations/routing",
                                    "/api/v1/admin/configurations/backend-link-partners",
                                    "/api/v1/admin/configurations/queues",
-                                   "/api/v1/admin/configurations/message-procesing",
+                                   "/api/v1/admin/configurations/message-processing",
                                    // SOAP
                                    "/services/backend",
                                    // swagger ui

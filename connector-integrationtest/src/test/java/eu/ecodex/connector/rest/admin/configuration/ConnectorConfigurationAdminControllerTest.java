@@ -81,7 +81,7 @@ public class ConnectorConfigurationAdminControllerTest extends AbstractIntegrati
     @Test
     void should_list_message_processing_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/message-procesing")
+                 .uri(BASE_URL + "/message-processing")
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<ConnectorMessageProcessingPropertiesDto>() {

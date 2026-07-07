@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -45,6 +46,7 @@ public record ConnectorOutboundMessageRequest(
         String backendMessageIdentifier,
         @NotNull(message = "The business content must not be null.")
         ConnectorOutboundMessageBusinessContent businessContent,
+        @Valid
         @NotNull(message = "The as4 properties must not be null")
         ConnectorOutboundMessageAS4Properties as4Properties,
         List<String> attachments

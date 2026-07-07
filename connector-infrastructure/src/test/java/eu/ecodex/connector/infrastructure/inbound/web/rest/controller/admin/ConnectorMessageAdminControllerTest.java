@@ -18,11 +18,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.ecodex.connector.MessageStatsTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveTransportStep;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepNotFoundException;
@@ -43,6 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ConnectorMessageAdminController.class)
 public class ConnectorMessageAdminControllerTest {
     private static final String URL = "/api/v1/admin/messages";
+    private static final String URL_STATS = "/api/v1/admin/messages/stats";
     private static final String URL_MESSAGE_DETAIL = "/api/v1/admin/messages/%s";
     private static final String URL_TRANSPORT_STEP = "/api/v1/admin/messages/%s/transport-steps";
 
@@ -52,6 +55,8 @@ public class ConnectorMessageAdminControllerTest {
     private ConnectorRetrieveMessage retrieveMessageService;
     @MockitoBean
     private ConnectorRetrieveTransportStep retrieveTransportStepService;
+    @MockitoBean
+    private ConnectorRetrieveMessageStats retrieveMessageStatsService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -83,7 +88,8 @@ public class ConnectorMessageAdminControllerTest {
         when(retrieveMessageService.execute(any()))
                 .thenReturn(MessageTestFixtures.createConfirmedMessage());
 
-        mockMvc.perform(get(URL_MESSAGE_DETAIL.formatted("/223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu"))
+        mockMvc.perform(get(URL_MESSAGE_DETAIL.formatted(
+                       "/223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu"))
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -110,7 +116,8 @@ public class ConnectorMessageAdminControllerTest {
         when(retrieveTransportStepService.execute(any()))
                 .thenReturn(TransportStepFixtures.createTransportStep());
 
-        mockMvc.perform(get(URL_TRANSPORT_STEP.formatted("/223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu"))
+        mockMvc.perform(get(URL_TRANSPORT_STEP.formatted(
+                       "/223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu"))
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -121,12 +128,39 @@ public class ConnectorMessageAdminControllerTest {
     @Test
     void should_return_404_not_found_when_retrieving_a_message_transport_steps_with_unknown_identifier()
             throws Exception {
-        doThrow(ConnectorMessageTransportStepNotFoundException.class).when(retrieveTransportStepService)
+        doThrow(ConnectorMessageTransportStepNotFoundException.class).when(
+                                                                             retrieveTransportStepService)
                                                                      .execute(any());
 
         mockMvc.perform(get(URL_TRANSPORT_STEP.formatted("unknown-identifier"))
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isNotFound())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    // stats
+
+    @Test
+    void should_retrieve_message_stats() throws Exception {
+        when(retrieveMessageStatsService.execute(any(), any()))
+                .thenReturn(MessageStatsTestFixtures.createStats());
+
+        mockMvc.perform(get(URL_STATS).contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.all.total").value(100))
+               .andExpect(jsonPath("$.all.delivered").value(90))
+               .andExpect(jsonPath("$.all.rejected").value(10))
+               .andExpect(jsonPath("$.all.pending").value(0))
+               .andExpect(jsonPath("$.outbound.total").value(80))
+               .andExpect(jsonPath("$.outbound.delivered").value(75))
+               .andExpect(jsonPath("$.outbound.rejected").value(5))
+               .andExpect(jsonPath("$.outbound.pending").value(0))
+               .andExpect(jsonPath("$.inbound.total").value(20))
+               .andExpect(jsonPath("$.inbound.delivered").value(15))
+               .andExpect(jsonPath("$.inbound.rejected").value(5))
+               .andExpect(jsonPath("$.inbound.pending").value(0))
+
+        ;
     }
 }

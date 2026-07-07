@@ -12,10 +12,12 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveTransportStep;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
+import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
@@ -29,6 +31,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     private final ConnectorListMessages listMessagesService;
     private final ConnectorRetrieveMessage retrieveMessageService;
     private final ConnectorRetrieveTransportStep retrieveTransportStepService;
+    private final ConnectorRetrieveMessageStats retrieveMessageStatsService;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
@@ -36,14 +39,17 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
      * @param listMessagesService          The service for listing messages.
      * @param retrieveMessageService       The service for retrieving a specific message.
      * @param retrieveTransportStepService The service for retrieving a specific transport step.
+     * @param retrieveMessageStatsService  The service for retrieving message statistics.
      */
     public ConnectorMessageAdminController(
             ConnectorListMessages listMessagesService,
             ConnectorRetrieveMessage retrieveMessageService,
-            ConnectorRetrieveTransportStep retrieveTransportStepService) {
+            ConnectorRetrieveTransportStep retrieveTransportStepService,
+            ConnectorRetrieveMessageStats retrieveMessageStatsService) {
         this.listMessagesService = listMessagesService;
         this.retrieveMessageService = retrieveMessageService;
         this.retrieveTransportStepService = retrieveTransportStepService;
+        this.retrieveMessageStatsService = retrieveMessageStatsService;
     }
 
     @Override
@@ -76,5 +82,10 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         var step = retrieveTransportStepService.execute(identifier);
 
         return ConnectorMessageTransportStepDto.from(step);
+    }
+
+    @Override
+    public ConnectorMessageStats getStats(String from, String to) {
+        return retrieveMessageStatsService.execute(from, to);
     }
 }

@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -51,12 +52,16 @@ public record ConnectorOutboundMessageAS4Properties(
         String originalSender,
         @NotBlank(message = "The final recipient must not be blank.")
         String finalRecipient,
+        @Valid
         @NotNull(message = "The service must not be null.")
         ConnectorOutboundMessageService service,
+        @Valid
         @NotNull(message = "The action must not be null.")
         ConnectorOutboundMessageAction action,
+        @Valid
         @NotNull(message = "The from party must not be null.")
         ConnectorOutboundMessageParty fromParty,
+        @Valid
         @NotNull(message = "The to party must not be null.")
         ConnectorOutboundMessageParty toParty
 ) {

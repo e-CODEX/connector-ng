@@ -8,18 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.spi;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
 
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import java.time.Instant;
 import java.util.List;
 
 /**
- * Provides a contract for retrieving statistics related to connector messages.
+ * Represents the message reporting data for a single calendar year.
+ *
+ * @param year   the calendar year
+ * @param months the monthly reports for the year, typically ordered by month
  */
-public interface ConnectorMessageStatsRepository {
-    ConnectorMessageStats findAll(Instant from, Instant to);
-
-    List<ConnectorMessageReport> computeReport(Instant from, Instant to);
+public record YearReport(
+        int year,
+        List<MonthReport> months
+) {
 }

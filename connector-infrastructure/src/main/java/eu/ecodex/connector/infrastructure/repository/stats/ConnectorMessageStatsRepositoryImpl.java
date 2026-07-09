@@ -10,11 +10,13 @@
 
 package eu.ecodex.connector.infrastructure.repository.stats;
 
+import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStatsItem;
 import eu.ecodex.connector.domain.spi.ConnectorMessageStatsRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.stats.ConnectorMessageStatsJpaRepository;
 import java.time.Instant;
+import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
@@ -70,5 +72,18 @@ public class ConnectorMessageStatsRepositoryImpl implements ConnectorMessageStat
                                     .outbound(outbound)
                                     .inbound(inbound)
                                     .build();
+    }
+
+    @Override
+    public List<ConnectorMessageReport> computeReport(Instant from, Instant to) {
+        var reports = messageStatsJpaRepository.computeReports(from, to);
+        return reports.stream().map((report) -> new ConnectorMessageReport(
+                report.year(),
+                report.month(),
+                report.party(),
+                report.service(),
+                report.direction(),
+                report.total()
+        )).toList();
     }
 }

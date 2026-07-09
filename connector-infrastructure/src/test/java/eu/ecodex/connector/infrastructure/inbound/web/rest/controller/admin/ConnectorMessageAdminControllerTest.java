@@ -18,12 +18,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.ecodex.connector.MessageReportTestFixtures;
 import eu.ecodex.connector.MessageStatsTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveTransportStep;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
@@ -46,6 +48,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class ConnectorMessageAdminControllerTest {
     private static final String URL = "/api/v1/admin/messages";
     private static final String URL_STATS = "/api/v1/admin/messages/stats";
+    private static final String URL_REPORT = "/api/v1/admin/messages/reports";
     private static final String URL_MESSAGE_DETAIL = "/api/v1/admin/messages/%s";
     private static final String URL_TRANSPORT_STEP = "/api/v1/admin/messages/%s/transport-steps";
 
@@ -57,6 +60,8 @@ public class ConnectorMessageAdminControllerTest {
     private ConnectorRetrieveTransportStep retrieveTransportStepService;
     @MockitoBean
     private ConnectorRetrieveMessageStats retrieveMessageStatsService;
+    @MockitoBean
+    private ConnectorRetrieveMessageReport retrieveMessageReportService;
     @Autowired
     private MockMvc mockMvc;
 
@@ -159,8 +164,57 @@ public class ConnectorMessageAdminControllerTest {
                .andExpect(jsonPath("$.inbound.total").value(20))
                .andExpect(jsonPath("$.inbound.delivered").value(15))
                .andExpect(jsonPath("$.inbound.rejected").value(5))
-               .andExpect(jsonPath("$.inbound.pending").value(0))
+               .andExpect(jsonPath("$.inbound.pending").value(0));
+    }
 
+    // report
+
+    @Test
+    void should_retrieve_message_report() throws Exception {
+        when(retrieveMessageReportService.execute(any(), any()))
+                .thenReturn(MessageReportTestFixtures.createReport());
+
+        mockMvc.perform(get(URL_REPORT).contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.services").isArray())
+               .andExpect(jsonPath("$.services").isNotEmpty())
+               .andExpect(jsonPath("$.services[0]").value("EPO"))
+               .andExpect(jsonPath("$.services[1]").value("FP"))
+               .andExpect(jsonPath("$.parties").isArray())
+               .andExpect(jsonPath("$.parties").isNotEmpty())
+               .andExpect(jsonPath("$.parties[0]").value("RE"))
+               .andExpect(jsonPath("$.months").isArray())
+               .andExpect(jsonPath("$.months").isNotEmpty())
+               .andExpect(jsonPath("$.months[0].year").value(2026))
+               .andExpect(jsonPath("$.months[0].month").value(5))
+               .andExpect(jsonPath("$.months[1].year").value(2026))
+               .andExpect(jsonPath("$.months[1].month").value(6))
+               .andExpect(jsonPath("$.years").isArray())
+               .andExpect(jsonPath("$.years").isNotEmpty())
+               .andExpect(jsonPath("$.years[0].year").value(2026))
+               .andExpect(jsonPath("$.years[0].months").isArray())
+               .andExpect(jsonPath("$.years[0].months").isNotEmpty())
+               .andExpect(jsonPath("$.years[0].months[0].month").value(5))
+               .andExpect(jsonPath("$.years[0].months[0].label").value("May"))
+               .andExpect(jsonPath("$.years[0].months[0].totalInbound").value(1))
+               .andExpect(jsonPath("$.years[0].months[0].totalOutbound").value(0))
+               .andExpect(jsonPath("$.years[0].months[0].total").value(1))
+               .andExpect(jsonPath("$.years[0].months[0].reports[0].party").value("RE"))
+               .andExpect(jsonPath("$.years[0].months[0].reports[0].service").value("FP"))
+               .andExpect(jsonPath("$.years[0].months[0].reports[0].inbound").value(1))
+               .andExpect(jsonPath("$.years[0].months[0].reports[0].outbound").value(0))
+               .andExpect(jsonPath("$.years[0].months[0].reports[0].total").value(1))
+               .andExpect(jsonPath("$.years[0].months[1].month").value(6))
+               .andExpect(jsonPath("$.years[0].months[1].label").value("June"))
+               .andExpect(jsonPath("$.years[0].months[1].totalInbound").value(0))
+               .andExpect(jsonPath("$.years[0].months[1].totalOutbound").value(1))
+               .andExpect(jsonPath("$.years[0].months[1].total").value(1))
+               .andExpect(jsonPath("$.years[0].months[1].reports[0].party").value("RE"))
+               .andExpect(jsonPath("$.years[0].months[1].reports[0].service").value("EPO"))
+               .andExpect(jsonPath("$.years[0].months[1].reports[0].inbound").value(0))
+               .andExpect(jsonPath("$.years[0].months[1].reports[0].outbound").value(1))
+               .andExpect(jsonPath("$.years[0].months[1].reports[0].total").value(1))
         ;
     }
 }

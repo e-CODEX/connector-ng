@@ -8,18 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.spi;
+package eu.ecodex.connector.application.service.usecase.stats;
 
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import java.time.Instant;
 import java.util.List;
 
 /**
- * Provides a contract for retrieving statistics related to connector messages.
+ * Service interface for retrieving message reports.
  */
-public interface ConnectorMessageStatsRepository {
-    ConnectorMessageStats findAll(Instant from, Instant to);
-
-    List<ConnectorMessageReport> computeReport(Instant from, Instant to);
+public interface ConnectorRetrieveMessageReport {
+    List<ConnectorMessageReport> execute(String from, String to);
 }

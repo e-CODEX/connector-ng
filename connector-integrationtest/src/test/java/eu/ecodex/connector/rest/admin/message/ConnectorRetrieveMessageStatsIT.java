@@ -45,7 +45,6 @@ public class ConnectorRetrieveMessageStatsIT extends AbstractIntegrationTest {
             "classpath:sql/message-as4-properties.sql",
     })
     void should_retrieve_connector_messages_stats_successfully() {
-        var messageId = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
         apiClient.get()
                  .uri("/api/v1/admin/messages/stats")
                  .exchange()

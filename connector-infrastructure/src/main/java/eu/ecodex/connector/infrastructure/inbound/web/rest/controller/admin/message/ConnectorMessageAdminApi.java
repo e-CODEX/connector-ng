@@ -14,12 +14,12 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report.ConnectorMessageReportDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -71,6 +71,14 @@ public interface ConnectorMessageAdminApi {
     @GetMapping("/stats")
     @Operation(summary = "Get message statistics.")
     ConnectorMessageStats getStats(
+            @RequestParam(name = "from", required = false) String from,
+            @RequestParam(name = "to", required = false) String to
+    );
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/reports")
+    @Operation(summary = "Get message reporting.")
+    ConnectorMessageReportDto getReports(
             @RequestParam(name = "from", required = false) String from,
             @RequestParam(name = "to", required = false) String to
     );

@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 
 import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
 import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveTransportStep;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
@@ -20,6 +21,7 @@ import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report.ConnectorMessageReportDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,6 +34,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     private final ConnectorRetrieveMessage retrieveMessageService;
     private final ConnectorRetrieveTransportStep retrieveTransportStepService;
     private final ConnectorRetrieveMessageStats retrieveMessageStatsService;
+    private final ConnectorRetrieveMessageReport retrieveMessageReportService;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
@@ -40,16 +43,19 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
      * @param retrieveMessageService       The service for retrieving a specific message.
      * @param retrieveTransportStepService The service for retrieving a specific transport step.
      * @param retrieveMessageStatsService  The service for retrieving message statistics.
+     * @param retrieveMessageReportService The service for retrieving message reports.
      */
     public ConnectorMessageAdminController(
             ConnectorListMessages listMessagesService,
             ConnectorRetrieveMessage retrieveMessageService,
             ConnectorRetrieveTransportStep retrieveTransportStepService,
-            ConnectorRetrieveMessageStats retrieveMessageStatsService) {
+            ConnectorRetrieveMessageStats retrieveMessageStatsService,
+            ConnectorRetrieveMessageReport retrieveMessageReportService) {
         this.listMessagesService = listMessagesService;
         this.retrieveMessageService = retrieveMessageService;
         this.retrieveTransportStepService = retrieveTransportStepService;
         this.retrieveMessageStatsService = retrieveMessageStatsService;
+        this.retrieveMessageReportService = retrieveMessageReportService;
     }
 
     @Override
@@ -87,5 +93,11 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     @Override
     public ConnectorMessageStats getStats(String from, String to) {
         return retrieveMessageStatsService.execute(from, to);
+    }
+
+    @Override
+    public ConnectorMessageReportDto getReports(String from, String to) {
+        var reports = retrieveMessageReportService.execute(from, to);
+        return ConnectorMessageReportDto.of(reports);
     }
 }

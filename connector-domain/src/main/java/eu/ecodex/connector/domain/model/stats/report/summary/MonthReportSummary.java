@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
+package eu.ecodex.connector.domain.model.stats.report.summary;
 
 import java.util.List;
 
@@ -22,12 +22,12 @@ import java.util.List;
  * @param total         the total number of messages for the month
  * @param reports       the message statistics grouped by party and service for the month
  */
-public record MonthReport(
+public record MonthReportSummary(
         int month,
         String label,
         long totalInbound,
         long totalOutbound,
         long total,
-        List<MessageReportItem> reports
+        List<MessageReportSummaryItem> reports
 ) {
 }

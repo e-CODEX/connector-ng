@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
+package eu.ecodex.connector.domain.model.stats.report.summary;
 
 /**
  * Identifies a calendar month by its year and month number.

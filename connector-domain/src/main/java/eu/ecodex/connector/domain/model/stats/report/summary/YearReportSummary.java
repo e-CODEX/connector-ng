@@ -8,13 +8,18 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.usecase.stats;
+package eu.ecodex.connector.domain.model.stats.report.summary;
 
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+import java.util.List;
 
 /**
- * Service interface for retrieving message reports.
+ * Represents the message reporting data for a single calendar year.
+ *
+ * @param year   the calendar year
+ * @param months the monthly reports for the year, typically ordered by month
  */
-public interface ConnectorRetrieveMessageReport {
-    ConnectorMessageReportSummary execute(String from, String to);
+public record YearReportSummary(
+        int year,
+        List<MonthReportSummary> months
+) {
 }

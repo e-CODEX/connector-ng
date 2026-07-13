@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.admin.message;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report.ConnectorMessageReportDto;
+import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -45,12 +45,12 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql",
     })
-    void should_retrieve_connector_messages_stats_successfully() {
+    void should_retrieve_connector_messages_report_successfully() {
         apiClient.get()
                  .uri("/api/v1/admin/messages/reports")
                  .exchange()
                  .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageReportDto>() {
+                 .expectBody(new ParameterizedTypeReference<ConnectorMessageReportSummary>() {
                  })
                  .value(reports -> {
                      assertThat(reports).isNotNull();
@@ -72,7 +72,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
                      assertThat(month1.totalInbound()).isEqualTo(3);
                      assertThat(month1.totalOutbound()).isEqualTo(1);
                      assertThat(month1.total())
-                             .isEqualTo(month1.totalOutbound() +  month1.totalInbound());
+                             .isEqualTo(month1.totalOutbound() + month1.totalInbound());
 
 
                      assertThat(month1.reports().size()).isEqualTo(2);
@@ -83,7 +83,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
                      assertThat(monthReport1.inbound()).isEqualTo(3);
                      assertThat(monthReport1.outbound()).isEqualTo(0);
                      assertThat(monthReport1.total())
-                             .isEqualTo(monthReport1.inbound()  + monthReport1.outbound());
+                             .isEqualTo(monthReport1.inbound() + monthReport1.outbound());
 
                      var monthReport2 = month1.reports().get(1);
                      assertThat(monthReport2).isNotNull();
@@ -92,8 +92,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
                      assertThat(monthReport2.inbound()).isEqualTo(0);
                      assertThat(monthReport2.outbound()).isEqualTo(1);
                      assertThat(monthReport2.total())
-                             .isEqualTo(monthReport2.inbound()  + monthReport2.outbound());
-
+                             .isEqualTo(monthReport2.inbound() + monthReport2.outbound());
                  });
     }
 }

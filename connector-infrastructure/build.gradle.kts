@@ -34,6 +34,8 @@ dependencies {
     implementation(libs.apache.commons.io)
     // apache tika
     implementation(libs.apache.tika)
+    // apache poi
+    implementation(libs.apache.poi)
     // dss tool
     implementation(platform(libs.dss.tool))
     implementation("eu.europa.ec.joinup.sd-dss:dss-document")
@@ -84,6 +86,7 @@ dependencies {
     implementation(libs.lombok)
     annotationProcessor(libs.lombok)
     implementation(libs.micrometer)
+    implementation(libs.opencsv)
     implementation(libs.s3)
     // test
     testImplementation(testFixtures(project(":connector-domain")))

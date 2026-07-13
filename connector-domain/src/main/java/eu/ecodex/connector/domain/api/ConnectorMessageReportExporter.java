@@ -8,18 +8,17 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
+package eu.ecodex.connector.domain.api;
 
-import java.util.List;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+import jakarta.annotation.Nonnull;
 
 /**
- * Represents the message reporting data for a single calendar year.
- *
- * @param year   the calendar year
- * @param months the monthly reports for the year, typically ordered by month
+ * Interface for exporting connector message reports.
  */
-public record YearReport(
-        int year,
-        List<MonthReport> months
-) {
+public interface ConnectorMessageReportExporter {
+    ConnectorMessageReportExportFormat getFormat();
+
+    byte[] export(@Nonnull ConnectorMessageReportSummary summary);
 }

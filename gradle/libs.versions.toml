@@ -3,6 +3,7 @@
 apache-commons-lang3 = "3.20.0"
 apache-commons-io = "2.21.0"
 apache-cxf = "4.1.0"
+apache-poi = "5.4.1"
 apache-tika = "3.3.1"
 apache-wss4j = "3.0.5" # do not migrate to 4.x series due to xmlsec 4.x serie clash
 apache-xmlsec = "3.0.5" # keep this due to limitation of DSS library
@@ -38,6 +39,7 @@ jackson-databind = "2.21.0"
 lombok = "1.18.42"
 micrometer = "1.6.2"
 okhttp = "5.3.2"
+opencsv = "5.12.0"
 slf4j-api = "2.0.17"
 # tests
 assertj = "3.27.7"
@@ -51,6 +53,7 @@ mockito = "5.21.0"
 apache-commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "apache-commons-lang3" }
 apache-commons-io = { module = "commons-io:commons-io", version.ref = "apache-commons-io" }
 apache-cxf-bom = { module = "org.apache.cxf:cxf-bom", version.ref = "apache-cxf" }
+apache-poi = { module = "org.apache.poi:poi-ooxml", version.ref = "apache-poi" }
 apache-tika = { module = "org.apache.tika:tika-core", version.ref = "apache-tika" }
 apache-wss4j-common = { module = "org.apache.wss4j:wss4j-ws-security-common", version.ref = "apache-wss4j"}
 apache-wss4j-dom = { module = "org.apache.wss4j:wss4j-ws-security-dom", version.ref = "apache-wss4j"}
@@ -87,6 +90,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version.ref = "micrometer" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+opencsv = { module = "com.opencsv:opencsv", version.ref = "opencsv" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
 # test
 minio = { module = "io.minio:minio", version.ref = "minio" }

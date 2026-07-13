@@ -12,15 +12,17 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report.ConnectorMessageReportDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,8 +80,17 @@ public interface ConnectorMessageAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/reports")
     @Operation(summary = "Get message reporting.")
-    ConnectorMessageReportDto getReports(
+    ConnectorMessageReportSummary getReports(
             @RequestParam(name = "from", required = false) String from,
             @RequestParam(name = "to", required = false) String to
+    );
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/reports/export")
+    @Operation(summary = "Export message reporting.")
+    ResponseEntity<byte[]> exportReports(
+            @RequestParam(name = "from", required = false) String from,
+            @RequestParam(name = "to", required = false) String to,
+            @RequestParam(name = "format") ConnectorMessageReportExportFormat format
     );
 }

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
+package eu.ecodex.connector.domain.model.stats.report.summary;
 
 /**
  * Represents message statistics for a specific party and service combination.
@@ -19,7 +19,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
  * @param outbound the number of outbound messages
  * @param total    the total number of messages
  */
-public record MessageReportItem(
+public record MessageReportSummaryItem(
         String party,
         String service,
         long inbound,

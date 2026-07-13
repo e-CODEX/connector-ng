@@ -8,13 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.usecase.stats;
-
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+package eu.ecodex.connector.infrastructure.outbound.export;
 
 /**
- * Service interface for retrieving message reports.
+ * Represents an exception thrown when an error occurs during the export of a connector message
+ * report.
  */
-public interface ConnectorRetrieveMessageReport {
-    ConnectorMessageReportSummary execute(String from, String to);
+public class ConnectorMessageReportExportException extends RuntimeException {
+    public ConnectorMessageReportExportException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

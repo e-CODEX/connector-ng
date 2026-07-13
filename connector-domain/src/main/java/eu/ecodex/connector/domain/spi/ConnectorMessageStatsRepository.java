@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.domain.spi;
 
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
 import java.time.Instant;
 import java.util.List;
 

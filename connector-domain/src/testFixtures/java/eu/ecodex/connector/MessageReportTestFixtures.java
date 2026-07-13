@@ -11,7 +11,7 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
 import java.util.List;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})

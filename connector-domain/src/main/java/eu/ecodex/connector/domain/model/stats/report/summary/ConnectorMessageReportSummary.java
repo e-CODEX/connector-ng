@@ -8,10 +8,10 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.stats.report;
+package eu.ecodex.connector.domain.model.stats.report.summary;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
 import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.Comparator;
@@ -22,40 +22,44 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-
 /**
- * Data transfer object representing a connector message report aggregated for reporting purposes.
+ * Represents a summary of message reports for a connector, including data grouped by services,
+ * parties, months, and years.
  *
- * <p>The report contains the distinct services, parties, and months present in the source data,
- * along with yearly report data grouped by year.
- *
- * @param services the distinct service names included in the report
- * @param parties  the distinct party names included in the report
- * @param months   the distinct month keys represented in the report
- * @param years    the yearly report data, ordered by ascending year
+ * @param services a list of distinct and sorted service identifiers involved in the message
+ *                 reports
+ * @param parties  a list of distinct and sorted party identifiers involved in the message reports
+ * @param months   a list of distinct and sorted {@code MonthKey} objects representing months where
+ *                 message reports are available
+ * @param years    a list of {@code YearReport} objects containing detailed yearly message report
+ *                 data
  */
-public record ConnectorMessageReportDto(
+public record ConnectorMessageReportSummary(
         List<String> services,
         List<String> parties,
         List<MonthKey> months,
-        List<YearReport> years
+        List<YearReportSummary> years
 ) {
-
     private static final ConnectorMessageDirection INBOUND =
             ConnectorMessageDirection.GATEWAY_TO_BACKEND;
     private static final ConnectorMessageDirection OUTBOUND =
             ConnectorMessageDirection.BACKEND_TO_GATEWAY;
 
     /**
-     * Creates a {@code ConnectorMessageReportDto} from a collection of
-     * {@link ConnectorMessageReport} instances.
+     * Constructs a new {@code ConnectorMessageReportSummary} instance based on the provided list of
+     * {@code ConnectorMessageReport} objects. This method processes the input reports to extract
+     * distinct values for services, parties, and month keys, and computes aggregated yearly
+     * reports.
      *
-     * @param reports the source connector message reports
+     * @param reports the list of {@code ConnectorMessageReport} objects used to generate the
+     *                summary. Each report contains statistical data about connector messages
+     *                including service, party, year, month, direction, and message totals.
      *
-     * @return a DTO containing the aggregated reporting data
+     * @return a new {@code ConnectorMessageReportSummary} instance containing aggregated and sorted
+     *         statistics derived from the provided reports.
      */
-    public static ConnectorMessageReportDto of(List<ConnectorMessageReport> reports) {
-        return new ConnectorMessageReportDto(
+    public static ConnectorMessageReportSummary of(List<ConnectorMessageReport> reports) {
+        return new ConnectorMessageReportSummary(
                 distinctSorted(reports, ConnectorMessageReport::service),
                 distinctSorted(reports, ConnectorMessageReport::party),
                 toMonths(reports),
@@ -77,7 +81,7 @@ public record ConnectorMessageReportDto(
                       .toList();
     }
 
-    private static List<YearReport> toYearReports(List<ConnectorMessageReport> reports) {
+    private static List<YearReportSummary> toYearReports(List<ConnectorMessageReport> reports) {
         return reports.stream()
                       .collect(Collectors.groupingBy(
                               ConnectorMessageReport::year,
@@ -86,11 +90,11 @@ public record ConnectorMessageReportDto(
                       ))
                       .entrySet()
                       .stream()
-                      .map(ConnectorMessageReportDto::toYearReport)
+                      .map(ConnectorMessageReportSummary::toYearReport)
                       .toList();
     }
 
-    private static YearReport toYearReport(
+    private static YearReportSummary toYearReport(
             Map.Entry<Integer, List<ConnectorMessageReport>> yearEntry) {
         var months = yearEntry.getValue()
                               .stream()
@@ -101,13 +105,13 @@ public record ConnectorMessageReportDto(
                               ))
                               .entrySet()
                               .stream()
-                              .map(ConnectorMessageReportDto::toMonthReport)
+                              .map(ConnectorMessageReportSummary::toMonthReport)
                               .toList();
 
-        return new YearReport(yearEntry.getKey(), months);
+        return new YearReportSummary(yearEntry.getKey(), months);
     }
 
-    private static MonthReport toMonthReport(
+    private static MonthReportSummary toMonthReport(
             Map.Entry<Integer, List<ConnectorMessageReport>> monthEntry) {
 
         int month = monthEntry.getKey();
@@ -140,7 +144,7 @@ public record ConnectorMessageReportDto(
                                                               )))
                 .toList();
 
-        return new MonthReport(
+        return new MonthReportSummary(
                 month,
                 Month.of(month).getDisplayName(TextStyle.FULL, Locale.ENGLISH),
                 totalInbound,
@@ -150,13 +154,13 @@ public record ConnectorMessageReportDto(
         );
     }
 
-    private static MessageReportItem toMessageReportItem(
+    private static MessageReportSummaryItem toMessageReportItem(
             String party,
             String service,
             List<ConnectorMessageReport> reports) {
         long inbound = sumByDirection(reports, INBOUND);
         long outbound = sumByDirection(reports, OUTBOUND);
-        return new MessageReportItem(party, service, inbound, outbound, inbound + outbound);
+        return new MessageReportSummaryItem(party, service, inbound, outbound, inbound + outbound);
     }
 
     private static long sumByDirection(

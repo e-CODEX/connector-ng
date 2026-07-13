@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -28,12 +29,22 @@ import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieve
 import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.domain.api.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.message.ConnectorMessageAdminController;
+import eu.ecodex.connector.infrastructure.outbound.export.ConnectorMessageReportExporterFactory;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -43,15 +54,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @AutoConfigureRestTestClient
+@ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorMessageAdminController.class)
 public class ConnectorMessageAdminControllerTest {
     private static final String URL = "/api/v1/admin/messages";
     private static final String URL_STATS = "/api/v1/admin/messages/stats";
     private static final String URL_REPORT = "/api/v1/admin/messages/reports";
+    private static final String URL_REPORT_EXPORT = "/api/v1/admin/messages/reports/export?format=%s";
     private static final String URL_MESSAGE_DETAIL = "/api/v1/admin/messages/%s";
     private static final String URL_TRANSPORT_STEP = "/api/v1/admin/messages/%s/transport-steps";
-
     @MockitoBean
     private ConnectorListMessages listMessagesService;
     @MockitoBean
@@ -62,6 +74,14 @@ public class ConnectorMessageAdminControllerTest {
     private ConnectorRetrieveMessageStats retrieveMessageStatsService;
     @MockitoBean
     private ConnectorRetrieveMessageReport retrieveMessageReportService;
+    @MockitoBean
+    private ConnectorMessageReportExporterFactory reportExporterFactory;
+    @Mock
+    private ConnectorMessageReportExporter csvExporter;
+    @Mock
+    private ConnectorMessageReportExporter jsonExporter;
+    @Mock
+    private ConnectorMessageReportExporter xlsxExporter;
     @Autowired
     private MockMvc mockMvc;
 
@@ -170,9 +190,11 @@ public class ConnectorMessageAdminControllerTest {
     // report
 
     @Test
-    void should_retrieve_message_report() throws Exception {
+    void should_retrieve_message_report_successfully() throws Exception {
         when(retrieveMessageReportService.execute(any(), any()))
-                .thenReturn(MessageReportTestFixtures.createReport());
+                .thenReturn(
+                        ConnectorMessageReportSummary.of(MessageReportTestFixtures.createReport())
+                );
 
         mockMvc.perform(get(URL_REPORT).contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
@@ -216,5 +238,37 @@ public class ConnectorMessageAdminControllerTest {
                .andExpect(jsonPath("$.years[0].months[1].reports[0].outbound").value(1))
                .andExpect(jsonPath("$.years[0].months[1].reports[0].total").value(1))
         ;
+    }
+
+    // report export
+
+    // @Test
+    @ParameterizedTest
+    @EnumSource(ConnectorMessageReportExportFormat.class)
+    void should_export_message_report_successfully(ConnectorMessageReportExportFormat format)
+            throws Exception {
+        var exporter = exporterFor(format);
+
+        when(retrieveMessageReportService.execute(any(), any()))
+                .thenReturn(ConnectorMessageReportSummary.of(MessageReportTestFixtures.createReport()));
+        when(reportExporterFactory.create(format)).thenReturn(exporter);
+        when(exporter.export(any())).thenReturn("dummy-content".getBytes(StandardCharsets.UTF_8));
+        when(exporter.getFormat()).thenReturn(format);
+
+        mockMvc.perform(get(URL_REPORT_EXPORT.formatted(format))
+                                .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.valueOf(format.getContentType())));
+
+        verify(reportExporterFactory).create(format);
+        verify(exporter).export(any());
+    }
+
+    private ConnectorMessageReportExporter exporterFor(ConnectorMessageReportExportFormat format) {
+        return switch (format) {
+            case CSV -> csvExporter;
+            case JSON -> jsonExporter;
+            case XLSX -> xlsxExporter;
+        };
     }
 }

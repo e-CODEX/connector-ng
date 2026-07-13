@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.repository.stats;
 
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStatsItem;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
 import eu.ecodex.connector.domain.spi.ConnectorMessageStatsRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.stats.ConnectorMessageStatsJpaRepository;
 import java.time.Instant;

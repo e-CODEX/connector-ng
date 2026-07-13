@@ -11,7 +11,8 @@
 package eu.ecodex.connector.application.service.impl.stats;
 
 import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageReport;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageReport;
+import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
+import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.domain.spi.ConnectorMessageStatsRepository;
 import java.time.Instant;
 import java.util.List;
@@ -33,7 +34,9 @@ public class ConnectorRetrieveMessageReportService implements ConnectorRetrieveM
     }
 
     @Override
-    public List<ConnectorMessageReport> execute(String from, String to) {
-        return statsRepository.computeReport(parseInstant(from), parseInstant(to));
+    public ConnectorMessageReportSummary execute(String from, String to) {
+        var computedReport = statsRepository.computeReport(parseInstant(from), parseInstant(to));
+
+        return ConnectorMessageReportSummary.of(computedReport);
     }
 }

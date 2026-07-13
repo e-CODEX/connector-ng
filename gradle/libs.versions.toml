@@ -35,7 +35,7 @@ messaginghub = "3.2.2"
 # other
 dss-tool = "6.1"
 itextpdf = "9.5.0"
-jackson-databind = "2.21.0"
+jackson-databind = "2.21.5"
 lombok = "1.18.42"
 micrometer = "1.6.2"
 okhttp = "5.3.2"

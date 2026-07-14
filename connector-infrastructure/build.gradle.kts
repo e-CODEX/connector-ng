@@ -88,6 +88,7 @@ dependencies {
     annotationProcessor(libs.lombok)
     implementation(libs.micrometer)
     implementation(libs.opencsv)
+    implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
     implementation(libs.s3)
     // test
     testImplementation(testFixtures(project(":connector-domain")))

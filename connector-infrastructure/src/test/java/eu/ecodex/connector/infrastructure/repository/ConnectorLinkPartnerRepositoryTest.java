@@ -47,6 +47,7 @@ import org.springframework.boot.test.context.SpringBootTest;
                     connector.link.backend[0].link-partners[0].properties.encryption-alias=alice
                     # this must match the certificate DN (lower- or UPPERcase is ignored)
                     connector.link.backend[0].link-partners[0].properties.certificate-dn=cn=alice
+                    spring.autoconfigure.exclude=org.apache.cxf.spring.boot.autoconfigure.micrometer.MicrometerMetricsAutoConfiguration
                 """
         }
 )

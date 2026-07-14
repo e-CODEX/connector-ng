@@ -62,6 +62,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-activemq")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     // databases
     implementation(libs.h2)
     runtimeOnly(libs.mysql)

@@ -14,24 +14,20 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @SuppressWarnings("DataFlowIssue")
 @Sql(
         statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
-public class ConnectorMessageAttachmentRepositoryTest {
+public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorMessageAttachmentRepository repository;
 

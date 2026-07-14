@@ -69,6 +69,8 @@ public class WebSecurityConfiguration {
                                    "/api/v1/admin/configurations/message-processing",
                                    // SOAP
                                    "/services/backend",
+                                   // actuator
+                                   "/actuator/**",
                                    // swagger ui
                                    "/swagger-ui/**",
                                    "/v3/api-docs/**",

@@ -15,19 +15,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
-public class ConnectorProcessingModeRepositoryTest {
+public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorProcessingModeRepository repository;
 

@@ -13,22 +13,18 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @SuppressWarnings("DataFlowIssue")
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
-public class ConnectorMessageTransportStepRepositoryTest {
+public class ConnectorMessageTransportStepRepositoryTest extends AbstractRepositoryTest {
     private static final String STEP_IDENTIFIER = "8af8af19-839a-4594-a19d-40d67868474c@connector.ecodex.eu_backend_alice";
     private static final String MESSAGE_IDENTIFIER = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
 
@@ -54,7 +50,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
             "classpath:sql/message-as4-properties.sql",
     })
     void should_create_a_new_transport_step_successfully() {
-        var transportStep = this.repository.save(generateTransportStep(MESSAGE_IDENTIFIER));
+        var transportStep = this.repository.save(generateTransportStep());
 
         assertThat(transportStep).isNotNull();
         assertThat(transportStep.identifier()).isEqualTo(STEP_IDENTIFIER);
@@ -75,7 +71,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
                 NullPointerException.class,
                 () -> this.repository.update(
                         null,
-                        generateTransportStep(MESSAGE_IDENTIFIER)
+                        generateTransportStep()
                 )
         );
     }
@@ -101,7 +97,7 @@ public class ConnectorMessageTransportStepRepositoryTest {
             "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_update_an_existing_transport_step_successfully() {
-        var transportStep = generateTransportStep(MESSAGE_IDENTIFIER)
+        var transportStep = generateTransportStep()
                 .toBuilder()
                 .status(ConnectorMessageTransportStatus.DOWNLOADED)
                 .build();
@@ -199,14 +195,14 @@ public class ConnectorMessageTransportStepRepositoryTest {
         assertThat(messagesIds.size()).isEqualTo(1);
     }
 
-    private ConnectorMessageTransportStep generateTransportStep(String messageIdentifier) {
+    private ConnectorMessageTransportStep generateTransportStep() {
         return ConnectorMessageTransportStep.builder()
                                             .identifier(STEP_IDENTIFIER)
                                             .numberOfAttempts(0)
                                             .status(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
                                             .transportedMessage(
                                                     ConnectorMessage.builder()
-                                                                    .identifier(messageIdentifier)
+                                                                    .identifier(MESSAGE_IDENTIFIER)
                                                                     .build()
                                             )
                                             .build();

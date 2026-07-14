@@ -15,21 +15,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
 
-@Transactional
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
-public class ConnectorPartyRepositoryTest {
+public class ConnectorPartyRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorPartyRepository repository;
 
@@ -112,7 +108,8 @@ public class ConnectorPartyRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_searching_party_by_null_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                NullPointerException.class,
+                () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
                         null,
                         ConnectorPartyRoleType.INITIATOR,
                         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
@@ -123,7 +120,8 @@ public class ConnectorPartyRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_searching_party_by_null_role_type_from_database() {
         assertThrows(
-                NullPointerException.class, () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                NullPointerException.class,
+                () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
                         "AT",
                         null,
                         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
@@ -134,7 +132,8 @@ public class ConnectorPartyRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_searching_party_by_null_business_domain_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                NullPointerException.class,
+                () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
                         "AT",
                         ConnectorPartyRoleType.INITIATOR,
                         null
@@ -145,7 +144,8 @@ public class ConnectorPartyRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_searching_party_by_null_identifier_role_and_business_domain_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                NullPointerException.class,
+                () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
                         null,
                         null,
                         null

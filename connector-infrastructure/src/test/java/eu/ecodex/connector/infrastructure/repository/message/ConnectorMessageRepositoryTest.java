@@ -14,22 +14,18 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @SuppressWarnings("DataFlowIssue")
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
-public class ConnectorMessageRepositoryTest {
+public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorMessageRepository repository;
     @Autowired
@@ -405,10 +401,12 @@ public class ConnectorMessageRepositoryTest {
             "classpath:sql/evidence.sql",
     })
     void should_find_a_message_by_its_identifier_successfully() {
-        var message = repository.findByIdentifier("7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
+        var message = repository.findByIdentifier(
+                "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
 
         assertThat(message).isNotNull();
-        assertThat(message.identifier()).isEqualTo("7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
+        assertThat(message.identifier()).isEqualTo(
+                "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
         assertThat(message.direction()).isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
         assertThat(message.attachments()).isNotEmpty();
         assertThat(message.evidences()).isNotEmpty();

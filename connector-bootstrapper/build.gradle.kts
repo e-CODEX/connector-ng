@@ -8,6 +8,7 @@ plugins {
 
 springBoot {
     mainClass.set("eu.ecodex.connector.ConnectorApplication")
+    buildInfo()
 }
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")

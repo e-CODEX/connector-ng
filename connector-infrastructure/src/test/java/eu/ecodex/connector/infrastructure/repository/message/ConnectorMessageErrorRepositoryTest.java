@@ -13,20 +13,16 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageErrorRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 @SuppressWarnings("DataFlowIssue")
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
-public class ConnectorMessageErrorRepositoryTest {
+public class ConnectorMessageErrorRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorMessageErrorRepository repository;
 

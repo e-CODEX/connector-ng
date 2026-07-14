@@ -17,22 +17,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
-public class ConnectorServiceRepositoryTest {
+public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorServiceRepository repository;
     @MockitoSpyBean

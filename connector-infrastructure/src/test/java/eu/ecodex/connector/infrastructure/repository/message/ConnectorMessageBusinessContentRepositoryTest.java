@@ -15,22 +15,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
+import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
 @SuppressWarnings("DataFlowIssue")
-@Transactional
-@SpringBootTest(classes = RepositoryContextConfiguration.class)
-public class ConnectorMessageBusinessContentRepositoryTest {
+public class ConnectorMessageBusinessContentRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorMessageBusinessContentRepository repository;
 
@@ -51,7 +47,8 @@ public class ConnectorMessageBusinessContentRepositoryTest {
     @Sql("classpath:sql/processing-mode.sql")
     @Sql("classpath:sql/message.sql")
     @Sql("classpath:sql/attachment.sql")
-    void should_save_message_business_content_successfully_to_database(ConnectorMessageBusinessContent businessContent) {
+    void should_save_message_business_content_successfully_to_database(
+            ConnectorMessageBusinessContent businessContent) {
         var saved = this.repository.save(
                 businessContent,
                 "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"

@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
+import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepNotFoundException;
@@ -85,6 +86,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorMessageTransportStepNotFoundException.class)
     public ErrorResponse handleMessageTransportStepsNotFoundException(
             ConnectorMessageTransportStepNotFoundException exception) {
+        return new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ConnectorEvidenceNotFoundException.class)
+    public ErrorResponse handleMessageEvidenceNotFoundException(
+            ConnectorEvidenceNotFoundException exception) {
         return new ErrorResponse(
                 HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );

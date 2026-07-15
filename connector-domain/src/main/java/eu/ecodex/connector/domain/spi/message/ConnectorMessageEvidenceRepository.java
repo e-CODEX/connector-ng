@@ -33,14 +33,17 @@ public interface ConnectorMessageEvidenceRepository {
      *         persistence-related information (e.g., generated identifiers)
      */
     ConnectorMessageEvidence save(
-            @Nonnull ConnectorMessageEvidence evidence, @Nonnull String messageIdentifier);
+            @Nonnull ConnectorMessageEvidence evidence,
+            @Nonnull String messageIdentifier);
+
+    ConnectorMessageEvidence findByUuid(String uuid);
 
     /**
      * Updates the state or metadata of the connector evidence identified by the given identifier to
      * reflect that it has been delivered to the link partner.
      *
-     * @param uuid the unique identifier of the connector evidence that has been delivered to
-     *                   the link partner. Must not be null.
+     * @param uuid the unique identifier of the connector evidence that has been delivered to the
+     *             link partner. Must not be null.
      */
     void setDeliveredToLinkPartnerAt(@Nonnull String uuid);
 }

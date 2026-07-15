@@ -33,11 +33,11 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
      * Constructs an instance of ConnectorMessageEvidenceRepositoryImpl with the necessary JPA
      * repositories to perform persistence operations.
      *
-     * @param evidenceJpaRepository   Repository for performing CRUD operations on
-     *                                ConnectorMessageEvidenceEntity instances.
-     * @param messageJpaRepository    Repository for performing CRUD operations on
-     *                                ConnectorMessageEntity instances and finding messages by their
-     *                                identifier.
+     * @param evidenceJpaRepository Repository for performing CRUD operations on
+     *                              ConnectorMessageEvidenceEntity instances.
+     * @param messageJpaRepository  Repository for performing CRUD operations on
+     *                              ConnectorMessageEntity instances and finding messages by their
+     *                              identifier.
      */
     public ConnectorMessageEvidenceRepositoryImpl(
             ConnectorEvidenceJpaRepository evidenceJpaRepository,
@@ -47,6 +47,10 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
     }
 
     static ConnectorMessageEvidence toDomain(ConnectorMessageEvidenceEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
         return ConnectorMessageEvidence
                 .builder()
                 .uuid(entity.getUuid())
@@ -67,6 +71,12 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
         var savedEvidence = evidenceJpaRepository.save(evidenceToSave);
 
         return toDomain(savedEvidence);
+    }
+
+    @Override
+    public ConnectorMessageEvidence findByUuid(String uuid) {
+        var evidence = this.evidenceJpaRepository.findByUuid(uuid);
+        return toDomain(evidence);
     }
 
     @Override

@@ -68,6 +68,7 @@ public class WebSecurityConfiguration {
                                    "/api/v1/admin/configurations/backend-link-partners",
                                    "/api/v1/admin/configurations/queues",
                                    "/api/v1/admin/configurations/message-processing",
+                                   "/api/v1/admin/jms/queues/stats",
                                    // SOAP
                                    "/services/backend",
                                    // actuator

@@ -18,24 +18,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorListAttachments;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.attachment.ConnectorAttachmentAdminController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@AutoConfigureRestTestClient
-@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorAttachmentAdminController.class)
-public class ConnectorAttachmentAdminControllerTest {
+public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorListAttachments listAttachmentsService;
     @Autowired
@@ -44,15 +40,15 @@ public class ConnectorAttachmentAdminControllerTest {
     @Test
     void should_return_200_when_retrieving_attachments() throws Exception {
         var pageResult = new ConnectorPageResult<>(
-                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
+            List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
         );
 
         when(listAttachmentsService.execute(any())).thenReturn(pageResult);
 
         mockMvc.perform(get("/api/v1/admin/attachments")
-                                .param("page", "0")
-                                .param("size", "20")
-                                .contentType(MediaType.APPLICATION_JSON))
+                            .param("page", "0")
+                            .param("size", "20")
+                            .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$.totalElements").value(1))

@@ -17,25 +17,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.service.usecase.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport.ConnectorMessageTransportStepAdminController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@AutoConfigureRestTestClient
-@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorMessageTransportStepAdminController.class)
-public class ConnectorMessageTransportStepAdminControllerTest {
+public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/transport-steps";
     @MockitoBean
     private ConnectorListTransportSteps listTransportStepsService;
@@ -45,15 +41,15 @@ public class ConnectorMessageTransportStepAdminControllerTest {
     @Test
     void should_return_200_when_listing_messages_transport_steps() throws Exception {
         var pageResult = new ConnectorPageResult<>(
-                List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
+            List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
         );
 
         when(listTransportStepsService.execute(any(), any(), any())).thenReturn(pageResult);
 
         mockMvc.perform(get(URL)
-                                .param("page", "0")
-                                .param("size", "20")
-                                .contentType(MediaType.APPLICATION_JSON))
+                            .param("page", "0")
+                            .param("size", "20")
+                            .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$.totalElements").value(1))

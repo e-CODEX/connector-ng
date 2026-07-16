@@ -20,25 +20,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachment.ConnectorAttachmentController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@AutoConfigureRestTestClient
-@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorAttachmentController.class)
-public class ConnectorAttachmentControllerTest {
+public class ConnectorAttachmentControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorUploadAttachments uploadAttachmentsService;
     @Autowired
@@ -47,12 +42,12 @@ public class ConnectorAttachmentControllerTest {
     @Test
     void should_send_201_when_uploading_attachments() throws Exception {
         when(uploadAttachmentsService.execute(any()))
-                .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
+            .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/attachments/upload")
-                                .file(getAttachment("raw/fake_file.pdf", "fake_file.pdf"))
-                                .file(getAttachment("raw/fake_file.txt", "fake_file.txt"))
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                            .file(getAttachment("raw/fake_file.pdf", "fake_file.pdf"))
+                            .file(getAttachment("raw/fake_file.txt", "fake_file.txt"))
+                            .contentType(MediaType.MULTIPART_FORM_DATA)
                )
                .andExpect(status().isCreated())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -61,10 +56,10 @@ public class ConnectorAttachmentControllerTest {
 
     private MockMultipartFile getAttachment(String resourcePath, String filename) {
         return new MockMultipartFile(
-                "attachments",
-                filename,
-                MediaType.APPLICATION_XML_VALUE,
-                FileTestFixtures.readAsBytes(resourcePath)
+            "attachments",
+            filename,
+            MediaType.APPLICATION_XML_VALUE,
+            FileTestFixtures.readAsBytes(resourcePath)
         );
     }
 }

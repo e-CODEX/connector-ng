@@ -17,26 +17,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.QueuesStatsTestFixtures;
-import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveQueuesStats;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.jms.ConnectorJmsAdminController;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@AutoConfigureRestTestClient
-@ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorJmsAdminController.class)
-public class ConnectorJmsAdminControllerTest {
+public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
     private static final String BASE_URL = "/api/v1/admin/jms/queues/stats";
 
     @MockitoBean
@@ -46,14 +39,15 @@ public class ConnectorJmsAdminControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void should_retrieve_message_stats() throws Exception {
+    void should_retrieve_jms_queues_stats() throws Exception {
         when(retrieveQueuesStatsService.execute())
             .thenReturn(List.of(QueuesStatsTestFixtures.create()));
 
         mockMvc.perform(get(BASE_URL).contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$[0].queueName").value("connector.queues.outbound-message-staging-queue"))
+               .andExpect(jsonPath("$[0].queueName").value(
+                   "connector.queues.outbound-message-staging-queue"))
                .andExpect(jsonPath("$[0].pendingCount").value(0))
                .andExpect(jsonPath("$[0].dlqCount").value(1));
     }

@@ -19,31 +19,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-@AutoConfigureRestTestClient
-@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength"})
-@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorProcessingModeAdminController.class)
-public class ConnectorProcessingModeAdminControllerTest {
+@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength"})
+public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/processing-modes";
 
     @Autowired
@@ -60,82 +56,82 @@ public class ConnectorProcessingModeAdminControllerTest {
     // save processing mode
     @Test
     void should_send_201_response_when_creating_processing_mode_with_application_xml()
-            throws Exception {
+        throws Exception {
         when(registerProcessingModeService.execute(any(), any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+            .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var processingModeXml = new MockMultipartFile(
-                "processingModeXmlFile",
-                "processing-mode.xml",
-                MediaType.APPLICATION_XML_VALUE,
-                "<processingMode>test content</processingMode>".getBytes()
+            "processingModeXmlFile",
+            "processing-mode.xml",
+            MediaType.APPLICATION_XML_VALUE,
+            "<processingMode>test content</processingMode>".getBytes()
         );
 
         var metadataFile = new MockMultipartFile(
-                "metadata",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
+            "metadata",
+            "",
+            MediaType.APPLICATION_JSON_VALUE,
+            JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
         mockMvc.perform(multipart(HttpMethod.POST, URL)
-                                .file(processingModeXml)
-                                .file(metadataFile)
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                            .file(processingModeXml)
+                            .file(metadataFile)
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isCreated());
     }
 
     @Test
     void should_send_201_response_when_creating_processing_mode_with_text_xml_file()
-            throws Exception {
+        throws Exception {
         when(registerProcessingModeService.execute(any(), any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+            .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var processingModeXml = new MockMultipartFile(
-                "processingModeXmlFile",
-                "processing-mode.xml",
-                MediaType.TEXT_XML_VALUE,
-                "<processingMode>test content</processingMode>".getBytes()
+            "processingModeXmlFile",
+            "processing-mode.xml",
+            MediaType.TEXT_XML_VALUE,
+            "<processingMode>test content</processingMode>".getBytes()
         );
 
         var metadataFile = new MockMultipartFile(
-                "metadata",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
+            "metadata",
+            "",
+            MediaType.APPLICATION_JSON_VALUE,
+            JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
         mockMvc.perform(multipart(HttpMethod.POST, URL)
-                                .file(processingModeXml)
-                                .file(metadataFile)
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                            .file(processingModeXml)
+                            .file(metadataFile)
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isCreated());
     }
 
     @Test
     void should_send_400_response_when_creating_processing_mode_if_pmode_file_type_is_not_xml()
-            throws Exception {
+        throws Exception {
         when(registerProcessingModeService.execute(any(), any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+            .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var processingModeXml = new MockMultipartFile(
-                "processingModeXmlFile",
-                "processing-mode.xml",
-                MediaType.TEXT_PLAIN_VALUE,
-                "<processingMode>test content</processingMode>".getBytes()
+            "processingModeXmlFile",
+            "processing-mode.xml",
+            MediaType.TEXT_PLAIN_VALUE,
+            "<processingMode>test content</processingMode>".getBytes()
         );
 
         var metadataFile = new MockMultipartFile(
-                "metadata",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
+            "metadata",
+            "",
+            MediaType.APPLICATION_JSON_VALUE,
+            JsonTestFixtures.readJson("json/processing-mode.creation.json").getBytes()
         );
 
         mockMvc.perform(multipart(HttpMethod.POST, URL)
-                                .file(processingModeXml)
-                                .file(metadataFile)
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                            .file(processingModeXml)
+                            .file(metadataFile)
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isBadRequest());
     }
 
@@ -154,7 +150,7 @@ public class ConnectorProcessingModeAdminControllerTest {
     @Test
     void should_list_processing_modes_successfully() {
         when(listProcessingModeService.execute())
-                .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
+            .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
 
         var response = apiClient.get()
                                 .uri(URL)
@@ -174,7 +170,7 @@ public class ConnectorProcessingModeAdminControllerTest {
     @Test
     void should_retrieve_a_processing_mode_successfully() {
         when(retrieveProcessingModeService.execute(any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+            .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
         var response = apiClient.get()
                                 .uri(URL + "/{identifier}", "test-identifier")

@@ -19,38 +19,33 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.application.service.usecase.evidence.ConnectorRetrieveEvidence;
 import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.evidence.ConnectorEvidenceController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@AutoConfigureRestTestClient
-@ContextConfiguration(classes = TestConfiguration.class)
 @WebMvcTest(ConnectorEvidenceController.class)
-public class ConnectorMessageEvidenceControllerTest {
+public class ConnectorMessageEvidenceControllerTest extends AbstractWebMvcTest {
     private static final String URL_DOWNLOAD = "/api/v1/evidences/%s/download";
+
     @MockitoBean
     private ConnectorRetrieveEvidence downloadEvidenceService;
-
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void should_download_evidence_successfully() throws Exception {
         when(downloadEvidenceService.execute(any())).thenReturn(
-                EvidenceTestFixtures.createSubmissionAcceptanceEvidence()
+            EvidenceTestFixtures.createSubmissionAcceptanceEvidence()
         );
 
         mockMvc.perform(get(URL_DOWNLOAD.formatted("12345678-1234-1234-1234-123456789012"))
-                                .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_XML));
 
@@ -59,12 +54,12 @@ public class ConnectorMessageEvidenceControllerTest {
 
     @Test
     void should_return_404_not_found_when_downloading_an_evidence_with_unknown_identifier()
-            throws Exception {
+        throws Exception {
         doThrow(ConnectorEvidenceNotFoundException.class).when(downloadEvidenceService)
                                                          .execute(any());
 
         mockMvc.perform(get(URL_DOWNLOAD.formatted("unknown-identifier"))
-                                .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isNotFound())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }

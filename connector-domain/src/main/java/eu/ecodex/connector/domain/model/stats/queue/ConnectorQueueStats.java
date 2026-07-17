@@ -15,12 +15,32 @@ package eu.ecodex.connector.domain.model.stats.queue;
  * queue and its associated metrics, including the count of pending messages and messages in the
  * dead letter queue.
  *
- * @param queueName    The name of the queue.
- * @param pendingCount The number of messages pending processing in the queue.
- * @param dlqCount     The number of messages in the dead letter queue.
+ * @param queueName        The name of the queue.
+ * @param pendingCount     The number of messages pending processing in the queue.
+ * @param dlqCount         The number of messages in the dead letter queue.
+ * @param queueDescription The description of the queue.
  */
-public record ConnectorQueueStats(String queueName, long pendingCount, long dlqCount) {
-    public static ConnectorQueueStats of(String queueName, long pendingCount, long dlqCount) {
-        return new ConnectorQueueStats(queueName, pendingCount, dlqCount);
+public record ConnectorQueueStats(
+    String queueName,
+    String queueDescription,
+    long pendingCount,
+    long dlqCount
+) {
+    /**
+     * Creates a new instance of {@code ConnectorQueueStats} using the specified parameters.
+     *
+     * @param queueName        The name of the queue.
+     * @param queueDescription A description of the queue.
+     * @param pendingCount     The number of messages pending processing in the queue.
+     * @param dlqCount         The number of messages in the dead letter queue.
+     *
+     * @return A new {@code ConnectorQueueStats} instance populated with the provided values.
+     */
+    public static ConnectorQueueStats of(
+        String queueName,
+        String queueDescription,
+        long pendingCount,
+        long dlqCount) {
+        return new ConnectorQueueStats(queueName, queueDescription, pendingCount, dlqCount);
     }
 }

@@ -17,6 +17,7 @@ public class QueuesStatsTestFixtures {
     public static ConnectorQueueStats create() {
         return ConnectorQueueStats.of(
             "connector.queues.outbound-message-staging-queue",
+            "Staging area for outbound messages awaiting processing",
             0,
             1
         );

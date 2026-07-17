@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.provider;
 
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import eu.ecodex.connector.domain.model.stats.queue.MonitoredQueue;
 import eu.ecodex.connector.domain.spi.ConnectorQueueStatsProvider;
 import java.util.List;
 import org.springframework.jms.core.JmsTemplate;
@@ -21,15 +22,39 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvider {
-    private static final List<String> MONITORED_QUEUES = List.of(
-        "connector.queues.outbound-message-staging-queue",
-        "connector.queues.outbound-evidence-trigger-queue",
-        "connector.queues.outbound-message-processing-queue",
-        "connector.queues.inbound-message-processing-queue",
-        "connector.queues.inbound-evidence-trigger-queue",
-        "connector.queues.backend-delivery-queue",
-        "domibus.backend.jms.inQueue",
-        "domibus.backend.jms.replyQueue"
+    private static final List<MonitoredQueue> MONITORED_QUEUES = List.of(
+        new MonitoredQueue(
+            "connector.queues.outbound-message-staging-queue",
+            "Staging area for outbound messages awaiting processing"
+        ),
+        new MonitoredQueue(
+            "connector.queues.outbound-evidence-trigger-queue",
+            "Triggers REM evidence generation for outbound messages"
+        ),
+        new MonitoredQueue(
+            "connector.queues.outbound-message-processing-queue",
+            "Outbound messages being processed toward the gateway"
+        ),
+        new MonitoredQueue(
+            "connector.queues.inbound-message-processing-queue",
+            "Inbound messages being processed from the gateway"
+        ),
+        new MonitoredQueue(
+            "connector.queues.inbound-evidence-trigger-queue",
+            "Triggers REM evidence generation for inbound messages"
+        ),
+        new MonitoredQueue(
+            "connector.queues.backend-delivery-queue",
+            "Messages ready for delivery to the backend"
+        ),
+        new MonitoredQueue(
+            "domibus.backend.jms.inQueue",
+            "Domibus backend inbound JMS queue"
+        ),
+        new MonitoredQueue(
+            "domibus.backend.jms.replyQueue",
+            "Domibus backend reply JMS queue"
+        )
     );
 
     private final JmsTemplate jmsTemplate;
@@ -40,7 +65,10 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
 
     @Override
     public List<ConnectorQueueStats> getAllStats() {
-        return MONITORED_QUEUES.stream().map((this::getStats)).toList();
+        return MONITORED_QUEUES.stream().map((monitoredQueue -> getStats(
+            monitoredQueue.name(),
+            monitoredQueue.description()
+        ))).toList();
     }
 
     private String dlqNameOf(String queue) {
@@ -62,7 +90,12 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
         return n == null ? 0 : n;
     }
 
-    private ConnectorQueueStats getStats(String queue) {
-        return ConnectorQueueStats.of(queue, count(queue), count(dlqNameOf(queue)));
+    private ConnectorQueueStats getStats(String queue, String queueDescription) {
+        return ConnectorQueueStats.of(
+            queue,
+            queueDescription,
+            count(queue),
+            count(dlqNameOf(queue))
+        );
     }
 }

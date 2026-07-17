@@ -39,8 +39,8 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
      *                                    entities and retrieve processing mode configurations.
      */
     public ConnectorServiceRepositoryImpl(
-            ConnectorServiceJpaRepository serviceJpaRepository,
-            ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
+        ConnectorServiceJpaRepository serviceJpaRepository,
+        ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.serviceJpaRepository = serviceJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
     }
@@ -54,17 +54,17 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
      *                       resulting {@link ConnectorServiceEntity}
      *
      * @return a new {@link ConnectorServiceEntity} instance with values derived from the provided
-     *         {@link ConnectorService} and {@link ConnectorProcessingModeEntity}
+     *     {@link ConnectorService} and {@link ConnectorProcessingModeEntity}
      */
     public static ConnectorServiceEntity toEntity(
-            ConnectorService service,
-            ConnectorProcessingModeEntity processingMode) {
+        ConnectorService service,
+        ConnectorProcessingModeEntity processingMode) {
         return ConnectorServiceEntity
-                .builder()
-                .name(service.name())
-                .type(service.type())
-                .processingMode(processingMode)
-                .build();
+            .builder()
+            .name(service.name())
+            .type(service.type())
+            .processingMode(processingMode)
+            .build();
     }
 
     /**
@@ -74,7 +74,7 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
      * @param entity the {@link ConnectorServiceEntity} to be converted
      *
      * @return a new {@link ConnectorService} instance populated with data from the provided entity,
-     *         or {@code null} if the input entity is {@code null}
+     *     or {@code null} if the input entity is {@code null}
      */
     public static ConnectorService toDomain(ConnectorServiceEntity entity) {
         if (entity == null) {
@@ -82,22 +82,22 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
         }
 
         return ConnectorService
-                .builder()
-                .name(entity.getName())
-                .type(entity.getType())
-                .build();
+            .builder()
+            .name(entity.getName())
+            .type(entity.getType())
+            .build();
     }
 
     @Override
     public List<ConnectorService> saveAll(
-            @NonNull List<ConnectorService> services,
-            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        @NonNull List<ConnectorService> services,
+        @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
-                businessDomainIdentifier.messageLaneIdentifier()
+            businessDomainIdentifier.messageLaneIdentifier()
         );
 
         var savedServices = this.serviceJpaRepository.saveAll(
-                services.stream().map(service -> toEntity(service, processingMode)).toList()
+            services.stream().map(service -> toEntity(service, processingMode)).toList()
         );
 
         return savedServices.stream().map(ConnectorServiceRepositoryImpl::toDomain).toList();
@@ -105,12 +105,22 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
 
     @Override
     public ConnectorService findByNameAndBusinessDomain(
-            @NonNull String name,
-            @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
+        @NonNull String name,
+        @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var service = this.serviceJpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
-                name, businessDomainIdentifier.messageLaneIdentifier()
+            name, businessDomainIdentifier.messageLaneIdentifier()
         );
 
         return toDomain(service);
+    }
+
+    @Override
+    public List<ConnectorService> findAllByBusinessDomainIdentifier(
+        @NonNull ConnectorBusinessDomainIdentifier identifier) {
+        var services = this.serviceJpaRepository.findByProcessingModeBusinessDomainIdentifier(
+            identifier.messageLaneIdentifier()
+        );
+
+        return services.stream().map(ConnectorServiceRepositoryImpl::toDomain).toList();
     }
 }

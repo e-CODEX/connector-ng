@@ -42,8 +42,8 @@ public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
         var service = ServiceTestFixtures.createService();
 
         var savedServices = repository.saveAll(
-                List.of(service),
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            List.of(service),
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(savedServices).isNotNull();
@@ -55,30 +55,30 @@ public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_bulk_saving_services_with_null_list_of_services_to_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.saveAll(
-                        null,
-                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-                )
+            NullPointerException.class, () -> repository.saveAll(
+                null,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_bulk_saving_services_with_null_business_domain_identifier_to_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.saveAll(
-                        List.of(ServiceTestFixtures.createService()),
-                        null
-                )
+            NullPointerException.class, () -> repository.saveAll(
+                List.of(ServiceTestFixtures.createService()),
+                null
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_bulk_saving_services_with_null_list_of_services_and_business_domain_identifier_to_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.saveAll(
-                        null,
-                        null
-                )
+            NullPointerException.class, () -> repository.saveAll(
+                null,
+                null
+            )
         );
     }
 
@@ -90,8 +90,8 @@ public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
     @Sql("classpath:sql/service.sql")
     void should_find_service_by_business_domain_identifier_successfully_from_database() {
         var service = this.repository.findByNameAndBusinessDomain(
-                "Connector-TEST",
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            "Connector-TEST",
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(service).isNotNull();
@@ -104,8 +104,8 @@ public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
     @Sql("classpath:sql/service.sql")
     void should_return_null_when_searching_service_by_unknown_business_domain_identifier_from_database() {
         var service = this.repository.findByNameAndBusinessDomain(
-                "unknown",
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            "unknown",
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(service).isNull();
@@ -114,30 +114,45 @@ public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_searching_service_with_a_null_name_from_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                        null,
-                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-                )
+            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                null,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_searching_service_with_a_null_business_domain_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                        "Connector-TEST",
-                        null
-                )
+            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                "Connector-TEST",
+                null
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_searching_service_with_a_null_name_and_business_domain_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                        null,
-                        null
-                )
+            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                null,
+                null
+            )
         );
+    }
+
+    // find all by business domain identifier
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    @Sql("classpath:sql/processing-mode.sql")
+    @Sql("classpath:sql/service.sql")
+    void should_find_all_services_by_business_domain_identifier_successfully_from_database() {
+        var services = repository.findAllByBusinessDomainIdentifier(
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+        );
+
+        assertThat(services).isNotNull();
+        assertThat(services).hasSize(7);
     }
 }

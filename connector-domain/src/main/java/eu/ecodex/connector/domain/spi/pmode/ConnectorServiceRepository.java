@@ -21,8 +21,8 @@ import java.util.List;
  */
 public interface ConnectorServiceRepository {
     List<ConnectorService> saveAll(
-            @Nonnull List<ConnectorService> services,
-            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+        @Nonnull List<ConnectorService> services,
+        @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 
     /**
      * Retrieves a {@link ConnectorService} based on its name and the associated business domain
@@ -33,9 +33,22 @@ public interface ConnectorServiceRepository {
      *                                 the service is associated; must not be null.
      *
      * @return the {@link ConnectorService} matching the specified service name and business domain
-     *         identifier, or null if no such service exists.
+     *     identifier, or null if no such service exists.
      */
     ConnectorService findByNameAndBusinessDomain(
-            @Nonnull String name,
-            @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+        @Nonnull String name,
+        @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
+    /**
+     * Retrieves a list of {@link ConnectorService} objects associated with the specified business
+     * domain identifier.
+     *
+     * @param identifier the {@link ConnectorBusinessDomainIdentifier} representing the unique
+     *                   identifier of the business domain; must not be null.
+     *
+     * @return a {@link List} of {@link ConnectorService} instances associated with the given
+     *     business domain identifier.
+     */
+    List<ConnectorService> findAllByBusinessDomainIdentifier(
+        @Nonnull ConnectorBusinessDomainIdentifier identifier);
 }

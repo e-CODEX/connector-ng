@@ -42,6 +42,7 @@ public class ConnectorRetrieveQueuesStatsServiceTest {
         var statsEntry = stats.getFirst();
         assertThat(statsEntry.queueName())
             .isEqualTo("connector.queues.outbound-message-staging-queue");
+        assertThat(statsEntry.queueDescription()).isEqualTo("Staging area for outbound messages awaiting processing");
         assertThat(statsEntry.pendingCount()).isEqualTo(0);
         assertThat(statsEntry.dlqCount()).isEqualTo(1);
     }

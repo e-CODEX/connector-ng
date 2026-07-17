@@ -48,6 +48,8 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$[0].queueName").value(
                    "connector.queues.outbound-message-staging-queue"))
+               .andExpect(jsonPath("$[0].queueDescription")
+                              .value("Staging area for outbound messages awaiting processing"))
                .andExpect(jsonPath("$[0].pendingCount").value(0))
                .andExpect(jsonPath("$[0].dlqCount").value(1));
     }

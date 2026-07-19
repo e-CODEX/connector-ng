@@ -100,11 +100,11 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice",
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,default_business_domain",
             // identifier
-            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice",
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,default_business_domain",
             // backendMessageIdentifier
-            "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice",
+            "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice,default_business_domain",
             // conversationIdentifier
     })
     @Sql({
@@ -116,9 +116,10 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql"
     })
-    void should_list_connector_messages_applying_identifier_and_backend_name_filter_successfully(
+    void should_list_connector_messages_applying_identifier_and_backend_name_and_business_domain_filter_successfully(
             String identifier,
-            String backendName) {
+            String backendName,
+            String businessDomain) {
         apiClient.get()
                  .uri(String.format(
                          "%s?identifier=%s&backendName=%s",

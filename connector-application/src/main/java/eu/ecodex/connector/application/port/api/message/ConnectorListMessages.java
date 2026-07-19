@@ -25,11 +25,13 @@ public interface ConnectorListMessages {
      * Executes a paginated process to retrieve a list of connector messages based on the specified
      * page request.
      *
-     * @param pageRequest the pagination request containing parameters for retrieving a specific
-     *                    page of connector messages. Must not be null.
-     * @param identifier  the identifier of the message to be retrieved (id, ebmsMessageId,
-     *                    conversationId, etc.)
-     * @param backendName the name of the backend to which the message belongs to.
+     * @param pageRequest              the pagination request containing parameters for retrieving a
+     *                                 specific page of connector messages. Must not be null.
+     * @param identifier               the identifier of the message to be retrieved (id,
+     *                                 ebmsMessageId, conversationId, etc.)
+     * @param backendName              the name of the backend to which the message belongs to.
+     * @param businessDomainIdentifier the identifier of the business domain to which the message
+     *                                 belongs to.
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} objects
      *     and pagination metadata.
@@ -37,6 +39,7 @@ public interface ConnectorListMessages {
     ConnectorPageResult<ConnectorMessage> execute(
         @Nonnull ConnectorPageRequest pageRequest,
         String identifier,
-        String backendName
+        String backendName,
+        String businessDomainIdentifier
     );
 }

@@ -26,6 +26,7 @@ public class MessageSpecification {
     private static final String CONVERSATION_IDENTIFIER_FIELD = "conversationIdentifier";
     private static final String EBMS_IDENTIFIER_FIELD = "ebmsMessageIdentifier";
     private static final String BACKEND_NAME_FIELD = "backendName";
+    private static final String BUSINESS_DOMAIN_FIELD = "businessDomain";
 
     /**
      * Creates a {@link Specification} for querying {@link ConnectorMessageEntity} instances based
@@ -33,17 +34,20 @@ public class MessageSpecification {
      * as the main identifier, backend message identifier, reference to backend message identifier,
      * conversation identifier, and EBMS identifier.
      *
-     * @param identifier  the identifier value to search for. The search will be performed as a
-     *                    case-insensitive "LIKE" match across multiple entity fields. If the
-     *                    identifier is {@code null}, the specification will not add any criteria.
-     * @param backendName the name of the backend to filter the results. If the backend name is
+     * @param identifier               the identifier value to search for. The search will be
+     *                                 performed as a case-insensitive "LIKE" match across multiple
+     *                                 entity fields. If the identifier is {@code null}, the
+     *                                 specification will not add any criteria.
+     * @param backendName              the name of the backend to filter the results.
+     * @param businessDomainIdentifier the identifier of the business domain to filter the results.
      *
      * @return a {@link Specification} that can be used for querying {@link ConnectorMessageEntity}
      *     instances matching the given identifier across one or more relevant fields.
      */
     public static Specification<ConnectorMessageEntity> withFilters(
         String identifier,
-        String backendName) {
+        String backendName,
+        String businessDomainIdentifier) {
         return Specification
             .where(withIdentifier(identifier))
             .or(
@@ -51,6 +55,7 @@ public class MessageSpecification {
                     .or(withRefToBackendMessageIdentifier(identifier))
                     .or(withConversationIdentifier(identifier))
                     .or(withEbmsIdentifier(identifier))
+                    .or(withBusinessDomain(businessDomainIdentifier))
             )
             .and(withBackendName(backendName));
     }
@@ -135,6 +140,22 @@ public class MessageSpecification {
 
             return cb.like(
                 root.get(BACKEND_NAME_FIELD), pattern
+            );
+        });
+    }
+
+    private static Specification<ConnectorMessageEntity> withBusinessDomain(
+        String businessDomainIdentifier) {
+        return ((root, query, cb) -> {
+            if (!StringUtils.hasText(businessDomainIdentifier)) {
+                return null;
+            }
+
+            var pattern = "%" + businessDomainIdentifier + "%";
+
+            return cb.like(
+                root.get(BUSINESS_DOMAIN_FIELD).get(IDENTIFIER_FIELD),
+                pattern
             );
         });
     }

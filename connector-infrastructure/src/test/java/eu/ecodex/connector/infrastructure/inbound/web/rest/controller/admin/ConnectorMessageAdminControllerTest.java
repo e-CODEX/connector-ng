@@ -88,7 +88,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
             List.of(MessageTestFixtures.createConfirmedMessage()), 1, 1, 1
         );
 
-        when(listMessagesService.execute(any(), any(), any())).thenReturn(pageResult);
+        when(listMessagesService.execute(any(), any(), any(), any())).thenReturn(pageResult);
 
         mockMvc.perform(get(URL)
                             .param("page", "0")

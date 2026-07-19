@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.export;
 
 import com.opencsv.CSVWriter;
-import eu.ecodex.connector.domain.api.ConnectorMessageReportExporter;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import java.io.ByteArrayOutputStream;
@@ -27,13 +27,13 @@ import lombok.NonNull;
  */
 public class ConnectorMessageReportCsvExporter implements ConnectorMessageReportExporter {
     private static final String[] HEADERS = {
-            "Year",
-            "Month",
-            "Party",
-            "Service",
-            "Inbound",
-            "Outbound",
-            "Total"
+        "Year",
+        "Month",
+        "Party",
+        "Service",
+        "Inbound",
+        "Outbound",
+        "Total"
     };
 
     @Override
@@ -57,20 +57,20 @@ public class ConnectorMessageReportCsvExporter implements ConnectorMessageReport
                 for (var month : year.months()) {
                     for (var report : month.reports()) {
                         writer.writeNext(row(
-                                year.year(),
-                                month.label(),
-                                report.party(),
-                                report.service(),
-                                report.inbound(),
-                                report.outbound(),
-                                report.total()
+                            year.year(),
+                            month.label(),
+                            report.party(),
+                            report.service(),
+                            report.inbound(),
+                            report.outbound(),
+                            report.total()
                         ));
                     }
                 }
             }
         } catch (IOException e) {
             throw new ConnectorMessageReportExportException(
-                    "Failed to export connector message report as CSV", e
+                "Failed to export connector message report as CSV", e
             );
         }
         return out.toByteArray();

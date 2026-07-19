@@ -16,11 +16,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageEbmsIdStep;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGenerator;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,10 +46,10 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
     @Test
     void should_execute_outbound_message_and_set_ebms_id_successfully() {
         var configuration = ConnectorMessageProcessingConfiguration
-                .builder()
-                .ebmsIdGeneratorEnabled(true)
-                .ebmsIdSuffix("connector.ecodex.eu")
-                .build();
+            .builder()
+            .ebmsIdGeneratorEnabled(true)
+            .ebmsIdSuffix("connector.ecodex.eu")
+            .build();
         var ebmsIdentifier = String.format("%s@%s", UUID.randomUUID(), configuration);
         var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
         var as4Properties = outboundMessage.as4Properties();
@@ -58,7 +57,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
 
         when(messageEbmsIdGenerator.generateIdentifier()).thenReturn(ebmsIdentifier);
         when(messageRepository.updateEbmsIdentifier(any(), any()))
-                .thenReturn(outboundMessage.toBuilder().as4Properties(as4Properties).build());
+            .thenReturn(outboundMessage.toBuilder().as4Properties(as4Properties).build());
         when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration);
 
         var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
@@ -67,7 +66,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
         assertThat(outputMessage.as4Properties().ebmsMessageIdentifier()).isNotEmpty();
 
         assertThat(outputMessage.as4Properties().ebmsMessageIdentifier())
-                .contains(configuration.ebmsIdSuffix());
+            .contains(configuration.ebmsIdSuffix());
     }
 
     @Test
@@ -75,12 +74,12 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
         var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
 
         when(processingConfigurationProvider.getConfiguration())
-                .thenReturn(
-                        ConnectorMessageProcessingConfiguration
-                                .builder()
-                                .ebmsIdGeneratorEnabled(false)
-                                .build()
-                );
+            .thenReturn(
+                ConnectorMessageProcessingConfiguration
+                    .builder()
+                    .ebmsIdGeneratorEnabled(false)
+                    .build()
+            );
 
         var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
 
@@ -92,8 +91,8 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> outboundMessageEbmsIdCreationStep.execute(null)
+            NullPointerException.class,
+            () -> outboundMessageEbmsIdCreationStep.execute(null)
         );
     }
 }

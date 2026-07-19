@@ -14,9 +14,9 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings("DataFlowIssue")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+    statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepositoryTest {
     @Autowired
@@ -71,7 +71,7 @@ public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepository
     @Test
     void should_throw_null_pointer_exception_when_searching_attachment_by_null_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> this.repository.findByIdentifier(null)
+            NullPointerException.class, () -> this.repository.findByIdentifier(null)
         );
     }
 
@@ -101,8 +101,8 @@ public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepository
     @Sql("classpath:sql/attachment.sql")
     void should_attach_a_message_to_an_attachment_successfully_in_database() {
         repository.attachToMessage(
-                "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file",
-                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
+            "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file",
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
         );
     }
 
@@ -113,44 +113,44 @@ public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepository
     @Sql("classpath:sql/attachment.sql")
     void should_fail_to_attach_a_message_to_an_attachment_if_it_has_already_been_attached_in_database() {
         assertThrows(
-                RuntimeException.class,
-                () -> repository.attachToMessage(
-                        "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
-                        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
-                )
+            RuntimeException.class,
+            () -> repository.attachToMessage(
+                "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
+                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_attaching_a_message_to_an_attachment_with_a_null_message_identifier_in_database() {
         assertThrows(
-                NullPointerException.class,
-                () -> repository.attachToMessage(
-                        "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
-                        null
-                )
+            NullPointerException.class,
+            () -> repository.attachToMessage(
+                "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
+                null
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_attaching_a_message_to_an_attachment_with_a_null_attachment_identifier_in_database() {
         assertThrows(
-                NullPointerException.class,
-                () -> repository.attachToMessage(
-                        null,
-                        "e4d9a3a5-42e8-4eeb-9236-678ecfbc0eb4"
-                )
+            NullPointerException.class,
+            () -> repository.attachToMessage(
+                null,
+                "e4d9a3a5-42e8-4eeb-9236-678ecfbc0eb4"
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_attaching_a_message_to_an_attachment_with_a_null_message_and_attachment_identifiers_in_database() {
         assertThrows(
-                NullPointerException.class,
-                () -> repository.attachToMessage(
-                        null,
-                        null
-                )
+            NullPointerException.class,
+            () -> repository.attachToMessage(
+                null,
+                null
+            )
         );
     }
 }

@@ -30,7 +30,7 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageRoutingBusinessDomainItem(
-        String defaultName,
-        Map<ConnectorLinkPartnerName, ConnectorMessageRoutingRule> rules
+    String defaultName,
+    Map<ConnectorLinkPartnerName, ConnectorMessageRoutingRule> rules
 ) {
 }

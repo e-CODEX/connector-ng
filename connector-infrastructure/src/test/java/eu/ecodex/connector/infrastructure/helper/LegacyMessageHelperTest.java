@@ -20,6 +20,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -32,8 +34,6 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ public class LegacyMessageHelperTest {
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
         assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class LegacyMessageHelperTest {
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
         assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
 
@@ -80,7 +80,7 @@ public class LegacyMessageHelperTest {
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
         assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class LegacyMessageHelperTest {
         var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
 
         assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -101,12 +101,12 @@ public class LegacyMessageHelperTest {
         var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
 
         when(fileStorageProvider.findByIdentifier("xml-content-id"))
-                .thenReturn("<xml/>".getBytes());
+            .thenReturn("<xml/>".getBytes());
         when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
+            .thenReturn(List.of());
 
         assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-                .isInstanceOf(IllegalStateException.class);
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class LegacyMessageHelperTest {
                                       .build();
 
         when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
+            .thenReturn(List.of());
 
         legacyMessageHelper.convertMessage(inbound);
 
@@ -144,7 +144,7 @@ public class LegacyMessageHelperTest {
                                       .build();
 
         when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
+            .thenReturn(List.of());
 
         legacyMessageHelper.convertMessage(inbound);
 
@@ -158,12 +158,12 @@ public class LegacyMessageHelperTest {
         legacyMessageHelper.convertMessage(inboundMessage());
 
         verify(attachmentRepository).findByMessageIdentifierAndTypes(
-                eq(MESSAGE_ID),
-                argThat(types -> types.containsAll(List.of(
-                        ConnectorAttachmentType.ATTACHMENT,
-                        ConnectorAttachmentType.PDF_TOKEN,
-                        ConnectorAttachmentType.XML_TOKEN
-                )))
+            eq(MESSAGE_ID),
+            argThat(types -> types.containsAll(List.of(
+                ConnectorAttachmentType.ATTACHMENT,
+                ConnectorAttachmentType.PDF_TOKEN,
+                ConnectorAttachmentType.XML_TOKEN
+            )))
         );
     }
 
@@ -186,58 +186,58 @@ public class LegacyMessageHelperTest {
 
     private void stubHappyPath() {
         when(fileStorageProvider.findByIdentifier("xml-content-id"))
-                .thenReturn("<xml/>".getBytes());
+            .thenReturn("<xml/>".getBytes());
         when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-                .thenReturn(List.of());
+            .thenReturn(List.of());
     }
 
     private ConnectorMessageAS4Properties as4Properties() {
         return ConnectorMessageAS4Properties
-                .builder()
-                .service(ConnectorService.builder()
-                                         .name("EPO")
-                                         .type("urn:e-codex:services:")
-                                         .build())
-                .action(ConnectorAction.builder()
-                                       .name("Form_A")
-                                       .build())
-                .fromParty(ConnectorParty.builder()
-                                         .identifier("BL")
-                                         .identifierType(
-                                                 "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
-                                         .role("GW")
-                                         .roleType(ConnectorPartyRoleType.INITIATOR)
-                                         .build())
-                .toParty(ConnectorParty.builder()
-                                       .identifier("RE")
-                                       .identifierType(
-                                               "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
-                                       .role("GW")
-                                       .roleType(ConnectorPartyRoleType.RESPONDER)
-                                       .build())
-                .conversationIdentifier("3d5ec775-6602-4bb0-a23c-0311ef8dabc8")
-                .ebmsMessageIdentifier("50ef4a19-916f-4e38-bc86-4f85921e6f0a@domibus.eu")
-                .referenceToIdentifier(null)
-                .originalSender("bob")
-                .finalRecipient("alice")
-                .build();
+            .builder()
+            .service(ConnectorService.builder()
+                                     .name("EPO")
+                                     .type("urn:e-codex:services:")
+                                     .build())
+            .action(ConnectorAction.builder()
+                                   .name("Form_A")
+                                   .build())
+            .fromParty(ConnectorParty.builder()
+                                     .identifier("BL")
+                                     .identifierType(
+                                         "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                     .role("GW")
+                                     .roleType(ConnectorPartyRoleType.INITIATOR)
+                                     .build())
+            .toParty(ConnectorParty.builder()
+                                   .identifier("RE")
+                                   .identifierType(
+                                       "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                   .role("GW")
+                                   .roleType(ConnectorPartyRoleType.RESPONDER)
+                                   .build())
+            .conversationIdentifier("3d5ec775-6602-4bb0-a23c-0311ef8dabc8")
+            .ebmsMessageIdentifier("50ef4a19-916f-4e38-bc86-4f85921e6f0a@domibus.eu")
+            .referenceToIdentifier(null)
+            .originalSender("bob")
+            .finalRecipient("alice")
+            .build();
     }
 
     private ConnectorMessageBusinessContent businessContent() {
         return ConnectorMessageBusinessContent
-                .builder()
-                .uuid(UUID.randomUUID().toString())
-                .xmlContent(ConnectorMessageAttachment.builder()
-                                                      .identifier("xml-content-id")
-                                                      .build())
-                .build();
+            .builder()
+            .uuid(UUID.randomUUID().toString())
+            .xmlContent(ConnectorMessageAttachment.builder()
+                                                  .identifier("xml-content-id")
+                                                  .build())
+            .build();
     }
 
     private ConnectorMessage inboundMessage() {
         return ConnectorMessage.builder()
                                .businessDomainIdentifier(
-                                       BusinessDomainTestFixtures.createDefaultBusinessDomain()
-                                                                 .identifier())
+                                   BusinessDomainTestFixtures.createDefaultBusinessDomain()
+                                                             .identifier())
                                .identifier(MESSAGE_ID)
                                .backendName(BACKEND_NAME)
                                .backendMessageIdentifier(null)

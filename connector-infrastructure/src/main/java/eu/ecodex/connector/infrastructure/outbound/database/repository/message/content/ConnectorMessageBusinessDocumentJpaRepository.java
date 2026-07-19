@@ -20,5 +20,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorMessageBusinessDocumentJpaRepository extends
-        JpaRepository<ConnectorMessageBusinessDocumentEntity, Long> {
+    JpaRepository<ConnectorMessageBusinessDocumentEntity, Long> {
 }

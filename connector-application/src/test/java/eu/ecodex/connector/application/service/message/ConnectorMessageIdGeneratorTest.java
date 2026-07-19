@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,12 +31,12 @@ public class ConnectorMessageIdGeneratorTest {
     @Test
     void should_generate_message_identifier_successfully() {
         when(messageProcessingConfigProvider.getConfiguration())
-                .thenReturn(
-                        ConnectorMessageProcessingConfiguration
-                                .builder()
-                                .identifierSuffix("connector.ecodex.eu")
-                                .build()
-                );
+            .thenReturn(
+                ConnectorMessageProcessingConfiguration
+                    .builder()
+                    .identifierSuffix("connector.ecodex.eu")
+                    .build()
+            );
 
         var generatedIdentifier = messageIdGenerator.generateIdentifier();
 

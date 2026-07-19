@@ -20,7 +20,7 @@ public class ConnectorMerlinPropertiesFactory {
     private static final String KS_FILE = "org.apache.wss4j.crypto.merlin.keystore.file";
     private static final String KS_ALIAS = "org.apache.wss4j.crypto.merlin.keystore.alias";
     private static final String KS_KEY_PASSWORD
-            = "org.apache.wss4j.crypto.merlin.keystore.private.password";
+        = "org.apache.wss4j.crypto.merlin.keystore.private.password";
     private static final String TS_TYPE = "org.apache.wss4j.crypto.merlin.truststore.type";
     private static final String TS_PASSWORD = "org.apache.wss4j.crypto.merlin.truststore.password";
     private static final String TS_FILE = "org.apache.wss4j.crypto.merlin.truststore.file";
@@ -37,7 +37,7 @@ public class ConnectorMerlinPropertiesFactory {
      *                               and passwords.
      *
      * @return a {@code Properties} object populated with the necessary signing configurations for
-     *         the Merlin Crypto implementation.
+     *     the Merlin Crypto implementation.
      *
      * @throws IllegalArgumentException if {@code linkEndpointProperties}, its keystore, or its
      *                                  private key is null.
@@ -81,7 +81,7 @@ public class ConnectorMerlinPropertiesFactory {
      *                               configured with valid values for type, path, and password.
      *
      * @return a {@code Properties} object populated with the necessary encryption configurations
-     *         for the Merlin Crypto implementation.
+     *     for the Merlin Crypto implementation.
      *
      * @throws IllegalArgumentException if {@code linkEndpointProperties} or its truststore is
      *                                  null.

@@ -14,7 +14,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Postal address appended to ETSI REM evidences. */
+/**
+ * Postal address appended to ETSI REM evidences.
+ */
 @Getter
 @Setter
 public class PostalAddressProperties {

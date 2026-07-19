@@ -10,15 +10,15 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 
-import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
-import eu.ecodex.connector.application.service.impl.message.ConnectorListPendingMessagesService;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
-import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
-import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
+import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
+import eu.ecodex.connector.application.service.message.ConnectorListPendingMessagesService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -102,15 +102,15 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      *                                            message formats.
      */
     public ConnectorBackendWebServiceController(
-            ConnectorOutboundMessageReceiver messageStagingService,
-            ConnectorListPendingMessageIds listPendingMessageIdsService,
-            ConnectorListPendingMessagesService listPendingMessagesService,
-            ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService,
-            ConnectorUploadAttachments uploadAttachmentsService,
-            ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService,
-            ConnectorAckMessageTransportStep ackMessageTransportStepService,
-            ConnectorBackendClientVerifier backendClientVerifierService,
-            LegacyMessageHelper legacyMessageHelper) {
+        ConnectorOutboundMessageReceiver messageStagingService,
+        ConnectorListPendingMessageIds listPendingMessageIdsService,
+        ConnectorListPendingMessagesService listPendingMessagesService,
+        ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService,
+        ConnectorUploadAttachments uploadAttachmentsService,
+        ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService,
+        ConnectorAckMessageTransportStep ackMessageTransportStepService,
+        ConnectorBackendClientVerifier backendClientVerifierService,
+        LegacyMessageHelper legacyMessageHelper) {
         this.messageStagingService = messageStagingService;
         this.listPendingMessageIdsService = listPendingMessageIdsService;
         this.listPendingMessagesService = listPendingMessagesService;
@@ -131,8 +131,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     @Override
     public EmptyRequestType acknowledgeMessage(DomibusConnectorMessageResponseType responseType) {
         var commandBuilder = UpdateMessageTransportCommand
-                .builder()
-                .remoteMessageIdentifier(responseType.getAssignedMessageId());
+            .builder()
+            .remoteMessageIdentifier(responseType.getAssignedMessageId());
         if (responseType.isResult()) {
             commandBuilder.status(ConnectorMessageTransportStatus.DELIVERED);
             commandBuilder.errors(null);
@@ -142,8 +142,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         }
 
         ackMessageTransportStepService.execute(
-                responseType.getResponseForMessageId(),
-                commandBuilder.build()
+            responseType.getResponseForMessageId(),
+            commandBuilder.build()
         );
 
         return new EmptyRequestType();
@@ -151,12 +151,12 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
     @Override
     public ListPendingMessageIdsResponse listPendingMessageIds(
-            EmptyRequestType listPendingMessageIdsRequest) {
+        EmptyRequestType listPendingMessageIdsRequest) {
         try {
             var backendClientName = getBackendClientName();
             var response = new ListPendingMessageIdsResponse();
             response.getMessageTransportIds().addAll(
-                    listPendingMessageIdsService.execute(backendClientName)
+                listPendingMessageIdsService.execute(backendClientName)
             );
 
             return response;
@@ -176,8 +176,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var messageContext = webServiceContext.getMessageContext();
         var wrappedMessageContext = (WrappedMessageContext) messageContext;
         var interceptor = new ProcessMessageAfterDownload(
-                message,
-                ackMessageTransportStepService
+            message,
+            ackMessageTransportStepService
 
         );
         wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
@@ -201,8 +201,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             var messageContext = webServiceContext.getMessageContext();
             var wrappedMessageContext = (WrappedMessageContext) messageContext;
             var interceptor = new ProcessMessagesAfterDownload(
-                    backendClientName,
-                    changePendingMessagesStatusService
+                backendClientName,
+                changePendingMessagesStatusService
 
             );
             wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
@@ -217,7 +217,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
     @Override
     public DomibsConnectorAcknowledgementType submitMessage(
-            DomibusConnectorMessageType submitMessageRequest) {
+        DomibusConnectorMessageType submitMessageRequest) {
         var answer = new DomibsConnectorAcknowledgementType();
 
         try {
@@ -226,23 +226,23 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             final ConnectorMessage parsedMessage;
             if (MessageHelpers.isEvidenceTriggerRequest(submitMessageRequest)) {
                 parsedMessage = MessageHelpers.toDomain(
-                        submitMessageRequest, null, null, null, backendClientName
+                    submitMessageRequest, null, null, null, backendClientName
                 );
             } else {
                 var attachmentIdentifiers = persistAttachments(
-                        submitMessageRequest.getMessageAttachments()
+                    submitMessageRequest.getMessageAttachments()
                 );
                 var businessContent = submitMessageRequest.getMessageContent();
                 var businessDocumentAttachmentIdentifier = persistBusinessDocument(
-                        businessContent.getDocument()
+                    businessContent.getDocument()
                 );
                 var businessContentAttachmentIdentifier = persistBusinessContent(businessContent);
                 parsedMessage = MessageHelpers.toDomain(
-                        submitMessageRequest,
-                        attachmentIdentifiers,
-                        businessContentAttachmentIdentifier,
-                        businessDocumentAttachmentIdentifier,
-                        backendClientName
+                    submitMessageRequest,
+                    attachmentIdentifiers,
+                    businessContentAttachmentIdentifier,
+                    businessDocumentAttachmentIdentifier,
+                    backendClientName
                 );
             }
 
@@ -260,7 +260,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     }
 
     private List<String> persistAttachments(
-            List<DomibusConnectorMessageAttachmentType> attachments) {
+        List<DomibusConnectorMessageAttachmentType> attachments) {
         if (attachments.isEmpty()) {
             return null;
         }
@@ -302,72 +302,72 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     }
 
     private FileUploadCommand toFileUploadCommand(
-            DomibusConnectorMessageDocumentType pdfBusinessContent) {
+        DomibusConnectorMessageDocumentType pdfBusinessContent) {
         try {
             var tempFile = AttachmentHelpers.dataHandlerToTempFile(
-                    pdfBusinessContent.getDocument());
+                pdfBusinessContent.getDocument());
             var file = tempFile.toFile();
             var contentType = getContentType(tempFile);
 
             return FileUploadCommand
-                    .builder()
-                    .filename(StringUtils.cleanPath(pdfBusinessContent.getDocumentName()))
-                    .contentType(contentType)
-                    .size(file.length())
-                    .tempFileLocation(tempFile)
-                    .description("Registered business document")
-                    .build();
+                .builder()
+                .filename(StringUtils.cleanPath(pdfBusinessContent.getDocumentName()))
+                .contentType(contentType)
+                .size(file.length())
+                .tempFileLocation(tempFile)
+                .description("Registered business document")
+                .build();
         } catch (Exception e) {
             throw new ConnectorInternalServerException(e.getMessage());
         }
     }
 
     private FileUploadCommand toFileUploadCommand(
-            DomibusConnectorMessageContentType businessContent) {
+        DomibusConnectorMessageContentType businessContent) {
         try {
             var tempFile = AttachmentHelpers.sourceToTempFile(businessContent.getXmlContent());
             var filename = tempFile.getFileName().toString();
             var file = tempFile.toFile();
 
             return FileUploadCommand
-                    .builder()
-                    .filename(filename.endsWith("default.tmp") ? "businessContent.xml" : filename)
-                    .contentType(MediaType.APPLICATION_XML_VALUE)
-                    .size(file.length())
-                    .tempFileLocation(tempFile)
-                    .description("Registered business content")
-                    .build();
+                .builder()
+                .filename(filename.endsWith("default.tmp") ? "businessContent.xml" : filename)
+                .contentType(MediaType.APPLICATION_XML_VALUE)
+                .size(file.length())
+                .tempFileLocation(tempFile)
+                .description("Registered business content")
+                .build();
         } catch (Exception e) {
             throw new ConnectorInternalServerException(e.getMessage());
         }
     }
 
     private List<FileUploadCommand> toFileUploadCommands(
-            List<DomibusConnectorMessageAttachmentType> attachments) {
+        List<DomibusConnectorMessageAttachmentType> attachments) {
         return attachments
-                .stream()
-                .map(attachment -> {
-                         try {
-                             var tempFile = AttachmentHelpers.dataHandlerToTempFile(
-                                     attachment.getAttachment());
-                             var file = tempFile.toFile();
-                             return FileUploadCommand
-                                     .builder()
-                                     .filename(attachment.getName())
-                                     .contentType(attachment.getMimeType())
-                                     .size(file.length())
-                                     .tempFileLocation(
-                                             AttachmentHelpers.dataHandlerToTempFile(
-                                                     attachment.getAttachment())
-                                     )
-                                     .description("Registered attachment")
-                                     .build();
-                         } catch (Exception e) {
-                             throw new ConnectorInternalServerException(e.getMessage());
-                         }
+            .stream()
+            .map(attachment -> {
+                     try {
+                         var tempFile = AttachmentHelpers.dataHandlerToTempFile(
+                             attachment.getAttachment());
+                         var file = tempFile.toFile();
+                         return FileUploadCommand
+                             .builder()
+                             .filename(attachment.getName())
+                             .contentType(attachment.getMimeType())
+                             .size(file.length())
+                             .tempFileLocation(
+                                 AttachmentHelpers.dataHandlerToTempFile(
+                                     attachment.getAttachment())
+                             )
+                             .description("Registered attachment")
+                             .build();
+                     } catch (Exception e) {
+                         throw new ConnectorInternalServerException(e.getMessage());
                      }
-                )
-                .toList();
+                 }
+            )
+            .toList();
     }
 
     private String getContentType(Path tempFile) throws IOException {
@@ -377,17 +377,17 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     }
 
     private List<ConnectorMessageError> toDomainErrors(
-            List<DomibusConnectorMessageErrorType> errors) {
+        List<DomibusConnectorMessageErrorType> errors) {
         if (errors == null) {
             return new ArrayList<>();
         }
 
         return errors.stream().map(
-                error -> ConnectorMessageError.builder()
-                                              .label(error.getErrorMessage())
-                                              .details(error.getErrorDetails())
-                                              .source(error.getErrorSource())
-                                              .build()).toList();
+            error -> ConnectorMessageError.builder()
+                                          .label(error.getErrorMessage())
+                                          .details(error.getErrorDetails())
+                                          .source(error.getErrorSource())
+                                          .build()).toList();
     }
 
     private String getBackendClientName() {
@@ -396,10 +396,10 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
         if (userPrincipal == null || !StringUtils.hasLength(certificateDn)) {
             var error = String.format(
-                    "Cannot handle request because userPrincipal is [%s] the certificate DN "
-                            + "is [%s].",
-                    userPrincipal,
-                    certificateDn
+                "Cannot handle request because userPrincipal is [%s] the certificate DN "
+                    + "is [%s].",
+                userPrincipal,
+                certificateDn
             );
             log.error(error);
             throw new IllegalStateException(error);
@@ -409,9 +409,9 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
         if (backendClientName == null) {
             var error = String.format(
-                    "Cannot handle request because the certificate DN [%s] is not registered as "
-                            + "backend client.",
-                    certificateDn
+                "Cannot handle request because the certificate DN [%s] is not registered as "
+                    + "backend client.",
+                certificateDn
             );
             log.error(error);
             throw new IllegalStateException(error);

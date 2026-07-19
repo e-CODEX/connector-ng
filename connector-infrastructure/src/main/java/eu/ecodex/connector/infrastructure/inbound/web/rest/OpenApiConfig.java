@@ -37,24 +37,24 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         var info = new Info()
-                .title("e-CODEX Connector")
-                .version("1.0.0")
-                .description("Open API documentation for e-CODEX Connector.");
+            .title("e-CODEX Connector")
+            .version("1.0.0")
+            .description("Open API documentation for e-CODEX Connector.");
 
         var resolvedSchema = ModelConverters
-                .getInstance()
-                .resolveAsResolvedSchema(new AnnotatedType(ErrorResponse.class));
+            .getInstance()
+            .resolveAsResolvedSchema(new AnnotatedType(ErrorResponse.class));
 
         var components = new Components()
-                .addSchemas("ErrorResponse", resolvedSchema.schema);
+            .addSchemas("ErrorResponse", resolvedSchema.schema);
 
         if (resolvedSchema.referencedSchemas != null) {
             resolvedSchema.referencedSchemas.forEach(components::addSchemas);
         }
 
         return new OpenAPI()
-                .components(components)
-                .info(info);
+            .components(components)
+            .info(info);
     }
 
     @Bean
@@ -70,40 +70,40 @@ public class OpenApiConfig {
     @Bean
     public OpenApiCustomizer injectErrorResponseSchema() {
         return openApi ->
-                openApi
-                        .getPaths()
-                        .values()
-                        .forEach(pathItem ->
-                                         pathItem.readOperations()
-                                                 .forEach(
-                                                 operation ->
-                                                         operation.getResponses().forEach(
-                                                                 (code, apiResponse) -> {
-                                                                     if (code.startsWith("4")
-                                                                         || code.startsWith("5")) {
-                                                                         apiResponse.content(
-                                                                                 getContent()
-                                                                         );
-                                                                     }
-                                                                 })
-                                         )
-                        );
+            openApi
+                .getPaths()
+                .values()
+                .forEach(pathItem ->
+                             pathItem.readOperations()
+                                     .forEach(
+                                         operation ->
+                                             operation.getResponses().forEach(
+                                                 (code, apiResponse) -> {
+                                                     if (code.startsWith("4")
+                                                         || code.startsWith("5")) {
+                                                         apiResponse.content(
+                                                             getContent()
+                                                         );
+                                                     }
+                                                 })
+                                     )
+                );
     }
 
     private void addErrorResponse(ApiResponses responses, String code, String description) {
         responses.addApiResponse(
-                code,
-                new ApiResponse()
-                        .description(description)
-                        .content(getContent())
+            code,
+            new ApiResponse()
+                .description(description)
+                .content(getContent())
         );
     }
 
     private Content getContent() {
         return new Content()
-                .addMediaType(
-                        "application/json",
-                        new MediaType().schema(new Schema<>().$ref(ERROR_RESPONSE_SCHEMA))
-                );
+            .addMediaType(
+                "application/json",
+                new MediaType().schema(new Schema<>().$ref(ERROR_RESPONSE_SCHEMA))
+            );
     }
 }

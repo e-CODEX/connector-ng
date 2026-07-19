@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorListTransportSteps;
+import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
@@ -22,35 +22,35 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorMessageTransportStepAdminController
-        implements ConnectorMessageTransportStepAdminApi {
+    implements ConnectorMessageTransportStepAdminApi {
     private final ConnectorListTransportSteps listTransportStepsService;
 
     public ConnectorMessageTransportStepAdminController(
-            ConnectorListTransportSteps listTransportStepsService) {
+        ConnectorListTransportSteps listTransportStepsService) {
         this.listTransportStepsService = listTransportStepsService;
     }
 
     @Override
     public ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
-            String messageOrRemoteSystemIdentifier,
-            String linkPartnerName,
-            int page,
-            int size) {
+        String messageOrRemoteSystemIdentifier,
+        String linkPartnerName,
+        int page,
+        int size) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
         var transportSteps = listTransportStepsService.execute(
-                pageRequest,
-                messageOrRemoteSystemIdentifier,
-                linkPartnerName
+            pageRequest,
+            messageOrRemoteSystemIdentifier,
+            linkPartnerName
         );
 
         return ConnectorPageResult.of(
-                transportSteps.content()
-                              .stream()
-                              .map(ConnectorMessageTransportStepDto::from)
-                              .toList(),
-                transportSteps.size(),
-                transportSteps.totalElements(),
-                transportSteps.totalPages()
+            transportSteps.content()
+                          .stream()
+                          .map(ConnectorMessageTransportStepDto::from)
+                          .toList(),
+            transportSteps.size(),
+            transportSteps.totalElements(),
+            transportSteps.totalPages()
         );
     }
 }

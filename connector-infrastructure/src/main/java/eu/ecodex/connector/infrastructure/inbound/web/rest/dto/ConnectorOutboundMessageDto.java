@@ -31,9 +31,9 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorOutboundMessageDto(
-        @NotBlank String identifier,
-        @NotBlank String backendMessageIdentifier,
-        @Nullable String referenceToBackendMessageIdentifier,
-        @Nonnull ConnectorMessageDirection direction
+    @NotBlank String identifier,
+    @NotBlank String backendMessageIdentifier,
+    @Nullable String referenceToBackendMessageIdentifier,
+    @Nonnull ConnectorMessageDirection direction
 ) {
 }

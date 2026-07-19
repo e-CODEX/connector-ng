@@ -27,60 +27,60 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Repository
 public interface ConnectorMessageTransportStepJpaRepository extends
-        JpaRepository<ConnectorMessageTransportStepEntity, Long>,
-        JpaSpecificationExecutor<ConnectorMessageTransportStepEntity> {
+    JpaRepository<ConnectorMessageTransportStepEntity, Long>,
+    JpaSpecificationExecutor<ConnectorMessageTransportStepEntity> {
     @EntityGraph(attributePaths = {"statuses"})
     ConnectorMessageTransportStepEntity findByIdentifier(String identifier);
 
     @Query(
-            value = """
-                    SELECT MTS.*
-                    FROM connector_message_transport_steps MTS
-                    WHERE MTS.transported_message_identifier = :identifier
-                    OR MTS.remote_system_identifier = :identifier
-                    """,
-            nativeQuery = true
+        value = """
+            SELECT MTS.*
+            FROM connector_message_transport_steps MTS
+            WHERE MTS.transported_message_identifier = :identifier
+            OR MTS.remote_system_identifier = :identifier
+            """,
+        nativeQuery = true
     )
     ConnectorMessageTransportStepEntity findByTransportedMessageIdentifierOrRemoteSystemIdentifier(
-            @Param("identifier") String identifier);
+        @Param("identifier") String identifier);
 
     @Query(
-            value = """
-                    SELECT DISTINCT MTS.identifier
-                    FROM connector_message_transport_steps MTS
-                    WHERE MTS.status = 'READY_FOR_DOWNLOAD'
-                    AND MTS.link_partner_name = :backendName
-                    """,
-            nativeQuery = true
+        value = """
+            SELECT DISTINCT MTS.identifier
+            FROM connector_message_transport_steps MTS
+            WHERE MTS.status = 'READY_FOR_DOWNLOAD'
+            AND MTS.link_partner_name = :backendName
+            """,
+        nativeQuery = true
     )
     List<String> findAllPendingByBackendName(@Param("backendName") String backendName);
 
     @Query(
-            value = """
-                    SELECT DISTINCT MTS.transported_message_identifier
-                    FROM connector_message_transport_steps MTS
-                    WHERE MTS.status = 'READY_FOR_DOWNLOAD'
-                    AND MTS.link_partner_name = :backendName
-                    """,
-            nativeQuery = true
+        value = """
+            SELECT DISTINCT MTS.transported_message_identifier
+            FROM connector_message_transport_steps MTS
+            WHERE MTS.status = 'READY_FOR_DOWNLOAD'
+            AND MTS.link_partner_name = :backendName
+            """,
+        nativeQuery = true
     )
     List<String> findAllPendingMessageIdsByBackendName(
-            @Param("backendName") String backendName);
+        @Param("backendName") String backendName);
 
     @Modifying
     @Transactional
     @Query(
-            value = """
-                    UPDATE connector_message_transport_steps MTS
-                    SET
-                        MTS.status = :status,
-                        MTS.number_of_attempts = MTS.number_of_attempts + 1,
-                        MTS.updated_at = now()
-                    WHERE MTS.identifier IN :identifiers
-                    """,
-            nativeQuery = true
+        value = """
+            UPDATE connector_message_transport_steps MTS
+            SET
+                MTS.status = :status,
+                MTS.number_of_attempts = MTS.number_of_attempts + 1,
+                MTS.updated_at = now()
+            WHERE MTS.identifier IN :identifiers
+            """,
+        nativeQuery = true
     )
     void updateStatus(
-            @Param("identifiers") List<String> identifiers,
-            @Param("status") String status);
+        @Param("identifiers") List<String> identifiers,
+        @Param("status") String status);
 }

@@ -36,10 +36,10 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageEvidenceDto(
-        @Nullable String uuid,
-        @Nonnull ConnectorEvidenceType type,
-        @Nullable Instant createdAt,
-        @Nullable Instant updatedAt,
-        @Nullable Instant deliveredToLinkPartnerAt
+    @Nullable String uuid,
+    @Nonnull ConnectorEvidenceType type,
+    @Nullable Instant createdAt,
+    @Nullable Instant updatedAt,
+    @Nullable Instant deliveredToLinkPartnerAt
 ) implements Serializable {
 }

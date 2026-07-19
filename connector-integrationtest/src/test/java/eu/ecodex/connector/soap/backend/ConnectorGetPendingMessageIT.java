@@ -16,11 +16,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
-import eu.ecodex.connector.infrastructure.repository.provider.ConnectorS3FileStorageProvider;
+import eu.ecodex.connector.infrastructure.outbound.provider.ConnectorS3FileStorageProvider;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import org.junit.jupiter.api.AfterEach;

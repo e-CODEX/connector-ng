@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingModeServices;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.service.ConnectorProcessingModeServiceController;
 import java.util.List;
 import org.junit.jupiter.api.Test;

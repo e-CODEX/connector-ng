@@ -21,10 +21,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
-import eu.ecodex.connector.domain.exception.ConnectorProcessingModeException;
+import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorListBusinessDomain;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.infrastructure.property.businessdomain.ConnectorBusinessDomainProperties;
@@ -66,20 +66,20 @@ public class ConnectorBusinessDomainInitializerTest {
         initializer.run(applicationArguments);
 
         verify(registerBusinessDomainService).execute(
-                ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN
+            ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN
         );
     }
 
     @Test
     void should_register_default_in_app_business_domain_if_no_one_is_configured_2()
-            throws Exception {
+        throws Exception {
         when(domainProperties.getDefaults()).thenReturn(List.of());
         when(listBusinessDomainService.execute()).thenReturn(List.of());
 
         initializer.run(applicationArguments);
 
         verify(registerBusinessDomainService).execute(
-                ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN
+            ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN
         );
     }
 
@@ -87,10 +87,10 @@ public class ConnectorBusinessDomainInitializerTest {
 
     @Test
     void should_do_nothing_if_no_default_business_domain_is_configured_but_one_is_already_registered()
-            throws Exception {
+        throws Exception {
         when(domainProperties.getDefaults()).thenReturn(null);
         when(listBusinessDomainService.execute())
-                .thenReturn(List.of(mock(ConnectorBusinessDomain.class)));
+            .thenReturn(List.of(mock(ConnectorBusinessDomain.class)));
 
         initializer.run(applicationArguments);
 
@@ -99,10 +99,10 @@ public class ConnectorBusinessDomainInitializerTest {
 
     @Test
     void should_do_nothing_if_no_default_business_domain_is_configured_but_one_is_already_registered_2()
-            throws Exception {
+        throws Exception {
         when(domainProperties.getDefaults()).thenReturn(List.of());
         when(listBusinessDomainService.execute())
-                .thenReturn(List.of(mock(ConnectorBusinessDomain.class)));
+            .thenReturn(List.of(mock(ConnectorBusinessDomain.class)));
 
         initializer.run(applicationArguments);
 
@@ -120,18 +120,18 @@ public class ConnectorBusinessDomainInitializerTest {
         initializer.run(applicationArguments);
 
         verify(registerBusinessDomainService).execute(
-                argThat(domain ->
-                                "domain-a".equals(domain.identifier().messageLaneIdentifier())
-                                        && "Domain A".equals(domain.description())
-                                        && domain.enabled()
-                                        && domain.source() == ConnectorConfigurationSource.IMPLEMENTATION
-                ));
+            argThat(domain ->
+                        "domain-a".equals(domain.identifier().messageLaneIdentifier())
+                            && "Domain A".equals(domain.description())
+                            && domain.enabled()
+                            && domain.source() == ConnectorConfigurationSource.IMPLEMENTATION
+            ));
         verify(registerBusinessDomainService).execute(
-                argThat(domain ->
-                                "domain-b".equals(domain.identifier().messageLaneIdentifier())
-                                        && "Domain B".equals(domain.description())
-                                        && !domain.enabled()
-                ));
+            argThat(domain ->
+                        "domain-b".equals(domain.identifier().messageLaneIdentifier())
+                            && "Domain B".equals(domain.description())
+                            && !domain.enabled()
+            ));
         verify(registerBusinessDomainService, times(2)).execute(any());
         verifyNoInteractions(listBusinessDomainService);
     }
@@ -146,22 +146,22 @@ public class ConnectorBusinessDomainInitializerTest {
         when(domainProperties.getDefaults()).thenReturn(List.of(props1, props2, props3));
 
         doThrow(new RuntimeException("duplicate identifier"))
-                .when(registerBusinessDomainService)
-                .execute(argThat(domain ->
-                                         "domain-b".equals(domain.identifier()
-                                                                 .messageLaneIdentifier())
-                ));
+            .when(registerBusinessDomainService)
+            .execute(argThat(domain ->
+                                 "domain-b".equals(domain.identifier()
+                                                         .messageLaneIdentifier())
+            ));
 
         assertThatNoException().isThrownBy(() -> initializer.run(applicationArguments));
 
         verify(registerBusinessDomainService).execute(
-                argThat(domain ->
-                                "domain-a".equals(domain.identifier().messageLaneIdentifier())
-                ));
+            argThat(domain ->
+                        "domain-a".equals(domain.identifier().messageLaneIdentifier())
+            ));
         verify(registerBusinessDomainService).execute(
-                argThat(domain ->
-                                "domain-c".equals(domain.identifier().messageLaneIdentifier())
-                ));
+            argThat(domain ->
+                        "domain-c".equals(domain.identifier().messageLaneIdentifier())
+            ));
         verify(registerBusinessDomainService, times(3)).execute(any());
     }
 
@@ -169,33 +169,33 @@ public class ConnectorBusinessDomainInitializerTest {
 
     @Test
     void should_register_each_configured_default_business_domains_with_its_pmode_successfully(@TempDir Path tempDir)
-            throws Exception {
+        throws Exception {
         var pmodeFile = tempDir.resolve("pmode.xml");
         Files.writeString(pmodeFile, "<pmode>config</pmode>");
 
         var props = defaultDomainProperties(
-                "domain-a", "Domain A", true, "file:" + pmodeFile
+            "domain-a", "Domain A", true, "file:" + pmodeFile
         );
         when(domainProperties.getDefaults()).thenReturn(List.of(props));
 
         initializer.run(applicationArguments);
 
         verify(registerProcessingModeService).execute(
-                argThat(id -> "domain-a".equals(id.messageLaneIdentifier())),
-                argThat(pmode ->
-                                "<pmode>config</pmode>".equals(pmode.content())
-                                        && ("file:" + pmodeFile).equals(pmode.filename())
-                                        && pmode.description().contains("domain-a")
-                )
+            argThat(id -> "domain-a".equals(id.messageLaneIdentifier())),
+            argThat(pmode ->
+                        "<pmode>config</pmode>".equals(pmode.content())
+                            && ("file:" + pmodeFile).equals(pmode.filename())
+                            && pmode.description().contains("domain-a")
+            )
         );
     }
 
     @Test
     void should_register_each_configured_default_business_domains_log_warning_for_invalid_pmode_successfully(
-            @TempDir Path tempDir) {
+        @TempDir Path tempDir) {
         var missingFile = tempDir.resolve("does-not-exist.xml");
         var props = defaultDomainProperties(
-                "domain-a", "Domain A", true, "file:" + missingFile
+            "domain-a", "Domain A", true, "file:" + missingFile
         );
         when(domainProperties.getDefaults()).thenReturn(List.of(props));
 
@@ -211,18 +211,18 @@ public class ConnectorBusinessDomainInitializerTest {
 
     @Test
     void should_register_each_configured_default_business_domains_log_warning_if_error_occurs_during_pmode_registration_successfully(
-            @TempDir Path tempDir)
-            throws Exception {
+        @TempDir Path tempDir)
+        throws Exception {
         var pmodeFile = tempDir.resolve("pmode.xml");
         Files.writeString(pmodeFile, "<pmode>config</pmode>");
 
         var props = defaultDomainProperties(
-                "domain-a", "Domain A", true, "file:" + pmodeFile
+            "domain-a", "Domain A", true, "file:" + pmodeFile
         );
         when(domainProperties.getDefaults()).thenReturn(List.of(props));
 
         doThrow(new ConnectorProcessingModeException("Error parsing processing mode xml file"))
-                .when(registerProcessingModeService).execute(any(), any());
+            .when(registerProcessingModeService).execute(any(), any());
 
         assertThatNoException().isThrownBy(() -> initializer.run(applicationArguments));
 
@@ -231,7 +231,7 @@ public class ConnectorBusinessDomainInitializerTest {
     }
 
     private DefaultBusinessDomainProperties defaultDomainProperties(
-            String identifier, String description, boolean enabled, String pmodeFile) {
+        String identifier, String description, boolean enabled, String pmodeFile) {
         var props = mock(DefaultBusinessDomainProperties.class);
         when(props.getIdentifier()).thenReturn(identifier);
         when(props.getDescription()).thenReturn(description);

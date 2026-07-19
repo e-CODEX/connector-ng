@@ -18,9 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageSecurityStep;
-import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -59,7 +58,7 @@ public class ConnectorOutboundMessageSecurityStepTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class, () -> outboundMessageSecurityStep.execute(null)
+            NullPointerException.class, () -> outboundMessageSecurityStep.execute(null)
         );
     }
 }

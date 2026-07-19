@@ -16,9 +16,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageGatewayNameStep;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +41,9 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
         var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessageWithoutGatewayName();
 
         when(messageRepository.updateGatewayName(any(), any()))
-                .thenReturn(outboundMessage.toBuilder().gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME).build());
+            .thenReturn(outboundMessage.toBuilder()
+                                       .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
+                                       .build());
 
         var outputMessage = outboundMessageGatewayNameValidationStep.execute(outboundMessage);
 
@@ -66,8 +67,8 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> outboundMessageGatewayNameValidationStep.execute(null)
+            NullPointerException.class,
+            () -> outboundMessageGatewayNameValidationStep.execute(null)
         );
     }
 }

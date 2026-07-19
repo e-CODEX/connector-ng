@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
         var processingMode = ProcessingModeTestFixtures.createWithBusinessDomain();
 
         var savedProcessingMode = repository.save(
-                processingMode, processingMode.businessDomain().identifier()
+            processingMode, processingMode.businessDomain().identifier()
         );
 
         assertThat(savedProcessingMode).isNotNull();
@@ -42,26 +42,26 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
     @Test
     void should_throw_null_pointer_exception_when_saving_pmode_with_a_null_pmode_and_business_domain_identifier() {
         assertThrows(
-                NullPointerException.class, () -> repository.save(null, null)
+            NullPointerException.class, () -> repository.save(null, null)
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_saving_pmode_with_a_null_pmode() {
         assertThrows(
-                NullPointerException.class, () -> repository.save(
-                        null,
-                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-                )
+            NullPointerException.class, () -> repository.save(
+                null,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_saving_pmode_with_a_null_business_domain_identifier() {
         assertThrows(
-                NullPointerException.class, () -> repository.save(
-                        ProcessingModeTestFixtures.createWithBusinessDomain(), null
-                )
+            NullPointerException.class, () -> repository.save(
+                ProcessingModeTestFixtures.createWithBusinessDomain(), null
+            )
         );
     }
 
@@ -71,7 +71,7 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
     @Sql("classpath:sql/processing-mode.sql")
     void should_find_pmode_by_uuid_successfully_from_database() {
         var processingMode = repository.findByUuid(
-                "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf"
+            "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf"
         );
 
         assertThat(processingMode).isNotNull();
@@ -87,7 +87,7 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
     @Test
     void should_throw_null_pointer_exception_when_searching_pmode_with_a_null_uuid() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByUuid(null)
+            NullPointerException.class, () -> repository.findByUuid(null)
         );
     }
 
@@ -97,15 +97,15 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
     @Sql("classpath:sql/processing-mode.sql")
     void should_find_pmode_by_business_domain_identifier_successfully_from_database() {
         var processingMode = repository.findByBusinessDomainIdentifier(
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(processingMode).isNotNull();
         assertThat(processingMode.businessDomain().identifier())
-                .isEqualTo(
-                        BusinessDomainIdentifierTestFixtures
-                                .createDefaultBusinessDomainIdentifier()
-                );
+            .isEqualTo(
+                BusinessDomainIdentifierTestFixtures
+                    .createDefaultBusinessDomainIdentifier()
+            );
     }
 
     @Test
@@ -113,7 +113,7 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
     @Sql("classpath:sql/processing-mode.sql")
     void should_return_null_when_searching_pmode_by_unknown_business_domain_identifier_from_database() {
         var processingMode = repository.findByBusinessDomainIdentifier(
-                ConnectorBusinessDomainIdentifier.builder().build()
+            ConnectorBusinessDomainIdentifier.builder().build()
         );
 
         assertThat(processingMode).isNull();
@@ -122,8 +122,8 @@ public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTes
     @Test
     void should_throw_null_pointer_exception_when_searching_pmode_with_a_null_business_domain_identifier() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.findByBusinessDomainIdentifier(null)
+            NullPointerException.class,
+            () -> this.repository.findByBusinessDomainIdentifier(null)
         );
     }
 

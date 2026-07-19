@@ -24,13 +24,13 @@ public class AttachmentSpecification {
     private static final String TYPE_FIELD = "type";
 
     public static Specification<ConnectorMessageAttachmentEntity> hasMessageIdentifierAndTypeIn(
-            String messageUuid,
-            List<ConnectorAttachmentType> types) {
+        String messageUuid,
+        List<ConnectorAttachmentType> types) {
         return Specification.where(withMessageUuid(messageUuid)).and(withTypes(types));
     }
 
     private static Specification<ConnectorMessageAttachmentEntity> withMessageUuid(
-            String messageUuid) {
+        String messageUuid) {
         return ((root, query, cb) -> {
             if (messageUuid == null) {
                 return null;
@@ -41,7 +41,7 @@ public class AttachmentSpecification {
     }
 
     private static Specification<ConnectorMessageAttachmentEntity> withTypes(
-            List<ConnectorAttachmentType> types) {
+        List<ConnectorAttachmentType> types) {
         return ((root, query, cb) -> {
             if (types == null || types.isEmpty()) {
                 return null;

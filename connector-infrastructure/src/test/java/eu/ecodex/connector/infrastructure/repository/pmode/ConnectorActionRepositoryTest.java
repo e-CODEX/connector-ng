@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;

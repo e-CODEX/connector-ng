@@ -14,8 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.QueuesStatsTestFixtures;
-import eu.ecodex.connector.application.service.impl.stats.ConnectorRetrieveQueuesStatsService;
-import eu.ecodex.connector.domain.spi.ConnectorQueueStatsProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorQueueStatsProvider;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,8 @@ public class ConnectorRetrieveQueuesStatsServiceTest {
         var statsEntry = stats.getFirst();
         assertThat(statsEntry.queueName())
             .isEqualTo("connector.queues.outbound-message-staging-queue");
-        assertThat(statsEntry.queueDescription()).isEqualTo("Staging area for outbound messages awaiting processing");
+        assertThat(statsEntry.queueDescription()).isEqualTo(
+            "Staging area for outbound messages awaiting processing");
         assertThat(statsEntry.pendingCount()).isEqualTo(0);
         assertThat(statsEntry.dlqCount()).isEqualTo(1);
     }

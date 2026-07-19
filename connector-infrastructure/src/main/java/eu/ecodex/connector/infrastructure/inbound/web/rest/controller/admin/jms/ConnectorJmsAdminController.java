@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.jms;
 
-import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveQueuesStats;
+import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;

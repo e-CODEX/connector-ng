@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain;
 
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorListBusinessDomain;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
@@ -30,15 +30,15 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
     private final ConnectorListBusinessDomain listBusinessDomain;
 
     public ConnectorBusinessDomainAdminController(
-            ConnectorRegisterBusinessDomain registerBusinessDomain,
-            ConnectorListBusinessDomain listBusinessDomain) {
+        ConnectorRegisterBusinessDomain registerBusinessDomain,
+        ConnectorListBusinessDomain listBusinessDomain) {
         this.registerBusinessDomain = registerBusinessDomain;
         this.listBusinessDomain = listBusinessDomain;
     }
 
     @Override
     public ConnectorBusinessDomainDto create(
-            @Valid @RequestBody ConnectorBusinessDomainCreationRequest request) {
+        @Valid @RequestBody ConnectorBusinessDomainCreationRequest request) {
         var created = this.registerBusinessDomain.execute(toDomain(request));
 
         return ConnectorBusinessDomainDto.from(created);
@@ -54,10 +54,10 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
     private ConnectorBusinessDomain toDomain(ConnectorBusinessDomainCreationRequest request) {
         return ConnectorBusinessDomain.builder()
                                       .identifier(
-                                              ConnectorBusinessDomainIdentifier
-                                                      .builder()
-                                                      .messageLaneIdentifier(request.identifier())
-                                                      .build()
+                                          ConnectorBusinessDomainIdentifier
+                                              .builder()
+                                              .messageLaneIdentifier(request.identifier())
+                                              .build()
                                       )
                                       .description(request.description())
                                       .enabled(request.enabled())

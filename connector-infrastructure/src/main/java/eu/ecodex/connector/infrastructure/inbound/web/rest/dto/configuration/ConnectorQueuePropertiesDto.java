@@ -17,13 +17,13 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorQueuePropertiesDto(
-        String outboundMessageStagingQueue,
-        String outboundEvidenceTriggerQueue,
-        String outboundMessageProcessingQueue,
-        String inboundMessageProcessingQueue,
-        String inboundEvidenceTriggerQueue,
-        String backendDeliveryQueue,
-        String gatewaySubmissionQueue,
-        String gatewaySubmissionReplyQueue
+    String outboundMessageStagingQueue,
+    String outboundEvidenceTriggerQueue,
+    String outboundMessageProcessingQueue,
+    String inboundMessageProcessingQueue,
+    String inboundEvidenceTriggerQueue,
+    String backendDeliveryQueue,
+    String gatewaySubmissionQueue,
+    String gatewaySubmissionReplyQueue
 ) {
 }

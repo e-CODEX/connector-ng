@@ -35,17 +35,17 @@ public class TransportStepSpecification {
      *                                        name.
      *
      * @return a {@link Specification} representing the combined filter criteria. Returns null if
-     *         all the input parameters are null or empty.
+     *     all the input parameters are null or empty.
      */
     public static Specification<ConnectorMessageTransportStepEntity> withFilters(
-            String messageOrRemoteSystemIdentifier,
-            String linkPartnerName) {
+        String messageOrRemoteSystemIdentifier,
+        String linkPartnerName) {
         return Specification
-                .where(withTransportedMessageIdentifier(messageOrRemoteSystemIdentifier))
-                .or(
-                        withRemoteSystemIdentifier(messageOrRemoteSystemIdentifier)
-                )
-                .and(withLinkPartnerName(linkPartnerName));
+            .where(withTransportedMessageIdentifier(messageOrRemoteSystemIdentifier))
+            .or(
+                withRemoteSystemIdentifier(messageOrRemoteSystemIdentifier)
+            )
+            .and(withLinkPartnerName(linkPartnerName));
     }
 
     private static Specification<ConnectorMessageTransportStepEntity>
@@ -62,7 +62,7 @@ public class TransportStepSpecification {
     }
 
     private static Specification<ConnectorMessageTransportStepEntity> withRemoteSystemIdentifier(
-            String identifier) {
+        String identifier) {
         return ((root, query, cb) -> {
             if (!StringUtils.hasText(identifier)) {
                 return null;
@@ -75,7 +75,7 @@ public class TransportStepSpecification {
     }
 
     private static Specification<ConnectorMessageTransportStepEntity> withLinkPartnerName(
-            String linkPartnerName) {
+        String linkPartnerName) {
         return ((root, query, cb) -> {
             if (!StringUtils.hasText(linkPartnerName)) {
                 return null;

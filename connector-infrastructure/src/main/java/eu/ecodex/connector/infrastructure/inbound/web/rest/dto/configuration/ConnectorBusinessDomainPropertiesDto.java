@@ -19,6 +19,6 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDomainPropertiesDto(
-        List<DefaultBusinessDomainProperties> defaults
+    List<DefaultBusinessDomainProperties> defaults
 ) {
 }

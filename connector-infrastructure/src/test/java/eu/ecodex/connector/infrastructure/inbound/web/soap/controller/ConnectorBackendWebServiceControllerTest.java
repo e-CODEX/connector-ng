@@ -22,14 +22,14 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.ConnectorListPendingMessagesService;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorListPendingMessageIds;
-import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveMessageByTransportId;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
-import eu.ecodex.connector.domain.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.service.message.ConnectorListPendingMessagesService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
@@ -90,15 +90,15 @@ public class ConnectorBackendWebServiceControllerTest {
     @BeforeEach
     void setUp() {
         backendWebService = new ConnectorBackendWebServiceController(
-                messageStagingService,
-                listPendingMessageIdsService,
-                listPendingMessagesService,
-                retrieveMessageByTransportIdService,
-                uploadAttachmentsService,
-                changePendingMessagesStatusService,
-                acknowledgeMessageTransportStepService,
-                backendClientVerifierService,
-                legacyMessageHelper
+            messageStagingService,
+            listPendingMessageIdsService,
+            listPendingMessagesService,
+            retrieveMessageByTransportIdService,
+            uploadAttachmentsService,
+            changePendingMessagesStatusService,
+            acknowledgeMessageTransportStepService,
+            backendClientVerifierService,
+            legacyMessageHelper
         );
         // Inject @Resource field manually via reflection
         ReflectionTestUtils.setField(backendWebService, "webServiceContext", webServiceContext);
@@ -110,14 +110,14 @@ public class ConnectorBackendWebServiceControllerTest {
     void should_return_successful_ack_when_submitting_message_from_backend_to_the_connector() {
         when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
         when(backendClientVerifierService.getBackendClient(any()))
-                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(uploadAttachmentsService.execute(any()))
-                .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
+            .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
         // TODO set appropriate response
         when(messageStagingService.execute(any()))
-                .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
+            .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
         when(backendClientVerifierService.getBackendClient(any()))
-                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
 
         var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
         var ack = backendWebService.submitMessage(payload);
@@ -125,7 +125,7 @@ public class ConnectorBackendWebServiceControllerTest {
         assertThat(ack).isNotNull();
         assertThat(ack.getMessageId()).isNotNull();
         assertThat(ack.getMessageId()).isEqualTo(
-                "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
+            "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
         assertThat(ack.getMessageId()).isNotEmpty();
         assertThat(ack.getResultMessage()).isNullOrEmpty();
         assertThat(ack.isResult()).isTrue();
@@ -135,12 +135,12 @@ public class ConnectorBackendWebServiceControllerTest {
     void should_return_failure_ack_when_submitting_message_from_backend_to_the_connector_if_an_exception_occurs() {
         when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
         when(backendClientVerifierService.getBackendClient(any()))
-                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(uploadAttachmentsService.execute(any()))
-                .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
+            .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
         when(messageStagingService.execute(any()))
-                .thenThrow(new RuntimeException("Error"));
+            .thenThrow(new RuntimeException("Error"));
 
         var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();
         var ack = backendWebService.submitMessage(payload);
@@ -157,7 +157,7 @@ public class ConnectorBackendWebServiceControllerTest {
     void should_list_pending_messages_identifiers_successfully() {
         when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
         when(backendClientVerifierService.getBackendClient(any()))
-                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(listPendingMessageIdsService.execute(any())).thenReturn(List.of(TRANSPORT_ID));
 
         var response = backendWebService.listPendingMessageIds(new EmptyRequestType());
@@ -166,7 +166,7 @@ public class ConnectorBackendWebServiceControllerTest {
         assertThat(response.getMessageTransportIds()).isNotNull();
         assertThat(response.getMessageTransportIds().size()).isEqualTo(1);
         assertThat(response.getMessageTransportIds().getFirst())
-                .isEqualTo(TRANSPORT_ID);
+            .isEqualTo(TRANSPORT_ID);
     }
 
     // get message by transport id
@@ -201,10 +201,10 @@ public class ConnectorBackendWebServiceControllerTest {
         request.setMessageTransportId("UNKNOWN-ID");
 
         when(retrieveMessageByTransportIdService.execute("UNKNOWN-ID"))
-                .thenThrow(new NotFoundException("not found"));
+            .thenThrow(new NotFoundException("not found"));
 
         assertThatThrownBy(() -> backendWebService.getMessageById(request))
-                .isInstanceOf(NotFoundException.class);
+            .isInstanceOf(NotFoundException.class);
 
         verifyNoInteractions(webServiceContext, legacyMessageHelper);
     }
@@ -217,9 +217,9 @@ public class ConnectorBackendWebServiceControllerTest {
         var expectedResult = new DomibusConnectorMessageType();
 
         when(listPendingMessagesService.execute("backend_alice")).thenReturn(List.of(
-                connectorMessage));
+            connectorMessage));
         when(backendClientVerifierService.getBackendClient(any()))
-                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
         when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
         when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
         when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
@@ -262,7 +262,7 @@ public class ConnectorBackendWebServiceControllerTest {
         ackResponse.setResult(result);
         ackResponse.setAssignedMessageId("12345678-1234-1234-1234-123456789012");
         ackResponse.setResponseForMessageId(
-                "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+            "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
         ackResponse.setResultMessage("Message acknowledged successfully");
         return ackResponse;
     }

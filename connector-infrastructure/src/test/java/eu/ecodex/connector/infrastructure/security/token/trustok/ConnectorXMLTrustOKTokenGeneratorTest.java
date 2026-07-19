@@ -14,11 +14,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.infrastructure.outbound.security.token.trustok.xml.ConnectorXMLTrustOKTokenGenerator;
+import eu.ecodex.connector.infrastructure.outbound.security.token.validation.ConnectorTokenValidationGenerator;
+import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenValidationFactory;
 import eu.ecodex.connector.infrastructure.security.SecurityUtil;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
-import eu.ecodex.connector.infrastructure.security.token.trustok.xml.ConnectorXMLTrustOKTokenGenerator;
-import eu.ecodex.connector.infrastructure.security.token.validation.ConnectorTokenValidationGenerator;
-import eu.ecodex.connector.infrastructure.security.token.validation.technical.ConnectorTokenValidationFactory;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import java.io.IOException;
@@ -41,10 +41,10 @@ public class ConnectorXMLTrustOKTokenGeneratorTest extends BaseTokenTest {
         var issuer = validationFactory.getTokenIssuer(message);
 
         var token = validationGenerator.createToken(
-                message,
-                businessDocument,
-                null,
-                issuer
+            message,
+            businessDocument,
+            null,
+            issuer
         );
 
         var xmlToken = trustOKTokenGenerator.generate(token);

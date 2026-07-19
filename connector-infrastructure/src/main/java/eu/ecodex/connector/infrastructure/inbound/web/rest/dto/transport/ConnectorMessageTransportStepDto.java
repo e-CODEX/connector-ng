@@ -45,16 +45,16 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageTransportStepDto(
-        String identifier,
-        String remoteSystemIdentifier,
-        String transportedMessageIdentifier,
-        int numberOfAttempts,
-        String linkPartnerName,
-        String status,
-        Set<ConnectorMessageTransportStepStatusDto> statuses,
-        String messageType,
-        Instant createdAt,
-        Instant updatedAt
+    String identifier,
+    String remoteSystemIdentifier,
+    String transportedMessageIdentifier,
+    int numberOfAttempts,
+    String linkPartnerName,
+    String status,
+    Set<ConnectorMessageTransportStepStatusDto> statuses,
+    String messageType,
+    Instant createdAt,
+    Instant updatedAt
 ) {
     /**
      * Converts a {@link ConnectorMessageTransportStep} object into a
@@ -63,22 +63,22 @@ public record ConnectorMessageTransportStepDto(
      * @param step The {@link ConnectorMessageTransportStep} instance to be converted.
      *
      * @return A {@link ConnectorMessageTransportStepDto} instance containing the data from the
-     *         given {@link ConnectorMessageTransportStep}.
+     *     given {@link ConnectorMessageTransportStep}.
      */
     public static ConnectorMessageTransportStepDto from(ConnectorMessageTransportStep step) {
         return ConnectorMessageTransportStepDto
-                .builder()
-                .identifier(step.identifier())
-                .remoteSystemIdentifier(step.remoteSystemIdentifier())
-                .transportedMessageIdentifier(step.transportedMessageIdentifier())
-                .numberOfAttempts(step.numberOfAttempts())
-                .linkPartnerName(step.linkPartnerName())
-                .status(step.status().name())
-                .statuses(toStatuses(step.statuses()))
-                .messageType(getTransportedMessageType(step.transportedMessage()))
-                .createdAt(step.createdAt())
-                .updatedAt(step.updatedAt())
-                .build();
+            .builder()
+            .identifier(step.identifier())
+            .remoteSystemIdentifier(step.remoteSystemIdentifier())
+            .transportedMessageIdentifier(step.transportedMessageIdentifier())
+            .numberOfAttempts(step.numberOfAttempts())
+            .linkPartnerName(step.linkPartnerName())
+            .status(step.status().name())
+            .statuses(toStatuses(step.statuses()))
+            .messageType(getTransportedMessageType(step.transportedMessage()))
+            .createdAt(step.createdAt())
+            .updatedAt(step.updatedAt())
+            .build();
     }
 
     private static String getTransportedMessageType(ConnectorMessage transportedMessage) {
@@ -86,14 +86,14 @@ public record ConnectorMessageTransportStepDto(
     }
 
     private static Set<ConnectorMessageTransportStepStatusDto> toStatuses(
-            Set<ConnectorMessageTransportStepStatus> statuses) {
+        Set<ConnectorMessageTransportStepStatus> statuses) {
         return statuses.stream()
                        .map(status ->
-                                    ConnectorMessageTransportStepStatusDto
-                                            .builder()
-                                            .status(status.status().name())
-                                            .createdAt(status.createdAt())
-                                            .build())
+                                ConnectorMessageTransportStepStatusDto
+                                    .builder()
+                                    .status(status.status().name())
+                                    .createdAt(status.createdAt())
+                                    .build())
                        .collect(Collectors.toSet());
     }
 }

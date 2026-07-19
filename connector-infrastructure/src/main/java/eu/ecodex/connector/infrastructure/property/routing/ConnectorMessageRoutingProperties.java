@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "connector.routing")
 public class ConnectorMessageRoutingProperties implements
-        ConnectorMessageRoutingConfigurationProvider {
+    ConnectorMessageRoutingConfigurationProvider {
     private boolean enabled;
     private String defaultBackendName;
     private List<BackendRuleProperties> backendRules = new ArrayList<>();
@@ -45,28 +45,31 @@ public class ConnectorMessageRoutingProperties implements
     public ConnectorMessageRoutingConfiguration getConfiguration() {
         // Accumulate all rules under the single default domain before building
         var partnerRoutingRules = new LinkedHashMap<ConnectorLinkPartnerName,
-                ConnectorMessageRoutingRule>();
+            ConnectorMessageRoutingRule>();
 
         for (var rule : backendRules) {
             var partnerName = new ConnectorLinkPartnerName(rule.getLinkName());
             var routingRule = ConnectorMessageRoutingRule.builder()
-                    .linkName(rule.getLinkName())
-                    .matchClause(new ConnectorRoutingRulePattern(rule.getMatchClause()))
-                    .build();
+                                                         .linkName(rule.getLinkName())
+                                                         .matchClause(
+                                                             new ConnectorRoutingRulePattern(
+                                                             rule.getMatchClause()))
+                                                         .build();
             partnerRoutingRules.put(partnerName, routingRule);
         }
 
         var backendRouting = new ConnectorMessageRoutingBusinessDomainItem(
-                defaultBackendName,
-                Collections.unmodifiableMap(partnerRoutingRules));
+            defaultBackendName,
+            Collections.unmodifiableMap(partnerRoutingRules)
+        );
 
         var domainProperties = new ConnectorMessageRoutingBusinessDomainProperties(
-                backendRouting,
-                null
+            backendRouting,
+            null
         );
 
         var businessDomainRouting = Map.of(
-                ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID, domainProperties);
+            ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID, domainProperties);
 
         return new ConnectorMessageRoutingConfiguration(enabled, businessDomainRouting);
     }

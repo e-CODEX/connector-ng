@@ -32,8 +32,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents the Connector Message entity used to manage and store information about
- * connector {@link ConnectorMessageAS4Properties} within the system.
+ * Represents the Connector Message entity used to manage and store information about connector
+ * {@link ConnectorMessageAS4Properties} within the system.
  */
 @Entity
 @Getter

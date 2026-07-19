@@ -16,10 +16,10 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.application.service.impl.attachement.ConnectorListAttachmentsService;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.application.service.attachement.ConnectorListAttachmentsService;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,7 +39,7 @@ public class ConnectorListAttachmentsServiceTest {
     @Test
     void should_retrieve_attachments_successfully() {
         var pageResult = ConnectorPageResult.of(
-                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
+            List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
         );
         when(attachmentRepository.findAll(any())).thenReturn(pageResult);
 
@@ -56,30 +56,30 @@ public class ConnectorListAttachmentsServiceTest {
     @Test
     void should_throw_illegal_argument_exception_when_retrieving_attachments_if_page_request_page_is_negative() {
         assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    var pageRequest = ConnectorPageRequest.builder().page(-1).size(20).build();
-                    connectorListAttachmentsService.execute(pageRequest);
-                }
+            IllegalArgumentException.class,
+            () -> {
+                var pageRequest = ConnectorPageRequest.builder().page(-1).size(20).build();
+                connectorListAttachmentsService.execute(pageRequest);
+            }
         );
     }
 
     @Test
     void should_throw_illegal_argument_exception_when_retrieving_attachments_if_page_request_size_is_over_100() {
         assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    var pageRequest = ConnectorPageRequest.builder().page(0).size(101).build();
-                    connectorListAttachmentsService.execute(pageRequest);
-                }
+            IllegalArgumentException.class,
+            () -> {
+                var pageRequest = ConnectorPageRequest.builder().page(0).size(101).build();
+                connectorListAttachmentsService.execute(pageRequest);
+            }
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_retrieving_attachments_if_page_request_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> connectorListAttachmentsService.execute(null)
+            NullPointerException.class,
+            () -> connectorListAttachmentsService.execute(null)
         );
     }
 }

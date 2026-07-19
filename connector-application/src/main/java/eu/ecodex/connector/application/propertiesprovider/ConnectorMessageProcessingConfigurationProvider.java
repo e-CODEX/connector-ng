@@ -31,7 +31,7 @@ public interface ConnectorMessageProcessingConfigurationProvider {
      * message ID generation, and message verification modes, among others.
      *
      * @return an instance of {@link ConnectorMessageProcessingConfiguration} representing the
-     *         current message processing configuration
+     *     current message processing configuration
      */
     ConnectorMessageProcessingConfiguration getConfiguration();
 }

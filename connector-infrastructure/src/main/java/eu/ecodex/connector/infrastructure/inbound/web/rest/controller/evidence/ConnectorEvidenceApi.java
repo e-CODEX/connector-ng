@@ -32,7 +32,7 @@ public interface ConnectorEvidenceApi {
     @GetMapping(value = "/{uuid}/download")
     @Operation(summary = "Download a message evidence by its uuid")
     @ApiResponses(
-            @ApiResponse(responseCode = "404", description = "Not Found")
+        @ApiResponse(responseCode = "404", description = "Not Found")
     )
     ResponseEntity<byte[]> download(@PathVariable String uuid) throws IOException;
 }

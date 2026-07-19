@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.service;
 
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingModeServices;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;

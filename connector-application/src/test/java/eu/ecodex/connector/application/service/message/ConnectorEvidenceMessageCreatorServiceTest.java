@@ -16,9 +16,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.ConnectorEvidenceMessageCreatorService;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,15 +38,15 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
 
     private static Stream<ConnectorMessageEvidence> provideEvidence() {
         return Stream.of(
-                EvidenceTestFixtures.createSubmissionAcceptanceEvidence(),
-                EvidenceTestFixtures.createSubmissionRejectionEvidence(),
-                EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence(),
-                EvidenceTestFixtures.createRelayREMMDRejectionEvidence(),
-                EvidenceTestFixtures.createRelayREMMDFailureEvidence(),
-                EvidenceTestFixtures.createDeliveryEvidence(),
-                EvidenceTestFixtures.createNonDeliveryEvidence(),
-                EvidenceTestFixtures.createRetrievalEvidence(),
-                EvidenceTestFixtures.createNonRetrievalEvidence()
+            EvidenceTestFixtures.createSubmissionAcceptanceEvidence(),
+            EvidenceTestFixtures.createSubmissionRejectionEvidence(),
+            EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence(),
+            EvidenceTestFixtures.createRelayREMMDRejectionEvidence(),
+            EvidenceTestFixtures.createRelayREMMDFailureEvidence(),
+            EvidenceTestFixtures.createDeliveryEvidence(),
+            EvidenceTestFixtures.createNonDeliveryEvidence(),
+            EvidenceTestFixtures.createRetrievalEvidence(),
+            EvidenceTestFixtures.createNonRetrievalEvidence()
         );
     }
 
@@ -57,9 +54,9 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
     @MethodSource("provideEvidence")
     void should_create_evidence_message_successfully(ConnectorMessageEvidence evidence) {
         when(messageIdGenerator.generateIdentifier())
-               .thenReturn("d040fe80-55a6-4d51-85de-9e16280eb503@connector.ecodex.eu");
+            .thenReturn("d040fe80-55a6-4d51-85de-9e16280eb503@connector.ecodex.eu");
         lenient().when(messageEbmsIdGenerator.generateIdentifier())
-                .thenReturn("62705399-0793-485e-bc48-9f0a49bd9ba3@connector.ecodex.eu");
+                 .thenReturn("62705399-0793-485e-bc48-9f0a49bd9ba3@connector.ecodex.eu");
         var message = MessageTestFixtures.createOutboundBusinessMessage();
         var as4Properties = message.as4Properties();
         var action = ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type());
@@ -72,28 +69,28 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
         assertThat(evidenceMessage.evidences()).isNullOrEmpty();
         assertThat(evidenceMessage.identifier()).isNotEqualTo(message.identifier());
         assertThat(evidenceMessage.as4Properties().action().name()).isEqualTo(
-                ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type()).name());
+            ConnectorEvidenceMessageCreatorService.getEvidenceAction(evidence.type()).name());
         assertThat(evidenceMessage.as4Properties().service()).isEqualTo(
-                message.as4Properties().service());
+            message.as4Properties().service());
         assertThat(evidenceMessage.referenceToBackendMessageIdentifier()).isEqualTo(
-                message.backendMessageIdentifier());
+            message.backendMessageIdentifier());
         assertThat(evidenceMessage.as4Properties().referenceToIdentifier()).isIn(
-                message.as4Properties().ebmsMessageIdentifier(), message.backendMessageIdentifier());
+            message.as4Properties().ebmsMessageIdentifier(), message.backendMessageIdentifier());
         assertThat(evidenceMessage.as4Properties().ebmsMessageIdentifier()).isEqualTo(
-                message.as4Properties().ebmsMessageIdentifier());
+            message.as4Properties().ebmsMessageIdentifier());
         assertThat(evidenceMessage.as4Properties().conversationIdentifier()).isEqualTo(
-                message.as4Properties().conversationIdentifier());
+            message.as4Properties().conversationIdentifier());
         assertThat(evidenceMessage.as4Properties().fromParty()).isEqualTo(
-                message.as4Properties().fromParty());
+            message.as4Properties().fromParty());
         assertThat(evidenceMessage.as4Properties().toParty()).isEqualTo(
-                message.as4Properties().toParty());
+            message.as4Properties().toParty());
         assertThat(evidenceMessage.as4Properties().finalRecipient()).isEqualTo(
-                message.as4Properties().finalRecipient());
+            message.as4Properties().finalRecipient());
         assertThat(evidenceMessage.as4Properties().originalSender()).isEqualTo(
-                message.as4Properties().originalSender());
+            message.as4Properties().originalSender());
         assertThat(evidenceMessage.gatewayName()).isEqualTo(message.gatewayName());
         assertThat(evidenceMessage.backendName()).isEqualTo(message.backendName());
         assertThat(evidenceMessage.direction()).isEqualTo(
-                message.direction());
+            message.direction());
     }
 }

@@ -19,6 +19,6 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorLinkPropertiesDto(
-        List<BackendLinkProperties> backend
+    List<BackendLinkProperties> backend
 ) {
 }

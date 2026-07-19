@@ -22,15 +22,15 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorMessageJpaRepository extends
-        JpaRepository<ConnectorMessageEntity, Long>,
-        JpaSpecificationExecutor<ConnectorMessageEntity> {
+    JpaRepository<ConnectorMessageEntity, Long>,
+    JpaSpecificationExecutor<ConnectorMessageEntity> {
     ConnectorMessageEntity findByIdentifier(String identifier);
 
     List<ConnectorMessageEntity> findByAs4PropertiesConversationIdentifier(
-            String conversationIdentifier);
+        String conversationIdentifier);
 
     ConnectorMessageEntity findByAs4PropertiesEbmsMessageIdentifierAndDirection(
-            String ebmsMessageIdentifier, ConnectorMessageDirection direction);
+        String ebmsMessageIdentifier, ConnectorMessageDirection direction);
 
     ConnectorMessageEntity findByBackendMessageIdentifier(String backendMessageIdentifier);
 

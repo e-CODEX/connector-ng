@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.property.link;
 
-import java.time.Duration;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -25,19 +25,19 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Repository
 public interface ConnectorMessageTransportStepStatusJpaRepository extends
-        JpaRepository<ConnectorMessageTransportStepStatusEntity, Long> {
+    JpaRepository<ConnectorMessageTransportStepStatusEntity, Long> {
     @Modifying
     @Transactional
     @Query(
-            value = """
-                    INSERT INTO connector_message_transport_step_statuses(
-                        status, transport_step_id, created_at, updated_at
-                    )
-                    SELECT :status, MTS.id, now(), now()
-                    FROM connector_message_transport_steps MTS
-                    WHERE MTS.identifier IN :identifiers
-                    """,
-            nativeQuery = true
+        value = """
+            INSERT INTO connector_message_transport_step_statuses(
+                status, transport_step_id, created_at, updated_at
+            )
+            SELECT :status, MTS.id, now(), now()
+            FROM connector_message_transport_steps MTS
+            WHERE MTS.identifier IN :identifiers
+            """,
+        nativeQuery = true
     )
     void insert(@Param("identifiers") List<String> identifiers, @Param("status") String status);
 }

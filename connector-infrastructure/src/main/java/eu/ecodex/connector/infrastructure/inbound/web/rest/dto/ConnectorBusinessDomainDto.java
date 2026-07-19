@@ -32,12 +32,12 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDomainDto(
-        String uuid,
-        String identifier,
-        String description, boolean enabled,
-        ConnectorConfigurationSource source,
-        Instant createdAt,
-        Instant updatedAt
+    String uuid,
+    String identifier,
+    String description, boolean enabled,
+    ConnectorConfigurationSource source,
+    Instant createdAt,
+    Instant updatedAt
 ) {
     /**
      * Converts a {@link ConnectorBusinessDomain} instance into a
@@ -46,13 +46,13 @@ public record ConnectorBusinessDomainDto(
      * @param businessDomain the {@link ConnectorBusinessDomain} instance to be converted.
      *
      * @return a new {@link ConnectorBusinessDomainDto} instance built with values from the provided
-     *         {@link ConnectorBusinessDomain}.
+     *     {@link ConnectorBusinessDomain}.
      */
     public static ConnectorBusinessDomainDto from(ConnectorBusinessDomain businessDomain) {
         return ConnectorBusinessDomainDto.builder()
                                          .uuid(businessDomain.uuid())
                                          .identifier(
-                                                 businessDomain.identifier().messageLaneIdentifier()
+                                             businessDomain.identifier().messageLaneIdentifier()
                                          )
                                          .description(businessDomain.description())
                                          .enabled(businessDomain.enabled())

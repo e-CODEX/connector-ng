@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
+import eu.ecodex.connector.infrastructure.outbound.provider.ConnectorS3FileStorageProvider;
 import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,7 +52,7 @@ public class ConnectorS3FileStorageProviderTest {
     void should_store_files_into_s3_bucket_successfully() throws IOException {
         when(s3ProviderProperties.getBucket()).thenReturn("attachments");
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
-                .thenReturn(PutObjectResponse.builder().build());
+            .thenReturn(PutObjectResponse.builder().build());
 
         var attachment = MessageAttachmentTestFixtures.createAttachment();
         var identifier = fileStorageProvider.save(attachment, provideTemporaryPath());
@@ -63,24 +64,24 @@ public class ConnectorS3FileStorageProviderTest {
     void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_input_stream_is_null() {
         var attachment = MessageAttachmentTestFixtures.createAttachment();
         assertThrows(
-                NullPointerException.class,
-                () -> fileStorageProvider.save(attachment, (Path) null)
+            NullPointerException.class,
+            () -> fileStorageProvider.save(attachment, (Path) null)
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_attachment_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> fileStorageProvider.save(null, provideTemporaryPath())
+            NullPointerException.class,
+            () -> fileStorageProvider.save(null, provideTemporaryPath())
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_storing_file_into_s3_if_the_attachment_and_input_stream_are_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> fileStorageProvider.save(null, (Path) null)
+            NullPointerException.class,
+            () -> fileStorageProvider.save(null, (Path) null)
         );
     }
 
@@ -91,10 +92,10 @@ public class ConnectorS3FileStorageProviderTest {
         var attachment = MessageAttachmentTestFixtures.createAttachment();
         when(s3ProviderProperties.getBucket()).thenReturn("attachments");
         when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
-                .thenReturn(
-                        ResponseBytes.fromByteArray(
-                                GetObjectResponse.builder().build(), new byte[1])
-                );
+            .thenReturn(
+                ResponseBytes.fromByteArray(
+                    GetObjectResponse.builder().build(), new byte[1])
+            );
 
         var foundAttachment = fileStorageProvider.findByIdentifier(attachment.identifier());
 
@@ -105,8 +106,8 @@ public class ConnectorS3FileStorageProviderTest {
     @Test
     void should_throw_null_pointer_exception_when_finding_file_by_null_identifier() {
         assertThrows(
-                NullPointerException.class,
-                () -> fileStorageProvider.findByIdentifier(null)
+            NullPointerException.class,
+            () -> fileStorageProvider.findByIdentifier(null)
         );
     }
 

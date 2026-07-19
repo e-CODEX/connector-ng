@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.export;
 
-import eu.ecodex.connector.domain.api.ConnectorMessageReportExporter;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ public class ConnectorMessageReportExporterFactory {
      *               {@link ConnectorMessageReportExportFormat}
      *
      * @return an instance of {@link ConnectorMessageReportExporter} corresponding to the specified
-     *         format
+     *     format
      *
      * @throws IllegalArgumentException if the provided format is unknown or unsupported
      */

@@ -41,24 +41,24 @@ public class DssConfig {
         var proxyProperties = properties.getProxy();
 
         resolveProxyProperties(
-                "https",
-                proxyProperties,
-                proxyProperties != null ? proxyProperties.getHttps() : null,
-                "https.proxyHost",
-                "https.proxyPort",
-                "HTTPS_PROXY"
+            "https",
+            proxyProperties,
+            proxyProperties != null ? proxyProperties.getHttps() : null,
+            "https.proxyHost",
+            "https.proxyPort",
+            "HTTPS_PROXY"
         )
-                .ifPresent(proxyConfig::setHttpsProperties);
+            .ifPresent(proxyConfig::setHttpsProperties);
 
         resolveProxyProperties(
-                "http",
-                proxyProperties,
-                proxyProperties != null ? proxyProperties.getHttp() : null,
-                "http.proxyHost",
-                "http.proxyPort",
-                "HTTP_PROXY"
+            "http",
+            proxyProperties,
+            proxyProperties != null ? proxyProperties.getHttp() : null,
+            "http.proxyHost",
+            "http.proxyPort",
+            "HTTP_PROXY"
         )
-                .ifPresent(proxyConfig::setHttpProperties);
+            .ifPresent(proxyConfig::setHttpProperties);
 
         return proxyConfig;
     }
@@ -78,8 +78,8 @@ public class DssConfig {
 
     @Bean
     public OnlineOCSPSource defaultOcspOnlineSource(
-            ProxyConfig proxyConfig,
-            NonceSource nonceSource) {
+        ProxyConfig proxyConfig,
+        NonceSource nonceSource) {
         var ocspDataLoader = new OCSPDataLoader();
         ocspDataLoader.setProxyConfig(proxyConfig);
 
@@ -104,12 +104,12 @@ public class DssConfig {
      * variable (e.g. HTTPS_PROXY)
      */
     private Optional<ProxyProperties> resolveProxyProperties(
-            String scheme,
-            DssProxyProperties proxyProperties,
-            ProxyProperties explicitConfig,
-            String sysPropHost,
-            String sysPropPort,
-            String envVar) {
+        String scheme,
+        DssProxyProperties proxyProperties,
+        ProxyProperties explicitConfig,
+        String sysPropHost,
+        String sysPropPort,
+        String envVar) {
 
         if (proxyProperties != null) {
             if (explicitConfig != null) {
@@ -131,8 +131,8 @@ public class DssConfig {
             var props = parseEnvProxy(System.getenv(envVar), scheme);
             if (props.isPresent()) {
                 log.info(
-                        "Setting DSS {} proxy configuration from environment variable [{}]",
-                        scheme, envVar
+                    "Setting DSS {} proxy configuration from environment variable [{}]",
+                    scheme, envVar
                 );
             }
             return props;

@@ -14,9 +14,8 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.impl.link.ConnectorFindLinkPartnerService;
-import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerException;
-import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.exception.ConnectorLinkPartnerException;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +35,7 @@ public class ConnectorFindLinkPartnerServiceTest {
     @Test
     void should_find_link_partner_by_certificate_dn_successfully() {
         when(linkPartnerRepository.findByCertificateDn("cn=alice"))
-               .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
 
         var linkPartner = this.findLinkPartnerService.findByCertificateDn("cn=alice");
 
@@ -50,16 +49,16 @@ public class ConnectorFindLinkPartnerServiceTest {
         when(linkPartnerRepository.findByCertificateDn("cn=alice")).thenReturn(null);
 
         assertThrows(
-                ConnectorLinkPartnerException.class,
-                () -> this.findLinkPartnerService.findByCertificateDn("cn=alice")
+            ConnectorLinkPartnerException.class,
+            () -> this.findLinkPartnerService.findByCertificateDn("cn=alice")
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_searching_link_partner_by_null_certificate_dn() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.findLinkPartnerService.findByCertificateDn(null)
+            NullPointerException.class,
+            () -> this.findLinkPartnerService.findByCertificateDn(null)
         );
     }
 }

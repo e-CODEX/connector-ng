@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.QueuesStatsTestFixtures;
-import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveQueuesStats;
+import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.jms.ConnectorJmsAdminController;
 import java.util.List;

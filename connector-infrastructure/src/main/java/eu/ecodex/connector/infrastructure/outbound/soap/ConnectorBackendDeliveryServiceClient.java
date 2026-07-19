@@ -1,7 +1,7 @@
 package eu.ecodex.connector.infrastructure.outbound.soap;
 
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
-import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebService;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +38,9 @@ public class ConnectorBackendDeliveryServiceClient {
      *                                 properties.
      */
     public ConnectorBackendDeliveryServiceClient(
-            ConnectorLinkPartnerRepository linkPartnerRepository,
-            ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory,
-            ConnectorMerlinPropertiesFactory merlinPropertiesFactory) {
+        ConnectorLinkPartnerRepository linkPartnerRepository,
+        ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory,
+        ConnectorMerlinPropertiesFactory merlinPropertiesFactory) {
         this.linkPartnerRepository = linkPartnerRepository;
         this.linkPartnerConfigFactory = linkPartnerConfigFactory;
         this.merlinPropertiesFactory = merlinPropertiesFactory;
@@ -55,7 +55,7 @@ public class ConnectorBackendDeliveryServiceClient {
      *                    created. Must not be null or empty.
      *
      * @return An instance of {@code DomibusConnectorBackendDeliveryWebService} configured to
-     *         interact with the specified backend link partner.
+     *     interact with the specified backend link partner.
      *
      * @throws IllegalStateException if the link partner or its configuration cannot be found.
      */
@@ -71,12 +71,12 @@ public class ConnectorBackendDeliveryServiceClient {
         }
 
         var linkPartnerConfig = this.linkPartnerConfigFactory.findByLinkPartnerName(
-                linkPartnerName
+            linkPartnerName
         );
 
         if (linkPartnerConfig == null) {
             throw new IllegalStateException(
-                    "Link partner config " + linkPartnerName + " not found"
+                "Link partner config " + linkPartnerName + " not found"
             );
         }
 
@@ -90,29 +90,29 @@ public class ConnectorBackendDeliveryServiceClient {
         }
 
         var policyLoader = new ConnectorWsPolicyLoader(
-                linkPartnerConfig.getProperties().getWsPolicy()
+            linkPartnerConfig.getProperties().getWsPolicy()
         );
         factory.getFeatures().add(policyLoader.loadPolicyFeature());
 
         var linkEndpointProperties = linkPartnerConfig.getProperties().getEndpoint();
 
         var encryptionProperties = merlinPropertiesFactory.createEncryptionProperties(
-                linkEndpointProperties);
+            linkEndpointProperties);
         var sigingProperties = merlinPropertiesFactory.createSigningProperties(
-                linkEndpointProperties);
+            linkEndpointProperties);
 
         var jaxWsFactoryBeanProperties = new HashMap<String, Object>();
         var privateKey = linkEndpointProperties.getPrivateKey();
         jaxWsFactoryBeanProperties.put(
-                SecurityConstants.ENCRYPT_USERNAME,
-                linkPartner.encryptionAlias()
+            SecurityConstants.ENCRYPT_USERNAME,
+            linkPartner.encryptionAlias()
         );
         jaxWsFactoryBeanProperties.put(SecurityConstants.ENCRYPT_PROPERTIES, encryptionProperties);
         jaxWsFactoryBeanProperties.put(SecurityConstants.SIGNATURE_USERNAME, privateKey.getAlias());
         jaxWsFactoryBeanProperties.put(SecurityConstants.SIGNATURE_PROPERTIES, sigingProperties);
         jaxWsFactoryBeanProperties.put(
-                SecurityConstants.CALLBACK_HANDLER,
-                new KeystorePasswordCallback(privateKey.getPassword())
+            SecurityConstants.CALLBACK_HANDLER,
+            new KeystorePasswordCallback(privateKey.getPassword())
         );
         jaxWsFactoryBeanProperties.put("mtom-enabled", true);
 

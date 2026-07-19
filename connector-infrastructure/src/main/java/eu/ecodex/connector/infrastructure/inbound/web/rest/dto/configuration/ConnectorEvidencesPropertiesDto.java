@@ -19,7 +19,7 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorEvidencesPropertiesDto(
-        EvidencesSignatureProperties signature,
-        EvidencesIssuerProperties issuer
+    EvidencesSignatureProperties signature,
+    EvidencesIssuerProperties issuer
 ) {
 }

@@ -27,8 +27,8 @@ import org.springframework.context.annotation.Configuration;
 public class ActiveMQConfig {
     @Bean
     public ActiveMQConnectionFactoryCustomizer connectionFactoryCustomizer(
-            ActiveMQAddressSettingsProperties settingsProperties,
-            ConnectorQueueProperties queueProperties) {
+        ActiveMQAddressSettingsProperties settingsProperties,
+        ConnectorQueueProperties queueProperties) {
 
         return factory -> {
             factory.setRedeliveryPolicy(defaultRedeliveryPolicy(settingsProperties));
@@ -36,12 +36,12 @@ public class ActiveMQConfig {
             var policyMap = new RedeliveryPolicyMap();
 
             addQueue(
-                    policyMap, queueProperties.getOutboundMessageStagingQueue(),
-                    settingsProperties
+                policyMap, queueProperties.getOutboundMessageStagingQueue(),
+                settingsProperties
             );
             addQueue(
-                    policyMap, queueProperties.getOutboundMessageProcessingQueue(),
-                    settingsProperties
+                policyMap, queueProperties.getOutboundMessageProcessingQueue(),
+                settingsProperties
             );
 
             factory.setRedeliveryPolicyMap(policyMap);
@@ -49,14 +49,14 @@ public class ActiveMQConfig {
     }
 
     private void addQueue(
-            RedeliveryPolicyMap policyMap,
-            String queueName,
-            ActiveMQAddressSettingsProperties settingsProperties) {
+        RedeliveryPolicyMap policyMap,
+        String queueName,
+        ActiveMQAddressSettingsProperties settingsProperties) {
         policyMap.put(new ActiveMQQueue(queueName), defaultRedeliveryPolicy(settingsProperties));
     }
 
     private RedeliveryPolicy defaultRedeliveryPolicy(
-            ActiveMQAddressSettingsProperties settingsProperties) {
+        ActiveMQAddressSettingsProperties settingsProperties) {
         var policy = new RedeliveryPolicy();
         policy.setMaximumRedeliveries(settingsProperties.getMaxDeliveryAttempts());
         policy.setInitialRedeliveryDelay(settingsProperties.getRedeliveryDelay());

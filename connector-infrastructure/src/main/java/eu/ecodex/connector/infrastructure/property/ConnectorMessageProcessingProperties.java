@@ -27,26 +27,26 @@ import org.springframework.context.annotation.Configuration;
 @SuppressWarnings("checkstyle:LineLength")
 @ConfigurationProperties(prefix = "connector.message-processing")
 public class ConnectorMessageProcessingProperties implements
-        ConnectorMessageProcessingConfigurationProvider {
+    ConnectorMessageProcessingConfigurationProvider {
     private final boolean ebmsIdGeneratorEnabled = true;
-    private boolean sendGeneratedEvidencesToBackend = true;
     private final String identifierSuffix = "connector.ecodex.eu";
     private final String ebmsIdSuffix = "connector.ecodex.eu";
     private final String transportIdSuffix = "connector.ecodex.eu";
     private final ProcessingModeVerificationMode outboundMessageVerificationMode = ProcessingModeVerificationMode.STRICT;
     private final ProcessingModeVerificationMode inboundMessageVerificationMode = ProcessingModeVerificationMode.RELAXED;
+    private boolean sendGeneratedEvidencesToBackend = true;
 
     @Override
     public ConnectorMessageProcessingConfiguration getConfiguration() {
         return ConnectorMessageProcessingConfiguration
-                .builder()
-                .ebmsIdSuffix(ebmsIdSuffix)
-                .identifierSuffix(identifierSuffix)
-                .transportIdSuffix(transportIdSuffix)
-                .sendGeneratedEvidencesToBackend(sendGeneratedEvidencesToBackend)
-                .inboundMessageVerificationMode(inboundMessageVerificationMode)
-                .outboundMessageVerificationMode(outboundMessageVerificationMode)
-                .ebmsIdGeneratorEnabled(ebmsIdGeneratorEnabled)
-                .build();
+            .builder()
+            .ebmsIdSuffix(ebmsIdSuffix)
+            .identifierSuffix(identifierSuffix)
+            .transportIdSuffix(transportIdSuffix)
+            .sendGeneratedEvidencesToBackend(sendGeneratedEvidencesToBackend)
+            .inboundMessageVerificationMode(inboundMessageVerificationMode)
+            .outboundMessageVerificationMode(outboundMessageVerificationMode)
+            .ebmsIdGeneratorEnabled(ebmsIdGeneratorEnabled)
+            .build();
     }
 }

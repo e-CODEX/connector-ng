@@ -24,9 +24,9 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorProcessingModeCreationRequest(
-        @NotBlank(message = "Processing mode description must not be blank.")
-        String description,
-        @NotBlank(message = "Business domain identifier must not be blank.")
-        String businessDomainIdentifier
+    @NotBlank(message = "Processing mode description must not be blank.")
+    String description,
+    @NotBlank(message = "Business domain identifier must not be blank.")
+    String businessDomainIdentifier
 ) {
 }

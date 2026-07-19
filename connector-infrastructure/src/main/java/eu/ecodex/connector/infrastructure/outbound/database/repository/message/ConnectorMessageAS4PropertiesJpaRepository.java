@@ -16,10 +16,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for performing CRUD operations on the {@link ConnectorMessageAS4Properties}.
+ * Repository interface for performing CRUD operations on the
+ * {@link ConnectorMessageAS4Properties}.
  */
 @Repository
 public interface ConnectorMessageAS4PropertiesJpaRepository extends
-        JpaRepository<ConnectorMessageAS4PropertiesEntity, Long> {
+    JpaRepository<ConnectorMessageAS4PropertiesEntity, Long> {
     ConnectorMessageAS4PropertiesEntity findByMessageIdentifier(String messageIdentifier);
 }

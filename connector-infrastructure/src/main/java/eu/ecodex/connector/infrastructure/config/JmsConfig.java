@@ -35,9 +35,9 @@ import org.springframework.transaction.jta.JtaTransactionManager;
 public class JmsConfig {
     @Bean
     public XAConnectionFactory xaConnectionFactory(
-            @Value("${spring.activemq.broker-url}") String brokerUrl,
-            @Value("${spring.activemq.user}") String user,
-            @Value("${spring.activemq.password}") String password) {
+        @Value("${spring.activemq.broker-url}") String brokerUrl,
+        @Value("${spring.activemq.user}") String user,
+        @Value("${spring.activemq.password}") String password) {
         var xaConnectionFactory = new ActiveMQXAConnectionFactory();
 
         xaConnectionFactory.setBrokerURL(brokerUrl);
@@ -51,16 +51,16 @@ public class JmsConfig {
     @Bean
     @Primary
     public ConnectionFactory connectionFactory(
-            XAConnectionFactory xaConnectionFactory,
-            XAConnectionFactoryWrapper wrapper) throws Exception {
+        XAConnectionFactory xaConnectionFactory,
+        XAConnectionFactoryWrapper wrapper) throws Exception {
         return wrapper.wrapConnectionFactory(xaConnectionFactory);
     }
 
     @Bean
     public DefaultJmsListenerContainerFactory jmsListenerContainerFactory(
-            ConnectionFactory connectionFactory,
-            JtaTransactionManager transactionManager,
-            MessageConverter messageConverter) {
+        ConnectionFactory connectionFactory,
+        JtaTransactionManager transactionManager,
+        MessageConverter messageConverter) {
         var factory = new DefaultJmsListenerContainerFactory();
 
         factory.setConnectionFactory(connectionFactory);
@@ -73,7 +73,7 @@ public class JmsConfig {
 
     @Bean
     public JmsTemplate jmsTemplate(
-            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+        ConnectionFactory connectionFactory, MessageConverter messageConverter) {
         var template = new JmsTemplate(connectionFactory);
         template.setMessageConverter(messageConverter);
         template.setPubSubDomain(false);

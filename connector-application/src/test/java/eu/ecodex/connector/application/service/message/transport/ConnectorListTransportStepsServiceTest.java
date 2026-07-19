@@ -16,10 +16,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.TransportStepFixtures;
-import eu.ecodex.connector.application.service.impl.message.transport.ConnectorListTransportStepsService;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,18 +38,18 @@ public class ConnectorListTransportStepsServiceTest {
     @Test
     void should_throw_exception_if_page_request_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> listTransportStepsService.execute(null, null, null)
+            NullPointerException.class,
+            () -> listTransportStepsService.execute(null, null, null)
         );
     }
 
     @Test
     void should_list_paginated_transport_steps_successfully() {
         var pageResult = ConnectorPageResult.of(
-                List.of(TransportStepFixtures.createTransportStep()),
-                1,
-                0,
-                20
+            List.of(TransportStepFixtures.createTransportStep()),
+            1,
+            0,
+            20
 
         );
         when(transportStepRepository.findAll(any(), any(), any())).thenReturn(pageResult);

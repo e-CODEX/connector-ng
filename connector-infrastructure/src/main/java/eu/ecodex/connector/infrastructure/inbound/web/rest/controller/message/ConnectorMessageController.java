@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
-import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -65,9 +65,9 @@ public class ConnectorMessageController implements ConnectorMessageApi {
      *                                     processing.
      */
     public ConnectorMessageController(
-            ConnectorOutboundMessageReceiver outboundMessageReceiver,
-            ConnectorBackendClientVerifier backendClientVerifierService,
-            ConnectorUploadAttachments uploadAttachmentsService) {
+        ConnectorOutboundMessageReceiver outboundMessageReceiver,
+        ConnectorBackendClientVerifier backendClientVerifierService,
+        ConnectorUploadAttachments uploadAttachmentsService) {
         this.outboundMessageReceiver = outboundMessageReceiver;
         this.backendClientVerifierService = backendClientVerifierService;
         this.uploadAttachmentsService = uploadAttachmentsService;
@@ -75,7 +75,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
     @Override
     public ConnectorOutboundMessageDto submitOutboundMessage(
-            ConnectorOutboundMessageRequest request) throws IOException {
+        ConnectorOutboundMessageRequest request) throws IOException {
         var message = toDomain(request);
         var registeredMessage = outboundMessageReceiver.execute(message);
 
@@ -84,34 +84,34 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
     @Override
     public ConnectorEvidenceMessageDto submitEvidenceTriggerMessage(
-            ConnectorEvidenceTriggerMessageRequest request) {
+        ConnectorEvidenceTriggerMessageRequest request) {
         // TODO current cn is fake, retrieve the certificate dn from user principal
         var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
         var transportedEvidences = List.of(
-                ConnectorMessageEvidence.builder()
-                                        .type(request.evidenceType())
-                                        .build()
+            ConnectorMessageEvidence.builder()
+                                    .type(request.evidenceType())
+                                    .build()
         );
         var message = ConnectorMessage
-                .builder()
-                .backendMessageIdentifier(request.identifiers().backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(
-                        request.identifiers().backendMessageIdentifier()
-                )
-                .backendName(backendClientName)
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .as4Properties(
-                        ConnectorMessageAS4Properties
-                                .builder()
-                                .referenceToIdentifier(
-                                        request.identifiers().referenceToIdentifier()
-                                )
-                                .build()
-                )
-                .businessContent(null)
-                .attachments(null)
-                .transportedEvidences(transportedEvidences)
-                .build();
+            .builder()
+            .backendMessageIdentifier(request.identifiers().backendMessageIdentifier())
+            .referenceToBackendMessageIdentifier(
+                request.identifiers().backendMessageIdentifier()
+            )
+            .backendName(backendClientName)
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .as4Properties(
+                ConnectorMessageAS4Properties
+                    .builder()
+                    .referenceToIdentifier(
+                        request.identifiers().referenceToIdentifier()
+                    )
+                    .build()
+            )
+            .businessContent(null)
+            .attachments(null)
+            .transportedEvidences(transportedEvidences)
+            .build();
 
         var registeredMessage = outboundMessageReceiver.execute(message);
 
@@ -120,69 +120,69 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
     private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
         return ConnectorOutboundMessageDto
-                .builder()
-                .identifier(message.identifier())
-                .backendMessageIdentifier(message.backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
-                .direction(Objects.requireNonNull(message.direction()))
-                .build();
+            .builder()
+            .identifier(message.identifier())
+            .backendMessageIdentifier(message.backendMessageIdentifier())
+            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+            .direction(Objects.requireNonNull(message.direction()))
+            .build();
     }
 
     private ConnectorMessage toDomain(ConnectorOutboundMessageRequest request) throws IOException {
         // TODO current cn is fake, retrieve the certificate dn from user principal
         var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
         return ConnectorMessage
-                .builder()
-                .businessDomainIdentifier(
-                        resolveBusinessDomainIdentifier(request.businessDomainIdentifier())
-                )
-                .backendMessageIdentifier(request.backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(null)
-                .backendName(backendClientName)
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .as4Properties(toDomainAS4Properties(request.as4Properties()))
-                .businessContent(toBusinessContent(request.businessContent()))
-                .attachments(toAttachments(request.attachments()))
-                .build();
+            .builder()
+            .businessDomainIdentifier(
+                resolveBusinessDomainIdentifier(request.businessDomainIdentifier())
+            )
+            .backendMessageIdentifier(request.backendMessageIdentifier())
+            .referenceToBackendMessageIdentifier(null)
+            .backendName(backendClientName)
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .as4Properties(toDomainAS4Properties(request.as4Properties()))
+            .businessContent(toBusinessContent(request.businessContent()))
+            .attachments(toAttachments(request.attachments()))
+            .build();
     }
 
     private ConnectorMessageAS4Properties toDomainAS4Properties(
-            ConnectorOutboundMessageAS4Properties as4Properties) {
+        ConnectorOutboundMessageAS4Properties as4Properties) {
         var action = ConnectorAction
-                .builder()
-                .name(as4Properties.action().name())
-                .build();
+            .builder()
+            .name(as4Properties.action().name())
+            .build();
         var service = ConnectorService
-                .builder()
-                .name(as4Properties.service().name())
-                .type(as4Properties.service().type())
-                .build();
+            .builder()
+            .name(as4Properties.service().name())
+            .type(as4Properties.service().type())
+            .build();
         var fromParty = ConnectorParty
-                .builder()
-                .identifier(as4Properties.fromParty().identifier())
-                .identifierType(as4Properties.fromParty().identifierType())
-                .role(as4Properties.fromParty().role())
-                .roleType(ConnectorPartyRoleType.INITIATOR)
-                .build();
+            .builder()
+            .identifier(as4Properties.fromParty().identifier())
+            .identifierType(as4Properties.fromParty().identifierType())
+            .role(as4Properties.fromParty().role())
+            .roleType(ConnectorPartyRoleType.INITIATOR)
+            .build();
         var toParty = ConnectorParty
-                .builder()
-                .identifier(as4Properties.toParty().identifier())
-                .identifierType(as4Properties.toParty().identifierType())
-                .role(as4Properties.toParty().role())
-                .roleType(ConnectorPartyRoleType.RESPONDER)
-                .build();
+            .builder()
+            .identifier(as4Properties.toParty().identifier())
+            .identifierType(as4Properties.toParty().identifierType())
+            .role(as4Properties.toParty().role())
+            .roleType(ConnectorPartyRoleType.RESPONDER)
+            .build();
 
         return ConnectorMessageAS4Properties
-                .builder()
-                .originalSender(as4Properties.originalSender())
-                .finalRecipient(as4Properties.finalRecipient())
-                .ebmsMessageIdentifier(as4Properties.ebmsIdentifier())
-                .conversationIdentifier(as4Properties.conversationIdentifier())
-                .service(service)
-                .action(action)
-                .fromParty(fromParty)
-                .toParty(toParty)
-                .build();
+            .builder()
+            .originalSender(as4Properties.originalSender())
+            .finalRecipient(as4Properties.finalRecipient())
+            .ebmsMessageIdentifier(as4Properties.ebmsIdentifier())
+            .conversationIdentifier(as4Properties.conversationIdentifier())
+            .service(service)
+            .action(action)
+            .fromParty(fromParty)
+            .toParty(toParty)
+            .build();
     }
 
     private ConnectorBusinessDomainIdentifier resolveBusinessDomainIdentifier(String identifier) {
@@ -191,76 +191,76 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         }
 
         return ConnectorBusinessDomainIdentifier
-                .builder()
-                .messageLaneIdentifier(identifier)
-                .build();
+            .builder()
+            .messageLaneIdentifier(identifier)
+            .build();
     }
 
     private ConnectorMessageBusinessContent toBusinessContent(
-            ConnectorOutboundMessageBusinessContent businessContent) throws IOException {
+        ConnectorOutboundMessageBusinessContent businessContent) throws IOException {
         var businessDocumentRequest = businessContent.businessDocument();
         var businessDocument = ConnectorMessageBusinessDocument
-                .builder()
-                .attachment(toAttachment(businessContent.businessDocument().document()))
-                .detachedSignature(toDetachedSignature(businessDocumentRequest.detachedSignature()))
-                .aesType(businessDocumentRequest.aesType())
-                .build();
+            .builder()
+            .attachment(toAttachment(businessContent.businessDocument().document()))
+            .detachedSignature(toDetachedSignature(businessDocumentRequest.detachedSignature()))
+            .aesType(businessDocumentRequest.aesType())
+            .build();
 
         return ConnectorMessageBusinessContent
-                .builder()
-                .xmlContent(toAttachment(businessContent.contentFile()))
-                .businessDocument(businessDocument)
-                .build();
+            .builder()
+            .xmlContent(toAttachment(businessContent.contentFile()))
+            .businessDocument(businessDocument)
+            .build();
     }
 
     private DetachedSignature toDetachedSignature(
-            ConnectorOutboundMessageDetachedSignature detachedSignature) throws IOException {
+        ConnectorOutboundMessageDetachedSignature detachedSignature) throws IOException {
         if (detachedSignature == null || detachedSignature.signature() == null) {
             return null;
         }
 
         return DetachedSignature
-                .builder()
-                .name(
-                        StringUtils.cleanPath(
-                                Objects.requireNonNull(detachedSignature.signature()
-                                                                        .getOriginalFilename()))
-                )
-                .signature(detachedSignature.signature().getBytes())
-                .mimeType(detachedSignature.mimeType())
-                .build();
+            .builder()
+            .name(
+                StringUtils.cleanPath(
+                    Objects.requireNonNull(detachedSignature.signature()
+                                                            .getOriginalFilename()))
+            )
+            .signature(detachedSignature.signature().getBytes())
+            .mimeType(detachedSignature.mimeType())
+            .build();
     }
 
     private ConnectorMessageAttachment toAttachment(String identifier) {
         return ConnectorMessageAttachment
-                .builder()
-                .identifier(identifier)
-                .build();
+            .builder()
+            .identifier(identifier)
+            .build();
     }
 
     private ConnectorMessageAttachment toAttachment(MultipartFile file) throws IOException {
         var filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
         var tempLocation = Files.createTempFile(
-                "upload-%s".formatted(UUID.randomUUID()),
-                filename
+            "upload-%s".formatted(UUID.randomUUID()),
+            filename
         );
 
         try {
             file.transferTo(tempLocation);
             var uploadCommand = FileUploadCommand
-                    .builder()
-                    .contentType(Objects.requireNonNull(file.getContentType()))
-                    .filename(filename)
-                    .tempFileLocation(tempLocation)
-                    .size(file.getSize())
-                    .description("Registered business content/document")
-                    .build();
+                .builder()
+                .contentType(Objects.requireNonNull(file.getContentType()))
+                .filename(filename)
+                .tempFileLocation(tempLocation)
+                .size(file.getSize())
+                .description("Registered business content/document")
+                .build();
 
             return uploadAttachmentsService.execute(List.of(uploadCommand)).getFirst();
         } catch (Exception e) {
             throw new ConnectorAttachmentUploadException(
-                    "Failed to upload attachment: " + file.getName(), e);
+                "Failed to upload attachment: " + file.getName(), e);
         } finally {
             // Always runs — covers both success and failure paths
             Files.deleteIfExists(tempLocation);

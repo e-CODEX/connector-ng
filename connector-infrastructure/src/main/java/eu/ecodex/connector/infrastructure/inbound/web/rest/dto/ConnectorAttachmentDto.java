@@ -35,15 +35,15 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorAttachmentDto(
-        String identifier,
-        String name,
-        String contentType,
-        long size,
-        String description,
-        ConnectorAttachmentStorage storage,
-        ConnectorAttachmentType type,
-        Instant createdAt,
-        Instant updatedAt
+    String identifier,
+    String name,
+    String contentType,
+    long size,
+    String description,
+    ConnectorAttachmentStorage storage,
+    ConnectorAttachmentType type,
+    Instant createdAt,
+    Instant updatedAt
 ) {
     /**
      * Creates an instance of {@code ConnectorAttachmentDto} from a given
@@ -53,20 +53,20 @@ public record ConnectorAttachmentDto(
      *                   the DTO
      *
      * @return a new instance of {@code ConnectorAttachmentDto} populated with the properties from
-     *         the provided attachment
+     *     the provided attachment
      */
     public static ConnectorAttachmentDto from(ConnectorMessageAttachment attachment) {
         return ConnectorAttachmentDto
-                .builder()
-                .identifier(attachment.identifier())
-                .name(attachment.name())
-                .size(attachment.size())
-                .contentType(attachment.contentType())
-                .description(attachment.description())
-                .storage(attachment.storage())
-                .type(attachment.type())
-                .createdAt(attachment.createdAt())
-                .updatedAt(attachment.updatedAt())
-                .build();
+            .builder()
+            .identifier(attachment.identifier())
+            .name(attachment.name())
+            .size(attachment.size())
+            .contentType(attachment.contentType())
+            .description(attachment.description())
+            .storage(attachment.storage())
+            .type(attachment.type())
+            .createdAt(attachment.createdAt())
+            .updatedAt(attachment.updatedAt())
+            .build();
     }
 }

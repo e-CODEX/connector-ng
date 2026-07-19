@@ -14,8 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.application.service.impl.pmode.ConnectorListProcessingModeService;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +33,7 @@ public class ConnectorListProcessingModeServiceTest {
     @Test
     void should_return_all_processing_modes_successfully() {
         when(processingModeRepository.findAll())
-                .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
+            .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
 
         var foundProcessingModes = this.processingModeService.execute();
 

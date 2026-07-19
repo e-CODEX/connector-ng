@@ -19,8 +19,8 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageRoutingPropertiesDto(
-        boolean enabled,
-        String defaultBackendName,
-        List<BackendRuleProperties> backendRules
+    boolean enabled,
+    String defaultBackendName,
+    List<BackendRuleProperties> backendRules
 ) {
 }

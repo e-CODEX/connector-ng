@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEbmsIdGenerator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,12 +32,12 @@ public class ConnectorMessageEbmsIdGeneratorTest {
     @Test
     void should_generate_message_identifier_successfully() {
         when(messageProcessingConfigProvider.getConfiguration())
-                .thenReturn(
-                        ConnectorMessageProcessingConfiguration
-                                .builder()
-                                .ebmsIdSuffix("connector.ecodex.eu")
-                                .build()
-                );
+            .thenReturn(
+                ConnectorMessageProcessingConfiguration
+                    .builder()
+                    .ebmsIdSuffix("connector.ecodex.eu")
+                    .build()
+            );
         var ebmsIdentifier = ebmsIdGenerator.generateIdentifier();
 
         assertThat(ebmsIdentifier).isNotNull();

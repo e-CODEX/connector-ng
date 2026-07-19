@@ -17,11 +17,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.application.service.impl.attachement.ConnectorUploadAttachmentsService;
-import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
-import eu.ecodex.connector.domain.exception.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.application.service.attachement.ConnectorUploadAttachmentsService;
+import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,11 +50,11 @@ public class ConnectorUploadAttachmentsServiceTest {
         when(storageProvider.save(any(), (Path) any())).thenReturn(savedAttachment.identifier());
 
         var fileUploadCommand = new FileUploadCommand(
-                "test_attachment.txt",
-                100L,
-                "text/plain",
-                provideTemporaryPath(),
-                "test_message"
+            "test_attachment.txt",
+            100L,
+            "text/plain",
+            provideTemporaryPath(),
+            "test_message"
         );
         var attachments = uploadAttachmentsService.execute(List.of(fileUploadCommand));
 
@@ -70,30 +70,31 @@ public class ConnectorUploadAttachmentsServiceTest {
     }
 
     @Test
-    void should_throw_attachment_exception_when_uploading_attachment_if_an_io_exception_occurs() throws IOException {
+    void should_throw_attachment_exception_when_uploading_attachment_if_an_io_exception_occurs()
+        throws IOException {
         var savedAttachment = MessageAttachmentTestFixtures.createAttachment();
         when(attachmentRepository.save(any())).thenReturn(savedAttachment);
         doThrow(RuntimeException.class).when(storageProvider).save(any(), (Path) any());
 
         var fileUploadCommand = new FileUploadCommand(
-                "test_attachment.txt",
-                100L,
-                "text/plain",
-                provideTemporaryPath(),
-                "test_message"
+            "test_attachment.txt",
+            100L,
+            "text/plain",
+            provideTemporaryPath(),
+            "test_message"
         );
 
         assertThrows(
-                ConnectorMessageAttachmentException.class,
-                () -> uploadAttachmentsService.execute(List.of(fileUploadCommand))
+            ConnectorMessageAttachmentException.class,
+            () -> uploadAttachmentsService.execute(List.of(fileUploadCommand))
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_saving_attachments_if_upload_commands_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> uploadAttachmentsService.execute(null)
+            NullPointerException.class,
+            () -> uploadAttachmentsService.execute(null)
         );
     }
 

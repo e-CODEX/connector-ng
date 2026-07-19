@@ -17,9 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.link.ConnectorLinkPartnerVerifierService;
-import eu.ecodex.connector.domain.exception.ConnectorLinkPartnerSubmissionException;
-import eu.ecodex.connector.domain.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.exception.ConnectorLinkPartnerSubmissionException;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,7 @@ public class ConnectorLinkPartnerVerifierServiceTest {
     @Test
     void should_submit_outbound_message_successfully_to_gateway_if_link_partner_is_valid() {
         when(linkPartnerRepository.findByName(any()))
-                .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
+            .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
 
         var message = MessageTestFixtures.createOutboundBusinessMessage();
 
@@ -56,10 +55,10 @@ public class ConnectorLinkPartnerVerifierServiceTest {
         when(linkPartnerRepository.findByName(any())).thenReturn(null);
 
         assertThrows(
-                ConnectorLinkPartnerSubmissionException.class,
-                () -> gatewayLinkEventHandler.verify(
-                        MessageTestFixtures.createOutboundBusinessMessage()
-                )
+            ConnectorLinkPartnerSubmissionException.class,
+            () -> gatewayLinkEventHandler.verify(
+                MessageTestFixtures.createOutboundBusinessMessage()
+            )
         );
 
         verify(linkPartnerRepository, times(1)).findByName(any());
@@ -68,31 +67,31 @@ public class ConnectorLinkPartnerVerifierServiceTest {
     @Test
     void should_throw_exception_if_message_is_null_when_submitting_outbound_message_to_gateway() {
         assertThrows(
-                NullPointerException.class, () -> gatewayLinkEventHandler.verify(null)
+            NullPointerException.class, () -> gatewayLinkEventHandler.verify(null)
         );
     }
 
     @Test
     void should_throw_exception_when_submitting_message_to_gateway_with_backend_link_partner() {
         when(linkPartnerRepository.findByName(any()))
-                .thenReturn(LinkPartnerTestFixtures.createDefaultBackendLinkPartner());
+            .thenReturn(LinkPartnerTestFixtures.createDefaultBackendLinkPartner());
 
         assertThrows(
-                ConnectorLinkPartnerSubmissionException.class,
-                () -> gatewayLinkEventHandler.verify(
-                        MessageTestFixtures.createOutboundBusinessMessage())
+            ConnectorLinkPartnerSubmissionException.class,
+            () -> gatewayLinkEventHandler.verify(
+                MessageTestFixtures.createOutboundBusinessMessage())
         );
     }
 
     @Test
     void should_throw_exception_when_submitting_message_to_backend_with_gateway_link_partner() {
         when(linkPartnerRepository.findByName(any()))
-                .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
+            .thenReturn(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner());
 
         assertThrows(
-                ConnectorLinkPartnerSubmissionException.class,
-                () -> gatewayLinkEventHandler.verify(
-                        MessageTestFixtures.createInboundBusinessMessage())
+            ConnectorLinkPartnerSubmissionException.class,
+            () -> gatewayLinkEventHandler.verify(
+                MessageTestFixtures.createInboundBusinessMessage())
         );
     }
 }

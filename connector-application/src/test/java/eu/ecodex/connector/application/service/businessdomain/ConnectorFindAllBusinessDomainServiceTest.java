@@ -14,8 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.application.service.impl.businessdomain.ConnectorListBusinessDomainService;
-import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

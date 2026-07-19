@@ -28,10 +28,10 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorEvidenceTriggerMessageRequest(
-        @NotNull(message = "Evidence type must not be null")
-        ConnectorEvidenceType evidenceType,
-        @Valid
-        @NotNull(message = "Identifiers must not be null")
-        ConnectorEvidenceTriggerMessageIdentifiers identifiers
+    @NotNull(message = "Evidence type must not be null")
+    ConnectorEvidenceType evidenceType,
+    @Valid
+    @NotNull(message = "Identifiers must not be null")
+    ConnectorEvidenceTriggerMessageIdentifiers identifiers
 ) {
 }

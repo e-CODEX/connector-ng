@@ -19,8 +19,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.application.service.usecase.evidence.ConnectorRetrieveEvidence;
-import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.evidence.ConnectorEvidenceController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

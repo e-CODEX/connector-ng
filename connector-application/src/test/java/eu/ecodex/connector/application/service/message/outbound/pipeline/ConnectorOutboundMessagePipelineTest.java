@@ -18,10 +18,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.ConnectorOutboundMessagePipeline;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.exception.ConnectorGatewaySubmissionException;
+import eu.ecodex.connector.application.exception.ConnectorGatewaySubmissionException;
+import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessagePipeline;
+import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,14 +54,14 @@ public class ConnectorOutboundMessagePipelineTest {
     @BeforeEach
     void setUp() {
         outboundMessagePipeline = new ConnectorOutboundMessagePipeline(
-                validationStep,
-                securityStep,
-                gatewayNameStep,
-                ebmsIdStep,
-                acceptanceStep,
-                confirmationStep,
-                rejectionStep,
-                linkSubmissionStep
+            validationStep,
+            securityStep,
+            gatewayNameStep,
+            ebmsIdStep,
+            acceptanceStep,
+            confirmationStep,
+            rejectionStep,
+            linkSubmissionStep
         );
     }
 
@@ -73,10 +72,10 @@ public class ConnectorOutboundMessagePipelineTest {
         when(validationStep.execute(any())).thenReturn(outboundMessage);
         when(securityStep.execute(any())).thenReturn(outboundMessage);
         when(gatewayNameStep.execute(any())).thenReturn(
-                outboundMessage);
+            outboundMessage);
         when(ebmsIdStep.execute(any())).thenReturn(outboundMessage);
         when(acceptanceStep.execute(any())).thenReturn(
-                outboundMessage);
+            outboundMessage);
         when(confirmationStep.execute(any())).thenReturn(outboundMessage);
         when(linkSubmissionStep.execute(any())).thenReturn(outboundMessage);
 
@@ -100,8 +99,8 @@ public class ConnectorOutboundMessagePipelineTest {
         when(linkSubmissionStep.execute(any())).thenReturn(outboundMessage);
 
         assertThrows(
-                ConnectorGatewaySubmissionException.class,
-                () -> outboundMessagePipeline.process(outboundMessage)
+            ConnectorGatewaySubmissionException.class,
+            () -> outboundMessagePipeline.process(outboundMessage)
         );
 
         verify(validationStep, times(1)).execute(outboundMessage);
@@ -116,7 +115,7 @@ public class ConnectorOutboundMessagePipelineTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class, () -> outboundMessagePipeline.process(null)
+            NullPointerException.class, () -> outboundMessagePipeline.process(null)
         );
     }
 }

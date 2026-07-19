@@ -16,10 +16,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.application.service.impl.businessdomain.ConnectorRegisterBusinessDomainService;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
-import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,16 +39,16 @@ public class ConnectorRegisterBusinessDomainServiceTest {
         var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
         when(businessDomainRepository.findByIdentifier(any()))
-                .thenReturn(null);
+            .thenReturn(null);
         when(businessDomainRepository.save(any()))
-                .thenReturn(BusinessDomainTestFixtures.createdDefaultBusinessDomain());
+            .thenReturn(BusinessDomainTestFixtures.createdDefaultBusinessDomain());
 
         var createdBusinessDomain = registerBusinessDomainService.execute(businessDomain);
 
         assertThat(createdBusinessDomain).isNotNull();
         assertThat(createdBusinessDomain.identifier()).isEqualTo(businessDomain.identifier());
         assertThat(createdBusinessDomain.source())
-                                   .isEqualTo(ConnectorConfigurationSource.IMPLEMENTATION);
+            .isEqualTo(ConnectorConfigurationSource.IMPLEMENTATION);
         assertThat(createdBusinessDomain.uuid()).isNotEmpty();
         assertThat(createdBusinessDomain.createdAt()).isNotNull();
         assertThat(createdBusinessDomain.updatedAt()).isNotNull();
@@ -60,19 +59,19 @@ public class ConnectorRegisterBusinessDomainServiceTest {
         var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
         when(businessDomainRepository.findByIdentifier(any()))
-                .thenReturn(businessDomain);
+            .thenReturn(businessDomain);
 
         assertThrows(
-                ConnectorBusinessDomainAlreadyExistsException.class,
-                () -> registerBusinessDomainService.execute(businessDomain)
+            ConnectorBusinessDomainAlreadyExistsException.class,
+            () -> registerBusinessDomainService.execute(businessDomain)
         );
     }
 
     @Test
     void should_throw_exception_if_business_domain_is_null_when_saving() {
         assertThrows(
-                NullPointerException.class,
-                () -> registerBusinessDomainService.execute(null)
+            NullPointerException.class,
+            () -> registerBusinessDomainService.execute(null)
         );
     }
 }

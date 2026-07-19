@@ -23,8 +23,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorMessageAttachmentJpaRepository extends
-        JpaRepository<ConnectorMessageAttachmentEntity, Long>,
-        JpaSpecificationExecutor<ConnectorMessageAttachmentEntity> {
+    JpaRepository<ConnectorMessageAttachmentEntity, Long>,
+    JpaSpecificationExecutor<ConnectorMessageAttachmentEntity> {
     @EntityGraph(attributePaths = {"message"})
     ConnectorMessageAttachmentEntity findByIdentifier(String identifier);
 

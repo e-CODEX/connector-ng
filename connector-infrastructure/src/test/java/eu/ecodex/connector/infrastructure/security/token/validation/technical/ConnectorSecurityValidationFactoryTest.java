@@ -15,6 +15,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenValidationFactory;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

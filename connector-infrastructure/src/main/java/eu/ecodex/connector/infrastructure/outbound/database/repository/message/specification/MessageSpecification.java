@@ -21,7 +21,7 @@ public class MessageSpecification {
     private static final String IDENTIFIER_FIELD = "identifier";
     private static final String BACKEND_MESSAGE_IDENTIFIER_FIELD = "backendMessageIdentifier";
     private static final String REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER =
-            "referenceToBackendMessageIdentifier";
+        "referenceToBackendMessageIdentifier";
     private static final String AS4_PROPERTIES_FIELD = "as4Properties";
     private static final String CONVERSATION_IDENTIFIER_FIELD = "conversationIdentifier";
     private static final String EBMS_IDENTIFIER_FIELD = "ebmsMessageIdentifier";
@@ -39,20 +39,20 @@ public class MessageSpecification {
      * @param backendName the name of the backend to filter the results. If the backend name is
      *
      * @return a {@link Specification} that can be used for querying {@link ConnectorMessageEntity}
-     *         instances matching the given identifier across one or more relevant fields.
+     *     instances matching the given identifier across one or more relevant fields.
      */
     public static Specification<ConnectorMessageEntity> withFilters(
-            String identifier,
-            String backendName) {
+        String identifier,
+        String backendName) {
         return Specification
-                .where(withIdentifier(identifier))
-                .or(
-                        withBackendMessageIdentifier(identifier)
-                                .or(withRefToBackendMessageIdentifier(identifier))
-                                .or(withConversationIdentifier(identifier))
-                                .or(withEbmsIdentifier(identifier))
-                )
-                .and(withBackendName(backendName));
+            .where(withIdentifier(identifier))
+            .or(
+                withBackendMessageIdentifier(identifier)
+                    .or(withRefToBackendMessageIdentifier(identifier))
+                    .or(withConversationIdentifier(identifier))
+                    .or(withEbmsIdentifier(identifier))
+            )
+            .and(withBackendName(backendName));
     }
 
     private static Specification<ConnectorMessageEntity> withIdentifier(String identifier) {
@@ -68,7 +68,7 @@ public class MessageSpecification {
     }
 
     private static Specification<ConnectorMessageEntity> withBackendMessageIdentifier(
-            String identifier) {
+        String identifier) {
         return ((root, query, cb) -> {
             if (!StringUtils.hasText(identifier)) {
                 return null;
@@ -81,7 +81,7 @@ public class MessageSpecification {
     }
 
     private static Specification<ConnectorMessageEntity> withRefToBackendMessageIdentifier(
-            String identifier) {
+        String identifier) {
         return ((root, query, cb) -> {
             if (!StringUtils.hasText(identifier)) {
                 return null;
@@ -94,7 +94,7 @@ public class MessageSpecification {
     }
 
     private static Specification<ConnectorMessageEntity> withConversationIdentifier(
-            String identifier) {
+        String identifier) {
         return ((root, query, cb) -> {
             if (!StringUtils.hasText(identifier)) {
                 return null;
@@ -103,14 +103,14 @@ public class MessageSpecification {
             var pattern = "%" + identifier + "%";
 
             return cb.like(
-                    root.get(AS4_PROPERTIES_FIELD).get(CONVERSATION_IDENTIFIER_FIELD),
-                    pattern
+                root.get(AS4_PROPERTIES_FIELD).get(CONVERSATION_IDENTIFIER_FIELD),
+                pattern
             );
         });
     }
 
     private static Specification<ConnectorMessageEntity> withEbmsIdentifier(
-            String identifier) {
+        String identifier) {
         return ((root, query, cb) -> {
             if (!StringUtils.hasText(identifier)) {
                 return null;
@@ -119,8 +119,8 @@ public class MessageSpecification {
             var pattern = "%" + identifier + "%";
 
             return cb.like(
-                    root.get(AS4_PROPERTIES_FIELD).get(EBMS_IDENTIFIER_FIELD),
-                    pattern
+                root.get(AS4_PROPERTIES_FIELD).get(EBMS_IDENTIFIER_FIELD),
+                pattern
             );
         });
     }
@@ -134,7 +134,7 @@ public class MessageSpecification {
             var pattern = "%" + backendName + "%";
 
             return cb.like(
-                    root.get(BACKEND_NAME_FIELD), pattern
+                root.get(BACKEND_NAME_FIELD), pattern
             );
         });
     }

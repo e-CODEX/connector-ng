@@ -59,7 +59,7 @@ public class ConnectorDssDocumentSigner {
      * @param dssServiceFactory factory for DSS services
      */
     public ConnectorDssDocumentSigner(
-            ConnectorDssServiceFactory dssServiceFactory) {
+        ConnectorDssServiceFactory dssServiceFactory) {
         this.dssServiceFactory = dssServiceFactory;
     }
 
@@ -76,21 +76,22 @@ public class ConnectorDssDocumentSigner {
      * @param documentToSign the document to sign
      *
      * @return the resulting ASiC container as a {@link DSSDocument}
+     *
      * @throws NullPointerException if {@code documentToSign} is null
      */
     public DSSDocument signWithASIC(
-            @NonNull DSSDocument documentToSign,
-            ConnectorDssSigningTokenProvider signingTokenProvider) {
+        @NonNull DSSDocument documentToSign,
+        ConnectorDssSigningTokenProvider signingTokenProvider) {
         var params = new ASiCWithXAdESSignatureParameters();
         params.setSignatureLevel(SignatureLevel.XAdES_BASELINE_B);
         params.setSignaturePackaging(SignaturePackaging.DETACHED);
         params.aSiC().setContainerType(ASiCContainerType.ASiC_S);
 
         return sign(
-                documentToSign,
-                params,
-                dssServiceFactory.createAsicWithXAdESService(),
-                signingTokenProvider
+            documentToSign,
+            params,
+            dssServiceFactory.createAsicWithXAdESService(),
+            signingTokenProvider
         );
     }
 
@@ -108,13 +109,14 @@ public class ConnectorDssDocumentSigner {
      * @param digestAlgorithm     digest algorithm (e.g. SHA-256)
      *
      * @return the signed XML document
+     *
      * @throws NullPointerException if {@code documentToSign} is null
      */
     public DSSDocument signWithXAdES(
-            @NonNull final DSSDocument documentToSign,
-            EncryptionAlgorithm encryptionAlgorithm,
-            DigestAlgorithm digestAlgorithm,
-            ConnectorDssSigningTokenProvider signingTokenProvider) {
+        @NonNull final DSSDocument documentToSign,
+        EncryptionAlgorithm encryptionAlgorithm,
+        DigestAlgorithm digestAlgorithm,
+        ConnectorDssSigningTokenProvider signingTokenProvider) {
         var params = new XAdESSignatureParameters();
         params.setSignatureLevel(SignatureLevel.XAdES_BASELINE_B);
         params.setSignaturePackaging(SignaturePackaging.ENVELOPED);
@@ -122,10 +124,10 @@ public class ConnectorDssDocumentSigner {
         params.setDigestAlgorithm(digestAlgorithm);
 
         return sign(
-                documentToSign,
-                params,
-                dssServiceFactory.createXadESSService(),
-                signingTokenProvider
+            documentToSign,
+            params,
+            dssServiceFactory.createXadESSService(),
+            signingTokenProvider
         );
     }
 
@@ -143,13 +145,14 @@ public class ConnectorDssDocumentSigner {
      * @param digestAlgorithm     digest algorithm (e.g. SHA-256)
      *
      * @return the signed PDF document
+     *
      * @throws NullPointerException if {@code documentToSign} is null
      */
     public DSSDocument signWithPadES(
-            @NonNull final DSSDocument documentToSign,
-            EncryptionAlgorithm encryptionAlgorithm,
-            DigestAlgorithm digestAlgorithm,
-            ConnectorDssSigningTokenProvider signingTokenProvider) {
+        @NonNull final DSSDocument documentToSign,
+        EncryptionAlgorithm encryptionAlgorithm,
+        DigestAlgorithm digestAlgorithm,
+        ConnectorDssSigningTokenProvider signingTokenProvider) {
         var params = new PAdESSignatureParameters();
         params.setSignaturePackaging(SignaturePackaging.ENVELOPED);
         params.setSignatureLevel(SignatureLevel.PAdES_BASELINE_B);
@@ -157,18 +160,18 @@ public class ConnectorDssDocumentSigner {
         params.setDigestAlgorithm(digestAlgorithm);
 
         return sign(
-                documentToSign,
-                params,
-                dssServiceFactory.createPadESSService(),
-                signingTokenProvider
+            documentToSign,
+            params,
+            dssServiceFactory.createPadESSService(),
+            signingTokenProvider
         );
     }
 
     private <P extends AbstractSignatureParameters<?>> DSSDocument sign(
-            DSSDocument documentToSign,
-            P params,
-            AbstractSignatureService<P, ?> service,
-            ConnectorDssSigningTokenProvider signingTokenProvider) {
+        DSSDocument documentToSign,
+        P params,
+        AbstractSignatureService<P, ?> service,
+        ConnectorDssSigningTokenProvider signingTokenProvider) {
         var privateKey = signingTokenProvider.getSigningKey();
         params.setSigningCertificate(privateKey.getCertificate());
         params.setCertificateChain(privateKey.getCertificateChain());
@@ -178,15 +181,15 @@ public class ConnectorDssDocumentSigner {
             var dataToSign = service.getDataToSign(documentToSign, params);
             var signedData = signingTokenProvider.getSigningToken()
                                                  .sign(
-                                                         dataToSign,
-                                                         params.getDigestAlgorithm(),
-                                                         privateKey
+                                                     dataToSign,
+                                                     params.getDigestAlgorithm(),
+                                                     privateKey
                                                  );
             return service.signDocument(documentToSign, params, signedData);
         } catch (Exception e) {
             log.error(
-                    "Failed to sign document [{}] with params [{}]",
-                    documentToSign.getName(), params.getSignatureLevel(), e
+                "Failed to sign document [{}] with params [{}]",
+                documentToSign.getName(), params.getSignatureLevel(), e
             );
             throw new RuntimeException("Document signing failed", e);
         }

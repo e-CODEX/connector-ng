@@ -55,14 +55,14 @@ public class ConnectorConfigurationAdminController implements ConnectorConfigura
      * @param linkProperties              the properties for backend link partners configuration
      */
     public ConnectorConfigurationAdminController(
-            ConnectorBusinessDomainProperties businessDomainProperties,
-            ConnectorContainerProperties containerProperties,
-            ConnectorQueueProperties queueProperties,
-            ConnectorMessageProcessingProperties messageProcessingProperties,
-            ConnectorEvidencesProperties evidencesProperties,
-            ConnectorBusinessDocumentProperties businessDocumentProperties,
-            ConnectorMessageRoutingProperties messageRoutingProperties,
-            ConnectorLinkProperties linkProperties) {
+        ConnectorBusinessDomainProperties businessDomainProperties,
+        ConnectorContainerProperties containerProperties,
+        ConnectorQueueProperties queueProperties,
+        ConnectorMessageProcessingProperties messageProcessingProperties,
+        ConnectorEvidencesProperties evidencesProperties,
+        ConnectorBusinessDocumentProperties businessDocumentProperties,
+        ConnectorMessageRoutingProperties messageRoutingProperties,
+        ConnectorLinkProperties linkProperties) {
         this.businessDomainProperties = businessDomainProperties;
         this.containerProperties = containerProperties;
         this.queueProperties = queueProperties;
@@ -90,33 +90,33 @@ public class ConnectorConfigurationAdminController implements ConnectorConfigura
     @Override
     public ConnectorQueuePropertiesDto listQueues() {
         return ConnectorQueuePropertiesDto
-                .builder()
-                .outboundMessageStagingQueue(queueProperties.getOutboundMessageStagingQueue())
-                .outboundEvidenceTriggerQueue(queueProperties.getOutboundEvidenceTriggerQueue())
-                .outboundMessageProcessingQueue(queueProperties.getOutboundMessageProcessingQueue())
-                .inboundMessageProcessingQueue(queueProperties.getInboundMessageProcessingQueue())
-                .inboundEvidenceTriggerQueue(queueProperties.getInboundEvidenceTriggerQueue())
-                .backendDeliveryQueue(queueProperties.getBackendDeliveryQueue())
-                .gatewaySubmissionQueue(queueProperties.getGatewaySubmissionQueue())
-                .gatewaySubmissionReplyQueue(queueProperties.getGatewaySubmissionReplyQueue())
-                .build();
+            .builder()
+            .outboundMessageStagingQueue(queueProperties.getOutboundMessageStagingQueue())
+            .outboundEvidenceTriggerQueue(queueProperties.getOutboundEvidenceTriggerQueue())
+            .outboundMessageProcessingQueue(queueProperties.getOutboundMessageProcessingQueue())
+            .inboundMessageProcessingQueue(queueProperties.getInboundMessageProcessingQueue())
+            .inboundEvidenceTriggerQueue(queueProperties.getInboundEvidenceTriggerQueue())
+            .backendDeliveryQueue(queueProperties.getBackendDeliveryQueue())
+            .gatewaySubmissionQueue(queueProperties.getGatewaySubmissionQueue())
+            .gatewaySubmissionReplyQueue(queueProperties.getGatewaySubmissionReplyQueue())
+            .build();
     }
 
     @Override
     public ConnectorMessageProcessingPropertiesDto listMessageProcessing() {
         return ConnectorMessageProcessingPropertiesDto
-                .builder()
-                .ebmsIdGeneratorEnabled(messageProcessingProperties.isEbmsIdGeneratorEnabled())
-                .identifierSuffix(messageProcessingProperties.getIdentifierSuffix())
-                .ebmsIdSuffix(messageProcessingProperties.getEbmsIdSuffix())
-                .transportIdSuffix(messageProcessingProperties.getTransportIdSuffix())
-                .outboundMessageVerificationMode(
-                        messageProcessingProperties.getOutboundMessageVerificationMode())
-                .inboundMessageVerificationMode(
-                        messageProcessingProperties.getInboundMessageVerificationMode())
-                .sendGeneratedEvidencesToBackend(
-                        messageProcessingProperties.isSendGeneratedEvidencesToBackend())
-                .build();
+            .builder()
+            .ebmsIdGeneratorEnabled(messageProcessingProperties.isEbmsIdGeneratorEnabled())
+            .identifierSuffix(messageProcessingProperties.getIdentifierSuffix())
+            .ebmsIdSuffix(messageProcessingProperties.getEbmsIdSuffix())
+            .transportIdSuffix(messageProcessingProperties.getTransportIdSuffix())
+            .outboundMessageVerificationMode(
+                messageProcessingProperties.getOutboundMessageVerificationMode())
+            .inboundMessageVerificationMode(
+                messageProcessingProperties.getInboundMessageVerificationMode())
+            .sendGeneratedEvidencesToBackend(
+                messageProcessingProperties.isSendGeneratedEvidencesToBackend())
+            .build();
     }
 
     @Override
@@ -130,24 +130,24 @@ public class ConnectorConfigurationAdminController implements ConnectorConfigura
     @Override
     public ConnectorBusinessDocumentPropertiesDto listBusinessDocument() {
         return ConnectorBusinessDocumentPropertiesDto
-                .builder()
-                .country(businessDocumentProperties.getCountry())
-                .serviceProvider(businessDocumentProperties.getServiceProvider())
-                .defaultAdvancedSystemType(
-                        businessDocumentProperties.getDefaultAdvancedSystemType())
-                .authenticationValidation(businessDocumentProperties.getAuthenticationValidation())
-                .signature(businessDocumentProperties.getSignature())
-                .build();
+            .builder()
+            .country(businessDocumentProperties.getCountry())
+            .serviceProvider(businessDocumentProperties.getServiceProvider())
+            .defaultAdvancedSystemType(
+                businessDocumentProperties.getDefaultAdvancedSystemType())
+            .authenticationValidation(businessDocumentProperties.getAuthenticationValidation())
+            .signature(businessDocumentProperties.getSignature())
+            .build();
     }
 
     @Override
     public ConnectorMessageRoutingPropertiesDto listRouting() {
         return ConnectorMessageRoutingPropertiesDto
-                .builder()
-                .enabled(messageRoutingProperties.isEnabled())
-                .defaultBackendName(messageRoutingProperties.getDefaultBackendName())
-                .backendRules(messageRoutingProperties.getBackendRules())
-                .build();
+            .builder()
+            .enabled(messageRoutingProperties.isEnabled())
+            .defaultBackendName(messageRoutingProperties.getDefaultBackendName())
+            .backendRules(messageRoutingProperties.getBackendRules())
+            .build();
     }
 
     @Override

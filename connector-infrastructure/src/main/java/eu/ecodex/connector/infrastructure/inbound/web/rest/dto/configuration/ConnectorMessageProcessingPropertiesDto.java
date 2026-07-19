@@ -31,12 +31,12 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageProcessingPropertiesDto(
-        boolean ebmsIdGeneratorEnabled,
-        String identifierSuffix,
-        String ebmsIdSuffix,
-        String transportIdSuffix,
-        ProcessingModeVerificationMode outboundMessageVerificationMode,
-        ProcessingModeVerificationMode inboundMessageVerificationMode,
-        boolean sendGeneratedEvidencesToBackend
+    boolean ebmsIdGeneratorEnabled,
+    String identifierSuffix,
+    String ebmsIdSuffix,
+    String transportIdSuffix,
+    ProcessingModeVerificationMode outboundMessageVerificationMode,
+    ProcessingModeVerificationMode inboundMessageVerificationMode,
+    boolean sendGeneratedEvidencesToBackend
 ) {
 }

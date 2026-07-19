@@ -33,7 +33,7 @@ public interface ConnectorAttachmentApi {
     @Operation(summary = "Persist a message attachment.")
     @PostMapping(path = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ApiResponses(
-            @ApiResponse(responseCode = "400", description = "Bad Request")
+        @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     List<String> upload(@RequestPart("attachments") List<MultipartFile> attachments);
 }

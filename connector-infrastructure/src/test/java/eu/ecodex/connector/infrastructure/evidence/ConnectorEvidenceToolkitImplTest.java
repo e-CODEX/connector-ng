@@ -16,14 +16,14 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceContextConfiguration;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.domain.api.ConnectorEvidenceToolkit;
+import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,16 +57,16 @@ class ConnectorEvidenceToolkitImplTest {
         Mockito.reset(attachmentRepository, fileStorageProvider);
         storedContent.clear();
         when(attachmentRepository.save(any(ConnectorMessageAttachment.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+            .thenAnswer(invocation -> invocation.getArgument(0));
         when(fileStorageProvider.save(any(ConnectorMessageAttachment.class), any(byte[].class)))
-                .thenAnswer(invocation -> {
-                    var attachment = invocation.<ConnectorMessageAttachment>getArgument(0);
-                    var bytes = invocation.getArgument(1, byte[].class);
-                    storedContent.put(attachment.identifier(), bytes);
-                    return attachment.identifier();
-                });
+            .thenAnswer(invocation -> {
+                var attachment = invocation.<ConnectorMessageAttachment>getArgument(0);
+                var bytes = invocation.getArgument(1, byte[].class);
+                storedContent.put(attachment.identifier(), bytes);
+                return attachment.identifier();
+            });
         when(fileStorageProvider.findByIdentifier(any()))
-                .thenAnswer(invocation -> storedContent.get(invocation.getArgument(0)));
+            .thenAnswer(invocation -> storedContent.get(invocation.getArgument(0)));
     }
 
     private byte[] evidenceBytes(ConnectorMessageEvidence evidence) {
@@ -82,9 +82,9 @@ class ConnectorEvidenceToolkitImplTest {
         ConnectorMessage message = base.toBuilder().as4Properties(as4).build();
 
         var evidence = evidenceToolkit.create(
-                message,
-                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                null
+            message,
+            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+            null
         );
 
         byte[] bytes = evidenceBytes(evidence);
@@ -103,9 +103,9 @@ class ConnectorEvidenceToolkitImplTest {
         ConnectorMessage message = base.toBuilder().as4Properties(as4).build();
 
         var evidence = evidenceToolkit.create(
-                message,
-                ConnectorEvidenceType.SUBMISSION_REJECTION,
-                ConnectorMessageRejectionReason.BACKEND_REJECTION
+            message,
+            ConnectorEvidenceType.SUBMISSION_REJECTION,
+            ConnectorMessageRejectionReason.BACKEND_REJECTION
         );
 
         byte[] bytes = evidenceBytes(evidence);
@@ -124,10 +124,10 @@ class ConnectorEvidenceToolkitImplTest {
 
         var chain = new ArrayList<ConnectorMessageEvidence>();
         for (var step : List.of(
-                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
-                ConnectorEvidenceType.DELIVERY,
-                ConnectorEvidenceType.RETRIEVAL
+            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+            ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
+            ConnectorEvidenceType.DELIVERY,
+            ConnectorEvidenceType.RETRIEVAL
         )) {
             var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
             var next = evidenceToolkit.create(withPrior, step, null);
@@ -149,8 +149,8 @@ class ConnectorEvidenceToolkitImplTest {
 
         var chain = new ArrayList<ConnectorMessageEvidence>();
         for (var step : List.of(
-                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
+            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+            ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
         )) {
             var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
             chain.add(evidenceToolkit.create(withPrior, step, null));
@@ -158,14 +158,14 @@ class ConnectorEvidenceToolkitImplTest {
 
         var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
         var evidence = evidenceToolkit.create(
-                withPrior,
-                ConnectorEvidenceType.NON_DELIVERY,
-                ConnectorMessageRejectionReason.UNREACHABLE
+            withPrior,
+            ConnectorEvidenceType.NON_DELIVERY,
+            ConnectorMessageRejectionReason.UNREACHABLE
         );
 
         assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.NON_DELIVERY);
         assertThat(new String(evidenceBytes(evidence), StandardCharsets.UTF_8)).contains(
-                "ds:Signature");
+            "ds:Signature");
     }
 
     @TestConfiguration

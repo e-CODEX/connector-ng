@@ -15,8 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageStatsTestFixtures;
-import eu.ecodex.connector.application.service.impl.stats.ConnectorRetrieveMessageStatsService;
-import eu.ecodex.connector.domain.spi.ConnectorMessageStatsRepository;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageStatsRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,8 +33,8 @@ public class ConnectorRetrieveMessageStatsServiceTest {
     @Test
     void should_retrieve_message_stats_successfully() {
         when(statsRepository.findAll(
-                any(),
-                any()
+            any(),
+            any()
         )).thenReturn(MessageStatsTestFixtures.createStats());
 
         var stats = service.execute(any(), any());

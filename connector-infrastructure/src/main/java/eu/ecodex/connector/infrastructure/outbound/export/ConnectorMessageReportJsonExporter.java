@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.export;
 
-import eu.ecodex.connector.domain.api.ConnectorMessageReportExporter;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import lombok.NonNull;

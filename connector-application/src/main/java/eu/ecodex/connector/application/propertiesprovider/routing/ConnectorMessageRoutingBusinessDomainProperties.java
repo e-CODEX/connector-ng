@@ -25,7 +25,7 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageRoutingBusinessDomainProperties(
-        ConnectorMessageRoutingBusinessDomainItem backend,
-        ConnectorMessageRoutingBusinessDomainItem gateway
+    ConnectorMessageRoutingBusinessDomainItem backend,
+    ConnectorMessageRoutingBusinessDomainItem gateway
 ) {
 }

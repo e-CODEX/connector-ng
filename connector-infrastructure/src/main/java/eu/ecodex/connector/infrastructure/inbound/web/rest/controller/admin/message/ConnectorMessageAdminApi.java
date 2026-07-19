@@ -36,9 +36,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * {@code /api/v1/admin/messages}.
  */
 @Tag(
-        name = "MessageAdmin",
-        description = "API for managing messages within the connector system for administrative "
-                + "purposes"
+    name = "MessageAdmin",
+    description = "API for managing messages within the connector system for administrative "
+        + "purposes"
 )
 @RequestMapping("/api/v1/admin/messages")
 public interface ConnectorMessageAdminApi {
@@ -46,18 +46,18 @@ public interface ConnectorMessageAdminApi {
     @GetMapping
     @Operation(summary = "Get paginated list of messages.")
     ConnectorPageResult<ConnectorMessageDto> listMessages(
-            @RequestParam(name = "identifier", required = false) String identifier,
-            @RequestParam(name = "backendName", required = false) String backendName,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size
+        @RequestParam(name = "identifier", required = false) String identifier,
+        @RequestParam(name = "backendName", required = false) String backendName,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size
     );
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{identifier}")
     @Operation(summary = "Get a message by identifier.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Message found"),
-            @ApiResponse(responseCode = "404", description = "Not Found")
+        @ApiResponse(responseCode = "200", description = "Message found"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorMessageDetailDto retrieveMessage(@PathVariable String identifier);
 
@@ -65,7 +65,7 @@ public interface ConnectorMessageAdminApi {
     @GetMapping("/{identifier}/transport-steps")
     @Operation(summary = "Get a message transport step by identifier.")
     @ApiResponses({
-            @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
     })
     ConnectorMessageTransportStepDto retrieveMessageTransportStep(@PathVariable String identifier);
 
@@ -73,24 +73,24 @@ public interface ConnectorMessageAdminApi {
     @GetMapping("/stats")
     @Operation(summary = "Get message statistics.")
     ConnectorMessageStats getStats(
-            @RequestParam(name = "from", required = false) String from,
-            @RequestParam(name = "to", required = false) String to
+        @RequestParam(name = "from", required = false) String from,
+        @RequestParam(name = "to", required = false) String to
     );
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/reports")
     @Operation(summary = "Get message reporting.")
     ConnectorMessageReportSummary getReports(
-            @RequestParam(name = "from", required = false) String from,
-            @RequestParam(name = "to", required = false) String to
+        @RequestParam(name = "from", required = false) String from,
+        @RequestParam(name = "to", required = false) String to
     );
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/reports/export")
     @Operation(summary = "Export message reporting.")
     ResponseEntity<byte[]> exportReports(
-            @RequestParam(name = "from", required = false) String from,
-            @RequestParam(name = "to", required = false) String to,
-            @RequestParam(name = "format") ConnectorMessageReportExportFormat format
+        @RequestParam(name = "from", required = false) String from,
+        @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "format") ConnectorMessageReportExportFormat format
     );
 }

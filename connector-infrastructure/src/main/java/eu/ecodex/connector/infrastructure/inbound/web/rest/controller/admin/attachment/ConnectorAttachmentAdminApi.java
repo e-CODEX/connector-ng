@@ -26,14 +26,14 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @RequestMapping("/api/v1/admin/attachments")
 @Tag(
-        name = "MessageAttachmentAdmin",
-        description = "Defines the API for managing message attachments for administrative purposes"
+    name = "MessageAttachmentAdmin",
+    description = "Defines the API for managing message attachments for administrative purposes"
 )
 public interface ConnectorAttachmentAdminApi {
     @GetMapping
     @Operation(summary = "Get paginated list of message attachments.")
     ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size
     );
 }

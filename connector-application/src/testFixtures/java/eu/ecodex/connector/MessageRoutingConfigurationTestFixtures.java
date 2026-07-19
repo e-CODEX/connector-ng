@@ -29,63 +29,63 @@ public class MessageRoutingConfigurationTestFixtures {
         var defaultBusinessDomainProperties = defaultBusinessDomainProperties();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
-                defaultBusinessDomainProperties
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
+            defaultBusinessDomainProperties
         );
 
         return ConnectorMessageRoutingConfiguration
-                .builder()
-                .enabled(true)
-                .businessDomainRouting(businessDomain)
-                .build();
+            .builder()
+            .enabled(true)
+            .businessDomainRouting(businessDomain)
+            .build();
     }
 
     private static ConnectorMessageRoutingBusinessDomainProperties defaultBusinessDomainProperties() {
         var backendRoutingRule = ConnectorMessageRoutingRule
-                .builder()
-                .linkName("backend_connector_test")
-                .description("Test touting rule")
-                .matchClause(
-                        new ConnectorRoutingRulePattern("equals(ServiceName, 'Connector-TEST')"))
-                .build();
+            .builder()
+            .linkName("backend_connector_test")
+            .description("Test touting rule")
+            .matchClause(
+                new ConnectorRoutingRulePattern("equals(ServiceName, 'Connector-TEST')"))
+            .build();
         var backendLinkName = ConnectorLinkPartnerName
-                .builder()
-                .name("backend_connector_test")
-                .build();
+            .builder()
+            .name("backend_connector_test")
+            .build();
 
         return ConnectorMessageRoutingBusinessDomainProperties
-                .builder()
-                .backend(
-                        ConnectorMessageRoutingBusinessDomainItem
-                                .builder()
-                                .defaultName(ConnectorDefaults.DEFAULT_BACKEND_NAME)
-                                .rules(Map.of(backendLinkName, backendRoutingRule))
-                                .build()
-                )
-                .gateway(
-                        ConnectorMessageRoutingBusinessDomainItem
-                                .builder()
-                                .defaultName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
-                                .build()
-                )
-                .build();
+            .builder()
+            .backend(
+                ConnectorMessageRoutingBusinessDomainItem
+                    .builder()
+                    .defaultName(ConnectorDefaults.DEFAULT_BACKEND_NAME)
+                    .rules(Map.of(backendLinkName, backendRoutingRule))
+                    .build()
+            )
+            .gateway(
+                ConnectorMessageRoutingBusinessDomainItem
+                    .builder()
+                    .defaultName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
+                    .build()
+            )
+            .build();
     }
 
     public static ConnectorMessageRoutingConfiguration getRoutingPropertiesWithNoDefaultBackendName() {
         var routingProperties = routingProperties();
         var backendRoutingRule = routingProperties
-                .businessDomainRouting()
-                .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
-                .backend();
+            .businessDomainRouting()
+            .get(BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier())
+            .backend();
 
         var domainProperties = defaultBusinessDomainProperties()
-                .toBuilder()
-                .backend(backendRoutingRule.toBuilder().defaultName(null).build())
-                .build();
+            .toBuilder()
+            .backend(backendRoutingRule.toBuilder().defaultName(null).build())
+            .build();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
-                domainProperties
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
+            domainProperties
         );
 
         return routingProperties.toBuilder().businessDomainRouting(businessDomain).build();
@@ -96,37 +96,37 @@ public class MessageRoutingConfigurationTestFixtures {
         var defaultBusinessDomainProperties = defaultBusinessDomainProperties();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
-                defaultBusinessDomainProperties
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
+            defaultBusinessDomainProperties
         );
 
         return ConnectorMessageRoutingConfiguration
-                .builder()
-                .enabled(true)
-                .businessDomainRouting(businessDomain)
-                .build();
+            .builder()
+            .enabled(true)
+            .businessDomainRouting(businessDomain)
+            .build();
     }
 
     public static ConnectorMessageRoutingConfiguration getRoutingPropertiesWithNoDefaultBackendRules() {
         var routingProperties = routingProperties();
         var backendRoutingRule = routingProperties.businessDomainRouting().get(
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         ).backend();
 
         var domainProperties = defaultBusinessDomainProperties()
-                .toBuilder()
-                .backend(backendRoutingRule.toBuilder().rules(null).build())
-                .build();
+            .toBuilder()
+            .backend(backendRoutingRule.toBuilder().rules(null).build())
+            .build();
 
         var businessDomain = Map.of(
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
-                domainProperties
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier(),
+            domainProperties
         );
 
         return routingProperties
-                .toBuilder()
-                .businessDomainRouting(businessDomain)
-                .build();
+            .toBuilder()
+            .businessDomainRouting(businessDomain)
+            .build();
     }
 
     public static ConnectorMessageRoutingConfiguration getDisabledRoutingProperties() {

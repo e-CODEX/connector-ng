@@ -51,7 +51,7 @@ public @interface AtLeastOneNotEmpty {
      * level or error codes).
      *
      * @return an array of classes that inherit from Payload to provide additional details about the
-     *         constraint violation.
+     *     constraint violation.
      */
     Class<? extends Payload>[] payload() default {};
 

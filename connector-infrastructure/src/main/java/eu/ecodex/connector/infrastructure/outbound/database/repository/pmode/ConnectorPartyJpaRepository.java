@@ -21,8 +21,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConnectorPartyJpaRepository extends JpaRepository<ConnectorPartyEntity, Long> {
     ConnectorPartyEntity findByNameAndProcessingModeBusinessDomainIdentifier(
-            String name, String businessDomainIdentifier);
+        String name, String businessDomainIdentifier);
 
     ConnectorPartyEntity findByIdentifierAndRoleTypeAndProcessingModeBusinessDomainIdentifier(
-            String identifier, ConnectorPartyRoleType roleType, String businessDomainIdentifier);
+        String identifier, ConnectorPartyRoleType roleType, String businessDomainIdentifier);
 }

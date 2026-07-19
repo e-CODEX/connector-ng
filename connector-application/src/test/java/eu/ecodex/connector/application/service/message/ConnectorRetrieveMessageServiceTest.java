@@ -16,9 +16,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.ConnectorRetrieveMessageService;
-import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,8 +36,8 @@ public class ConnectorRetrieveMessageServiceTest {
     @Test
     void should_throw_null_pointer_exception_if_message_identifier_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> retrieveMessageService.execute(null)
+            NullPointerException.class,
+            () -> retrieveMessageService.execute(null)
         );
     }
 
@@ -47,8 +46,8 @@ public class ConnectorRetrieveMessageServiceTest {
         when(messageRepository.findByIdentifier(any())).thenReturn(null);
 
         assertThrows(
-                ConnectorMessageNotFoundException.class,
-                () -> retrieveMessageService.execute("message-identifier")
+            ConnectorMessageNotFoundException.class,
+            () -> retrieveMessageService.execute("message-identifier")
         );
     }
 
@@ -58,7 +57,7 @@ public class ConnectorRetrieveMessageServiceTest {
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
 
         var retrievedMessage = retrieveMessageService.execute(
-                "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
+            "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
 
         assertThat(retrievedMessage).isNotNull();
         assertThat(retrievedMessage).isEqualTo(message);

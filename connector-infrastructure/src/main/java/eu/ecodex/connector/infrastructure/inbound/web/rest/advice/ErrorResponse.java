@@ -25,7 +25,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
  * @param message A descriptive error message detailing the cause of the error.
  */
 public record ErrorResponse(
-        int status,
-        String message
+    int status,
+    String message
 ) {
 }

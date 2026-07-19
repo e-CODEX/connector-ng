@@ -18,10 +18,9 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.step.ConnectorInboundMessageAcceptanceStep;
-import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
+import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import org.junit.jupiter.api.Test;
@@ -53,7 +52,7 @@ public class ConnectorInboundMessageAcceptanceStepTest {
 
         when(evidenceCreatorService.createSuccess(any(), any())).thenReturn(evidence);
         when(evidenceMessageCreatorService.create(any(), any()))
-                .thenReturn(MessageTestFixtures.createRelayRMMDAcceptanceEvidenceMessage());
+            .thenReturn(MessageTestFixtures.createRelayRMMDAcceptanceEvidenceMessage());
         doNothing().when(evidenceVerifierService).verify(any(), any());
 
         var outputMessage = acceptanceCreationStep.execute(inboundMessage);
@@ -63,17 +62,17 @@ public class ConnectorInboundMessageAcceptanceStepTest {
         assertThat(outputMessage.evidences()).isNotEmpty();
         assertThat(outputMessage.evidences()).hasSize(1);
         assertThat(outputMessage.evidences().getFirst().type())
-                .isEqualTo(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE);
+            .isEqualTo(ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE);
         assertThat(outputMessage.direction()).isNotEqualTo(inboundMessage.direction());
         assertThat(outputMessage.direction())
-                .isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
+            .isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
     }
 
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> acceptanceCreationStep.execute(null)
+            NullPointerException.class,
+            () -> acceptanceCreationStep.execute(null)
         );
     }
 }

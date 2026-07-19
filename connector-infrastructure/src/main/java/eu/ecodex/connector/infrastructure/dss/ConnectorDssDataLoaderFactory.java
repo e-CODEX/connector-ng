@@ -45,8 +45,8 @@ public class ConnectorDssDataLoaderFactory {
      * @throws IllegalStateException if the cache directory cannot be resolved or created
      */
     public ConnectorDssDataLoaderFactory(
-            ConnectorDssProperties dssProperties,
-            DataLoader defaultDataLoader) {
+        ConnectorDssProperties dssProperties,
+        DataLoader defaultDataLoader) {
         this.dssProperties = dssProperties;
         this.defaultDataLoader = defaultDataLoader;
 
@@ -84,7 +84,7 @@ public class ConnectorDssDataLoaderFactory {
         var loader = new FileCacheDataLoader();
         loader.setFileCacheDirectory(this.cacheDir);
         loader.setCacheExpirationTime(
-                dssProperties.getCache().getExpirationMs().toMillis()
+            dssProperties.getCache().getExpirationMs().toMillis()
         );
         loader.setDataLoader(new IgnoreDataLoader());
 
@@ -96,7 +96,7 @@ public class ConnectorDssDataLoaderFactory {
             var dir = properties.getCache().getLocation().getFile();
             if (!dir.exists() && !dir.mkdirs()) {
                 throw new IllegalStateException(
-                        "Failed to create DSS cache directory: " + dir.getAbsolutePath()
+                    "Failed to create DSS cache directory: " + dir.getAbsolutePath()
                 );
             }
 

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.export;
 
-import eu.ecodex.connector.domain.api.ConnectorMessageReportExporter;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import java.io.ByteArrayOutputStream;
@@ -36,11 +36,11 @@ public class ConnectorMessageReportXlsxExporter implements ConnectorMessageRepor
     private static final String COUNT_FORMAT = "#,##0";
 
     private static final List<String> HEADERS = List.of(
-            "Party",
-            "Service",
-            "Inbound",
-            "Outbound",
-            "Total"
+        "Party",
+        "Service",
+        "Inbound",
+        "Outbound",
+        "Total"
     );
 
     private static final int COL_PARTY = 0;
@@ -71,8 +71,8 @@ public class ConnectorMessageReportXlsxExporter implements ConnectorMessageRepor
     }
 
     private static int writeReportLine(
-            Sheet sheet, Styles styles, int rowNum,
-            String party, String service, long inbound, long outbound, long total) {
+        Sheet sheet, Styles styles, int rowNum,
+        String party, String service, long inbound, long outbound, long total) {
 
         var row = sheet.createRow(rowNum);
         row.createCell(COL_PARTY).setCellValue(party);
@@ -84,8 +84,8 @@ public class ConnectorMessageReportXlsxExporter implements ConnectorMessageRepor
     }
 
     private static int writeTotalLine(
-            Sheet sheet, Styles styles, int rowNum,
-            long inbound, long outbound, long total) {
+        Sheet sheet, Styles styles, int rowNum,
+        long inbound, long outbound, long total) {
 
         var row = sheet.createRow(rowNum);
 
@@ -154,15 +154,15 @@ public class ConnectorMessageReportXlsxExporter implements ConnectorMessageRepor
 
                     for (var line : month.reports()) {
                         rowNum = writeReportLine(
-                                sheet, styles, rowNum,
-                                line.party(), line.service(),
-                                line.inbound(), line.outbound(), line.total()
+                            sheet, styles, rowNum,
+                            line.party(), line.service(),
+                            line.inbound(), line.outbound(), line.total()
                         );
                     }
 
                     rowNum = writeTotalLine(
-                            sheet, styles, rowNum,
-                            month.totalInbound(), month.totalOutbound(), month.total()
+                        sheet, styles, rowNum,
+                        month.totalInbound(), month.totalOutbound(), month.total()
                     );
 
                     rowNum++; // spacer
@@ -177,19 +177,19 @@ public class ConnectorMessageReportXlsxExporter implements ConnectorMessageRepor
             return out.toByteArray();
         } catch (IOException e) {
             throw new UncheckedIOException(
-                    "Unable to export the connector message report as XLSX",
-                    e
+                "Unable to export the connector message report as XLSX",
+                e
             );
         }
     }
 
     private record Styles(
-            CellStyle year,
-            CellStyle month,
-            CellStyle header,
-            CellStyle count,
-            CellStyle total,
-            CellStyle totalCount
+        CellStyle year,
+        CellStyle month,
+        CellStyle header,
+        CellStyle count,
+        CellStyle total,
+        CellStyle totalCount
     ) {
 
         static Styles of(Workbook workbook) {

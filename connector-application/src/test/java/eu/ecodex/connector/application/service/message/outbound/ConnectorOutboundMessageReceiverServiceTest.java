@@ -20,20 +20,19 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.ConnectorMessageException;
+import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageVerifier;
+import eu.ecodex.connector.application.port.api.message.ConnectorVerifyTriggeredEvidence;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageIdGenerator;
-import eu.ecodex.connector.application.service.impl.message.outbound.ConnectorOutboundMessageReceiverService;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorBusinessDomainVerifier;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageVerifier;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorVerifyTriggeredEvidence;
-import eu.ecodex.connector.application.service.usecase.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.domain.api.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
-import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.domain.exception.ConnectorMessageException;
-import eu.ecodex.connector.domain.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.service.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,65 +67,65 @@ public class ConnectorOutboundMessageReceiverServiceTest {
     @BeforeEach
     void setUp() {
         messageReceiverService = new ConnectorOutboundMessageReceiverService(
-                messageProcessingConfigurationProvider,
-                messageVerifier,
-                stagingEventPublisher,
-                evidenceTriggerEventPublisher,
-                messageIdGenerator,
-                businessDomainVerifier,
-                verifyTriggeredEvidenceService
+            messageProcessingConfigurationProvider,
+            messageVerifier,
+            stagingEventPublisher,
+            evidenceTriggerEventPublisher,
+            messageIdGenerator,
+            businessDomainVerifier,
+            verifyTriggeredEvidenceService
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_receiving_outbound_message_if_message_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> messageReceiverService.execute(null)
+            NullPointerException.class,
+            () -> messageReceiverService.execute(null)
         );
 
         verifyNoInteractions(
-                evidenceTriggerEventPublisher,
-                stagingEventPublisher,
-                verifyTriggeredEvidenceService
+            evidenceTriggerEventPublisher,
+            stagingEventPublisher,
+            verifyTriggeredEvidenceService
         );
     }
 
     @Test
     void should_throw_exception_when_business_domain_is_not_found() {
         doThrow(ConnectorBusinessDomainNotFoundException.class)
-                .when(businessDomainVerifier).execute(any());
+            .when(businessDomainVerifier).execute(any());
 
         var outboundMessage = MessageTestFixtures.createOutboundStagingBusinessMessage();
 
         assertThrows(
-                ConnectorBusinessDomainNotFoundException.class,
-                () -> messageReceiverService.execute(outboundMessage)
+            ConnectorBusinessDomainNotFoundException.class,
+            () -> messageReceiverService.execute(outboundMessage)
         );
 
         verifyNoInteractions(
-                evidenceTriggerEventPublisher,
-                stagingEventPublisher,
-                verifyTriggeredEvidenceService
+            evidenceTriggerEventPublisher,
+            stagingEventPublisher,
+            verifyTriggeredEvidenceService
         );
     }
 
     @Test
     void should_throw_exception_when_business_domain_is_not_enabled() {
         doThrow(ConnectorBusinessDomainNotEnabledException.class)
-                .when(businessDomainVerifier).execute(any());
+            .when(businessDomainVerifier).execute(any());
 
         var outboundMessage = MessageTestFixtures.createOutboundStagingBusinessMessage();
 
         assertThrows(
-                ConnectorBusinessDomainNotEnabledException.class,
-                () -> messageReceiverService.execute(outboundMessage)
+            ConnectorBusinessDomainNotEnabledException.class,
+            () -> messageReceiverService.execute(outboundMessage)
         );
 
         verifyNoInteractions(
-                evidenceTriggerEventPublisher,
-                stagingEventPublisher,
-                verifyTriggeredEvidenceService
+            evidenceTriggerEventPublisher,
+            stagingEventPublisher,
+            verifyTriggeredEvidenceService
         );
     }
 
@@ -135,15 +134,15 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         var outboundMessage = MessageTestFixtures.createEvidenceMessage();
 
         assertThrows(
-                ConnectorMessageException.class,
-                () -> messageReceiverService.execute(outboundMessage)
+            ConnectorMessageException.class,
+            () -> messageReceiverService.execute(outboundMessage)
         );
 
         verifyNoInteractions(
-                businessDomainVerifier,
-                evidenceTriggerEventPublisher,
-                stagingEventPublisher,
-                verifyTriggeredEvidenceService
+            businessDomainVerifier,
+            evidenceTriggerEventPublisher,
+            stagingEventPublisher,
+            verifyTriggeredEvidenceService
         );
     }
 
@@ -154,12 +153,12 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         doNothing().when(businessDomainVerifier).execute(any());
         when(messageIdGenerator.generateIdentifier()).thenReturn(MESSAGE_ID);
         when(messageProcessingConfigurationProvider.getConfiguration())
-                .thenReturn(
-                        ConnectorMessageProcessingConfiguration
-                                .builder()
-                                .outboundMessageVerificationMode(ProcessingModeVerificationMode.STRICT)
-                                .build()
-                );
+            .thenReturn(
+                ConnectorMessageProcessingConfiguration
+                    .builder()
+                    .outboundMessageVerificationMode(ProcessingModeVerificationMode.STRICT)
+                    .build()
+            );
         doNothing().when(messageVerifier).verify(any(), any());
 
         var outboundMessage = MessageTestFixtures.createOutboundStagingBusinessMessage();
@@ -178,11 +177,11 @@ public class ConnectorOutboundMessageReceiverServiceTest {
 
     @ParameterizedTest
     @ValueSource(classes = {
-            ConnectorEvidenceException.class,
-            ConnectorMessageNotFoundException.class
+        ConnectorEvidenceException.class,
+        ConnectorMessageNotFoundException.class
     })
     void should_throw_exception_when_triggered_evidence_related_business_message_verification_fails(
-            Class<? extends Exception> exceptionClass) {
+        Class<? extends Exception> exceptionClass) {
         doThrow(exceptionClass).when(verifyTriggeredEvidenceService).verify(any());
         when(messageIdGenerator.generateIdentifier()).thenReturn(MESSAGE_ID);
 
@@ -207,10 +206,10 @@ public class ConnectorOutboundMessageReceiverServiceTest {
         assertThat(message.identifier()).isEqualTo(MESSAGE_ID);
 
         verifyNoInteractions(
-                businessDomainVerifier,
-                stagingEventPublisher,
-                businessDomainVerifier,
-                messageVerifier
+            businessDomainVerifier,
+            stagingEventPublisher,
+            businessDomainVerifier,
+            messageVerifier
         );
         verify(evidenceTriggerEventPublisher).publish(any());
     }

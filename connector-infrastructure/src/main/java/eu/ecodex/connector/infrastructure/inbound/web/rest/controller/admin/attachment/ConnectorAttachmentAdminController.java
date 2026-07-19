@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.attachment;
 
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorListAttachments;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorListAttachments;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
@@ -25,7 +25,7 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
     private final ConnectorListAttachments listAttachmentsService;
 
     public ConnectorAttachmentAdminController(
-            ConnectorListAttachments listAttachmentsService) {
+        ConnectorListAttachments listAttachmentsService) {
         this.listAttachmentsService = listAttachmentsService;
     }
 
@@ -36,10 +36,10 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
         var attachments = listAttachmentsService.execute(pageRequest);
 
         return ConnectorPageResult.of(
-                attachments.content().stream().map(ConnectorAttachmentDto::from).toList(),
-                attachments.size(),
-                attachments.totalElements(),
-                attachments.totalPages()
+            attachments.content().stream().map(ConnectorAttachmentDto::from).toList(),
+            attachments.size(),
+            attachments.totalElements(),
+            attachments.totalPages()
         );
     }
 }

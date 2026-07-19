@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.initializer;
 
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorListBusinessDomain;
-import eu.ecodex.connector.application.service.usecase.businessdomain.ConnectorRegisterBusinessDomain;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorListBusinessDomain;
+import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
@@ -27,7 +27,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -57,10 +56,10 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
      *                                      domain information.
      */
     public ConnectorBusinessDomainInitializer(
-            ConnectorRegisterBusinessDomain registerBusinessDomainService,
-            ConnectorListBusinessDomain listBusinessDomainService,
-            ConnectorRegisterProcessingMode registerProcessingModeService,
-            ConnectorBusinessDomainProperties domainProperties) {
+        ConnectorRegisterBusinessDomain registerBusinessDomainService,
+        ConnectorListBusinessDomain listBusinessDomainService,
+        ConnectorRegisterProcessingMode registerProcessingModeService,
+        ConnectorBusinessDomainProperties domainProperties) {
         this.registerBusinessDomainService = registerBusinessDomainService;
         this.listBusinessDomainService = listBusinessDomainService;
         this.registerProcessingModeService = registerProcessingModeService;
@@ -79,13 +78,13 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
             registerBusinessDomainService.execute(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN);
         } else {
             log.debug(
-                    "No default business domains configured; existing domains found, nothing to do"
+                "No default business domains configured; existing domains found, nothing to do"
             );
         }
     }
 
     private void registerDefaultBusinessDomains(
-            List<DefaultBusinessDomainProperties> defaultBusinessDomains) {
+        List<DefaultBusinessDomainProperties> defaultBusinessDomains) {
         log.info("Found {} default business domains", defaultBusinessDomains.size());
 
         for (var properties : defaultBusinessDomains) {
@@ -94,8 +93,8 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
                 registerBusinessDomainService.execute(businessDomain);
             } catch (Exception e) {
                 log.warn(
-                        "Could not register business domain [{}]: Reason: [{}]",
-                        properties.getIdentifier(), e.getMessage()
+                    "Could not register business domain [{}]: Reason: [{}]",
+                    properties.getIdentifier(), e.getMessage()
                 );
             }
 
@@ -105,12 +104,12 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
                 try {
                     var processingMode = toProcessingMode(properties);
                     registerProcessingModeService.execute(
-                            businessDomain.identifier(), processingMode
+                        businessDomain.identifier(), processingMode
                     );
                 } catch (Exception e) {
                     log.warn(
-                            "Could not register configured p-mode for domain [{}]: Reason: [{}]",
-                            properties.getIdentifier(), e.getMessage()
+                        "Could not register configured p-mode for domain [{}]: Reason: [{}]",
+                        properties.getIdentifier(), e.getMessage()
                     );
                 }
             }
@@ -119,24 +118,24 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
 
     private ConnectorBusinessDomain toBusinessDomain(DefaultBusinessDomainProperties properties) {
         return ConnectorBusinessDomain
-                .builder()
-                .identifier(
-                        ConnectorBusinessDomainIdentifier
-                                .builder()
-                                .messageLaneIdentifier(properties.getIdentifier())
-                                .build())
-                .description(properties.getDescription())
-                .enabled(properties.isEnabled())
-                .source(ConnectorConfigurationSource.IMPLEMENTATION)
-                .build();
+            .builder()
+            .identifier(
+                ConnectorBusinessDomainIdentifier
+                    .builder()
+                    .messageLaneIdentifier(properties.getIdentifier())
+                    .build())
+            .description(properties.getDescription())
+            .enabled(properties.isEnabled())
+            .source(ConnectorConfigurationSource.IMPLEMENTATION)
+            .build();
     }
 
     private ConnectorProcessingMode toProcessingMode(DefaultBusinessDomainProperties properties)
-            throws IOException {
+        throws IOException {
         return ConnectorProcessingMode.builder()
                                       .description(String.format(
-                                              "Default processing mode for %s",
-                                              properties.getIdentifier()
+                                          "Default processing mode for %s",
+                                          properties.getIdentifier()
                                       ))
                                       .filename(properties.getPmodeFile())
                                       .content(getPmodeFile(properties.getPmodeFile()))

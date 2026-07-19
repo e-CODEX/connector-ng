@@ -25,10 +25,10 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.domain",
                 "eu.ecodex.connector.infrastructure.property",
                 "eu.ecodex.connector.infrastructure.dss",
-                "eu.ecodex.connector.infrastructure.security.exception",
-                "eu.ecodex.connector.infrastructure.security.model",
-                "eu.ecodex.connector.infrastructure.security.token",
-                "eu.ecodex.connector.infrastructure.security.util",
+                "eu.ecodex.connector.infrastructure.outbound.security.exception",
+                "eu.ecodex.connector.infrastructure.outbound.security.model",
+                "eu.ecodex.connector.infrastructure.outbound.security.token",
+                "eu.ecodex.connector.infrastructure.outbound.security.util",
         }
 )
 public class TokenContextConfiguration {

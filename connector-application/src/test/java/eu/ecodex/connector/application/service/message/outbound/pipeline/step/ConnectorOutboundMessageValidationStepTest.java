@@ -16,8 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageValidationStep;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorMessagePartiesVerifier;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,7 +50,7 @@ public class ConnectorOutboundMessageValidationStepTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class, () -> outboundMessageValidationStep.execute(null)
+            NullPointerException.class, () -> outboundMessageValidationStep.execute(null)
         );
     }
 }

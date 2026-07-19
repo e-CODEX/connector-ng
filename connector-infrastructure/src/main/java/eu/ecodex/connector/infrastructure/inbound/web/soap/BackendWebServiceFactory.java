@@ -49,9 +49,9 @@ public class BackendWebServiceFactory {
      *                                backend requests. Must not be null.
      */
     public BackendWebServiceFactory(
-            Bus bus,
-            ConnectorMerlinPropertiesFactory merlinPropertiesFactory,
-            DomibusConnectorBackendWebService backendWebService) {
+        Bus bus,
+        ConnectorMerlinPropertiesFactory merlinPropertiesFactory,
+        DomibusConnectorBackendWebService backendWebService) {
         this.bus = bus;
         this.backendWebService = backendWebService;
         this.merlinPropertiesFactory = merlinPropertiesFactory;
@@ -65,7 +65,7 @@ public class BackendWebServiceFactory {
         endpoint.setAddress(linkConfigProperties.getPublishAddress());
         endpoint.setServiceName(DomibusConnectorBackendWSService.SERVICE);
         endpoint.setEndpointName(
-                DomibusConnectorBackendWSService.DomibusConnectorBackendWebService);
+            DomibusConnectorBackendWSService.DomibusConnectorBackendWebService);
         endpoint.setWsdlLocation("classpath:wsdl/v1/DomibusConnectorBackendWebService.wsdl");
 
         // Common properties
@@ -74,18 +74,18 @@ public class BackendWebServiceFactory {
         endpoint.getProperties().put("mtom-enabled", true);
 
         endpoint.getProperties().put(
-                SecurityConstants.SIGNATURE_PROPERTIES,
-                merlinPropertiesFactory.createSigningProperties(linkConfigProperties.getEndpoint())
+            SecurityConstants.SIGNATURE_PROPERTIES,
+            merlinPropertiesFactory.createSigningProperties(linkConfigProperties.getEndpoint())
         );
         endpoint.getProperties().put(SecurityConstants.ENCRYPT_USERNAME, "useReqSigCert");
         endpoint.getProperties().put(
-                SecurityConstants.ENCRYPT_PROPERTIES,
-                merlinPropertiesFactory.createEncryptionProperties(
-                        linkConfigProperties.getEndpoint())
+            SecurityConstants.ENCRYPT_PROPERTIES,
+            merlinPropertiesFactory.createEncryptionProperties(
+                linkConfigProperties.getEndpoint())
         );
         endpoint.getProperties().put(
-                SecurityConstants.CALLBACK_HANDLER,
-                new DefaultWsCallbackHandler()
+            SecurityConstants.CALLBACK_HANDLER,
+            new DefaultWsCallbackHandler()
         );
 
         if (linkConfigProperties.isLoggingEnabled()) {
@@ -94,7 +94,7 @@ public class BackendWebServiceFactory {
 
         // apply ws policy
         var policyLoader = new ConnectorWsPolicyLoader(
-                linkConfigProperties.getWsPolicy()
+            linkConfigProperties.getWsPolicy()
         );
 
         endpoint.getFeatures().add(policyLoader.loadPolicyFeature());
@@ -102,8 +102,8 @@ public class BackendWebServiceFactory {
         endpoint.publish();
 
         log.debug(
-                "Published Backend WebService [{}] under [{}]",
-                DomibusConnectorBackendWSService.class, linkConfigProperties.getPublishAddress()
+            "Published Backend WebService [{}] under [{}]",
+            DomibusConnectorBackendWSService.class, linkConfigProperties.getPublishAddress()
         );
 
         return endpoint;

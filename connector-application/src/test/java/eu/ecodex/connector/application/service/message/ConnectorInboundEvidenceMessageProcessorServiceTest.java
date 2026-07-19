@@ -20,18 +20,18 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.evidence.ConnectorInboundEvidenceMessageProcessorService;
-import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkSubmitter;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
-import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.service.evidence.ConnectorInboundEvidenceMessageProcessorService;
 import eu.ecodex.connector.domain.model.ConnectorErrorCode;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,10 +44,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     private static final String REFERENCED_EBMS_ID = "original-ebms-id@domibus.eu";
     private static final String REFERENCED_MESSAGE_ID =
-            "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
+        "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
     private static final String CONFIRMATION_MESSAGE_ID = "evidence-msg@connector.ecodex.eu";
     private static final String BACKEND_MESSAGE_ID =
-            "85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu";
+        "85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu";
 
     @Mock
     private ConnectorMessageRepository messageRepository;
@@ -61,33 +61,72 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     @InjectMocks
     private ConnectorInboundEvidenceMessageProcessorService processor;
 
+    private static ConnectorMessage referencedBusinessMessage() {
+        return MessageTestFixtures.createOutboundBusinessMessage()
+                                  .toBuilder()
+                                  .identifier(REFERENCED_MESSAGE_ID)
+                                  .backendMessageIdentifier(BACKEND_MESSAGE_ID)
+                                  .as4Properties(
+                                      MessageTestFixtures.createOutboundBusinessMessage()
+                                                         .as4Properties()
+                                                         .toBuilder()
+                                                         .ebmsMessageIdentifier(REFERENCED_EBMS_ID)
+                                                         .build()
+                                  )
+                                  .build();
+    }
+
+    private static ConnectorMessage gatewayConfirmationMessage(
+        List<ConnectorMessageEvidence> evidences) {
+        return ConnectorMessage.builder()
+                               .identifier(CONFIRMATION_MESSAGE_ID)
+                               .businessDomainIdentifier(
+                                   MessageTestFixtures.createOutboundBusinessMessage()
+                                                      .businessDomainIdentifier()
+                               )
+                               .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                               .as4Properties(
+                                   ConnectorMessageAS4Properties.builder()
+                                                                .referenceToIdentifier(
+                                                                    ConnectorInboundEvidenceMessageProcessorServiceTest.REFERENCED_EBMS_ID)
+                                                                .ebmsMessageIdentifier(
+                                                                    "evidence-ebms@domibus.eu")
+                                                                .build()
+                               )
+                               .transportedEvidences(evidences)
+                               .build();
+    }
+
     @Test
     void should_apply_delivery_evidence_and_forward_confirmation_message_to_backend() {
         var deliveryEvidence = EvidenceTestFixtures.createDeliveryEvidence();
         var confirmationMessage = gatewayConfirmationMessage(
-                List.of(deliveryEvidence)
+            List.of(deliveryEvidence)
         );
         var referencedMessage = referencedBusinessMessage();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
-                REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
-                .thenReturn(referencedMessage);
+            REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
+            .thenReturn(referencedMessage);
         when(messageRepository.findByIdentifier(REFERENCED_MESSAGE_ID))
-                .thenReturn(referencedMessage);
+            .thenReturn(referencedMessage);
 
         processor.process(confirmationMessage);
 
-        verify(evidenceVerifier).verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorMessage.class));
+        verify(evidenceVerifier).verify(
+            eq(ConnectorEvidenceType.DELIVERY),
+            any(ConnectorMessage.class)
+        );
         verify(evidenceRepository).save(deliveryEvidence, REFERENCED_MESSAGE_ID);
     }
 
     @Test
     void should_forward_confirmation_message_without_lifecycle_update_when_reference_is_missing() {
         var confirmationMessage = gatewayConfirmationMessage(
-                List.of(EvidenceTestFixtures.createDeliveryEvidence())
+            List.of(EvidenceTestFixtures.createDeliveryEvidence())
         );
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
-                REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction()))
+            REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction()))
         ).thenReturn(null);
 
         processor.process(confirmationMessage);
@@ -100,55 +139,20 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     void should_ignore_irrelevant_evidence_but_still_forward_confirmation_message() {
         var deliveryEvidence = EvidenceTestFixtures.createDeliveryEvidence();
         var confirmationMessage = gatewayConfirmationMessage(
-                List.of(deliveryEvidence)
+            List.of(deliveryEvidence)
         );
         var referencedMessage = referencedBusinessMessage();
 
         when(messageRepository.findByEbmsMessageIdentifierAndDirection(
-                REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
-                .thenReturn(referencedMessage);
+            REFERENCED_EBMS_ID, ConnectorMessageDirection.revert(confirmationMessage.direction())))
+            .thenReturn(referencedMessage);
         doThrow(new ConnectorEvidenceNotRelevantException(
-                ConnectorErrorCode.EVIDENCE_IGNORED_DUE_HIGHER_PRIORITY
-        )).when(evidenceVerifier).verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorMessage.class));
+            ConnectorErrorCode.EVIDENCE_IGNORED_DUE_HIGHER_PRIORITY
+        )).when(evidenceVerifier)
+          .verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorMessage.class));
 
         processor.process(confirmationMessage);
 
         verify(evidenceRepository, never()).save(any(), any());
-    }
-
-    private static ConnectorMessage referencedBusinessMessage() {
-        return MessageTestFixtures.createOutboundBusinessMessage()
-                                  .toBuilder()
-                                  .identifier(REFERENCED_MESSAGE_ID)
-                                  .backendMessageIdentifier(BACKEND_MESSAGE_ID)
-                                  .as4Properties(
-                                          MessageTestFixtures.createOutboundBusinessMessage()
-                                                             .as4Properties()
-                                                             .toBuilder()
-                                                             .ebmsMessageIdentifier(REFERENCED_EBMS_ID)
-                                                             .build()
-                                  )
-                                  .build();
-    }
-
-    private static ConnectorMessage gatewayConfirmationMessage(
-            List<ConnectorMessageEvidence> evidences) {
-        return ConnectorMessage.builder()
-                               .identifier(CONFIRMATION_MESSAGE_ID)
-                               .businessDomainIdentifier(
-                                       MessageTestFixtures.createOutboundBusinessMessage()
-                                                          .businessDomainIdentifier()
-                               )
-                               .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                               .as4Properties(
-                                       ConnectorMessageAS4Properties.builder()
-                                                                    .referenceToIdentifier(
-                                                                            ConnectorInboundEvidenceMessageProcessorServiceTest.REFERENCED_EBMS_ID)
-                                                                    .ebmsMessageIdentifier(
-                                                                            "evidence-ebms@domibus.eu")
-                                                                    .build()
-                               )
-                               .transportedEvidences(evidences)
-                               .build();
     }
 }

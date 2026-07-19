@@ -25,9 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageBusinessContent(
-        @NotNull(message = "The business content file must not be null.")
-        MultipartFile contentFile,
-        @NotNull(message = "The business document must not be null.")
-        ConnectorOutboundMessageBusinessDocument businessDocument
+    @NotNull(message = "The business content file must not be null.")
+    MultipartFile contentFile,
+    @NotNull(message = "The business document must not be null.")
+    ConnectorOutboundMessageBusinessDocument businessDocument
 ) {
 }

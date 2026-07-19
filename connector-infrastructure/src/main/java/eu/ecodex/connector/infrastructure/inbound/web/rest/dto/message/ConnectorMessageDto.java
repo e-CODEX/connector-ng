@@ -55,22 +55,22 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageDto(
-        String businessDomainIdentifier,
-        String identifier,
-        String backendMessageIdentifier,
-        String referenceToBackendMessageIdentifier,
-        String backendName,
-        String gatewayName,
-        ConnectorMessageAS4Properties as4Properties,
-        ConnectorMessageDirection direction,
-        boolean delivered,
-        Instant createdAt,
-        Instant updatedAt,
-        Instant deletedAt,
-        Instant rejectedAt,
-        Instant confirmedAt,
-        Instant deliveredToGatewayAt,
-        Instant deliveredToBackendAt
+    String businessDomainIdentifier,
+    String identifier,
+    String backendMessageIdentifier,
+    String referenceToBackendMessageIdentifier,
+    String backendName,
+    String gatewayName,
+    ConnectorMessageAS4Properties as4Properties,
+    ConnectorMessageDirection direction,
+    boolean delivered,
+    Instant createdAt,
+    Instant updatedAt,
+    Instant deletedAt,
+    Instant rejectedAt,
+    Instant confirmedAt,
+    Instant deliveredToGatewayAt,
+    Instant deliveredToBackendAt
 ) {
     /**
      * Converts a {@link ConnectorMessage} instance into a {@link ConnectorMessageDto} instance.
@@ -81,25 +81,25 @@ public record ConnectorMessageDto(
      */
     public static ConnectorMessageDto from(ConnectorMessage message) {
         return ConnectorMessageDto
-                .builder()
-                .businessDomainIdentifier(
-                        message.businessDomainIdentifier().messageLaneIdentifier())
-                .identifier(message.identifier())
-                .backendMessageIdentifier(message.backendMessageIdentifier())
-                .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
-                .direction(Objects.requireNonNull(message.direction()))
-                .delivered(isDelivered(message))
-                .backendName(message.backendName())
-                .gatewayName(message.gatewayName())
-                .as4Properties(message.as4Properties())
-                .createdAt(message.createdAt())
-                .updatedAt(message.updatedAt())
-                .deletedAt(message.deletedAt())
-                .rejectedAt(message.rejectedAt())
-                .confirmedAt(message.confirmedAt())
-                .deliveredToBackendAt(message.deliveredToBackendAt())
-                .deliveredToGatewayAt(message.deliveredToGatewayAt())
-                .build();
+            .builder()
+            .businessDomainIdentifier(
+                message.businessDomainIdentifier().messageLaneIdentifier())
+            .identifier(message.identifier())
+            .backendMessageIdentifier(message.backendMessageIdentifier())
+            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+            .direction(Objects.requireNonNull(message.direction()))
+            .delivered(isDelivered(message))
+            .backendName(message.backendName())
+            .gatewayName(message.gatewayName())
+            .as4Properties(message.as4Properties())
+            .createdAt(message.createdAt())
+            .updatedAt(message.updatedAt())
+            .deletedAt(message.deletedAt())
+            .rejectedAt(message.rejectedAt())
+            .confirmedAt(message.confirmedAt())
+            .deliveredToBackendAt(message.deliveredToBackendAt())
+            .deliveredToGatewayAt(message.deliveredToGatewayAt())
+            .build();
     }
 
     private static boolean isDelivered(ConnectorMessage message) {

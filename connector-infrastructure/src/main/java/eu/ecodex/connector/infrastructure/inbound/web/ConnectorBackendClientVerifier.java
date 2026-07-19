@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web;
 
-import eu.ecodex.connector.application.service.usecase.link.ConnectorFindLinkPartner;
+import eu.ecodex.connector.application.port.api.link.ConnectorFindLinkPartner;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

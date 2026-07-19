@@ -24,8 +24,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Defines the REST API for managing message transport steps.
  */
 @Tag(
-        name = "MessageTransportStepAdmin",
-        description = "API for managing message transport steps for administrative purposes."
+    name = "MessageTransportStepAdmin",
+    description = "API for managing message transport steps for administrative purposes."
 )
 @RequestMapping("/api/v1/admin/transport-steps")
 public interface ConnectorMessageTransportStepAdminApi {
@@ -33,10 +33,10 @@ public interface ConnectorMessageTransportStepAdminApi {
     @GetMapping
     @Operation(summary = "Get paginated list of messages transport steps.")
     ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
-            @RequestParam(name = "messageOrRemoteSystemIdentifier", required = false)
-            String messageOrRemoteSystemIdentifier,
-            @RequestParam(name = "linkPartnerName", required = false) String linkPartnerName,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "20") int size
+        @RequestParam(name = "messageOrRemoteSystemIdentifier", required = false)
+        String messageOrRemoteSystemIdentifier,
+        @RequestParam(name = "linkPartnerName", required = false) String linkPartnerName,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size
     );
 }

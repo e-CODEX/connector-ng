@@ -13,10 +13,10 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -34,20 +34,20 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
     @Test
     void should_throw_null_pointer_exception_when_saving_if_the_transport_step_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.save(null)
+            NullPointerException.class,
+            () -> this.repository.save(null)
         );
     }
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
     })
     void should_create_a_new_transport_step_successfully() {
         var transportStep = this.repository.save(generateTransportStep());
@@ -60,51 +60,51 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
     @Test
     void should_throw_null_pointer_exception_when_updating_transport_step_with_null_transport_step_identifier() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.update(STEP_IDENTIFIER, null)
+            NullPointerException.class,
+            () -> this.repository.update(STEP_IDENTIFIER, null)
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_updating_transport_step_with_null_transport_step() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.update(
-                        null,
-                        generateTransportStep()
-                )
+            NullPointerException.class,
+            () -> this.repository.update(
+                null,
+                generateTransportStep()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_updating_transport_step_with_null_transport_step_and_identifier() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.update(null, null)
+            NullPointerException.class,
+            () -> this.repository.update(null, null)
         );
     }
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_update_an_existing_transport_step_successfully() {
         var transportStep = generateTransportStep()
-                .toBuilder()
-                .status(ConnectorMessageTransportStatus.DOWNLOADED)
-                .build();
+            .toBuilder()
+            .status(ConnectorMessageTransportStatus.DOWNLOADED)
+            .build();
 
         var updatedStep = this.repository.update(
-                STEP_IDENTIFIER,
-                transportStep
+            STEP_IDENTIFIER,
+            transportStep
         );
 
         assertThat(updatedStep).isNotNull();
@@ -117,50 +117,50 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
     @Test
     void should_throw_null_pointer_exception_when_updating_transport_step_status_with_null_identifiers() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.updateStatus(null, ConnectorMessageTransportStatus.DOWNLOADED)
+            NullPointerException.class,
+            () -> this.repository.updateStatus(null, ConnectorMessageTransportStatus.DOWNLOADED)
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_updating_transport_step_status_with_null_status() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.updateStatus(
-                        List.of("b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice"),
-                        null
-                )
+            NullPointerException.class,
+            () -> this.repository.updateStatus(
+                List.of("b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice"),
+                null
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_updating_transport_step_status_with_null_identifiers_and_status() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.updateStatus(null, null)
+            NullPointerException.class,
+            () -> this.repository.updateStatus(null, null)
         );
     }
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_update_transport_step_status_successfully() {
         this.repository.updateStatus(
-                List.of("b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice"),
-                ConnectorMessageTransportStatus.DOWNLOADED
+            List.of("b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice"),
+            ConnectorMessageTransportStatus.DOWNLOADED
         );
 
         var updatedTransportStep = this.repository.findByIdentifier(
-                "b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice");
+            "b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice");
         assertThat(updatedTransportStep).isNotNull();
         assertThat(updatedTransportStep.status()).isEqualTo(ConnectorMessageTransportStatus.DOWNLOADED);
         assertThat(updatedTransportStep.statuses().size()).isEqualTo(2);
@@ -171,22 +171,22 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
     @Test
     void should_throw_null_pointer_exception_when_searching_pending_messages_ids_with_null_backend_name() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.findPendingMessagesIds(null)
+            NullPointerException.class,
+            () -> this.repository.findPendingMessagesIds(null)
         );
     }
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
     })
     void should_find_pending_messages_ids_successfully() {
         var messagesIds = this.repository.findPendingMessagesIds("backend_alice");
@@ -201,9 +201,9 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
                                             .numberOfAttempts(0)
                                             .status(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
                                             .transportedMessage(
-                                                    ConnectorMessage.builder()
-                                                                    .identifier(MESSAGE_IDENTIFIER)
-                                                                    .build()
+                                                ConnectorMessage.builder()
+                                                                .identifier(MESSAGE_IDENTIFIER)
+                                                                .build()
                                             )
                                             .build();
     }

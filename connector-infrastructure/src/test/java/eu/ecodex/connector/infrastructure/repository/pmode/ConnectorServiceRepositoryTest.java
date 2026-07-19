@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;

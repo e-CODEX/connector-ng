@@ -26,11 +26,11 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageReportDto(
-        int year,
-        int month,
-        String party,
-        String service,
-        ConnectorMessageDirection direction,
-        long total
+    int year,
+    int month,
+    String party,
+    String service,
+    ConnectorMessageDirection direction,
+    long total
 ) {
 }

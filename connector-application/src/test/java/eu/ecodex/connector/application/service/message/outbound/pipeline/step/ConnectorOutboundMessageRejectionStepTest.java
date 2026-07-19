@@ -19,10 +19,9 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageRejectionStep;
-import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorEvidenceMessageCreator;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
+import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import org.junit.jupiter.api.Test;
@@ -54,7 +53,7 @@ public class ConnectorOutboundMessageRejectionStepTest {
 
         when(evidenceCreatorService.createFailure(any(), any(), any())).thenReturn(evidence);
         when(evidenceMessageCreatorService.create(any(), any()))
-                .thenReturn(MessageTestFixtures.createRejectedMessage());
+            .thenReturn(MessageTestFixtures.createRejectedMessage());
         doNothing().when(evidenceVerifier).verify(any(), any());
 
         var outputMessage = outboundMessageRejectionCreationStep.execute(outboundMessage);
@@ -65,16 +64,16 @@ public class ConnectorOutboundMessageRejectionStepTest {
         assertThat(outputMessage.evidences()).hasSize(1);
         assertNotNull(outputMessage.evidences());
         assertThat(outputMessage.evidences().getFirst().type())
-                .isEqualTo(ConnectorEvidenceType.SUBMISSION_REJECTION);
+            .isEqualTo(ConnectorEvidenceType.SUBMISSION_REJECTION);
         assertThat(outputMessage.direction()).isNotEqualTo(outboundMessage.direction());
         assertThat(outputMessage.direction())
-                .isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
+            .isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
     }
 
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class, () -> outboundMessageRejectionCreationStep.execute(null)
+            NullPointerException.class, () -> outboundMessageRejectionCreationStep.execute(null)
         );
     }
 }

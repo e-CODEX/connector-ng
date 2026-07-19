@@ -16,11 +16,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.ConnectorMessageEvidenceVerifierService;
-import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.domain.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,33 +40,33 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
     @ParameterizedTest
     @EnumSource(value = ConnectorEvidenceType.class, names = {"DELIVERY", "RETRIEVAL"})
     void should_process_a_message_as_confirmed_successfully_if_its_evidence_is_delivery_or_retrieval(
-            ConnectorEvidenceType evidenceType) {
+        ConnectorEvidenceType evidenceType) {
         var message = MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage();
 
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
         when(messageRepository.setAsConfirmed(any())).thenReturn(
-                MessageTestFixtures.createConfirmedMessage());
+            MessageTestFixtures.createConfirmedMessage());
 
         this.messageEvidenceVerifierService.verify(evidenceType, message);
     }
 
     @ParameterizedTest
     @EnumSource(
-            value = ConnectorEvidenceType.class,
-            names = {
-                    "SUBMISSION_REJECTION",
-                    "NON_DELIVERY",
-                    "NON_RETRIEVAL",
-                    "RELAY_REMMD_REJECTION",
-                    "RELAY_REMMD_FAILURE"
-            }
+        value = ConnectorEvidenceType.class,
+        names = {
+            "SUBMISSION_REJECTION",
+            "NON_DELIVERY",
+            "NON_RETRIEVAL",
+            "RELAY_REMMD_REJECTION",
+            "RELAY_REMMD_FAILURE"
+        }
     )
     void should_process_a_message_as_rejected_successfully_if_its_evidence_is_not_delivery_or_retrieval(
-            ConnectorEvidenceType evidenceType) {
+        ConnectorEvidenceType evidenceType) {
         var message = MessageTestFixtures.createRejectedMessage();
 
         when(messageRepository.setAsRejected(any())).thenReturn(
-                MessageTestFixtures.createConfirmedMessage());
+            MessageTestFixtures.createConfirmedMessage());
 
         this.messageEvidenceVerifierService.verify(evidenceType, message);
     }
@@ -75,18 +74,18 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
     @ParameterizedTest
     @EnumSource(value = ConnectorEvidenceType.class, names = {"DELIVERY", "RETRIEVAL"})
     void should_throw_exception_when_processing_message_as_delivery_or_retrieval_if_it_has_been_rejected(
-            ConnectorEvidenceType evidenceType) {
+        ConnectorEvidenceType evidenceType) {
         var message = MessageTestFixtures.createRejectedMessage();
 
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
 
         var exception = assertThrows(
-                ConnectorEvidenceNotRelevantException.class,
-                () -> this.messageEvidenceVerifierService.verify(evidenceType, message)
+            ConnectorEvidenceNotRelevantException.class,
+            () -> this.messageEvidenceVerifierService.verify(evidenceType, message)
         );
 
         assertThat(exception.getMessage()).contains(
-                "The processed evidence is ignored, because the business message is already in rejected state");
+            "The processed evidence is ignored, because the business message is already in rejected state");
     }
 
     @Test
@@ -96,18 +95,18 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
         when(messageRepository.findByIdentifier(any())).thenReturn(message);
 
         var exception = assertThrows(
-                ConnectorEvidenceNotRelevantException.class,
-                () -> this.messageEvidenceVerifierService.verify(
-                        ConnectorEvidenceType.RETRIEVAL,
-                        message
-                )
+            ConnectorEvidenceNotRelevantException.class,
+            () -> this.messageEvidenceVerifierService.verify(
+                ConnectorEvidenceType.RETRIEVAL,
+                message
+            )
         );
 
         assertThat(exception.getMessage())
-                .contains(
-                        "The processed evidence is ignored, because the business message is "
-                                + "already in rejected state"
-                );
+            .contains(
+                "The processed evidence is ignored, because the business message is "
+                    + "already in rejected state"
+            );
     }
 
     @Test
@@ -115,11 +114,11 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
         var message = MessageTestFixtures.createRejectedMessage();
 
         assertThrows(
-                ConnectorEvidenceNotRelevantException.class,
-                () -> this.messageEvidenceVerifierService.verify(
-                        ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                        message
-                )
+            ConnectorEvidenceNotRelevantException.class,
+            () -> this.messageEvidenceVerifierService.verify(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                message
+            )
         );
     }
 
@@ -131,33 +130,33 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
                                          .build();
 
         assertThrows(
-                ConnectorEvidenceException.class,
-                () -> this.messageEvidenceVerifierService.verify(
-                        ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                        message
-                )
+            ConnectorEvidenceException.class,
+            () -> this.messageEvidenceVerifierService.verify(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                message
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_processing_message_with_null_evidence_type() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.messageEvidenceVerifierService.verify(
-                        null,
-                        MessageTestFixtures.createOutboundBusinessMessage()
-                )
+            NullPointerException.class,
+            () -> this.messageEvidenceVerifierService.verify(
+                null,
+                MessageTestFixtures.createOutboundBusinessMessage()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_processing_message_with_null_message() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.messageEvidenceVerifierService.verify(
-                        ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                        null
-                )
+            NullPointerException.class,
+            () -> this.messageEvidenceVerifierService.verify(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                null
+            )
         );
     }
 }

@@ -28,9 +28,10 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.domain",
                 "eu.ecodex.connector.infrastructure.outbound.database",
                 "eu.ecodex.connector.infrastructure.property",
-                "eu.ecodex.connector.infrastructure.repository",
+                "eu.ecodex.connector.infrastructure.outbound.persistence",
+                "eu.ecodex.connector.infrastructure.outbound.provider",
                 "eu.ecodex.connector.infrastructure.dss",
-                "eu.ecodex.connector.infrastructure.security"
+                "eu.ecodex.connector.infrastructure.outbound.security"
         }
 )
 public class ContainerContextConfiguration {

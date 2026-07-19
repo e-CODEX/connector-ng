@@ -63,8 +63,8 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
      *                   keystore, including the alias and password
      */
     public ConnectorDssSigningTokenProvider(
-            KeystoreProperties keystore,
-            PrivateKeyProperties privateKey) {
+        KeystoreProperties keystore,
+        PrivateKeyProperties privateKey) {
         this.keystore = keystore;
         this.signingToken = initSigningToken(keystore);
         this.privateKey = privateKey;
@@ -80,7 +80,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
         log.debug("Loading signing keystore from: {}", keystore.getPath());
 
         var protection = new KeyStore.PasswordProtection(
-                keystore.getPassword().toCharArray()
+            keystore.getPassword().toCharArray()
         );
 
         var token = switch (keystore.getType()) {
@@ -108,7 +108,7 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
 
         if (key == null) {
             throw new IllegalArgumentException(
-                    "No signing key found for alias [" + alias + "] in keystore"
+                "No signing key found for alias [" + alias + "] in keystore"
             );
         }
 
@@ -116,25 +116,25 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
     }
 
     private Pkcs12SignatureToken loadPkcs12(
-            KeystoreProperties properties,
-            KeyStore.PasswordProtection protection) {
+        KeystoreProperties properties,
+        KeyStore.PasswordProtection protection) {
         try {
             return new Pkcs12SignatureToken(resolveStream(properties.getPath()), protection);
         } catch (IOException e) {
             throw new IllegalStateException(
-                    "Failed to load PKCS12 keystore: " + properties.getPath(), e
+                "Failed to load PKCS12 keystore: " + properties.getPath(), e
             );
         }
     }
 
     private JKSSignatureToken loadJks(
-            KeystoreProperties properties,
-            KeyStore.PasswordProtection protection) {
+        KeystoreProperties properties,
+        KeyStore.PasswordProtection protection) {
         try {
             return new JKSSignatureToken(resolveStream(properties.getPath()), protection);
         } catch (IOException e) {
             throw new IllegalStateException(
-                    "Failed to load JKS keystore: " + properties.getPath(), e);
+                "Failed to load JKS keystore: " + properties.getPath(), e);
         }
     }
 

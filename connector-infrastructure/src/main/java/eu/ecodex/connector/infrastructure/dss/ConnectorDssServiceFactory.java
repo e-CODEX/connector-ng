@@ -51,8 +51,8 @@ public class ConnectorDssServiceFactory {
      *                             signatures.
      */
     public ConnectorDssServiceFactory(
-            ConnectorDssCertificateVerifier certificateVerifier,
-            ConnectorDssTimeStampingProtocol timeStampingProtocol) {
+        ConnectorDssCertificateVerifier certificateVerifier,
+        ConnectorDssTimeStampingProtocol timeStampingProtocol) {
         this.certificateVerifier = certificateVerifier;
         this.timeStampingProtocol = timeStampingProtocol;
     }
@@ -65,13 +65,14 @@ public class ConnectorDssServiceFactory {
      * </ul>.
      *
      * @return configured {@link ASiCWithXAdESService} instance
+     *
      * @implNote A custom certificate verifier should be introduced to properly validate
-     *         certificate chains instead of relying solely on the current configuration.
+     *     certificate chains instead of relying solely on the current configuration.
      */
     public ASiCWithXAdESService createAsicWithXAdESService() {
         var service = new ASiCWithXAdESService(
-                // TODO use a custom verifier that checks the certificate chain
-                certificateVerifier.getCommonCertificateVerifier()
+            // TODO use a custom verifier that checks the certificate chain
+            certificateVerifier.getCommonCertificateVerifier()
         );
         service.setTspSource(timeStampingProtocol.getCompositeTspSource()); // ← here
 

@@ -50,7 +50,7 @@ public class ConnectorMessageRoutingRule {
     public static final int LOW_PRIORITY = 2000;
 
     private final ConnectorConfigurationSource configurationSource =
-            ConnectorConfigurationSource.ENVIRONMENT;
+        ConnectorConfigurationSource.ENVIRONMENT;
 
     @NotBlank
     private String linkName;

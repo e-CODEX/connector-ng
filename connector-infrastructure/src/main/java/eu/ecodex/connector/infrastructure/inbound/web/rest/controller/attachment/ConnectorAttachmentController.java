@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachment;
 
-import eu.ecodex.connector.application.service.impl.attachement.FileUploadCommand;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import java.io.IOException;
@@ -31,38 +31,38 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
     private final ConnectorUploadAttachments uploadAttachmentsService;
 
     public ConnectorAttachmentController(
-            ConnectorUploadAttachments uploadAttachmentsService) {
+        ConnectorUploadAttachments uploadAttachmentsService) {
         this.uploadAttachmentsService = uploadAttachmentsService;
     }
 
     @Override
     public List<String> upload(List<MultipartFile> attachments) {
         var fileUploadCommands = attachments
-                .stream()
-                .map(attachment -> {
-                         try {
-                             var filename = StringUtils.cleanPath(
-                                     Objects.requireNonNull(attachment.getOriginalFilename())
-                             );
+            .stream()
+            .map(attachment -> {
+                     try {
+                         var filename = StringUtils.cleanPath(
+                             Objects.requireNonNull(attachment.getOriginalFilename())
+                         );
 
-                             var tempLocation = Files.createTempFile(
-                                     "upload-attachment-%s-".formatted(UUID.randomUUID()),
-                                     filename
-                             );
-                             attachment.transferTo(tempLocation);
+                         var tempLocation = Files.createTempFile(
+                             "upload-attachment-%s-".formatted(UUID.randomUUID()),
+                             filename
+                         );
+                         attachment.transferTo(tempLocation);
 
-                             return new FileUploadCommand(
-                                     filename,
-                                     attachment.getSize(),
-                                     attachment.getContentType(),
-                                     tempLocation,
-                                     "Uploaded attachment"
-                             );
-                         } catch (IOException e) {
-                             throw new ConnectorInternalServerException(e.getMessage());
-                         }
+                         return new FileUploadCommand(
+                             filename,
+                             attachment.getSize(),
+                             attachment.getContentType(),
+                             tempLocation,
+                             "Uploaded attachment"
+                         );
+                     } catch (IOException e) {
+                         throw new ConnectorInternalServerException(e.getMessage());
                      }
-                ).toList();
+                 }
+            ).toList();
 
         try {
             return this.uploadAttachmentsService.execute(fileUploadCommands)

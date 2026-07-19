@@ -27,9 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder(toBuilder = true)
 @SuppressWarnings("checkstyle:LineLength")
 public record ConnectorOutboundMessageBusinessDocument(
-        @NotNull(message = "The business business document must not be null.")
-        MultipartFile document,
-        ConnectorOutboundMessageDetachedSignature detachedSignature,
-        ConnectorBusinessDocumentAESType aesType
+    @NotNull(message = "The business business document must not be null.")
+    MultipartFile document,
+    ConnectorOutboundMessageDetachedSignature detachedSignature,
+    ConnectorBusinessDocumentAESType aesType
 ) {
 }

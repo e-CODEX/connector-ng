@@ -31,12 +31,12 @@ public class RepositoryConfig {
                        .region(Region.of(properties.getRegion()))
                        .endpointOverride(URI.create(properties.getEndpoint()))
                        .credentialsProvider(
-                               StaticCredentialsProvider.create(
-                                       AwsBasicCredentials.create(
-                                               properties.getAccessKey(),
-                                               properties.getSecretKey()
-                                       )
+                           StaticCredentialsProvider.create(
+                               AwsBasicCredentials.create(
+                                   properties.getAccessKey(),
+                                   properties.getSecretKey()
                                )
+                           )
                        )
                        .forcePathStyle(true)
                        .build();

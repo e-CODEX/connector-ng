@@ -33,5 +33,5 @@ public class ConnectorBusinessDocumentProperties {
     AuthenticationValidationProperties authenticationValidation;
     BusinessDocumentSignatureProperties signature;
     Set<ConnectorBusinessDocumentAESType> allowedAdvancedSystemTypes =
-            new HashSet<>(List.of(ConnectorBusinessDocumentAESType.values()));
+        new HashSet<>(List.of(ConnectorBusinessDocumentAESType.values()));
 }

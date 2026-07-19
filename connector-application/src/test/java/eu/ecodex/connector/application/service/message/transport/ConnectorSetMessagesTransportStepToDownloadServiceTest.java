@@ -14,9 +14,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.impl.message.transport.ConnectorSetMessagesTransportStepToDownloadService;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,18 +36,18 @@ public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
     void should_change_pending_messages_status_successfully() {
         var pendingMessagesIds = List.of("1", "2");
         when(transportStepRepository.findPendingTransportSteps(BACKEND_NAME))
-                .thenReturn(pendingMessagesIds);
+            .thenReturn(pendingMessagesIds);
         doNothing().when(transportStepRepository)
                    .updateStatus(pendingMessagesIds, ConnectorMessageTransportStatus.DOWNLOADED);
 
         changePendingMessagesStatusService.execute(
-                BACKEND_NAME
+            BACKEND_NAME
         );
 
         verify(transportStepRepository).findPendingTransportSteps(BACKEND_NAME);
         verify(transportStepRepository).updateStatus(
-                pendingMessagesIds,
-                ConnectorMessageTransportStatus.DOWNLOADED
+            pendingMessagesIds,
+            ConnectorMessageTransportStatus.DOWNLOADED
         );
     }
 }

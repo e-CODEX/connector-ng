@@ -20,7 +20,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorProcessingModeJpaRepository extends
-        JpaRepository<ConnectorProcessingModeEntity, Long> {
+    JpaRepository<ConnectorProcessingModeEntity, Long> {
     ConnectorProcessingModeEntity findByUuid(String uuid);
 
     ConnectorProcessingModeEntity findByBusinessDomainIdentifier(String businessDomainIdentifier);

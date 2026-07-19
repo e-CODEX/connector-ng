@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Import;
         basePackages = {
                 "eu.ecodex.connector.domain",
                 "eu.ecodex.connector.infrastructure.outbound.database",
-                "eu.ecodex.connector.infrastructure.repository",
+                "eu.ecodex.connector.infrastructure.outbound.persistence",
                 "eu.ecodex.connector.infrastructure.property",
         }
 )

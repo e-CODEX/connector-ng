@@ -22,7 +22,7 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageTransportStepStatusDto(
-        String status,
-        Instant createdAt
+    String status,
+    Instant createdAt
 ) {
 }

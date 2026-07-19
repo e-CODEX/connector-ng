@@ -41,6 +41,7 @@ public class SecureXmlParserUtil {
      * @param xmlString The XML content to be parsed, provided as a string.
      *
      * @return A {@link Document} object representing the parsed XML content.
+     *
      * @throws RuntimeException If an error occurs during XML parsing or secure configuration
      *                          setup.
      */
@@ -54,7 +55,7 @@ public class SecureXmlParserUtil {
             factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
             factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
             factory.setFeature(
-                    "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+                "http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         } catch (ParserConfigurationException e) {
             log.error("Error configuring XML parser ", e);
             throw new RuntimeException(e);
@@ -69,7 +70,7 @@ public class SecureXmlParserUtil {
         // limit entity expansion (if available in your Java version)
         try {
             factory.setAttribute(
-                    "http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", "0");
+                "http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", "0");
         } catch (IllegalArgumentException e) {
             log.warn("Entity expansion limit not supported", e);
         }

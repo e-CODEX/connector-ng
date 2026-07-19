@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.repository;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
+import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

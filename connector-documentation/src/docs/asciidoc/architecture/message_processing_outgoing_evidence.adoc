@@ -39,7 +39,7 @@ The message is transformed from the SOAP transition model to the internal `Conne
 
 === Evidence trigger processing
 
-`ConnectorOutboundEvidenceTriggerListener` consumes trigger messages from the outbound evidence trigger queue and delegates to `ConnectorEvidenceTriggerProcessorService` (aligned with the legacy `EvidenceMessageProcessor` and `EvidenceTriggerStep`).
+`ConnectorJmsOutboundEvidenceTriggerListener` consumes trigger messages from the outbound evidence trigger queue and delegates to `ConnectorEvidenceTriggerProcessorService` (aligned with the legacy `EvidenceMessageProcessor` and `EvidenceTriggerStep`).
 
 [plantuml,outgoing_evidence_2,format=svg, opts=inline]
 ----

@@ -25,6 +25,6 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorOutboundMessageAction(
-        @NotBlank(message = "Action name must not be null") String name
+    @NotBlank(message = "Action name must not be null") String name
 ) {
 }

@@ -34,8 +34,8 @@ public class BackendSoapWebServiceConfig {
     private final ConnectorLinkProperties connectorLinkProperties;
 
     public BackendSoapWebServiceConfig(
-            BackendWebServiceFactory backendWebServiceFactory,
-            ConnectorLinkProperties connectorLinkProperties) {
+        BackendWebServiceFactory backendWebServiceFactory,
+        ConnectorLinkProperties connectorLinkProperties) {
         this.backendWebServiceFactory = backendWebServiceFactory;
         this.connectorLinkProperties = connectorLinkProperties;
     }

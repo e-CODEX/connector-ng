@@ -14,7 +14,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
-/** Evidence issuer AS4 party (gateway identity). */
+/**
+ * Evidence issuer AS4 party (gateway identity).
+ */
 @Getter
 @Setter
 public class As4IssuerPartyProperties {

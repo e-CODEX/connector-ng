@@ -25,12 +25,12 @@ import lombok.Builder;
  *                                 messages.
  */
 @AtLeastOneNotEmpty(fields = {
-        "backendMessageIdentifier",
-        "referenceToIdentifier"
+    "backendMessageIdentifier",
+    "referenceToIdentifier"
 })
 @Builder
 public record ConnectorEvidenceTriggerMessageIdentifiers(
-        String backendMessageIdentifier,
-        String referenceToIdentifier
+    String backendMessageIdentifier,
+    String referenceToIdentifier
 ) {
 }

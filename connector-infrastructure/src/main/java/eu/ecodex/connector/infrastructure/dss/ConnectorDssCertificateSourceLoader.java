@@ -43,14 +43,15 @@ public class ConnectorDssCertificateSourceLoader {
      * @param keystore the keystore properties containing a path, type, and password
      *
      * @return a {@link KeyStoreCertificateSource} initialized from the provided keystore
+     *
      * @throws IllegalStateException if the keystore cannot be loaded
      */
     public KeyStoreCertificateSource createCertificateSource(KeystoreProperties keystore) {
         try (var keystoreStream = openKeystoreStream(keystore.getPath())) {
             return new KeyStoreCertificateSource(
-                    keystoreStream,
-                    keystore.getType().name(),
-                    keystore.getPassword().toCharArray()
+                keystoreStream,
+                keystore.getType().name(),
+                keystore.getPassword().toCharArray()
             );
         } catch (IOException e) {
             log.error("Unable to load truststore from [{}]", keystore);
@@ -68,7 +69,7 @@ public class ConnectorDssCertificateSourceLoader {
      * @return a {@link CommonTrustedCertificateSource} containing trusted certificates
      */
     public CommonTrustedCertificateSource createCommonTrustedCertificateSource(
-            KeystoreProperties keystore) {
+        KeystoreProperties keystore) {
         var trustedCertSource = new CommonTrustedCertificateSource();
         trustedCertSource.importAsTrusted(createCertificateSource(keystore));
 

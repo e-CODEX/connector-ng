@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.evidence;
 
-import eu.ecodex.connector.application.service.usecase.evidence.ConnectorRetrieveEvidence;
+import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,8 +34,8 @@ public class ConnectorEvidenceController implements ConnectorEvidenceApi {
         return ResponseEntity.ok()
                              .contentType(MediaType.APPLICATION_XML)
                              .header(
-                                     HttpHeaders.CONTENT_DISPOSITION,
-                                     "attachment; filename=%s.xml".formatted(evidence.type())
+                                 HttpHeaders.CONTENT_DISPOSITION,
+                                 "attachment; filename=%s.xml".formatted(evidence.type())
                              )
                              .body(evidence.content());
     }

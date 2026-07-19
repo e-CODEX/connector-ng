@@ -10,12 +10,12 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageAcknowledgementListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorGatewayMessageListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.inbound.ConnectorInboundMessagePipelineListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorBackendMessageDeliveryListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorOutboundMessagePipelineListener;
-import eu.ecodex.connector.infrastructure.messaging.listener.outbound.ConnectorOutboundMessageStagingListener;
+import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageAcknowledgementListener;
+import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageListener;
+import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsInboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
+import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -72,17 +72,17 @@ public abstract class AbstractIntegrationTest {
     }
 
     @MockitoBean
-    ConnectorBackendMessageDeliveryListener backendMessageDeliveryListener;
+    ConnectorJmsBackendMessageDeliveryListener backendMessageDeliveryListener;
     @MockitoBean
-    ConnectorGatewayMessageAcknowledgementListener gatewayMessageAcknowledgementListener;
+    ConnectorJmsGatewayMessageAcknowledgementListener gatewayMessageAcknowledgementListener;
     @MockitoBean
-    ConnectorGatewayMessageListener gatewayMessageListener;
+    ConnectorJmsGatewayMessageListener gatewayMessageListener;
     @MockitoBean
-    ConnectorInboundMessagePipelineListener inboundMessagePipelineListener;
+    ConnectorJmsInboundMessagePipelineListener inboundMessagePipelineListener;
     @MockitoBean
-    ConnectorOutboundMessagePipelineListener outboundMessagePipelineListener;
+    ConnectorJmsOutboundMessagePipelineListener outboundMessagePipelineListener;
     @MockitoBean
-    ConnectorOutboundMessageStagingListener outboundMessageStagingListener;
+    ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

@@ -29,8 +29,8 @@ public class BeanConfig {
     @ConditionalOnMissingBean   // won't conflict if another module already defines one
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
-                .findAndRegisterModules()
-                .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+            .findAndRegisterModules()
+            .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 }

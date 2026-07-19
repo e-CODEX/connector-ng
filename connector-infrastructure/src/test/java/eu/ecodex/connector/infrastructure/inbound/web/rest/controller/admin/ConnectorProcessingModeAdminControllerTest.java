@@ -19,10 +19,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRetrieveProcessingMode;
-import eu.ecodex.connector.domain.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;

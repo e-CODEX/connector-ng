@@ -43,6 +43,7 @@ public class HashValueBuilder {
      * Builds a hash value using the specified digest algorithm.
      *
      * @param originalMessage The byte array representing the original message to be hashed.
+     *
      * @return The hash value of the original message as a byte array.
      */
     public byte[] buildHashValue(byte[] originalMessage) {

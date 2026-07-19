@@ -15,8 +15,9 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenTechnicalTrustLevel;
+import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenAuthBasedTechnicalValidationGenerator;
 import eu.ecodex.connector.infrastructure.property.businessdocument.ConnectorBusinessDocumentProperties;
-import eu.ecodex.connector.infrastructure.security.model.token.ConnectorTokenTechnicalTrustLevel;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,23 +29,23 @@ public class ConnectorTokenAuthBasedTechnicalValidationGeneratorTest extends Bas
     @Test
     void should_build_validation_successfully() throws Exception {
         var message = MessageTestFixtures
-                .createOutboundBusinessMessage()
-                .toBuilder()
-                .businessContent(
-                        MessageContentTestFixtures
-                                .createContent()
-                                .toBuilder()
-                                .businessDocument(
-                                        ConnectorMessageDocumentTestFixtures
-                                                .createDocumentWithoutSignature()
-                                )
-                                .build()
-                )
-                .build();
+            .createOutboundBusinessMessage()
+            .toBuilder()
+            .businessContent(
+                MessageContentTestFixtures
+                    .createContent()
+                    .toBuilder()
+                    .businessDocument(
+                        ConnectorMessageDocumentTestFixtures
+                            .createDocumentWithoutSignature()
+                    )
+                    .build()
+            )
+            .build();
 
         var generator = new ConnectorTokenAuthBasedTechnicalValidationGenerator(
-                businessDocumentProperties.getAuthenticationValidation().getIdentityProvider(),
-                message
+            businessDocumentProperties.getAuthenticationValidation().getIdentityProvider(),
+            message
         );
 
         var validation = generator.generate(null, null);
@@ -53,13 +54,15 @@ public class ConnectorTokenAuthBasedTechnicalValidationGeneratorTest extends Bas
         var authData = validation.getVerificationData().getAuthenticationData();
         assertThat(authData).isNotNull();
         assertThat(authData.getIdentityProvider())
-                .isEqualTo(businessDocumentProperties.getAuthenticationValidation().getIdentityProvider());
-        assertThat(authData.getUsernameSynonym()).isEqualTo(message.as4Properties().originalSender());
+            .isEqualTo(businessDocumentProperties.getAuthenticationValidation()
+                                                 .getIdentityProvider());
+        assertThat(authData.getUsernameSynonym()).isEqualTo(message.as4Properties()
+                                                                   .originalSender());
 
         var technicalResult = validation.getTechnicalResult();
         assertThat(technicalResult).isNotNull();
         assertThat(technicalResult.getTrustLevel())
-                .isEqualTo(ConnectorTokenTechnicalTrustLevel.SUCCESSFUL);
+            .isEqualTo(ConnectorTokenTechnicalTrustLevel.SUCCESSFUL);
         assertThat(technicalResult.getComment()).isEqualTo("The authentication is valid.");
     }
 }

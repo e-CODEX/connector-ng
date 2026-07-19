@@ -59,8 +59,8 @@ public class ConnectorDssTimeStampingProtocol {
      * @param proxyConfig   proxy configuration applied to TSA calls
      */
     public ConnectorDssTimeStampingProtocol(
-            ConnectorDssProperties dssProperties,
-            NonceSource nonceSource, ProxyConfig proxyConfig) {
+        ConnectorDssProperties dssProperties,
+        NonceSource nonceSource, ProxyConfig proxyConfig) {
         this.dssProperties = dssProperties;
         this.nonceSource = nonceSource;
         this.proxyConfig = proxyConfig;
@@ -83,7 +83,7 @@ public class ConnectorDssTimeStampingProtocol {
         servers.forEach((name, tsaProps) -> {
             if (!StringUtils.hasText(tsaProps.getUrl())) {
                 throw new IllegalArgumentException(
-                        "TSA [" + name + "] is missing a required URL");
+                    "TSA [" + name + "] is missing a required URL");
             }
         });
 
@@ -102,10 +102,10 @@ public class ConnectorDssTimeStampingProtocol {
             }
 
             log.info(
-                    "TSA [{}] -> {} with policy [{}] registered",
-                    name,
-                    tsaProps.getUrl(),
-                    policyID
+                "TSA [{}] -> {} with policy [{}] registered",
+                name,
+                tsaProps.getUrl(),
+                policyID
             );
 
             tspMap.put(name, source);

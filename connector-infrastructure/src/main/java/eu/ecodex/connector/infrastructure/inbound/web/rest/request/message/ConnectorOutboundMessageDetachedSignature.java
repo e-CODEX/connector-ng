@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Builder
 public record ConnectorOutboundMessageDetachedSignature(
-        MultipartFile signature,
-        DetachedSignatureMimeType mimeType
+    MultipartFile signature,
+    DetachedSignatureMimeType mimeType
 ) implements Serializable {
 }

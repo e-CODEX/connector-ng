@@ -31,13 +31,13 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorProcessingModeDto(
-        String uuid,
-        String description,
-        String content,
-        String filename,
-        String businessDomainIdentifier,
-        Instant createdAt,
-        Instant updatedAt
+    String uuid,
+    String description,
+    String content,
+    String filename,
+    String businessDomainIdentifier,
+    Instant createdAt,
+    Instant updatedAt
 ) {
     /**
      * Converts a ConnectorProcessingMode entity into a ConnectorProcessingModeDto.
@@ -45,22 +45,21 @@ public record ConnectorProcessingModeDto(
      * @param processingMode the ConnectorProcessingMode instance containing the data to be
      *                       converted
      *
-     * @return a ConnectorProcessingModeDto instance built from the provided
-     *         ConnectorProcessingMode
+     * @return a ConnectorProcessingModeDto instance built from the provided ConnectorProcessingMode
      */
     public static ConnectorProcessingModeDto from(ConnectorProcessingMode processingMode) {
         return ConnectorProcessingModeDto
-                .builder()
-                .uuid(processingMode.uuid())
-                .description(processingMode.description())
-                .content(processingMode.content())
-                .filename(processingMode.filename())
-                .businessDomainIdentifier(
-                        Objects.requireNonNull(processingMode.businessDomain())
-                               .identifier().messageLaneIdentifier()
-                )
-                .createdAt(processingMode.createdAt())
-                .updatedAt(processingMode.updatedAt())
-                .build();
+            .builder()
+            .uuid(processingMode.uuid())
+            .description(processingMode.description())
+            .content(processingMode.content())
+            .filename(processingMode.filename())
+            .businessDomainIdentifier(
+                Objects.requireNonNull(processingMode.businessDomain())
+                       .identifier().messageLaneIdentifier()
+            )
+            .createdAt(processingMode.createdAt())
+            .updatedAt(processingMode.updatedAt())
+            .build();
     }
 }

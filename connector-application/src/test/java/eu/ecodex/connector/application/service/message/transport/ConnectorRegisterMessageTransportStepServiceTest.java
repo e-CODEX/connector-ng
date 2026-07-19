@@ -19,12 +19,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.impl.message.transport.ConnectorRegisterMessageTransportStepService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,8 +47,11 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
     @Test
     void should_throw_exception_if_message_is_null() {
-        assertThatThrownBy(() -> service.execute(null, ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD))
-                .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> service.execute(
+            null,
+            ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
+        ))
+            .isInstanceOf(NullPointerException.class);
 
         verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
     }
@@ -57,7 +59,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
     @Test
     void should_throw_exception_if_status_is_null() {
         assertThatThrownBy(() -> service.execute(message(), null))
-                .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class);
 
         verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
     }
@@ -67,11 +69,11 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         var message = ConnectorMessage.builder().identifier(null).build();
 
         assertThatThrownBy(() -> service.execute(
-                message,
-                ConnectorMessageTransportStatus.SUBMITTED
+            message,
+            ConnectorMessageTransportStatus.SUBMITTED
         ))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Message identifier must not be null");
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Message identifier must not be null");
 
         verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
     }
@@ -81,8 +83,8 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         var message = ConnectorMessage.builder().identifier(null).build();
 
         assertThrows(
-                IllegalArgumentException.class,
-                () -> service.execute(message, ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+            IllegalArgumentException.class,
+            () -> service.execute(message, ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
         );
 
         verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
@@ -99,11 +101,11 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
 
         verify(transportStepRepository).save(
-                argThat(
-                        step ->
-                                step.numberOfAttempts() == 1
-                                        && step.status() == ConnectorMessageTransportStatus.SUBMITTED
-                ));
+            argThat(
+                step ->
+                    step.numberOfAttempts() == 1
+                        && step.status() == ConnectorMessageTransportStatus.SUBMITTED
+            ));
     }
 
     private ConnectorMessage message() {

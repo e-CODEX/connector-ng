@@ -50,8 +50,8 @@ public class ConnectorLinkPartnerConfigFactory {
             for (var backendProperties : backendList) {
                 for (var partnerProperties : backendProperties.getLinkPartners()) {
                     var linkPartnerName = ConnectorLinkPartnerName.builder()
-                            .name(partnerProperties.getName())
-                            .build();
+                                                                  .name(partnerProperties.getName())
+                                                                  .build();
                     checkNoDuplicateName(partnersConfigMap, linkPartnerName);
                     partnersConfigMap.put(linkPartnerName, backendProperties.getLinkConfig());
                 }
@@ -68,20 +68,20 @@ public class ConnectorLinkPartnerConfigFactory {
      *             not be null.
      *
      * @return The {@code LinkConfigProperties} associated with the specified link partner name.
-     *         Returns {@code null} if no configuration is found for the given name.
+     *     Returns {@code null} if no configuration is found for the given name.
      */
     public LinkConfigProperties findByLinkPartnerName(@NonNull ConnectorLinkPartnerName name) {
         return this.partnersConfig.getOrDefault(name, null);
     }
 
     private void checkNoDuplicateName(
-            Map<ConnectorLinkPartnerName, ?> map,
-            ConnectorLinkPartnerName name) {
+        Map<ConnectorLinkPartnerName, ?> map,
+        ConnectorLinkPartnerName name) {
         if (map.containsKey(name)) {
             throw new IllegalStateException(
-                    "Duplicate link partner name detected during registry initialisation: '"
-                            + name.name() + "'. Each partner name must be unique across gateway "
-                            + "and backend."
+                "Duplicate link partner name detected during registry initialisation: '"
+                    + name.name() + "'. Each partner name must be unique across gateway "
+                    + "and backend."
             );
         }
     }

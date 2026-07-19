@@ -16,8 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.step.ConnectorInboundMessageSecurityStep;
-import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
+import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,7 +49,7 @@ public class ConnectorInboundMessageSecurityStepTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class, () -> securityStep.execute(null)
+            NullPointerException.class, () -> securityStep.execute(null)
         );
     }
 }

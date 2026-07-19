@@ -59,11 +59,11 @@ public class ConnectorDssCertificateVerifier {
      * @param dataLoader              data loader used for AIA resolution
      */
     public ConnectorDssCertificateVerifier(
-            ConnectorDssCertificateSourceLoader certificateSourceLoader,
-            ConnectorDssTrustedListLoader trustedListLoader,
-            OnlineCRLSource onlineCRLSource,
-            OnlineOCSPSource onlineOCSPSource,
-            DataLoader dataLoader) {
+        ConnectorDssCertificateSourceLoader certificateSourceLoader,
+        ConnectorDssTrustedListLoader trustedListLoader,
+        OnlineCRLSource onlineCRLSource,
+        OnlineOCSPSource onlineOCSPSource,
+        DataLoader dataLoader) {
         this.certificateSourceLoader = certificateSourceLoader;
         this.trustedListLoader = trustedListLoader;
         this.onlineCRLSource = onlineCRLSource;
@@ -88,10 +88,11 @@ public class ConnectorDssCertificateVerifier {
      * @param properties the verifier configuration properties
      *
      * @return a fully configured {@link CommonCertificateVerifier}
+     *
      * @throws IllegalArgumentException if required, truststore configuration is missing
      */
     public CommonCertificateVerifier createCommonCertificateVerifier(
-            ConnectorCertificateVerifierProperties properties) {
+        ConnectorCertificateVerifierProperties properties) {
         log.debug("Initializing certificate verifier");
         var commonCertificateVerifier = new CommonCertificateVerifier(true);
 
@@ -108,12 +109,12 @@ public class ConnectorDssCertificateVerifier {
                 trustedCertificateSourcesList.add(certificateSource);
             } else {
                 log.warn(
-                        "There is no TrustedListsCertificateSource with key [{}] configured.",
-                        trustedListSourceName
+                    "There is no TrustedListsCertificateSource with key [{}] configured.",
+                    trustedListSourceName
                 );
                 log.warn(
-                        "Available TrustedListsCertificateSource are [{}]",
-                        trustedListLoader.getAllSourceNames()
+                    "Available TrustedListsCertificateSource are [{}]",
+                    trustedListLoader.getAllSourceNames()
                 );
             }
         }
@@ -122,10 +123,10 @@ public class ConnectorDssCertificateVerifier {
             var truststore = properties.getTruststore();
             if (truststore == null) {
                 throw new IllegalArgumentException(
-                        "Trust store is set to enabled, but it is not configured!");
+                    "Trust store is set to enabled, but it is not configured!");
             }
             var certificateSourceFromStore =
-                    certificateSourceLoader.createCommonTrustedCertificateSource(truststore);
+                certificateSourceLoader.createCommonTrustedCertificateSource(truststore);
             trustedCertificateSourcesList.add(certificateSourceFromStore);
         } else {
             log.debug("truststore is not enabled");
@@ -136,13 +137,13 @@ public class ConnectorDssCertificateVerifier {
         } else {
             commonCertificateVerifier.setTrustedCertSources(trustedCertificateSourcesList);
             log.debug(
-                    "Setting trusted certificate sources: [{}]",
-                    trustedCertificateSourcesList
-                            .getSources()
-                            .stream()
-                            .map(s -> "[" + s.getCertificateSourceType()
-                                      + " entries " + s.getCertificates().size() + "]")
-                            .collect(Collectors.joining(","))
+                "Setting trusted certificate sources: [{}]",
+                trustedCertificateSourcesList
+                    .getSources()
+                    .stream()
+                    .map(s -> "[" + s.getCertificateSourceType()
+                        + " entries " + s.getCertificates().size() + "]")
+                    .collect(Collectors.joining(","))
             );
         }
 
@@ -150,14 +151,14 @@ public class ConnectorDssCertificateVerifier {
             var ignoreStore = properties.getIgnoreStore();
             if (ignoreStore == null) {
                 throw new IllegalArgumentException(
-                        "Trust store is set to enabled, but it is not configured!");
+                    "Trust store is set to enabled, but it is not configured!");
             }
 
             var certificateSourceFromStore =
-                    certificateSourceLoader.createCommonTrustedCertificateSource(ignoreStore);
+                certificateSourceLoader.createCommonTrustedCertificateSource(ignoreStore);
             commonCertificateVerifier.setAdjunctCertSources(certificateSourceFromStore);
             log.debug(
-                    "Setting untrusted certificate source: [{}]", certificateSourceFromStore);
+                "Setting untrusted certificate source: [{}]", certificateSourceFromStore);
         } else {
             log.debug("ignore store is not enabled");
         }
@@ -166,8 +167,8 @@ public class ConnectorDssCertificateVerifier {
     }
 
     private void configureAia(
-            ConnectorCertificateVerifierProperties properties,
-            CommonCertificateVerifier commonCertificateVerifier) {
+        ConnectorCertificateVerifierProperties properties,
+        CommonCertificateVerifier commonCertificateVerifier) {
         if (properties.isAiaEnabled()) {
             log.info("AIA loading is enabled");
             var aiaSource = new DefaultAIASource(dataLoader);
@@ -178,8 +179,8 @@ public class ConnectorDssCertificateVerifier {
     }
 
     private void configureOcsp(
-            ConnectorCertificateVerifierProperties properties,
-            CommonCertificateVerifier commonCertificateVerifier) {
+        ConnectorCertificateVerifierProperties properties,
+        CommonCertificateVerifier commonCertificateVerifier) {
         if (properties.isOcspEnabled()) {
             log.info("OCSP loading is enabled");
             commonCertificateVerifier.setOcspSource(onlineOCSPSource);
@@ -189,8 +190,8 @@ public class ConnectorDssCertificateVerifier {
     }
 
     private void configureCrl(
-            ConnectorCertificateVerifierProperties properties,
-            CommonCertificateVerifier commonCertificateVerifier) {
+        ConnectorCertificateVerifierProperties properties,
+        CommonCertificateVerifier commonCertificateVerifier) {
         if (properties.isCrlEnabled()) {
             log.info("CRL loading is enabled");
             commonCertificateVerifier.setCrlSource(onlineCRLSource);

@@ -17,9 +17,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.link.ConnectorLinkSubmitterService;
-import eu.ecodex.connector.application.service.usecase.link.ConnectorLinkPartnerVerifier;
-import eu.ecodex.connector.domain.spi.link.ConnectorLinkTransportStrategy;
+import eu.ecodex.connector.application.port.api.link.ConnectorLinkPartnerVerifier;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkTransportStrategy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -33,8 +33,8 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageRoutingConfiguration(
-        boolean enabled,
-        Map<ConnectorBusinessDomainIdentifier, ConnectorMessageRoutingBusinessDomainProperties>
-        businessDomainRouting
+    boolean enabled,
+    Map<ConnectorBusinessDomainIdentifier, ConnectorMessageRoutingBusinessDomainProperties>
+    businessDomainRouting
 ) {
 }

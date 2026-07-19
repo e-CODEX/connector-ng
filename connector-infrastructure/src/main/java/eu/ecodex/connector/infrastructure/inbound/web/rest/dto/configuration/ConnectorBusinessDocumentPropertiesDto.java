@@ -20,10 +20,10 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDocumentPropertiesDto(
-        String country,
-        String serviceProvider,
-        ConnectorBusinessDocumentAESType defaultAdvancedSystemType,
-        AuthenticationValidationProperties authenticationValidation,
-        BusinessDocumentSignatureProperties signature
+    String country,
+    String serviceProvider,
+    ConnectorBusinessDocumentAESType defaultAdvancedSystemType,
+    AuthenticationValidationProperties authenticationValidation,
+    BusinessDocumentSignatureProperties signature
 ) {
 }

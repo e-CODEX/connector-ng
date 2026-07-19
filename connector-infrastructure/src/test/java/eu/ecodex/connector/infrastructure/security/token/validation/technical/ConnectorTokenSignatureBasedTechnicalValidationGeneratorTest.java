@@ -13,7 +13,8 @@ package eu.ecodex.connector.infrastructure.security.token.validation.technical;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.infrastructure.security.model.token.ConnectorTokenTechnicalTrustLevel;
+import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenTechnicalTrustLevel;
+import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenSignatureBasedTechnicalValidationGenerator;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import org.junit.jupiter.api.Test;

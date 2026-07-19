@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Validates that at least one of the specified fields is not empty.
  */
 public class AtLeastOneNotEmptyValidator
-        implements ConstraintValidator<AtLeastOneNotEmpty, Object> {
+    implements ConstraintValidator<AtLeastOneNotEmpty, Object> {
     private String[] fields;
 
     @Override
@@ -48,7 +48,7 @@ public class AtLeastOneNotEmptyValidator
         var labels = String.join(", ", fields);
         context.disableDefaultConstraintViolation();
         context.buildConstraintViolationWithTemplate(
-                "At least one of the following must be provided: " + labels
+            "At least one of the following must be provided: " + labels
         ).addConstraintViolation();
 
         return false;

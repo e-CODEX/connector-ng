@@ -21,7 +21,7 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorOutboundMessageService(
-        @NotBlank String name,
-        @NotBlank String type
+    @NotBlank String name,
+    @NotBlank String type
 ) {
 }

@@ -24,7 +24,7 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorEvidenceMessageDto(
-        @NotBlank String identifier
+    @NotBlank String identifier
 ) {
     public static ConnectorEvidenceMessageDto of(String identifier) {
         return new ConnectorEvidenceMessageDto(identifier);

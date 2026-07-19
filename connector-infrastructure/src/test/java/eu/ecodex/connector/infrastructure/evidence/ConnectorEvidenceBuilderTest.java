@@ -19,11 +19,11 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssDocumentSigner;
-import eu.ecodex.connector.infrastructure.evidence.builder.ConnectorEvidenceBuilder;
-import eu.ecodex.connector.infrastructure.evidence.builder.ConnectorRemEvidenceBuilder;
-import eu.ecodex.connector.infrastructure.evidence.exception.ConnectorEvidenceBuilderException;
-import eu.ecodex.connector.infrastructure.evidence.model.ConnectorEvidenceMessageDetails;
-import eu.ecodex.connector.infrastructure.evidence.spocseu.model.EDeliveryDetails;
+import eu.ecodex.connector.infrastructure.outbound.evidence.builder.ConnectorEvidenceBuilder;
+import eu.ecodex.connector.infrastructure.outbound.evidence.builder.ConnectorRemEvidenceBuilder;
+import eu.ecodex.connector.infrastructure.outbound.evidence.exception.ConnectorEvidenceBuilderException;
+import eu.ecodex.connector.infrastructure.outbound.evidence.model.ConnectorEvidenceMessageDetails;
+import eu.ecodex.connector.infrastructure.outbound.evidence.spocseu.model.EDeliveryDetails;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;

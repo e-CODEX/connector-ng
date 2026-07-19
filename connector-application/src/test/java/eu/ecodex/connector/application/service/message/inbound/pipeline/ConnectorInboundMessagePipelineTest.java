@@ -18,9 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.inbound.pipeline.ConnectorInboundMessagePipeline;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessagePipeline;
-import eu.ecodex.connector.application.service.usecase.message.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessagePipeline;
+import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,11 +47,11 @@ public class ConnectorInboundMessagePipelineTest {
     @BeforeEach
     void setUp() {
         inboundMessagePipeline = new ConnectorInboundMessagePipeline(
-                backendNameStep,
-                acceptanceStep,
-                securityStep,
-                nonDeliveryStep,
-                linkSubmissionStep
+            backendNameStep,
+            acceptanceStep,
+            securityStep,
+            nonDeliveryStep,
+            linkSubmissionStep
         );
     }
 
@@ -95,7 +94,7 @@ public class ConnectorInboundMessagePipelineTest {
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class, () -> inboundMessagePipeline.process(null)
+            NullPointerException.class, () -> inboundMessagePipeline.process(null)
         );
     }
 }

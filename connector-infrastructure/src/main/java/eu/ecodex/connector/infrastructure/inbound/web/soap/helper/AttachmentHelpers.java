@@ -43,7 +43,7 @@ public class AttachmentHelpers {
     public static Path sourceToTempFile(Source source) throws Exception {
         var sourceFileName = StringUtils.cleanPath(getSourceFileName(source));
         var tempFile = Files.createTempFile(
-                "ws-payload-", !StringUtils.hasText(sourceFileName) ? "default.tmp" : sourceFileName
+            "ws-payload-", !StringUtils.hasText(sourceFileName) ? "default.tmp" : sourceFileName
         );
         try {
             var transformer = transformerFactory.newTransformer();

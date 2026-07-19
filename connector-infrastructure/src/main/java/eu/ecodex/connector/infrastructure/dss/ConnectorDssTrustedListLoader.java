@@ -44,7 +44,7 @@ public class ConnectorDssTrustedListLoader {
     private final ConnectorDssTrustedListFactory trustedListFactory;
     private final ConnectorDssProperties dssProperties;
     private Map<String, TrustedListsCertificateSource> trustedListsCertificateSourceMap
-            = new HashMap<>();
+        = new HashMap<>();
 
     /**
      * Constructs and initializes the trusted list manager.
@@ -57,10 +57,10 @@ public class ConnectorDssTrustedListLoader {
      * @param dssProperties      DSS connector configuration properties
      */
     public ConnectorDssTrustedListLoader(
-            ConnectorDssDataLoaderFactory dataLoaderFactory,
-            ConnectorDssLotlFactory dssLotlFactory,
-            ConnectorDssTrustedListFactory trustedListFactory,
-            ConnectorDssProperties dssProperties) {
+        ConnectorDssDataLoaderFactory dataLoaderFactory,
+        ConnectorDssLotlFactory dssLotlFactory,
+        ConnectorDssTrustedListFactory trustedListFactory,
+        ConnectorDssProperties dssProperties) {
         this.dataLoaderFactory = dataLoaderFactory;
         this.dssLotlFactory = dssLotlFactory;
         this.trustedListFactory = trustedListFactory;
@@ -97,7 +97,7 @@ public class ConnectorDssTrustedListLoader {
         var trustSources = this.dssProperties.getTrustListSources();
         trustSources.forEach((key, value) -> buildTrustSource(key));
         this.trustedListsCertificateSourceMap = Collections.unmodifiableMap(
-                trustedListsCertificateSourceMap
+            trustedListsCertificateSourceMap
         );
     }
 
@@ -108,10 +108,10 @@ public class ConnectorDssTrustedListLoader {
         job.setDebug(log.isDebugEnabled());
 
         job.setListOfTrustedListSources(
-                dssLotlFactory.getLotlSources().toArray(LOTLSource[]::new)
+            dssLotlFactory.getLotlSources().toArray(LOTLSource[]::new)
         );
         job.setTrustedListSources(
-                trustedListFactory.getTrustedListSources().toArray(TLSource[]::new)
+            trustedListFactory.getTrustedListSources().toArray(TLSource[]::new)
         );
         job.setOfflineDataLoader(dataLoaderFactory.createFileCacheDataLoader());
         job.setOnlineDataLoader(dataLoaderFactory.createOnlineDataLoader());
@@ -124,14 +124,14 @@ public class ConnectorDssTrustedListLoader {
         } catch (Exception e) {
             // Offline data still usable; log and continue rather than failing to startup
             log.warn(
-                    "Online refresh failed for trust source [{}], falling back to cache: [{}]",
-                    name, e.getMessage()
+                "Online refresh failed for trust source [{}], falling back to cache: [{}]",
+                name, e.getMessage()
             );
         }
 
         log.info(
-                "Configured trust source [{}] with {} trusted public keys",
-                name, certificateSource.getNumberOfTrustedPublicKeys()
+            "Configured trust source [{}] with {} trusted public keys",
+            name, certificateSource.getNumberOfTrustedPublicKeys()
         );
 
         trustedListsCertificateSourceMap.put(name, certificateSource);

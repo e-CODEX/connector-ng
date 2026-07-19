@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.helper;
 
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -18,8 +20,6 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.transition.DomibusConnectorActionType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorConfirmationType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureMimeType;
@@ -52,8 +52,8 @@ public class LegacyMessageHelper {
     private final ConnectorFileStorageProvider fileStorageProvider;
 
     public LegacyMessageHelper(
-            ConnectorMessageAttachmentRepository attachmentRepository,
-            ConnectorFileStorageProvider fileStorageProvider) {
+        ConnectorMessageAttachmentRepository attachmentRepository,
+        ConnectorFileStorageProvider fileStorageProvider) {
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
     }
@@ -64,7 +64,7 @@ public class LegacyMessageHelper {
      * @param message the {@link ConnectorMessage} instance to be converted
      *
      * @return a {@link DomibusConnectorMessageType} instance containing the converted data from the
-     *         input message
+     *     input message
      */
     public DomibusConnectorMessageType convertMessage(ConnectorMessage message) {
         var details = convertDetails(message);
@@ -76,11 +76,11 @@ public class LegacyMessageHelper {
         }
 
         messageType.getMessageAttachments().addAll(
-                toAttachments(message.identifier())
+            toAttachments(message.identifier())
         );
 
         messageType.getMessageConfirmations().addAll(
-                toConfirmations(message.transportedEvidences())
+            toConfirmations(message.transportedEvidences())
         );
 
         messageType.getMessageErrors().addAll(toErrors(message.errors()));
@@ -154,9 +154,9 @@ public class LegacyMessageHelper {
         var data = this.fileStorageProvider.findByIdentifier(content.xmlContent().identifier());
         var contentType = new DomibusConnectorMessageContentType();
         contentType.setXmlContent(
-                new StreamSource(
-                        new ByteArrayInputStream(Arrays.copyOf(data, data.length))
-                )
+            new StreamSource(
+                new ByteArrayInputStream(Arrays.copyOf(data, data.length))
+            )
         );
         contentType.setDocument(toDocument(content.businessDocument()));
 
@@ -164,7 +164,7 @@ public class LegacyMessageHelper {
     }
 
     private DomibusConnectorMessageDocumentType toDocument(
-            ConnectorMessageBusinessDocument document) {
+        ConnectorMessageBusinessDocument document) {
         if (document == null) {
             return null;
         }
@@ -174,26 +174,26 @@ public class LegacyMessageHelper {
         var documentType = new DomibusConnectorMessageDocumentType();
         documentType.setDocumentName(document.attachment().name());
         documentType.setDocument(
-                new DataHandler(
-                        new ByteArrayDataSource(
-                                Arrays.copyOf(data, data.length),
-                                document.attachment().contentType()
-                        )
+            new DataHandler(
+                new ByteArrayDataSource(
+                    Arrays.copyOf(data, data.length),
+                    document.attachment().contentType()
                 )
+            )
         );
 
         if (document.aesType() != null) {
             documentType.setAesType(
-                    DomibusConnectorDocumentAESType.fromValue(document.aesType().name())
+                DomibusConnectorDocumentAESType.fromValue(document.aesType().name())
             );
         }
 
         if (document.detachedSignature() != null) {
             var detachedSignature = new DomibusConnectorDetachedSignatureType();
             detachedSignature.setMimeType(
-                    DomibusConnectorDetachedSignatureMimeType.fromValue(document.detachedSignature()
-                                                                                .mimeType()
-                                                                                .name())
+                DomibusConnectorDetachedSignatureMimeType.fromValue(document.detachedSignature()
+                                                                            .mimeType()
+                                                                            .name())
             );
             detachedSignature.setDetachedSignatureName(document.detachedSignature().name());
             detachedSignature.setDetachedSignature(document.detachedSignature().signature());
@@ -205,12 +205,12 @@ public class LegacyMessageHelper {
 
     private List<DomibusConnectorMessageAttachmentType> toAttachments(String messageIdentifier) {
         var attachments = this.attachmentRepository.findByMessageIdentifierAndTypes(
-                messageIdentifier,
-                List.of(
-                        ConnectorAttachmentType.ATTACHMENT,
-                        ConnectorAttachmentType.PDF_TOKEN,
-                        ConnectorAttachmentType.XML_TOKEN
-                )
+            messageIdentifier,
+            List.of(
+                ConnectorAttachmentType.ATTACHMENT,
+                ConnectorAttachmentType.PDF_TOKEN,
+                ConnectorAttachmentType.XML_TOKEN
+            )
         );
 
         return attachments.stream().map((attachment) -> {
@@ -221,11 +221,11 @@ public class LegacyMessageHelper {
             attachmentType.setMimeType(attachment.contentType());
             attachmentType.setDescription(attachment.description());
             attachmentType.setAttachment(
-                    new DataHandler(
-                            new ByteArrayDataSource(
-                                    Arrays.copyOf(data, data.length), attachment.contentType()
-                            )
+                new DataHandler(
+                    new ByteArrayDataSource(
+                        Arrays.copyOf(data, data.length), attachment.contentType()
                     )
+                )
             );
 
             return attachmentType;
@@ -233,7 +233,7 @@ public class LegacyMessageHelper {
     }
 
     private List<DomibusConnectorMessageConfirmationType> toConfirmations(
-            List<ConnectorMessageEvidence> transportedEvidences) {
+        List<ConnectorMessageEvidence> transportedEvidences) {
 
         if (transportedEvidences == null || transportedEvidences.isEmpty()) {
             return new ArrayList<>();
@@ -244,21 +244,21 @@ public class LegacyMessageHelper {
 
             if (content == null) {
                 throw new IllegalStateException(
-                        "Evidence content is null for evidence " + evidence.type()
+                    "Evidence content is null for evidence " + evidence.type()
                 );
             }
 
             var confirmation = new DomibusConnectorMessageConfirmationType();
             confirmation.setConfirmationType(
-                    DomibusConnectorConfirmationType.fromValue(evidence.type().name())
+                DomibusConnectorConfirmationType.fromValue(evidence.type().name())
             );
             confirmation.setConfirmation(
-                    new StreamSource(
-                            new ByteArrayInputStream(Arrays.copyOf(
-                                    evidence.content(),
-                                    evidence.content().length
-                            ))
-                    )
+                new StreamSource(
+                    new ByteArrayInputStream(Arrays.copyOf(
+                        evidence.content(),
+                        evidence.content().length
+                    ))
+                )
             );
 
             return confirmation;

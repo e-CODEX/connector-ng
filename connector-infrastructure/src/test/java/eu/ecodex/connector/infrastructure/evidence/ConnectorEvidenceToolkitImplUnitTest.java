@@ -22,18 +22,19 @@ import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.domain.exception.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.infrastructure.evidence.builder.ConnectorEvidenceBuilder;
-import eu.ecodex.connector.infrastructure.evidence.exception.ConnectorEvidenceBuilderException;
-import eu.ecodex.connector.infrastructure.evidence.model.ConnectorEvidenceMessageDetails;
+import eu.ecodex.connector.infrastructure.outbound.evidence.ConnectorEvidenceToolkitImpl;
+import eu.ecodex.connector.infrastructure.outbound.evidence.builder.ConnectorEvidenceBuilder;
+import eu.ecodex.connector.infrastructure.outbound.evidence.exception.ConnectorEvidenceBuilderException;
+import eu.ecodex.connector.infrastructure.outbound.evidence.model.ConnectorEvidenceMessageDetails;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
 import java.nio.charset.StandardCharsets;
@@ -61,9 +62,9 @@ class ConnectorEvidenceToolkitImplUnitTest {
     private static final String HASH_HEX = "abab";
     private static final String PRIOR_EVIDENCE_ATTACHMENT_ID = "prior-attachment-for-test";
     private static final String BUSINESS_XML_ATTACHMENT_ID =
-            "104ebc70-abd5-45da-8c74-940d687501b3_messageContent";
+        "104ebc70-abd5-45da-8c74-940d687501b3_messageContent";
     private static final String FIXTURE_SUBMISSION_ACCEPTANCE_ATTACHMENT_ID =
-            "c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE";
+        "c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE";
 
     @Mock
     private ConnectorEvidenceBuilder evidenceBuilder;
@@ -78,32 +79,32 @@ class ConnectorEvidenceToolkitImplUnitTest {
 
     static Stream<Arguments> rejectionEvidenceTypes() {
         return Stream.of(
-                Arguments.of(ConnectorEvidenceType.SUBMISSION_REJECTION),
-                Arguments.of(ConnectorEvidenceType.RELAY_REMMD_REJECTION),
-                Arguments.of(ConnectorEvidenceType.RELAY_REMMD_FAILURE),
-                Arguments.of(ConnectorEvidenceType.NON_DELIVERY),
-                Arguments.of(ConnectorEvidenceType.NON_RETRIEVAL)
+            Arguments.of(ConnectorEvidenceType.SUBMISSION_REJECTION),
+            Arguments.of(ConnectorEvidenceType.RELAY_REMMD_REJECTION),
+            Arguments.of(ConnectorEvidenceType.RELAY_REMMD_FAILURE),
+            Arguments.of(ConnectorEvidenceType.NON_DELIVERY),
+            Arguments.of(ConnectorEvidenceType.NON_RETRIEVAL)
         );
     }
 
     static Stream<Arguments> missingPredecessorCases() {
         return Stream.of(
-                Arguments.of(
-                        ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
-                        ConnectorEvidenceType.DELIVERY
-                ),
-                Arguments.of(
-                        ConnectorEvidenceType.DELIVERY,
-                        ConnectorEvidenceType.SUBMISSION_ACCEPTANCE
-                ),
-                Arguments.of(
-                        ConnectorEvidenceType.RETRIEVAL,
-                        ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
-                ),
-                Arguments.of(
-                        ConnectorEvidenceType.RELAY_REMMD_FAILURE,
-                        ConnectorEvidenceType.DELIVERY
-                )
+            Arguments.of(
+                ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
+                ConnectorEvidenceType.DELIVERY
+            ),
+            Arguments.of(
+                ConnectorEvidenceType.DELIVERY,
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE
+            ),
+            Arguments.of(
+                ConnectorEvidenceType.RETRIEVAL,
+                ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
+            ),
+            Arguments.of(
+                ConnectorEvidenceType.RELAY_REMMD_FAILURE,
+                ConnectorEvidenceType.DELIVERY
+            )
         );
     }
 
@@ -118,22 +119,22 @@ class ConnectorEvidenceToolkitImplUnitTest {
         evidencesProperties.getIssuer().getPostalAddress().setCountry("EU");
 
         when(attachmentRepository.save(any(ConnectorMessageAttachment.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
+            .thenAnswer(inv -> inv.getArgument(0));
         when(fileStorageProvider.findByIdentifier(PRIOR_EVIDENCE_ATTACHMENT_ID)).thenReturn(PREV);
         when(fileStorageProvider.findByIdentifier(FIXTURE_SUBMISSION_ACCEPTANCE_ATTACHMENT_ID)).thenReturn(
-                PREV);
+            PREV);
         when(fileStorageProvider.findByIdentifier(BUSINESS_XML_ATTACHMENT_ID))
-                .thenReturn("<?xml version=\"1.0\"?><root/>".getBytes(StandardCharsets.UTF_8));
+            .thenReturn("<?xml version=\"1.0\"?><root/>".getBytes(StandardCharsets.UTF_8));
 
         when(hashValueBuilder.getAlgorithm()).thenReturn("SHA-256");
         defaultEvidenceBuilderStubs();
 
         toolkit = new ConnectorEvidenceToolkitImpl(
-                attachmentRepository,
-                fileStorageProvider,
-                evidenceBuilder,
-                hashValueBuilder,
-                evidencesProperties
+            attachmentRepository,
+            fileStorageProvider,
+            evidenceBuilder,
+            hashValueBuilder,
+            evidencesProperties
         );
     }
 
@@ -152,7 +153,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
 
         var detailsCaptor = ArgumentCaptor.forClass(ConnectorEvidenceMessageDetails.class);
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
+            eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
         );
         var details = detailsCaptor.getValue();
         assertThat(details.getNationalMessageId()).isEqualTo(message.backendMessageIdentifier());
@@ -176,7 +177,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var detailsCaptor = ArgumentCaptor.forClass(ConnectorEvidenceMessageDetails.class);
 
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
+            eq(true), nullable(EventReasonType.class), any(), detailsCaptor.capture()
         );
         assertThat(detailsCaptor.getValue().getHashValue()).isNull();
     }
@@ -188,8 +189,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         var evidence = toolkit.create(
-                message, ConnectorEvidenceType.SUBMISSION_REJECTION,
-                ConnectorMessageRejectionReason.BACKEND_REJECTION
+            message, ConnectorEvidenceType.SUBMISSION_REJECTION,
+            ConnectorMessageRejectionReason.BACKEND_REJECTION
         );
 
         assertThat(evidence).isNotNull();
@@ -197,12 +198,12 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
-                eq(false), reasonCaptor.capture(), any(), detailsCaptor.capture()
+            eq(false), reasonCaptor.capture(), any(), detailsCaptor.capture()
         );
         assertThat(reasonCaptor.getValue().getCode())
-                .isEqualTo(ConnectorMessageRejectionReason.BACKEND_REJECTION.getErrorCode());
+            .isEqualTo(ConnectorMessageRejectionReason.BACKEND_REJECTION.getErrorCode());
         assertThat(reasonCaptor.getValue().getDetails())
-                .isEqualTo(ConnectorMessageRejectionReason.BACKEND_REJECTION.getReason());
+            .isEqualTo(ConnectorMessageRejectionReason.BACKEND_REJECTION.getReason());
     }
 
     @Test
@@ -211,8 +212,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         var evidence = toolkit.create(
-                message, ConnectorEvidenceType.SUBMISSION_REJECTION,
-                ConnectorMessageRejectionReason.UNSPECIFIC_PROCESSING_ERROR
+            message, ConnectorEvidenceType.SUBMISSION_REJECTION,
+            ConnectorMessageRejectionReason.UNSPECIFIC_PROCESSING_ERROR
         );
 
         assertThat(evidence).isNotNull();
@@ -220,10 +221,10 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createSubmissionAcceptanceRejection(
-                eq(false), reasonCaptor.capture(), any(), any()
+            eq(false), reasonCaptor.capture(), any(), any()
         );
         assertThat(reasonCaptor.getValue().getDetails())
-                .isEqualTo(ConnectorMessageRejectionReason.UNSPECIFIC_PROCESSING_ERROR.name());
+            .isEqualTo(ConnectorMessageRejectionReason.UNSPECIFIC_PROCESSING_ERROR.name());
     }
 
     @ParameterizedTest
@@ -232,8 +233,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var message = messageWithPrior(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
 
         assertThatThrownBy(() -> toolkit.create(message, type, null))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("RejectionReason may not be null");
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("RejectionReason may not be null");
     }
 
     @Test
@@ -241,9 +242,9 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var message = submissionReadyMessage().toBuilder().backendMessageIdentifier("  ").build();
 
         assertThatThrownBy(
-                () -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("nationalMessageId");
+            () -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("nationalMessageId");
     }
 
     @Test
@@ -252,9 +253,9 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var message = submissionReadyMessage().toBuilder().as4Properties(as4).build();
 
         assertThatThrownBy(
-                () -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("finalRecipient");
+            () -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("finalRecipient");
     }
 
     @Test
@@ -263,9 +264,9 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var message = submissionReadyMessage().toBuilder().as4Properties(as4).build();
 
         assertThatThrownBy(
-                () -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("originalSender");
+            () -> toolkit.create(message, ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null))
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("originalSender");
     }
 
     @Test
@@ -283,50 +284,50 @@ class ConnectorEvidenceToolkitImplUnitTest {
                                                      .build();
 
         when(fileStorageProvider.findByIdentifier("hash-fail-xml-id"))
-                .thenReturn(xmlContent.getBytes(StandardCharsets.UTF_8));
+            .thenReturn(xmlContent.getBytes(StandardCharsets.UTF_8));
         when(hashValueBuilder.buildHashValueAsString(xmlContent.getBytes(StandardCharsets.UTF_8)))
-                .thenThrow(new IllegalStateException("hash boom"));
+            .thenThrow(new IllegalStateException("hash boom"));
 
         assertThatThrownBy(() -> toolkit.create(
-                messageWithXml,
-                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                null
+            messageWithXml,
+            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+            null
         ))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("could not build payload hash");
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("could not build payload hash");
     }
 
     @Test
     void evidence_builder_exception_is_wrapped() throws Exception {
         var message = submissionReadyMessage();
         when(evidenceBuilder.createSubmissionAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), any()
+            eq(true), nullable(EventReasonType.class), any(), any()
         )).thenThrow(new ConnectorEvidenceBuilderException("x"));
 
         assertThatThrownBy(() -> toolkit.create(
-                message,
-                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                null
+            message,
+            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+            null
         ))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("evidence could not be created")
-                .hasCauseInstanceOf(ConnectorEvidenceBuilderException.class);
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("evidence could not be created")
+            .hasCauseInstanceOf(ConnectorEvidenceBuilderException.class);
     }
 
     @ParameterizedTest
     @MethodSource("missingPredecessorCases")
     void missing_predecessor_evidence_throws(
-            ConnectorEvidenceType toCreate,
-            ConnectorEvidenceType present) {
+        ConnectorEvidenceType toCreate,
+        ConnectorEvidenceType present) {
         var message = messageWithPrior(present);
 
         assertThatThrownBy(() -> toolkit.create(
-                message,
-                toCreate,
-                rejectionReasonIfNeeded(toCreate)
+            message,
+            toCreate,
+            rejectionReasonIfNeeded(toCreate)
         ))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("no prior evidence of type");
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("no prior evidence of type");
     }
 
     @Test
@@ -335,9 +336,9 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var message = base.toBuilder().evidences(null).build();
 
         assertThatThrownBy(
-                () -> toolkit.create(message, ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE, null))
-                .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("no prior evidence");
+            () -> toolkit.create(message, ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE, null))
+            .isInstanceOf(ConnectorEvidenceException.class)
+            .hasMessageContaining("no prior evidence");
     }
 
     @Test
@@ -351,7 +352,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createRelayREMMDAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), eq(PREV)
+            eq(true), nullable(EventReasonType.class), any(), eq(PREV)
         );
     }
 
@@ -366,7 +367,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createDeliveryNonDeliveryToRecipient(
-                eq(true), nullable(EventReasonType.class), any(), eq(PREV)
+            eq(true), nullable(EventReasonType.class), any(), eq(PREV)
         );
     }
 
@@ -381,7 +382,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createRetrievalNonRetrievalByRecipient(
-                eq(true), nullable(EventReasonType.class), any(), eq(PREV)
+            eq(true), nullable(EventReasonType.class), any(), eq(PREV)
         );
     }
 
@@ -391,8 +392,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         var evidence = toolkit.create(
-                message, ConnectorEvidenceType.NON_DELIVERY,
-                ConnectorMessageRejectionReason.UNREACHABLE
+            message, ConnectorEvidenceType.NON_DELIVERY,
+            ConnectorMessageRejectionReason.UNREACHABLE
         );
 
         assertThat(evidence).isNotNull();
@@ -400,7 +401,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createDeliveryNonDeliveryToRecipient(
-                eq(false), reasonCaptor.capture(), any(), eq(PREV)
+            eq(false), reasonCaptor.capture(), any(), eq(PREV)
         );
         assertThat(reasonCaptor.getValue().getCode()).isEqualTo("E404");
     }
@@ -411,8 +412,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         var evidence = toolkit.create(
-                message, ConnectorEvidenceType.NON_RETRIEVAL,
-                ConnectorMessageRejectionReason.DELIVERY_EVIDENCE_TIMEOUT
+            message, ConnectorEvidenceType.NON_RETRIEVAL,
+            ConnectorMessageRejectionReason.DELIVERY_EVIDENCE_TIMEOUT
         );
 
         assertThat(evidence).isNotNull();
@@ -420,7 +421,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createRetrievalNonRetrievalByRecipient(
-                eq(false), reasonCaptor.capture(), any(), eq(PREV)
+            eq(false), reasonCaptor.capture(), any(), eq(PREV)
         );
         assertThat(reasonCaptor.getValue().getCode()).isEqualTo("E300");
     }
@@ -433,8 +434,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         var evidence = toolkit.create(
-                message, ConnectorEvidenceType.RELAY_REMMD_REJECTION,
-                ConnectorMessageRejectionReason.GW_REJECTION
+            message, ConnectorEvidenceType.RELAY_REMMD_REJECTION,
+            ConnectorMessageRejectionReason.GW_REJECTION
         );
 
         assertThat(evidence).isNotNull();
@@ -442,7 +443,7 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createRelayREMMDAcceptanceRejection(
-                eq(false), reasonCaptor.capture(), any(), eq(PREV)
+            eq(false), reasonCaptor.capture(), any(), eq(PREV)
         );
         assertThat(reasonCaptor.getValue().getCode()).isEqualTo("E201");
     }
@@ -453,8 +454,8 @@ class ConnectorEvidenceToolkitImplUnitTest {
         var reasonCaptor = ArgumentCaptor.forClass(EventReasonType.class);
 
         var evidence = toolkit.create(
-                message, ConnectorEvidenceType.RELAY_REMMD_FAILURE,
-                ConnectorMessageRejectionReason.RELAY_REMMD_TIMEOUT
+            message, ConnectorEvidenceType.RELAY_REMMD_FAILURE,
+            ConnectorMessageRejectionReason.RELAY_REMMD_TIMEOUT
         );
 
         assertThat(evidence).isNotNull();
@@ -484,28 +485,28 @@ class ConnectorEvidenceToolkitImplUnitTest {
         assertThat(evidence.content()).isNotNull();
 
         verify(evidenceBuilder).createRelayREMMDAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), eq(PREV)
+            eq(true), nullable(EventReasonType.class), any(), eq(PREV)
         );
     }
 
     private void defaultEvidenceBuilderStubs() throws ConnectorEvidenceBuilderException {
         when(evidenceBuilder.createSubmissionAcceptanceRejection(
-                eq(true), nullable(EventReasonType.class), any(), any()
+            eq(true), nullable(EventReasonType.class), any(), any()
         )).thenReturn(STUB_EVIDENCE_BYTES);
         when(evidenceBuilder.createSubmissionAcceptanceRejection(
-                eq(false), any(EventReasonType.class), any(), any()
+            eq(false), any(EventReasonType.class), any(), any()
         )).thenReturn(STUB_EVIDENCE_BYTES);
         when(evidenceBuilder.createRelayREMMDAcceptanceRejection(
-                any(boolean.class), nullable(EventReasonType.class), any(), any()
+            any(boolean.class), nullable(EventReasonType.class), any(), any()
         )).thenReturn(STUB_EVIDENCE_BYTES);
         when(evidenceBuilder.createRelayREMMDFailure(
-                any(EventReasonType.class), any(), any()
+            any(EventReasonType.class), any(), any()
         )).thenReturn(STUB_EVIDENCE_BYTES);
         when(evidenceBuilder.createDeliveryNonDeliveryToRecipient(
-                any(boolean.class), nullable(EventReasonType.class), any(), any()
+            any(boolean.class), nullable(EventReasonType.class), any(), any()
         )).thenReturn(STUB_EVIDENCE_BYTES);
         when(evidenceBuilder.createRetrievalNonRetrievalByRecipient(
-                any(boolean.class), nullable(EventReasonType.class), any(), any()
+            any(boolean.class), nullable(EventReasonType.class), any(), any()
         )).thenReturn(STUB_EVIDENCE_BYTES);
     }
 

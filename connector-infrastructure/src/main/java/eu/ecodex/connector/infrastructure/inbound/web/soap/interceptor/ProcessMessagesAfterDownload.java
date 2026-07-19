@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.message.Message;
@@ -37,8 +37,8 @@ public class ProcessMessagesAfterDownload extends AbstractPhaseInterceptor<Messa
      *                                           pending connector messages
      */
     public ProcessMessagesAfterDownload(
-            String backendClient,
-            ConnectorSetMessagesTransportStepToDownload setTransportStepsToDownloadService) {
+        String backendClient,
+        ConnectorSetMessagesTransportStepToDownload setTransportStepsToDownloadService) {
         super(Phase.POST_INVOKE);
         this.backendClient = backendClient;
         this.setTransportStepsToDownloadService = setTransportStepsToDownloadService;
@@ -47,16 +47,16 @@ public class ProcessMessagesAfterDownload extends AbstractPhaseInterceptor<Messa
     @Override
     public void handleMessage(Message message) throws Fault {
         log.info(
-                "Updating retrieved messages transport step status for the backend client [{}]",
-                this.backendClient
+            "Updating retrieved messages transport step status for the backend client [{}]",
+            this.backendClient
         );
         try {
             setTransportStepsToDownloadService.execute(this.backendClient);
         } catch (Exception e) {
             log.error(
-                    "Failed to update the transport steps statuses for the backend client [{}]",
-                    this.backendClient,
-                    e
+                "Failed to update the transport steps statuses for the backend client [{}]",
+                this.backendClient,
+                e
             );
 
             throw new Fault(e);

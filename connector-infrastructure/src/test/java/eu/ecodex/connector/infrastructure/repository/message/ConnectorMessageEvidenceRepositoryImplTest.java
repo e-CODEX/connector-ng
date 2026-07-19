@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageEvidenceRepository;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

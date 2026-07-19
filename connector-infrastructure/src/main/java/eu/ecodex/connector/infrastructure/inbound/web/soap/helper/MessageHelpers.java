@@ -48,8 +48,7 @@ public class MessageHelpers {
      *                request. This parameter should not be null and represents the message whose
      *                metadata and confirmations are inspected.
      *
-     * @return {@code true} if the message is an evidence trigger request; otherwise,
-     *         {@code false}.
+     * @return {@code true} if the message is an evidence trigger request; otherwise, {@code false}.
      */
     public static boolean isEvidenceTriggerRequest(DomibusConnectorMessageType message) {
         if (message.getMessageContent() != null) {
@@ -57,16 +56,16 @@ public class MessageHelpers {
         }
         var confirmations = message.getMessageConfirmations();
         return confirmations != null
-                && confirmations.size() == 1
-                && isEmptyConfirmationPayload(confirmations.getFirst());
+            && confirmations.size() == 1
+            && isEmptyConfirmationPayload(confirmations.getFirst());
     }
 
     public static ConnectorMessage toDomain(
-            DomibusConnectorMessageType message,
-            List<String> attachments,
-            String businessContentAttachmentIdentifier,
-            String businessDocumentAttachmentIdentifier,
-            String backendClientName
+        DomibusConnectorMessageType message,
+        List<String> attachments,
+        String businessContentAttachmentIdentifier,
+        String businessDocumentAttachmentIdentifier,
+        String backendClientName
     ) throws Exception {
         if (isEvidenceTriggerRequest(message)) {
             return toEvidenceTriggerDomain(message, backendClientName);
@@ -77,32 +76,32 @@ public class MessageHelpers {
         var incomingBusinessContent = message.getMessageContent();
 
         return ConnectorMessage
-                .builder()
-                .backendMessageIdentifier(details.getBackendMessageId())
-                .backendName(backendClientName)
-                .referenceToBackendMessageIdentifier(details.getRefToMessageId())
-                .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
-                .as4Properties(toAS4Properties(details))
-                .businessContent(toBusinessContent(
-                        incomingBusinessContent,
-                        businessContentAttachmentIdentifier,
-                        businessDocumentAttachmentIdentifier
-                ))
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .attachments(toAttachments(attachments))
-                .build();
+            .builder()
+            .backendMessageIdentifier(details.getBackendMessageId())
+            .backendName(backendClientName)
+            .referenceToBackendMessageIdentifier(details.getRefToMessageId())
+            .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
+            .as4Properties(toAS4Properties(details))
+            .businessContent(toBusinessContent(
+                incomingBusinessContent,
+                businessContentAttachmentIdentifier,
+                businessDocumentAttachmentIdentifier
+            ))
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .attachments(toAttachments(attachments))
+            .build();
     }
 
     private static ConnectorMessage toEvidenceTriggerDomain(
-            DomibusConnectorMessageType message,
-            String backendClientName) {
+        DomibusConnectorMessageType message,
+        String backendClientName) {
         var details = message.getMessageDetails();
         var confirmation = message.getMessageConfirmations().getFirst();
 
         var triggerEvidence = ConnectorMessageEvidence.builder()
                                                       .type(ConnectorEvidenceType.valueOf(
-                                                              confirmation.getConfirmationType()
-                                                                          .value()))
+                                                          confirmation.getConfirmationType()
+                                                                      .value()))
                                                       .content(null)
                                                       .build();
 
@@ -110,88 +109,88 @@ public class MessageHelpers {
         transportedEvidences.add(triggerEvidence);
 
         return ConnectorMessage
-                .builder()
-                .backendMessageIdentifier(details.getBackendMessageId())
-                .backendName(backendClientName)
-                .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
-                .as4Properties(toTriggerAS4Properties(details))
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .transportedEvidences(transportedEvidences)
-                .build();
+            .builder()
+            .backendMessageIdentifier(details.getBackendMessageId())
+            .backendName(backendClientName)
+            .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
+            .as4Properties(toTriggerAS4Properties(details))
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .transportedEvidences(transportedEvidences)
+            .build();
     }
 
     private static ConnectorMessageAS4Properties toTriggerAS4Properties(
-            DomibusConnectorMessageDetailsType details) {
+        DomibusConnectorMessageDetailsType details) {
         return toAS4Properties(details).toBuilder()
                                        .referenceToIdentifier(details.getRefToMessageId())
                                        .build();
     }
 
     public static ConnectorMessageAS4Properties toAS4Properties(
-            DomibusConnectorMessageDetailsType details) {
+        DomibusConnectorMessageDetailsType details) {
         var service = ConnectorService
-                .builder()
-                .name(details.getService().getService())
-                .type(details.getService().getServiceType())
-                .build();
+            .builder()
+            .name(details.getService().getService())
+            .type(details.getService().getServiceType())
+            .build();
         var action = ConnectorAction
-                .builder()
-                .name(details.getAction().getAction())
-                .build();
+            .builder()
+            .name(details.getAction().getAction())
+            .build();
         var fromParty = ConnectorParty
-                .builder()
-                .identifier(details.getFromParty().getPartyId())
-                .identifierType(details.getFromParty().getPartyIdType())
-                .role(details.getFromParty().getRole())
-                .roleType(ConnectorPartyRoleType.INITIATOR)
-                .build();
+            .builder()
+            .identifier(details.getFromParty().getPartyId())
+            .identifierType(details.getFromParty().getPartyIdType())
+            .role(details.getFromParty().getRole())
+            .roleType(ConnectorPartyRoleType.INITIATOR)
+            .build();
         var toParty = ConnectorParty
-                .builder()
-                .identifier(details.getToParty().getPartyId())
-                .identifierType(details.getToParty().getPartyIdType())
-                .role(details.getToParty().getRole())
-                .roleType(ConnectorPartyRoleType.RESPONDER)
-                .build();
+            .builder()
+            .identifier(details.getToParty().getPartyId())
+            .identifierType(details.getToParty().getPartyIdType())
+            .role(details.getToParty().getRole())
+            .roleType(ConnectorPartyRoleType.RESPONDER)
+            .build();
 
         return ConnectorMessageAS4Properties
-                .builder()
-                .conversationIdentifier(details.getConversationId())
-                .ebmsMessageIdentifier(details.getEbmsMessageId())
-                .originalSender(details.getOriginalSender())
-                .finalRecipient(details.getFinalRecipient())
-                .service(service)
-                .action(action)
-                .fromParty(fromParty)
-                .toParty(toParty)
-                .build();
+            .builder()
+            .conversationIdentifier(details.getConversationId())
+            .ebmsMessageIdentifier(details.getEbmsMessageId())
+            .originalSender(details.getOriginalSender())
+            .finalRecipient(details.getFinalRecipient())
+            .service(service)
+            .action(action)
+            .fromParty(fromParty)
+            .toParty(toParty)
+            .build();
     }
 
     public static ConnectorMessageBusinessContent toBusinessContent(
-            DomibusConnectorMessageContentType content,
-            String businessContentAttachmentIdentifier,
-            String businessDocumentAttachmentIdentifier) {
+        DomibusConnectorMessageContentType content,
+        String businessContentAttachmentIdentifier,
+        String businessDocumentAttachmentIdentifier) {
         var document = content.getDocument();
         var businessDocument = ConnectorMessageBusinessDocument
-                .builder()
-                .attachment(toAttachment(businessDocumentAttachmentIdentifier))
-                .detachedSignature(toDetachedSignature(document.getDetachedSignature()))
-                .aesType(ConnectorBusinessDocumentAESType.from(
-                                 document.getAesType() != null
-                                         ? document.getAesType().value()
-                                         : null
-                         )
-                )
-                .build();
+            .builder()
+            .attachment(toAttachment(businessDocumentAttachmentIdentifier))
+            .detachedSignature(toDetachedSignature(document.getDetachedSignature()))
+            .aesType(ConnectorBusinessDocumentAESType.from(
+                         document.getAesType() != null
+                             ? document.getAesType().value()
+                             : null
+                     )
+            )
+            .build();
 
         return ConnectorMessageBusinessContent
-                .builder()
-                .xmlContent(toAttachment(businessContentAttachmentIdentifier))
-                .businessDocument(businessDocument)
-                .build();
+            .builder()
+            .xmlContent(toAttachment(businessContentAttachmentIdentifier))
+            .businessDocument(businessDocument)
+            .build();
     }
 
     private static boolean isEmptyConfirmationPayload(
-            DomibusConnectorMessageConfirmationType confirmation) {
+        DomibusConnectorMessageConfirmationType confirmation) {
         var source = confirmation.getConfirmation();
 
         if (source == null) {
@@ -221,24 +220,24 @@ public class MessageHelpers {
     }
 
     private static DetachedSignature toDetachedSignature(
-            DomibusConnectorDetachedSignatureType signature) {
+        DomibusConnectorDetachedSignatureType signature) {
         if (signature == null) {
             return null;
         }
 
         return DetachedSignature
-                .builder()
-                .name(signature.getDetachedSignatureName())
-                .signature(signature.getDetachedSignature())
-                .mimeType(DetachedSignatureMimeType.valueOf(signature.getMimeType().value()))
-                .build();
+            .builder()
+            .name(signature.getDetachedSignatureName())
+            .signature(signature.getDetachedSignature())
+            .mimeType(DetachedSignatureMimeType.valueOf(signature.getMimeType().value()))
+            .build();
     }
 
     private static ConnectorMessageAttachment toAttachment(String identifier) {
         return ConnectorMessageAttachment
-                .builder()
-                .identifier(identifier)
-                .build();
+            .builder()
+            .identifier(identifier)
+            .build();
     }
 
     private static List<ConnectorMessageAttachment> toAttachments(List<String> identifiers) {

@@ -20,5 +20,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ConnectorMessageErrorJpaRepository extends
-        JpaRepository<ConnectorMessageErrorEntity, Long> {
+    JpaRepository<ConnectorMessageErrorEntity, Long> {
 }

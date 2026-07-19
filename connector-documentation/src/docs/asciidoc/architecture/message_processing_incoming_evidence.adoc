@@ -30,7 +30,7 @@ gatewayReceptionQueue --> ConnectorGatewayMessageListener : JMS MapMessage
 @enduml
 ----
 
-`ConnectorGatewayMessageListener` parses AS4 properties and payloads from the JMS message.
+`ConnectorJmsGatewayMessageListener` parses AS4 properties and payloads from the JMS message.
 When the message has no business content but contains evidence payloads, it is treated as a confirmation message.
 
 === Confirmation message processing

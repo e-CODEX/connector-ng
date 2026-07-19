@@ -39,8 +39,8 @@ import org.springframework.web.multipart.MultipartFile;
  * {@code /api/v1/admin/processing-modes}.
  */
 @Tag(
-        name = "ProcessingModeAdmin",
-        description = "API for managing processing modes for administrative purposes"
+    name = "ProcessingModeAdmin",
+    description = "API for managing processing modes for administrative purposes"
 )
 @RequestMapping("/api/v1/admin/processing-modes")
 public interface ConnectorProcessingModeAdminApi {
@@ -48,13 +48,13 @@ public interface ConnectorProcessingModeAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new processing mode.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Created"),
-            @ApiResponse(responseCode = "400", description = "Bad Request")
+        @ApiResponse(responseCode = "201", description = "Created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")
     })
     ConnectorProcessingModeDto create(
-            @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
-            @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
-            throws IOException;
+        @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
+        @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
+        throws IOException;
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
@@ -65,8 +65,8 @@ public interface ConnectorProcessingModeAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a processing mode by identifier.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Pmode found"),
-            @ApiResponse(responseCode = "404", description = "Not Found")
+        @ApiResponse(responseCode = "200", description = "Pmode found"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorProcessingModeDetailDto getPmode(@PathVariable String uuid);
 }

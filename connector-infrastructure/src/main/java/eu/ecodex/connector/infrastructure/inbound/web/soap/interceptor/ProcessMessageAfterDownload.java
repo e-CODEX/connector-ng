@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.interceptor;
 
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorAckMessageTransportStep;
-import eu.ecodex.connector.application.service.usecase.transport.command.UpdateMessageTransportCommand;
+import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
+import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +38,8 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
      *                                transport step
      */
     public ProcessMessageAfterDownload(
-            ConnectorMessage connectorMessage,
-            ConnectorAckMessageTransportStep ackMessageTransportStep) {
+        ConnectorMessage connectorMessage,
+        ConnectorAckMessageTransportStep ackMessageTransportStep) {
         super(Phase.POST_INVOKE);
 
         this.connectorMessage = connectorMessage;
@@ -49,21 +49,21 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
     @Override
     public void handleMessage(Message message) throws Fault {
         log.info(
-                "Updating retrieve message transport step status for the message [{}]",
-                this.connectorMessage.identifier()
+            "Updating retrieve message transport step status for the message [{}]",
+            this.connectorMessage.identifier()
         );
         try {
             var command = UpdateMessageTransportCommand
-                    .builder()
-                    .remoteMessageIdentifier(this.connectorMessage.identifier())
-                    .status(ConnectorMessageTransportStatus.DOWNLOADED)
-                    .errors(null)
-                    .build();
+                .builder()
+                .remoteMessageIdentifier(this.connectorMessage.identifier())
+                .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                .errors(null)
+                .build();
             ackMessageTransportStep.execute(this.connectorMessage.identifier(), command);
         } catch (Exception e) {
             log.error(
-                    "Failed to update the transport step status for the me message [{}]",
-                    this.connectorMessage.identifier(), e
+                "Failed to update the transport step status for the me message [{}]",
+                this.connectorMessage.identifier(), e
             );
             throw new Fault(e);
         }

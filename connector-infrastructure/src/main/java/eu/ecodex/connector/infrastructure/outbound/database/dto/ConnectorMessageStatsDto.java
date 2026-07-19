@@ -31,14 +31,14 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorMessageStatsDto(
-        long total,
-        long delivered,
-        long rejected,
-        long backendToGateway,
-        long backendToGatewayDelivered,
-        long backendToGatewayRejected,
-        long gatewayToBackend,
-        long gatewayToBackendDelivered,
-        long gatewayToBackendRejected
+    long total,
+    long delivered,
+    long rejected,
+    long backendToGateway,
+    long backendToGatewayDelivered,
+    long backendToGatewayRejected,
+    long gatewayToBackend,
+    long gatewayToBackendDelivered,
+    long gatewayToBackendRejected
 ) {
 }

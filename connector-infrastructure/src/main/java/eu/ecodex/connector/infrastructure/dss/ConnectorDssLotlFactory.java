@@ -38,8 +38,8 @@ public class ConnectorDssLotlFactory {
      *                                configurations
      */
     public ConnectorDssLotlFactory(
-            ConnectorDssCertificateSourceLoader certificateSourceLoader,
-            ConnectorDssProperties dssProperties) {
+        ConnectorDssCertificateSourceLoader certificateSourceLoader,
+        ConnectorDssProperties dssProperties) {
         this.certificateSourceLoader = certificateSourceLoader;
         this.dssProperties = dssProperties;
     }
@@ -56,12 +56,12 @@ public class ConnectorDssLotlFactory {
         dssProperties.getTrustListSources()
                      .values()
                      .forEach(group -> group
-                             .getLotlSources()
-                             .forEach(source -> {
-                                          var lotlSource = createLotlSource(source);
-                                          lotlSources.add(lotlSource);
-                                      }
-                             )
+                         .getLotlSources()
+                         .forEach(source -> {
+                                      var lotlSource = createLotlSource(source);
+                                      lotlSources.add(lotlSource);
+                                  }
+                         )
                      );
 
         return lotlSources;
@@ -75,9 +75,9 @@ public class ConnectorDssLotlFactory {
 
         if (StringUtils.hasText(source.getSigningCertificatesAnnouncementUri())) {
             lotlSource.setSigningCertificatesAnnouncementPredicate(
-                    new OfficialJournalSchemeInformationURI(
-                            source.getSigningCertificatesAnnouncementUri()
-                    )
+                new OfficialJournalSchemeInformationURI(
+                    source.getSigningCertificatesAnnouncementUri()
+                )
             );
         }
 
@@ -85,7 +85,7 @@ public class ConnectorDssLotlFactory {
 
         if (signingCerts != null) {
             var trustedCertSource = certificateSourceLoader.createCommonTrustedCertificateSource(
-                    signingCerts);
+                signingCerts);
 
             lotlSource.setCertificateSource(trustedCertSource);
         }

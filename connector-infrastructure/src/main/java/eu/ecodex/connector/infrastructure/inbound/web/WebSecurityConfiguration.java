@@ -11,7 +11,6 @@
 package eu.ecodex.connector.infrastructure.inbound.web;
 
 import eu.ecodex.connector.infrastructure.property.ConnectorCorsProperties;
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -36,7 +35,7 @@ public class WebSecurityConfiguration {
      * @param http the {@code HttpSecurity} object used to configure the security settings
      *
      * @return the {@code SecurityFilterChain} object representing the configured security filter
-     *         chain
+     *     chain
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -44,42 +43,42 @@ public class WebSecurityConfiguration {
                    .httpBasic(AbstractHttpConfigurer::disable)
                    .cors(Customizer.withDefaults())
                    .authorizeHttpRequests(request -> request
-                           .requestMatchers(
-                                   "/api/v1/admin/business-domains",
-                                   "/api/v1/admin/processing-modes",
-                                   "/api/v1/admin/processing-modes/{uuid}",
-                                   "/api/v1/admin/attachments",
-                                   "/api/v1/attachments/upload",
-                                   "/api/v1/admin/messages",
-                                   "/api/v1/admin/messages/stats",
-                                   "/api/v1/admin/messages/reports",
-                                   "/api/v1/admin/messages/reports/export",
-                                   "/api/v1/admin/messages/{identifier}",
-                                   "/api/v1/admin/messages/{identifier}/transport-steps",
-                                   "/api/v1/messages/outbound",
-                                   "/api/v1/messages/evidence-trigger",
-                                   "/api/v1/evidences/{uuid}/download",
-                                   "/api/v1/admin/transport-steps",
-                                   "/api/v1/admin/configurations/business-domains",
-                                   "/api/v1/admin/configurations/container",
-                                   "/api/v1/admin/configurations/business-document",
-                                   "/api/v1/admin/configurations/evidence",
-                                   "/api/v1/admin/configurations/routing",
-                                   "/api/v1/admin/configurations/backend-link-partners",
-                                   "/api/v1/admin/configurations/queues",
-                                   "/api/v1/admin/configurations/message-processing",
-                                   "/api/v1/admin/jms/queues/stats",
-                                   "/api/v1/services",
-                                   // SOAP
-                                   "/services/backend",
-                                   // actuator
-                                   "/actuator/**",
-                                   // swagger ui
-                                   "/swagger-ui/**",
-                                   "/v3/api-docs/**",
-                                   "/swagger-resources/**"
-                           ).permitAll()
-                           .anyRequest().authenticated()
+                       .requestMatchers(
+                           "/api/v1/admin/business-domains",
+                           "/api/v1/admin/processing-modes",
+                           "/api/v1/admin/processing-modes/{uuid}",
+                           "/api/v1/admin/attachments",
+                           "/api/v1/attachments/upload",
+                           "/api/v1/admin/messages",
+                           "/api/v1/admin/messages/stats",
+                           "/api/v1/admin/messages/reports",
+                           "/api/v1/admin/messages/reports/export",
+                           "/api/v1/admin/messages/{identifier}",
+                           "/api/v1/admin/messages/{identifier}/transport-steps",
+                           "/api/v1/messages/outbound",
+                           "/api/v1/messages/evidence-trigger",
+                           "/api/v1/evidences/{uuid}/download",
+                           "/api/v1/admin/transport-steps",
+                           "/api/v1/admin/configurations/business-domains",
+                           "/api/v1/admin/configurations/container",
+                           "/api/v1/admin/configurations/business-document",
+                           "/api/v1/admin/configurations/evidence",
+                           "/api/v1/admin/configurations/routing",
+                           "/api/v1/admin/configurations/backend-link-partners",
+                           "/api/v1/admin/configurations/queues",
+                           "/api/v1/admin/configurations/message-processing",
+                           "/api/v1/admin/jms/queues/stats",
+                           "/api/v1/services",
+                           // SOAP
+                           "/services/backend",
+                           // actuator
+                           "/actuator/**",
+                           // swagger ui
+                           "/swagger-ui/**",
+                           "/v3/api-docs/**",
+                           "/swagger-resources/**"
+                       ).permitAll()
+                       .anyRequest().authenticated()
                    )
                    .build();
     }

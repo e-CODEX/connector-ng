@@ -17,8 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.application.service.impl.pmode.ConnectorListProcessingModeServicesService;
-import eu.ecodex.connector.domain.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

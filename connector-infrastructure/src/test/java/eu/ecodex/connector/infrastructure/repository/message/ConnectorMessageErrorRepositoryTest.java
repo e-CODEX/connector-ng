@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageErrorRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageErrorRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -31,46 +31,46 @@ public class ConnectorMessageErrorRepositoryTest extends AbstractRepositoryTest 
     @Test
     void should_throw_exception_when_saving_error_with_null_message_identifier() {
         assertThrows(
-                NullPointerException.class, () -> repository.save(null, List.of())
+            NullPointerException.class, () -> repository.save(null, List.of())
         );
     }
 
     @Test
     void should_throw_exception_when_saving_error_with_null_errors() {
         assertThrows(
-                NullPointerException.class, () -> repository.save("message-identifier", null)
+            NullPointerException.class, () -> repository.save("message-identifier", null)
         );
     }
 
     @Test
     void should_throw_exception_when_saving_error_with_null_message_identifier_and_errors() {
         assertThrows(
-                NullPointerException.class, () -> repository.save(null, null)
+            NullPointerException.class, () -> repository.save(null, null)
         );
     }
 
     @Test
     void should_throw_exception_when_saving_error_with_empty_errors() {
         assertThrows(
-                IllegalArgumentException.class,
-                () -> repository.save("message-identifier", List.of())
+            IllegalArgumentException.class,
+            () -> repository.save("message-identifier", List.of())
         );
     }
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
     })
     void should_save_message_errors_successfully() {
         var savedErrors = repository.save(
-                "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu",
-                errors()
+            "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu",
+            errors()
         );
 
         assertThat(savedErrors).isNotNull();
@@ -80,11 +80,11 @@ public class ConnectorMessageErrorRepositoryTest extends AbstractRepositoryTest 
 
     private List<ConnectorMessageError> errors() {
         return List.of(
-                ConnectorMessageError.builder()
-                                     .label("error-label")
-                                     .details("error-details")
-                                     .source("error-source")
-                                     .build()
+            ConnectorMessageError.builder()
+                                 .label("error-label")
+                                 .details("error-details")
+                                 .source("error-source")
+                                 .build()
         );
     }
 }

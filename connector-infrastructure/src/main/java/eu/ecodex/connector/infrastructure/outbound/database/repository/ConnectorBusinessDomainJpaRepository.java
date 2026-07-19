@@ -19,11 +19,11 @@ import org.springframework.stereotype.Repository;
  * {@link ConnectorBusinessDomainEntity}.
  *
  * <p>This interface provides access to the persistent storage of Connector Business Domain
- * entities, enabling interaction with the underlying database. It uses Spring Data JPA to
- * simplify the implementation of data access layer functionality.
+ * entities, enabling interaction with the underlying database. It uses Spring Data JPA to simplify
+ * the implementation of data access layer functionality.
  */
 @Repository
 public interface ConnectorBusinessDomainJpaRepository extends
-        JpaRepository<ConnectorBusinessDomainEntity, Long> {
+    JpaRepository<ConnectorBusinessDomainEntity, Long> {
     ConnectorBusinessDomainEntity findByIdentifier(String identifier);
 }

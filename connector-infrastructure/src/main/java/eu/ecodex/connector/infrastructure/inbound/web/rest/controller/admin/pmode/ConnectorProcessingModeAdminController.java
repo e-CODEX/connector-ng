@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
 
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorListProcessingMode;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRegisterProcessingMode;
-import eu.ecodex.connector.application.service.usecase.pmode.ConnectorRetrieveProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
@@ -48,9 +48,9 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
      * @param retrieveProcessingModeService the service for retrieving specific processing modes
      */
     public ConnectorProcessingModeAdminController(
-            ConnectorRegisterProcessingMode registerProcessingModeService,
-            ConnectorListProcessingMode listProcessingModeService,
-            ConnectorRetrieveProcessingMode retrieveProcessingModeService) {
+        ConnectorRegisterProcessingMode registerProcessingModeService,
+        ConnectorListProcessingMode listProcessingModeService,
+        ConnectorRetrieveProcessingMode retrieveProcessingModeService) {
         this.registerProcessingModeService = registerProcessingModeService;
         this.listProcessingModeService = listProcessingModeService;
         this.retrieveProcessingModeService = retrieveProcessingModeService;
@@ -58,20 +58,20 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
 
     @Override
     public ConnectorProcessingModeDto create(
-            @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
-            @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
-            throws IOException {
+        @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
+        @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
+        throws IOException {
         var businessDomainIdentifier = ConnectorBusinessDomainIdentifier
-                .builder()
-                .messageLaneIdentifier(metadata.businessDomainIdentifier())
-                .build();
+            .builder()
+            .messageLaneIdentifier(metadata.businessDomainIdentifier())
+            .build();
 
         var processingMode = processCreationRequest(
-                metadata, processingModeXmlFile
+            metadata, processingModeXmlFile
         );
 
         var created = this.registerProcessingModeService.execute(
-                businessDomainIdentifier, processingMode
+            businessDomainIdentifier, processingMode
         );
 
         return ConnectorProcessingModeDto.from(created);
@@ -91,22 +91,22 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     private ConnectorProcessingMode processCreationRequest(
-            ConnectorProcessingModeCreationRequest metadata,
-            MultipartFile processingModeXmlFile) throws IOException {
+        ConnectorProcessingModeCreationRequest metadata,
+        MultipartFile processingModeXmlFile) throws IOException {
         var xmlFileContentType = processingModeXmlFile.getContentType();
 
         if (!Objects.equals(xmlFileContentType, MediaType.APPLICATION_XML_VALUE)
-                && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
+            && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
             throw new ConnectorBadRequestException("pmode file must be XML");
         }
 
         return ConnectorProcessingMode
-                .builder()
-                .description(metadata.description())
-                .content(new String(processingModeXmlFile.getBytes()))
-                .filename(StringUtils.cleanPath(
-                        Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
-                )
-                .build();
+            .builder()
+            .description(metadata.description())
+            .content(new String(processingModeXmlFile.getBytes()))
+            .filename(StringUtils.cleanPath(
+                Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
+            )
+            .build();
     }
 }

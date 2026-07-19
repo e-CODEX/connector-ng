@@ -10,11 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.message;
 
-import eu.ecodex.connector.application.service.usecase.message.ConnectorListMessages;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorRetrieveMessage;
-import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageReport;
-import eu.ecodex.connector.application.service.usecase.stats.ConnectorRetrieveMessageStats;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
+import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
@@ -53,12 +53,12 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
      * @param reportExporterFactory        The factory for creating message report exporters.
      */
     public ConnectorMessageAdminController(
-            ConnectorListMessages listMessagesService,
-            ConnectorRetrieveMessage retrieveMessageService,
-            ConnectorRetrieveTransportStep retrieveTransportStepService,
-            ConnectorRetrieveMessageStats retrieveMessageStatsService,
-            ConnectorRetrieveMessageReport retrieveMessageReportService,
-            ConnectorMessageReportExporterFactory reportExporterFactory) {
+        ConnectorListMessages listMessagesService,
+        ConnectorRetrieveMessage retrieveMessageService,
+        ConnectorRetrieveTransportStep retrieveTransportStepService,
+        ConnectorRetrieveMessageStats retrieveMessageStatsService,
+        ConnectorRetrieveMessageReport retrieveMessageReportService,
+        ConnectorMessageReportExporterFactory reportExporterFactory) {
         this.listMessagesService = listMessagesService;
         this.retrieveMessageService = retrieveMessageService;
         this.retrieveTransportStepService = retrieveTransportStepService;
@@ -69,19 +69,19 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
 
     @Override
     public ConnectorPageResult<ConnectorMessageDto> listMessages(
-            String identifier,
-            String backendName,
-            int page,
-            int size) {
+        String identifier,
+        String backendName,
+        int page,
+        int size) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
         var messages = listMessagesService.execute(pageRequest, identifier, backendName);
 
         return ConnectorPageResult.of(
-                messages.content().stream().map(ConnectorMessageDto::from).toList(),
-                messages.size(),
-                messages.totalElements(),
-                messages.totalPages()
+            messages.content().stream().map(ConnectorMessageDto::from).toList(),
+            messages.size(),
+            messages.totalElements(),
+            messages.totalPages()
         );
     }
 
@@ -111,20 +111,20 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
 
     @Override
     public ResponseEntity<byte[]> exportReports(
-            String from,
-            String to,
-            ConnectorMessageReportExportFormat format) {
+        String from,
+        String to,
+        ConnectorMessageReportExportFormat format) {
         var reportsSummary = retrieveMessageReportService.execute(from, to);
         var exporter = reportExporterFactory.create(format);
 
         return ResponseEntity.ok()
                              .contentType(MediaType.parseMediaType(
-                                     exporter.getFormat().getContentType()
+                                 exporter.getFormat().getContentType()
                              ))
                              .header(
-                                     HttpHeaders.CONTENT_DISPOSITION,
-                                     "attachment; filename=connector-message-report."
-                                             + exporter.getFormat().getExtension()
+                                 HttpHeaders.CONTENT_DISPOSITION,
+                                 "attachment; filename=connector-message-report."
+                                     + exporter.getFormat().getExtension()
                              )
                              .body(exporter.export(reportsSummary));
     }

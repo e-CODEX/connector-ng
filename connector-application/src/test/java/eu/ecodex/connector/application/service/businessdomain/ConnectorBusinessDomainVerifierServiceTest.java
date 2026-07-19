@@ -17,12 +17,10 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.application.service.impl.businessdomain.ConnectorBusinessDomainVerifierService;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.domain.exception.ConnectorBusinessDomainNotFoundException;
-import eu.ecodex.connector.domain.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.spi.ConnectorBusinessDomainRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,19 +31,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorBusinessDomainVerifierServiceTest {
     private static final ConnectorBusinessDomainIdentifier BUSINESS_DOMAIN_IDENTIFIER =
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
-
-    @Mock
-    private ConnectorBusinessDomainRepository businessDomainRepository;
-
+        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
     @InjectMocks
     protected ConnectorBusinessDomainVerifierService businessDomainVerifierService;
+    @Mock
+    private ConnectorBusinessDomainRepository businessDomainRepository;
 
     @Test
     void should_throw_exception_if_business_domain_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> businessDomainVerifierService.execute(null)
+            NullPointerException.class,
+            () -> businessDomainVerifierService.execute(null)
         );
     }
 
@@ -54,8 +50,8 @@ public class ConnectorBusinessDomainVerifierServiceTest {
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(null);
 
         assertThrows(
-                ConnectorBusinessDomainNotFoundException.class,
-                () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
+            ConnectorBusinessDomainNotFoundException.class,
+            () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
         );
     }
 
@@ -68,8 +64,8 @@ public class ConnectorBusinessDomainVerifierServiceTest {
         when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
 
         assertThrows(
-                ConnectorBusinessDomainNotEnabledException.class,
-                () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
+            ConnectorBusinessDomainNotEnabledException.class,
+            () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
         );
     }
 
@@ -81,6 +77,6 @@ public class ConnectorBusinessDomainVerifierServiceTest {
         businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER);
 
         assertThatNoException().isThrownBy(() -> businessDomainVerifierService.execute(
-                BUSINESS_DOMAIN_IDENTIFIER));
+            BUSINESS_DOMAIN_IDENTIFIER));
     }
 }

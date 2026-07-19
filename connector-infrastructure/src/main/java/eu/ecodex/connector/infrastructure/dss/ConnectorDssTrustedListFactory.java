@@ -38,8 +38,8 @@ public class ConnectorDssTrustedListFactory {
      *                                sources
      */
     public ConnectorDssTrustedListFactory(
-            ConnectorDssProperties dssProperties,
-            ConnectorDssCertificateSourceLoader certificateSourceLoader) {
+        ConnectorDssProperties dssProperties,
+        ConnectorDssCertificateSourceLoader certificateSourceLoader) {
         this.dssProperties = dssProperties;
         this.certificateSourceLoader = certificateSourceLoader;
     }
@@ -51,7 +51,7 @@ public class ConnectorDssTrustedListFactory {
 
         if (signingCerts != null) {
             var trustedCertSource = certificateSourceLoader.createCommonTrustedCertificateSource(
-                    signingCerts);
+                signingCerts);
 
             source.setCertificateSource(trustedCertSource);
         }
@@ -72,12 +72,12 @@ public class ConnectorDssTrustedListFactory {
         dssProperties.getTrustListSources()
                      .values()
                      .forEach(group -> group
-                             .getTlSources()
-                             .forEach(source -> {
-                                          var trustedListSource = createTrustedListSource(source);
-                                          tlSources.add(trustedListSource);
-                                      }
-                             )
+                         .getTlSources()
+                         .forEach(source -> {
+                                      var trustedListSource = createTrustedListSource(source);
+                                      tlSources.add(trustedListSource);
+                                  }
+                         )
                      );
 
         return tlSources;

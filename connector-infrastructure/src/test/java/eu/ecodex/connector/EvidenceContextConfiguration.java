@@ -27,8 +27,7 @@ import org.springframework.context.annotation.Import;
         basePackages = {
                 "eu.ecodex.connector.infrastructure.property",
                 "eu.ecodex.connector.infrastructure.dss",
-                "eu.ecodex.connector.infrastructure.evidence",
-                "eu.ecodex.connector.infrastructure.evidence",
+                "eu.ecodex.connector.infrastructure.outbound.evidence",
         }
 )
 public class EvidenceContextConfiguration {

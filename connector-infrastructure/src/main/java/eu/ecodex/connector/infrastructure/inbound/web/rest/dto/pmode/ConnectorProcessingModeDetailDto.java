@@ -44,17 +44,17 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorProcessingModeDetailDto(
-        String uuid,
-        String description,
-        String content,
-        String filename,
-        String businessDomainIdentifier,
-        ConnectorBusinessDomain businessDomain,
-        Set<ConnectorParty> parties,
-        Set<ConnectorService> services,
-        Set<ConnectorAction> actions,
-        Instant createdAt,
-        Instant updatedAt
+    String uuid,
+    String description,
+    String content,
+    String filename,
+    String businessDomainIdentifier,
+    ConnectorBusinessDomain businessDomain,
+    Set<ConnectorParty> parties,
+    Set<ConnectorService> services,
+    Set<ConnectorAction> actions,
+    Instant createdAt,
+    Instant updatedAt
 ) {
     /**
      * Converts a {@link ConnectorProcessingMode} object into a
@@ -63,24 +63,24 @@ public record ConnectorProcessingModeDetailDto(
      * @param processingMode The {@link ConnectorProcessingMode} to be converted. Must not be null.
      *
      * @return A {@link ConnectorProcessingModeDetailDto} representing the details of the provided
-     *         processing mode.
+     *     processing mode.
      */
     public static ConnectorProcessingModeDetailDto from(ConnectorProcessingMode processingMode) {
         return ConnectorProcessingModeDetailDto
-                .builder()
-                .uuid(processingMode.uuid())
-                .description(processingMode.description())
-                .content(processingMode.content())
-                .filename(processingMode.filename())
-                .businessDomainIdentifier(
-                        Objects.requireNonNull(processingMode.businessDomain())
-                               .identifier().messageLaneIdentifier()
-                )
-                .parties(processingMode.parties())
-                .services(processingMode.services())
-                .actions(processingMode.actions())
-                .createdAt(processingMode.createdAt())
-                .updatedAt(processingMode.updatedAt())
-                .build();
+            .builder()
+            .uuid(processingMode.uuid())
+            .description(processingMode.description())
+            .content(processingMode.content())
+            .filename(processingMode.filename())
+            .businessDomainIdentifier(
+                Objects.requireNonNull(processingMode.businessDomain())
+                       .identifier().messageLaneIdentifier()
+            )
+            .parties(processingMode.parties())
+            .services(processingMode.services())
+            .actions(processingMode.actions())
+            .createdAt(processingMode.createdAt())
+            .updatedAt(processingMode.updatedAt())
+            .build();
     }
 }

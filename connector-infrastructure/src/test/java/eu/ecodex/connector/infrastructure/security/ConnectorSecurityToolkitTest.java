@@ -21,10 +21,10 @@ import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.domain.api.ConnectorSecurityToolkit;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.infrastructure.security.exception.ConnectorContainerException;
+import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -55,9 +55,10 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
 
     @Test
     void should_build_asics_container_sign_it_and_push_for_process_successfully() {
-        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID().toString());
+        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
+                                                                           .toString());
         when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
+            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
 
         var message = createMessage();
 
@@ -69,10 +70,11 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
     @Test
     void should_build_asics_container_sign_it_and_push_for_process_successfully_2() {
         // message with attachment
-        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID().toString());
+        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
+                                                                           .toString());
         when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/attachment/Attachment.png"));
+            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
+            .thenReturn(FileTestFixtures.readAsBytes("raw/attachment/Attachment.png"));
 
         var message = createMessageWithAttachment();
 
@@ -92,8 +94,8 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
         var message = createMessageWithIdenticalAttachmentNames();
 
         assertThrows(
-                ConnectorContainerException.class,
-                () -> securityToolkit.buildContainer(message)
+            ConnectorContainerException.class,
+            () -> securityToolkit.buildContainer(message)
         );
     }
 
@@ -102,21 +104,21 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
         // message with attachment
         doThrow(RuntimeException.class).when(fileStorageProvider).save(any(), (Path) any());
         when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
+            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
 
         var message = createMessage();
 
         assertThrows(
-                ConnectorContainerException.class,
-                () -> securityToolkit.buildContainer(message)
+            ConnectorContainerException.class,
+            () -> securityToolkit.buildContainer(message)
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_building_asics_container_if_the_message_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> securityToolkit.buildContainer(null)
+            NullPointerException.class,
+            () -> securityToolkit.buildContainer(null)
         );
     }
 
@@ -127,52 +129,52 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
                                          .identifier(null)
                                          .build();
         assertThrows(
-                ConnectorContainerException.class,
-                () -> securityToolkit.buildContainer(message)
+            ConnectorContainerException.class,
+            () -> securityToolkit.buildContainer(message)
         );
     }
 
     private ConnectorMessage createMessage() {
         return MessageTestFixtures
-                .createOutboundBusinessMessage()
-                .toBuilder()
-                .businessContent(
-                        MessageContentTestFixtures
-                                .createContent()
-                                .toBuilder()
-                                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
-                                .businessDocument(
-                                        ConnectorMessageDocumentTestFixtures
-                                                .createDocumentWithoutSignature()
-                                )
-                                .build()
-                )
-                .build();
+            .createOutboundBusinessMessage()
+            .toBuilder()
+            .businessContent(
+                MessageContentTestFixtures
+                    .createContent()
+                    .toBuilder()
+                    .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
+                    .businessDocument(
+                        ConnectorMessageDocumentTestFixtures
+                            .createDocumentWithoutSignature()
+                    )
+                    .build()
+            )
+            .build();
     }
 
     private ConnectorMessage createMessageWithAttachment() {
         return createMessage()
-                .toBuilder()
-                .identifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")
-                .attachments(
-                        List.of(
-                                MessageAttachmentTestFixtures.createAttachment()
-                        )
+            .toBuilder()
+            .identifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")
+            .attachments(
+                List.of(
+                    MessageAttachmentTestFixtures.createAttachment()
                 )
-                .build();
+            )
+            .build();
     }
 
     private ConnectorMessage createMessageWithIdenticalAttachmentNames() {
         return createMessage()
-                .toBuilder()
-                .identifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")
-                .attachments(
-                        List.of(
-                                MessageAttachmentTestFixtures.createAttachment(),
-                                MessageAttachmentTestFixtures.createAttachment(),
-                                MessageAttachmentTestFixtures.createAttachment()
-                        )
+            .toBuilder()
+            .identifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")
+            .attachments(
+                List.of(
+                    MessageAttachmentTestFixtures.createAttachment(),
+                    MessageAttachmentTestFixtures.createAttachment(),
+                    MessageAttachmentTestFixtures.createAttachment()
                 )
-                .build();
+            )
+            .build();
     }
 }

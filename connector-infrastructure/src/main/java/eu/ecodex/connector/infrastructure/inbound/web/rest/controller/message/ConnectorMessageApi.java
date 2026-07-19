@@ -38,20 +38,20 @@ public interface ConnectorMessageApi {
     @PostMapping(value = "/outbound", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Submit a message from the backend system to the connector")
     @ApiResponses(
-            @ApiResponse(responseCode = "400", description = "Bad Request")
+        @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     ConnectorOutboundMessageDto submitOutboundMessage(
-            @Valid @ModelAttribute ConnectorOutboundMessageRequest request
+        @Valid @ModelAttribute ConnectorOutboundMessageRequest request
     ) throws IOException;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/evidence-trigger")
     @Operation(summary = "Submit an evidence trigger message from the backend to the connector")
     @ApiResponses({
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "404", description = "Not Found"),
-            @ApiResponse(responseCode = "409", description = "Conflict")
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
     })
     ConnectorEvidenceMessageDto submitEvidenceTriggerMessage(
-            @Valid @RequestBody ConnectorEvidenceTriggerMessageRequest request);
+        @Valid @RequestBody ConnectorEvidenceTriggerMessageRequest request);
 }

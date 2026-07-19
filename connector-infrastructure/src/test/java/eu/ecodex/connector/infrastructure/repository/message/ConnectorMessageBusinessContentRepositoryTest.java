@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -32,12 +32,12 @@ public class ConnectorMessageBusinessContentRepositoryTest extends AbstractRepos
 
     private static Stream<ConnectorMessageBusinessContent> createContents() {
         return Stream.of(
-                MessageContentTestFixtures.createContent(),
-                MessageContentTestFixtures.createContent()
-                                          .toBuilder()
-                                          .businessDocument(
-                                                  ConnectorMessageDocumentTestFixtures.createDocumentWithoutSignature())
-                                          .build()
+            MessageContentTestFixtures.createContent(),
+            MessageContentTestFixtures.createContent()
+                                      .toBuilder()
+                                      .businessDocument(
+                                          ConnectorMessageDocumentTestFixtures.createDocumentWithoutSignature())
+                                      .build()
         );
     }
 
@@ -48,10 +48,10 @@ public class ConnectorMessageBusinessContentRepositoryTest extends AbstractRepos
     @Sql("classpath:sql/message.sql")
     @Sql("classpath:sql/attachment.sql")
     void should_save_message_business_content_successfully_to_database(
-            ConnectorMessageBusinessContent businessContent) {
+        ConnectorMessageBusinessContent businessContent) {
         var saved = this.repository.save(
-                businessContent,
-                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
+            businessContent,
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
         );
 
         assertThat(saved).isNotNull();
@@ -60,25 +60,25 @@ public class ConnectorMessageBusinessContentRepositoryTest extends AbstractRepos
     @Test
     void should_thrown_null_pointer_exception_when_saving_business_content_with_null_content_to_database() {
         assertThrows(
-                NullPointerException.class, () -> this.repository.save(
-                        null, "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
-                )
+            NullPointerException.class, () -> this.repository.save(
+                null, "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
+            )
         );
     }
 
     @Test
     void should_thrown_null_pointer_exception_when_saving_business_content_with_null_message_identifier_to_database() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.save(MessageContentTestFixtures.createContent(), null)
+            NullPointerException.class,
+            () -> this.repository.save(MessageContentTestFixtures.createContent(), null)
         );
     }
 
     @Test
     void should_thrown_null_pointer_exception_when_saving_business_content_with_null_content_and_message_identifier_to_database() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.repository.save(null, null)
+            NullPointerException.class,
+            () -> this.repository.save(null, null)
         );
     }
 }

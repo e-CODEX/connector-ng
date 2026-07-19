@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.usecase.link.ConnectorFindLinkPartner;
+import eu.ecodex.connector.application.port.api.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -43,7 +43,7 @@ public class ConnectorWsPolicyLoader {
      * object configured with the resulting policy elements.
      *
      * @return a {@link WSPolicyFeature} object encapsulating the loaded WS-Policy definition, with
-     *         its corresponding elements set and enabled.
+     *     its corresponding elements set and enabled.
      *
      * @throws UncheckedIOException             if the policy file cannot be accessed or read.
      * @throws ConnectorWsPolicyLoaderException if parsing the policy file fails, or the parsed
@@ -57,8 +57,8 @@ public class ConnectorWsPolicyLoader {
 
             if (element == null) {
                 throw new ConnectorWsPolicyLoaderException(
-                        "Policy file parsed but produced no document element: " + wsPolicyPath,
-                        null
+                    "Policy file parsed but produced no document element: " + wsPolicyPath,
+                    null
                 );
             }
 
@@ -72,8 +72,8 @@ public class ConnectorWsPolicyLoader {
             throw new UncheckedIOException("WS policy '" + wsPolicyPath + "' cannot be read", e);
         } catch (XMLStreamException e) {
             throw new ConnectorWsPolicyLoaderException(
-                    "Cannot parse WS policy '" + wsPolicyPath + "'",
-                    e
+                "Cannot parse WS policy '" + wsPolicyPath + "'",
+                e
             );
         }
     }

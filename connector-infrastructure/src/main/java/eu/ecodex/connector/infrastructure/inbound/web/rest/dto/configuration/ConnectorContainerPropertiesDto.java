@@ -18,6 +18,6 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorContainerPropertiesDto(
-        ContainerSignatureProperties signature
+    ContainerSignatureProperties signature
 ) {
 }

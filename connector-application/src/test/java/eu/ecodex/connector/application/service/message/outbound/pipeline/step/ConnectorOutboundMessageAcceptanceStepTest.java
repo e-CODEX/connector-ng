@@ -19,9 +19,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
-import eu.ecodex.connector.application.service.impl.message.outbound.pipeline.step.ConnectorOutboundMessageAcceptanceStep;
-import eu.ecodex.connector.application.service.usecase.evidence.ConnectorMessageEvidenceCreator;
-import eu.ecodex.connector.application.service.usecase.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import org.junit.jupiter.api.Test;
@@ -61,17 +60,17 @@ public class ConnectorOutboundMessageAcceptanceStepTest {
         assertThat(outputMessage.evidences()).hasSize(1);
         assertNotNull(outputMessage.evidences());
         assertThat(outputMessage.evidences().getFirst().type())
-                .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
+            .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
         assertThat(outputMessage.direction()).isEqualTo(outboundMessage.direction());
         assertThat(outputMessage.direction())
-                .isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
+            .isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
     }
 
     @Test
     void should_throw_exception_when_message_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> outboundMessageSubmissionAcceptanceCreationStep.execute(null)
+            NullPointerException.class,
+            () -> outboundMessageSubmissionAcceptanceCreationStep.execute(null)
         );
     }
 }

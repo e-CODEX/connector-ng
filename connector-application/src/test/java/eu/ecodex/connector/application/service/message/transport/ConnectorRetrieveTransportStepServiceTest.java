@@ -16,10 +16,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.TransportStepFixtures;
-import eu.ecodex.connector.application.service.impl.message.transport.ConnectorRetrieveTransportStepService;
-import eu.ecodex.connector.domain.exception.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.spi.message.ConnectorMessageTransportStepRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +39,7 @@ public class ConnectorRetrieveTransportStepServiceTest {
     @Test
     void should_throw_exception_if_message_identifier_is_null() {
         assertThrows(
-                NullPointerException.class, () -> retrieveTransportStepService.execute(null)
+            NullPointerException.class, () -> retrieveTransportStepService.execute(null)
         );
     }
 
@@ -49,15 +48,15 @@ public class ConnectorRetrieveTransportStepServiceTest {
         when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any())).thenReturn(null);
 
         assertThrows(
-                ConnectorMessageTransportStepNotFoundException.class,
-                () -> retrieveTransportStepService.execute(MESSAGE_ID)
+            ConnectorMessageTransportStepNotFoundException.class,
+            () -> retrieveTransportStepService.execute(MESSAGE_ID)
         );
     }
 
     @Test
     void should_retrieve_message_transport_step_successfully() {
         when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
-                .thenReturn(TransportStepFixtures.createTransportStep());
+            .thenReturn(TransportStepFixtures.createTransportStep());
 
         var transportStep = retrieveTransportStepService.execute(MESSAGE_ID);
 

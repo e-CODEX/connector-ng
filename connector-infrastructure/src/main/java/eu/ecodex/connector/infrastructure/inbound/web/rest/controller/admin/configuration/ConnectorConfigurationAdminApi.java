@@ -18,8 +18,6 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.Con
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorMessageProcessingPropertiesDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorMessageRoutingPropertiesDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorQueuePropertiesDto;
-import eu.ecodex.connector.infrastructure.property.businessdocument.ConnectorBusinessDocumentProperties;
-import eu.ecodex.connector.infrastructure.property.routing.ConnectorMessageRoutingProperties;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,9 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * purposes.
  */
 @Tag(
-        name = "ConfigurationAdmin",
-        description = "API for managing configuration within the connector system for "
-                + "administrative purposes."
+    name = "ConfigurationAdmin",
+    description = "API for managing configuration within the connector system for "
+        + "administrative purposes."
 )
 @RequestMapping(value = "/api/v1/admin/configurations")
 public interface ConnectorConfigurationAdminApi {

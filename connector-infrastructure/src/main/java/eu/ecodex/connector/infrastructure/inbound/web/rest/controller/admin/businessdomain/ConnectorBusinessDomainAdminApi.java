@@ -33,9 +33,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * {@code /api/v1/admin/business-domains}.
  */
 @Tag(
-        name = "BusinessDomainsAdmin",
-        description = "API for managing business domains within the connector system for "
-                + "administrative purposes."
+    name = "BusinessDomainsAdmin",
+    description = "API for managing business domains within the connector system for "
+        + "administrative purposes."
 )
 @RequestMapping(value = "/api/v1/admin/business-domains")
 public interface ConnectorBusinessDomainAdminApi {
@@ -43,10 +43,10 @@ public interface ConnectorBusinessDomainAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new business domain.")
     @ApiResponses(
-            @ApiResponse(responseCode = "400", description = "Bad Request")
+        @ApiResponse(responseCode = "400", description = "Bad Request")
     )
     ConnectorBusinessDomainDto create(
-            @Valid @RequestBody ConnectorBusinessDomainCreationRequest request);
+        @Valid @RequestBody ConnectorBusinessDomainCreationRequest request);
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)

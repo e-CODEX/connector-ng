@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.TransportStepFixtures;
-import eu.ecodex.connector.application.service.usecase.transport.ConnectorListTransportSteps;
+import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport.ConnectorMessageTransportStepAdminController;

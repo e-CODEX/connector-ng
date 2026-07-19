@@ -40,15 +40,15 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageRequest(
-        @NotBlank(message = "The business domain identifier must not be blank.")
-        String businessDomainIdentifier,
-        @NotBlank(message = "The backend identifier must not be blank.")
-        String backendMessageIdentifier,
-        @NotNull(message = "The business content must not be null.")
-        ConnectorOutboundMessageBusinessContent businessContent,
-        @Valid
-        @NotNull(message = "The as4 properties must not be null")
-        ConnectorOutboundMessageAS4Properties as4Properties,
-        List<String> attachments
+    @NotBlank(message = "The business domain identifier must not be blank.")
+    String businessDomainIdentifier,
+    @NotBlank(message = "The backend identifier must not be blank.")
+    String backendMessageIdentifier,
+    @NotNull(message = "The business content must not be null.")
+    ConnectorOutboundMessageBusinessContent businessContent,
+    @Valid
+    @NotNull(message = "The as4 properties must not be null")
+    ConnectorOutboundMessageAS4Properties as4Properties,
+    List<String> attachments
 ) {
 }

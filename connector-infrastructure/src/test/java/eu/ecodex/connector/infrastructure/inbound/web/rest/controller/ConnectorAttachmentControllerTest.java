@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.application.service.usecase.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachment.ConnectorAttachmentController;
 import java.util.List;
 import org.junit.jupiter.api.Test;

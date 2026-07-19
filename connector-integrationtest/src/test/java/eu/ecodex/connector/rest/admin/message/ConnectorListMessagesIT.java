@@ -122,10 +122,11 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
             String businessDomain) {
         apiClient.get()
                  .uri(String.format(
-                         "%s?identifier=%s&backendName=%s",
+                         "%s?identifier=%s&backendName=%s&businessDomain=%s",
                          URL,
                          identifier,
-                         backendName
+                         backendName,
+                         businessDomain
                  ))
                  .exchange()
                  .expectStatus().isOk()
@@ -134,9 +135,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                  .value(result -> {
                      assertThat(result).isNotNull();
                      assert result != null;
-                     assertThat(result.content().size()).isEqualTo(1);
-                     assertThat(result.size()).isEqualTo(1);
-                     assertThat(result.totalElements()).isEqualTo(1);
+                     assertThat(result.content().size()).isEqualTo(4);
+                     assertThat(result.size()).isEqualTo(4);
+                     assertThat(result.totalElements()).isEqualTo(4);
                      assertThat(result.totalPages()).isEqualTo(1);
                  });
     }

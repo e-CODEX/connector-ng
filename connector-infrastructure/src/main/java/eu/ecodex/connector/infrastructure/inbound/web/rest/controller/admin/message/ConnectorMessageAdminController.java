@@ -71,11 +71,17 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     public ConnectorPageResult<ConnectorMessageDto> listMessages(
         String identifier,
         String backendName,
+        String businessDomain,
         int page,
         int size) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
-        var messages = listMessagesService.execute(pageRequest, identifier, backendName);
+        var messages = listMessagesService.execute(
+            pageRequest,
+            identifier,
+            backendName,
+            businessDomain
+        );
 
         return ConnectorPageResult.of(
             messages.content().stream().map(ConnectorMessageDto::from).toList(),

@@ -33,7 +33,14 @@ public class ConnectorListMessagesService implements ConnectorListMessages {
     public ConnectorPageResult<ConnectorMessage> execute(
         @NonNull ConnectorPageRequest pageRequest,
         String identifier,
-        String backendName) {
-        return connectorMessageRepository.findAll(pageRequest, identifier, backendName);
+        String backendName,
+        String businessDomainIdentifier) {
+
+        return connectorMessageRepository.findAll(
+            pageRequest,
+            identifier,
+            backendName,
+            businessDomainIdentifier
+        );
     }
 }

@@ -48,6 +48,7 @@ public interface ConnectorMessageAdminApi {
     ConnectorPageResult<ConnectorMessageDto> listMessages(
         @RequestParam(name = "identifier", required = false) String identifier,
         @RequestParam(name = "backendName", required = false) String backendName,
+        @RequestParam(name = "businessDomain", required = false) String businessDomain,
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "20") int size
     );

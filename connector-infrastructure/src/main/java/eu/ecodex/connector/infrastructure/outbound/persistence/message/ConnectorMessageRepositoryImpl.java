@@ -241,10 +241,15 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     public ConnectorPageResult<ConnectorMessage> findAll(
         ConnectorPageRequest request,
         String identifier,
-        String backendName) {
+        String backendName,
+        String businessDomainIdentifier) {
         var pageable = paginationMapper.toPageable(request);
 
-        var specification = MessageSpecification.withFilters(identifier, backendName);
+        var specification = MessageSpecification.withFilters(
+            identifier,
+            backendName,
+            businessDomainIdentifier
+        );
 
         var messages = messageJpaRepository.findAll(specification, pageable).map(this::toDomain);
 

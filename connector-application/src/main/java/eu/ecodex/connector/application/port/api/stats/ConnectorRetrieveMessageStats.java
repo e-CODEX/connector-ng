@@ -18,5 +18,19 @@ import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
  * and inbound messages within a given period.
  */
 public interface ConnectorRetrieveMessageStats {
-    ConnectorMessageStats execute(String from, String to);
+    /**
+     * Executes the retrieval of statistical data related to messages processed by a connector
+     * within a specified time range and business domain. The method provides aggregated metrics for
+     * all messages, as well as for outbound and inbound messages separately.
+     *
+     * @param from           The starting timestamp of the time range (inclusive) in ISO 8601
+     *                       format.
+     * @param to             The ending timestamp of the time range (exclusive) in ISO 8601 format.
+     * @param businessDomain The unique identifier of the business domain for which the statistics
+     *                       are to be retrieved.
+     *
+     * @return A {@code ConnectorMessageStats} object containing aggregated metrics for the
+     *     specified time range and business domain.
+     */
+    ConnectorMessageStats execute(String from, String to, String businessDomain);
 }

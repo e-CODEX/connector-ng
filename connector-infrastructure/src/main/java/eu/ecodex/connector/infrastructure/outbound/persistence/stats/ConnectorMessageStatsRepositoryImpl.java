@@ -32,8 +32,8 @@ public class ConnectorMessageStatsRepositoryImpl implements ConnectorMessageStat
     }
 
     @Override
-    public ConnectorMessageStats findAll(Instant from, Instant to) {
-        var stats = messageStatsJpaRepository.computeStats(from, to);
+    public ConnectorMessageStats findAll(Instant from, Instant to, String businessDomain) {
+        var stats = messageStatsJpaRepository.computeStats(from, to, businessDomain);
 
         if (stats == null) {
             return ConnectorMessageStats.ofZero();
@@ -75,8 +75,11 @@ public class ConnectorMessageStatsRepositoryImpl implements ConnectorMessageStat
     }
 
     @Override
-    public List<ConnectorMessageReport> computeReport(Instant from, Instant to) {
-        var reports = messageStatsJpaRepository.computeReports(from, to);
+    public List<ConnectorMessageReport> computeReport(
+        Instant from,
+        Instant to,
+        String businessDomain) {
+        var reports = messageStatsJpaRepository.computeReports(from, to, businessDomain);
         return reports.stream().map((report) -> new ConnectorMessageReport(
             report.year(),
             report.month(),

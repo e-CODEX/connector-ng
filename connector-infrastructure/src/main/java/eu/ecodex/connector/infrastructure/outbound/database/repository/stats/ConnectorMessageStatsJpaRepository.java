@@ -46,10 +46,15 @@ public interface ConnectorMessageStatsJpaRepository extends
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
                         AND m.rejectedAt IS NOT NULL THEN 1 END))
         FROM ConnectorMessageEntity m
-            WHERE (:from IS NULL OR m.createdAt >= :from)
-                  AND (:to   IS NULL OR m.createdAt <= :to)
+        WHERE
+            (:from IS NULL OR m.createdAt >= :from)
+            AND (:to IS NULL OR m.createdAt <= :to)
+            AND (:businessDomain IS NULL OR m.businessDomain.identifier = :businessDomain)
         """)
-    ConnectorMessageStatsDto computeStats(@Param("from") Instant from, @Param("to") Instant to);
+    ConnectorMessageStatsDto computeStats(
+        @Param("from") Instant from,
+        @Param("to") Instant to,
+        @Param("businessDomain") String businessDomain);
 
     @Query("""
         SELECT new eu.ecodex.connector.infrastructure.outbound.database.dto.ConnectorMessageReportDto(
@@ -61,13 +66,16 @@ public interface ConnectorMessageStatsJpaRepository extends
             m.direction,
             count(a)
         )
-        from ConnectorMessageAS4PropertiesEntity a
+        FROM ConnectorMessageAS4PropertiesEntity a
             JOIN a.message m
             JOIN a.service srv
             LEFT JOIN a.fromParty fp
             LEFT JOIN a.toParty  tp
-        WHERE (:from IS NULL OR m.createdAt >= :from) AND (:to   IS NULL OR m.createdAt <= :to)
-          AND m.direction IN (
+        WHERE
+            (:from IS NULL OR m.createdAt >= :from)
+            AND (:to IS NULL OR m.createdAt <= :to)
+            AND (:businessDomain IS NULL OR m.businessDomain.identifier = :businessDomain)
+            AND m.direction IN (
                 eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND,
                 eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY)
         GROUP BY
@@ -86,5 +94,6 @@ public interface ConnectorMessageStatsJpaRepository extends
         """)
     List<ConnectorMessageReportDto> computeReports(
         @Param("from") Instant from,
-        @Param("to") Instant to);
+        @Param("to") Instant to,
+        @Param("businessDomain") String businessDomain);
 }

@@ -77,7 +77,8 @@ public interface ConnectorMessageAdminApi {
     @Operation(summary = "Get message statistics.")
     ConnectorMessageStats getStats(
         @RequestParam(name = "from", required = false) String from,
-        @RequestParam(name = "to", required = false) String to
+        @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "businessDomain", required = false) String businessDomain
     );
 
     @ResponseStatus(HttpStatus.OK)
@@ -85,7 +86,8 @@ public interface ConnectorMessageAdminApi {
     @Operation(summary = "Get message reporting.")
     ConnectorMessageReportSummary getReports(
         @RequestParam(name = "from", required = false) String from,
-        @RequestParam(name = "to", required = false) String to
+        @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "businessDomain", required = false) String businessDomain
     );
 
     @ResponseStatus(HttpStatus.OK)
@@ -94,6 +96,7 @@ public interface ConnectorMessageAdminApi {
     ResponseEntity<byte[]> exportReports(
         @RequestParam(name = "from", required = false) String from,
         @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "businessDomain", required = false) String businessDomain,
         @RequestParam(name = "format") ConnectorMessageReportExportFormat format
     );
 }

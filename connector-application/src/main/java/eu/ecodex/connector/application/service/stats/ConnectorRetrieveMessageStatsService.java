@@ -32,7 +32,7 @@ public class ConnectorRetrieveMessageStatsService implements ConnectorRetrieveMe
     }
 
     @Override
-    public ConnectorMessageStats execute(String from, String to) {
-        return statsRepository.findAll(parseInstant(from), parseInstant(to));
+    public ConnectorMessageStats execute(String from, String to, String businessDomain) {
+        return statsRepository.findAll(parseInstant(from), parseInstant(to), businessDomain);
     }
 }

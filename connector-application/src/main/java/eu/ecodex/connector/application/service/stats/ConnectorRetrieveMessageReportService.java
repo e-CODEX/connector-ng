@@ -32,8 +32,12 @@ public class ConnectorRetrieveMessageReportService implements ConnectorRetrieveM
     }
 
     @Override
-    public ConnectorMessageReportSummary execute(String from, String to) {
-        var computedReport = statsRepository.computeReport(parseInstant(from), parseInstant(to));
+    public ConnectorMessageReportSummary execute(String from, String to, String businessDomain) {
+        var computedReport = statsRepository.computeReport(
+            parseInstant(from),
+            parseInstant(to),
+            businessDomain
+        );
 
         return ConnectorMessageReportSummary.of(computedReport);
     }

@@ -110,21 +110,22 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     }
 
     @Override
-    public ConnectorMessageStats getStats(String from, String to) {
-        return retrieveMessageStatsService.execute(from, to);
+    public ConnectorMessageStats getStats(String from, String to, String businessDomain) {
+        return retrieveMessageStatsService.execute(from, to, businessDomain);
     }
 
     @Override
-    public ConnectorMessageReportSummary getReports(String from, String to) {
-        return retrieveMessageReportService.execute(from, to);
+    public ConnectorMessageReportSummary getReports(String from, String to, String businessDomain) {
+        return retrieveMessageReportService.execute(from, to, businessDomain);
     }
 
     @Override
     public ResponseEntity<byte[]> exportReports(
         String from,
         String to,
+        String businessDomain,
         ConnectorMessageReportExportFormat format) {
-        var reportsSummary = retrieveMessageReportService.execute(from, to);
+        var reportsSummary = retrieveMessageReportService.execute(from, to, businessDomain);
         var exporter = reportExporterFactory.create(format);
 
         return ResponseEntity.ok()

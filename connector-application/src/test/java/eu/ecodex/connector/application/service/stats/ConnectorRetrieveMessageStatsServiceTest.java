@@ -34,10 +34,11 @@ public class ConnectorRetrieveMessageStatsServiceTest {
     void should_retrieve_message_stats_successfully() {
         when(statsRepository.findAll(
             any(),
+            any(),
             any()
         )).thenReturn(MessageStatsTestFixtures.createStats());
 
-        var stats = service.execute(any(), any());
+        var stats = service.execute(any(), any(), any());
 
         assertThat(stats).isNotNull();
         assertThat(stats.all()).isNotNull();

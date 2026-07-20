@@ -19,7 +19,7 @@ import java.util.List;
  * Provides a contract for retrieving statistics related to connector messages.
  */
 public interface ConnectorMessageStatsRepository {
-    ConnectorMessageStats findAll(Instant from, Instant to);
+    ConnectorMessageStats findAll(Instant from, Instant to, String businessDomain);
 
-    List<ConnectorMessageReport> computeReport(Instant from, Instant to);
+    List<ConnectorMessageReport> computeReport(Instant from, Instant to, String businessDomain);
 }

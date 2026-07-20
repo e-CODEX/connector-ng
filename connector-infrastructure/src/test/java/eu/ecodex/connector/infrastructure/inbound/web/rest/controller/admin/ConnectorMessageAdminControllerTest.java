@@ -164,7 +164,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
 
     @Test
     void should_retrieve_message_stats() throws Exception {
-        when(retrieveMessageStatsService.execute(any(), any()))
+        when(retrieveMessageStatsService.execute(any(), any(), any()))
             .thenReturn(MessageStatsTestFixtures.createStats());
 
         mockMvc.perform(get(URL_STATS).contentType(MediaType.APPLICATION_JSON))
@@ -188,7 +188,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
 
     @Test
     void should_retrieve_message_report_successfully() throws Exception {
-        when(retrieveMessageReportService.execute(any(), any()))
+        when(retrieveMessageReportService.execute(any(), any(), any()))
             .thenReturn(
                 ConnectorMessageReportSummary.of(MessageReportTestFixtures.createReport())
             );
@@ -246,7 +246,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
         throws Exception {
         var exporter = exporterFor(format);
 
-        when(retrieveMessageReportService.execute(any(), any()))
+        when(retrieveMessageReportService.execute(any(), any(), any()))
             .thenReturn(ConnectorMessageReportSummary.of(MessageReportTestFixtures.createReport()));
         when(reportExporterFactory.create(format)).thenReturn(exporter);
         when(exporter.export(any())).thenReturn("dummy-content".getBytes(StandardCharsets.UTF_8));

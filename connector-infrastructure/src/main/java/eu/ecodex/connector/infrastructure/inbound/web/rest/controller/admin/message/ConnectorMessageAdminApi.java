@@ -46,11 +46,13 @@ public interface ConnectorMessageAdminApi {
     @GetMapping
     @Operation(summary = "Get paginated list of messages.")
     ConnectorPageResult<ConnectorMessageDto> listMessages(
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size,
         @RequestParam(name = "identifier", required = false) String identifier,
         @RequestParam(name = "backendName", required = false) String backendName,
         @RequestParam(name = "businessDomain", required = false) String businessDomain,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "20") int size
+        @RequestParam(name = "service", required = false) String service,
+        @RequestParam(name = "action", required = false) String action
     );
 
     @ResponseStatus(HttpStatus.OK)

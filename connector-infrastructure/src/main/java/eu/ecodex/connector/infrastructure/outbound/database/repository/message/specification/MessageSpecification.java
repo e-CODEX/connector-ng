@@ -23,6 +23,9 @@ public class MessageSpecification {
     private static final String REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER =
         "referenceToBackendMessageIdentifier";
     private static final String AS4_PROPERTIES_FIELD = "as4Properties";
+    private static final String SERVICE_FIELD = "service";
+    private static final String ACTION_FIELD = "action";
+    private static final String NAME_FIELD = "name";
     private static final String CONVERSATION_IDENTIFIER_FIELD = "conversationIdentifier";
     private static final String EBMS_IDENTIFIER_FIELD = "ebmsMessageIdentifier";
     private static final String BACKEND_NAME_FIELD = "backendName";
@@ -40,6 +43,8 @@ public class MessageSpecification {
      *                                 specification will not add any criteria.
      * @param backendName              the name of the backend to filter the results.
      * @param businessDomainIdentifier the identifier of the business domain to filter the results.
+     * @param serviceName              the name of the service to filter the results.
+     * @param actionName               the name of the action to filter the results.
      *
      * @return a {@link Specification} that can be used for querying {@link ConnectorMessageEntity}
      *     instances matching the given identifier across one or more relevant fields.
@@ -47,7 +52,9 @@ public class MessageSpecification {
     public static Specification<ConnectorMessageEntity> withFilters(
         String identifier,
         String backendName,
-        String businessDomainIdentifier) {
+        String businessDomainIdentifier,
+        String serviceName,
+        String actionName) {
         return Specification
             .where(withIdentifier(identifier))
             .or(
@@ -55,9 +62,11 @@ public class MessageSpecification {
                     .or(withRefToBackendMessageIdentifier(identifier))
                     .or(withConversationIdentifier(identifier))
                     .or(withEbmsIdentifier(identifier))
-                    .or(withBusinessDomain(businessDomainIdentifier))
             )
-            .and(withBackendName(backendName));
+            .and(withBackendName(backendName))
+            .and(withBusinessDomain(businessDomainIdentifier))
+            .and(withServiceName(serviceName))
+            .and(withActionName(actionName));
     }
 
     private static Specification<ConnectorMessageEntity> withIdentifier(String identifier) {
@@ -155,6 +164,36 @@ public class MessageSpecification {
 
             return cb.like(
                 root.get(BUSINESS_DOMAIN_FIELD).get(IDENTIFIER_FIELD),
+                pattern
+            );
+        });
+    }
+
+    private static Specification<ConnectorMessageEntity> withServiceName(String serviceName) {
+        return ((root, query, cb) -> {
+            if (!StringUtils.hasText(serviceName)) {
+                return null;
+            }
+
+            var pattern = "%" + serviceName + "%";
+
+            return cb.like(
+                root.get(AS4_PROPERTIES_FIELD).get(SERVICE_FIELD).get(NAME_FIELD),
+                pattern
+            );
+        });
+    }
+
+    private static Specification<ConnectorMessageEntity> withActionName(String actionName) {
+        return ((root, query, cb) -> {
+            if (!StringUtils.hasText(actionName)) {
+                return null;
+            }
+
+            var pattern = "%" + actionName + "%";
+
+            return cb.like(
+                root.get(AS4_PROPERTIES_FIELD).get(ACTION_FIELD).get(NAME_FIELD),
                 pattern
             );
         });

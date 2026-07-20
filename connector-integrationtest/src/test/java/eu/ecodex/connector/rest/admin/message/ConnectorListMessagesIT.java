@@ -100,11 +100,11 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
 
     @ParameterizedTest
     @CsvSource({
-            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,default_business_domain",
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,default_business_domain,Connector-TEST,Test_Form",
             // identifier
-            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,default_business_domain",
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,default_business_domain,Connector-TEST,Test_Form",
             // backendMessageIdentifier
-            "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice,default_business_domain",
+            "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice,default_business_domain,Connector-TEST,Test_Form",
             // conversationIdentifier
     })
     @Sql({
@@ -119,14 +119,18 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     void should_list_connector_messages_applying_identifier_and_backend_name_and_business_domain_filter_successfully(
             String identifier,
             String backendName,
-            String businessDomain) {
+            String businessDomain,
+            String service,
+            String action) {
         apiClient.get()
                  .uri(String.format(
-                         "%s?identifier=%s&backendName=%s&businessDomain=%s",
+                         "%s?identifier=%s&backendName=%s&businessDomain=%s&service=%s&action=%s",
                          URL,
                          identifier,
                          backendName,
-                         businessDomain
+                         businessDomain,
+                         service,
+                         action
                  ))
                  .exchange()
                  .expectStatus().isOk()
@@ -135,9 +139,9 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
                  .value(result -> {
                      assertThat(result).isNotNull();
                      assert result != null;
-                     assertThat(result.content().size()).isEqualTo(4);
-                     assertThat(result.size()).isEqualTo(4);
-                     assertThat(result.totalElements()).isEqualTo(4);
+                     assertThat(result.content().size()).isEqualTo(1);
+                     assertThat(result.size()).isEqualTo(1);
+                     assertThat(result.totalElements()).isEqualTo(1);
                      assertThat(result.totalPages()).isEqualTo(1);
                  });
     }

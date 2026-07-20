@@ -32,6 +32,8 @@ public interface ConnectorListMessages {
      * @param backendName              the name of the backend to which the message belongs to.
      * @param businessDomainIdentifier the identifier of the business domain to which the message
      *                                 belongs to.
+     * @param service                  the service name of the message.
+     * @param action                   the action name of the message.
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} objects
      *     and pagination metadata.
@@ -40,6 +42,8 @@ public interface ConnectorListMessages {
         @Nonnull ConnectorPageRequest pageRequest,
         String identifier,
         String backendName,
-        String businessDomainIdentifier
+        String businessDomainIdentifier,
+        String service,
+        String action
     );
 }

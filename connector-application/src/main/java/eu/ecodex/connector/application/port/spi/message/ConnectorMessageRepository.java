@@ -72,6 +72,8 @@ public interface ConnectorMessageRepository {
      *                                 messages associated with a specific backend name; may be null
      *                                 or empty if no backend filtering is required.
      * @param businessDomainIdentifier the identifier of the business domain to filter
+     * @param service                  the service name to filter messages
+     * @param action                   the action name to filter messages
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} instances
      *     that match the specified criteria. The result includes pagination details such as total
@@ -82,7 +84,9 @@ public interface ConnectorMessageRepository {
         ConnectorPageRequest request,
         String identifier,
         String backendName,
-        String businessDomainIdentifier
+        String businessDomainIdentifier,
+        String service,
+        String action
     );
 
     /**

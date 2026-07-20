@@ -69,18 +69,22 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
 
     @Override
     public ConnectorPageResult<ConnectorMessageDto> listMessages(
+        int page,
+        int size,
         String identifier,
         String backendName,
         String businessDomain,
-        int page,
-        int size) {
+        String service,
+        String action) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
         var messages = listMessagesService.execute(
             pageRequest,
             identifier,
             backendName,
-            businessDomain
+            businessDomain,
+            service,
+            action
         );
 
         return ConnectorPageResult.of(

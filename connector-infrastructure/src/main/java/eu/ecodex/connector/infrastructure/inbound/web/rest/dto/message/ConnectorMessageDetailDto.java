@@ -71,8 +71,7 @@ public record ConnectorMessageDetailDto(
     Instant deletedAt,
     Instant rejectedAt,
     Instant confirmedAt,
-    Instant deliveredToGatewayAt,
-    Instant deliveredToBackendAt,
+    Instant deliveredToLinkPartnerAt,
     List<ConnectorMessageAttachment> attachments,
     List<ConnectorMessageEvidenceDto> evidences,
     List<ConnectorMessageError> errors
@@ -103,8 +102,7 @@ public record ConnectorMessageDetailDto(
             .deletedAt(message.deletedAt())
             .rejectedAt(message.rejectedAt())
             .confirmedAt(message.confirmedAt())
-            .deliveredToBackendAt(message.deliveredToBackendAt())
-            .deliveredToGatewayAt(message.deliveredToGatewayAt())
+            .deliveredToLinkPartnerAt(message.deliveredToLinkPartnerAt())
             .errors(message.errors())
             .attachments(message.attachments())
             .evidences(

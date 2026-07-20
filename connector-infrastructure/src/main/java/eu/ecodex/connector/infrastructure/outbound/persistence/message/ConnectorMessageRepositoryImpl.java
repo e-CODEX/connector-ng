@@ -112,8 +112,7 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
             .deletedAt(entity.getDeletedAt())
             .rejectedAt(entity.getRejectedAt())
             .confirmedAt(entity.getConfirmedAt())
-            .deliveredToBackendAt(entity.getDeliveredToBackendAt())
-            .deliveredToGatewayAt(entity.getDeliveredToGatewayAt())
+            .deliveredToLinkPartnerAt(entity.getDeliveredToLinkPartnerAt())
             .as4Properties(toDomain(entity.getAs4Properties()))
             .build();
     }
@@ -339,18 +338,9 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     @Override
-    public ConnectorMessage setDeliveredToGatewayAt(@NonNull String identifier) {
+    public ConnectorMessage setDeliveredToLinkPartnerAt(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
-        foundMessage.setDeliveredToGatewayAt(Instant.now());
-        var updatedMessage = this.messageJpaRepository.save(foundMessage);
-
-        return toDomain(updatedMessage);
-    }
-
-    @Override
-    public ConnectorMessage setDeliveredToBackendAt(@NonNull String identifier) {
-        var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
-        foundMessage.setDeliveredToBackendAt(Instant.now());
+        foundMessage.setDeliveredToLinkPartnerAt(Instant.now());
         var updatedMessage = this.messageJpaRepository.save(foundMessage);
 
         return toDomain(updatedMessage);

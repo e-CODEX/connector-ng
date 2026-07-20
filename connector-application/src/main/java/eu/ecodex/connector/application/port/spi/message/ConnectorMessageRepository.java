@@ -187,7 +187,12 @@ public interface ConnectorMessageRepository {
      */
     ConnectorMessage setAsConfirmed(@Nonnull String identifier);
 
-    ConnectorMessage setDeliveredToGatewayAt(@Nonnull String identifier);
-
-    ConnectorMessage setDeliveredToBackendAt(@Nonnull String identifier);
+    /**
+     * Sets the timestamp indicating when the item was delivered to the link partner, identified by
+     * the given identifier.
+     *
+     * @param identifier A non-null unique identifier for the link partner to whom the item delivery
+     *                   should be recorded.
+     */
+    ConnectorMessage setDeliveredToLinkPartnerAt(@Nonnull String identifier);
 }

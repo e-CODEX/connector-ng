@@ -48,10 +48,8 @@ import lombok.Builder;
  * @param deletedAt                           The timestamp when the message was deleted.
  * @param rejectedAt                          The timestamp when the message was rejected.
  * @param confirmedAt                         The timestamp when the message was confirmed.
- * @param deliveredToGatewayAt                The timestamp when the message was delivered to the
- *                                            gateway.
- * @param deliveredToBackendAt                The timestamp when the message was delivered to the
- *                                            backend.
+ * @param deliveredToLinkPartnerAt            The timestamp when the message was delivered to the
+ *                                            link partner.
  */
 @Builder
 public record ConnectorMessageDto(
@@ -69,8 +67,7 @@ public record ConnectorMessageDto(
     Instant deletedAt,
     Instant rejectedAt,
     Instant confirmedAt,
-    Instant deliveredToGatewayAt,
-    Instant deliveredToBackendAt
+    Instant deliveredToLinkPartnerAt
 ) {
     /**
      * Converts a {@link ConnectorMessage} instance into a {@link ConnectorMessageDto} instance.
@@ -97,12 +94,11 @@ public record ConnectorMessageDto(
             .deletedAt(message.deletedAt())
             .rejectedAt(message.rejectedAt())
             .confirmedAt(message.confirmedAt())
-            .deliveredToBackendAt(message.deliveredToBackendAt())
-            .deliveredToGatewayAt(message.deliveredToGatewayAt())
+            .deliveredToLinkPartnerAt(message.deliveredToLinkPartnerAt())
             .build();
     }
 
     private static boolean isDelivered(ConnectorMessage message) {
-        return message.deliveredToGatewayAt() != null || message.deliveredToBackendAt() != null;
+        return message.deliveredToLinkPartnerAt() != null;
     }
 }

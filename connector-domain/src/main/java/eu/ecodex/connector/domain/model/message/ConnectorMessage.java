@@ -17,7 +17,6 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
@@ -57,10 +56,8 @@ import lombok.Builder;
  *                                            during processing. Maybe null.
  * @param confirmedAt                         The timestamp indicating when the backend or gateway
  *                                            confirmed the message. Maybe null.
- * @param deliveredToGatewayAt                The timestamp indicating when the message was
- *                                            successfully delivered to the gateway. Maybe null.
- * @param deliveredToBackendAt                The timestamp indicating when the message was
- *                                            successfully delivered to the backend. Maybe null.
+ * @param deliveredToLinkPartnerAt            The timestamp indicating when the message was
+ *                                            delivered to the link partner.
  * @param businessContent                     The core businessContent of the message, encapsulated
  *                                            as XML data and potentially a printable
  *                                            businessDocument. This field determines if the message
@@ -77,27 +74,26 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorMessage(
-        // TODO check if caused by should be set to connector message definition
-        @Nullable ConnectorBusinessDomainIdentifier businessDomainIdentifier,
-        @Nullable String identifier,
-        @Nullable String backendMessageIdentifier,
-        @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
-        @Nullable String backendName,
-        @Nullable String gatewayName,
-        @Nonnull ConnectorMessageAS4Properties as4Properties,
-        @Nullable ConnectorMessageDirection direction,
-        @Nullable Instant createdAt,
-        @Nullable Instant updatedAt,
-        @Nullable Instant deletedAt,
-        @Nullable Instant rejectedAt,
-        @Nullable Instant confirmedAt,
-        @Nullable Instant deliveredToGatewayAt,
-        @Nullable Instant deliveredToBackendAt,
-        @Nullable ConnectorMessageBusinessContent businessContent,
-        @Nullable List<ConnectorMessageAttachment> attachments,
-        @Nullable List<ConnectorMessageError> errors,
-        @Nullable List<ConnectorMessageEvidence> evidences,
-        @Nullable List<ConnectorMessageEvidence> transportedEvidences
+    // TODO check if caused by should be set to connector message definition
+    @Nullable ConnectorBusinessDomainIdentifier businessDomainIdentifier,
+    @Nullable String identifier,
+    @Nullable String backendMessageIdentifier,
+    @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
+    @Nullable String backendName,
+    @Nullable String gatewayName,
+    @Nonnull ConnectorMessageAS4Properties as4Properties,
+    @Nullable ConnectorMessageDirection direction,
+    @Nullable Instant createdAt,
+    @Nullable Instant updatedAt,
+    @Nullable Instant deletedAt,
+    @Nullable Instant rejectedAt,
+    @Nullable Instant confirmedAt,
+    @Nullable Instant deliveredToLinkPartnerAt,
+    @Nullable ConnectorMessageBusinessContent businessContent,
+    @Nullable List<ConnectorMessageAttachment> attachments,
+    @Nullable List<ConnectorMessageError> errors,
+    @Nullable List<ConnectorMessageEvidence> evidences,
+    @Nullable List<ConnectorMessageEvidence> transportedEvidences
 ) implements Serializable {
     /**
      * Determines whether the current message has been rejected.
@@ -123,8 +119,8 @@ public record ConnectorMessage(
      */
     public boolean isEvidenceMessage() {
         return this.businessContent() == null
-                && this.transportedEvidences() != null
-                && !this.transportedEvidences().isEmpty();
+            && this.transportedEvidences() != null
+            && !this.transportedEvidences().isEmpty();
     }
 
     /**
@@ -160,8 +156,8 @@ public record ConnectorMessage(
         var transported = this.transportedEvidences();
 
         return transported != null
-                && transported.size() == 1
-                && transported.getFirst().content() == null;
+            && transported.size() == 1
+            && transported.getFirst().content() == null;
     }
 
     /**
@@ -172,7 +168,7 @@ public record ConnectorMessage(
      * from the backend system and is directed toward the gateway.
      *
      * @return {@code true} if evidence triggering is allowed for the message; {@code false}
-     *         otherwise.
+     *     otherwise.
      */
     public boolean isEvidenceTriggeringAllowed() {
         return this.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY;
@@ -187,7 +183,7 @@ public record ConnectorMessage(
      * properties, but with reversed sender-to-receiver directions.
      *
      * @return A new {@code ConnectorMessage} instance with updated direction, roles, and party
-     *         information, reflecting the switched communication flow.
+     *     information, reflecting the switched communication flow.
      */
     @Nonnull
     public ConnectorMessage switchDirection() {
@@ -215,7 +211,7 @@ public record ConnectorMessage(
 
         var switchedMessageBuilder = this.toBuilder();
         switchedMessageBuilder.direction(
-                ConnectorMessageDirection.from(direction.getTarget(), direction.getSource())
+            ConnectorMessageDirection.from(direction.getTarget(), direction.getSource())
         );
         switchedMessageBuilder.as4Properties(switchedAS4PropertiesBuilder.build());
 
@@ -226,12 +222,12 @@ public record ConnectorMessage(
     @Nonnull
     public String toString() {
         return String.format(
-                "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
-                        + "referenceToBackendMessageIdentifier=%s, direction=%s, as4Properties=%s "
-                        + "businessContent=%s, attachments=%s, errors=%s, evidences=%s",
-                identifier, backendMessageIdentifier, backendName, gatewayName,
-                referenceToBackendMessageIdentifier, direction, as4Properties, businessContent,
-                attachments, errors, evidences
+            "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
+                + "referenceToBackendMessageIdentifier=%s, direction=%s, as4Properties=%s "
+                + "businessContent=%s, attachments=%s, errors=%s, evidences=%s",
+            identifier, backendMessageIdentifier, backendName, gatewayName,
+            referenceToBackendMessageIdentifier, direction, as4Properties, businessContent,
+            attachments, errors, evidences
         );
     }
 }

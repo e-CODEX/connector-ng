@@ -118,7 +118,7 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
             if (acknowledgment.isResult()) {
                 if (message.isBusinessMessage()) {
                     // TODO: also send SUBMISSION_CONFIRMATION back here ?
-                    messageRepository.setDeliveredToBackendAt(identifier);
+                    messageRepository.setDeliveredToLinkPartnerAt(identifier);
                     if (acknowledgment.getMessageId() != null) {
                         messageRepository.updateBackendIdentifier(
                             identifier,

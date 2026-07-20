@@ -30,19 +30,18 @@ public interface ConnectorMessageStatsJpaRepository extends
     @Query("""
         SELECT new eu.ecodex.connector.infrastructure.outbound.database.dto.ConnectorMessageStatsDto(
             COUNT(m),
-            COUNT(CASE WHEN m.deliveredToGatewayAt IS NOT NULL
-                        OR m.deliveredToBackendAt IS NOT NULL THEN 1 END),
+            COUNT(CASE WHEN m.deliveredToLinkPartnerAt IS NOT NULL THEN 1 END),
             COUNT(CASE WHEN m.rejectedAt IS NOT NULL THEN 1 END),
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY
                         THEN 1 END),
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY
-                        AND m.deliveredToGatewayAt IS NOT NULL THEN 1 END),
+                        AND m.deliveredToLinkPartnerAt IS NOT NULL THEN 1 END),
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY
                         AND m.rejectedAt IS NOT NULL THEN 1 END),
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
                         THEN 1 END),
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
-                        AND m.deliveredToBackendAt IS NOT NULL THEN 1 END),
+                        AND m.deliveredToLinkPartnerAt IS NOT NULL THEN 1 END),
             COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
                         AND m.rejectedAt IS NOT NULL THEN 1 END))
         FROM ConnectorMessageEntity m

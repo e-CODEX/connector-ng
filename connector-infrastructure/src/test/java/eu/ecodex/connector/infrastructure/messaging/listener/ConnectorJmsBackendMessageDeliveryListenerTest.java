@@ -144,7 +144,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             eq(ConnectorMessageTransportStatus.FAILED)
         );
         verify(messageRepository).setAsRejected(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
     }
 
@@ -162,7 +162,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             eq(ConnectorMessageTransportStatus.FAILED)
         );
         verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
         verify(messageRepository, never()).setAsRejected(any());
     }
@@ -184,7 +184,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             any(),
             eq(ConnectorMessageTransportStatus.DELIVERED)
         );
-        verify(messageRepository).setDeliveredToBackendAt(MESSAGE_ID);
+        verify(messageRepository).setDeliveredToLinkPartnerAt(MESSAGE_ID);
         verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, "backend-message-id");
         verify(messageRepository, never()).setAsRejected(any());
     }
@@ -206,7 +206,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             any(),
             eq(ConnectorMessageTransportStatus.DELIVERED)
         );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
         verify(messageRepository, never()).setAsRejected(any());
     }
@@ -223,7 +223,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             any(),
             eq(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
         );
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
         verify(messageRepository, never()).setAsRejected(any());
     }

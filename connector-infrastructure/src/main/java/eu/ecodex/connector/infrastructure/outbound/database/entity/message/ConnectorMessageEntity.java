@@ -91,12 +91,8 @@ public class ConnectorMessageEntity extends BaseEntity {
     private Instant confirmedAt;
 
     @Setter
-    @Column(name = "DELIVERED_TO_GATEWAY_AT")
-    private Instant deliveredToGatewayAt;
-
-    @Setter
-    @Column(name = "DELIVERED_TO_BACKEND_AT")
-    private Instant deliveredToBackendAt;
+    @Column(name = "DELIVERED_TO_LINK_PARTNER_AT")
+    private Instant deliveredToLinkPartnerAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "BUSINESS_DOMAIN_ID", nullable = false)

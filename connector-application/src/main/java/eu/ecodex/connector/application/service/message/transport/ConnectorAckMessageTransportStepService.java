@@ -173,14 +173,13 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         }
 
         if (message.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
-            messageRepository.setDeliveredToBackendAt(identifier);
             messageRepository.updateBackendIdentifier(identifier, remoteMessageIdentifier);
             log.info("Message [{}] delivered to backend link partner", identifier);
         } else {
             // TODO see if ebms ID should be updated
-            messageRepository.setDeliveredToGatewayAt(identifier);
             log.info("Message [{}] delivered to gateway link partner", identifier);
         }
+        messageRepository.setDeliveredToLinkPartnerAt(identifier);
     }
 
     private void updateEvidenceMessage(ConnectorMessage message, String identifier) {

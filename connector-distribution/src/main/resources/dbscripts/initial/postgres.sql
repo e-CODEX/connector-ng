@@ -70,8 +70,7 @@ create table connector_messages
     backend_name                            varchar(255),
     confirmed_at                            timestamp(6) with time zone,
     deleted_at                              timestamp(6) with time zone,
-    delivered_to_backend_at                 timestamp(6) with time zone,
-    delivered_to_gateway_at                 timestamp(6) with time zone,
+    delivered_to_link_partner_at            timestamp(6) with time zone,
     direction                               varchar(255)                not null
         constraint connector_messages_direction_check
             check ((direction)::text = ANY

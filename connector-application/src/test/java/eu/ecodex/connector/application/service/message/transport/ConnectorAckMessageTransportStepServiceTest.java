@@ -166,7 +166,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
             eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
         );
         verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToBackendAt(MESSAGE_ID);
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
         verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
         verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
 
@@ -190,9 +190,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
             eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
         );
         verify(messageRepository).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository).setDeliveredToBackendAt(MESSAGE_ID);
+        verify(messageRepository).setDeliveredToLinkPartnerAt(MESSAGE_ID);
         verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
-        verify(messageRepository, never()).setDeliveredToGatewayAt(any());
         verifyNoInteractions(messageErrorRepository);
     }
 
@@ -217,9 +216,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
             eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 0)
         );
         verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToBackendAt(MESSAGE_ID);
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
         verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
-        verify(messageRepository, never()).setDeliveredToGatewayAt(any());
         verifyNoInteractions(messageErrorRepository);
     }
 
@@ -243,7 +241,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
             argThat(step -> step.numberOfAttempts() == 1)
         );
         verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToBackendAt(MESSAGE_ID);
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
         verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
         verify(evidenceRepository).setDeliveredToLinkPartnerAt(any());
 
@@ -258,7 +256,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
         assertThatNoException().isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
 
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
     }
 
@@ -282,7 +280,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
             eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
         );
         verify(messageErrorRepository).save(MESSAGE_ID, errors);
-        verify(messageRepository, never()).setDeliveredToBackendAt(any());
+        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
     }
 

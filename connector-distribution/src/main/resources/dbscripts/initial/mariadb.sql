@@ -52,8 +52,7 @@ create table connector_messages
     backend_name                            varchar(255)                                      null,
     confirmed_at                            datetime(6)                                       null,
     deleted_at                              datetime(6)                                       null,
-    delivered_to_backend_at                 datetime(6)                                       null,
-    delivered_to_gateway_at                 datetime(6)                                       null,
+    delivered_to_link_partner_at            datetime(6)                                       null,
     direction                               enum ('BACKEND_TO_GATEWAY', 'GATEWAY_TO_BACKEND') not null,
     gateway_name                            varchar(255)                                      null,
     identifier                              varchar(255)                                      not null,
@@ -78,8 +77,7 @@ create table connector_message_attachments
     storage      enum ('S3_BUCKET') not null,
     type         varchar(64)        null
         check (`type` in
-               ('ATTACHMENT', 'ASICS', 'BUSINESS_CONTENT', 'BUSINESS_DOCUMENT', 'DETACHED_SIGNATURE', 'EVIDENCE_XML',
-                'PDF_TOKEN', 'XML_TOKEN')),
+               ('ATTACHMENT', 'ASICS', 'BUSINESS_CONTENT', 'BUSINESS_DOCUMENT', 'DETACHED_SIGNATURE', 'EVIDENCE_XML', 'PDF_TOKEN', 'XML_TOKEN')),
     message_id   bigint             null,
     constraint UKqkwekyau6mx7fqymuavj4bkqw
         unique (identifier),

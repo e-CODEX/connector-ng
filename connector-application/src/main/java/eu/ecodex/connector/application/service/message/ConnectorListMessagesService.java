@@ -34,13 +34,16 @@ public class ConnectorListMessagesService implements ConnectorListMessages {
         @NonNull ConnectorPageRequest pageRequest,
         String identifier,
         String backendName,
-        String businessDomainIdentifier) {
-
+        String businessDomainIdentifier,
+        String service,
+        String action) {
         return connectorMessageRepository.findAll(
             pageRequest,
             identifier,
             backendName,
-            businessDomainIdentifier
+            businessDomainIdentifier,
+            service,
+            action
         );
     }
 }

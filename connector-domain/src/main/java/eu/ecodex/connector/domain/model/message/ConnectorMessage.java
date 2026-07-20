@@ -34,7 +34,6 @@ import lombok.Builder;
  *
  * @param businessDomainIdentifier            The uuid for the business domain where the message is
  *                                            being used.
- * @param uuid                                A globally unique uuid for the message. Maybe null.
  * @param identifier                          A mandatory unique uuid for the message within the
  *                                            system scope.
  * @param backendMessageIdentifier            A mandatory unique uuid for the message from the
@@ -80,7 +79,6 @@ import lombok.Builder;
 public record ConnectorMessage(
         // TODO check if caused by should be set to connector message definition
         @Nullable ConnectorBusinessDomainIdentifier businessDomainIdentifier,
-        @Nullable String uuid,
         @Nullable String identifier,
         @Nullable String backendMessageIdentifier,
         @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed

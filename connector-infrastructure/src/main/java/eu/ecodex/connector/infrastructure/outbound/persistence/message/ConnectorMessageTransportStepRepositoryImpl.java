@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -63,6 +64,7 @@ public class ConnectorMessageTransportStepRepositoryImpl
         this.stepStatusJpaRepository = stepStatusJpaRepository;
         this.paginationMapper = paginationMapper;
         this.objectMapper = objectMapper;
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override

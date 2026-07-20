@@ -29,7 +29,6 @@ public class MessageTestFixtures {
     public static ConnectorMessage createOutboundStagingBusinessMessage() {
         return backendToGatewayMessage()
                 .identifier(null)
-                .uuid(null)
                 .backendName(null)
                 .gatewayName(null)
                 .direction(null)
@@ -218,7 +217,6 @@ public class MessageTestFixtures {
         var builder = backendToGatewayMessage();
         return builder
                 .identifier(null)
-                .uuid(null)
                 .backendName(null)
                 .gatewayName(null)
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
@@ -251,7 +249,6 @@ public class MessageTestFixtures {
                                                   .identifier()
                 )
                 .businessContent(MessageContentTestFixtures.createContent())
-                .uuid("223caef9-cae9-4387-a38c-ad4879f94b4e")
                 .identifier("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
                 .backendMessageIdentifier(
                         "85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu")

@@ -86,7 +86,6 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
 
         return ConnectorMessage
             .builder()
-            .uuid(businessMessage.uuid())
             .identifier(messageIdGenerator.generateIdentifier())
             .backendMessageIdentifier(businessMessage.backendMessageIdentifier())
             .businessDomainIdentifier(businessMessage.businessDomainIdentifier())

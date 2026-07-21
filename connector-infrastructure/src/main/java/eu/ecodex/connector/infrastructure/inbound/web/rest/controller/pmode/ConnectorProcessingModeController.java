@@ -11,8 +11,10 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeActions;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeParties;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,12 +26,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConnectorProcessingModeController implements ConnectorProcessingModeApi {
     private final ConnectorListProcessingModeServices listProcessingModeServicesService;
     private final ConnectorListProcessingModeActions listProcessingModeActionsService;
+    private final ConnectorListProcessingModeParties listProcessingModePartiesService;
 
+    /**
+     * Constructs an instance of the {@code ConnectorProcessingModeController}, which is responsible
+     * for managing processing modes within the connector system.
+     *
+     * @param listProcessingModeServicesService the service handling operations related to listing
+     *                                          {@link ConnectorService} entities in the processing
+     *                                          mode.
+     * @param listProcessingModeActionsService  the service handling operations related to listing
+     *                                          {@link ConnectorAction} entities in the processing
+     *                                          mode.
+     * @param listProcessingModePartiesService  the service handling operations related to listing
+     *                                          {@link ConnectorParty} entities in the processing
+     *                                          mode.
+     */
     public ConnectorProcessingModeController(
         ConnectorListProcessingModeServices listProcessingModeServicesService,
-        ConnectorListProcessingModeActions listProcessingModeActionsService) {
+        ConnectorListProcessingModeActions listProcessingModeActionsService,
+        ConnectorListProcessingModeParties listProcessingModePartiesService) {
         this.listProcessingModeServicesService = listProcessingModeServicesService;
         this.listProcessingModeActionsService = listProcessingModeActionsService;
+        this.listProcessingModePartiesService = listProcessingModePartiesService;
     }
 
     @Override
@@ -40,5 +59,10 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     @Override
     public List<ConnectorAction> listProcessingModeActions(String identifier) {
         return this.listProcessingModeActionsService.execute(identifier);
+    }
+
+    @Override
+    public List<ConnectorParty> listProcessingModeParties(String identifier) {
+        return listProcessingModePartiesService.execute(identifier);
     }
 }

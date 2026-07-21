@@ -119,4 +119,13 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
 
         return toDomain(party);
     }
+
+    @Override
+    public List<ConnectorParty> findAllByBusinessDomainIdentifier(
+        @NonNull ConnectorBusinessDomainIdentifier identifier) {
+        var parties = partyJpaRepository.findByProcessingModeBusinessDomainIdentifier(
+            identifier.messageLaneIdentifier());
+
+        return parties.stream().map(ConnectorPartyRepositoryImpl::toDomain).toList();
+    }
 }

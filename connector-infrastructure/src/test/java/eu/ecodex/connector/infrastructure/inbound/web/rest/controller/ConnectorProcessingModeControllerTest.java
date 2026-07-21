@@ -18,8 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ActionTestFixtures;
+import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeActions;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeParties;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode.ConnectorProcessingModeController;
 import java.util.List;
@@ -34,6 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 public class ConnectorProcessingModeControllerTest extends AbstractWebMvcTest {
     private static final String SERVICE_URL = "/api/v1/processing-modes/%s/services";
     private static final String ACTION_URL = "/api/v1/processing-modes/%s/actions";
+    private static final String PARTY_URL = "/api/v1/processing-modes/%s/parties";
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,6 +45,8 @@ public class ConnectorProcessingModeControllerTest extends AbstractWebMvcTest {
     private ConnectorListProcessingModeServices listProcessingModeServices;
     @MockitoBean
     private ConnectorListProcessingModeActions listProcessingModeActions;
+    @MockitoBean
+    private ConnectorListProcessingModeParties listProcessingModeParties;
 
     // list processing mode services
 
@@ -73,5 +78,25 @@ public class ConnectorProcessingModeControllerTest extends AbstractWebMvcTest {
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$[0].name").value("ConTest_Form"));
+    }
+
+    // list processing mode parties
+
+    @Test
+    void should_list_a_processing_mode_parties_successfully() throws Exception {
+        when(listProcessingModeParties.execute(any()))
+            .thenReturn(List.of(PartyTestFixtures.createToParty()));
+
+        mockMvc.perform(
+                   get(PARTY_URL.formatted("default_business_domain"))
+                       .contentType(MediaType.APPLICATION_JSON)
+               )
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$[0].name").value("service_red_ecodex"))
+               .andExpect(jsonPath("$[0].identifier").value("RE"))
+               .andExpect(jsonPath("$[0].identifierType").value("urn:oasis:names:tc:ebcore:partyid-type:ecodex"))
+               .andExpect(jsonPath("$[0].role").value("GW"))
+               .andExpect(jsonPath("$[0].roleType").value("RESPONDER"));
     }
 }

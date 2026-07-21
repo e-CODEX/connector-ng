@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,4 +37,8 @@ public interface ConnectorProcessingModeApi {
     @GetMapping("{identifier}/actions")
     @Operation(summary = "List a processing mode actions")
     List<ConnectorAction> listProcessingModeActions(@PathVariable String identifier);
+
+    @GetMapping("{identifier}/parties")
+    @Operation(summary = "List a processing mode parties")
+    List<ConnectorParty> listProcessingModeParties(@PathVariable String identifier);
 }

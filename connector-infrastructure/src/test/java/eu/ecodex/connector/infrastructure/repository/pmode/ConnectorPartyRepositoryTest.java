@@ -152,4 +152,21 @@ public class ConnectorPartyRepositoryTest extends AbstractRepositoryTest {
             )
         );
     }
+
+    // find all by business domain identifier
+
+    @Test
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+    })
+    void should_find_all_parties_by_business_domain_identifier_successfully_from_database() {
+        var parties = this.repository.findAllByBusinessDomainIdentifier(
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+        );
+
+        assertThat(parties).isNotNull();
+        assertThat(parties).hasSize(4);
+    }
 }

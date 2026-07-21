@@ -71,6 +71,7 @@ public class WebSecurityConfiguration {
                            "/api/v1/services",
                            "/api/v1/processing-modes/{identifier}/services",
                            "/api/v1/processing-modes/{identifier}/actions",
+                           "/api/v1/processing-modes/{identifier}/parties",
                            // SOAP
                            "/services/backend",
                            // actuator

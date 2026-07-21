@@ -35,8 +35,8 @@ public class ConnectorActionRepositoryTest extends AbstractRepositoryTest {
         var action = ActionTestFixtures.createAction();
 
         var savedAction = repository.saveAll(
-                List.of(action),
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            List.of(action),
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(savedAction).isNotNull();
@@ -46,30 +46,30 @@ public class ConnectorActionRepositoryTest extends AbstractRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_bulk_saving_actions_with_null_list_of_actions() {
         assertThrows(
-                NullPointerException.class, () -> repository.saveAll(
-                        null,
-                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-                )
+            NullPointerException.class, () -> repository.saveAll(
+                null,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_bulk_saving_actions_with_null_business_domain_identifier() {
         assertThrows(
-                NullPointerException.class, () -> repository.saveAll(
-                        List.of(ActionTestFixtures.createAction()),
-                        null
-                )
+            NullPointerException.class, () -> repository.saveAll(
+                List.of(ActionTestFixtures.createAction()),
+                null
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_bulk_saving_actions_with_null_list_of_actions_and_business_domain_identifier() {
         assertThrows(
-                NullPointerException.class, () -> repository.saveAll(
-                        null,
-                        null
-                )
+            NullPointerException.class, () -> repository.saveAll(
+                null,
+                null
+            )
         );
     }
 
@@ -81,8 +81,8 @@ public class ConnectorActionRepositoryTest extends AbstractRepositoryTest {
     @Sql("classpath:sql/action.sql")
     void should_find_action_by_name_and_business_domain_identifier_successfully_from_database() {
         var action = repository.findByNameAndBusinessDomain(
-                "Test_Form",
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            "Test_Form",
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(action).isNotNull();
@@ -95,8 +95,8 @@ public class ConnectorActionRepositoryTest extends AbstractRepositoryTest {
     @Sql("classpath:sql/action.sql")
     void should_return_null_when_searching_action_by_unknown_name_and_business_domain_identifier_from_database() {
         var action = repository.findByNameAndBusinessDomain(
-                "Test_Form_Unknown",
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            "Test_Form_Unknown",
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
         );
 
         assertThat(action).isNull();
@@ -105,30 +105,47 @@ public class ConnectorActionRepositoryTest extends AbstractRepositoryTest {
     @Test
     void should_throw_null_pointer_exception_when_searching_action_with_a_null_name_from_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                        null,
-                        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-                )
+            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                null,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_searching_action_with_a_null_business_domain_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                        "Test_Form",
-                        null
-                )
+            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                "Test_Form",
+                null
+            )
         );
     }
 
     @Test
     void should_throw_null_pointer_exception_when_searching_action_with_a_null_name_and_business_domain_identifier_from_database() {
         assertThrows(
-                NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                        null,
-                        null
-                )
+            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
+                null,
+                null
+            )
         );
+    }
+
+    // find all by business domain identifier
+
+    @Test
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/action.sql",
+    })
+    void should_find_all_actions_by_business_domain_identifier_successfully_from_database() {
+        var actions = repository.findAllByBusinessDomainIdentifier(
+            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+        );
+
+        assertThat(actions).isNotNull();
+        assertThat(actions).hasSize(31);
     }
 }

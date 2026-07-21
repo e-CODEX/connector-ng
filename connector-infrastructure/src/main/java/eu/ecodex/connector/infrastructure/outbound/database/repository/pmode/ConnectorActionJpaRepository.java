@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.pmode;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,4 +22,8 @@ import org.springframework.stereotype.Repository;
 public interface ConnectorActionJpaRepository extends JpaRepository<ConnectorActionEntity, Long> {
     ConnectorActionEntity findByNameAndProcessingModeBusinessDomainIdentifier(
         String name, String businessDomainIdentifier);
+
+    List<ConnectorActionEntity> findByProcessingModeBusinessDomainIdentifier(
+        String businessDomainIdentifier
+    );
 }

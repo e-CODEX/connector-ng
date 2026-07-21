@@ -98,4 +98,13 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
 
         return toDomain(action);
     }
+
+    @Override
+    public List<ConnectorAction> findAllByBusinessDomainIdentifier(
+        @NonNull ConnectorBusinessDomainIdentifier identifier) {
+        var actions = this.actionJpaRepository.findByProcessingModeBusinessDomainIdentifier(
+            identifier.messageLaneIdentifier());
+
+        return actions.stream().map(ConnectorActionRepositoryImpl::toDomain).toList();
+    }
 }

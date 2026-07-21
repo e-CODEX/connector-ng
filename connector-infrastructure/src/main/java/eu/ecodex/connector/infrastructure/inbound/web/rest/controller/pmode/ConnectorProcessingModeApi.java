@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -27,6 +28,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 )
 @RequestMapping("/api/v1/processing-modes")
 public interface ConnectorProcessingModeApi {
+
+    @GetMapping("{identifier}/services")
+    @Operation(summary = "List a processing mode services")
+    List<ConnectorService> listProcessingModeServices(@PathVariable String identifier);
+
     @GetMapping("{identifier}/actions")
     @Operation(summary = "List a processing mode actions")
     List<ConnectorAction> listProcessingModeActions(@PathVariable String identifier);

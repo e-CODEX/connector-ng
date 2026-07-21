@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest.service;
+package eu.ecodex.connector.rest.pmode;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorListPmodeServicesIT extends AbstractIntegrationTest {
+public class ConnectorListProcessingModeServicesIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
@@ -39,13 +39,11 @@ public class ConnectorListPmodeServicesIT extends AbstractIntegrationTest {
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
         "classpath:sql/service.sql",
-        "classpath:sql/action.sql",
     })
     void should_list_connector_pmode_services_successfully() {
         apiClient.get()
-                 .uri("/api/v1/services?businessDomain=default_business_domain")
+                 .uri("/api/v1/processing-modes/default_business_domain/services")
                  .exchange()
                  .expectStatus().isOk()
                  .expectBody(new ParameterizedTypeReference<List<ConnectorService>>() {

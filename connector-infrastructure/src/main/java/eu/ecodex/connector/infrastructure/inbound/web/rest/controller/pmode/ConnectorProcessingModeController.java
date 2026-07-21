@@ -11,7 +11,9 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeActions;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,11 +22,19 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorProcessingModeController implements ConnectorProcessingModeApi {
+    private final ConnectorListProcessingModeServices listProcessingModeServicesService;
     private final ConnectorListProcessingModeActions listProcessingModeActionsService;
 
     public ConnectorProcessingModeController(
+        ConnectorListProcessingModeServices listProcessingModeServicesService,
         ConnectorListProcessingModeActions listProcessingModeActionsService) {
+        this.listProcessingModeServicesService = listProcessingModeServicesService;
         this.listProcessingModeActionsService = listProcessingModeActionsService;
+    }
+
+    @Override
+    public List<ConnectorService> listProcessingModeServices(String identifier) {
+        return listProcessingModeServicesService.execute(identifier);
     }
 
     @Override

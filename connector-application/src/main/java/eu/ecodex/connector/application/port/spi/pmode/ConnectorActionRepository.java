@@ -38,4 +38,17 @@ public interface ConnectorActionRepository {
     ConnectorAction findByNameAndBusinessDomain(
         @Nonnull String name,
         @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+
+    /**
+     * Retrieves a list of {@link ConnectorAction} objects associated with the specified business
+     * domain identifier.
+     *
+     * @param identifier the {@link ConnectorBusinessDomainIdentifier} representing the unique
+     *                   identifier of the business domain; must not be null.
+     *
+     * @return a {@link List} of {@link ConnectorAction} instances associated with the given
+     *     business domain identifier.
+     */
+    List<ConnectorAction> findAllByBusinessDomainIdentifier(
+        @Nonnull ConnectorBusinessDomainIdentifier identifier);
 }

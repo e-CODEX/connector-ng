@@ -69,6 +69,7 @@ public class WebSecurityConfiguration {
                            "/api/v1/admin/configurations/message-processing",
                            "/api/v1/admin/jms/queues/stats",
                            "/api/v1/services",
+                           "/api/v1/processing-modes/{identifier}/services",
                            "/api/v1/processing-modes/{identifier}/actions",
                            // SOAP
                            "/services/backend",

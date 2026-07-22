@@ -18,11 +18,6 @@ import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class LinkPartnerTestFixtures {
-    public static ConnectorLinkPartner createLinkPartner() {
-        var builder = createAbstractLinkPartner();
-        return builder.build();
-    }
-
     public static ConnectorLinkPartner createDefaultGatewayLinkPartner() {
         var builder = createAbstractLinkPartner();
         builder.type(ConnectorLinkType.GATEWAY);
@@ -48,14 +43,14 @@ public class LinkPartnerTestFixtures {
 
     private static ConnectorLinkPartner.ConnectorLinkPartnerBuilder createAbstractLinkPartner() {
         return ConnectorLinkPartner
-                .builder()
-                .name(
-                        ConnectorLinkPartnerName.builder().name("default_gateway").build()
-                )
-                .description("linkPartnerDescription")
-                .enabled(true)
-                .senderMode(ConnectorLinkMode.PUSH)
-                .type(ConnectorLinkType.BACKEND)
-                .source(ConnectorConfigurationSource.IMPLEMENTATION);
+            .builder()
+            .name(
+                ConnectorLinkPartnerName.builder().name("default_gateway").build()
+            )
+            .description("linkPartnerDescription")
+            .enabled(true)
+            .senderMode(ConnectorLinkMode.PUSH)
+            .type(ConnectorLinkType.BACKEND)
+            .source(ConnectorConfigurationSource.IMPLEMENTATION);
     }
 }

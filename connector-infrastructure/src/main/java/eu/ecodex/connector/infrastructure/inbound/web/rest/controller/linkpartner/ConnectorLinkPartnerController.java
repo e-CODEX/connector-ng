@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.linkpartn
 
 import eu.ecodex.connector.application.port.api.link.ConnectorListLinkPartners;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
-import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorLinkPartnerDto;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,7 +28,10 @@ public class ConnectorLinkPartnerController implements ConnectorLinkPartnerApi {
     }
 
     @Override
-    public List<ConnectorLinkPartner> listLinkPartners(ConnectorLinkType linkType) {
-        return listLinkPartners.execute(linkType);
+    public List<ConnectorLinkPartnerDto> listLinkPartners(ConnectorLinkType linkType) {
+        return listLinkPartners.execute(linkType)
+                               .stream()
+                               .map(ConnectorLinkPartnerDto::of)
+                               .toList();
     }
 }

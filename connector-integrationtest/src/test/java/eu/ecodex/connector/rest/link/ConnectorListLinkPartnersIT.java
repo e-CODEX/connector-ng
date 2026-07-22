@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
-import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorLinkPartnerDto;
 import java.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
                                 .uri(URL)
                                 .exchange()
                                 .expectStatus().isOk()
-                                .returnResult(ConnectorLinkPartner[].class);
+                                .returnResult(ConnectorLinkPartnerDto[].class);
 
         var linkPartners = response.getResponseBody();
         assertThat(linkPartners).isNotNull();
@@ -56,7 +56,7 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
                                 .uri(URL.concat("?linkType=BACKEND"))
                                 .exchange()
                                 .expectStatus().isOk()
-                                .returnResult(ConnectorLinkPartner[].class);
+                                .returnResult(ConnectorLinkPartnerDto[].class);
 
         var linkPartners = response.getResponseBody();
         assertThat(linkPartners).isNotNull();

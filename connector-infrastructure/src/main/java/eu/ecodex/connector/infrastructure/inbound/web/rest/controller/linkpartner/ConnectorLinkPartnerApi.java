@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.linkpartner;
 
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
-import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorLinkPartnerDto;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Tag(name = "LinkPartner", description = "Api for managing link partner")
 public interface ConnectorLinkPartnerApi {
     @GetMapping("")
-    List<ConnectorLinkPartner> listLinkPartners(
+    List<ConnectorLinkPartnerDto> listLinkPartners(
         @RequestParam(name = "linkType", required = false) ConnectorLinkType linkType);
 }

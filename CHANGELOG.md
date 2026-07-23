@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.0.1] - 0000-00-00
+
+### Technical
+
+- **Database** — Support Oracle DBMS.
+
 ## [7.0.0] - 2026-06-30
 
 ### Release Notes

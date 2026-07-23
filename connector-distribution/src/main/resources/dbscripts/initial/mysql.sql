@@ -73,7 +73,7 @@ create table connector_message_attachments
     description  varchar(255)                                                                                                                          not null,
     identifier   varchar(255)                                                                                                                          not null,
     name         varchar(255)                                                                                                                          not null,
-    size         bigint                                                                                                                                not null,
+    file_size    bigint                                                                                                                                not null,
     storage      enum ('S3_BUCKET')                                                                                                                    not null,
     type         enum ('ASICS', 'ATTACHMENT', 'BUSINESS_CONTENT', 'BUSINESS_DOCUMENT', 'DETACHED_SIGNATURE', 'EVIDENCE_XML', 'PDF_TOKEN', 'XML_TOKEN') null,
     message_id   bigint                                                                                                                                null,

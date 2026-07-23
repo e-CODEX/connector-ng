@@ -56,7 +56,7 @@ public class ConnectorMessageAttachmentEntity extends BaseEntity {
     @Column(name = "CONTENT_TYPE", nullable = false, updatable = false)
     private String contentType;
 
-    @Column(name = "SIZE", nullable = false)
+    @Column(name = "FILE_SIZE", nullable = false)
     private long size;
 
     @Column(name = "DESCRIPTION", nullable = false)

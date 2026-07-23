@@ -68,6 +68,7 @@ dependencies {
     runtimeOnly(libs.mysql)
     runtimeOnly(libs.mariadb)
     runtimeOnly(libs.postgresql)
+    runtimeOnly(libs.oracle)
     // jakarta
     implementation(libs.jakarta.annotation)
     implementation(libs.jakarta.validation)

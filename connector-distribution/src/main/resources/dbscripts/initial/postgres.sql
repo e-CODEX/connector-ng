@@ -99,7 +99,7 @@ create table connector_message_attachments
         constraint ukqkwekyau6mx7fqymuavj4bkqw
             unique,
     name         varchar(255)                not null,
-    size         bigint                      not null,
+    file_size    bigint                      not null,
     storage      varchar(255)                not null
         constraint connector_message_attachments_storage_check
             check ((storage)::text = 'S3_BUCKET'::text),

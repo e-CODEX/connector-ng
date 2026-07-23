@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.application.service.pmode;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
@@ -78,7 +77,7 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
         @NonNull ConnectorProcessingMode processingMode) {
         log.info(
             "Registering a new processing mode for the business domain [{}]: ",
-            businessDomainIdentifier
+            businessDomainIdentifier.messageLaneIdentifier()
         );
 
         var businessDomain = this.businessDomainRepository.findByIdentifier(
@@ -87,7 +86,8 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
 
         if (businessDomain == null) {
             throw new ConnectorBusinessDomainNotFoundException(
-                "Business domain not found: %s".formatted(businessDomainIdentifier)
+                "Business domain not found: %s"
+                    .formatted(businessDomainIdentifier.messageLaneIdentifier())
             );
         }
 
@@ -96,9 +96,9 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
         );
 
         if (existingProcessingMode != null) {
-            throw new ConnectorBusinessDomainAlreadyExistsException(
+            throw new ConnectorProcessingModeException(
                 "The business domain [%s] already has a processing mode"
-                    .formatted(businessDomainIdentifier)
+                    .formatted(businessDomainIdentifier.messageLaneIdentifier())
             );
         }
 
@@ -110,7 +110,7 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
             log.error("Error parsing processing mode", e);
             throw new ConnectorProcessingModeException(
                 "Error parsing processing mode for business domain [%s]: %s"
-                    .formatted(businessDomainIdentifier, e.getMessage())
+                    .formatted(businessDomainIdentifier.messageLaneIdentifier(), e.getMessage())
             );
         }
 
@@ -125,7 +125,7 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
 
         log.info(
             "Processing mode [{}] registered for the business domain [{}]",
-            created.uuid(), businessDomainIdentifier
+            created.uuid(), businessDomainIdentifier.messageLaneIdentifier()
         );
 
         this.partyRepository.saveAll(List.copyOf(parsed.parties()), businessDomainIdentifier);

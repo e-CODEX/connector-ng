@@ -24,7 +24,6 @@ import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
@@ -164,7 +163,7 @@ class ConnectorRegisterProcessingModeServiceTest {
             assertThatExceptionOfType(ConnectorBusinessDomainNotFoundException.class)
                 .isThrownBy(() -> registerProcessingModeService.execute(
                     businessDomain.identifier(), processingMode))
-                .withMessageContaining(businessDomain.identifier().toString());
+                .withMessageContaining(businessDomain.identifier().messageLaneIdentifier());
 
             verifyNoInteractions(
                 processingModeParser, partyRepository, serviceRepository,
@@ -179,7 +178,7 @@ class ConnectorRegisterProcessingModeServiceTest {
             when(processingModeRepository.findByBusinessDomainIdentifier(any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
-            assertThatExceptionOfType(ConnectorBusinessDomainAlreadyExistsException.class)
+            assertThatExceptionOfType(ConnectorProcessingModeException.class)
                 .isThrownBy(() -> registerProcessingModeService.execute(
                     businessDomain.identifier(), processingMode));
 

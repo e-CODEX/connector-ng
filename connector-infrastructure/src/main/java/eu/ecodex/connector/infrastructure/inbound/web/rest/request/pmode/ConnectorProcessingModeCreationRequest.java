@@ -10,8 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Represents a request to create a connector processing mode. This record encapsulates essential
@@ -24,9 +27,13 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorProcessingModeCreationRequest(
+    @NotBlank(message = "Business domain identifier must not be blank.")
+    String businessDomainIdentifier,
     @NotBlank(message = "Processing mode description must not be blank.")
     String description,
-    @NotBlank(message = "Business domain identifier must not be blank.")
-    String businessDomainIdentifier
+    @NotNull(message = "processingModeFile")
+    MultipartFile processingModeFile,
+    @Valid
+    ConnectorProcessingModeTruststoreRequest truststore
 ) {
 }

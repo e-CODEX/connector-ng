@@ -13,9 +13,12 @@ package eu.ecodex.connector.infrastructure.outbound.persistence.pmode;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeTruststoreEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorBusinessDomainJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeTruststoreJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.ConnectorBusinessDomainRepositoryImpl;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Component;
 public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessingModeRepository {
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
     private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
+    private final ConnectorProcessingModeTruststoreJpaRepository truststoreJpaRepository;
 
     /**
      * Constructs an instance of {@code ConnectorProcessingModeRepositoryImpl} with the specified
@@ -39,12 +43,16 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
      *                                    {@code ConnectorProcessingModeEntity}.
      * @param businessDomainJpaRepository the repository for performing operations on
      *                                    {@code ConnectorBusinessDomainEntity}.
+     * @param truststoreJpaRepository     the repository for performing operations on
+     *                                    {@code ConnectorProcessingModeTruststoreEntity}.
      */
     public ConnectorProcessingModeRepositoryImpl(
         ConnectorProcessingModeJpaRepository processingModeJpaRepository,
-        ConnectorBusinessDomainJpaRepository businessDomainJpaRepository) {
+        ConnectorBusinessDomainJpaRepository businessDomainJpaRepository,
+        ConnectorProcessingModeTruststoreJpaRepository truststoreJpaRepository) {
         this.processingModeJpaRepository = processingModeJpaRepository;
         this.businessDomainJpaRepository = businessDomainJpaRepository;
+        this.truststoreJpaRepository = truststoreJpaRepository;
     }
 
     @Override
@@ -53,6 +61,13 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
         @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier
     ) {
         var savedProcessingMode = this.processingModeJpaRepository.save(toEntity(processingMode));
+
+        var truststoreToSave = toEntity(processingMode.truststore());
+        truststoreToSave.setProcessingMode(savedProcessingMode);
+
+        var savedTruststore = truststoreJpaRepository.save(truststoreToSave);
+
+        savedProcessingMode.setTruststore(savedTruststore);
 
         return toDomain(savedProcessingMode);
     }
@@ -85,13 +100,21 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
                    .identifier().messageLaneIdentifier()
         );
 
-        return ConnectorProcessingModeEntity
-            .builder()
-            .description(processingMode.description())
-            .content(processingMode.content())
-            .filename(processingMode.filename())
-            .businessDomain(businessDomain)
-            .build();
+        return ConnectorProcessingModeEntity.builder()
+                                            .description(processingMode.description())
+                                            .content(processingMode.content())
+                                            .filename(processingMode.filename())
+                                            .businessDomain(businessDomain)
+                                            .build();
+    }
+
+    private ConnectorProcessingModeTruststoreEntity toEntity(ConnectorTruststore truststore) {
+        return ConnectorProcessingModeTruststoreEntity.builder()
+                                                      .content(truststore.content())
+                                                      .password(truststore.password())
+                                                      .type(truststore.type())
+                                                      .filename(truststore.filename())
+                                                      .build();
     }
 
     private ConnectorProcessingMode toDomain(ConnectorProcessingModeEntity entity) {
@@ -107,6 +130,7 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
             .description(entity.getDescription())
             .content(entity.getContent())
             .filename(entity.getFilename())
+            .truststore(toDomain(entity.getTruststore()))
             .parties(entity.getParties().stream().map(
                 ConnectorPartyRepositoryImpl::toDomain).collect(
                 Collectors.toSet()))
@@ -119,5 +143,18 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
             .build();
+    }
+
+    private ConnectorTruststore toDomain(ConnectorProcessingModeTruststoreEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorTruststore.builder()
+                                  .content(entity.getContent())
+                                  .password(entity.getPassword())
+                                  .type(entity.getType())
+                                  .filename(entity.getFilename())
+                                  .build();
     }
 }

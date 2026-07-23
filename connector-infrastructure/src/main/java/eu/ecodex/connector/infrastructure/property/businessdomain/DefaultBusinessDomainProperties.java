@@ -10,17 +10,30 @@
 
 package eu.ecodex.connector.infrastructure.property.businessdomain;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Default business domain properties.
  */
 @Setter
 @Getter
+@Validated
 public class DefaultBusinessDomainProperties {
+    @Valid
+    @NotEmpty
     private String identifier;
+
+    @Valid
+    @NotEmpty
     private String description;
-    private boolean enabled;
-    private String pmodeFile;
+
+    @Valid
+    private boolean enabled = false;
+
+    @Valid
+    private DefaultBusinessDomainPmodeProperties pmode;
 }

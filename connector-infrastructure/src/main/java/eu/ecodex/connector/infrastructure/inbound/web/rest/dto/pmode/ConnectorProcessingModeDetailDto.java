@@ -31,8 +31,7 @@ import lombok.Builder;
  * @param filename                 The filename of the processing mode configuration file.
  * @param businessDomainIdentifier A logical identifier representing the business domain associated
  *                                 with the processing mode.
- * @param businessDomain           The {@link ConnectorBusinessDomain} associated with the
- *                                 processing mode.
+ * @param truststore               The truststore information associated with the processing mode.
  * @param parties                  The set of {@link ConnectorParty}s involved in the processing
  *                                 mode.
  * @param services                 The set of {@link ConnectorService}s involved in the processing
@@ -50,6 +49,7 @@ public record ConnectorProcessingModeDetailDto(
     String filename,
     String businessDomainIdentifier,
     ConnectorBusinessDomain businessDomain,
+    ConnectorProcessingModeTruststoreDto truststore,
     Set<ConnectorParty> parties,
     Set<ConnectorService> services,
     Set<ConnectorAction> actions,
@@ -76,6 +76,7 @@ public record ConnectorProcessingModeDetailDto(
                 Objects.requireNonNull(processingMode.businessDomain())
                        .identifier().messageLaneIdentifier()
             )
+            .truststore(ConnectorProcessingModeTruststoreDto.from(processingMode.truststore()))
             .parties(processingMode.parties())
             .services(processingMode.services())
             .actions(processingMode.actions())

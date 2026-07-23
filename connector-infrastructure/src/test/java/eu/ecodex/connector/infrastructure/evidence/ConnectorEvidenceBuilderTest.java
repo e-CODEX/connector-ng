@@ -18,6 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.FileTestFixtures;
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssDocumentSigner;
 import eu.ecodex.connector.infrastructure.outbound.evidence.builder.ConnectorEvidenceBuilder;
 import eu.ecodex.connector.infrastructure.outbound.evidence.builder.ConnectorRemEvidenceBuilder;
@@ -25,7 +26,6 @@ import eu.ecodex.connector.infrastructure.outbound.evidence.exception.ConnectorE
 import eu.ecodex.connector.infrastructure.outbound.evidence.model.ConnectorEvidenceMessageDetails;
 import eu.ecodex.connector.infrastructure.outbound.evidence.spocseu.model.EDeliveryDetails;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
-import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.ecodex.connector.infrastructure.property.evidence.EvidencesSignatureProperties;
@@ -45,7 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorEvidenceBuilderTest {
     private static final byte[] PREVIOUS_EVIDENCE = FileTestFixtures.readAsBytes(
-            "evidence/samples/SUBMISSION_ACCEPTANCE.xml");
+        "evidence/samples/SUBMISSION_ACCEPTANCE.xml");
     private static final byte[] SIGNED_BYTES = "<signed/>".getBytes();
     private static final String EBMS_ID = "ebms-001";
     private static final String NATIONAL_ID = "national-001";
@@ -79,10 +79,10 @@ public class ConnectorEvidenceBuilderTest {
 
     @Test
     void should_create_and_sign_SubmissionAcceptanceRejection_acceptance_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(null);
         var result = builder.createSubmissionAcceptanceRejection(
-                true, null, issuerDetails(), messageDetails()
+            true, null, issuerDetails(), messageDetails()
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -90,11 +90,11 @@ public class ConnectorEvidenceBuilderTest {
 
     @Test
     void should_create_and_sign_SubmissionAcceptanceRejection_rejection_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(null);
 
         var result = builder.createSubmissionAcceptanceRejection(
-                false, null, issuerDetails(), messageDetails()
+            false, null, issuerDetails(), messageDetails()
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -104,28 +104,28 @@ public class ConnectorEvidenceBuilderTest {
     void should_create_and_sign_SubmissionAcceptanceRejection_acceptance_evidence_with_event_reason_successfully() {
         var builder = builderWithMockedSigning(null);
         assertThatNoException()
-                .isThrownBy(() ->
-                                    builder.createSubmissionAcceptanceRejection(
-                                            true,
-                                            mock(EventReasonType.class),
-                                            issuerDetails(),
-                                            messageDetails()
-                                    )
-                );
+            .isThrownBy(() ->
+                            builder.createSubmissionAcceptanceRejection(
+                                true,
+                                mock(EventReasonType.class),
+                                issuerDetails(),
+                                messageDetails()
+                            )
+            );
     }
 
     // createRelayREMMDAcceptanceRejection
 
     @Test
     void should_create_and_sign_RelayREMMDAcceptanceRejection_acceptance_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createRelayREMMDAcceptanceRejection(
-                true,
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            true,
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -133,14 +133,14 @@ public class ConnectorEvidenceBuilderTest {
 
     @Test
     void should_create_and_sign_RelayREMMDAcceptanceRejection_rejection_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createRelayREMMDAcceptanceRejection(
-                false,
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            false,
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -150,15 +150,15 @@ public class ConnectorEvidenceBuilderTest {
     void should_create_and_sign_RelayREMMDAcceptanceRejection_evidence_with_event_reason_successfully() {
         var builder = builderWithMockedSigning(previousEvidence());
         assertThatNoException()
-                .isThrownBy(() ->
-                                    builder.createRelayREMMDAcceptanceRejection(
-                                            true,
-                                            mock(EventReasonType.class),
-                                            issuerDetails(),
-                                            FileTestFixtures.readAsBytes(
-                                                    "evidence/samples/SUBMISSION_ACCEPTANCE.xml")
-                                    )
-                );
+            .isThrownBy(() ->
+                            builder.createRelayREMMDAcceptanceRejection(
+                                true,
+                                mock(EventReasonType.class),
+                                issuerDetails(),
+                                FileTestFixtures.readAsBytes(
+                                    "evidence/samples/SUBMISSION_ACCEPTANCE.xml")
+                            )
+            );
     }
 
     // createRelayREMMDFailure
@@ -168,9 +168,9 @@ public class ConnectorEvidenceBuilderTest {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createRelayREMMDFailure(
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -181,28 +181,28 @@ public class ConnectorEvidenceBuilderTest {
         var builder = builderWithMockedSigning(previousEvidence());
 
         assertThatNoException()
-                .isThrownBy(() ->
-                                    builder.createRelayREMMDFailure(
-                                            mock(EventReasonType.class),
-                                            issuerDetails(),
-                                            FileTestFixtures.readAsBytes(
-                                                    "evidence/samples/SUBMISSION_ACCEPTANCE.xml")
-                                    )
-                );
+            .isThrownBy(() ->
+                            builder.createRelayREMMDFailure(
+                                mock(EventReasonType.class),
+                                issuerDetails(),
+                                FileTestFixtures.readAsBytes(
+                                    "evidence/samples/SUBMISSION_ACCEPTANCE.xml")
+                            )
+            );
     }
 
     // createDeliveryNonDeliveryToRecipient
 
     @Test
     void should_create_and_sign_DeliveryNonDeliveryToRecipient_delivery_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createDeliveryNonDeliveryToRecipient(
-                true,
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            true,
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -210,14 +210,14 @@ public class ConnectorEvidenceBuilderTest {
 
     @Test
     void should_create_and_sign_DeliveryNonDeliveryToRecipient_nonDelivery_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createDeliveryNonDeliveryToRecipient(
-                false,
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            false,
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -227,14 +227,14 @@ public class ConnectorEvidenceBuilderTest {
 
     @Test
     void should_create_and_sign_RetrievalNonRetrievalByRecipient_retrieval_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createRetrievalNonRetrievalByRecipient(
-                true,
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            true,
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -242,14 +242,14 @@ public class ConnectorEvidenceBuilderTest {
 
     @Test
     void should_create_and_sign_RetrievalNonRetrievalByRecipient_nonRetrieval_evidence_successfully()
-            throws Exception {
+        throws Exception {
         var builder = builderWithMockedSigning(previousEvidence());
 
         var result = builder.createRetrievalNonRetrievalByRecipient(
-                false,
-                null,
-                issuerDetails(),
-                PREVIOUS_EVIDENCE
+            false,
+            null,
+            issuerDetails(),
+            PREVIOUS_EVIDENCE
         );
 
         assertThat(result).isEqualTo(SIGNED_BYTES);
@@ -270,7 +270,7 @@ public class ConnectorEvidenceBuilderTest {
         var brokenDocument = mock(DSSDocument.class);
         when(brokenDocument.openStream()).thenReturn(brokenStream);
         when(documentSigner.signWithXAdES(any(), any(), any(), any()))
-                .thenReturn(brokenDocument);
+            .thenReturn(brokenDocument);
 
         var builder = new ConnectorRemEvidenceBuilder(documentSigner, evidencesProperties) {
             @Override
@@ -280,13 +280,13 @@ public class ConnectorEvidenceBuilderTest {
         };
 
         assertThatThrownBy(
-                () -> builder.createRelayREMMDAcceptanceRejection(
-                        true,
-                        null,
-                        issuerDetails(),
-                        PREVIOUS_EVIDENCE
-                ))
-                .isInstanceOf(ConnectorEvidenceBuilderException.class);
+            () -> builder.createRelayREMMDAcceptanceRejection(
+                true,
+                null,
+                issuerDetails(),
+                PREVIOUS_EVIDENCE
+            ))
+            .isInstanceOf(ConnectorEvidenceBuilderException.class);
     }
 
     private REMEvidenceType previousEvidence() {

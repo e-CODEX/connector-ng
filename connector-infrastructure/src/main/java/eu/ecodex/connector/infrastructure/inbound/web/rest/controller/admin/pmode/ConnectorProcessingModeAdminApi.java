@@ -23,13 +23,11 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Defines the API for managing processing modes within the connector system for administrative
@@ -52,9 +50,7 @@ public interface ConnectorProcessingModeAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request")
     })
     ConnectorProcessingModeDto create(
-        @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
-        @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
-        throws IOException;
+        @Valid @ModelAttribute ConnectorProcessingModeCreationRequest request) throws IOException;
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)

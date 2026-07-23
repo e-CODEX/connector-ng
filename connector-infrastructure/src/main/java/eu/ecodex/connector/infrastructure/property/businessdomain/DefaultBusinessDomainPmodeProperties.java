@@ -10,23 +10,28 @@
 
 package eu.ecodex.connector.infrastructure.property.businessdomain;
 
-import java.util.List;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
 /**
- * Configuration properties for the default business domain in the connector. Provides the ability
- * to configure the identifier, description, enabled status, and source of the business domain
- * through externalized configuration.
+ * Default business domain P-Mode properties.
  */
 @Getter
 @Setter
 @Validated
-@Configuration
-@ConfigurationProperties(prefix = "connector.business-domains")
-public class ConnectorBusinessDomainProperties {
-    private List<DefaultBusinessDomainProperties> defaults;
+public class DefaultBusinessDomainPmodeProperties {
+    @Valid
+    @NotEmpty
+    private String file;
+
+    @Valid
+    @NotEmpty
+    private String truststore;
+
+    @Valid
+    @NotEmpty
+    private String truststorePassword;
 }

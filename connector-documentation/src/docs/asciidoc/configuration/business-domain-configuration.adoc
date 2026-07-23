@@ -1,0 +1,163 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Business Domain Configuration
+
+At startup, `ConnectorBusinessDomainInitializer` registers the business domains declared
+under `connector.business-domains.defaults`, together with the processing mode (PMode)
+attached to each of them.
+
+The initializer is idempotent: domains and processing modes that are already registered
+are skipped silently, so restarting the connector is safe. Any other failure — an
+unreadable file, a malformed PMode definition, a truststore that cannot be opened —
+aborts startup rather than leaving the connector half-configured.
+
+If no default is configured and no business domain exists yet, the connector registers a
+single built-in default domain so that it can start in a usable state.
+
+== Properties
+Configuration is provided via `application.properties` under the `connector.connector.business-domains.*` prefix.
+
+.Business Domains Configuration
+[cols="35,40,10,15", options="header"]
+|===
+| Property | Description | Optional | Example
+
+| `connector.business-domains.defaults[n].identifier`
+| Message lane identifier of the business domain. Must be unique across the connector.
+| No
+| `default_business_domain`
+
+| `connector.business-domains.defaults[n].description`
+| Free-text description. Is shown in the administration UI.
+| No
+| `Default business domain`
+
+| `connector.business-domains.defaults[n].enabled`
+| Whether the domain accepts messages. Defaults to `false`.
+| Yes
+| `true`
+
+| `connector.business-domains.defaults[n].pmode.file`
+| Processing mode definition (XML) registered for the domain. When absent, no processing
+mode is registered and the remaining `pmode.*` properties are ignored.
+| Yes
+| `file:./config/pmode/pmode-blue.xml`
+
+| `connector.business-domains.defaults[n].pmode.truststore`
+| Truststore holding the certificates of the gateways declared in the processing mode.
+Required as soon as `pmode.file` is set.
+| Yes
+| `file:./config/pmode/truststore-blue.jks`
+
+| `connector.business-domains.defaults[n].pmode.truststore-password`
+| Password protecting the truststore. Required as soon as `pmode.file` is set.
+| Yes
+| `${PMODE_TRUSTSTORE_PASSWORD}`
+
+|===
+
+[NOTE]
+====
+A processing mode is bound to exactly one business domain, and a business domain can hold
+at most one processing mode. Declaring a second processing mode for the same domain is
+rejected.
+====
+
+== Location syntax
+
+`pmode.file` and `pmode.truststore` are resolved as Spring resource locations. The prefix
+determines where the resource is read from:
+
+[cols="1,3", options="header"]
+|===
+| Prefix | Resolved from
+
+| `file:`
+| The filesystem, relative to the working directory or as an absolute path.
+
+| `classpath:`
+| The application classpath — useful for bundling a default configuration.
+
+| `http:`, `https:`
+| A remote endpoint, read once at startup.
+|===
+
+[WARNING]
+====
+A location without a prefix is resolved from the *classpath*, not the filesystem.
+Filesystem paths must be written as `file:./config/pmode/pmode-blue.xml`. Deployments
+migrating from connector 6.x, where bare paths were treated as filesystem paths, must
+add the prefix.
+====
+
+.Configuration Example
+[source,properties]
+----
+connector.business-domains.defaults[0].identifier=default_business_domain
+connector.business-domains.defaults[0].description=Default business domain
+connector.business-domains.defaults[0].enabled=true
+connector.business-domains.defaults[0].pmode.file=file:./config/pmode/pmode-blue.xml
+connector.business-domains.defaults[0].pmode.truststore=file:./config/pmode/truststore-blue.jks
+connector.business-domains.defaults[0].pmode.truststore-password=12345
+----
+
+== Registering a processing mode after startup
+
+Configuring `pmode.file` is optional. A business domain declared without one starts
+without a processing mode and cannot exchange messages until one is registered.
+
+The processing mode and its truststore can then be uploaded at any time through the
+administration API, or through the *Processing modes* screen of the administration UI,
+which posts to the same endpoint.
+
+[source,http]
+----
+POST /api/v1/admin/processing-modes
+Content-Type: multipart/form-data
+----
+
+.Request parts
+[cols="3,4,1,3", options="header"]
+|===
+| Part | Description | Optional | Example
+
+| `businessDomainIdentifier`
+| Identifier of the business domain the processing mode is registered against. The domain
+must already exist.
+| No
+| `default_business_domain`
+
+| `description`
+| Free-text description of the processing mode.
+| No
+| `Default processing mode for domain blue`
+
+| `processingModeFile`
+| Processing mode definition. Must be an XML document.
+| No
+| `pmode-blue.xml`
+
+| `truststore.truststoreFile`
+| Truststore holding the certificates.
+Must be a `.jks`, `.keystore`, `.p12` or `.pfx` file.
+| No
+| `truststore-blue.jks`
+
+| `truststore.password`
+| Password protecting the truststore.
+| No
+| `12345`
+|===
+
+.Example
+[source,bash]
+----
+curl -X POST http://localhost:8080/api/v1/admin/processing-modes \
+  -F "businessDomainIdentifier=default_business_domain" \
+  -F "description=Default processing mode for domain blue" \
+  -F "processingModeFile=@./config/pmode/pmode-blue.xml;type=application/xml" \
+  -F "truststore.truststoreFile=@./config/pmode/truststore-blue.jks" \
+  -F "truststore.password=12345"
+----

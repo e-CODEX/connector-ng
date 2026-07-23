@@ -4,7 +4,7 @@ endif::header[]
 
 = e-CODEX Connector Configuration
 
-include::{basepath}/configuration/business-domaine-configuration.adoc[leveloffset=+1]
+include::{basepath}/configuration/business-domain-configuration.adoc[leveloffset=+1]
 
 include::{basepath}/configuration/message-processing-configuration.adoc[leveloffset=+1]
 

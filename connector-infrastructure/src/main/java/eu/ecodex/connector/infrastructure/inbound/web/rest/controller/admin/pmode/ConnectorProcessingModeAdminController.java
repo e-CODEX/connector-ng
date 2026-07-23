@@ -10,25 +10,24 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode;
 
+import static eu.ecodex.connector.domain.model.security.KeystoreType.fromFileName;
+
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
-import jakarta.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Defines the REST controller for managing processing modes within the connector system.
@@ -57,18 +56,14 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     @Override
-    public ConnectorProcessingModeDto create(
-        @RequestParam("processingModeXmlFile") MultipartFile processingModeXmlFile,
-        @Valid @RequestPart("metadata") ConnectorProcessingModeCreationRequest metadata)
+    public ConnectorProcessingModeDto create(ConnectorProcessingModeCreationRequest request)
         throws IOException {
         var businessDomainIdentifier = ConnectorBusinessDomainIdentifier
             .builder()
-            .messageLaneIdentifier(metadata.businessDomainIdentifier())
+            .messageLaneIdentifier(request.businessDomainIdentifier())
             .build();
 
-        var processingMode = processCreationRequest(
-            metadata, processingModeXmlFile
-        );
+        var processingMode = processCreationRequest(request);
 
         var created = this.registerProcessingModeService.execute(
             businessDomainIdentifier, processingMode
@@ -91,22 +86,36 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     private ConnectorProcessingMode processCreationRequest(
-        ConnectorProcessingModeCreationRequest metadata,
-        MultipartFile processingModeXmlFile) throws IOException {
+        ConnectorProcessingModeCreationRequest request) throws IOException {
+        var processingModeXmlFile = request.processingModeFile();
+
         var xmlFileContentType = processingModeXmlFile.getContentType();
 
         if (!Objects.equals(xmlFileContentType, MediaType.APPLICATION_XML_VALUE)
             && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
-            throw new ConnectorBadRequestException("pmode file must be XML");
+            throw new ConnectorBadRequestException("Pmode file must be XML");
         }
 
-        return ConnectorProcessingMode
-            .builder()
-            .description(metadata.description())
-            .content(new String(processingModeXmlFile.getBytes()))
-            .filename(StringUtils.cleanPath(
-                Objects.requireNonNull(processingModeXmlFile.getOriginalFilename()))
-            )
-            .build();
+        var truststoreRequest = request.truststore();
+
+        var truststoreFilename = StringUtils.cleanPath(Objects.requireNonNull(
+            truststoreRequest.truststoreFile()
+                             .getOriginalFilename()));
+
+        var truststore = ConnectorTruststore.builder()
+                                            .filename(truststoreFilename)
+                                            .password(truststoreRequest.password())
+                                            .content(truststoreRequest.truststoreFile().getBytes())
+                                            .type(fromFileName(truststoreFilename).orElse(null))
+                                            .build();
+
+        return ConnectorProcessingMode.builder()
+                                      .description(request.description())
+                                      .content(new String(processingModeXmlFile.getBytes()))
+                                      .filename(StringUtils.cleanPath(Objects.requireNonNull(
+                                          processingModeXmlFile.getOriginalFilename()))
+                                      )
+                                      .truststore(truststore)
+                                      .build();
     }
 }

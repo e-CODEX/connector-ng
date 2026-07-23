@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.property.common;
 
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import lombok.Getter;
 import lombok.Setter;
 

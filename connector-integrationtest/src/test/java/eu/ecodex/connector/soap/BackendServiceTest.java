@@ -11,12 +11,12 @@
 package eu.ecodex.connector.soap;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorMerlinPropertiesFactory;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorWsPolicyLoader;
 import eu.ecodex.connector.infrastructure.outbound.soap.KeystorePasswordCallback;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
-import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
 import eu.ecodex.connector.infrastructure.property.link.LinkConfigDetailProperties;
 import eu.ecodex.connector.infrastructure.property.link.LinkEndpointProperties;
@@ -49,24 +49,24 @@ public class BackendServiceTest extends AbstractIntegrationTest {
         var linkEndpointProperties = linkProperties.getEndpoint();
 
         var encryptionProperties = merlinPropertiesFactory.createEncryptionProperties(
-                linkEndpointProperties);
+            linkEndpointProperties);
         var sigingProperties = merlinPropertiesFactory.createSigningProperties(
-                linkEndpointProperties);
+            linkEndpointProperties);
 
         var privateKey = linkEndpointProperties.getPrivateKey();
 
         var properties = new HashMap<String, Object>();
 
         properties.put(
-                SecurityConstants.ENCRYPT_USERNAME,
-                linkEndpointProperties.getEncryptAlias()
+            SecurityConstants.ENCRYPT_USERNAME,
+            linkEndpointProperties.getEncryptAlias()
         );
         properties.put(SecurityConstants.ENCRYPT_PROPERTIES, encryptionProperties);
         properties.put(SecurityConstants.SIGNATURE_USERNAME, privateKey.getAlias());
         properties.put(SecurityConstants.SIGNATURE_PROPERTIES, sigingProperties);
         properties.put(
-                SecurityConstants.CALLBACK_HANDLER,
-                new KeystorePasswordCallback(privateKey.getPassword())
+            SecurityConstants.CALLBACK_HANDLER,
+            new KeystorePasswordCallback(privateKey.getPassword())
         );
 
         properties.put("mtom-enabled", true);
@@ -78,7 +78,7 @@ public class BackendServiceTest extends AbstractIntegrationTest {
         factory.setProperties(properties);
 
         var policyLoader = new ConnectorWsPolicyLoader(
-                linkProperties.getWsPolicy()
+            linkProperties.getWsPolicy()
         );
         factory.getFeatures().add(policyLoader.loadPolicyFeature());
 

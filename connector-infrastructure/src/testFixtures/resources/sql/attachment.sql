@@ -3,7 +3,7 @@ insert into connector_message_attachments (
     content_type,
     description,
     name,
-    size,
+    file_size,
     storage,
     type,
     message_id,

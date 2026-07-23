@@ -160,6 +160,27 @@ services:
             - "30032:5432"
         volumes:
             - ng-postgres-data:/var/lib/postgresql/data
+    connector-ng-oracle-db:
+        image: gvenzl/oracle-free:23-slim
+        container_name: connector-oracle
+        profiles: [ "oracle" ]
+        environment:
+            ORACLE_PASSWORD: oracle
+            APP_USER: connector
+            APP_USER_PASSWORD: connector
+        expose:
+            - "1521"
+        ports:
+            - "30021:1521"
+        volumes:
+            - oracle-data:/opt/oracle/oradata
+            - ./docker/oracle/init:/container-entrypoint-initdb.d:ro
+        healthcheck:
+            test: [ "CMD", "healthcheck.sh" ]
+            interval: 10s
+            timeout: 5s
+            retries: 30
+            start_period: 60s
     connector-ng:
         container_name: connector-ng
         # uncomment the bellow section if you want to build your connector image during the launch of docker-compose
@@ -198,3 +219,4 @@ volumes:
     gateway-attachments:
     minio_data:
     activemq-data:
+    oracle-data:

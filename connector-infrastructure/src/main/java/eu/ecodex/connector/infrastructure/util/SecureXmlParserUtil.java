@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.util;
+package eu.ecodex.connector.infrastructure.util;
 
 import java.io.IOException;
 import java.io.StringReader;

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.pmode;
 
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
@@ -18,24 +19,14 @@ import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
-import eu.ecodex.connector.application.util.SecureXmlParserUtil;
-import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
+import eu.ecodex.connector.domain.spi.ConnectorProcessingModeParser;
+import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 /**
  * Implementation of the {@link ConnectorRegisterProcessingMode} service.
@@ -49,6 +40,7 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
     private final ConnectorPartyRepository partyRepository;
     private final ConnectorActionRepository actionRepository;
     private final ConnectorServiceRepository serviceRepository;
+    private final ConnectorProcessingModeParser processingModeParser;
 
     /**
      * Creates an instance of {@code ConnectorRegisterProcessingModeService}.
@@ -56,24 +48,28 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
      * @param processingModeRepository The repository used for managing
      *                                 {@link ConnectorProcessingMode} entities.
      * @param businessDomainRepository The repository used for managing
-     *                                 {@link ConnectorBusinessDomain} entities.
-     * @param partyRepository          The repository used for managing {@link ConnectorParty}
+     *                                 {@code ConnectorBusinessDomain} entities.
+     * @param partyRepository          The repository used for managing {@code ConnectorParty}
      *                                 entities.
-     * @param actionRepository         The repository used for managing {@link ConnectorAction}
+     * @param actionRepository         The repository used for managing {@code ConnectorAction}
      *                                 entities.
-     * @param serviceRepository        The repository used for managing {@link ConnectorService}
+     * @param serviceRepository        The repository used for managing {@code ConnectorService}
      *                                 entities.
+     * @param processingModeParser     The parser extracting parties, services, and actions from the
+     *                                 processing mode definition.
      */
     public ConnectorRegisterProcessingModeService(
         ConnectorProcessingModeRepository processingModeRepository,
         ConnectorBusinessDomainRepository businessDomainRepository,
         ConnectorPartyRepository partyRepository, ConnectorActionRepository actionRepository,
-        ConnectorServiceRepository serviceRepository) {
+        ConnectorServiceRepository serviceRepository,
+        ConnectorProcessingModeParser processingModeParser) {
         this.processingModeRepository = processingModeRepository;
         this.businessDomainRepository = businessDomainRepository;
         this.partyRepository = partyRepository;
         this.actionRepository = actionRepository;
         this.serviceRepository = serviceRepository;
+        this.processingModeParser = processingModeParser;
     }
 
     @Override
@@ -85,12 +81,14 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
             businessDomainIdentifier
         );
 
-        var foundBusinessDomain = this.businessDomainRepository.findByIdentifier(
+        var businessDomain = this.businessDomainRepository.findByIdentifier(
             businessDomainIdentifier
         );
 
-        if (foundBusinessDomain == null) {
-            throw new ConnectorBusinessDomainNotFoundException("Business domain not found");
+        if (businessDomain == null) {
+            throw new ConnectorBusinessDomainNotFoundException(
+                "Business domain not found: %s".formatted(businessDomainIdentifier)
+            );
         }
 
         var existingProcessingMode = this.processingModeRepository.findByBusinessDomainIdentifier(
@@ -98,183 +96,47 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
         );
 
         if (existingProcessingMode != null) {
-            throw new ConnectorProcessingModeException(
-                "The business domain has already a processing mode linked"
+            throw new ConnectorBusinessDomainAlreadyExistsException(
+                "The business domain [%s] already has a processing mode"
+                    .formatted(businessDomainIdentifier)
             );
         }
 
-        var parsedProcessingMode = parseXmlFile(processingMode);
+        ConnectorProcessingModeParser.ParsedProcessingMode parsed;
 
-        log.debug("Processing mode parsed successfully [{}]", parsedProcessingMode);
+        try {
+            parsed = this.processingModeParser.parse(processingMode.content().getBytes());
+        } catch (Exception e) {
+            log.error("Error parsing processing mode", e);
+            throw new ConnectorProcessingModeException(
+                "Error parsing processing mode for business domain [%s]: %s"
+                    .formatted(businessDomainIdentifier, e.getMessage())
+            );
+        }
 
-        parsedProcessingMode = parsedProcessingMode
+        log.debug("Processing mode parsed successfully [{}]", parsed);
+
+        var toPersist = processingMode
             .toBuilder()
-            .businessDomain(foundBusinessDomain)
+            .businessDomain(businessDomain)
             .build();
 
-        var createdProcessingMode = this.processingModeRepository.save(
-            parsedProcessingMode,
-            businessDomainIdentifier
+        var created = this.processingModeRepository.save(toPersist, businessDomainIdentifier);
+
+        log.info(
+            "Processing mode [{}] registered for the business domain [{}]",
+            created.uuid(), businessDomainIdentifier
         );
 
-        log.debug(
-            "Processing mode created successfully [{}]. will add parties, services and actions",
-            createdProcessingMode
+        this.partyRepository.saveAll(List.copyOf(parsed.parties()), businessDomainIdentifier);
+        this.serviceRepository.saveAll(List.copyOf(parsed.services()), businessDomainIdentifier);
+        this.actionRepository.saveAll(List.copyOf(parsed.actions()), businessDomainIdentifier);
+
+        log.info(
+            "With {} parties, {} services, {} actions",
+            parsed.parties().size(), parsed.services().size(), parsed.actions().size()
         );
 
-        this.partyRepository.saveAll(
-            Objects.requireNonNull(parsedProcessingMode.parties()).stream().toList(),
-            businessDomainIdentifier
-        );
-        this.serviceRepository.saveAll(
-            Objects.requireNonNull(parsedProcessingMode.services()).stream().toList(),
-            businessDomainIdentifier
-        );
-        this.actionRepository.saveAll(
-            Objects.requireNonNull(parsedProcessingMode.actions()).stream().toList(),
-            businessDomainIdentifier
-        );
-
-        log.info("Processing mode [{}] created successfully", createdProcessingMode.uuid());
-
-        return createdProcessingMode;
-    }
-
-    private ConnectorProcessingMode parseXmlFile(ConnectorProcessingMode processingMode) {
-        try {
-            var document = SecureXmlParserUtil.parseSecurely(processingMode.content());
-            document.getDocumentElement().normalize();
-            var root = document.getDocumentElement();
-            var homePartyName = root.getAttribute("party");
-
-            var partiesNode = document.getElementsByTagName("party");
-            var partyIdTypesNode = document.getElementsByTagName("partyIdType");
-            var servicesNodes = document.getElementsByTagName("service");
-            var actionsNodes = document.getElementsByTagName("action");
-
-            var parties = this.retrieveParties(partiesNode, partyIdTypesNode, homePartyName);
-            var services = this.retrieveServices(servicesNodes);
-            var actions = this.retrieveActions(actionsNodes);
-
-            var homeParty = parties.stream()
-                                   .filter(p -> p.name().equals(homePartyName))
-                                   .findFirst()
-                                   .orElse(null);
-
-            if (homeParty == null) {
-                throw new ConnectorProcessingModeException("Home party not found");
-            }
-
-            var updatedProcessingMode = processingMode
-                .toBuilder()
-                .parties(parties)
-                .services(services)
-                .actions(actions)
-                .build();
-
-            log.debug("Processing mode parsed successfully");
-
-            return updatedProcessingMode;
-        } catch (Exception e) {
-            log.error("Error parsing processing mode xml file", e);
-            throw new ConnectorProcessingModeException("Error parsing processing mode xml file", e);
-        }
-    }
-
-    private Map<String, String> retrievePartyIdTypes(NodeList partyIdTypesNodeList) {
-        var partyIdTypes = new HashMap<String, String>();
-
-        for (int i = 0; i < partyIdTypesNodeList.getLength(); i++) {
-            var partyIdType = (Element) partyIdTypesNodeList.item(i);
-            var name = partyIdType.getAttribute("name");
-            var value = partyIdType.getAttribute("value");
-
-            partyIdTypes.put(name, value);
-        }
-
-        return partyIdTypes;
-    }
-
-    private HashSet<ConnectorParty> retrieveParties(
-        NodeList partiesNodeList,
-        NodeList partyIdTypesNodeList,
-        String homePartyName) {
-        var partyIdTypes = this.retrievePartyIdTypes(partyIdTypesNodeList);
-
-        var parties = new HashSet<ConnectorParty>();
-
-        for (int i = 0; i < partiesNodeList.getLength(); i++) {
-            var party = (Element) partiesNodeList.item(i);
-
-            var name = party.getAttribute("name");
-
-            var identifier = (Element) party.getElementsByTagName("identifier").item(0);
-            var partyId = identifier.getAttribute("partyId");
-            var partyIdType = identifier.getAttribute("partyIdType");
-
-            var connectorParty = ConnectorParty
-                .builder()
-                .name(name)
-                .identifier(partyId)
-                .identifierType(partyIdTypes.getOrDefault(partyIdType, null))
-                .role("GW")
-                .roleType(ConnectorPartyRoleType.INITIATOR)
-                .isHome(homePartyName.equals(name))
-                .build();
-
-            parties.add(connectorParty);
-
-            connectorParty = connectorParty
-                .toBuilder()
-                .roleType(ConnectorPartyRoleType.RESPONDER)
-                .build();
-            parties.add(connectorParty);
-        }
-
-        return parties;
-    }
-
-    private HashSet<ConnectorService> retrieveServices(NodeList servicesNodeList) {
-        log.debug("retrieving services from processing mode xml file");
-
-        var services = new HashSet<ConnectorService>();
-
-        for (int i = 0; i < servicesNodeList.getLength(); i++) {
-            var service = (Element) servicesNodeList.item(i);
-
-            var value = service.getAttribute("value");
-            var type = service.getAttribute("type");
-
-            var connectorParty = ConnectorService
-                .builder()
-                .name(value)
-                .type(type)
-                .build();
-
-            services.add(connectorParty);
-        }
-
-        return services;
-    }
-
-    private HashSet<ConnectorAction> retrieveActions(NodeList actionsNodeList) {
-        log.debug("retrieving actions from processing mode xml file");
-
-        var actions = new HashSet<ConnectorAction>();
-
-        for (int i = 0; i < actionsNodeList.getLength(); i++) {
-            var service = (Element) actionsNodeList.item(i);
-
-            var value = service.getAttribute("value");
-
-            var connectorParty = ConnectorAction
-                .builder()
-                .name(value)
-                .build();
-
-            actions.add(connectorParty);
-        }
-
-        return actions;
+        return created;
     }
 }

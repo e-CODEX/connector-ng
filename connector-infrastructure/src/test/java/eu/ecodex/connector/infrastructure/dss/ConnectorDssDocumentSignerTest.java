@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.dss;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.FileTestFixtures;
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
-import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
 import eu.europa.esig.dss.enumerations.DigestAlgorithm;
 import eu.europa.esig.dss.enumerations.EncryptionAlgorithm;
@@ -29,9 +29,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ConnectorDssDocumentSignerTest extends BaseDssTest {
+    private final ConnectorDssSigningTokenProvider signingTokenProvider;
     @Autowired
     private ConnectorDssDocumentSigner documentSigner;
-    private final ConnectorDssSigningTokenProvider signingTokenProvider;
 
     {
         var keystoreProperties = new KeystoreProperties();
@@ -44,7 +44,7 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
         privateKeyProperties.setPassword("12345");
 
         signingTokenProvider = new ConnectorDssSigningTokenProvider(
-                keystoreProperties, privateKeyProperties
+            keystoreProperties, privateKeyProperties
         );
     }
 
@@ -53,10 +53,10 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
         var pdf = FileTestFixtures.readAsBytes("raw/test-pdf.pdf");
         var document = new InMemoryDocument(pdf);
         var signedDocument = documentSigner.signWithPadES(
-                document,
-                EncryptionAlgorithm.RSA,
-                DigestAlgorithm.SHA256,
-                signingTokenProvider
+            document,
+            EncryptionAlgorithm.RSA,
+            DigestAlgorithm.SHA256,
+            signingTokenProvider
         );
 
         assertThat(signedDocument).isNotNull();
@@ -68,10 +68,10 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
         var xml = FileTestFixtures.readAsBytes("raw/test-xml.xml");
         var document = new InMemoryDocument(xml);
         var signedDocument = documentSigner.signWithXAdES(
-                document,
-                EncryptionAlgorithm.RSA,
-                DigestAlgorithm.SHA256,
-                signingTokenProvider
+            document,
+            EncryptionAlgorithm.RSA,
+            DigestAlgorithm.SHA256,
+            signingTokenProvider
         );
 
         assertThat(signedDocument).isNotNull();
@@ -98,13 +98,13 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
         signedContentZip.close();
 
         final var document = new InMemoryDocument(
-                signedContentBytes.toByteArray(),
-                "SignedContent.zip",
-                MimeTypeEnum.BINARY
+            signedContentBytes.toByteArray(),
+            "SignedContent.zip",
+            MimeTypeEnum.BINARY
         );
 
         var signedDocument = documentSigner.signWithASIC(
-                document, signingTokenProvider
+            document, signingTokenProvider
         );
 
         assertThat(signedDocument).isNotNull();

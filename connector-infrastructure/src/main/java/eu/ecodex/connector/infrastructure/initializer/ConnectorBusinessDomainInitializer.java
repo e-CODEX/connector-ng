@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.initializer;
 
+import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
@@ -17,17 +19,18 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.businessdomain.ConnectorBusinessDomainProperties;
 import eu.ecodex.connector.infrastructure.property.businessdomain.DefaultBusinessDomainProperties;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Initializes the connector's business domains based on provided configuration and existing data.
@@ -35,95 +38,119 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
-    private static final String FILE_PREFIX = "file:";
     private final ConnectorRegisterBusinessDomain registerBusinessDomainService;
     private final ConnectorListBusinessDomain listBusinessDomainService;
     private final ConnectorRegisterProcessingMode registerProcessingModeService;
     private final ConnectorBusinessDomainProperties domainProperties;
+    private final ResourceLoader resourceLoader;
 
     /**
-     * Initializes the connector's business domains based on provided configuration and existing
-     * data. This constructor sets up the necessary services and properties required for managing
-     * business domains in the connector environment.
+     * Creates the initializer.
      *
-     * @param registerBusinessDomainService the service responsible for registering new business
-     *                                      domains into the system.
-     * @param listBusinessDomainService     the service responsible for listing all existing
-     *                                      business domains in the system.
-     * @param registerProcessingModeService the service responsible for registering new processing
-     *                                      modes
-     * @param domainProperties              the configuration properties containing default business
-     *                                      domain information.
+     * @param registerBusinessDomainService the service registering new business domains.
+     * @param listBusinessDomainService     the service listing existing business domains.
+     * @param registerProcessingModeService the service registering new processing modes.
+     * @param domainProperties              the configured default business domains.
+     * @param resourceLoader                resolves {@code file:}, {@code classpath:} and
+     *                                      {@code http(s):} locations uniformly.
      */
     public ConnectorBusinessDomainInitializer(
         ConnectorRegisterBusinessDomain registerBusinessDomainService,
         ConnectorListBusinessDomain listBusinessDomainService,
         ConnectorRegisterProcessingMode registerProcessingModeService,
-        ConnectorBusinessDomainProperties domainProperties) {
+        ConnectorBusinessDomainProperties domainProperties,
+        ResourceLoader resourceLoader) {
         this.registerBusinessDomainService = registerBusinessDomainService;
         this.listBusinessDomainService = listBusinessDomainService;
         this.registerProcessingModeService = registerProcessingModeService;
         this.domainProperties = domainProperties;
+        this.resourceLoader = resourceLoader;
+    }
+
+    private static ConnectorBusinessDomainIdentifier businessDomainIdentifier(String identifier) {
+        return ConnectorBusinessDomainIdentifier
+            .builder()
+            .messageLaneIdentifier(identifier)
+            .build();
+    }
+
+    static String filenameOf(String location) {
+        var withoutQuery = location.split("[?#]", 2)[0];
+        var lastSeparator = Math.max(withoutQuery.lastIndexOf('/'), withoutQuery.lastIndexOf('\\'));
+
+        return lastSeparator < 0 ? withoutQuery : withoutQuery.substring(lastSeparator + 1);
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        log.info("Initializing business domains");
+    public void run(ApplicationArguments args) {
+        var defaults = domainProperties.getDefaults();
 
-        var defaultBusinessDomains = domainProperties.getDefaults();
-        if (defaultBusinessDomains != null && !defaultBusinessDomains.isEmpty()) {
-            registerDefaultBusinessDomains(defaultBusinessDomains);
-        } else if (listBusinessDomainService.execute().isEmpty()) {
-            log.info("No default business domains configured and none registered yet");
-            registerBusinessDomainService.execute(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN);
-        } else {
-            log.debug(
-                "No default business domains configured; existing domains found, nothing to do"
-            );
+        if (defaults == null || defaults.isEmpty()) {
+            registerFallbackBusinessDomain();
+            return;
         }
+
+        log.info("Initializing {} configured business domain(s)", defaults.size());
+        defaults.forEach(this::initializeBusinessDomain);
     }
 
-    private void registerDefaultBusinessDomains(
-        List<DefaultBusinessDomainProperties> defaultBusinessDomains) {
-        log.info("Found {} default business domains", defaultBusinessDomains.size());
+    private void registerFallbackBusinessDomain() {
+        if (!listBusinessDomainService.execute().isEmpty()) {
+            log.debug("No default business domains configured; existing domains found");
+            return;
+        }
 
-        for (var properties : defaultBusinessDomains) {
-            var businessDomain = toBusinessDomain(properties);
-            try {
-                registerBusinessDomainService.execute(businessDomain);
-            } catch (Exception e) {
-                log.warn(
-                    "Could not register business domain [{}]: Reason: [{}]",
-                    properties.getIdentifier(), e.getMessage()
-                );
-            }
+        log.info("No default business domains configured and none registered yet");
+        registerBusinessDomainService.execute(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN);
+    }
 
-            if (properties.getPmodeFile() != null) {
-                log.info("Found p-mode file for domain [{}]", properties.getIdentifier());
+    private void initializeBusinessDomain(DefaultBusinessDomainProperties properties) {
+        var identifier = properties.getIdentifier();
 
-                try {
-                    var processingMode = toProcessingMode(properties);
-                    registerProcessingModeService.execute(
-                        businessDomain.identifier(), processingMode
-                    );
-                } catch (Exception e) {
-                    log.warn(
-                        "Could not register configured p-mode for domain [{}]: Reason: [{}]",
-                        properties.getIdentifier(), e.getMessage()
-                    );
-                }
-            }
+        try {
+            registerBusinessDomainService.execute(toBusinessDomain(properties));
+            log.info("Business domain [{}] registered", identifier);
+        } catch (ConnectorBusinessDomainAlreadyExistsException e) {
+            log.debug("Business domain [{}] already registered", identifier);
+        }
+
+        registerConfiguredProcessingMode(properties);
+    }
+
+    private void registerConfiguredProcessingMode(DefaultBusinessDomainProperties properties) {
+        var identifier = properties.getIdentifier();
+        var pmode = properties.getPmode();
+
+        if (pmode == null || !StringUtils.hasText(pmode.getFile())) {
+            log.debug("No processing mode configured for business domain [{}]", identifier);
+            return;
+        }
+
+        if (!StringUtils.hasText(pmode.getTruststore())) {
+            throw new IllegalStateException(
+                "Business domain [%s] declares a processing mode file but no truststore"
+                    .formatted(identifier));
+        }
+
+        try {
+            registerProcessingModeService.execute(
+                businessDomainIdentifier(identifier), toProcessingMode(properties));
+            log.info("Processing mode registered for business domain [{}]", identifier);
+        } catch (ConnectorProcessingModeException e) {
+            log.debug("Business domain [{}] already has a processing mode", identifier);
+        } catch (IOException e) {
+            // Misconfigured location: fail fast rather than start in a half-configured state.
+            throw new IllegalStateException(
+                "Could not read the processing mode configured for business domain [%s]"
+                    .formatted(identifier), e
+            );
         }
     }
 
     private ConnectorBusinessDomain toBusinessDomain(DefaultBusinessDomainProperties properties) {
         return ConnectorBusinessDomain
             .builder()
-            .identifier(
-                ConnectorBusinessDomainIdentifier
-                    .builder()
-                    .messageLaneIdentifier(properties.getIdentifier())
-                    .build())
+            .identifier(businessDomainIdentifier(properties.getIdentifier()))
             .description(properties.getDescription())
             .enabled(properties.isEnabled())
             .source(ConnectorConfigurationSource.IMPLEMENTATION)
@@ -132,27 +159,41 @@ public class ConnectorBusinessDomainInitializer implements ApplicationRunner {
 
     private ConnectorProcessingMode toProcessingMode(DefaultBusinessDomainProperties properties)
         throws IOException {
-        return ConnectorProcessingMode.builder()
-                                      .description(String.format(
-                                          "Default processing mode for %s",
-                                          properties.getIdentifier()
-                                      ))
-                                      .filename(properties.getPmodeFile())
-                                      .content(getPmodeFile(properties.getPmodeFile()))
-                                      .build();
+        var pmode = properties.getPmode();
+
+        var truststoreLocation = pmode.getTruststore();
+        var truststoreFilename = filenameOf(truststoreLocation);
+
+        var truststore = ConnectorTruststore
+            .builder()
+            .filename(truststoreFilename)
+            .password(pmode.getTruststorePassword())
+            .content(read(truststoreLocation, "truststore"))
+            .type(KeystoreType.fromFileName(truststoreFilename)
+                              .orElseThrow(() -> new IllegalStateException(
+                                  "Cannot determine the keystore type of [%s]"
+                                      .formatted(truststoreFilename))))
+            .build();
+
+        return ConnectorProcessingMode
+            .builder()
+            .description("Default processing mode for %s".formatted(properties.getIdentifier()))
+            .filename(filenameOf(pmode.getFile()))
+            .content(new String(read(pmode.getFile(), "processing mode file")))
+            .truststore(truststore)
+            .build();
     }
 
-    private String getPmodeFile(String path) throws IOException {
-        if (path.startsWith(FILE_PREFIX)) {
-            var resourcePath = path.substring(FILE_PREFIX.length());
+    private byte[] read(String location, String description) throws IOException {
+        var resource = resourceLoader.getResource(location);
 
-            return Files.readString(Path.of(resourcePath));
+        if (!resource.exists()) {
+            throw new FileNotFoundException(
+                "No %s found at [%s]".formatted(description, location));
         }
 
-        try (var stream = URI.create(path).toURL().openStream()) {
-            return stream.toString();
-        } catch (Exception e) {
-            return Files.readString(Path.of(path));
+        try (var stream = resource.getInputStream()) {
+            return stream.readAllBytes();
         }
     }
 }

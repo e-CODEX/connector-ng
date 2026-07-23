@@ -13,9 +13,9 @@ package eu.ecodex.connector.infrastructure.dss;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.certificate.ConnectorCertificateVerifierProperties;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
-import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,7 +34,7 @@ public class ConnectorDssCertificateVerifierTest extends BaseDssTest {
         verifier.setTruststore(truststore);
 
         var commonCertificateVerifier = certificateVerifier.createCommonCertificateVerifier(
-                verifier
+            verifier
         );
 
         assertThat(commonCertificateVerifier).isNotNull();
@@ -49,10 +49,10 @@ public class ConnectorDssCertificateVerifierTest extends BaseDssTest {
         verifier.setIgnoreStoreEnabled(true);
 
         assertThrows(
-                IllegalArgumentException.class,
-                () -> certificateVerifier.createCommonCertificateVerifier(
-                        verifier
-                )
+            IllegalArgumentException.class,
+            () -> certificateVerifier.createCommonCertificateVerifier(
+                verifier
+            )
         );
     }
 
@@ -62,10 +62,10 @@ public class ConnectorDssCertificateVerifierTest extends BaseDssTest {
         assertThat(verifier).isNotNull();
 
         assertThrows(
-                IllegalArgumentException.class,
-                () -> certificateVerifier.createCommonCertificateVerifier(
-                        verifier
-                )
+            IllegalArgumentException.class,
+            () -> certificateVerifier.createCommonCertificateVerifier(
+                verifier
+            )
         );
     }
 }

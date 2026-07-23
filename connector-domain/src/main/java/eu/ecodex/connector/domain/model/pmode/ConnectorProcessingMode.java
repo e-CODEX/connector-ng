@@ -11,6 +11,7 @@
 package eu.ecodex.connector.domain.model.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
@@ -21,29 +22,31 @@ import lombok.Builder;
 /**
  * The ConnectorProcessingMode represents a set of PMode configurations for a Connector.
  *
- * @param uuid                     The UUID of the PMode.
- * @param description              The description of the PMode.
- * @param content                  The businessContent of the PMode.
- * @param filename                 The filename of the PMode.
+ * @param uuid           The UUID of the PMode.
+ * @param description    The description of the PMode.
+ * @param content        The businessContent of the PMode.
+ * @param filename       The filename of the PMode.
  * @param businessDomain The business domain of the PMode.
- * @param parties                  The parties of the PMode.
- * @param services                 The services of the PMode.
- * @param actions                  The actions of the PMode.
- * @param createdAt                The creation date of the PMode.
- * @param updatedAt                The last update date of the PMode.
+ * @param truststore     The truststore of the PMode.
+ * @param parties        The parties of the PMode.
+ * @param services       The services of the PMode.
+ * @param actions        The actions of the PMode.
+ * @param createdAt      The creation date of the PMode.
+ * @param updatedAt      The last update date of the PMode.
  */
 @Builder(toBuilder = true)
 public record ConnectorProcessingMode(
-        String uuid,
-        @Nullable String description,
-        @Nonnull String content,
-        @Nonnull String filename,
-        @Nullable ConnectorBusinessDomain businessDomain,
-        @Nullable Set<ConnectorParty> parties,
-        @Nullable Set<ConnectorService> services,
-        @Nullable Set<ConnectorAction> actions,
-        Instant createdAt,
-        Instant updatedAt
+    String uuid,
+    @Nullable String description,
+    @Nonnull String content,
+    @Nonnull String filename,
+    @Nullable ConnectorBusinessDomain businessDomain,
+    ConnectorTruststore truststore,
+    @Nullable Set<ConnectorParty> parties,
+    @Nullable Set<ConnectorService> services,
+    @Nullable Set<ConnectorAction> actions,
+    Instant createdAt,
+    Instant updatedAt
 ) implements Serializable {
     /**
      * Constructor.
@@ -58,7 +61,7 @@ public record ConnectorProcessingMode(
     @Nonnull
     public String toString() {
         return String.format(
-                "{uuid=%s, description=%s}", uuid, description
+            "{uuid=%s, description=%s}", uuid, description
         );
     }
 }

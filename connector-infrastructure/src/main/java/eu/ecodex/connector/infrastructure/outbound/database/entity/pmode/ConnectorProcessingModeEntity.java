@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.database.entity.pmode;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.ConnectorBusinessDomainEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.message.content.ConnectorMessageBusinessDocumentEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -23,6 +24,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import java.util.HashSet;
@@ -31,6 +33,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 /**
@@ -79,4 +82,8 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConnectorServiceEntity> services = new HashSet<>();
+
+    @Setter
+    @OneToOne(mappedBy = "processingMode")
+    private ConnectorProcessingModeTruststoreEntity truststore;
 }

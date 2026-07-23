@@ -16,132 +16,114 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import tools.jackson.databind.ObjectMapper;
 
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
     private static final String URL = "/api/v1/admin/processing-modes";
-    private final ConnectorProcessingModeCreationRequest metadata =
-            ConnectorProcessingModeCreationRequest
-                    .builder()
-                    .description("test processing mode")
-                    .businessDomainIdentifier("default_business_domain")
-                    .build();
+    private static final String BUSINESS_DOMAIN = "default_business_domain";
+    private static final String DESCRIPTION = "test processing mode";
+    private static final String TRUSTSTORE_PASSWORD = "changeit";
+
     @Autowired
     private RestTestClient apiClient;
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @AfterEach
     void cleanUp() {
         cleanDb();
     }
 
-    /*
-     * By default, a business domain is created at the startup if no one exists
-     * We are going to use it for our tests
-     */
-
     @Test
     @Sql("classpath:sql/business-domain.sql")
     void should_succeed_to_create_processing_mode() {
-        var parts = producePart();
+        var response = apiClient.post()
+                                .uri(URL)
+                                .contentType(MediaType.MULTIPART_FORM_DATA)
+                                .body(creationParts(BUSINESS_DOMAIN))
+                                .exchange()
+                                .expectStatus().isCreated()
+                                .returnResult(ConnectorProcessingModeDto.class)
+                                .getResponseBody();
 
-        var jsonHeaders = new HttpHeaders();
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
-        var metadataPart = new HttpEntity<>(objectMapper.writeValueAsString(metadata), jsonHeaders);
+        assertThat(response).isNotNull();
+        assertThat(response.businessDomainIdentifier()).isEqualTo(BUSINESS_DOMAIN);
+        assertThat(response.description()).isEqualTo(DESCRIPTION);
+    }
 
-        parts.add("metadata", metadataPart);
+    @Test
+    void should_fail_to_create_a_pmode_if_the_specified_business_domain_does_not_exist() {
+        apiClient.post()
+                 .uri(URL)
+                 .contentType(MediaType.MULTIPART_FORM_DATA)
+                 .body(creationParts("fake_business_domain"))
+                 .exchange()
+                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql"
+    })
+    void should_fail_to_create_a_pmode_if_the_specified_business_domain_has_already_one() {
+        apiClient.post()
+                 .uri(URL)
+                 .contentType(MediaType.MULTIPART_FORM_DATA)
+                 .body(creationParts(BUSINESS_DOMAIN))
+                 .exchange()
+                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
+    @Sql("classpath:sql/business-domain.sql")
+    void should_fail_to_create_a_pmode_if_the_truststore_is_missing() {
+        var parts = creationParts(BUSINESS_DOMAIN);
+        parts.remove("truststore.truststoreFile");
 
         apiClient.post()
                  .uri(URL)
                  .contentType(MediaType.MULTIPART_FORM_DATA)
                  .body(parts)
                  .exchange()
-                 .expectStatus().isCreated()
-                 .returnResult(ConnectorProcessingModeDto.class);
+                 .expectStatus().isBadRequest();
     }
 
-    @Test
-    void should_fail_to_create_a_pmode_if_the_specified_business_domain_does_not_exist() {
-        var parts = producePart();
-
-        var jsonHeaders = new HttpHeaders();
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
-        var updatedMetadata = metadata
-                .toBuilder()
-                .businessDomainIdentifier("fake_business_domain")
-                .build();
-
-        var metadataPart = new HttpEntity<>(
-                objectMapper.writeValueAsString(updatedMetadata),
-                jsonHeaders
-        );
-
-        parts.add("metadata", metadataPart);
-
-        var response = apiClient.post()
-                                .uri(URL)
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .body(parts)
-                                .exchange()
-                                .expectStatus().is4xxClientError()
-                                .returnResult(ConnectorProcessingModeDto.class);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-
-    @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql"
-    })
-    void should_fail_to_create_a_pmode_if_the_specified_business_domain_has_already_one() {
-        var parts = producePart();
-
-        var jsonHeaders = new HttpHeaders();
-        jsonHeaders.setContentType(MediaType.APPLICATION_JSON);
-        var metadataPart = new HttpEntity<>(objectMapper.writeValueAsString(metadata), jsonHeaders);
-
-        parts.add("metadata", metadataPart);
-
-        var response = apiClient.post()
-                                .uri(URL)
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .body(parts)
-                                .exchange()
-                                .expectStatus().is4xxClientError()
-                                .returnResult(ConnectorProcessingModeDto.class);
-
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.CONFLICT);
-    }
-
-    private MultiValueMap<String, Object> producePart() {
+    private MultiValueMap<String, Object> creationParts(String businessDomainIdentifier) {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
-                "processingModeXmlFile",
-                FilePartTestFixtures.filePart(
-                        "pmode.xml",
-                        FileTestFixtures.readAsString("pmode/pmode.xml").getBytes(),
-                        MediaType.APPLICATION_XML
-                )
+            "processingModeFile",
+            FilePartTestFixtures.filePart(
+                "pmode.xml",
+                FileTestFixtures.readAsString("pmode/pmode.xml").getBytes(StandardCharsets.UTF_8),
+                MediaType.APPLICATION_XML
+            )
         );
+
+        parts.add(
+            "truststore.truststoreFile",
+            FilePartTestFixtures.filePart(
+                "truststore.p12",
+                FileTestFixtures.readAsBytes("truststore/truststore.p12"),
+                MediaType.APPLICATION_OCTET_STREAM
+            )
+        );
+
+        parts.add("businessDomainIdentifier", businessDomainIdentifier);
+        parts.add("description", DESCRIPTION);
+        parts.add("truststore.password", TRUSTSTORE_PASSWORD);
 
         return parts;
     }

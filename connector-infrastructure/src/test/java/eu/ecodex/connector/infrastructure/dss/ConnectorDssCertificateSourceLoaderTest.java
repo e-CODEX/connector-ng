@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.dss;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
-import eu.ecodex.connector.infrastructure.property.common.KeystoreType;
 import eu.europa.esig.dss.enumerations.CertificateSourceType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +49,8 @@ public class ConnectorDssCertificateSourceLoaderTest extends BaseDssTest {
         properties.setType(KeystoreType.PKCS12);
 
         assertThrows(
-                IllegalArgumentException.class,
-                () -> certificateSourceLoader.createCertificateSource(properties)
+            IllegalArgumentException.class,
+            () -> certificateSourceLoader.createCertificateSource(properties)
         );
     }
 
@@ -62,8 +62,8 @@ public class ConnectorDssCertificateSourceLoaderTest extends BaseDssTest {
         properties.setType(KeystoreType.PKCS12);
 
         assertThrows(
-                IllegalArgumentException.class,
-                () -> certificateSourceLoader.createCertificateSource(properties)
+            IllegalArgumentException.class,
+            () -> certificateSourceLoader.createCertificateSource(properties)
         );
     }
 
@@ -75,8 +75,8 @@ public class ConnectorDssCertificateSourceLoaderTest extends BaseDssTest {
         properties.setType(KeystoreType.PKCS12);
 
         assertThrows(
-                IllegalStateException.class,
-                () -> certificateSourceLoader.createCertificateSource(properties)
+            IllegalStateException.class,
+            () -> certificateSourceLoader.createCertificateSource(properties)
         );
     }
 
@@ -90,13 +90,13 @@ public class ConnectorDssCertificateSourceLoaderTest extends BaseDssTest {
         properties.setType(KeystoreType.JKS);
 
         var trustedCertificateSource = certificateSourceLoader.createCommonTrustedCertificateSource(
-                properties);
+            properties);
         assertThat(trustedCertificateSource).isNotNull();
         assertThat(trustedCertificateSource.getCertificateSourceType()).isEqualTo(
-                CertificateSourceType.TRUSTED_STORE);
+            CertificateSourceType.TRUSTED_STORE);
 
         var token = certificateSourceLoader.createCertificateSource(properties).getCertificate(
-                "connector_blue");
+            "connector_blue");
 
         assertThat(trustedCertificateSource.isTrusted(token)).isTrue();
     }

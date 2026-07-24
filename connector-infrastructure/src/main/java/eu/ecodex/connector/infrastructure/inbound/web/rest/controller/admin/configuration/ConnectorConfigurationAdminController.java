@@ -116,6 +116,8 @@ public class ConnectorConfigurationAdminController implements ConnectorConfigura
                 messageProcessingProperties.getInboundMessageVerificationMode())
             .sendGeneratedEvidencesToBackend(
                 messageProcessingProperties.isSendGeneratedEvidencesToBackend())
+            .autoTriggerDeliveryEvidences(
+                messageProcessingProperties.isAutoTriggerDeliveryEvidences())
             .build();
     }
 

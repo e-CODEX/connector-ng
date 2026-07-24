@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [7.0.1] - 0000-00-00
 
+### Release Notes
+
+#### Added
+
+-**Delivery Evidence** — Support automatic `delivery evidence` submission.
+
 ### Technical
 
 - **Database** — Support Oracle DBMS.

@@ -35,6 +35,7 @@ public class ConnectorMessageProcessingProperties implements
     private final ProcessingModeVerificationMode outboundMessageVerificationMode = ProcessingModeVerificationMode.STRICT;
     private final ProcessingModeVerificationMode inboundMessageVerificationMode = ProcessingModeVerificationMode.RELAXED;
     private boolean sendGeneratedEvidencesToBackend = true;
+    private boolean autoTriggerDeliveryEvidences = true;
 
     @Override
     public ConnectorMessageProcessingConfiguration getConfiguration() {
@@ -47,6 +48,7 @@ public class ConnectorMessageProcessingProperties implements
             .inboundMessageVerificationMode(inboundMessageVerificationMode)
             .outboundMessageVerificationMode(outboundMessageVerificationMode)
             .ebmsIdGeneratorEnabled(ebmsIdGeneratorEnabled)
+            .autoTriggerDeliveryEvidences(autoTriggerDeliveryEvidences)
             .build();
     }
 }

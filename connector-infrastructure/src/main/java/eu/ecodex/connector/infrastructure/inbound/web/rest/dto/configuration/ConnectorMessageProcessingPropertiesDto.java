@@ -28,6 +28,8 @@ import lombok.Builder;
  *                                        messages.
  * @param sendGeneratedEvidencesToBackend Indicates whether generated evidences should be sent back
  *                                        to the backend.
+ * @param autoTriggerDeliveryEvidences    Flag indicating whether automatic evidence delivery should
+ *                                        be enabled.
  */
 @Builder
 public record ConnectorMessageProcessingPropertiesDto(
@@ -37,6 +39,7 @@ public record ConnectorMessageProcessingPropertiesDto(
     String transportIdSuffix,
     ProcessingModeVerificationMode outboundMessageVerificationMode,
     ProcessingModeVerificationMode inboundMessageVerificationMode,
-    boolean sendGeneratedEvidencesToBackend
+    boolean sendGeneratedEvidencesToBackend,
+    boolean autoTriggerDeliveryEvidences
 ) {
 }

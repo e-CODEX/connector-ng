@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
 
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
@@ -17,12 +18,18 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageReposito
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendDeliveryServiceClient;
+import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +47,10 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
     private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final LegacyMessageHelper legacyMessageHelper;
+    private final ConnectorOutboundMessageReceiver outboundMessageReceiverService;
+
+    @Value("${connector.message-processing.auto-trigger-delivery-evidences:false}")
+    private boolean autoTriggerDeliveryEvidences;
 
     /**
      * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
@@ -60,13 +71,15 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
         ConnectorMessageEvidenceRepository evidenceRepository,
         ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
         ConnectorLinkPartnerRepository linkPartnerRepository,
-        LegacyMessageHelper legacyMessageHelper) {
+        LegacyMessageHelper legacyMessageHelper,
+        ConnectorOutboundMessageReceiver outboundMessageReceiverService) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
         this.evidenceRepository = evidenceRepository;
         this.backendDeliveryServiceClient = backendDeliveryServiceClient;
         this.linkPartnerRepository = linkPartnerRepository;
         this.legacyMessageHelper = legacyMessageHelper;
+        this.outboundMessageReceiverService = outboundMessageReceiverService;
     }
 
     @Override
@@ -117,7 +130,14 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
 
             if (acknowledgment.isResult()) {
                 if (message.isBusinessMessage()) {
-                    // TODO: also send SUBMISSION_CONFIRMATION back here ?
+                    if (autoTriggerDeliveryEvidences) {
+                        triggerDeliveryConfirmation(
+                            message.backendMessageIdentifier(),
+                            message.as4Properties().ebmsMessageIdentifier(),
+                            message.backendName()
+                        );
+                    }
+
                     messageRepository.setDeliveredToLinkPartnerAt(identifier);
                     if (acknowledgment.getMessageId() != null) {
                         messageRepository.updateBackendIdentifier(
@@ -173,5 +193,35 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
             log.error("Failed to deliver message [{}] to the backend system", identifier, e);
             messageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
         }
+    }
+
+    private void triggerDeliveryConfirmation(
+        String backendMessageIdentifier,
+        String referenceToIdentifier,
+        String backendClientName) {
+        var transportedEvidences = List.of(
+            ConnectorMessageEvidence.builder()
+                                    .type(ConnectorEvidenceType.DELIVERY)
+                                    .build()
+        );
+
+        var message = ConnectorMessage
+            .builder()
+            .backendMessageIdentifier(backendMessageIdentifier)
+            .referenceToBackendMessageIdentifier(backendMessageIdentifier)
+            .backendName(backendClientName)
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .as4Properties(
+                ConnectorMessageAS4Properties
+                    .builder()
+                    .referenceToIdentifier(referenceToIdentifier)
+                    .build()
+            )
+            .businessContent(null)
+            .attachments(null)
+            .transportedEvidences(transportedEvidences)
+            .build();
+
+        outboundMessageReceiverService.execute(message);
     }
 }

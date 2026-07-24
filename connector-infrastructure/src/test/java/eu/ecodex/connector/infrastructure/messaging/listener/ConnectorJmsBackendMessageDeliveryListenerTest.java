@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
@@ -62,6 +64,8 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
     private ConnectorLinkPartnerRepository linkPartnerRepository;
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
+    @Mock
+    private ConnectorOutboundMessageReceiver outboundMessageReceiverService;
 
     @InjectMocks
     private ConnectorJmsBackendMessageDeliveryListener listener;
@@ -169,8 +173,10 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
 
     @Test
     void should_submit_a_business_message_to_backend_and_mark_it_as_delivered_when_successful() {
+        ReflectionTestUtils.setField(listener, "autoTriggerDeliveryEvidences", true);
         stubHappyPath(inboundMessage());
         when(linkPartnerRepository.findByName(any())).thenReturn(linkPartner());
+        when(outboundMessageReceiverService.execute(any())).thenReturn(null);
         var ack = mock(DomibsConnectorAcknowledgementType.class);
         when(ack.isResult()).thenReturn(true);
         when(ack.getMessageId()).thenReturn("backend-message-id");
@@ -187,6 +193,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
         verify(messageRepository).setDeliveredToLinkPartnerAt(MESSAGE_ID);
         verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, "backend-message-id");
         verify(messageRepository, never()).setAsRejected(any());
+        verify(outboundMessageReceiverService).execute(any());
     }
 
     @Test
@@ -209,6 +216,8 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
         verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
         verify(messageRepository, never()).updateBackendIdentifier(any(), any());
         verify(messageRepository, never()).setAsRejected(any());
+
+        verify(outboundMessageReceiverService, never()).execute(any());
     }
 
     @Test

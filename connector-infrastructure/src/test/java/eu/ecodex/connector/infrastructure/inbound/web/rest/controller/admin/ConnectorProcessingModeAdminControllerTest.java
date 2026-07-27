@@ -26,6 +26,7 @@ import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessin
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -193,7 +194,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                         .uri(URL + "/{identifier}", "test-identifier")
                                         .exchange()
                                         .expectStatus().isOk()
-                                        .returnResult(ConnectorProcessingModeDto.class)
+                                        .returnResult(ConnectorProcessingModeDetailDto.class)
                                         .getResponseBody();
 
             assertThat(responseBody).isNotNull();

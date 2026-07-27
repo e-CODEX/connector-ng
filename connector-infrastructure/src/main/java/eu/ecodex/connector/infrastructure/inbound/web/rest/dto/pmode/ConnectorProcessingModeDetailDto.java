@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Builder;

@@ -12,19 +12,26 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 
 import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.domain.model.security.KeystoreType;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.mapper.ConnectorTruststoreEntryMapper;
+import java.util.List;
+import lombok.Builder;
 
 /**
  * Represents a Data Transfer Object (DTO) for truststore information used in connector processing
  * mode configuration.
  *
- * @param filename The name of the truststore file.
- * @param password The password associated with the truststore for secure access.
- * @param type     The type of the truststore, represented by {@link KeystoreType}.
+ * @param filename        The name of the truststore file.
+ * @param password        The password associated with the truststore for secure access.
+ * @param type            The type of the truststore, represented by {@link KeystoreType}.
+ * @param certificateInfo A list of {@link ConnectorCertificateInfoDto} objects representing the
+ *                        truststore's certificates.
  */
+@Builder
 public record ConnectorProcessingModeTruststoreDto(
     String filename,
     String password,
-    KeystoreType type
+    KeystoreType type,
+    List<ConnectorCertificateInfoDto> certificateInfo
 ) {
     /**
      * Constructs a {@link ConnectorProcessingModeTruststoreDto} instance from the provided
@@ -44,7 +51,8 @@ public record ConnectorProcessingModeTruststoreDto(
         return new ConnectorProcessingModeTruststoreDto(
             truststore.filename(),
             truststore.password(),
-            truststore.type()
+            truststore.type(),
+            ConnectorTruststoreEntryMapper.toEntries(truststore)
         );
     }
 }

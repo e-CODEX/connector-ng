@@ -27,7 +27,7 @@ import lombok.Builder;
  * @param password The password required to access the truststore.
  * @param type     The type of the truststore (e.g., JKS or PKCS12).
  */
-@Builder
+@Builder(toBuilder = true)
 public record ConnectorTruststore(
     String filename,
     byte[] content,

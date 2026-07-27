@@ -10,12 +10,15 @@
 
 package eu.ecodex.connector;
 
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageAcknowledgementListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsInboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
+import eu.ecodex.connector.infrastructure.outbound.auth.JwtService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -23,6 +26,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -94,6 +98,8 @@ public abstract class AbstractIntegrationTest {
     ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JwtService jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
@@ -159,13 +165,29 @@ public abstract class AbstractIntegrationTest {
                     "connector_services",
                     "connector_actions",
                     "connector_processing_modes",
-                    "connector_processing_mode_truststores", // typo removed
-                    "connector_business_domains")) {
+                    "connector_processing_mode_truststores",
+                    "connector_business_domains",
+                    "connector_refresh_tokens",
+                    "connector_users",
+                    "connector_roles",
+                    "connector_users_roles"
+                )) {
                     st.execute("TRUNCATE TABLE " + table);
                 }
                 st.execute("SET FOREIGN_KEY_CHECKS = 1");
             }
             return null;
         });
+    }
+
+    protected String generateDefaultAdminToken() {
+        var user = new ConnectorUserDetails(ConnectorUser
+            .defaultAdminUser()
+            .toBuilder()
+            .uuid(UUID
+                .randomUUID()
+                .toString())
+            .build());
+        return jwtTokenService.generateAccessToken(user);
     }
 }

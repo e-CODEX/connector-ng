@@ -19,6 +19,9 @@ import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundExcepti
 import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
@@ -41,13 +44,36 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorUserAlreadyExistsException.class)
+    public ErrorResponse handleUserIdentifierException(
+            ConnectorUserAlreadyExistsException exception) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ConnectorUserNotFoundException.class)
+    public ErrorResponse handleUserNotFoundException(ConnectorUserNotFoundException exception) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConnectorUserBadRequestException.class)
+    public ErrorResponse handleUserException(ConnectorUserBadRequestException e) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
     @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(ConnectorBusinessDomainAlreadyExistsException.class)
     public ErrorResponse handleBusinessDomainException(
-        ConnectorBusinessDomainAlreadyExistsException exception) {
+            ConnectorBusinessDomainAlreadyExistsException exception) {
         return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
+                HttpStatus.CONFLICT.value(), exception.getMessage()
         );
     }
 
@@ -55,9 +81,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ConnectorBusinessDomainNotFoundException.class)
     public ErrorResponse handleBusinessDomainNotFoundException(
-        ConnectorBusinessDomainNotFoundException exception) {
+            ConnectorBusinessDomainNotFoundException exception) {
         return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );
     }
 
@@ -65,9 +91,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ConnectorProcessingModeNotFoundException.class)
     public ErrorResponse handleProcessingModeNotFoundException(
-        ConnectorProcessingModeNotFoundException exception) {
+            ConnectorProcessingModeNotFoundException exception) {
         return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );
     }
 
@@ -75,9 +101,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ConnectorMessageNotFoundException.class)
     public ErrorResponse handleMessageNotFoundException(
-        ConnectorMessageNotFoundException exception) {
+            ConnectorMessageNotFoundException exception) {
         return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );
     }
 
@@ -85,9 +111,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ConnectorMessageTransportStepNotFoundException.class)
     public ErrorResponse handleMessageTransportStepsNotFoundException(
-        ConnectorMessageTransportStepNotFoundException exception) {
+            ConnectorMessageTransportStepNotFoundException exception) {
         return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );
     }
 
@@ -95,9 +121,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ConnectorEvidenceNotFoundException.class)
     public ErrorResponse handleMessageEvidenceNotFoundException(
-        ConnectorEvidenceNotFoundException exception) {
+            ConnectorEvidenceNotFoundException exception) {
         return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
+                HttpStatus.NOT_FOUND.value(), exception.getMessage()
         );
     }
 
@@ -106,7 +132,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorProcessingModeException.class)
     public ErrorResponse handleProcessingModeException(ConnectorProcessingModeException exception) {
         return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
+                HttpStatus.CONFLICT.value(), exception.getMessage()
         );
     }
 
@@ -115,7 +141,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorEvidenceException.class)
     public ErrorResponse handleConnectorEvidenceException(ConnectorEvidenceException exception) {
         return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
+                HttpStatus.CONFLICT.value(), exception.getMessage()
         );
     }
 
@@ -124,7 +150,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorBadRequestException.class)
     public ErrorResponse handleBadRequestException(ConnectorBadRequestException exception) {
         return new ErrorResponse(
-            HttpStatus.BAD_REQUEST.value(), exception.getMessage()
+                HttpStatus.BAD_REQUEST.value(), exception.getMessage()
         );
     }
 
@@ -132,9 +158,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(ConnectorMessageAttachmentException.class)
     public ErrorResponse handleMessageAttachmentException(
-        ConnectorMessageAttachmentException exception) {
+            ConnectorMessageAttachmentException exception) {
         return new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );
     }
 
@@ -143,7 +169,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorAttachmentUploadException.class)
     public ErrorResponse handleAttachmentUploadException(ConnectorAttachmentUploadException e) {
         return new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()
         );
     }
 
@@ -152,7 +178,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorInternalServerException.class)
     public ErrorResponse handleInternalServerException(ConnectorInternalServerException exception) {
         return new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
+                HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );
     }
 
@@ -161,10 +187,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-                                  .getAllErrors()
-                                  .stream()
-                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                  .collect(Collectors.joining(", "));
+                .getAllErrors()
+                .stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(", "));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

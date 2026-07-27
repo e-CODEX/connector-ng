@@ -89,6 +89,9 @@ dependencies {
     implementation(libs.opencsv)
     implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
     implementation(libs.s3)
+    implementation(libs.jjwt.api)
+    runtimeOnly(libs.jjwt.impl)
+    runtimeOnly(libs.jjwt.jackson)
     // test
     testImplementation(testFixtures(project(":connector-domain")))
     testImplementation("org.springframework.boot:spring-boot-starter-test")

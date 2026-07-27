@@ -18,7 +18,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  */
 @Configuration
 @EnableJpaRepositories(
-    basePackages = {"eu.ecodex.connector.infrastructure.outbound.database.repository"}
+    basePackages = {"eu.ecodex.connector.infrastructure.outbound.database.repository",
+            "eu.ecodex.connector.infrastructure.iam"}
 )
 public class DatabaseConfig {
 }

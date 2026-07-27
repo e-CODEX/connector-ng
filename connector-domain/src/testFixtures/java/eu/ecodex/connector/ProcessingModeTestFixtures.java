@@ -118,6 +118,14 @@ public class ProcessingModeTestFixtures {
         return createWithNoBusinessDomain()
             .toBuilder()
             .businessDomain(BusinessDomainTestFixtures.createDefaultBusinessDomain())
+            .truststore(
+                ConnectorTruststore.builder()
+                                   .filename("truststore.jks")
+                                   .password("test")
+                                   .type(KeystoreType.JKS)
+                                   .content(new byte[1])
+                                   .build()
+            )
             .build();
     }
 }

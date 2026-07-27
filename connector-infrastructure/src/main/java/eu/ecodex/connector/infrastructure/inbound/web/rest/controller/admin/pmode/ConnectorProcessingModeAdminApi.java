@@ -64,5 +64,5 @@ public interface ConnectorProcessingModeAdminApi {
         @ApiResponse(responseCode = "200", description = "Pmode found"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorProcessingModeDetailDto getPmode(@PathVariable String uuid);
+    ConnectorProcessingModeDetailDto retrievePmode(@PathVariable String uuid);
 }

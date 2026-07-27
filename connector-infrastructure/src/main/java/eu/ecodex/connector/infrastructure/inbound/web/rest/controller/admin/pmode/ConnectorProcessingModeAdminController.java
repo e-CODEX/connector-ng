@@ -21,6 +21,7 @@ import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.mapper.ConnectorTruststoreEntryMapper;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import java.io.IOException;
 import java.util.List;
@@ -80,7 +81,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     @Override
-    public ConnectorProcessingModeDetailDto getPmode(String uuid) {
+    public ConnectorProcessingModeDetailDto retrievePmode(String uuid) {
         var processingMode = retrieveProcessingModeService.execute(uuid);
         return ConnectorProcessingModeDetailDto.from(processingMode);
     }

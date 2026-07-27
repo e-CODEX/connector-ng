@@ -14,14 +14,10 @@ import eu.ecodex.connector.infrastructure.config.BeanConfig;
 import eu.ecodex.connector.infrastructure.config.DatabaseConfig;
 import eu.ecodex.connector.infrastructure.config.DssConfig;
 import eu.ecodex.connector.infrastructure.config.RepositoryConfig;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@EnableAutoConfiguration
-@SuppressWarnings("checkstyle:MissingJavadocType")
+
 @Import({DssConfig.class, DatabaseConfig.class, RepositoryConfig.class, BeanConfig.class})
 @ComponentScan(
         basePackages = {
@@ -34,5 +30,5 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.infrastructure.outbound.security"
         }
 )
-public class ContainerContextConfiguration {
+public class ContainerContextConfiguration extends SecurityDisabledTestConfiguration {
 }

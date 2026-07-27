@@ -11,17 +11,10 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.infrastructure.config.BeanConfig;
-import eu.ecodex.connector.infrastructure.config.DssConfig;
-import eu.ecodex.connector.infrastructure.config.EvidenceConfig;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@EnableAutoConfiguration
 @Import({BeanConfig.class})
-@SuppressWarnings("checkstyle:MissingJavadocType")
 @ComponentScan(
         basePackages = {
                 "eu.ecodex.connector.domain",
@@ -30,5 +23,5 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.infrastructure.property",
         }
 )
-public class RepositoryContextConfiguration {
+public class RepositoryContextConfiguration extends SecurityDisabledTestConfiguration {
 }

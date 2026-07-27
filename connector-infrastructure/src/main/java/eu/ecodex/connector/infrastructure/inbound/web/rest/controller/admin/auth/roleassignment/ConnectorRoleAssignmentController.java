@@ -1,0 +1,56 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.auth.roleassignment;
+
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRoleAssignment;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RestController;
+
+/**
+ * REST controller for managing connector role assignments.
+ *
+ * <p>This controller provides endpoints to register and delete user-role associations
+ * within the system. It acts as an implementation of the {@link ConnectorRoleAssignmentAdminApi}
+ * interface and utilizes the {@link ConnectorRegisterRoleAssignment} service for performing
+ * the core business logic related to role management.
+ *
+ * <p>Responsibilities:
+ * - Registering of roles assigned to a user in the connector system.
+ * - Deleting of roles previously assigned to a user.
+ *
+ * <p>Each operation delegates the actual persistence-level actions to the
+ * {@link ConnectorRegisterRoleAssignment} service.
+ */
+@Slf4j
+@RestController
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class ConnectorRoleAssignmentController implements ConnectorRoleAssignmentAdminApi {
+
+    ConnectorRegisterRoleAssignment registerRoleAssignment;
+
+    @Override
+    public ConnectorUserDto register(String identifier, String role) {
+        var connectorUser = registerRoleAssignment.register(identifier, role);
+        return ConnectorUserDto.from(connectorUser);
+    }
+
+    @Override
+    public ConnectorUserDto delete(String identifier, String role) {
+        ConnectorUser connectorUser = registerRoleAssignment.remove(identifier, role);
+        return ConnectorUserDto.from(connectorUser);
+    }
+}

@@ -20,7 +20,7 @@ jakarta-xml-ws-api = "4.0.2"
 jaxb-impl = "4.0.6"
 jaxb-xjc = "4.0.9"
 # spring boot
-spring-boot = "4.0.2"
+spring-boot = "4.1.0"
 spring-doc = "3.0.1"
 s3 = "2.41.30"
 # dbms

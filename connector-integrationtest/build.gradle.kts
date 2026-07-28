@@ -96,6 +96,7 @@ tasks.test {
     useJUnitPlatform {
         excludeTags("integration")
     }
+    systemProperty("management.otlp.metrics.export.enabled", "false")
 }
 
 // separate task for integration tests
@@ -114,6 +115,7 @@ tasks.register<Test>("integrationTest") {
 
     maxParallelForks = 1
     systemProperty("junit.jupiter.execution.parallel.enabled", "false")
+    systemProperty("management.otlp.metrics.export.enabled", "false")
 
     // increase memory for integration tests
     maxHeapSize = "2g"

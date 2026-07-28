@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Technical
 
 - **Database** — Support Oracle DBMS.
+- **Transaction Management** — Replaced **Narayana** with **Atomikos** for JTA transaction management.
 
 ## [7.0.0] - 2026-06-30
 

@@ -82,6 +82,9 @@ configurations {
     all {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
     }
+    testRuntimeClasspath {
+        exclude(group = "com.atomikos")
+    }
 }
 
 tasks.named<ProcessResources>("processTestResources") {
@@ -97,6 +100,7 @@ tasks.test {
         excludeTags("integration")
     }
     systemProperty("management.otlp.metrics.export.enabled", "false")
+    systemProperty("spring.jta.enabled", "false")
 }
 
 // separate task for integration tests
@@ -116,6 +120,7 @@ tasks.register<Test>("integrationTest") {
     maxParallelForks = 1
     systemProperty("junit.jupiter.execution.parallel.enabled", "false")
     systemProperty("management.otlp.metrics.export.enabled", "false")
+    systemProperty("spring.jta.enabled", "false")
 
     // increase memory for integration tests
     maxHeapSize = "2g"

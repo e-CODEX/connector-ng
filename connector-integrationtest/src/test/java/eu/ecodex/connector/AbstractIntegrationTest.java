@@ -89,8 +89,7 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
         registry.add(
-                "spring.datasource.agroal.driver-class-name",
-                () -> "com.mysql.cj.jdbc.MysqlXADataSource"
+                "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
         );
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.datasource.url", mysql::getJdbcUrl);

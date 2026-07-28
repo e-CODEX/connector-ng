@@ -1,11 +1,30 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
 package eu.ecodex.connector.domain.model.user;
 
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Represents a data structure for a user in the Connector system.
+ * <p>
+ * This class provides information about the user, such as an identifier, username,
+ * password, email, and roles, and includes metadata such as enabled status, creation
+ * time, and last updated time.
+ * It also encapsulates behavior for content comparison
+ * and builder for creating immutable instances of the class.</li>
+ */
 public record ConnectorUser(
-        Long identifier,
+        String uuid,
         String username,
         String password,
         String email,
@@ -15,8 +34,17 @@ public record ConnectorUser(
         Instant updatedAt
 ) {
 
+    /**
+     * Compares the current {@code ConnectorUser} object with the specified {@code ConnectorUser} object
+     * to determine if they have identical content. The comparison is based on the values of the fields:
+     * {@code uuid}, {@code username}, {@code password}, {@code email}, and {@code enabled}.
+     *
+     * @param connectorUser the {@code ConnectorUser} object to compare with the current instance.
+     * @return {@code true} if all compared fields have the same values in both objects; {@code false} otherwise.
+     */
+    // TODO fix me
     public boolean hasSameContent(ConnectorUser connectorUser) {
-        return Objects.equals(this.identifier, connectorUser.identifier())
+        return Objects.equals(this.uuid, connectorUser.uuid())
                 && Objects.equals(this.username, connectorUser.username())
                 && Objects.equals(this.password, connectorUser.password())
                 && Objects.equals(this.email, connectorUser.email())
@@ -27,9 +55,14 @@ public record ConnectorUser(
         return new Builder();
     }
 
+    /**
+     * Creates a new {@code Builder} instance pre-populated with the current state of the {@code ConnectorUser} object.
+     *
+     * @return a {@code Builder} instance containing the fields of the current {@code ConnectorUser} object.
+     */
     public Builder toBuilder() {
         return new Builder()
-                .identifier(this.identifier)
+                .uuid(this.uuid)
                 .username(this.username)
                 .password(this.password)
                 .email(this.email)
@@ -40,8 +73,15 @@ public record ConnectorUser(
 
     }
 
+    /**
+     * Builder class for constructing instances of {@code ConnectorUser}.
+     * <p>
+     * This builder pattern enables the creation of immutable {@code ConnectorUser}
+     * objects by providing methods to set various fields incrementally and
+     * eventually constructing a fully populated instance.
+     */
     public static class Builder {
-        Long identifier;
+        String uuid;
         String username;
         String password;
         String email;
@@ -54,8 +94,8 @@ public record ConnectorUser(
 
         }
 
-        public Builder identifier(Long identifier) {
-            this.identifier = identifier;
+        public Builder uuid(String uuid) {
+            this.uuid = uuid;
             return this;
         }
 
@@ -95,7 +135,7 @@ public record ConnectorUser(
         }
 
         public ConnectorUser build() {
-            return new ConnectorUser(identifier, username, password, email, enabled, roles, createdAt,
+            return new ConnectorUser(uuid, username, password, email, enabled, roles, createdAt,
                     updatedAt);
         }
     }

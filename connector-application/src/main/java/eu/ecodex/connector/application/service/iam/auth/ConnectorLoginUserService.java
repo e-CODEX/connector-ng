@@ -1,0 +1,78 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.application.service.iam.auth;
+
+import eu.ecodex.connector.application.port.api.iam.auth.ConnectorLoginUser;
+import eu.ecodex.connector.application.port.spi.iam.auth.AuthenticationTokenProvider;
+import eu.ecodex.connector.domain.model.login.LoginResponse;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+/**
+ * Service implementation responsible for handling user login operations within the connector system.
+ * This class provides functionality to authenticate users based on their credentials and generate
+ * an authentication token upon successful login.
+ * <p>
+ * Dependencies:
+ * - {@link AuthenticationManager}: Facilitates the authentication of user credentials.
+ * - {@link AuthenticationTokenProvider}: Responsible for generating authentication tokens.
+ * <p>
+ * Core functionality:
+ * - Verifies user credentials by authenticating through the {@link AuthenticationManager}.
+ * - Retrieves the user details upon successful authentication.
+ * - Generates an authentication token using the {@link AuthenticationTokenProvider}.
+ * - Returns a {@link LoginResponse} containing the token details.
+ * <p>
+ * Exceptions:
+ * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after authentication.
+ * <p>
+ * Annotations:
+ * - {@code @Slf4j}: Enables logging for debugging and monitoring purposes.
+ * - {@code @Service}: Marks this class as a Spring service component.
+ * - {@code @RequiredArgsConstructor}: Generates a constructor for final fields.
+ * - {@code @FieldDefaults}: Ensures fields are private and final by default.
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class ConnectorLoginUserService implements ConnectorLoginUser {
+
+    AuthenticationManager authenticationManager;
+    AuthenticationTokenProvider authenticationTokenProvider;
+
+
+    @Override
+    public LoginResponse login(String username, String password) {
+
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                username,
+                                password
+                        )
+                );
+
+        UserDetails user = (UserDetails) authentication.getPrincipal();
+        if (user == null) {
+            throw new RuntimeException("Error reading principal");
+        }
+        var authToken = authenticationTokenProvider.generateToken(user);
+        return new LoginResponse(authToken, "Bearer", 3600);
+    }
+}

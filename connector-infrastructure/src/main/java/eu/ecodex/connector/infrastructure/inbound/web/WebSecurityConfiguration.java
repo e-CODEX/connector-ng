@@ -72,12 +72,13 @@ public class WebSecurityConfiguration {
                                 "/api/v1/admin/configurations/queues",
                                 "/api/v1/admin/configurations/message-processing",
                                 "/api/v1/admin/jms/queues/stats",
+                                "/api/v1/admin/users/**",
                                 "/api/v1/services",
                                 "/api/v1/processing-modes/{identifier}/services",
                                 "/api/v1/processing-modes/{identifier}/actions",
                                 "/api/v1/processing-modes/{identifier}/parties",
                                 "/api/v1/link-partners",
-                                "/api/v1/users/**",
+                                "/api/v1/auth/login/**",
                                 // SOAP
                                 "/services/backend",
                                 // actuator

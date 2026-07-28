@@ -51,3 +51,6 @@ transaction-logs/
 
 ### docker
 docker/gateway/config/conf/domibus/backups/
+
+# other
+*.lck

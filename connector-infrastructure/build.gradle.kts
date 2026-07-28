@@ -15,7 +15,7 @@ dependencies {
     implementation(project(":connector-soap-api"))
     implementation(project(":connector-application"))
     // apache
-    // apache cxf
+    // Apache CXF
     implementation(platform(libs.apache.cxf.bom))
     implementation("org.apache.cxf:cxf-spring-boot-starter-jaxws")
     implementation("org.apache.cxf:cxf-rt-frontend-jaxws")
@@ -32,9 +32,9 @@ dependencies {
     // apache common
     implementation(libs.apache.commons.lang3)
     implementation(libs.apache.commons.io)
-    // apache tika
+    // Apache Tika
     implementation(libs.apache.tika)
-    // apache poi
+    // Apache POI
     implementation(libs.apache.poi)
     // dss tool
     implementation(platform(libs.dss.tool))
@@ -78,9 +78,7 @@ dependencies {
     // activemq
     implementation("org.apache.activemq:activemq-client")
     // jta
-    implementation(libs.narayana)
-    implementation(libs.agroal)
-    implementation(libs.messaginghub)
+    runtimeOnly(libs.atomikos)
     // doc
     implementation(libs.spring.doc)
     // other
@@ -107,6 +105,9 @@ dependencies {
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)
     mockitoAgent(libs.mockito.core) { isTransitive = false }
+}
+configurations.testRuntimeClasspath {
+    exclude(group = "com.atomikos")
 }
 
 val evidenceJaxbOutputDir = layout.buildDirectory.dir("generated/jaxb")

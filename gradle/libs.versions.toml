@@ -30,9 +30,7 @@ mariadb = "3.5.9"
 postgresql = "42.7.11"
 oracle = "23.26.2.0.0"
 # jta
-narayana = "4.0.0"
-agroal = "3.0"
-messaginghub = "3.2.2"
+atomikos = "6.0.1"
 # other
 dss-tool = "6.1"
 itextpdf = "9.5.0"
@@ -81,10 +79,8 @@ mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mariadb" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 oracle = { module = "com.oracle.database.jdbc:ojdbc11", version.ref = "oracle" }
-# narayana
-narayana = { module = "dev.snowdrop:narayana-spring-boot-starter", version.ref = "narayana" }
-agroal = { module = "io.agroal:agroal-spring-boot-starter", version.ref = "agroal" }
-messaginghub = { module = "org.messaginghub:pooled-jms", version.ref = "messaginghub" }
+# jta
+atomikos = { module = "com.atomikos:transactions-spring-boot4-starter", version.ref = "atomikos" }
 # other
 dss-tool = { module = "eu.europa.ec.joinup.sd-dss:dss-bom", version.ref = "dss-tool" }
 itextpdf = { module = "com.itextpdf:itext7-core", version.ref = "itextpdf" }

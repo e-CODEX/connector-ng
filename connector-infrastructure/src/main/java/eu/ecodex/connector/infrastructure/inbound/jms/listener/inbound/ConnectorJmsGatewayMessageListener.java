@@ -267,8 +267,7 @@ public class ConnectorJmsGatewayMessageListener {
                     "Missing description for payload at index %d".formatted(i)
                 );
             }
-
-            if (MESSAGE_CONTENT_DESCRIPTION.equals(description)) {
+            if (MESSAGE_CONTENT_DESCRIPTION.equalsIgnoreCase(description)) {
                 var content = saveAndUploadAttachment(
                     resolvedName,
                     CONTENT_TYPE_XML,
@@ -281,7 +280,7 @@ public class ConnectorJmsGatewayMessageListener {
                                                                  .xmlContent(content)
                                                                  .businessDocument(null)
                                                                  .build();
-            } else if (ASICS_DESCRIPTION.equals(description)) {
+            } else if (ASICS_DESCRIPTION.equalsIgnoreCase(description)) {
                 attachments.add(saveAndUploadAttachment(
                     resolvedName,
                     CONTENT_TYPE_ASICS,
@@ -289,7 +288,7 @@ public class ConnectorJmsGatewayMessageListener {
                     ConnectorAttachmentType.ASICS,
                     payload
                 ));
-            } else if (XML_TOKEN_DESCRIPTION.equals(description)) {
+            } else if (XML_TOKEN_DESCRIPTION.equalsIgnoreCase(description)) {
                 attachments.add(saveAndUploadAttachment(
                     resolvedName,
                     CONTENT_TYPE_XML,
@@ -298,12 +297,11 @@ public class ConnectorJmsGatewayMessageListener {
                     payload
                 ));
             } else if (EVIDENCE_TYPE_NAMES.contains(description.toUpperCase(Locale.ROOT))) {
-                evidences.add(
-                    ConnectorMessageEvidence.builder()
-                                            .type(ConnectorEvidenceType.valueOf(
-                                                description.toUpperCase(Locale.ROOT)))
-                                            .content(payload)
-                                            .build());
+                evidences.add(ConnectorMessageEvidence.builder()
+                                                      .type(ConnectorEvidenceType.valueOf(
+                                                          description.toUpperCase(Locale.ROOT)))
+                                                      .content(payload)
+                                                      .build());
             } else {
                 log.warn(
                     "Unrecognised payload description '{}' at index {} — skipping",

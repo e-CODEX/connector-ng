@@ -250,8 +250,7 @@ public class ConnectorJmsGatewayLinkPublisher implements ConnectorEventPublisher
         var prefix = "payload_" + index;
         mapMessage.setStringProperty(prefix + "_mimeContentId", generateCID());
         mapMessage.setStringProperty(prefix + "_mimeType", mimeType);
-        mapMessage.setStringProperty(
-            prefix + "_description", description.toUpperCase(Locale.ROOT));
+        mapMessage.setStringProperty(prefix + "_description", description);
         mapMessage.setStringProperty(prefix + "_name", name);
         mapMessage.setStringProperty(prefix + "_fileName", name);
         mapMessage.setBytes(prefix, data);

@@ -2,18 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.0.1] - 0000-00-00
+## [7.0.1-SNAPSHOT] - 0000-00-00
 
 ### Release Notes
 
 #### Added
 
--**Delivery Evidence** — Support automatic `delivery evidence` submission.
+- **Delivery Evidence** — Support automatic `delivery evidence` submission.
+- **Statistics** — Added statistics for the connector messages. Supported formats: `csv`, `json`, `xlsx`.
+- **Search** — Filter messages by `business domain`.
 
 ### Technical
 
 - **Database** — Support Oracle DBMS.
 - **Transaction Management** — Replaced **Narayana** with **Atomikos** for JTA transaction management.
+- **Spring Boot** — Bump to Spring Boot 4.1.0
+- **Open Telemetry** — Support for Open Telemetry.
 
 ## [7.0.0] - 2026-06-30
 

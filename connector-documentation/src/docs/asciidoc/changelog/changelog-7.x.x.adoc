@@ -2,10 +2,27 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-= 7.0.0
+= Changelog
 
-== Release Notes
-=== Added
+== 7.0.1-SNAPSHOT
+
+=== Release Notes
+==== Added
+* *Delivery Evidence* -- Support automatic `delivery evidence` submission.
+* *Statistics* -- Added statistics for the connector messages. Supported formats: `csv`, `json`, `xlsx`.
+* *Search* -- Filter messages by `business domain`.
+
+==== Technical
+
+* *Database* – Support Oracle DBMS.
+* *Transaction Management* – Replaced *Narayana* with *Atomikos* for JTA transaction management.
+* *Spring Boot* – Bump to Spring Boot 4.1.0.
+* *Open Telemetry* – Support for Open Telemetry.
+
+== 7.0.0
+
+=== Release Notes
+==== Added
 * *Business message sending* -- Added support for sending business messages.
 * *Reception acknowledgment* -- Added support for backend confirmation of business message reception.
 * *ASiC-S container compatibility* -- Generated ASiC-S containers remain fully backward-compatible with the existing connector.
@@ -14,7 +31,7 @@ endif::header[]
 * *REST/JMS backend integration* -- Laid the foundation for future REST and JMS backend integration.
 
 
-=== Technical
+==== Technical
 
 * *Docker-friendly deployment* – The new connector is designed to run smoothly in containerized environments.
 * *Shared JMS broker* – The connector now shares the same JMS broker as the gateway.

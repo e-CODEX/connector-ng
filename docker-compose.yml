@@ -163,7 +163,7 @@ services:
     connector-ng-oracle-db:
         image: gvenzl/oracle-free:23-slim
         container_name: connector-oracle
-        profiles: [ "oracle" ]
+        # profiles: [ "oracle" ]
         environment:
             ORACLE_PASSWORD: oracle
             APP_USER: connector

@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - **Statistics** — Added statistics for the connector messages. Supported formats: `csv`, `json`, `xlsx`.
 - **Search** — Filter messages by `business domain`.
 
+#### Fixes
+- **Ebms** Set the correct message description for `ebms:description` for outbound messages.
+
 ### Technical
 
 - **Database** — Support Oracle DBMS.

@@ -25,9 +25,9 @@ import eu.ecodex.connector.infrastructure.outbound.evidence.spocseu.model.EDeliv
 import eu.ecodex.connector.infrastructure.outbound.evidence.util.RemEvidenceUnmarshaller;
 import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.spi.DSSUtils;
 import jakarta.xml.bind.JAXBException;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -292,10 +292,9 @@ public class ConnectorRemEvidenceBuilder implements ConnectorEvidenceBuilder {
                 signature.getDigestAlgorithm(),
                 signingTokenProvider
             );
-            try (var stream = signedDocument.openStream()) {
-                return stream.readAllBytes();
-            }
-        } catch (IOException e) {
+
+            return DSSUtils.toByteArray(signedDocument.openStream());
+        } catch (Exception e) {
             log.error("Failed to read signed REM evidence document bytes", e);
             throw new ConnectorEvidenceBuilderException("Signing REM evidence failed", e);
         }

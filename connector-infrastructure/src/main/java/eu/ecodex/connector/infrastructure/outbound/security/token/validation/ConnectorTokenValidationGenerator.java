@@ -35,6 +35,7 @@ import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.DSSException;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.model.x509.CertificateToken;
+import eu.europa.esig.dss.spi.DSSUtils;
 import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.CertificateValidity;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
@@ -363,8 +364,9 @@ public class ConnectorTokenValidationGenerator {
             return null; // certificate extraction only applies to embedded signatures
         }
 
-        try (var inputStream = businessDocument.openStream()) {
-            var document = new InMemoryDocument(inputStream.readAllBytes());
+        try {
+            var document = new InMemoryDocument(
+                DSSUtils.toByteArray(businessDocument.openStream()));
             SignedDocumentValidator validator;
 
             try {

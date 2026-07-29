@@ -11,18 +11,14 @@
 package eu.ecodex.connector.infrastructure.outbound.soap;
 
 import eu.ecodex.connector.infrastructure.outbound.soap.exception.ConnectorWsPolicyLoaderException;
+import eu.ecodex.connector.infrastructure.util.ResourceStreams;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import javax.xml.stream.XMLStreamException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.cxf.ws.policy.WSPolicyFeature;
-import org.springframework.core.io.ClassPathResource;
 
 /**
  * The WsPolicyLoader class is responsible for loading WS-Policy definitions from a specified path
@@ -30,8 +26,6 @@ import org.springframework.core.io.ClassPathResource;
  */
 @Slf4j
 public class ConnectorWsPolicyLoader {
-    private static final String CLASSPATH_PREFIX = "classpath:";
-
     private final String wsPolicyPath;
 
     public ConnectorWsPolicyLoader(String wsPolicyPath) {
@@ -52,7 +46,7 @@ public class ConnectorWsPolicyLoader {
     public WSPolicyFeature loadPolicyFeature() {
         log.debug("Loading WS policy from path: {}", wsPolicyPath);
 
-        try (var is = openPolicyStream(wsPolicyPath)) {
+        try (var is = ResourceStreams.openStream(wsPolicyPath)) {
             var element = StaxUtils.read(is).getDocumentElement();
 
             if (element == null) {
@@ -75,29 +69,6 @@ public class ConnectorWsPolicyLoader {
                 "Cannot parse WS policy '" + wsPolicyPath + "'",
                 e
             );
-        }
-    }
-
-    private InputStream openPolicyStream(String path) throws IOException {
-        if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("Policy path must not be blank");
-        }
-
-        if (path.startsWith(CLASSPATH_PREFIX)) {
-            var resourcePath = path.substring(CLASSPATH_PREFIX.length());
-            var resource = new ClassPathResource(resourcePath);
-
-            if (!resource.exists()) {
-                throw new IOException("Classpath policy not found: " + path);
-            }
-
-            return resource.getInputStream();
-        }
-
-        try {
-            return URI.create(path).toURL().openStream();
-        } catch (Exception e) {
-            return Files.newInputStream(Path.of(path));
         }
     }
 }

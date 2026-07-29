@@ -11,15 +11,11 @@
 package eu.ecodex.connector.infrastructure.dss;
 
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
+import eu.ecodex.connector.infrastructure.util.ResourceStreams;
 import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 /**
@@ -35,8 +31,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ConnectorDssCertificateSourceLoader {
-    private static final String CLASSPATH_PREFIX = "classpath:";
-
     /**
      * Creates a {@link KeyStoreCertificateSource} from the given keystore configuration.
      *
@@ -47,7 +41,7 @@ public class ConnectorDssCertificateSourceLoader {
      * @throws IllegalStateException if the keystore cannot be loaded
      */
     public KeyStoreCertificateSource createCertificateSource(KeystoreProperties keystore) {
-        try (var keystoreStream = openKeystoreStream(keystore.getPath())) {
+        try (var keystoreStream = ResourceStreams.openStream(keystore.getPath())) {
             return new KeyStoreCertificateSource(
                 keystoreStream,
                 keystore.getType().name(),
@@ -74,28 +68,5 @@ public class ConnectorDssCertificateSourceLoader {
         trustedCertSource.importAsTrusted(createCertificateSource(keystore));
 
         return trustedCertSource;
-    }
-
-    private InputStream openKeystoreStream(String path) throws IOException {
-        if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("Keystore path must not be blank");
-        }
-
-        if (path.startsWith(CLASSPATH_PREFIX)) {
-            var resourcePath = path.substring(CLASSPATH_PREFIX.length());
-            var resource = new ClassPathResource(resourcePath);
-
-            if (!resource.exists()) {
-                throw new IOException("Classpath keystore not found: " + path);
-            }
-
-            return resource.getInputStream();
-        }
-
-        try {
-            return URI.create(path).toURL().openStream();
-        } catch (Exception e) {
-            return Files.newInputStream(Path.of(path));
-        }
     }
 }

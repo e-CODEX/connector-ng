@@ -144,6 +144,11 @@ public class ConnectorAsicContainerBuilder {
 
     private ConnectorContainerBusinessContent toContainerBusinessContent(
         @NonNull ConnectorMessage message) {
+        if (message.identifier() == null) {
+            throw new ConnectorContainerException("Message identifier is null: %s"
+                                                      .formatted(message));
+        }
+
         var businessContent = message.businessContent();
 
         if (businessContent == null) {
@@ -194,8 +199,6 @@ public class ConnectorAsicContainerBuilder {
         }
 
         containerBusinessContent.setDocument(dssBusinessDocument);
-
-        assert message.identifier() != null;
 
         var attachments = this.attachmentRepository.findByMessageIdentifierAndTypes(
             message.identifier(),
@@ -288,6 +291,7 @@ public class ConnectorAsicContainerBuilder {
         throws IOException {
         zip.putNextEntry(new ZipEntry(name));
         zip.write(DSSUtils.toByteArray(document.openStream()));
+        zip.closeEntry();
     }
 
     private String resolveDocumentName(DSSDocument document, String fallback) {

@@ -23,12 +23,15 @@ import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeTyp
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainer;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainerBusinessContent;
+import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorToken;
 import eu.ecodex.connector.infrastructure.outbound.security.util.DSSDocumentUtil;
 import eu.ecodex.connector.infrastructure.outbound.security.util.XMLStreamUtil;
 import eu.ecodex.connector.infrastructure.outbound.security.util.ZipStreamUtil;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.spi.DSSUtils;
 import jakarta.xml.bind.JAXBException;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -36,6 +39,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -111,15 +115,22 @@ public class ConnectorAsicContainerValidator {
             .orElseThrow(() -> new IllegalArgumentException(
                 "Message must have an XML trust OK token attachment"));
 
+        final ConnectorContainer container;
+
         try {
             var asicsBytes = fileStorageProvider.findByIdentifier(asicAttachment.identifier());
             var xmlTokenBytes = fileStorageProvider.findByIdentifier(
                 xmlTokenAttachment.identifier());
-            var container = buildContainer(asicsBytes, xmlTokenBytes);
-            persistAsicsContent(container, message);
+            container = buildContainer(asicsBytes, xmlTokenBytes);
         } catch (IOException | JAXBException e) {
+            throw new ConnectorContainerException("Failed to load or parse ASiC-S container", e);
+        }
+
+        try {
+            persistAsicsContent(container, message);
+        } catch (IOException e) {
             // TODO: remove ASIC-S from S3 bucket on failure
-            throw new ConnectorContainerException("I/O error loading ASIC-S attachment", e);
+            throw new ConnectorContainerException("Failed to persist ASiC-S container content", e);
         }
     }
 
@@ -151,7 +162,12 @@ public class ConnectorAsicContainerValidator {
             throw new ConnectorContainerException("XML trust OK token is not an XML file");
         }
 
-        var token = XMLStreamUtil.decodeXMLStream(xmlTokenDocument.openStream());
+        ConnectorToken token;
+
+        try (var xmlIn = xmlTokenDocument.openStream()) {
+            token = XMLStreamUtil.decodeXMLStream(xmlIn);
+        }
+
         var businessDocumentName = token.getDocument().getFilename();
         var detachedSignatureName = token.getDocument().getSignatureFilename();
 
@@ -171,6 +187,11 @@ public class ConnectorAsicContainerValidator {
                 businessDocumentName,
                 detachedSignatureName
             );
+        }
+
+        if (pdfTrustOKToken == null) {
+            throw new ConnectorContainerException(
+                "ASiC-S signed content does not contain a PDF trust OK token");
         }
 
         return new ConnectorContainer(
@@ -223,10 +244,17 @@ public class ConnectorAsicContainerValidator {
 
     private void persistAsicsContent(ConnectorContainer container, ConnectorMessage message)
         throws IOException {
+        persistPdfTrustToken(container, message);
+        persistBusinessContent(container, message);
+        persistAdditionalAttachments(container, message);
+    }
+
+    private void persistPdfTrustToken(ConnectorContainer container, ConnectorMessage message)
+        throws IOException {
         persistAttachment(
             newAttachmentMetadata(
                 ConnectorContainerFileDefinitions.TOKEN_PDF.name(),
-                "application/pdf",
+                MediaType.APPLICATION_PDF_VALUE,
                 "PDF Trust OK Token",
                 ConnectorAttachmentType.PDF_TOKEN,
                 documentSize(container.tokenPDF())
@@ -234,64 +262,84 @@ public class ConnectorAsicContainerValidator {
             container.tokenPDF().openStream(),
             message.identifier()
         );
+    }
 
+    private void persistBusinessContent(ConnectorContainer container, ConnectorMessage message)
+        throws IOException {
         var businessDssDocument = container.businessContent().getDocument();
-        if (businessDssDocument != null) {
-            var businessDocumentAttachment = newAttachmentMetadata(
-                container.token().getDocument().getFilename(),
-                businessDssDocument.getMimeType().getMimeTypeString(),
-                "Business document",
-                ConnectorAttachmentType.BUSINESS_DOCUMENT,
-                documentSize(businessDssDocument)
-            );
-            persistAttachment(
-                businessDocumentAttachment,
-                businessDssDocument.openStream(),
-                message.identifier()
-            );
-
-            var businessDocument = ConnectorMessageBusinessDocument.builder()
-                                                                   .attachment(
-                                                                       businessDocumentAttachment);
-
-            var detachedDssSignature = container.businessContent().getDetachedSignature();
-            DetachedSignature detachedSignature;
-            if (detachedDssSignature != null) {
-                var detachedSignatureMimeType = detachedDssSignature.getMimeType() == null
-                    ? null
-                    : detachedDssSignature.getMimeType().getMimeTypeString();
-                persistAttachment(
-                    newAttachmentMetadata(
-                        detachedDssSignature.getName(),
-                        DetachedSignatureMimeType.fromMimeType(detachedSignatureMimeType)
-                                                 .getMimeType(),
-                        "Detached signature",
-                        ConnectorAttachmentType.DETACHED_SIGNATURE,
-                        documentSize(detachedDssSignature)
-                    ),
-                    detachedDssSignature.openStream(),
-                    message.identifier()
-                );
-                detachedSignature = DetachedSignature
-                    .builder()
-                    .signature(detachedDssSignature.openStream().readAllBytes())
-                    .name(detachedDssSignature.getName())
-                    .mimeType(DetachedSignatureMimeType.fromMimeType(detachedSignatureMimeType))
-                    .build();
-                businessDocument.detachedSignature(detachedSignature);
-            }
-
-            this.businessContentRepository.assignBusinessDocument(
-                message.businessContent().uuid(),
-                businessDocument.build()
-            );
+        if (businessDssDocument == null) {
+            return;
         }
 
+        var businessDocumentAttachment = newAttachmentMetadata(
+            container.token().getDocument().getFilename(),
+            mimeTypeString(businessDssDocument),
+            "Business document",
+            ConnectorAttachmentType.BUSINESS_DOCUMENT,
+            documentSize(businessDssDocument)
+        );
+        persistAttachment(
+            businessDocumentAttachment,
+            businessDssDocument.openStream(),
+            message.identifier()
+        );
+
+        var businessDocument = ConnectorMessageBusinessDocument
+            .builder()
+            .attachment(businessDocumentAttachment);
+
+        var detachedSignature =
+            persistDetachedSignature(container.businessContent().getDetachedSignature(), message);
+        if (detachedSignature != null) {
+            businessDocument.detachedSignature(detachedSignature);
+        }
+
+        this.businessContentRepository.assignBusinessDocument(
+            message.businessContent().uuid(),
+            businessDocument.build()
+        );
+    }
+
+    private DetachedSignature persistDetachedSignature(
+        DSSDocument detachedDssSignature,
+        ConnectorMessage message)
+        throws IOException {
+        if (detachedDssSignature == null) {
+            return null;
+        }
+
+        var mimeType = DetachedSignatureMimeType.fromMimeType(mimeTypeString(detachedDssSignature));
+
+        byte[] signatureBytes = DSSUtils.toByteArray(detachedDssSignature.openStream());
+
+        persistAttachment(
+            newAttachmentMetadata(
+                detachedDssSignature.getName(),
+                mimeType.getMimeType(),
+                "Detached signature",
+                ConnectorAttachmentType.DETACHED_SIGNATURE,
+                signatureBytes.length
+            ),
+            new ByteArrayInputStream(signatureBytes),
+            message.identifier()
+        );
+
+        return DetachedSignature.builder()
+                                .signature(signatureBytes)
+                                .name(detachedDssSignature.getName())
+                                .mimeType(mimeType)
+                                .build();
+    }
+
+    private void persistAdditionalAttachments(
+        ConnectorContainer container,
+        ConnectorMessage message)
+        throws IOException {
         for (var attachment : container.businessContent().getAttachments()) {
             persistAttachment(
                 newAttachmentMetadata(
                     attachment.getName(),
-                    attachment.getMimeType().getMimeTypeString(),
+                    mimeTypeString(attachment),
                     "Attachment",
                     ConnectorAttachmentType.ATTACHMENT,
                     documentSize(attachment)
@@ -329,7 +377,13 @@ public class ConnectorAsicContainerValidator {
         InputStream inputStream,
         String messageIdentifier) throws IOException {
         // TODO: use a streaming save for large files rather than readAllBytes()
-        fileStorageProvider.save(attachment, inputStream.readAllBytes());
+        byte[] content;
+
+        try (inputStream) {
+            content = inputStream.readAllBytes();
+        }
+
+        fileStorageProvider.save(attachment, content);
         attachmentRepository.save(attachment);
         attachmentRepository.attachToMessage(attachment.identifier(), messageIdentifier);
     }
@@ -346,5 +400,10 @@ public class ConnectorAsicContainerValidator {
         }
         // TODO: adapt to large-file support using an appropriate DSSDocument implementation
         return inMemory.getBytes().length;
+    }
+
+    private String mimeTypeString(DSSDocument document) {
+        var mimeType = document.getMimeType();
+        return mimeType == null ? null : mimeType.getMimeTypeString();
     }
 }

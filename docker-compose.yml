@@ -76,7 +76,7 @@ services:
             - gateway-mysql-data:/var/lib/mysql
     gateway:
         container_name: gateway
-        image: gateway:5.1.9
+        image: scm.ecodex.eu/docker/gateway:edge
         environment:
             DOMIBUS_DATABASE_SERVERNAME: gateway-db
             DOMIBUS_DATABASE_PORT: 3307

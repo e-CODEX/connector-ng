@@ -12,20 +12,17 @@ package eu.ecodex.connector.infrastructure.dss;
 
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
+import eu.ecodex.connector.infrastructure.util.ResourceStreams;
 import eu.europa.esig.dss.token.AbstractKeyStoreTokenConnection;
 import eu.europa.esig.dss.token.DSSPrivateKeyEntry;
 import eu.europa.esig.dss.token.JKSSignatureToken;
 import eu.europa.esig.dss.token.Pkcs12SignatureToken;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.KeyStore;
+import java.util.Objects;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StringUtils;
 
 /**
@@ -48,11 +45,9 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Getter
 public class ConnectorDssSigningTokenProvider implements Closeable {
-    private static final String CLASSPATH_PREFIX = "classpath:";
-
-    protected final KeystoreProperties keystore;
-    protected final PrivateKeyProperties privateKey;
-    protected final AbstractKeyStoreTokenConnection signingToken;
+    private final KeystoreProperties keystore;
+    private final PrivateKeyProperties privateKey;
+    private final AbstractKeyStoreTokenConnection signingToken;
 
     /**
      * Constructs a new instance of the {@code ConnectorDssSigningTokenProvider} class.
@@ -65,30 +60,38 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
     public ConnectorDssSigningTokenProvider(
         KeystoreProperties keystore,
         PrivateKeyProperties privateKey) {
-        this.keystore = keystore;
-        this.signingToken = initSigningToken(keystore);
-        this.privateKey = privateKey;
-    }
+        this.keystore = Objects.requireNonNull(keystore, "Keystore properties must not be null");
+        this.privateKey =
+            Objects.requireNonNull(privateKey, "Private key properties must not be null");
 
-    private AbstractKeyStoreTokenConnection initSigningToken(KeystoreProperties keystore) {
-        var path = keystore.getPath();
-
-        if (!StringUtils.hasText(path)) {
+        if (!StringUtils.hasText(keystore.getPath())) {
             throw new IllegalStateException("Signing keystore path must not be blank");
         }
 
-        log.debug("Loading signing keystore from: {}", keystore.getPath());
+        if (keystore.getPassword() == null) {
+            throw new IllegalStateException("Signing keystore password must not be null");
+        }
 
-        var protection = new KeyStore.PasswordProtection(
-            keystore.getPassword().toCharArray()
-        );
+        if (!StringUtils.hasText(privateKey.getAlias())) {
+            throw new IllegalStateException("Signing key alias must not be blank");
+        }
 
-        var token = switch (keystore.getType()) {
-            case PKCS12 -> loadPkcs12(keystore, protection);
-            case JKS -> loadJks(keystore, protection);
+        this.signingToken = initSigningToken(keystore);
+    }
+
+    private AbstractKeyStoreTokenConnection initSigningToken(KeystoreProperties properties) {
+        var path = properties.getPath();
+        log.debug("Loading signing keystore from: {}", path);
+
+        var protection = new KeyStore.PasswordProtection(properties.getPassword().toCharArray());
+        var token = switch (properties.getType()) {
+            case PKCS12 -> loadPkcs12(path, protection);
+            case JKS -> loadJks(path, protection);
         };
 
-        log.debug("Signing token loaded — {} key(s) available", token.getKeys().size());
+        if (log.isDebugEnabled()) {
+            log.debug("Signing token loaded — {} key(s) available", token.getKeys().size());
+        }
 
         return token;
     }
@@ -97,72 +100,37 @@ public class ConnectorDssSigningTokenProvider implements Closeable {
      * Retrieves the configured signing key using the alias defined in properties.
      *
      * @return the {@link DSSPrivateKeyEntry} associated with the configured alias
+     *
+     * @throws IllegalStateException if no key exists for the configured alias
      */
     public DSSPrivateKeyEntry getSigningKey() {
-        if (privateKey == null) {
-            throw new IllegalArgumentException("Missing private key configuration");
-        }
-
         var alias = privateKey.getAlias();
         var key = signingToken.getKey(alias);
-
         if (key == null) {
-            throw new IllegalArgumentException(
-                "No signing key found for alias [" + alias + "] in keystore"
-            );
+            throw new IllegalStateException(
+                "No signing key found for alias [" + alias + "] in keystore");
         }
-
         return key;
     }
 
-    private Pkcs12SignatureToken loadPkcs12(
-        KeystoreProperties properties,
-        KeyStore.PasswordProtection protection) {
-        try {
-            return new Pkcs12SignatureToken(resolveStream(properties.getPath()), protection);
+    private Pkcs12SignatureToken loadPkcs12(String path, KeyStore.PasswordProtection protection) {
+        try (var is = ResourceStreams.openStream(path)) {
+            return new Pkcs12SignatureToken(is, protection);
         } catch (IOException e) {
-            throw new IllegalStateException(
-                "Failed to load PKCS12 keystore: " + properties.getPath(), e
-            );
+            throw new IllegalStateException("Failed to load PKCS12 keystore: " + path, e);
         }
     }
 
-    private JKSSignatureToken loadJks(
-        KeystoreProperties properties,
-        KeyStore.PasswordProtection protection) {
-        try {
-            return new JKSSignatureToken(resolveStream(properties.getPath()), protection);
+    private JKSSignatureToken loadJks(String path, KeyStore.PasswordProtection protection) {
+        try (var is = ResourceStreams.openStream(path)) {
+            return new JKSSignatureToken(is, protection);
         } catch (IOException e) {
-            throw new IllegalStateException(
-                "Failed to load JKS keystore: " + properties.getPath(), e);
-        }
-    }
-
-    private InputStream resolveStream(String path) throws IOException {
-        if (path == null || path.isBlank()) {
-            throw new IllegalArgumentException("Keystore path must not be blank");
-        }
-
-        if (path.startsWith(CLASSPATH_PREFIX)) {
-            var resourcePath = path.substring(CLASSPATH_PREFIX.length());
-            var resource = new ClassPathResource(resourcePath);
-
-            if (!resource.exists()) {
-                throw new IllegalStateException("Classpath resource not found: " + resource);
-            }
-
-            return resource.getInputStream();
-        }
-
-        try {
-            return URI.create(path).toURL().openStream();
-        } catch (Exception e) {
-            return Files.newInputStream(Path.of(path));
+            throw new IllegalStateException("Failed to load JKS keystore: " + path, e);
         }
     }
 
     @Override
     public void close() {
-        this.signingToken.close();
+        signingToken.close();
     }
 }

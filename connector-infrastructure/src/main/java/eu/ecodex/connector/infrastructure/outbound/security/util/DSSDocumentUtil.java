@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.security.util;
 
 import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.spi.DSSUtils;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -36,9 +37,7 @@ public class DSSDocumentUtil {
             throw new IllegalArgumentException("document must not be null");
         }
 
-        try (var in = document.openStream()) {
-            return in.readAllBytes();
-        }
+        return DSSUtils.toByteArray(document.openStream());
     }
 
     /**

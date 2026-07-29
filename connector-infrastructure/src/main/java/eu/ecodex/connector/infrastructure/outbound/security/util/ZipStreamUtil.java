@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.security.util;
 
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import eu.europa.esig.dss.spi.DSSUtils;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
@@ -80,8 +81,9 @@ public class ZipStreamUtil {
                     throw new IllegalArgumentException(
                         "ZIP document contains an entry with an empty name");
                 }
-                documents.add(new InMemoryDocument(
-                    zipStream.readAllBytes(), entry.getName()));
+                documents.add(
+                    new InMemoryDocument(DSSUtils.toByteArray(zipStream), entry.getName())
+                );
             }
         } catch (ZipException e) {
             throw new IllegalArgumentException(

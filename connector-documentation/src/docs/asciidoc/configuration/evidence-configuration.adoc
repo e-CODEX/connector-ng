@@ -58,7 +58,7 @@ connector.evidences.signature.keystore.password=12345
 connector.evidences.signature.keystore.type=JKS
 connector.evidences.signature.private-key.alias=connector_blue
 connector.evidences.signature.private-key.password=12345
-connector.evidences.signature.payload-digest-algorithm=SHA256
+connector.evidences.signature.digest-algorithm=SHA256
 ----
 
 == Issuer configuration

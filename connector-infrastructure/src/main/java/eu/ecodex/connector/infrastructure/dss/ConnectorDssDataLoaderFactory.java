@@ -84,7 +84,7 @@ public class ConnectorDssDataLoaderFactory {
         var loader = new FileCacheDataLoader();
         loader.setFileCacheDirectory(this.cacheDir);
         loader.setCacheExpirationTime(
-            dssProperties.getCache().getExpirationMs().toMillis()
+            dssProperties.getCache().getExpiration().toMillis()
         );
         loader.setDataLoader(new IgnoreDataLoader());
 

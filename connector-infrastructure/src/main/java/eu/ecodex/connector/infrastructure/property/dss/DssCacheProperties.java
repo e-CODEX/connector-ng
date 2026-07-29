@@ -26,6 +26,6 @@ public class DssCacheProperties {
     private static final String LOCATION = System.getProperty("java.io.tmpdir") + "/dss-cache";
     @NotBlank
     private Resource location = new FileSystemResource(LOCATION);
-    private Duration expirationMs = Duration.ofDays(1);
+    private Duration expiration = Duration.ofDays(1);
     private String refreshCron = "0 0 */6 * * *";
 }

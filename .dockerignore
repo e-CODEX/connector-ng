@@ -1,0 +1,44 @@
+# Gradle
+.gradle/
+build/
+**/build/
+gradle-wrapper.jar
+gradlew
+gradlew.bat
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Test directories
+**/src/test/
+**/src/testFixtures/
+**/src/integrationTest/
+testdata/
+
+# CI/CD
+.github/
+qodana.yaml
+
+# Logs
+*.log
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+
+# Other
+*.lck

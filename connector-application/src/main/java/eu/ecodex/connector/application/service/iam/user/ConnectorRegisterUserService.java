@@ -16,8 +16,6 @@ import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.iam.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.spi.iam.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -69,6 +67,7 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
         userBuilder.password(user.password());
         userBuilder.email(user.email());
         userBuilder.enabled(user.enabled());
+        userBuilder.roles(user.roles());
 
         return repository.save(userBuilder.build());
     }
@@ -94,6 +93,9 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
             userBuilder.enabled(user.enabled());
         }
 
+        if (user.roles() != null) {
+            userBuilder.roles(user.roles());
+        }
         return repository.save(userBuilder.build());
     }
 
@@ -102,7 +104,7 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
             throw new ConnectorUserBadRequestException("Connector user id should not be blank");
         }
 
-        var existingUser = repository.findByUuId(identifier)
+        var existingUser = repository.findByUuid(identifier)
                 .orElseThrow(() -> new ConnectorUserNotFoundException(
                         "No existing user found with id " + identifier));
 
@@ -119,16 +121,25 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
      * an exception is thrown to indicate that the username is already taken.
      *
      * @param identifier the unique identifier of the user being checked; used to verify if the username belongs
-     *           to the same existing user or a different one
-     * @param user the ConnectorUser object containing the username to be validated
+     *                   to the same existing user or a different one
+     * @param user       the ConnectorUser object containing the username to be validated
      * @throws ConnectorUserAlreadyExistsException if a user with the same username exists, and
      *                                             their UUID is different from the provided ID
      */
 
     private void checkUsername(String identifier, ConnectorUser user) {
-        var existingUser = repository.findByUsername(user.username());
+        boolean exists;
 
-        if (existingUser.isPresent() && !Objects.equals(existingUser.get().uuid(), identifier)) {
+        if (identifier == null) {
+            exists = repository.existsByUsername(user.email());
+        } else {
+            exists = repository.existsByUsernameAndUuidNot(
+                    user.username(),
+                    identifier
+            );
+        }
+
+        if (exists) {
             throw new ConnectorUserAlreadyExistsException(
                     "Username '%s' already exists".formatted(user.username())
             );
@@ -141,20 +152,29 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
      * to indicate that the email is already taken.
      *
      * @param identifier the unique identifier of the user being checked; used to verify if the email belongs to
-     *           the same existing user or a different one
-     * @param user the ConnectorUser object containing the email to be validated
+     *                   the same existing user or a different one
+     * @param user       the ConnectorUser object containing the email to be validated
      * @throws ConnectorUserAlreadyExistsException if a user with the same email exists,
      *                                             and their UUID is different from the provided ID
      */
     private void checkEmail(String identifier, ConnectorUser user) {
-        if (user.email() != null) {
-            var existingUser = repository.findByEmail(user.email());
+        if (user.email() == null) {
+            return;
+        }
+        boolean exists;
 
-            if (existingUser.isPresent() && !Objects.equals(existingUser.get().uuid(), identifier)) {
-                throw new ConnectorUserAlreadyExistsException(
-                        "User email '%s' already exists".formatted(user.email())
-                );
-            }
+        if (identifier == null) {
+            exists = repository.existsByEmail(user.email());
+        } else {
+            exists = repository.existsByEmailAndUuidNot(
+                    user.email(),
+                    identifier
+            );
+        }
+        if (exists) {
+            throw new ConnectorUserAlreadyExistsException(
+                    "User email '%s' already exists".formatted(user.email())
+            );
         }
     }
 }

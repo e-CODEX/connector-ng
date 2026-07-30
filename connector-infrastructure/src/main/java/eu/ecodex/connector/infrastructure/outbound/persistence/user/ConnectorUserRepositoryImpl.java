@@ -14,19 +14,20 @@ import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.spi.iam.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Implementation of the {@link ConnectorUserRepository} interface that provides
@@ -57,63 +58,69 @@ import org.springframework.stereotype.Service;
 public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
 
     ConnectorUserJpaRepository jpaRepository;
+    ConnectorUserRoleJpaRepository roleRepository;
 
     @Override
     public ConnectorUser save(ConnectorUser domainUser) {
 
         var existing = jpaRepository.findByUuid(
                 domainUser.uuid()); // TODO check if this call could be optimized
-        ConnectorUserEntity entity = null;
+        ConnectorUserEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();
             updateEntity(domainUser, entity);
         } else {
-            entity = toEntity(domainUser);
+            entity = ConnectorUserMapper.toEntity(domainUser);
         }
 
+        updateUserRoles(domainUser, entity);
+
         var saved = jpaRepository.save(entity);
-        return toDomain(saved);
+        return ConnectorUserMapper.toDomain(saved);
     }
+
 
     @Override
     public Optional<ConnectorUser> findById(Long id) {
         var found = jpaRepository.findById(id);
-        return found.map(this::toDomain);
+        return found.map(ConnectorUserMapper::toDomain);
     }
 
     @Override
-    public Optional<ConnectorUser> findByUuId(String identifier) {
-        return jpaRepository.findByUuid(identifier).map(this::toDomain);
+    public Optional<ConnectorUser> findByUuid(String identifier) {
+        return jpaRepository.findByUuid(identifier).map(ConnectorUserMapper::toDomain);
     }
 
     @Override
     public Optional<ConnectorUser> findByUsername(String username) {
         var found = jpaRepository.findByUsername(username);
-        return found.map(this::toDomain);
+        return found.map(ConnectorUserMapper::toDomain);
     }
 
     @Override
     public Optional<ConnectorUser> findByEmail(String email) {
         var found = jpaRepository.findByEmail(email);
-        return found.map(this::toDomain);
+        return found.map(ConnectorUserMapper::toDomain);
     }
 
     @Override
     public Optional<ConnectorUser> findByUsernameAndEmail(String username, String email) {
         var found = jpaRepository.findByUsernameAndEmail(username, email);
-        return found.map(this::toDomain);
+        return found.map(ConnectorUserMapper::toDomain);
     }
 
     @Override
     public List<ConnectorUser> findAll() {
-        return jpaRepository.findAll().stream().map(this::toDomain).toList();
+        return jpaRepository.findAll().stream().map(ConnectorUserMapper::toDomain).toList();
     }
 
     @Override
+    @Transactional
     public void deleteByUuid(String identifier) {
         var entity = jpaRepository.findByUuid(identifier)
                 .orElseThrow(() ->
-                        new ConnectorUserNotFoundException("No user found by identifier " + identifier));
+                        new ConnectorUserNotFoundException(
+                                "No user found by identifier " + identifier));
         jpaRepository.delete(entity);
     }
 
@@ -122,28 +129,24 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
         return jpaRepository.existsByUuid(uuid);
     }
 
-
-    private ConnectorUserEntity toEntity(ConnectorUser domainUser) {
-        return ConnectorUserEntity.builder()
-                .uuid(domainUser.uuid())
-                .username(domainUser.username())
-                .password(domainUser.password())
-                .email(domainUser.email())
-                .enabled(domainUser.enabled())
-                .build();
+    @Override
+    public boolean existsByUsername(String username) {
+        return jpaRepository.existsByUsername(username);
     }
 
-    private ConnectorUser toDomain(ConnectorUserEntity entity) {
-        return ConnectorUser.builder()
-                .uuid(entity.getUuid())
-                .username(entity.getUsername())
-                .password(entity.getPassword())
-                .email(entity.getEmail())
-                .enabled(entity.isEnabled())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .roles(getUserRoles(entity))
-                .build();
+    @Override
+    public boolean existsByEmail(String email) {
+        return jpaRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByEmailAndUuidNot(String email, String identifier) {
+        return jpaRepository.existsByEmailAndUuidNot(email, identifier);
+    }
+
+    @Override
+    public boolean existsByUsernameAndUuidNot(String username, String identifier) {
+        return jpaRepository.existsByUsernameAndUuidNot(username, identifier);
     }
 
     private void updateEntity(ConnectorUser domainUser, ConnectorUserEntity entity) {
@@ -154,18 +157,16 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
         entity.setEmail(domainUser.email());
     }
 
-    private static Set<ConnectorUserRole> getUserRoles(ConnectorUserEntity entity) {
-        return entity.getRoles() == null ? null :
-                entity.getRoles().stream()
-                        .map(getUserRoleFunction())
-                        .collect(Collectors.toUnmodifiableSet());
-    }
+    private void updateUserRoles(ConnectorUser domainUser, ConnectorUserEntity entity) {
+        if (domainUser.roles() != null) {
+            Set<String> rolesNames = domainUser.roles()
+                    .stream()
+                    .map(ConnectorUserRole::name)
+                    .collect(Collectors.toUnmodifiableSet());
 
-    private static Function<ConnectorUserRoleEntity, ConnectorUserRole> getUserRoleFunction() {
-        return role ->
-                ConnectorUserRole.builder()
-                        .uuid(role.getUuid())
-                        .name(role.getName())
-                        .build();
+            Set<ConnectorRoleEntity> managedRoles = roleRepository.findByNameIn(rolesNames);
+            entity.getRoles().clear();
+            entity.getRoles().addAll(managedRoles);
+        }
     }
 }

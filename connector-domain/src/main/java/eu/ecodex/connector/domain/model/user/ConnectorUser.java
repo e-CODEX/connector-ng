@@ -34,6 +34,22 @@ public record ConnectorUser(
         Instant updatedAt
 ) {
 
+    public static final String DEFAULT_ADMIN_USER_NAME = "admin";
+    public static final String DEFAULT_ADMIN_PASSWORD = "123456";
+
+    public boolean isDefaultAdmin() {
+        return DEFAULT_ADMIN_USER_NAME.equals(username) && roles != null &&
+                roles.stream().anyMatch(ConnectorUserRole::isDefaultAdminRole);
+    }
+    public static ConnectorUser defaultAdminUser() {
+        return ConnectorUser.builder()
+                .username(DEFAULT_ADMIN_USER_NAME)
+                .password(DEFAULT_ADMIN_PASSWORD)
+                .enabled(true)
+                .roles(Set.of(ConnectorUserRole.builder().name(ConnectorUserRole.DEFAULT_ADMIN_ROLE).build()))
+                .build();
+    }
+
     /**
      * Compares the current {@code ConnectorUser} object with the specified {@code ConnectorUser} object
      * to determine if they have identical content. The comparison is based on the values of the fields:

@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.iam.role;
 
 import eu.ecodex.connector.application.port.api.iam.role.ConnectorListUserRole;
-import eu.ecodex.connector.application.port.spi.iam.role.ConnectorUserRoleRepository;
+import eu.ecodex.connector.application.port.spi.iam.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import java.util.List;
 import lombok.AccessLevel;
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service implementation for retrieving all user roles associated with the Connector system.
- * This class interacts with the {@link ConnectorUserRoleRepository} to query the data source
+ * This class interacts with the {@link ConnectorRoleRepository} to query the data source
  * and fetch a list of all available {@link ConnectorUserRole} instances.
  * <p>
  * Responsibilities:
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorListUserRoleService implements ConnectorListUserRole {
 
-    ConnectorUserRoleRepository repository;
+    ConnectorRoleRepository repository;
 
     @Override
     public List<ConnectorUserRole> findAll() {

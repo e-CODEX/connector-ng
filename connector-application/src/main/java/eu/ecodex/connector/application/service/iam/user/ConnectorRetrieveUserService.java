@@ -14,6 +14,7 @@ import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.iam.user.ConnectorRetrieveUser;
 import eu.ecodex.connector.application.port.spi.iam.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,7 +42,7 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
 
     @Override
     public ConnectorUser getById(String identifier) throws NotFoundException {
-        return repository.findByUuId(identifier).orElseThrow(() -> new NotFoundException(
+        return repository.findByUuid(identifier).orElseThrow(() -> new NotFoundException(
                 String.format("User not found by identifier %s", identifier)));
     }
 
@@ -64,5 +65,10 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
                 .orElseThrow(() -> new NotFoundException(
                         String.format("User not found by username %s and email %s", username,
                                 email)));
+    }
+
+    @Override
+    public Optional<ConnectorUser> findByUsername(String username) {
+        return repository.findByUsername(username);
     }
 }

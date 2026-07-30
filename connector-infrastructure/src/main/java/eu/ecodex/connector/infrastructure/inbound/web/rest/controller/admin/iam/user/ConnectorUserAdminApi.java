@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,12 +41,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public interface ConnectorUserAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorUserDto register(@Valid @RequestBody ConnectorUserRequest userRequest);
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Update a connector user.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorUserDto update(@PathVariable("id") String identifier,
@@ -53,6 +56,7 @@ public interface ConnectorUserAdminApi {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Update partially a connector user.")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorUserDto patch(@PathVariable("id") String identifier,
@@ -70,6 +74,7 @@ public interface ConnectorUserAdminApi {
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     List<ConnectorUserDto> getAll();
 
+    @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user by Id.")
     @DeleteMapping(path = "/{id}")

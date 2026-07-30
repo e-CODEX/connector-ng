@@ -58,7 +58,7 @@ public interface ConnectorUserRepository {
      * @param identifier the UUID of the {@code ConnectorUser} to retrieve; must not be null
      * @return an {@code Optional} containing the {@code ConnectorUser} if found, or an empty {@code Optional} if no user exists with the given UUID
      */
-    Optional<ConnectorUser> findByUuId(String identifier);
+    Optional<ConnectorUser> findByUuid(String identifier);
 
     /**
      * Retrieves a ConnectorUser entity based on the provided username.
@@ -127,4 +127,43 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified UUID exists, {@code false} otherwise
      */
     boolean existsByUuid(String uuid);
+
+    /**
+     * Checks if a {@code ConnectorUser} entity exists with the specified username.
+     *
+     * @param username the username of the {@code ConnectorUser} to check for existence; must not be null
+     * @return {@code true} if a {@code ConnectorUser} with the specified username exists, {@code false} otherwise
+     */
+    boolean existsByUsername(String username);
+
+    /**
+     * Checks if a {@code ConnectorUser} entity exists with the specified email.
+     *
+     * @param email the email address of the {@code ConnectorUser} to check for existence; must not be null
+     * @return {@code true} if a {@code ConnectorUser} with the specified email exists, {@code false} otherwise
+     */
+    boolean existsByEmail(String email);
+
+    /**
+     * Checks if a {@code ConnectorUser} entity exists with the given email
+     * and a UUID that is not equal to the provided UUID.
+     *
+     * @param email the email address of the {@code ConnectorUser} to check for existence; must not be null
+     * @param uuid the UUID that should not match the {@code ConnectorUser}'s UUID; must not be null
+     * @return {@code true} if a {@code ConnectorUser} with the specified email exists and has a different UUID
+     *         than the provided UUID, {@code false} otherwise
+     */
+    boolean existsByEmailAndUuidNot(String email, String uuid);
+
+    /**
+     * Checks if a {@code ConnectorUser} entity exists with the specified username
+     * and a UUID that is not equal to the provided UUID.
+     *
+     * @param username the username of the {@code ConnectorUser} to check for existence; must not be null
+     * @param uuid the UUID that should not match the {@code ConnectorUser}'s UUID; must not be null
+     * @return {@code true} if a {@code ConnectorUser} with the specified username exists and has a different UUID
+     *         than the provided UUID, {@code false} otherwise
+     */
+    boolean existsByUsernameAndUuidNot(String username, String uuid);
+
 }

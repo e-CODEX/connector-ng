@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.iam.role;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.iam.role.ConnectorRemoveUserRole;
-import eu.ecodex.connector.application.port.spi.iam.role.ConnectorUserRoleRepository;
+import eu.ecodex.connector.application.port.spi.iam.role.ConnectorRoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 /**
  * Service implementation for removing user roles associated with the Connector system.
  * This class provides the functionality to delete user roles based on their unique identifier (UUID),
- * interacting with the {@link ConnectorUserRoleRepository} to handle persistence operations.
+ * interacting with the {@link ConnectorRoleRepository} to handle persistence operations.
  * <p>
  * Responsibilities:
  * - Validates the existence of a user role identified by a UUID before attempting deletion.
@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRemoveUserRoleService implements ConnectorRemoveUserRole {
 
-    ConnectorUserRoleRepository repository;
+    ConnectorRoleRepository repository;
 
     @Override
     public void deleteById(String uuid) {

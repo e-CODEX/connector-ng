@@ -12,17 +12,30 @@ package eu.ecodex.connector.infrastructure.outbound.database.repository.user;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserEntity, Long> {
 
+    @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUuid(String uuid);
 
+    @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUsername(String username);
 
+    @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByEmail(String email);
 
+    @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUsernameAndEmail(String username, String email);
 
     boolean existsByUuid(String uuid);
+
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByUsernameAndUuidNot(String username, String uuid);
+
+    boolean existsByEmailAndUuidNot(String email, String uuid);
 }

@@ -8,12 +8,9 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.port.spi.iam.auth;
+package eu.ecodex.connector.infrastructure.property.auth.jwt;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import java.time.Duration;
 
-public interface AuthenticationTokenProvider {
-    String generateToken(UserDetails user);
-    boolean isValid(String token, UserDetails user);
-    String extractUsername(String token);
+public record RefreshTokenProperties(Duration expiration) {
 }

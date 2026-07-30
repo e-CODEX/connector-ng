@@ -11,24 +11,27 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.port.spi.iam.role.ConnectorUserRoleRepository;
+import eu.ecodex.connector.application.port.spi.iam.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserRoleEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class ConnectorUserRoleRepositoryImpl implements ConnectorUserRoleRepository {
+public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
 
     ConnectorUserRoleJpaRepository jpaRepository;
 
@@ -36,7 +39,7 @@ public class ConnectorUserRoleRepositoryImpl implements ConnectorUserRoleReposit
     public ConnectorUserRole save(ConnectorUserRole userRole) {
         var existing = jpaRepository.findByUuid(
                 userRole.uuid()); // TODO check if this call could be optimized
-        ConnectorUserRoleEntity entity = null;
+        ConnectorRoleEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();
             entity.setName(userRole.name());
@@ -66,6 +69,7 @@ public class ConnectorUserRoleRepositoryImpl implements ConnectorUserRoleReposit
     }
 
     @Override
+    @Transactional
     public void deleteByUuid(String identifier) {
         var entity = jpaRepository.findByUuid(identifier)
                 .orElseThrow(() ->
@@ -74,15 +78,22 @@ public class ConnectorUserRoleRepositoryImpl implements ConnectorUserRoleReposit
         jpaRepository.delete(entity);
     }
 
+    @Override
+    public Set<ConnectorUserRole> findByNameIn(Set<String> names) {
+        return jpaRepository.findByNameIn(names).stream()
+                .map(this::toDomain)
+                .collect(Collectors.toUnmodifiableSet());
+    }
 
-    private ConnectorUserRoleEntity toEntity(ConnectorUserRole domainUserRole) {
-        return ConnectorUserRoleEntity.builder()
+
+    private ConnectorRoleEntity toEntity(ConnectorUserRole domainUserRole) {
+        return ConnectorRoleEntity.builder()
                 .uuid(domainUserRole.uuid())
                 .name(domainUserRole.name())
                 .build();
     }
 
-    private ConnectorUserRole toDomain(ConnectorUserRoleEntity entity) {
+    private ConnectorUserRole toDomain(ConnectorRoleEntity entity) {
         return new ConnectorUserRole(entity.getUuid(), entity.getName(), entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }

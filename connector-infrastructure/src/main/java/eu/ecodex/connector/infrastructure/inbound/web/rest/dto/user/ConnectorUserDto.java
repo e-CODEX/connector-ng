@@ -11,8 +11,12 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import java.time.Instant;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Builder;
+import org.springframework.util.CollectionUtils;
 
 /**
  * A Data Transfer Object (DTO) that represents a user in the connector system.
@@ -31,6 +35,7 @@ public record ConnectorUserDto(
         String username,
         String email,
         Boolean enabled,
+        Set<String> roles,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -42,9 +47,16 @@ public record ConnectorUserDto(
                 .username(user.username())
                 .email(user.email())
                 .enabled(user.enabled())
+                .roles(getRoles(user))
                 .createdAt(user.createdAt())
                 .updatedAt(user.updatedAt())
                 .build();
+    }
+
+    private static  Set<String> getRoles(ConnectorUser user) {
+        return CollectionUtils.isEmpty(user.roles()) ? Set.of() :
+                user.roles().stream().map(ConnectorUserRole::name)
+                        .collect(Collectors.toUnmodifiableSet());
     }
 
 }

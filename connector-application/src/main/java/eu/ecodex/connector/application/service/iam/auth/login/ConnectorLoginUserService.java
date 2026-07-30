@@ -8,10 +8,11 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.iam.auth;
+package eu.ecodex.connector.application.service.iam.auth.login;
 
 import eu.ecodex.connector.application.port.api.iam.auth.ConnectorLoginUser;
-import eu.ecodex.connector.application.port.spi.iam.auth.AuthenticationTokenProvider;
+import eu.ecodex.connector.application.port.spi.iam.auth.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.service.iam.auth.logout.ConnectorRefreshUserTokenService;
 import eu.ecodex.connector.domain.model.login.LoginResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,12 +30,12 @@ import org.springframework.stereotype.Service;
  * <p>
  * Dependencies:
  * - {@link AuthenticationManager}: Facilitates the authentication of user credentials.
- * - {@link AuthenticationTokenProvider}: Responsible for generating authentication tokens.
+ * - {@link ConnectorAuthenticationTokenProvider}: Responsible for generating authentication tokens.
  * <p>
  * Core functionality:
  * - Verifies user credentials by authenticating through the {@link AuthenticationManager}.
  * - Retrieves the user details upon successful authentication.
- * - Generates an authentication token using the {@link AuthenticationTokenProvider}.
+ * - Generates an authentication token using the {@link ConnectorAuthenticationTokenProvider}.
  * - Returns a {@link LoginResponse} containing the token details.
  * <p>
  * Exceptions:
@@ -54,7 +54,8 @@ import org.springframework.stereotype.Service;
 public class ConnectorLoginUserService implements ConnectorLoginUser {
 
     AuthenticationManager authenticationManager;
-    AuthenticationTokenProvider authenticationTokenProvider;
+    ConnectorAuthenticationTokenProvider authenticationTokenProvider;
+    ConnectorRefreshUserTokenService refreshTokenService;
 
 
     @Override
@@ -68,11 +69,14 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
                         )
                 );
 
-        UserDetails user = (UserDetails) authentication.getPrincipal();
+        ConnectorUserDetails user = (ConnectorUserDetails) authentication.getPrincipal();
         if (user == null) {
             throw new RuntimeException("Error reading principal");
         }
-        var authToken = authenticationTokenProvider.generateToken(user);
-        return new LoginResponse(authToken, "Bearer", 3600);
+        var accessToken = authenticationTokenProvider.generateToken(user);
+
+        var refreshToken = refreshTokenService.create(user.getConnectorUser());
+
+        return new LoginResponse(accessToken, refreshToken.uuid(), 3600); // TODO fix me
     }
 }

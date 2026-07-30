@@ -13,8 +13,9 @@ package eu.ecodex.connector.application.service.iam.role;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.iam.role.ConnectorRetrieveUserRole;
-import eu.ecodex.connector.application.port.spi.iam.role.ConnectorUserRoleRepository;
+import eu.ecodex.connector.application.port.spi.iam.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import java.util.Set;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
 /**
  * Service implementation for retrieving user roles within the Connector system.
  * This class provides methods to fetch user role details based on a unique identifier or a username.
- * It interacts with the {@link ConnectorUserRoleRepository} to query the underlying data source.
+ * It interacts with the {@link ConnectorRoleRepository} to query the underlying data source.
  * <p>
  * The service is designed to throw a {@link NotFoundException} if a requested user role
  * cannot be located by the provided identifier or name.
@@ -35,7 +36,7 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRetrieveUserRoleService implements ConnectorRetrieveUserRole {
 
-    ConnectorUserRoleRepository repository;
+    ConnectorRoleRepository repository;
 
     @Override
     public ConnectorUserRole getById(String identifier) throws ConnectorUserNotFoundException {
@@ -48,6 +49,11 @@ public class ConnectorRetrieveUserRoleService implements ConnectorRetrieveUserRo
     public ConnectorUserRole getByName(String name) throws ConnectorUserNotFoundException {
         return repository.findByName(name).orElseThrow(() -> new ConnectorUserNotFoundException(
                 String.format("User not found by username %s", name)));
+    }
+
+    @Override
+    public Set<ConnectorUserRole> findByNameIn(Set<String> roles) {
+        return repository.findByNameIn(roles);
     }
 
 }

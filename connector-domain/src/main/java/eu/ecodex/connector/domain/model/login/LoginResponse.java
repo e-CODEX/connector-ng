@@ -1,8 +1,24 @@
 package eu.ecodex.connector.domain.model.login;
 
+/**
+ * Represents the response resulting from a successful user login operation.
+ * This record encapsulates the authentication token details that are generated
+ * and returned to the client upon successful authentication.
+ * <p>
+ * Fields:
+ * - accessToken: The token issued to the authenticated user, used for
+ * authorizing subsequent requests.
+ * - tokenType: The type of the issued token, typically indicating the
+ * authentication method (e.g., "Bearer").
+ * - expiresIn: The duration (in seconds) for which the token remains valid.
+ * <p>
+ * This class is immutable and is designed to securely transport token-related
+ * data to ensure proper authentication and authorization workflow within the
+ * system.
+ */
 public record LoginResponse(
         String accessToken,
-        String tokenType,
+        String refreshToken,
         long expiresIn
 ) {
 }

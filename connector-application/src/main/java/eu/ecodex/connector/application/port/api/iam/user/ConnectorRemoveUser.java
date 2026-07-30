@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.iam.user;
 
+import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 
 /**
@@ -24,5 +25,5 @@ public interface ConnectorRemoveUser {
      *
      * @param identifier the unique identifier of the {@link ConnectorUser} to be deleted; must not be null
      */
-    void deleteById(String identifier);
+    void deleteById(String identifier) throws ConnectorUserNotFoundException;
 }

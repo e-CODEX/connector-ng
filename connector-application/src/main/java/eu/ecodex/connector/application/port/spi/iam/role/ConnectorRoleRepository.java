@@ -13,12 +13,13 @@ package eu.ecodex.connector.application.port.spi.iam.role;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Repository interface for managing ConnectorUserRole entities.
  * Provides methods for CRUD operations and specific queries related to user roles.
  */
-public interface ConnectorUserRoleRepository {
+public interface ConnectorRoleRepository {
 
     /**
      * Persists or updates a ConnectorUserRole entity in the repository.
@@ -53,12 +54,18 @@ public interface ConnectorUserRoleRepository {
     List<ConnectorUserRole> findAll();
 
     /**
-     * Deletes a ConnectorUserRole entity by its unique identifier.
-     * If the entity with the provided identifier exists, it will be removed from the repository.
-     * Otherwise, an exception will be thrown indicating that no entity was found.
+     * Deletes a user role from the repository based on its unique UUID.
      *
-     * @param identifier the unique identifier of the ConnectorUserRole entity to delete
-     * @throws ConnectorUserNotFoundException if no entity is found with the provided identifier
+     * @param identifier the unique identifier (UUID) of the user role to be deleted
      */
     void deleteByUuid(String identifier);
+
+    /**
+     * Retrieves a set of {@code ConnectorUserRole} entities whose names match any
+     * of the provided names.
+     *
+     * @param names a set of role names to search for
+     * @return a set of {@code ConnectorUserRole} entities matching the provided names
+     */
+    Set<ConnectorUserRole> findByNameIn(Set<String> names);
 }

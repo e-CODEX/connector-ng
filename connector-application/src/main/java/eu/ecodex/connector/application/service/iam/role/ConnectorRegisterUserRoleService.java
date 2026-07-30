@@ -10,11 +10,11 @@
 
 package eu.ecodex.connector.application.service.iam.role;
 
-import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.iam.role.ConnectorRegisterUserRole;
-import eu.ecodex.connector.application.port.spi.iam.role.ConnectorUserRoleRepository;
+import eu.ecodex.connector.application.port.spi.iam.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import java.util.Objects;
 import lombok.AccessLevel;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 /**
  * Service responsible for managing the registration and updating of user roles within
  * the Connector system. This implementation interacts with the underlying persistence
- * layer through the {@link ConnectorUserRoleRepository}.
+ * layer through the {@link ConnectorRoleRepository}.
  * <p>
  * The primary goals of this service include:
  * - Ensuring new user roles are correctly registered in the persistence layer.
@@ -40,10 +40,10 @@ import org.springframework.stereotype.Component;
  * during updates.
  * <p>
  * Exception Handling:
- * - Throws {@link ConnectorUserBadRequestException} for invalid input, such as a non-blank
+ * - Throws {@link ConnectorUserRoleBadRequestException} for invalid input, such as a non-blank
  * identifier during registration.
- * - Throws {@link ConnectorUserNotFoundException} if a user role to update is not found.
- * - Throws {@link ConnectorUserAlreadyExistsException} when a duplicate role name is detected.
+ * - Throws {@link ConnectorUserRoleNotFoundException} if a user role to update is not found.
+ * - Throws {@link ConnectorUserRoleAlreadyExistsException} when a duplicate role name is detected.
  */
 @Slf4j
 @Component
@@ -51,12 +51,13 @@ import org.springframework.stereotype.Component;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRegisterUserRoleService implements ConnectorRegisterUserRole {
 
-    ConnectorUserRoleRepository repository;
+    ConnectorRoleRepository repository;
 
     @Override
     public ConnectorUserRole register(ConnectorUserRole userRole) {
         if (userRole.uuid() != null) {
-            throw new ConnectorUserBadRequestException("Connector user role id should be blank");
+            throw new ConnectorUserRoleBadRequestException(
+                    "Connector user role id should be blank");
         }
         checkRoleName(null, userRole);
         return repository.save(userRole);
@@ -65,12 +66,12 @@ public class ConnectorRegisterUserRoleService implements ConnectorRegisterUserRo
     @Override
     public ConnectorUserRole update(String identifier, ConnectorUserRole userRole) {
         if (identifier == null && userRole.uuid() == null) {
-            throw new ConnectorUserBadRequestException(
+            throw new ConnectorUserRoleBadRequestException(
                     "Connector user role id should not be blank");
         }
 
         var existingUserRole = repository.findByUuid(identifier)
-                .orElseThrow(() -> new ConnectorUserNotFoundException(
+                .orElseThrow(() -> new ConnectorUserRoleNotFoundException(
                         "No existing user role found with id " + identifier));
 
         checkRoleName(identifier, userRole);
@@ -90,7 +91,7 @@ public class ConnectorRegisterUserRoleService implements ConnectorRegisterUserRo
 
         if (existingUser.isPresent() &&
                 !Objects.equals(existingUser.get().uuid(), identifier)) {
-            throw new ConnectorUserAlreadyExistsException(
+            throw new ConnectorUserRoleAlreadyExistsException(
                     "Role name '%s' already exists".formatted(userRole.name())
             );
         }

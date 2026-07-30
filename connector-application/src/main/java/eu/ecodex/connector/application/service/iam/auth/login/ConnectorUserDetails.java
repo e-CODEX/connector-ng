@@ -1,8 +1,20 @@
-package eu.ecodex.connector.application.service.iam.auth;
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.application.service.iam.auth.login;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.util.Collection;
 import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
@@ -26,6 +38,8 @@ import org.springframework.security.core.userdetails.UserDetails;
  * - Exposing user-specific information, such as the username and password.
  */
 @Slf4j
+@Getter
+@Setter
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorUserDetails implements UserDetails {
 

@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.security.iam;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import eu.ecodex.connector.application.port.spi.iam.auth.AuthenticationTokenProvider;
+import eu.ecodex.connector.application.port.spi.iam.auth.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -20,11 +20,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import javax.crypto.SecretKey;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,7 @@ import org.springframework.stereotype.Service;
  * This implementation provides methods to create tokens, extract information
  * from tokens, and validate tokens against specific user details.
  * <p>
- * It conforms to the {@link AuthenticationTokenProvider} interface.
+ * It conforms to the {@link ConnectorAuthenticationTokenProvider} interface.
  * <p>
  * Dependencies:
  * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration period.
@@ -56,7 +58,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class JwtProvider implements AuthenticationTokenProvider {
+public class JwtProvider implements ConnectorAuthenticationTokenProvider {
 
     SecretKey secretKey;
     JwtProperties jwtProperties;
@@ -69,15 +71,18 @@ public class JwtProvider implements AuthenticationTokenProvider {
     @Override
     public String generateToken(UserDetails user) {
         Instant now = Instant.now();
+        var userRoles = user.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+
+        log.debug("Generating JWT token for user {} with roles {}", user.getUsername(), userRoles);
         return Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(jwtProperties.getExpiration())))
+                .expiration(Date.from(now.plusSeconds(jwtProperties.getExpiration().toSeconds())))
                 .claim("roles",
-                        user.getAuthorities()
-                                .stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .toList())
+                        userRoles)
                 .signWith(secretKey)
                 .compact();
 
@@ -85,14 +90,29 @@ public class JwtProvider implements AuthenticationTokenProvider {
 
     @Override
     public String extractUsername(String token) {
-
         return parse(token)
                 .getPayload()
                 .getSubject();
     }
 
     @Override
-    public boolean isValid(String token, UserDetails user) {
+    public List<? extends GrantedAuthority> extractAuthorities(String token) {
+        Claims claims = parse(token).getPayload();
+        Object claim = claims.get("roles");
+
+        if (!(claim instanceof List<?> roles)) {
+            return List.of();
+        }
+
+        return roles.stream()
+                .map(String::valueOf)
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+    }
+
+
+    @Override
+    public boolean isValidToken(String token, UserDetails user) {
         String username = extractUsername(token);
         return username.equals(user.getUsername())
                 && !isExpired(token);

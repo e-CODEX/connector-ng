@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.property.auth.jwt;
 
-import java.time.Duration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -19,9 +18,19 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "connector.auth.security.jwt")
-public class JwtProperties {
-    String secret;
-    Duration expiration;
-    RefreshTokenProperties refreshToken;
+@ConfigurationProperties(prefix = "connector.admin")
+public class ConnectorAdminUserProperties {
+    String username;
+    String password;
+    String role;
+    String email;
+    Boolean enabled;
+
+    public boolean isEmpty() {
+        return this.username == null
+                && this.password == null
+                && this.email == null
+                && this.role == null
+                && this.enabled == null;
+    }
 }

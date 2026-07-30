@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.iam.role;
 
+import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 
 /**
@@ -32,7 +33,8 @@ public interface ConnectorRegisterUserRole {
      * @return the registered {@link ConnectorUserRole} instance, including any
      *         additional fields populated during the registration process (e.g., identifier, timestamps).
      */
-    ConnectorUserRole register(ConnectorUserRole userRole);
+    ConnectorUserRole register(ConnectorUserRole userRole) throws
+            ConnectorUserRoleAlreadyExistsException;
 
     /**
      * Updates an existing user role in the Connector system.

@@ -10,12 +10,14 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.user;
 
-import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserRoleEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ConnectorUserRoleJpaRepository
-        extends JpaRepository<ConnectorUserRoleEntity, Long> {
-    Optional<ConnectorUserRoleEntity> findByName(String username);
-    Optional<ConnectorUserRoleEntity> findByUuid(String uuid);
+        extends JpaRepository<ConnectorRoleEntity, Long> {
+    Optional<ConnectorRoleEntity> findByName(String username);
+    Optional<ConnectorRoleEntity> findByUuid(String uuid);
+    Set<ConnectorRoleEntity> findByNameIn(Set<String> names);
 }

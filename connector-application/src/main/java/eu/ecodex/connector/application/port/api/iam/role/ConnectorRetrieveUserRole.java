@@ -10,8 +10,9 @@
 
 package eu.ecodex.connector.application.port.api.iam.role;
 
-import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import java.util.Set;
 
 /**
  * Defines a contract for retrieving user roles within the Connector system.
@@ -31,9 +32,9 @@ public interface ConnectorRetrieveUserRole {
      * @param identifier the unique identifier of the user role to be retrieved.
      *                   It must correspond to an existing user role in the system.
      * @return the {@link ConnectorUserRole} instance matching the given identifier.
-     * @throws NotFoundException if no user role is found for the specified identifier.
+     * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified identifier.
      */
-    ConnectorUserRole getById(String identifier) throws NotFoundException;
+    ConnectorUserRole getById(String identifier) throws ConnectorUserRoleNotFoundException;
 
     /**
      * Retrieves a user role identified by the specified name.
@@ -43,7 +44,19 @@ public interface ConnectorRetrieveUserRole {
      * @param roleName the name of the user role to be retrieved.
      *                 It must correspond to an existing user role in the system.
      * @return the {@link ConnectorUserRole} instance matching the given role name.
-     * @throws NotFoundException if no user role is found for the specified name.
+     * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified name.
      */
-    ConnectorUserRole getByName(String roleName) throws NotFoundException;
+    ConnectorUserRole getByName(String roleName) throws ConnectorUserRoleNotFoundException;
+
+    /**
+     * Retrieves a set of user roles based on the specified username.
+     * This method fetches all {@link ConnectorUserRole} entities that are
+     * associated with the given username from the underlying persistence source.
+     *
+     * @param username the username for which the user roles need to be retrieved.
+     *                 It must correspond to a valid user in the system.
+     * @return a set of {@link ConnectorUserRole} associated with the specified username.
+     *         The returned set may be empty if no roles are found.
+     */
+    Set<ConnectorUserRole> findByNameIn(Set<String> username);
 }

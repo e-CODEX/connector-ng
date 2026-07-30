@@ -22,6 +22,9 @@ import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFound
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
@@ -64,6 +67,28 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConnectorUserBadRequestException.class)
     public ErrorResponse handleUserException(ConnectorUserBadRequestException e) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorUserRoleAlreadyExistsException.class)
+    public ErrorResponse handleUserRoleIdentifierException(
+            ConnectorUserRoleAlreadyExistsException exception) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ConnectorUserRoleNotFoundException.class)
+    public ErrorResponse handleUserRoleNotFoundException(ConnectorUserRoleNotFoundException exception) {
+        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConnectorUserRoleBadRequestException.class)
+    public ErrorResponse handleUserRoleException(ConnectorUserRoleBadRequestException e) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 

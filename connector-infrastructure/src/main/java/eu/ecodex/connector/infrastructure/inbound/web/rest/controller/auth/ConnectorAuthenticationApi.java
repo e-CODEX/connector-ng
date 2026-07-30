@@ -8,18 +8,22 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth.login;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
 import eu.ecodex.connector.domain.model.login.LoginResponse;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.LoginRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -30,7 +34,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * <p>
  * Endpoints:
  * - POST /api/v1/auth/login: Handles user login by accepting credentials in the request body
- *   and responding with an authentication token.
+ * and responding with an authentication token.
  * <p>
  * Annotations:
  * - The class is annotated with @RequestMapping to define the base path for all endpoints.
@@ -38,13 +42,29 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @RequestMapping("/api/v1/auth")
 @Tag(name = "Users", description = "API for managing connector's users")
-public interface ConnectorUserLoginApi {
+public interface ConnectorAuthenticationApi {
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Login a connector user.")
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(
             @ApiResponse(responseCode = "400", description = "Bad Request")
     )
-    LoginResponse login(@RequestBody LoginRequest loginRequest);
+    LoginResponse login(@RequestBody ConnectorLoginRequest connectorLoginRequest);
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Logout a connector user.")
+    @PostMapping(path = "/logout", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses(
+            @ApiResponse(responseCode = "400", description = "Bad Request")
+    )
+    ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization);
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @Operation(summary = "Logout a connector user.")
+    @PostMapping("/refresh")
+    @ApiResponses(
+            @ApiResponse(responseCode = "400", description = "Bad Request")
+    )
+    LoginResponse refresh(@RequestBody ConnectorRefreshRequest request) ;
 
 }

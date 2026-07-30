@@ -8,7 +8,10 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
+package eu.ecodex.connector.application.exception;
 
-public record LoginRequest(String username, String password) {
+public class ConnectorUserRoleNotFoundException extends NotFoundException {
+    public ConnectorUserRoleNotFoundException(String message) {
+        super(message);
+    }
 }

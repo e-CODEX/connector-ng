@@ -50,11 +50,11 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_USERS_ROLES",
+@Table(name = "CONNECTOR_ROLES",
         indexes = {
-                @Index(name = "IDX_CONNECTOR_USERS_ROLES_UUID", columnList = "UUID"),
+                @Index(name = "IDX_CONNECTOR_ROLES_UUID", columnList = "UUID"),
         })
-public class ConnectorUserRoleEntity extends BaseEntity {
+public class ConnectorRoleEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

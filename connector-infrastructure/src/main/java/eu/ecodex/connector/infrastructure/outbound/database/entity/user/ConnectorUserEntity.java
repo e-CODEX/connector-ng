@@ -100,11 +100,15 @@ public class ConnectorUserEntity extends BaseEntity {
     @Column(name = "ENABLED")
     private boolean enabled;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @Setter
+    @Builder.Default
+    @ManyToMany(
+            fetch = FetchType.LAZY
+    )
     @JoinTable(
-            name = "CONNECTOR_USERS_ROLES_ASSIGNMENTS",
+            name = "CONNECTOR_USERS_ROLES",
             joinColumns = @JoinColumn(name = "USER_ID"),
             inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
-    private Set<ConnectorUserRoleEntity> roles = new HashSet<>();
+    private Set<ConnectorRoleEntity> roles = new HashSet<>();
 }

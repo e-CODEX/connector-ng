@@ -37,12 +37,25 @@ public record ConnectorUserRole(String uuid,
         return new Builder();
     }
 
+    public static final String DEFAULT_ADMIN_ROLE = "ROLE_ADMIN";
+
+
+    public static ConnectorUserRole defaultAdminRole() {
+        return ConnectorUserRole.builder()
+                .name(DEFAULT_ADMIN_ROLE)
+                .build();
+    }
+
+    public boolean isDefaultAdminRole() {
+        return DEFAULT_ADMIN_ROLE.equals(name);
+    }
+
     /**
      * Creates a new {@code Builder} instance pre-populated with the current state
      * of this {@code ConnectorUserRole} instance.
      *
      * @return a {@code Builder} instance containing the fields of the current
-     *         {@code ConnectorUserRole} object.
+     * {@code ConnectorUserRole} object.
      */
     public Builder toBuilder() {
         return new Builder()

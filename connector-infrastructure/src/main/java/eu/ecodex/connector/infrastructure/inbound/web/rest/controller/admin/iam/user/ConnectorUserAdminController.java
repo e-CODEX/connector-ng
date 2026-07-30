@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.iam.user;
 
+import static eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest.toDomain;
+
 import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
 import eu.ecodex.connector.application.port.api.iam.user.ConnectorListUser;
 import eu.ecodex.connector.application.port.api.iam.user.ConnectorRegisterUser;
@@ -29,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for managing connector users. Provides APIs for operations such as registration,
  * updating, partial updates, retrieval, listing, and deletion of users.
- *
+ * <p>
  * This controller relies on service classes for handling user-related operations and
  * ensures additional processing like password encoding before delegation.
  */
@@ -49,16 +51,21 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     public ConnectorUserDto register(ConnectorUserRequest userRequest) {
         log.info("Registering new user");
         userRequest = encodePassword(userRequest);
-        var registered = connectorRegisterUser.register(ConnectorUserRequest.toDomain(userRequest));
+
+        var registered = connectorRegisterUser.register(toDomain(userRequest));
+
         log.info("New user registered");
         return ConnectorUserDto.from(registered);
     }
+
 
     @Override
     public ConnectorUserDto update(String identifier, ConnectorUserRequest userRequest) {
         log.info("Updating existing user");
         userRequest = encodePassword(userRequest);
-        var updated = connectorRegisterUser.update(identifier, ConnectorUserRequest.toDomain(userRequest));
+
+        var updated = connectorRegisterUser.update(identifier, toDomain(userRequest));
+
         log.info("User updated");
         return ConnectorUserDto.from(updated);
     }
@@ -69,7 +76,8 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         if (userRequest.password() != null) {
             userRequest = encodePassword(userRequest);
         }
-        var registered = connectorRegisterUser.patch(id, ConnectorUserRequest.toDomain(userRequest));
+
+        var registered = connectorRegisterUser.patch(id, toDomain(userRequest));
         log.info("User patched");
         return ConnectorUserDto.from(registered);
     }
@@ -90,6 +98,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         connectorRemoveUser.deleteById(userIdentifier);
         log.info("User deleted by id");
     }
+
 
     private ConnectorUserRequest encodePassword(ConnectorUserRequest userRequest) {
         var encodedPassword = passwordEncoder.encode(userRequest.password());

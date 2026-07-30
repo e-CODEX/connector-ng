@@ -37,6 +37,11 @@ public class ConnectorMessagePartiesVerifierService implements ConnectorMessageP
         }
 
         var direction = message.direction();
+
+        if (direction == null) {
+            throw new IllegalStateException("message must have a direction");
+        }
+
         switch (direction) {
             case BACKEND_TO_GATEWAY -> {
                 if (fromParty.roleType() != ConnectorPartyRoleType.INITIATOR) {

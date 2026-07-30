@@ -118,8 +118,7 @@ public class ConnectorTokenLegalValidationGenerator {
                 Disclaimers.NOT_APPROVED
             );
         } else if ((signatures == null || signatures.isEmpty())
-            && token.getValidationVerificationAuthenticationData() != null
-            && technicallySuccessful) {
+            && token.getValidationVerificationAuthenticationData() != null) {
             setResult(
                 legalValidationResult,
                 ConnectorTokenLegalTrustLevel.SUCCESSFUL,

@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,10 +52,14 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
                          );
                          attachment.transferTo(tempLocation);
 
+                         var contentType = attachment.getContentType() != null
+                             ? attachment.getContentType()
+                             : MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
                          return new FileUploadCommand(
                              filename,
                              attachment.getSize(),
-                             attachment.getContentType(),
+                             contentType,
                              tempLocation,
                              "Uploaded attachment"
                          );

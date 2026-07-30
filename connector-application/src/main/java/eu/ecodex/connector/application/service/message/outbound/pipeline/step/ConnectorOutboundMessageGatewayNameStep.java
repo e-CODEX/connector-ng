@@ -36,9 +36,15 @@ public class ConnectorOutboundMessageGatewayNameStep implements ConnectorMessage
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
+        var identifier = outboundMessage.identifier();
+
+        if (identifier == null) {
+            throw new IllegalStateException("Message identifier is null");
+        }
+
         log.debug(
             "Processing outbound message [{}] gateway name validation",
-            outboundMessage.identifier()
+            identifier
         );
 
         if (StringUtils.isNotEmpty(outboundMessage.gatewayName())) {
@@ -46,7 +52,7 @@ public class ConnectorOutboundMessageGatewayNameStep implements ConnectorMessage
         }
 
         return this.messageRepository.updateGatewayName(
-            outboundMessage.identifier(), ConnectorDefaults.DEFAULT_GATEWAY_NAME
+            identifier, ConnectorDefaults.DEFAULT_GATEWAY_NAME
         );
     }
 }

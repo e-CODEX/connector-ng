@@ -105,6 +105,15 @@ public class ConnectorInboundEvidenceMessageProcessorService
             return null;
         }
 
+        if (confirmationMessage.direction() == null) {
+            log.warn(
+                "Confirmation message [{}] has no direction, skipping lifecycle update",
+                confirmationMessage.identifier()
+            );
+
+            return null;
+        }
+
         // the sorting by criteria because two messages can have the same ebms identifier
         return messageRepository.findByEbmsMessageIdentifierAndDirection(
             referenceToMessageId,
@@ -115,6 +124,10 @@ public class ConnectorInboundEvidenceMessageProcessorService
     private List<ConnectorMessageEvidence> applyEvidencesToReferencedBusinessMessage(
         ConnectorMessage confirmationMessage,
         ConnectorMessage referencedBusinessMessage) {
+        if (referencedBusinessMessage.identifier() == null) {
+            throw new IllegalStateException("Referenced business message has no identifier");
+        }
+
         var referencedBusinessMessageIdentifier = referencedBusinessMessage.identifier();
         log.info(
             "Applying transported evidences from confirmation message [{}] to referenced "
@@ -132,7 +145,16 @@ public class ConnectorInboundEvidenceMessageProcessorService
 
         // confirmationMessage.transportedEvidences() cannot be null because
         // of the !confirmationMessage.isEvidenceMessage() in the process method
-        for (var incomingEvidence : confirmationMessage.transportedEvidences()) {
+        var transportedEvidences = confirmationMessage.transportedEvidences();
+
+        if (transportedEvidences == null) {
+            throw new IllegalStateException(
+                "Confirmation message [%s] has no transported evidences"
+                    .formatted(confirmationMessage.identifier())
+            );
+        }
+
+        for (var incomingEvidence : transportedEvidences) {
             var appliedEvidence = applyEvidence(
                 referencedBusinessMessage,
                 accumulatedEvidences,
@@ -150,6 +172,11 @@ public class ConnectorInboundEvidenceMessageProcessorService
         ConnectorMessage referencedMessage,
         List<ConnectorMessageEvidence> accumulatedEvidences,
         ConnectorMessageEvidence incomingEvidence) {
+
+        if (referencedMessage.identifier() == null) {
+            throw new IllegalStateException("Referenced message has no identifier");
+        }
+
         var evidencesForVerification = new ArrayList<>(accumulatedEvidences);
         evidencesForVerification.add(incomingEvidence);
 

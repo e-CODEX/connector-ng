@@ -29,6 +29,8 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusiness
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +38,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+
+@DisplayName("ConnectorOutboundMessageStagerService")
 public class ConnectorOutboundMessageStagerServiceTest {
     @Mock
     private ConnectorEventPublisher outboundMessagePipelinePublisher;
@@ -49,94 +53,141 @@ public class ConnectorOutboundMessageStagerServiceTest {
     @InjectMocks
     private ConnectorOutboundMessageStagerService outboundMessageStagerService;
 
-    @Test
-    void should_stage_message_successfully_with_attachments() {
-        when(messageRepository.save(any())).thenReturn(createMessage());
-        when(attachmentRepository.findByIdentifier(any()))
-            .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-        doNothing().when(attachmentRepository).attachToMessage(any(), any());
-        when(businessContentRepository.save(any(), any()))
-            .thenReturn(MessageContentTestFixtures.createContent());
-
-        outboundMessageStagerService.stage(createMessage());
-
-        verify(messageRepository).save(any());
-        verify(attachmentRepository, times(3)).findByIdentifier(any());
-        verify(attachmentRepository, times(3)).attachToMessage(any(), any());
-        verify(attachmentRepository, times(3)).updateType(any(), any());
-        verify(outboundMessagePipelinePublisher).publish(any());
-    }
-
-    @Test
-    void should_stage_message_successfully_without_attachments() {
-        when(messageRepository.save(any())).thenReturn(
-            createMessage()
-                .toBuilder()
-                .attachments(null)
-                .build()
-        );
-
-        when(attachmentRepository.findByIdentifier(any()))
-            .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-        doNothing().when(attachmentRepository).attachToMessage(any(), any());
-        when(businessContentRepository.save(any(), any()))
-            .thenReturn(MessageContentTestFixtures.createContent());
-
-        outboundMessageStagerService.stage(createMessage());
-
-        verify(outboundMessagePipelinePublisher).publish(any());
-    }
-
-    @Test
-    void should_throw_exception_if_the_message_is_an_evidence_message() {
-        when(messageRepository.save(any())).thenReturn(
-            createMessage()
-                .toBuilder()
-                .attachments(null)
-                .build()
-        );
-
-        assertThrows(
-            ConnectorMessageException.class,
-            () -> outboundMessageStagerService.stage(
-                MessageTestFixtures.createEvidenceMessage()
-            )
-        );
-
-
-        verifyNoInteractions(
-            attachmentRepository,
-            businessContentRepository,
-            outboundMessagePipelinePublisher
-        );
-    }
-
-    @Test
-    void should_fail_to_stage_message_with_unknown_attachment() {
-        when(messageRepository.save(any())).thenReturn(createMessage());
-        when(attachmentRepository.findByIdentifier(any()))
-            .thenReturn(null);
-
-        assertThrows(
-            IllegalStateException.class,
-            () -> outboundMessageStagerService.stage(createMessage())
-        );
-
-        verify(messageRepository).save(any());
-        verify(attachmentRepository).findByIdentifier(any());
-        verify(attachmentRepository, never()).attachToMessage(any(), any());
-        verify(attachmentRepository, never()).updateType(any(), any());
-    }
-
     private ConnectorMessage createMessage() {
         var message = MessageTestFixtures.createOutboundBusinessMessage();
 
         return message
             .toBuilder()
-            .businessContent(
-                MessageContentTestFixtures.createContent()
-            )
+            .businessContent(MessageContentTestFixtures.createContent())
             .attachments(List.of(MessageAttachmentTestFixtures.createAttachment()))
             .build();
     }
+
+    @Nested
+    @DisplayName("when staging succeeds")
+    class WhenStagingSucceeds {
+        @Test
+        void should_stage_the_message_with_its_attachments() {
+            when(messageRepository.save(any())).thenReturn(createMessage());
+            when(attachmentRepository.findByIdentifier(any()))
+                .thenReturn(MessageAttachmentTestFixtures.createAttachment());
+            doNothing().when(attachmentRepository).attachToMessage(any(), any());
+            when(businessContentRepository.save(any(), any()))
+                .thenReturn(MessageContentTestFixtures.createContent());
+
+            outboundMessageStagerService.stage(createMessage());
+
+            verify(messageRepository).save(any());
+            verify(attachmentRepository, times(3)).findByIdentifier(any());
+            verify(attachmentRepository, times(3)).attachToMessage(any(), any());
+            verify(attachmentRepository, times(3)).updateType(any(), any());
+            verify(outboundMessagePipelinePublisher).publish(any());
+        }
+
+        @Test
+        void should_stage_the_message_without_attachments() {
+            when(messageRepository.save(any())).thenReturn(
+                createMessage()
+                    .toBuilder()
+                    .attachments(null)
+                    .build()
+            );
+            when(attachmentRepository.findByIdentifier(any()))
+                .thenReturn(MessageAttachmentTestFixtures.createAttachment());
+            doNothing().when(attachmentRepository).attachToMessage(any(), any());
+            when(businessContentRepository.save(any(), any()))
+                .thenReturn(MessageContentTestFixtures.createContent());
+
+            outboundMessageStagerService.stage(createMessage());
+
+            verify(outboundMessagePipelinePublisher).publish(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("when the message cannot be staged")
+    class WhenTheMessageCannotBeStaged {
+        @Test
+        void should_fail_when_the_message_is_an_evidence_message() {
+            when(messageRepository.save(any())).thenReturn(
+                createMessage()
+                    .toBuilder()
+                    .attachments(null)
+                    .build()
+            );
+
+            assertThrows(
+                ConnectorMessageException.class,
+                () -> outboundMessageStagerService.stage(
+                    MessageTestFixtures.createEvidenceMessage()
+                )
+            );
+
+            verifyNoInteractions(
+                attachmentRepository,
+                businessContentRepository,
+                outboundMessagePipelinePublisher
+            );
+        }
+
+        @Test
+        void should_fail_when_an_attachment_is_unknown() {
+            when(messageRepository.save(any())).thenReturn(createMessage());
+            when(attachmentRepository.findByIdentifier(any())).thenReturn(null);
+
+            assertThrows(
+                IllegalStateException.class,
+                () -> outboundMessageStagerService.stage(createMessage())
+            );
+
+            verify(messageRepository).save(any());
+            verify(attachmentRepository).findByIdentifier(any());
+            verify(attachmentRepository, never()).attachToMessage(any(), any());
+            verify(attachmentRepository, never()).updateType(any(), any());
+        }
+
+        @Test
+        void should_fail_when_the_business_content_is_null() {
+            when(messageRepository.save(any())).thenReturn(createMessage());
+
+            var message = createMessage()
+                .toBuilder()
+                .businessContent(null)
+                .attachments(null)
+                .build();
+
+            assertThrows(
+                ConnectorMessageException.class,
+                () -> outboundMessageStagerService.stage(message)
+            );
+
+            verify(messageRepository).save(any());
+            verify(businessContentRepository, never()).save(any(), any());
+        }
+
+        @Test
+        void should_fail_when_the_business_document_is_null() {
+            when(messageRepository.save(any())).thenReturn(createMessage());
+
+            var message = createMessage()
+                .toBuilder()
+                .businessContent(
+                    MessageContentTestFixtures.createContent()
+                                              .toBuilder()
+                                              .businessDocument(null)
+                                              .build()
+                )
+                .attachments(null)
+                .build();
+
+            assertThrows(
+                ConnectorMessageException.class,
+                () -> outboundMessageStagerService.stage(message)
+            );
+
+            verify(messageRepository).save(any());
+            verify(businessContentRepository, never()).save(any(), any());
+        }
+    }
 }
+

@@ -143,6 +143,11 @@ public class SubmissionAcceptanceRejection extends Evidence {
 
     private EntityDetailsType extractSenderDetails(EntityDetailsType from) {
         var senderAddress = SpocsFragments.getAttributedElectronicAddress(from);
+
+        if (senderAddress == null) {
+            throw new IllegalArgumentException("Sender address is null!");
+        }
+
         var senderEAddress = senderAddress.getValue();
         var senderName = senderAddress.getDisplayName();
         var senderPostalNames = extractPostalNames(from);
@@ -159,6 +164,11 @@ public class SubmissionAcceptanceRejection extends Evidence {
     private EntityDetailsListType extractRecipientDetails(Destinations destinations) {
         var recipient = destinations.getRecipient();
         var recipientAddr = SpocsFragments.getAttributedElectronicAddress(recipient);
+
+        if (recipientAddr == null) {
+            throw new IllegalArgumentException("Recipient address is null!");
+        }
+
         var recipientNames = extractPostalNames(recipient);
 
         var detailList = new EntityDetailsListType();

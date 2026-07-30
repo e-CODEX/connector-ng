@@ -77,6 +77,10 @@ public record ConnectorMessageDto(
      * @return a new {@link ConnectorMessageDto} instance containing the mapped values
      */
     public static ConnectorMessageDto from(ConnectorMessage message) {
+        if (message.businessDomainIdentifier() == null) {
+            throw new IllegalArgumentException("Message must have a business domain identifier");
+        }
+        
         return ConnectorMessageDto
             .builder()
             .businessDomainIdentifier(

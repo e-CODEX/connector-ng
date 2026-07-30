@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
@@ -32,6 +33,8 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,6 +43,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+
+@DisplayName("ConnectorAckMessageTransportStepService")
 public class ConnectorAckMessageTransportStepServiceTest {
     private static final String MESSAGE_ID = "msg-001";
     private static final String TRANSPORT_STEP_ID = "step-001";
@@ -56,233 +61,6 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
     @InjectMocks
     private ConnectorAckMessageTransportStepService service;
-
-    @Test
-    void should_throw_exception_when_transport_step_message_identifier_is_null() {
-        assertThatThrownBy(() -> service.execute(null, deliveredCommand()))
-            .isInstanceOf(NullPointerException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_transport_step_update_command_is_null() {
-        assertThatThrownBy(() -> service.execute(MESSAGE_ID, null))
-            .isInstanceOf(NullPointerException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_transport_step_message_identifier_and_update_command_are_null() {
-        assertThatThrownBy(() -> service.execute(null, null))
-            .isInstanceOf(NullPointerException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_transport_step_message_identifier_is_empty() {
-        assertThatThrownBy(() -> service.execute("", deliveredCommand()))
-            .isInstanceOf(IllegalArgumentException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_transport_step_message_identifier_is_blank() {
-        assertThatThrownBy(() -> service.execute(" ", deliveredCommand()))
-            .isInstanceOf(IllegalArgumentException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_command_status_is_failed_and_errors_is_null() {
-        assertThatThrownBy(() -> service.execute(MESSAGE_ID, failedCommand(null)))
-            .isInstanceOf(IllegalArgumentException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_command_status_is_failed_and_errors_are_empty() {
-        assertThatThrownBy(() -> service.execute(MESSAGE_ID, failedCommand(List.of())))
-            .isInstanceOf(IllegalArgumentException.class);
-
-        verifyNoInteractions(transportStepRepository, messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_no_transport_step_exists_for_the_message_identifier() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
-            .thenReturn(null);
-
-        assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
-            .isInstanceOf(ConnectorMessageTransportStepNotFoundException.class);
-
-        verifyNoInteractions(messageRepository, messageErrorRepository);
-    }
-
-    @Test
-    void should_throw_exception_when_existing_transport_step_is_in_terminal_status_delivered() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
-            .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DELIVERED, 1));
-
-        assertThatNoException().isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
-
-        verifyNoInteractions(messageRepository, messageErrorRepository);
-        verify(transportStepRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void should_throw_exception_when_existing_transport_step_is_in_terminal_status_failed() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
-            .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.FAILED, 1));
-
-        assertThatNoException().isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
-
-        verify(transportStepRepository, never()).update(any(), any());
-    }
-
-    @Test
-    void should_throw_exception_when_updating_transport_step_and_transported_message_identifier_is_null() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
-            stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
-                .toBuilder()
-                .transportedMessage(evidenceMessage().toBuilder().identifier(null).build())
-                .build());
-
-        assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
-            .isInstanceOf(IllegalStateException.class);
-
-        verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID),
-            argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED
-            )
-        );
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
-        );
-        verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
-        verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
-        verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
-
-        verifyNoInteractions(messageErrorRepository);
-    }
-
-    @Test
-    void should_update_existing_business_message_transport_step_successfully() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
-            stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(businessMessage());
-
-        service.execute(MESSAGE_ID, deliveredCommand());
-
-        verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID),
-            argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
-        );
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
-        );
-        verify(messageRepository).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository).setDeliveredToLinkPartnerAt(MESSAGE_ID);
-        verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
-        verifyNoInteractions(messageErrorRepository);
-    }
-
-    @Test
-    void should_update_existing_business_message_transport_step_and_not_increment_its_attempts_successfully() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
-            stepWithStatus(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD, 0));
-
-        service.execute(
-            MESSAGE_ID,
-            deliveredCommand().toBuilder()
-                              .status(ConnectorMessageTransportStatus.DOWNLOADED)
-                              .build()
-        );
-
-        verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID),
-            argThat(step -> step.status() == ConnectorMessageTransportStatus.DOWNLOADED)
-        );
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 0)
-        );
-        verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
-        verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
-        verifyNoInteractions(messageErrorRepository);
-    }
-
-    @Test
-    void should_update_existing_evidence_message_transport_step_successfully() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
-            stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
-                .toBuilder()
-                .transportedMessage(evidenceMessage())
-                .build());
-
-        service.execute(MESSAGE_ID, deliveredCommand());
-
-        verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID),
-            argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
-        );
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID),
-            argThat(step -> step.numberOfAttempts() == 1)
-        );
-        verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
-        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
-        verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
-        verify(evidenceRepository).setDeliveredToLinkPartnerAt(any());
-
-        verifyNoInteractions(messageErrorRepository);
-    }
-
-    @Test
-    void should_not_update_existing_transport_step_message_info_if_it_does_not_exist() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
-            stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
-        when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(null);
-
-        assertThatNoException().isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
-
-        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
-        verify(messageRepository, never()).updateBackendIdentifier(any(), any());
-    }
-
-    @Test
-    void should_update_existing_transport_step_successfully_if_it_failed_to_be_delivered() {
-        var errors = List.of(
-            ConnectorMessageError.builder().label("timeout").build(),
-            ConnectorMessageError.builder().label("connection refused").build()
-        );
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
-            stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
-
-        service.execute(MESSAGE_ID, failedCommand(errors));
-
-        verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID),
-            argThat(step -> step.status() == ConnectorMessageTransportStatus.FAILED)
-        );
-        verify(transportStepRepository).update(
-            eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
-        );
-        verify(messageErrorRepository).save(MESSAGE_ID, errors);
-        verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
-        verify(messageRepository, never()).updateBackendIdentifier(any(), any());
-    }
 
     private ConnectorMessage businessMessage() {
         return MessageTestFixtures.createInboundBusinessMessage()
@@ -322,5 +100,355 @@ public class ConnectorAckMessageTransportStepServiceTest {
                                             .numberOfAttempts(numberOfAttempts)
                                             .transportedMessage(businessMessage())
                                             .build();
+    }
+
+    @Nested
+    @DisplayName("when the input is invalid")
+    class WhenInputIsInvalid {
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            assertThatThrownBy(() -> service.execute(null, deliveredCommand()))
+                .isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+
+        @Test
+        void should_fail_when_the_command_is_null() {
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, null))
+                .isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+
+        @Test
+        void should_fail_when_both_arguments_are_null() {
+            assertThatThrownBy(() -> service.execute(null, null))
+                .isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_identifier_is_empty() {
+            assertThatThrownBy(() -> service.execute("", deliveredCommand()))
+                .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_identifier_is_blank() {
+            assertThatThrownBy(() -> service.execute(" ", deliveredCommand()))
+                .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+
+        @Test
+        void should_fail_when_the_command_failed_with_null_errors() {
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, failedCommand(null)))
+                .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+
+        @Test
+        void should_fail_when_the_command_failed_with_empty_errors() {
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, failedCommand(List.of())))
+                .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                messageErrorRepository
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("when the transport step is not found")
+    class WhenStepNotFound {
+        @Test
+        void should_fail_when_no_transport_step_exists_for_the_message() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(null);
+
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
+                .isInstanceOf(ConnectorMessageTransportStepNotFoundException.class);
+
+            verifyNoInteractions(messageRepository, messageErrorRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("when the step is already in a terminal status")
+    class WhenStepIsTerminal {
+        @Test
+        void should_skip_the_update_when_the_step_is_already_delivered() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DELIVERED, 1));
+
+            assertThatNoException()
+                .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
+
+            verifyNoInteractions(messageRepository, messageErrorRepository);
+            verify(transportStepRepository, never()).update(any(), any());
+        }
+
+        @Test
+        void should_skip_the_update_when_the_step_has_already_failed() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.FAILED, 1));
+
+            assertThatNoException()
+                .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
+
+            verify(transportStepRepository, never()).update(any(), any());
+        }
+    }
+
+    @Nested
+    @DisplayName("when the transported message is inconsistent")
+    class WhenTransportedMessageIsInconsistent {
+        @Test
+        void should_fail_when_the_transported_message_identifier_is_null() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(
+                    stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
+                        .toBuilder()
+                        .transportedMessage(evidenceMessage().toBuilder().identifier(null).build())
+                        .build());
+
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
+                .isInstanceOf(IllegalStateException.class);
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+            );
+            verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
+            verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
+            verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
+
+            verifyNoInteractions(messageErrorRepository);
+        }
+
+        @Test
+        void should_fail_when_the_transported_evidence_uuid_is_null() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(
+                    stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
+                        .toBuilder()
+                        .transportedMessage(
+                            evidenceMessage().toBuilder()
+                                             .transportedEvidences(
+                                                 List.of(
+                                                     EvidenceTestFixtures.createDeliveryEvidence()
+                                                                         .toBuilder()
+                                                                         .uuid(null)
+                                                                         .build()
+                                                 )
+                                             )
+                                             .build()
+                        )
+                        .build());
+
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
+                .isInstanceOf(IllegalStateException.class);
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+            );
+            verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
+            verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
+            verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
+
+            verifyNoInteractions(messageErrorRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("when the delivery succeeds")
+    class WhenDeliverySucceeds {
+        @Test
+        void should_update_the_business_message_step_and_the_message() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
+            when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(businessMessage());
+
+            service.execute(MESSAGE_ID, deliveredCommand());
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+            );
+            verify(messageRepository).findByIdentifier(MESSAGE_ID);
+            verify(messageRepository).setDeliveredToLinkPartnerAt(MESSAGE_ID);
+            verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
+            verifyNoInteractions(messageErrorRepository);
+        }
+
+        @Test
+        void should_update_the_step_without_incrementing_the_attempts() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD, 0));
+
+            service.execute(
+                MESSAGE_ID,
+                deliveredCommand().toBuilder()
+                                  .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                                  .build()
+            );
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.DOWNLOADED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 0)
+            );
+            verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
+            verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
+            verifyNoInteractions(messageErrorRepository);
+        }
+
+        @Test
+        void should_update_the_evidence_message_step_and_flag_the_evidence() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(
+                    stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
+                        .toBuilder()
+                        .transportedMessage(evidenceMessage())
+                        .build());
+
+            service.execute(MESSAGE_ID, deliveredCommand());
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+            );
+            verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
+            verify(messageRepository, never()).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
+            verify(evidenceRepository).setDeliveredToLinkPartnerAt(any());
+
+            verifyNoInteractions(messageErrorRepository);
+        }
+
+        @Test
+        void should_not_update_the_message_info_when_the_message_does_not_exist() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
+            when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(null);
+
+            assertThatNoException()
+                .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
+
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
+            verify(messageRepository, never()).updateBackendIdentifier(any(), any());
+        }
+    }
+
+    @Nested
+    @DisplayName("when the delivery failed")
+    class WhenDeliveryFailed {
+        @Test
+        void should_update_the_step_and_save_the_errors() {
+            var errors = List.of(
+                ConnectorMessageError.builder().label("timeout").build(),
+                ConnectorMessageError.builder().label("connection refused").build()
+            );
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
+
+            service.execute(MESSAGE_ID, failedCommand(errors));
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.FAILED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+            );
+            verify(messageErrorRepository).save(MESSAGE_ID, errors);
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
+            verify(messageRepository, never()).updateBackendIdentifier(any(), any());
+        }
+
+        @Test
+        void should_fail_to_update_the_step_and_save_the_errors_if_transported_message_id_is_null() {
+            var errors = List.of(
+                ConnectorMessageError.builder().label("timeout").build(),
+                ConnectorMessageError.builder().label("connection refused").build()
+            );
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID)).thenReturn(
+                stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1)
+                    .toBuilder()
+                    .transportedMessage(businessMessage().toBuilder().identifier(null).build())
+                    .build()
+            );
+
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, failedCommand(errors)))
+                .isInstanceOf(IllegalStateException.class);
+
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID),
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.FAILED)
+            );
+            verify(transportStepRepository).update(
+                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+            );
+            verify(messageErrorRepository, never()).save(MESSAGE_ID, errors);
+            verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
+            verify(messageRepository, never()).updateBackendIdentifier(any(), any());
+        }
     }
 }

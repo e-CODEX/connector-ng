@@ -46,7 +46,8 @@ public enum ConnectorMessageDirection implements Serializable {
     private final ConnectorMessageDirectionType target;
 
     ConnectorMessageDirection(
-            ConnectorMessageDirectionType source, ConnectorMessageDirectionType target) {
+        @Nonnull ConnectorMessageDirectionType source,
+        @Nonnull ConnectorMessageDirectionType target) {
         this.source = source;
         this.target = target;
     }
@@ -59,15 +60,16 @@ public enum ConnectorMessageDirection implements Serializable {
      * @param target the target of the message direction must not be null
      *
      * @return the matching {@link ConnectorMessageDirection} for the specified source and target
+     *
      * @throws java.util.NoSuchElementException if no matching {@link ConnectorMessageDirection} is
      *                                          found
      */
     public static ConnectorMessageDirection from(
-            @Nonnull ConnectorMessageDirectionType source,
-            @Nonnull ConnectorMessageDirectionType target) {
+        @Nonnull ConnectorMessageDirectionType source,
+        @Nonnull ConnectorMessageDirectionType target) {
         return Stream.of(ConnectorMessageDirection.values())
                      .filter(direction -> direction.source.equals(source)
-                                          && direction.target.equals(target)
+                         && direction.target.equals(target)
                      )
                      .findFirst()
                      .orElse(null);

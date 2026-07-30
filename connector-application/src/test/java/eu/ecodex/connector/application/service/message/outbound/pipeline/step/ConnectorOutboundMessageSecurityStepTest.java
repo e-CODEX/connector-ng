@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +33,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+
+@DisplayName("ConnectorOutboundMessageSecurityStep")
 public class ConnectorOutboundMessageSecurityStepTest {
     @Mock
     private ConnectorSecurityToolkit securityToolkit;
@@ -40,25 +44,46 @@ public class ConnectorOutboundMessageSecurityStepTest {
     @InjectMocks
     private ConnectorOutboundMessageSecurityStep outboundMessageSecurityStep;
 
-    @Test
-    void should_execute_outbound_message_security_successfully() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+    @Nested
+    @DisplayName("when executing successfully")
+    class WhenExecutingSuccessfully {
+        @Test
+        void should_build_the_security_container() {
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            when(securityToolkit.buildContainer(any())).thenReturn(outboundMessage);
+            when(messageRepository.findByIdentifier(any())).thenReturn(outboundMessage);
 
-        when(securityToolkit.buildContainer(any())).thenReturn(outboundMessage);
-        when(messageRepository.findByIdentifier(any())).thenReturn(outboundMessage);
+            var outputMessage = outboundMessageSecurityStep.execute(outboundMessage);
 
-        var outputMessage = outboundMessageSecurityStep.execute(outboundMessage);
-
-        // TODO add ASIC-S attachment t the message and check it
-        assertThat(outputMessage).isEqualTo(outputMessage);
-
-        verify(securityToolkit, times(1)).buildContainer(any());
+            // TODO add ASIC-S attachment to the message and assert on it
+            assertThat(outputMessage).isEqualTo(outboundMessage);
+            verify(securityToolkit, times(1)).buildContainer(any());
+        }
     }
 
-    @Test
-    void should_throw_exception_when_message_is_null() {
-        assertThrows(
-            NullPointerException.class, () -> outboundMessageSecurityStep.execute(null)
-        );
+    @Nested
+    @DisplayName("when the input is invalid")
+    class WhenInputIsInvalid {
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> outboundMessageSecurityStep.execute(null)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
+                                                     .toBuilder()
+                                                     .identifier(null)
+                                                     .build();
+
+            assertThrows(
+                IllegalStateException.class,
+                () -> outboundMessageSecurityStep.execute(outboundMessage)
+            );
+        }
     }
 }
+

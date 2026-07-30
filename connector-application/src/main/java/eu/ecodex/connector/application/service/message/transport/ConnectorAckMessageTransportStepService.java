@@ -190,7 +190,14 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
                 "Evidence message [%s] contains no transported evidence".formatted(identifier));
         }
 
-        evidenceRepository.setDeliveredToLinkPartnerAt(evidences.getFirst().uuid());
+        var evidenceUuid = evidences.getFirst().uuid();
+
+        if (evidenceUuid == null) {
+            throw new IllegalStateException(
+                "Evidence message [%s] contains no transported evidence".formatted(identifier));
+        }
+
+        evidenceRepository.setDeliveredToLinkPartnerAt(evidenceUuid);
     }
 
     private void registerErrors(
@@ -198,6 +205,12 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         List<ConnectorMessageError> errors) {
         // TODO for evidence messages, the errors should be registered to the step
         if (transportedMessage.isBusinessMessage()) {
+            if (transportedMessage.identifier() == null) {
+                throw new IllegalStateException(
+                    "The message identifier is not set for the transported message"
+                );
+            }
+
             this.messageErrorRepository.save(transportedMessage.identifier(), errors);
         }
     }

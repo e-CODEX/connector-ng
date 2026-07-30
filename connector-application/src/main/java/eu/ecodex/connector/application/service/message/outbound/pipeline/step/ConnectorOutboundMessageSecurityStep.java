@@ -70,7 +70,13 @@ public class ConnectorOutboundMessageSecurityStep implements ConnectorMessageSte
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
-        var updatedMessage = this.messageRepository.findByIdentifier(outboundMessage.identifier());
+        var identifier = outboundMessage.identifier();
+
+        if (identifier == null) {
+            throw new IllegalStateException("Message identifier is null");
+        }
+
+        var updatedMessage = this.messageRepository.findByIdentifier(identifier);
         log.debug(
             "Processing outbound message [{}] ASIC-S container creation",
             updatedMessage.identifier()

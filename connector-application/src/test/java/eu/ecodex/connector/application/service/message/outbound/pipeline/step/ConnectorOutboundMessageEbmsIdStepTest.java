@@ -21,6 +21,8 @@ import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProces
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGenerator;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +34,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+
+@DisplayName("ConnectorOutboundMessageEbmsIdStep")
 public class ConnectorOutboundMessageEbmsIdStepTest {
     @Mock
     private ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator;
@@ -43,56 +47,79 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
     @InjectMocks
     private ConnectorOutboundMessageEbmsIdStep outboundMessageEbmsIdCreationStep;
 
-    @Test
-    void should_execute_outbound_message_and_set_ebms_id_successfully() {
-        var configuration = ConnectorMessageProcessingConfiguration
-            .builder()
-            .ebmsIdGeneratorEnabled(true)
-            .ebmsIdSuffix("connector.ecodex.eu")
-            .build();
-        var ebmsIdentifier = String.format("%s@%s", UUID.randomUUID(), configuration);
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
-        var as4Properties = outboundMessage.as4Properties();
-        as4Properties = as4Properties.toBuilder().ebmsMessageIdentifier(ebmsIdentifier).build();
+    @Nested
+    @DisplayName("when executing successfully")
+    class WhenExecutingSuccessfully {
+        @Test
+        void should_set_the_ebms_id_when_the_generator_is_enabled() {
+            var configuration = ConnectorMessageProcessingConfiguration
+                .builder()
+                .ebmsIdGeneratorEnabled(true)
+                .ebmsIdSuffix("connector.ecodex.eu")
+                .build();
+            var ebmsIdentifier =
+                String.format("%s@%s", UUID.randomUUID(), configuration.ebmsIdSuffix());
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            var as4Properties = outboundMessage.as4Properties()
+                                               .toBuilder()
+                                               .ebmsMessageIdentifier(ebmsIdentifier)
+                                               .build();
 
-        when(messageEbmsIdGenerator.generateIdentifier()).thenReturn(ebmsIdentifier);
-        when(messageRepository.updateEbmsIdentifier(any(), any()))
-            .thenReturn(outboundMessage.toBuilder().as4Properties(as4Properties).build());
-        when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration);
+            when(messageEbmsIdGenerator.generateIdentifier()).thenReturn(ebmsIdentifier);
+            when(messageRepository.updateEbmsIdentifier(any(), any()))
+                .thenReturn(outboundMessage.toBuilder().as4Properties(as4Properties).build());
+            when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration);
 
-        var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
+            var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
 
-        assertThat(outboundMessage.as4Properties().ebmsMessageIdentifier()).isNull();
-        assertThat(outputMessage.as4Properties().ebmsMessageIdentifier()).isNotEmpty();
+            assertThat(outboundMessage.as4Properties().ebmsMessageIdentifier()).isNull();
+            assertThat(outputMessage.as4Properties().ebmsMessageIdentifier()).isNotEmpty();
+            assertThat(outputMessage.as4Properties().ebmsMessageIdentifier())
+                .contains(configuration.ebmsIdSuffix());
+        }
 
-        assertThat(outputMessage.as4Properties().ebmsMessageIdentifier())
-            .contains(configuration.ebmsIdSuffix());
+        @Test
+        void should_not_set_the_ebms_id_when_the_generator_is_disabled() {
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            when(processingConfigurationProvider.getConfiguration())
+                .thenReturn(
+                    ConnectorMessageProcessingConfiguration
+                        .builder()
+                        .ebmsIdGeneratorEnabled(false)
+                        .build()
+                );
+
+            var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
+
+            assertThat(outboundMessage.as4Properties().ebmsMessageIdentifier()).isNull();
+            assertThat(outputMessage.as4Properties().ebmsMessageIdentifier()).isNull();
+            assertThat(outputMessage).isEqualTo(outboundMessage);
+        }
     }
 
-    @Test
-    void should_execute_outbound_message_and_not_set_ebms_id_if_disabled() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
-
-        when(processingConfigurationProvider.getConfiguration())
-            .thenReturn(
-                ConnectorMessageProcessingConfiguration
-                    .builder()
-                    .ebmsIdGeneratorEnabled(false)
-                    .build()
+    @Nested
+    @DisplayName("when the input is invalid")
+    class WhenInputIsInvalid {
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> outboundMessageEbmsIdCreationStep.execute(null)
             );
+        }
 
-        var outputMessage = outboundMessageEbmsIdCreationStep.execute(outboundMessage);
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
+                                                     .toBuilder()
+                                                     .identifier(null)
+                                                     .build();
 
-        assertThat(outboundMessage.as4Properties().ebmsMessageIdentifier()).isNull();
-        assertThat(outputMessage.as4Properties().ebmsMessageIdentifier()).isNull();
-        assertThat(outputMessage).isEqualTo(outboundMessage);
-    }
-
-    @Test
-    void should_throw_exception_when_message_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> outboundMessageEbmsIdCreationStep.execute(null)
-        );
+            assertThrows(
+                IllegalStateException.class,
+                () -> outboundMessageEbmsIdCreationStep.execute(outboundMessage)
+            );
+        }
     }
 }
+

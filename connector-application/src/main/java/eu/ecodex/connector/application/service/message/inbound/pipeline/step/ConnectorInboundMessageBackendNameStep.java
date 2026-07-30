@@ -62,15 +62,21 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
+        var identifier = inboundMessage.identifier();
+
+        if (identifier == null) {
+            throw new IllegalStateException("Message identifier is null");
+        }
+
         log.debug(
             "Processing inbound message [{}] backend name validation ",
-            inboundMessage.identifier()
+            identifier
         );
 
         if (StringUtils.isNotEmpty(inboundMessage.backendName())) {
             log.debug(
                 "Backend name is already set for the message [{}], skipping the name "
-                    + "validation", inboundMessage.identifier()
+                    + "validation", identifier
             );
 
             return inboundMessage;
@@ -83,7 +89,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
 
         if (resolvedBackendName != null) {
             return this.messageRepository.updateBackendName(
-                inboundMessage.identifier(), resolvedBackendName
+                identifier, resolvedBackendName
             );
         }
 
@@ -99,7 +105,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
         );
 
         var updatedMessage = this.messageRepository.updateBackendName(
-            inboundMessage.identifier(), resolvedBackendName
+            identifier, resolvedBackendName
         );
 
         return updatedMessage.toBuilder()

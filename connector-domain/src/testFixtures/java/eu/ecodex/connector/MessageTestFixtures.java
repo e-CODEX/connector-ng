@@ -18,38 +18,38 @@ public class MessageTestFixtures {
     public static ConnectorMessage createEvidenceMessage() {
         var builder = backendToGatewayMessage();
         return builder
-                .businessContent(null)
-                .evidences(null)
-                .transportedEvidences(
-                        List.of(EvidenceTestFixtures.createDeliveryEvidence())
-                )
-                .build();
+            .businessContent(null)
+            .evidences(null)
+            .transportedEvidences(
+                List.of(EvidenceTestFixtures.createDeliveryEvidence())
+            )
+            .build();
     }
 
     public static ConnectorMessage createOutboundStagingBusinessMessage() {
         return backendToGatewayMessage()
-                .identifier(null)
-                .backendName(null)
-                .gatewayName(null)
-                .direction(null)
-                .evidences(null)
-                .createdAt(null)
-                .updatedAt(null)
-                .as4Properties(
-                        defaultASProperties()
-                                .toParty(PartyTestFixtures.createToStagingParty())
-                                .fromParty(PartyTestFixtures.createStagingFromParty())
-                                .build()
-                )
-                .build();
+            .identifier(null)
+            .backendName(null)
+            .gatewayName(null)
+            .direction(null)
+            .evidences(null)
+            .createdAt(null)
+            .updatedAt(null)
+            .as4Properties(
+                AS4PropertiesTestFixtures.defaultAS4Properties()
+                                         .toParty(PartyTestFixtures.createToStagingParty())
+                                         .fromParty(PartyTestFixtures.createStagingFromParty())
+                                         .build()
+            )
+            .build();
     }
 
     public static ConnectorMessage createInboundBusinessMessage() {
         return backendToGatewayMessage()
-                .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                .transportedEvidences(
-                        List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
-                ).build();
+            .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .transportedEvidences(
+                List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
+            ).build();
     }
 
     public static ConnectorMessage createInboundBusinessMessageWithoutBackendName() {
@@ -60,10 +60,12 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createInboundBusinessMessageWithoutBackendNameAndConversationIdentifier() {
         return createInboundBusinessMessageWithoutBackendName()
-                .toBuilder()
-                .backendName(null)
-                .as4Properties(defaultASProperties().conversationIdentifier(null).build())
-                .build();
+            .toBuilder()
+            .backendName(null)
+            .as4Properties(AS4PropertiesTestFixtures.defaultAS4Properties()
+                                                    .conversationIdentifier(null)
+                                                    .build())
+            .build();
     }
 
     public static ConnectorMessage createValidOutboundBusinessMessageWithoutGatewayName() {
@@ -72,60 +74,60 @@ public class MessageTestFixtures {
 
     public static ConnectorMessage createNullFromPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
-                .as4Properties(defaultASProperties().fromParty(null).build())
-                .build();
+            .as4Properties(AS4PropertiesTestFixtures.createAS4PropertiesWithoutFromParty())
+            .build();
     }
 
     public static ConnectorMessage createEmptyFromPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
-                .as4Properties(
-                        defaultASProperties()
-                                .fromParty(
-                                        PartyTestFixtures.createFromParty()
-                                                         .toBuilder()
-                                                         .identifierType("")
-                                                         .build())
-                                .build()
-                )
-                .build();
+            .as4Properties(
+                AS4PropertiesTestFixtures.defaultAS4Properties()
+                                         .fromParty(
+                                             PartyTestFixtures.createFromParty()
+                                                              .toBuilder()
+                                                              .identifierType("")
+                                                              .build())
+                                         .build()
+            )
+            .build();
     }
 
     public static ConnectorMessage createNullToPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
-                .as4Properties(defaultASProperties().toParty(null).build())
-                .build();
+            .as4Properties(AS4PropertiesTestFixtures.createAS4PropertiesWithoutToParty())
+            .build();
     }
 
     public static ConnectorMessage createEmptyToPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
-                .as4Properties(
-                        defaultASProperties()
-                                .toParty(PartyTestFixtures.createToParty()
-                                                          .toBuilder()
-                                                          .identifierType("")
-                                                          .build())
-                                .build()
-                )
-                .build();
+            .as4Properties(
+                AS4PropertiesTestFixtures.defaultAS4Properties()
+                                         .toParty(PartyTestFixtures.createToParty()
+                                                                   .toBuilder()
+                                                                   .identifierType("")
+                                                                   .build())
+                                         .build()
+            )
+            .build();
     }
 
     public static ConnectorMessage createInvalidFromPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
-                .as4Properties(
-                        defaultASProperties()
-                                .fromParty(PartyTestFixtures.createToParty())
-                                .build()
-                )
-                .build();
+            .as4Properties(
+                AS4PropertiesTestFixtures.defaultAS4Properties()
+                                         .fromParty(PartyTestFixtures.createToParty())
+                                         .build()
+            )
+            .build();
     }
 
     public static ConnectorMessage createInvalidToPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
-                .as4Properties(
-                        defaultASProperties()
-                                .toParty(PartyTestFixtures.createFromParty())
-                                .build()
-                ).build();
+            .as4Properties(
+                AS4PropertiesTestFixtures.defaultAS4Properties()
+                                         .toParty(PartyTestFixtures.createFromParty())
+                                         .build()
+            ).build();
     }
 
     public static ConnectorMessage createSubmissionAcceptanceEvidenceMessage() {
@@ -170,10 +172,10 @@ public class MessageTestFixtures {
         evidences.add(evidence);
 
         return backendToGatewayMessage()
-                .evidences(evidences)
-                .transportedEvidences(evidences)
-                .businessContent(null)
-                .build();
+            .evidences(evidences)
+            .transportedEvidences(evidences)
+            .businessContent(null)
+            .build();
     }
 
     public static ConnectorMessage createEvidenceTriggerMessage() {
@@ -182,9 +184,9 @@ public class MessageTestFixtures {
         transported.add(evidence);
 
         return evidencesMessage()
-                .transportedEvidences(transported)
-                .businessContent(null)
-                .build();
+            .transportedEvidences(transported)
+            .businessContent(null)
+            .build();
     }
 
     public static ConnectorMessage createRejectedMessage() {
@@ -193,11 +195,11 @@ public class MessageTestFixtures {
         evidences.add(evidence);
 
         return backendToGatewayMessage()
-                .evidences(evidences)
-                .transportedEvidences(evidences)
-                .businessContent(null)
-                .rejectedAt(Instant.now())
-                .build();
+            .evidences(evidences)
+            .transportedEvidences(evidences)
+            .businessContent(null)
+            .rejectedAt(Instant.now())
+            .build();
     }
 
     public static ConnectorMessage createConfirmedMessage() {
@@ -206,72 +208,59 @@ public class MessageTestFixtures {
         evidences.add(evidence);
 
         return backendToGatewayMessage()
-                .evidences(evidences)
-                .transportedEvidences(evidences)
-                .businessContent(null)
-                .confirmedAt(Instant.now())
-                .build();
+            .evidences(evidences)
+            .transportedEvidences(evidences)
+            .businessContent(null)
+            .confirmedAt(Instant.now())
+            .build();
     }
 
     private static ConnectorMessage.ConnectorMessageBuilder evidencesMessage() {
         var builder = backendToGatewayMessage();
         return builder
-                .identifier(null)
-                .backendName(null)
-                .gatewayName(null)
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .evidences(null)
-                .createdAt(null)
-                .updatedAt(null)
-                .as4Properties(
-                        ConnectorMessageAS4Properties
-                                .builder()
-                                .conversationIdentifier(null)
-                                .referenceToIdentifier(
-                                        "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
-                                .ebmsMessageIdentifier(null)
-                                .originalSender(null)
-                                .finalRecipient(null)
-                                .fromParty(null)
-                                .toParty(null)
-                                .service(null)
-                                .action(null)
-                                .build()
-                );
+            .identifier(null)
+            .backendName(null)
+            .gatewayName(null)
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .evidences(null)
+            .createdAt(null)
+            .updatedAt(null)
+            .as4Properties(
+                ConnectorMessageAS4Properties
+                    .builder()
+                    .conversationIdentifier(null)
+                    .referenceToIdentifier(
+                        "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
+                    .ebmsMessageIdentifier(null)
+                    .originalSender(null)
+                    .finalRecipient(null)
+                    .fromParty(null)
+                    .toParty(null)
+                    .service(null)
+                    .action(null)
+                    .build()
+            );
     }
 
     // is considered as an outgoing message
     private static ConnectorMessage.ConnectorMessageBuilder backendToGatewayMessage() {
         return ConnectorMessage
-                .builder()
-                .businessDomainIdentifier(
-                        BusinessDomainTestFixtures.createDefaultBusinessDomain()
-                                                  .identifier()
-                )
-                .businessContent(MessageContentTestFixtures.createContent())
-                .identifier("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
-                .backendMessageIdentifier(
-                        "85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu")
-                .backendName("default_backend")
-                .gatewayName("default_gateway")
-                .as4Properties(defaultASProperties().build())
-                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                .evidences(new ArrayList<>())
-                .transportedEvidences(new ArrayList<>())
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now());
-    }
-
-    private static ConnectorMessageAS4Properties.ConnectorMessageAS4PropertiesBuilder defaultASProperties() {
-        return ConnectorMessageAS4Properties
-                .builder()
-                .conversationIdentifier("e6a173ec-de21-46dc-8a19-63a6cb74915d")
-                .ebmsMessageIdentifier(null)
-                .originalSender("alice")
-                .finalRecipient("bob")
-                .fromParty(PartyTestFixtures.createFromParty())
-                .toParty(PartyTestFixtures.createToParty())
-                .service(ServiceTestFixtures.createService())
-                .action(ActionTestFixtures.createAction());
+            .builder()
+            .businessDomainIdentifier(
+                BusinessDomainTestFixtures.createDefaultBusinessDomain()
+                                          .identifier()
+            )
+            .businessContent(MessageContentTestFixtures.createContent())
+            .identifier("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu")
+            .backendMessageIdentifier(
+                "85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu")
+            .backendName("default_backend")
+            .gatewayName("default_gateway")
+            .as4Properties(AS4PropertiesTestFixtures.defaultAS4Properties().build())
+            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+            .evidences(new ArrayList<>())
+            .transportedEvidences(new ArrayList<>())
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now());
     }
 }

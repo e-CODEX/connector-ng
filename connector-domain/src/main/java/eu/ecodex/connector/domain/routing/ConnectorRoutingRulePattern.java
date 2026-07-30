@@ -51,6 +51,18 @@ public class ConnectorRoutingRulePattern {
 
     static String extractAs4Value(ConnectorMessage message, TokenType as4Attribute) {
         ConnectorMessageAS4Properties as4Properties = message.as4Properties();
+        if (as4Properties.service() == null) {
+            throw new IllegalStateException("Cannot extract AS4 value without a service");
+        }
+
+        if (as4Properties.fromParty() == null) {
+            throw new IllegalStateException("Cannot extract AS4 value without a fromParty");
+        }
+
+        if (as4Properties.action() == null) {
+            throw new IllegalStateException("Cannot extract AS4 value without a action");
+        }
+
         return switch (as4Attribute) {
             case TokenType.AS4_SERVICE_NAME -> as4Properties.service().name();
             case TokenType.AS4_SERVICE_TYPE -> as4Properties.service().type();
@@ -59,7 +71,7 @@ public class ConnectorRoutingRulePattern {
             case TokenType.AS4_FROM_PARTY_ID_TYPE -> as4Properties.fromParty().identifierType();
             case TokenType.AS4_FROM_PARTY_ID -> as4Properties.fromParty().identifier();
             case TokenType.AS4_FROM_PARTY_ROLE -> as4Properties.fromParty().role();
-            default -> throw new RuntimeException("Unsupported AS4 Attribute to match!");
+            default -> throw new IllegalStateException("Unsupported AS4 Attribute to match!");
         };
     }
 

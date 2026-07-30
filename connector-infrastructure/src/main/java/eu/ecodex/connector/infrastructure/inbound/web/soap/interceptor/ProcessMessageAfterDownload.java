@@ -52,6 +52,10 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
             "Updating retrieve message transport step status for the message [{}]",
             this.connectorMessage.identifier()
         );
+        if (this.connectorMessage.identifier() == null) {
+            throw new IllegalStateException("Message identifier is null");
+        }
+
         try {
             var command = UpdateMessageTransportCommand
                 .builder()

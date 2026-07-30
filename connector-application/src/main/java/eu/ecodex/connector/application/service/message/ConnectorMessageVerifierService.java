@@ -73,53 +73,61 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
     private void processRelaxedVerification(ConnectorMessage message) {
         this.processServiceAndActionVerification(message);
 
-        var toParty = message.as4Properties().toParty();
-
-        if (toParty != null && toParty.identifierType().isBlank()) {
-            log.warn(
-                "Message with identifier [{}] verification mode is RELAXED."
-                    + "Assuming ToParty IdentifierType [{}] as empty!",
-                message.identifier(), toParty.identifierType()
-            );
+        if (message.businessDomainIdentifier() == null) {
+            throw new IllegalStateException("Business domain identifier is null");
         }
 
-        // TODO improve the verification
-        var foundToParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
-            toParty.identifier(), toParty.roleType(), message.businessDomainIdentifier()
-        );
+        var toParty = message.as4Properties().toParty();
 
-        if (foundToParty == null) {
-            throw new ConnectorProcessingModeVerificationException(
-                String.format(
-                    "Message toParty [%s] is not configured on the connector! "
-                        + "Check the P-Mode linked to business domain with uuid [%s]",
-                    toParty, message.businessDomainIdentifier()
-                )
+        if (toParty != null) {
+            if (toParty.identifierType().isBlank()) {
+                log.warn(
+                    "Message with identifier [{}] verification mode is RELAXED. "
+                        + "Assuming ToParty IdentifierType [{}] as empty!",
+                    message.identifier(), toParty.identifierType()
+                );
+            }
+
+            // TODO improve the verification
+            var foundToParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                toParty.identifier(), toParty.roleType(), message.businessDomainIdentifier()
             );
+
+            if (foundToParty == null) {
+                throw new ConnectorProcessingModeVerificationException(
+                    String.format(
+                        "Message toParty [%s] is not configured on the connector! "
+                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                        toParty, message.businessDomainIdentifier()
+                    )
+                );
+            }
         }
 
         var fromParty = message.as4Properties().fromParty();
 
-        if (fromParty != null && fromParty.identifierType().isBlank()) {
-            log.warn(
-                "Message with identifier [{}] verification mode is RELAXED."
-                    + "Assuming FromParty IdentifierType [{}] as empty!",
-                message.identifier(), fromParty.identifierType()
-            );
-        }
+        if (fromParty != null) {
+            if (fromParty.identifierType().isBlank()) {
+                log.warn(
+                    "Message with identifier [{}] verification mode is RELAXED. "
+                        + "Assuming FromParty IdentifierType [{}] as empty!",
+                    message.identifier(), fromParty.identifierType()
+                );
+            }
 
-        var foundFromParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
-            fromParty.name(), fromParty.roleType(), message.businessDomainIdentifier()
-        );
-
-        if (foundFromParty == null) {
-            throw new ConnectorProcessingModeVerificationException(
-                String.format(
-                    "Message fromParty [%s] is not configured on the connector! "
-                        + "Check the P-Mode linked to business domain with uuid [%s]",
-                    fromParty, message.businessDomainIdentifier()
-                )
+            var foundFromParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                fromParty.identifier(), fromParty.roleType(), message.businessDomainIdentifier()
             );
+
+            if (foundFromParty == null) {
+                throw new ConnectorProcessingModeVerificationException(
+                    String.format(
+                        "Message fromParty [%s] is not configured on the connector! "
+                            + "Check the P-Mode linked to business domain with uuid [%s]",
+                        fromParty, message.businessDomainIdentifier()
+                    )
+                );
+            }
         }
     }
 
@@ -135,11 +143,25 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
     private void processServiceAndActionVerification(ConnectorMessage message) {
         log.debug("Verifying service and action for message [{}]", message.identifier());
+        var businessDomainIdentifier = message.businessDomainIdentifier();
+
+        if (businessDomainIdentifier == null) {
+            throw new IllegalStateException("Business domain identifier is null");
+        }
+
+        var as4Properties = message.as4Properties();
+
+        if (as4Properties.service() == null) {
+            throw new IllegalStateException("Service is null");
+        }
+
+        if (as4Properties.action() == null) {
+            throw new IllegalStateException("Action is null");
+        }
 
         try {
-            var as4Properties = message.as4Properties();
+
             var serviceName = as4Properties.service().name();
-            var businessDomainIdentifier = message.businessDomainIdentifier();
             var service = this.serviceRepository.findByNameAndBusinessDomain(
                 serviceName,
                 businessDomainIdentifier

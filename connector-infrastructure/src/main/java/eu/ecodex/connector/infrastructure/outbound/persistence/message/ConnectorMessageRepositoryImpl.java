@@ -159,10 +159,31 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
 
     @Override
     public ConnectorMessage save(@NonNull ConnectorMessage message) {
+        if (message.businessDomainIdentifier() == null) {
+            throw new IllegalArgumentException("Business domain identifier is required");
+        }
+
+        var as4Properties = message.as4Properties();
+
+        if (as4Properties.service() == null) {
+            throw new IllegalArgumentException("Service is required");
+        }
+
+        if (as4Properties.action() == null) {
+            throw new IllegalArgumentException("Action is required");
+        }
+
+        if (as4Properties.fromParty() == null) {
+            throw new IllegalArgumentException("From party is required");
+        }
+
+        if (as4Properties.toParty() == null) {
+            throw new IllegalArgumentException("To party is required");
+        }
+
         var messageToSave = toEntity(message);
         var savedMessage = this.messageJpaRepository.save(messageToSave);
 
-        var as4Properties = message.as4Properties();
         var businessDomainIdentifier = message.businessDomainIdentifier().messageLaneIdentifier();
         var service = this.serviceJpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
             as4Properties.service().name(), businessDomainIdentifier
@@ -347,6 +368,14 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
     }
 
     private ConnectorMessageEntity toEntity(ConnectorMessage message) {
+        if (message.businessDomainIdentifier() == null) {
+            throw new IllegalArgumentException("Business domain identifier is required");
+        }
+
+        if (message.identifier() == null) {
+            throw new IllegalArgumentException("Identifier is required");
+        }
+
         var businessDomain = this.businessDomainJpaRepository.findByIdentifier(
             message.businessDomainIdentifier().messageLaneIdentifier()
         );

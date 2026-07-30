@@ -95,6 +95,17 @@ public record ConnectorMessage(
     @Nullable List<ConnectorMessageEvidence> evidences,
     @Nullable List<ConnectorMessageEvidence> transportedEvidences
 ) implements Serializable {
+
+    /**
+     * Initializes the message with default values for optional fields.
+     */
+    public ConnectorMessage {
+        attachments = attachments == null ? List.of() : attachments;
+        errors = errors == null ? List.of() : errors;
+        evidences = evidences == null ? List.of() : evidences;
+        transportedEvidences = transportedEvidences == null ? List.of() : transportedEvidences;
+    }
+
     /**
      * Determines whether the current message has been rejected.
      *
@@ -189,8 +200,22 @@ public record ConnectorMessage(
     public ConnectorMessage switchDirection() {
         final var as4Properties = this.as4Properties();
         final var direction = this.direction();
+
+        if (direction == null) {
+            throw new IllegalStateException("Cannot switch direction without a direction");
+        }
+
         final var fromParty = as4Properties.fromParty();
+
+        if (fromParty == null) {
+            throw new IllegalStateException("Cannot switch direction without a fromParty");
+        }
+
         final var toParty = as4Properties.toParty();
+
+        if (toParty == null) {
+            throw new IllegalStateException("Cannot switch direction without a toParty");
+        }
 
         var switchedAS4PropertiesBuilder = this.as4Properties().toBuilder();
         // switching party, but keep Role and RoleType

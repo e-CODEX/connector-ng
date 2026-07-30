@@ -55,9 +55,13 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
         @NonNull ConnectorMessage message) {
         log.debug("Processing message [{}] with evidence [{}]", message.identifier(), evidenceType);
 
+        if (message.identifier() == null) {
+            throw new IllegalStateException("Message identifier is required");
+        }
+
         var transportedEvidences = message.transportedEvidences();
 
-        if (transportedEvidences == null) {
+        if (transportedEvidences == null || transportedEvidences.isEmpty()) {
             throw new ConnectorEvidenceException(
                 "Message [{" + message.identifier() + "}] has no evidences!"
             );

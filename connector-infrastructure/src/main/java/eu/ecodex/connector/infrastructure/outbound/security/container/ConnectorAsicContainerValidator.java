@@ -271,6 +271,10 @@ public class ConnectorAsicContainerValidator {
             return;
         }
 
+        if (message.businessContent() == null || message.businessContent().uuid() == null) {
+            throw new IllegalStateException("Message business content is null");
+        }
+
         var businessDocumentAttachment = newAttachmentMetadata(
             container.token().getDocument().getFilename(),
             mimeTypeString(businessDssDocument),

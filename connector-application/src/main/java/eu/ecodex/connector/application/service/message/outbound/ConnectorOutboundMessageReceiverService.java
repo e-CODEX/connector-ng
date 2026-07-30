@@ -81,6 +81,12 @@ public class ConnectorOutboundMessageReceiverService implements ConnectorOutboun
         var messageWithId = this.assignIdentifier(message);
 
         if (messageWithId.isBusinessMessage()) {
+            if (message.businessDomainIdentifier() == null) {
+                throw new IllegalStateException(
+                    "The message does not contain a business domain identifier. "
+                        + "It will therefore be rejected."
+                );
+            }
             businessDomainVerifierService.execute(message.businessDomainIdentifier());
             var configuration = this.configurationProvider.getConfiguration();
             this.messageVerifierService.verify(

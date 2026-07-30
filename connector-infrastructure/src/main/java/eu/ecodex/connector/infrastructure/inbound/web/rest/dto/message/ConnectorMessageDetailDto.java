@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
@@ -84,6 +85,10 @@ public record ConnectorMessageDetailDto(
      *     {@link ConnectorMessage}
      */
     public static ConnectorMessageDetailDto from(ConnectorMessage message) {
+        if (message.businessDomainIdentifier() == null) {
+            throw new IllegalArgumentException("Message must have a business domain identifier");
+        }
+
         return ConnectorMessageDetailDto
             .builder()
             .businessDomainIdentifier(
@@ -105,21 +110,27 @@ public record ConnectorMessageDetailDto(
             .deliveredToLinkPartnerAt(message.deliveredToLinkPartnerAt())
             .errors(message.errors())
             .attachments(message.attachments())
-            .evidences(
-                message.evidences()
-                       .stream()
-                       .map(evidence ->
-                                ConnectorMessageEvidenceDto
-                                    .builder()
-                                    .uuid(evidence.uuid())
-                                    .type(evidence.type())
-                                    .createdAt(evidence.createdAt())
-                                    .updatedAt(evidence.updatedAt())
-                                    .deliveredToLinkPartnerAt(
-                                        evidence.deliveredToLinkPartnerAt())
-                                    .build()
-                       ).toList()
-            )
+            .evidences(toEvidences(message.evidences()))
             .build();
+    }
+
+    private static List<ConnectorMessageEvidenceDto> toEvidences(
+        List<ConnectorMessageEvidence> evidences) {
+        if (evidences == null) {
+            return List.of();
+        }
+
+        return evidences.stream()
+                        .map(evidence ->
+                                 ConnectorMessageEvidenceDto
+                                     .builder()
+                                     .uuid(evidence.uuid())
+                                     .type(evidence.type())
+                                     .createdAt(evidence.createdAt())
+                                     .updatedAt(evidence.updatedAt())
+                                     .deliveredToLinkPartnerAt(
+                                         evidence.deliveredToLinkPartnerAt())
+                                     .build()
+                        ).toList();
     }
 }

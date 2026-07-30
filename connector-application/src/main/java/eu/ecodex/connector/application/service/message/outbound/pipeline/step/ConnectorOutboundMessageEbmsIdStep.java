@@ -52,25 +52,31 @@ public class ConnectorOutboundMessageEbmsIdStep implements ConnectorMessageStep 
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorMessage message) {
-        log.info("Creating EBMS ID for outbound message: [{}]", message.identifier());
+        var identifier = message.identifier();
+
+        if (identifier == null) {
+            throw new IllegalStateException("Message identifier is null");
+        }
+
+        log.info("Creating EBMS ID for outbound message: [{}]", identifier);
 
         var configuration = this.processingConfigurationProvider.getConfiguration();
 
         if (configuration.ebmsIdGeneratorEnabled()) {
             log.info(
                 "EBMS ID generator enabled, generating new EBMS message ID for "
-                    + "outbound connector message: [{}]", message.identifier()
+                    + "outbound connector message: [{}]", identifier
             );
 
             return this.messageRepository.updateEbmsIdentifier(
-                message.identifier(), messageEbmsIdGenerator.generateIdentifier()
+                identifier, messageEbmsIdGenerator.generateIdentifier()
             );
         }
 
         log.info(
             "EBMS ID generator disabled, skipping EBMS message ID generation for "
                 + "outbound connector message: [{}]",
-            message.identifier()
+            identifier
         );
 
         return message;

@@ -83,7 +83,15 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
             checkEvidentness(triggerMessage);
 
             // triggerEvidence cannot be null because of the checkEvidentness
-            var triggerEvidence = triggerMessage.transportedEvidences().getFirst();
+            var transportedEvidences = triggerMessage.transportedEvidences();
+
+            if (transportedEvidences == null || transportedEvidences.size() != 1) {
+                throw new ConnectorEvidenceException(
+                    "Evidence trigger message must contain exactly one evidence"
+                );
+            }
+
+            var triggerEvidence = transportedEvidences.getFirst();
             var evidenceType = triggerEvidence.type();
 
             var businessMessage = findReferencedBusinessMessage(triggerMessage);
@@ -185,6 +193,10 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
     private void applyEvidenceToBusinessMessage(
         ConnectorMessage businessMessage,
         ConnectorMessageEvidence createdEvidence) {
+        if (businessMessage.identifier() == null) {
+            throw new IllegalStateException("Business message identifier is null");
+        }
+
         var reloaded = messageRepository.findByIdentifier(businessMessage.identifier());
         var accumulated = reloaded.evidences() != null
             ? new ArrayList<>(reloaded.evidences())

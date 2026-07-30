@@ -136,11 +136,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     private byte[] requirePriorEvidence(
         ConnectorEvidenceType requiredType,
         ConnectorMessage message) {
-        byte[] prev = findPriorEvidence(requiredType, message);
-        if (prev == null) {
-            throw new ConnectorEvidenceException("prior evidence content is required");
-        }
-        return prev;
+        return findPriorEvidence(requiredType, message);
     }
 
     private byte[] createRelayRemmdAcceptance(ConnectorMessage message)
@@ -261,7 +257,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     private String checkPayloadAndBuildHashHex(ConnectorMessage message) {
         var businessContent = message.businessContent();
 
-        if (businessContent == null || businessContent.xmlContent() == null) {
+        if (businessContent == null) {
             return null;
         }
 

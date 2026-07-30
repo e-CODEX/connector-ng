@@ -65,6 +65,10 @@ public class ConnectorMessageEvidenceCreatorService implements ConnectorMessageE
         ConnectorEvidenceType evidenceType,
         ConnectorMessage message,
         ConnectorMessageRejectionReason rejectionReason) {
+        if (message.identifier() == null) {
+            throw new IllegalStateException("Message identifier is required");
+        }
+
         var evidence = this.evidenceToolkit.create(message, evidenceType, rejectionReason);
 
         return this.evidenceRepository.save(evidence, message.identifier());

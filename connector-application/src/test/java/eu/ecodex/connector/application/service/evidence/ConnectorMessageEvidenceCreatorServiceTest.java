@@ -22,6 +22,8 @@ import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,100 +32,120 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorMessageEvidenceCreatorService")
 public class ConnectorMessageEvidenceCreatorServiceTest {
     @Mock
     private ConnectorEvidenceToolkit evidenceToolkit;
     @Mock
     private ConnectorMessageEvidenceRepository evidenceRepository;
-
     @InjectMocks
     private ConnectorMessageEvidenceCreatorService evidenceService;
 
-    // success evidence creation (SUBMISSION_ACCEPTANCE)
-    @Test
-    void should_create_submission_acceptance_evidence_successfully() {
-        var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
+    @Nested
+    @DisplayName("create a success evidence")
+    class CreateSuccess {
+        @Test
+        void should_create_the_submission_acceptance_evidence_successfully() {
+            var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
+            when(evidenceToolkit.create(
+                any(),
+                eq(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE),
+                any()
+            )).thenReturn(evidence);
+            when(evidenceRepository.save(any(), any())).thenReturn(evidence);
 
-        when(evidenceToolkit.create(
-            any(),
-            eq(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE),
-            any()
-        )).thenReturn(evidence);
-        when(evidenceRepository.save(any(), any())).thenReturn(evidence);
-
-        var created = this.evidenceService.createSuccess(
-            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-            MessageTestFixtures.createOutboundBusinessMessage()
-        );
-
-        assertThat(created).isNotNull();
-        assertThat(created.type()).isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
-        assertThat(created.content()).isNotNull();
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_creating_evidence_with_null_message() {
-        assertThrows(
-            NullPointerException.class, () -> this.evidenceService.createSuccess(
-                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null)
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_creating_evidence_with_null_evidence_type() {
-        assertThrows(
-            NullPointerException.class, () -> this.evidenceService.createSuccess(
-                null,
+            var created = evidenceService.createSuccess(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
                 MessageTestFixtures.createOutboundBusinessMessage()
-            )
-        );
+            );
+
+            assertThat(created).isNotNull();
+            assertThat(created.type()).isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
+            assertThat(created.content()).isNotNull();
+        }
+
+        @Test
+        void should_fail_when_the_evidence_type_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> evidenceService.createSuccess(
+                    null,
+                    MessageTestFixtures.createOutboundBusinessMessage()
+                )
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> evidenceService.createSuccess(
+                    ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            var message = MessageTestFixtures.createOutboundBusinessMessage()
+                                             .toBuilder()
+                                             .identifier(null)
+                                             .build();
+
+            assertThrows(
+                IllegalStateException.class,
+                () -> evidenceService.createSuccess(
+                    ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message)
+            );
+        }
     }
 
-    // failure or rejection evidence creation
+    @Nested
+    @DisplayName("create a failure evidence")
+    class CreateFailure {
+        @Test
+        void should_create_the_rejection_evidence_successfully() {
+            var evidence = EvidenceTestFixtures.createRelayREMMDRejectionEvidence();
+            when(evidenceToolkit.create(
+                any(),
+                eq(ConnectorEvidenceType.RELAY_REMMD_REJECTION),
+                any()
+            )).thenReturn(evidence);
+            when(evidenceRepository.save(any(), any())).thenReturn(evidence);
 
-    @Test
-    void should_create_failure_acceptance_evidence_successfully() {
-        var evidence = EvidenceTestFixtures.createRelayREMMDRejectionEvidence();
-
-        when(evidenceToolkit.create(
-            any(),
-            eq(ConnectorEvidenceType.RELAY_REMMD_REJECTION),
-            any()
-        )).thenReturn(evidence);
-        when(evidenceRepository.save(any(), any())).thenReturn(evidence);
-
-        var created = this.evidenceService.createFailure(
-            ConnectorEvidenceType.RELAY_REMMD_REJECTION,
-            MessageTestFixtures.createOutboundBusinessMessage(),
-            ConnectorMessageRejectionReason.OTHER
-        );
-
-        assertThat(created).isNotNull();
-        assertThat(created.type()).isEqualTo(ConnectorEvidenceType.RELAY_REMMD_REJECTION);
-        assertThat(created.content()).isNotNull();
-    }
-
-    @Test
-    void should_throw_exception_when_evidence_type_is_null_during_failure__evidence_creation() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.evidenceService.createFailure(
-                null,
+            var created = evidenceService.createFailure(
+                ConnectorEvidenceType.RELAY_REMMD_REJECTION,
                 MessageTestFixtures.createOutboundBusinessMessage(),
                 ConnectorMessageRejectionReason.OTHER
-            )
-        );
-    }
+            );
 
-    @Test
-    void should_throw_exception_when_message_is_null_during_failure_evidence_creation() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.evidenceService.createFailure(
-                ConnectorEvidenceType.RELAY_REMMD_REJECTION,
-                null,
-                ConnectorMessageRejectionReason.OTHER
-            )
-        );
+            assertThat(created).isNotNull();
+            assertThat(created.type()).isEqualTo(ConnectorEvidenceType.RELAY_REMMD_REJECTION);
+            assertThat(created.content()).isNotNull();
+        }
+
+        @Test
+        void should_fail_when_the_evidence_type_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> evidenceService.createFailure(
+                    null,
+                    MessageTestFixtures.createOutboundBusinessMessage(),
+                    ConnectorMessageRejectionReason.OTHER
+                )
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> evidenceService.createFailure(
+                    ConnectorEvidenceType.RELAY_REMMD_REJECTION,
+                    null,
+                    ConnectorMessageRejectionReason.OTHER
+                )
+            );
+        }
     }
 }
+

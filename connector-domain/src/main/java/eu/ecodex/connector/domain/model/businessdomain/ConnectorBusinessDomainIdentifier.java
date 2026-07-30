@@ -27,7 +27,7 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDomainIdentifier(
-        String messageLaneIdentifier
+        @Nonnull String messageLaneIdentifier
 ) {
     @Override
     @Nonnull public String toString() {

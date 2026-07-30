@@ -10,80 +10,119 @@
 
 package eu.ecodex.connector.application.service.message;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorMessagePartiesVerifierService")
 public class ConnectorMessagePartiesVerifierServiceTest {
     private final ConnectorMessagePartiesVerifier partiesVerifierService =
         new ConnectorMessagePartiesVerifierService();
 
-    @Test
-    void should_check_outgoing_message_parties_info_successfully() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        // no thrown exception mean from and to parties are set correctly
-        this.partiesVerifierService.verify(message);
+    @Nested
+    @DisplayName("when the outbound message is valid")
+    class WhenValid {
+        @Test
+        void should_verify_the_message_without_error() {
+            var message = MessageTestFixtures.createOutboundBusinessMessage();
+            // no exception means the from and to parties are set correctly
+            assertThatCode(() -> partiesVerifierService.verify(message))
+                .doesNotThrowAnyException();
+        }
     }
 
-    @Test
-    void should_throw_exception_when_outbound_message_from_party_info_is_null() {
-        var message = MessageTestFixtures.createNullFromPartyOutboundBusinessMessage();
-        assertThrows(
-            ConnectorMessagePartyException.class,
-            () -> partiesVerifierService.verify(message)
-        );
+    @Nested
+    @DisplayName("when the message parties are invalid")
+    class WhenPartiesAreInvalid {
+        @Test
+        void should_fail_when_the_from_party_is_null() {
+            var message = MessageTestFixtures.createNullFromPartyOutboundBusinessMessage();
+
+            assertThrows(
+                ConnectorMessagePartyException.class,
+                () -> partiesVerifierService.verify(message)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_from_party_is_incorrect() {
+            var message = MessageTestFixtures.createInvalidFromPartyOutboundBusinessMessage();
+
+            assertThrows(
+                ConnectorMessagePartyException.class,
+                () -> partiesVerifierService.verify(message)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_to_party_is_null() {
+            var message = MessageTestFixtures.createNullToPartyOutboundBusinessMessage();
+
+            assertThrows(
+                ConnectorMessagePartyException.class,
+                () -> partiesVerifierService.verify(message)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_to_party_is_incorrect() {
+            var message = MessageTestFixtures.createInvalidToPartyOutboundBusinessMessage();
+
+            assertThrows(
+                ConnectorMessagePartyException.class,
+                () -> partiesVerifierService.verify(message)
+            );
+        }
     }
 
-    @Test
-    void should_throw_exception_when_outbound_message_to_party_info_is_null() {
-        var message = MessageTestFixtures.createNullToPartyOutboundBusinessMessage();
-        assertThrows(
-            ConnectorMessagePartyException.class,
-            () -> partiesVerifierService.verify(message)
-        );
-    }
+    @Nested
+    @DisplayName("when the message cannot be verified")
+    class WhenNotVerifiable {
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> partiesVerifierService.verify(null)
+            );
+        }
 
-    @Test
-    void should_throw_exception_when_outbound_message_from_party_info_are_incorrect() {
-        var message = MessageTestFixtures.createInvalidFromPartyOutboundBusinessMessage();
-        assertThrows(
-            ConnectorMessagePartyException.class,
-            () -> partiesVerifierService.verify(message)
-        );
-    }
+        @Test
+        void should_fail_when_the_direction_is_null() {
+            var message = MessageTestFixtures.createOutboundBusinessMessage()
+                                             .toBuilder()
+                                             .direction(null)
+                                             .build();
 
-    @Test
-    void should_throw_exception_when_outbound_message_to_party_info_are_incorrect() {
-        var message = MessageTestFixtures.createInvalidToPartyOutboundBusinessMessage();
-        assertThrows(
-            ConnectorMessagePartyException.class,
-            () -> partiesVerifierService.verify(message)
-        );
-    }
+            assertThrows(
+                IllegalStateException.class,
+                () -> partiesVerifierService.verify(message)
+            );
+        }
 
-    @Test
-    void should_throw_exception_when_outbound_message_direction_is_incorrect() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                         .toBuilder()
-                                         .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                         .build();
-        assertThrows(
-            UnsupportedOperationException.class,
-            () -> partiesVerifierService.verify(message)
-        );
-    }
+        @Test
+        void should_fail_when_the_direction_is_not_outbound() {
+            var message = MessageTestFixtures.createOutboundBusinessMessage()
+                                             .toBuilder()
+                                             .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                                             .build();
 
-    @Test
-    void should_throw_null_pointer_exception_when_message_is_null_when_checking_outgoing_message_parties_info() {
-        assertThrows(
-            NullPointerException.class, () -> partiesVerifierService.verify(null));
+            assertThrows(
+                UnsupportedOperationException.class,
+                () -> partiesVerifierService.verify(message)
+            );
+        }
     }
 }
+
+

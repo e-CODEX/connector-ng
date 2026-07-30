@@ -120,6 +120,10 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
     private void submitToBackend(@NonNull ConnectorMessage message) {
         var identifier = message.identifier();
 
+        if (identifier == null) {
+            throw new IllegalStateException("Message identifier cannot be null");
+        }
+
         log.info("Submitting message [{}] to the backend system", identifier);
 
         var deliveryWebService = backendDeliveryServiceClient.createClient(message.backendName());
@@ -147,11 +151,19 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
                     }
 
                     // a business message has at least one transported evidence
-                    message.transportedEvidences().forEach(
-                        evidence ->
-                            evidenceRepository.setDeliveredToLinkPartnerAt(
-                                evidence.uuid())
-                    );
+                    var transportedEvidences = message.transportedEvidences();
+
+                    if (transportedEvidences != null && !transportedEvidences.isEmpty()) {
+                        transportedEvidences.forEach(
+                            evidence -> {
+                                if (evidence.uuid() == null) {
+                                    throw new IllegalStateException(
+                                        "The evidence message contains no transported evidence");
+                                }
+                                evidenceRepository.setDeliveredToLinkPartnerAt(evidence.uuid());
+                            }
+                        );
+                    }
                 } else { // the message is an evidence message
                     var transportedEvidences = message.transportedEvidences();
 
@@ -162,6 +174,12 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
                     }
 
                     var transportedEvidence = transportedEvidences.getFirst();
+
+                    if (transportedEvidence.uuid() == null) {
+                        throw new IllegalStateException(
+                            "The evidence message contains no transported evidence"
+                        );
+                    }
 
                     evidenceRepository.setDeliveredToLinkPartnerAt(
                         transportedEvidence.uuid()

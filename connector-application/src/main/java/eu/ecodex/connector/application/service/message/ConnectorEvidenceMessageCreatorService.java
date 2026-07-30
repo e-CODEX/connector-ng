@@ -80,7 +80,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             .fromParty(copyParty(businessAs4.fromParty()))
             .toParty(copyParty(businessAs4.toParty()))
             .referenceToIdentifier(extractRefToMessageId(businessMessage))
-            .service(businessAs4.service().toBuilder().build())
+            .service(businessAs4.service())
             .action(action)
             .build();
 
@@ -105,7 +105,6 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         @NonNull ConnectorMessage triggerMessage) {
         var action = getEvidenceAction(evidence.type());
         var businessAs4 = businessMessage.as4Properties();
-        var triggerAs4 = triggerMessage.as4Properties();
 
         var as4Properties = ConnectorMessageAS4Properties
             .builder()
@@ -117,7 +116,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             .fromParty(copyParty(businessAs4.toParty()))
             .toParty(copyParty(businessAs4.fromParty()))
             .referenceToIdentifier(businessAs4.ebmsMessageIdentifier())
-            .service(businessAs4.service().toBuilder().build())
+            .service(businessAs4.service())
             .action(action)
             .build();
 
@@ -136,6 +135,10 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
     }
 
     private ConnectorParty copyParty(ConnectorParty party) {
+        if (party == null) {
+            throw new IllegalArgumentException("Party must not be null");
+        }
+
         return party.toBuilder().build();
     }
 

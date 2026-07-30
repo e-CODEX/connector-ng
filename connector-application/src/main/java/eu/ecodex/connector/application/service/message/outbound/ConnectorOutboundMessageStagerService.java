@@ -123,7 +123,13 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
     private void persistBusinessDocument(
         ConnectorMessageBusinessContent businessContent, String messageIdentifier) {
         if (businessContent == null) {
-            return;
+            throw new IllegalStateException("Business content is required");
+        }
+
+        var businessDocument = businessContent.businessDocument();
+
+        if (businessDocument == null) {
+            throw new ConnectorMessageException("Business document is required");
         }
 
         attachAttachment(
@@ -133,7 +139,7 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
         );
 
         attachAttachment(
-            businessContent.businessDocument().attachment(),
+            businessDocument.attachment(),
             messageIdentifier,
             ConnectorAttachmentType.BUSINESS_DOCUMENT
         );

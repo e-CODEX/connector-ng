@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+
+@DisplayName("ConnectorOutboundMessageGatewayNameStep")
 public class ConnectorOutboundMessageGatewayNameStepTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
@@ -36,39 +40,64 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
     @InjectMocks
     private ConnectorOutboundMessageGatewayNameStep outboundMessageGatewayNameValidationStep;
 
-    @Test
-    void should_execute_outbound_message_gateway_name_validation_successfully() {
-        var outboundMessage = MessageTestFixtures.createValidOutboundBusinessMessageWithoutGatewayName();
+    @Nested
+    @DisplayName("when executing successfully")
+    class WhenExecutingSuccessfully {
+        @Test
+        void should_assign_the_default_gateway_name_when_it_is_missing() {
+            var outboundMessage =
+                MessageTestFixtures.createValidOutboundBusinessMessageWithoutGatewayName();
+            when(messageRepository.updateGatewayName(any(), any()))
+                .thenReturn(outboundMessage.toBuilder()
+                                           .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
+                                           .build());
 
-        when(messageRepository.updateGatewayName(any(), any()))
-            .thenReturn(outboundMessage.toBuilder()
-                                       .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
-                                       .build());
+            var outputMessage =
+                outboundMessageGatewayNameValidationStep.execute(outboundMessage);
 
-        var outputMessage = outboundMessageGatewayNameValidationStep.execute(outboundMessage);
+            assertThat(outboundMessage.gatewayName()).isNull();
+            assertThat(outputMessage.gatewayName()).isNotEmpty();
+            assertThat(outputMessage.gatewayName()).isNotEqualTo(outboundMessage.gatewayName());
+            assertThat(outputMessage.gatewayName())
+                .isEqualTo(ConnectorDefaults.DEFAULT_GATEWAY_NAME);
+        }
 
-        assertThat(outboundMessage.gatewayName()).isNull();
-        assertThat(outputMessage.gatewayName()).isNotEmpty();
-        assertThat(outputMessage.gatewayName()).isNotEqualTo(outboundMessage.gatewayName());
-        assertThat(outputMessage.gatewayName()).isEqualTo(ConnectorDefaults.DEFAULT_GATEWAY_NAME);
+        @Test
+        void should_keep_the_existing_gateway_name_when_it_is_already_set() {
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+
+            var outputMessage =
+                outboundMessageGatewayNameValidationStep.execute(outboundMessage);
+
+            assertThat(outboundMessage.gatewayName()).isNotEmpty();
+            assertThat(outputMessage.gatewayName()).isNotEmpty();
+            assertThat(outputMessage.gatewayName()).isEqualTo(outboundMessage.gatewayName());
+        }
     }
 
-    @Test
-    void should_execute_outbound_message_gateway_name_validation_successfully_by_sending_back_message_if_name_already_set() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+    @Nested
+    @DisplayName("when the input is invalid")
+    class WhenInputIsInvalid {
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> outboundMessageGatewayNameValidationStep.execute(null)
+            );
+        }
 
-        var outputMessage = outboundMessageGatewayNameValidationStep.execute(outboundMessage);
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
+                                                     .toBuilder()
+                                                     .identifier(null)
+                                                     .build();
 
-        assertThat(outboundMessage.gatewayName()).isNotEmpty();
-        assertThat(outputMessage.gatewayName()).isNotEmpty();
-        assertThat(outputMessage.gatewayName()).isEqualTo(outboundMessage.gatewayName());
-    }
-
-    @Test
-    void should_throw_exception_when_message_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> outboundMessageGatewayNameValidationStep.execute(null)
-        );
+            assertThrows(
+                IllegalStateException.class,
+                () -> outboundMessageGatewayNameValidationStep.execute(outboundMessage)
+            );
+        }
     }
 }
+

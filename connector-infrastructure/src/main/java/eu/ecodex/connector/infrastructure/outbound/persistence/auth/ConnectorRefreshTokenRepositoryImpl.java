@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.auth;
 
 
-import eu.ecodex.connector.application.port.spi.iam.auth.ConnectorRefreshTokenRepository;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;

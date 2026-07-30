@@ -22,7 +22,7 @@ dependencies {
     implementation(platform(libs.spring.boot.bom))
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework:spring-tx")
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    
     // jakarta
     implementation(libs.jakarta.validation)
     // other

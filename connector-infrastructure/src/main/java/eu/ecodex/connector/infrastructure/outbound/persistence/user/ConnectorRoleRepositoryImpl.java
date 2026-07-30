@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.port.spi.iam.role.ConnectorRoleRepository;
+import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserRoleJpaRepository;

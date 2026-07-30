@@ -17,13 +17,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -53,18 +50,10 @@ public interface ConnectorAuthenticationApi {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Logout a connector user.")
-    @PostMapping(path = "/logout", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(
-            @ApiResponse(responseCode = "400", description = "Bad Request")
-    )
-    ResponseEntity<Void> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization);
-
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    @Operation(summary = "Logout a connector user.")
     @PostMapping("/refresh")
     @ApiResponses(
             @ApiResponse(responseCode = "400", description = "Bad Request")
     )
-    LoginResponse refresh(@RequestBody ConnectorRefreshRequest request) ;
+    LoginResponse refresh(@RequestBody ConnectorRefreshRequest request);
 
 }

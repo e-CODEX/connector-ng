@@ -10,17 +10,15 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
-import eu.ecodex.connector.application.service.iam.auth.login.ConnectorLoginUserService;
-import eu.ecodex.connector.application.service.iam.auth.logout.ConnectorLogoutUserService;
-import eu.ecodex.connector.application.service.iam.auth.logout.ConnectorRefreshUserTokenService;
+import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
 import eu.ecodex.connector.domain.model.login.LoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshRequest;
+import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorLoginUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -47,7 +45,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConnectorAuthenticationController implements ConnectorAuthenticationApi {
 
     ConnectorLoginUserService connectorLoginUserService;
-    ConnectorLogoutUserService connectorLogoutUserService;
     ConnectorRefreshUserTokenService connectorRefreshUserTokenService;
 
     @Override
@@ -55,13 +52,6 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
         return connectorLoginUserService.login(connectorLoginRequest.username(),
                 connectorLoginRequest.password());
 
-    }
-
-    @Override
-    public ResponseEntity<Void> logout(String authorization) {
-        String token = authorization.replace("Bearer ", "");
-        connectorLogoutUserService.logout(token);
-        return ResponseEntity.noContent().build();
     }
 
     @Override

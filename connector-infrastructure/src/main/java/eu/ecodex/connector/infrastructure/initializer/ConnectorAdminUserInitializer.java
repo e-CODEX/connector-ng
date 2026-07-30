@@ -16,10 +16,10 @@ import static eu.ecodex.connector.domain.model.user.ConnectorUserRole.defaultAdm
 
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
-import eu.ecodex.connector.application.port.api.iam.role.ConnectorRegisterUserRole;
-import eu.ecodex.connector.application.port.api.iam.role.ConnectorRetrieveUserRole;
-import eu.ecodex.connector.application.port.api.iam.user.ConnectorRegisterUser;
-import eu.ecodex.connector.application.port.api.iam.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.ConnectorAdminUserProperties;
@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,7 +52,7 @@ import org.springframework.stereotype.Component;
  * <p>
  * Dependencies:
  * - {@link ConnectorRegisterUser}: Service for registering and updating user information.
- * - {@link ConnectorRegisterUserRole}: Service for registering user roles.
+ * - {@link ConnectorRegisterRole}: Service for registering user roles.
  * - {@link ConnectorRetrieveUser}: Service for retrieving existing user details.
  * - {@link ConnectorAdminUserProperties}: Configuration properties for the admin user.
  * <p>
@@ -67,15 +68,15 @@ import org.springframework.stereotype.Component;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorAdminUserInitializer implements ApplicationRunner {
     ConnectorRegisterUser registerUserService;
-    ConnectorRegisterUserRole registerUserRoleService;
+    ConnectorRegisterRole registerUserRoleService;
     ConnectorRetrieveUser retrieveUserService;
-    ConnectorRetrieveUserRole retrieveUserRoleService;
+    ConnectorRetrieveRole retrieveUserRoleService;
     ConnectorAdminUserProperties adminUserProperties;
     PasswordEncoder passwordEncoder;
 
 
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(@NonNull ApplicationArguments args) {
         if (adminUserProperties == null || adminUserProperties.isEmpty()) {
             log.info("No Administrator user configured in properties");
             registerFallbackAdminUser();

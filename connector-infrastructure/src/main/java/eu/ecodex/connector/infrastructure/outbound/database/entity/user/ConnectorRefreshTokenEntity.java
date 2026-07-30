@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
 @Builder
@@ -32,6 +33,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "user")
 public class ConnectorRefreshTokenEntity extends BaseEntity {
 
     @Id

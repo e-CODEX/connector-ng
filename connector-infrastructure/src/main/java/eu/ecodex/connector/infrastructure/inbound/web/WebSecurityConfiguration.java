@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web;
 
-import eu.ecodex.connector.infrastructure.outbound.security.iam.JwtAuthenticationFilter;
+import eu.ecodex.connector.infrastructure.outbound.security.auth.JwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.property.ConnectorCorsProperties;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

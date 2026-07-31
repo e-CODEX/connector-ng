@@ -12,5 +12,8 @@ package eu.ecodex.connector.infrastructure.property.auth.jwt;
 
 import java.time.Duration;
 
+/**
+ * Refresh token configuration properties.
+ */
 public record RefreshTokenProperties(Duration expiration) {
 }

@@ -29,6 +29,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.UuidGenerator;
 
+/**
+ * Represents a refresh token entity used to manage and store information about connector.
+ */
 @Builder
 @Entity
 @Table(name = "CONNECTOR_REFRESH_TOKENS",

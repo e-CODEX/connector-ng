@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.security.auth.login;
+package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.application.port.api.auth.login.ConnectorLoginUser;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
@@ -23,14 +23,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation responsible for handling user login operations within the connector system.
+ * Service implementation responsible for handling user login operations within the connector
+ * system.
  * This class provides functionality to authenticate users based on their credentials and generate
  * an authentication token upon successful login.
  *
  * <p>
  * Dependencies:
  * - {@link AuthenticationManager}: Facilitates the authentication of user credentials.
- * - {@link ConnectorAuthenticationTokenProvider}: Responsible for generating authentication tokens.
+ * - {@link ConnectorAuthenticationTokenProvider}: Responsible for generating authentication
+ * tokens.
  *
  * <p>
  * Core functionality:
@@ -41,7 +43,8 @@ import org.springframework.stereotype.Service;
  *
  * <p>
  * Exceptions:
- * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after authentication.
+ * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after
+ * authentication.
  *
  * <p>
  * Annotations:

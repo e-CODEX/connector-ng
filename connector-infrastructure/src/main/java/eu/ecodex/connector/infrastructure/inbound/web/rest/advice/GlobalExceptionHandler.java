@@ -20,7 +20,7 @@ import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNo
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentiaslException;
+import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
@@ -51,8 +51,8 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(ConnectorUserBadCredentiaslException.class)
-    public ErrorResponse handleInvalidRefreshToken(ConnectorUserBadCredentiaslException exception) {
+    @ExceptionHandler(ConnectorUserBadCredentialsException.class)
+    public ErrorResponse handleInvalidRefreshToken(ConnectorUserBadCredentialsException exception) {
         return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
     }
 

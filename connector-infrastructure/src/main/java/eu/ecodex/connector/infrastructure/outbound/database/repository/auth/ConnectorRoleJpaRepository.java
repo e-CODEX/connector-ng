@@ -41,8 +41,9 @@ public interface ConnectorRoleJpaRepository
      * Finds a role entity by its unique name.
      *
      * @param username the unique name of the role to be retrieved
+     *
      * @return an {@code Optional} containing the {@code ConnectorRoleEntity} if found,
-     * or empty if not found
+     *         or empty if not found
      */
     Optional<ConnectorRoleEntity> findByName(String username);
 
@@ -50,8 +51,9 @@ public interface ConnectorRoleJpaRepository
      * Finds a role entity by its unique UUID.
      *
      * @param uuid the unique UUID of the role to be retrieved
+     *
      * @return an {@code Optional} containing the {@code ConnectorRoleEntity} if found,
-     * or an empty {@code Optional} if no role with the given UUID exists
+     *         or an empty {@code Optional} if no role with the given UUID exists
      */
     Optional<ConnectorRoleEntity> findByUuid(String uuid);
 
@@ -60,8 +62,9 @@ public interface ConnectorRoleJpaRepository
      * set of names.
      *
      * @param names a set of role names to search for
+     *
      * @return a set of {@link ConnectorRoleEntity} objects whose names are present in the provided
-     * set, or an empty set if no matching roles are found
+     *         set, or an empty set if no matching roles are found
      */
     Set<ConnectorRoleEntity> findByNameIn(Set<String> names);
 }

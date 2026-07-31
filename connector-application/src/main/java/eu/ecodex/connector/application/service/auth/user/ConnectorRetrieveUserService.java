@@ -25,9 +25,11 @@ import org.springframework.stereotype.Service;
  * Implementation of the {@link ConnectorRetrieveUser} interface, providing services for retrieving
  * {@link ConnectorUser} entities from a repository based on various attributes such as identifier,
  * username, email, or a combination of username and email.
+ *
  * <p>
  * This service integrates with a {@link ConnectorUserRepository} to perform data operations and
  * throws a {@link NotFoundException} when a user cannot be found based on the provided parameters.
+ *
  * <p>
  * Thread safety: This class is designed as a stateless Spring {@code @Service}, and its methods
  * are thread-safe as long as the underlying {@link ConnectorUserRepository} is thread-safe.
@@ -42,26 +44,33 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
 
     @Override
     public ConnectorUser getById(String identifier) throws NotFoundException {
-        return repository.findByUuid(identifier).orElseThrow(() -> new NotFoundException(
-                String.format("User not found by identifier %s", identifier)));
+        return repository
+                .findByUuid(identifier)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("User not found by identifier %s", identifier)));
     }
 
     @Override
     public ConnectorUser getByUsername(String username) throws NotFoundException {
-        return repository.findByUsername(username).orElseThrow(() -> new NotFoundException(
-                String.format("User not found by username %s", username)));
+        return repository
+                .findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("User not found by username %s", username)));
     }
 
     @Override
     public ConnectorUser getByEmail(String email) throws NotFoundException {
-        return repository.findByEmail(email).orElseThrow(() -> new NotFoundException(
-                String.format("User not found by email %s", email)));
+        return repository
+                .findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("User not found by email %s", email)));
     }
 
     @Override
     public ConnectorUser getByUsernameAndEmail(String username, String email)
             throws NotFoundException {
-        return repository.findByUsernameAndEmail(username, email)
+        return repository
+                .findByUsernameAndEmail(username, email)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("User not found by username %s and email %s", username,
                                 email)));

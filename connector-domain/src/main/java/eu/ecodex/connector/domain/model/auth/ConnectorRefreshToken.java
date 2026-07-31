@@ -44,7 +44,7 @@ public record ConnectorRefreshToken(
      * of this {@link ConnectorRefreshToken} instance.
      *
      * @return a {@link Builder} instance initialized with the field values of this
-     * {@link ConnectorRefreshToken}.
+     *         {@link ConnectorRefreshToken}.
      */
     public Builder toBuilder() {
         return new Builder()

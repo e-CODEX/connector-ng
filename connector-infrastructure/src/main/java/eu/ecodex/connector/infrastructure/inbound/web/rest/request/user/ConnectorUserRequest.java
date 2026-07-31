@@ -20,6 +20,10 @@ import lombok.NonNull;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+
+/**
+ * Represents a request for creating or updating a user in the connector system.
+ */
 @Validated
 @Builder(toBuilder = true)
 public record ConnectorUserRequest(@NonNull
@@ -32,7 +36,7 @@ public record ConnectorUserRequest(@NonNull
 ) {
 
     /**
-     * Map a domain ser to a request user
+     * Map a domain ser to a request user.
      *
      * @param user user to map
      * @return request user
@@ -49,7 +53,7 @@ public record ConnectorUserRequest(@NonNull
     }
 
     /**
-     * Map a request user into a domain user
+     * Map a request user into a domain user.
      *
      * @param userRequest user to map
      * @return domain user

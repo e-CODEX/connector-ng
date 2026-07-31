@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
-import org.springframework.util.CollectionUtils;
 
 /**
  * A Data Transfer Object (DTO) that represents a user in the connector system.
@@ -40,6 +39,13 @@ public record ConnectorUserDto(
         Instant updatedAt
 ) {
 
+    /**
+     * Converts a {@link ConnectorUser} instance into a {@link ConnectorUserDto} instance.
+     *
+     * @param user the {@link ConnectorUser} to be converted
+     *
+     * @return a new {@link ConnectorUserDto} instance containing the mapped values
+     */
     public static ConnectorUserDto from(ConnectorUser user) {
         return ConnectorUserDto
                 .builder()
@@ -54,9 +60,14 @@ public record ConnectorUserDto(
     }
 
     private static Set<String> getRoles(ConnectorUser user) {
-        return CollectionUtils.isEmpty(user.roles()) ? Set.of() :
-                user.roles().stream().map(ConnectorRole::name)
-                        .collect(Collectors.toUnmodifiableSet());
+        if (user == null || user.roles() == null) {
+            return null;
+        }
+        return user
+                .roles()
+                .stream()
+                .map(ConnectorRole::name)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
 }

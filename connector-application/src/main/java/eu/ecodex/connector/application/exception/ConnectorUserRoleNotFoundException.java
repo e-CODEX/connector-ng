@@ -10,6 +10,9 @@
 
 package eu.ecodex.connector.application.exception;
 
+/**
+ * Represents a not found exception for a user role.
+ */
 public class ConnectorUserRoleNotFoundException extends NotFoundException {
     public ConnectorUserRoleNotFoundException(String message) {
         super(message);

@@ -50,8 +50,9 @@ public class WebSecurityConfiguration {
      * Configures the security filter chain for the application by defining HTTP security rules.
      *
      * @param http the {@code HttpSecurity} object used to configure the security settings
+     *
      * @return the {@code SecurityFilterChain} object representing the configured security filter
-     * chain
+     *         chain
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
@@ -99,8 +100,10 @@ public class WebSecurityConfiguration {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                        )
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class)

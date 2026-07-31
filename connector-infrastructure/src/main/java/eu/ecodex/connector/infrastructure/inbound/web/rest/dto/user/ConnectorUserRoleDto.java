@@ -31,6 +31,13 @@ public record ConnectorUserRoleDto(
         Instant updatedAt
 ) {
 
+    /**
+     * Convert a domain role to a dto.
+     *
+     * @param userRole the domain role
+     *
+     * @return dto
+     */
     public static ConnectorUserRoleDto from(ConnectorRole userRole) {
         return ConnectorUserRoleDto
                 .builder()
@@ -41,6 +48,13 @@ public record ConnectorUserRoleDto(
                 .build();
     }
 
+    /**
+     * Convert a dto to a domain role.
+     *
+     * @param userRoleDto the dto
+     *
+     * @return domain role
+     */
     public static ConnectorRole toDomain(ConnectorUserRoleDto userRoleDto) {
         return ConnectorRole
                 .builder()

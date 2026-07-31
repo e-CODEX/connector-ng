@@ -20,8 +20,8 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.ConnectorAdminUserProperties;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,26 +38,34 @@ import org.springframework.stereotype.Component;
 
 /**
  * Initializes an admin user in the connector system during the application startup phase.
- * The class is designed to ensure that a default or configured admin user exists with appropriate roles.
+ * The class is designed to ensure that a default or configured admin user exists with appropriate
+ * roles.
+ *
  * <p>
  * This initializer performs the following steps:
  * 1. Checks if admin user properties are provided in the configuration.
  * 2. If no properties are provided, attempts to register a fallback default admin user.
- * 3. If properties are provided, uses them to initialize the admin user with the configured username, password, email, and role.
+ * 3. If properties are provided, uses them to initialize the admin user with the configured
+ * username, password, email, and role.
+ *
  * <p>
  * Key operations:
  * - Registers a new admin role if it does not already exist.
  * - Handles situations where the admin user or default admin role already exists.
  * - Updates an existing user with administrative privileges if necessary.
+ *
  * <p>
  * Dependencies:
  * - {@link ConnectorRegisterUser}: Service for registering and updating user information.
  * - {@link ConnectorRegisterRole}: Service for registering user roles.
  * - {@link ConnectorRetrieveUser}: Service for retrieving existing user details.
  * - {@link ConnectorAdminUserProperties}: Configuration properties for the admin user.
+ *
  * <p>
  * Implements:
- * - {@link ApplicationRunner}: Allows the initialization logic to execute upon application startup.
+ * - {@link ApplicationRunner}: Allows the initialization logic to execute upon application
+ * startup.
+ *
  * <p>
  * Logging:
  * - Logs events and outcomes during the initialization process for traceability and debugging.
@@ -121,15 +129,18 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
         );
 
         registerUserService.patch(administrator.uuid(),
-                administrator.toBuilder()
-                        .roles(userRoles).build());
+                administrator
+                        .toBuilder()
+                        .roles(userRoles)
+                        .build());
 
         log.info("{} added to Administrator user, admin user updated", DEFAULT_ADMIN_ROLE);
     }
 
     private void registerNewAdminUser() {
         log.info(
-                "No default Administrator user configured and none registered yet; creating default");
+                "No default Administrator user found and none registered yet; creating "
+                        + "default");
         try {
             registerUserRoleService.register(defaultAdminRole());
             log.info("Default Administrator user successfully created.");
@@ -137,15 +148,20 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
             log.info("Default Administrator role already exists.");
         }
         var defaultAdminUser = ConnectorUser.defaultAdminUser();
-        defaultAdminUser = defaultAdminUser.toBuilder()
+        defaultAdminUser = defaultAdminUser
+                .toBuilder()
                 .password(passwordEncoder.encode(defaultAdminUser.password()))
                 .build();
         registerUserService.register(defaultAdminUser);
     }
 
     private void initializeAdminUser(ConnectorAdminUserProperties properties) {
-        if (properties.getRole() == null || properties.getRole().isBlank()
-                || properties.getUsername() == null || properties.getUsername().isBlank()) {
+        if (properties.getRole() == null || properties
+                .getRole()
+                .isBlank()
+                || properties.getUsername() == null || properties
+                .getUsername()
+                .isBlank()) {
             registerFallbackAdminUser();
             return;
         }
@@ -174,7 +190,8 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     private ConnectorUser createAdminUser(ConnectorAdminUserProperties properties,
                                           ConnectorRole adminRole) {
         var encodedPassword = passwordEncoder.encode(properties.getPassword());
-        return ConnectorUser.builder()
+        return ConnectorUser
+                .builder()
                 .username(properties.getUsername())
                 .password(encodedPassword)
                 .email(properties.getEmail())

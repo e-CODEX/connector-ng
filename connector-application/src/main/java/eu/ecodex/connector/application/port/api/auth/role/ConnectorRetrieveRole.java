@@ -32,8 +32,11 @@ public interface ConnectorRetrieveRole {
      *
      * @param identifier the unique identifier of the user role to be retrieved.
      *                   It must correspond to an existing user role in the system.
+     *
      * @return the {@link ConnectorRole} instance matching the given identifier.
-     * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified identifier.
+     *
+     * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified
+     *                                            identifier.
      */
     ConnectorRole getById(String identifier) throws ConnectorUserRoleNotFoundException;
 
@@ -44,7 +47,9 @@ public interface ConnectorRetrieveRole {
      *
      * @param roleName the name of the user role to be retrieved.
      *                 It must correspond to an existing user role in the system.
+     *
      * @return the {@link ConnectorRole} instance matching the given role name.
+     *
      * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified name.
      */
     ConnectorRole getByName(String roleName) throws ConnectorUserRoleNotFoundException;
@@ -56,8 +61,9 @@ public interface ConnectorRetrieveRole {
      *
      * @param username the username for which the user roles need to be retrieved.
      *                 It must correspond to a valid user in the system.
+     *
      * @return a set of {@link ConnectorRole} associated with the specified username.
-     * The returned set may be empty if no roles are found.
+     *         The returned set may be empty if no roles are found.
      */
     Set<ConnectorRole> findByNameIn(Set<String> username);
 }

@@ -26,7 +26,9 @@ public interface ConnectorRoleRepository {
      * If the entity already exists, it will be updated. Otherwise, a new entity will be created.
      *
      * @param user the ConnectorUserRole entity to be saved or updated
-     * @return the saved ConnectorUserRole entity, including any modifications or generated identifiers
+     *
+     * @return the saved ConnectorUserRole entity, including any modifications or generated
+     *         identifiers
      */
     ConnectorRole save(ConnectorRole user);
 
@@ -34,7 +36,9 @@ public interface ConnectorRoleRepository {
      * Retrieves a ConnectorUserRole entity by its unique UUID.
      *
      * @param id the unique identifier (UUID) of the ConnectorUserRole entity to retrieve
-     * @return an Optional containing the ConnectorUserRole entity if found, or an empty Optional if not found
+     *
+     * @return an Optional containing the ConnectorUserRole entity if found, or an empty Optional if
+     *         not found
      */
     Optional<ConnectorRole> findByUuid(String id);
 
@@ -42,7 +46,9 @@ public interface ConnectorRoleRepository {
      * Searches for a ConnectorUserRole entity by its name.
      *
      * @param name the name of the ConnectorUserRole to search for
-     * @return an Optional containing the found ConnectorUserRole if it exists, or an empty Optional if no entity is found
+     *
+     * @return an Optional containing the found ConnectorUserRole if it exists, or an empty Optional
+     *         if no entity is found
      */
     Optional<ConnectorRole> findByName(String name);
 
@@ -65,6 +71,7 @@ public interface ConnectorRoleRepository {
      * of the provided names.
      *
      * @param names a set of role names to search for
+     *
      * @return a set of {@code ConnectorUserRole} entities matching the provided names
      */
     Set<ConnectorRole> findByNameIn(Set<String> names);

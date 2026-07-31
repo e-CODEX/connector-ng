@@ -10,6 +10,9 @@
 
 package eu.ecodex.connector.application.exception;
 
+/**
+ * Representation of a user not found exception.
+ */
 public class ConnectorUserNotFoundException extends NotFoundException {
     public ConnectorUserNotFoundException(String message) {
         super(message);

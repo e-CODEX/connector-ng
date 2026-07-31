@@ -8,12 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.security.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
-import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -46,7 +46,8 @@ import org.springframework.stereotype.Service;
  *
  * <p>
  * Dependencies:
- * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration period.
+ * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration
+ * period.
  * - {@link UserDetails}: Represents authenticated user information, including roles and username.
  * - {@link SecretKey}: Used for cryptographic operations.
  *
@@ -70,33 +71,49 @@ public class JwtTokenService {
     SecretKey secretKey;
     JwtProperties jwtProperties;
 
+    /**
+     * Constructor for JwtTokenService.
+     * Initializes the secret key and JWT properties from the provided JwtProperties.
+     *
+     * @param jwtProperties the JwtProperties object containing the secret key and other JWT-related
+     */
     public JwtTokenService(JwtProperties jwtProperties) {
-        this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(UTF_8));
+        this.secretKey = Keys.hmacShaKeyFor(jwtProperties
+                .getSecret()
+                .getBytes(UTF_8));
         this.jwtProperties = jwtProperties;
     }
 
     /**
      * Generates a JSON Web Token (JWT) for the given user, including user-specific claims such as
-     * username and granted roles, and sets the token's expiration time based on the configured properties.
+     * username and granted roles, and sets the token's expiration time based on the configured
+     * properties.
      *
-     * @param user the {@code ConnectorUserDetails} object representing the authenticated user for whom
-     *             the token is being generated. It includes user-specific information like username
+     * @param user the {@code ConnectorUserDetails} object representing the authenticated user for
+     *             whom
+     *             the token is being generated. It includes user-specific information like
+     *             username
      *             and granted roles.
+     *
      * @return a {@code String} representing the generated JWT token encoded with the user's details
-     * and cryptographically signed using the configured secret key.
+     *         and cryptographically signed using the configured secret key.
      */
     public String generateToken(ConnectorUserDetails user) {
         Instant now = Instant.now();
-        var userRoles = user.getAuthorities()
+        var userRoles = user
+                .getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
         log.debug("Generating JWT token for user {} ", user.getUsername());
-        return Jwts.builder()
+        return Jwts
+                .builder()
                 .subject(user.getUsername())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(jwtProperties.getExpiration().toSeconds())))
+                .expiration(Date.from(now.plusSeconds(jwtProperties
+                        .getExpiration()
+                        .toSeconds())))
                 .claims(Map.of("roles", userRoles, "userId", user.getUserId()))
                 .signWith(secretKey)
                 .compact();
@@ -108,6 +125,7 @@ public class JwtTokenService {
      * Extracts the username from the payload of the provided JWT token.
      *
      * @param token the JWT token from which the username is to be extracted.
+     *
      * @return the username contained in the token payload.
      */
     public String extractUsername(String token) {
@@ -122,6 +140,7 @@ public class JwtTokenService {
      * The roles are converted into a list of {@code GrantedAuthority} objects.
      *
      * @param token the JWT token from which the authorities are to be extracted.
+     *
      * @return a list of {@code GrantedAuthority} objects representing the roles
      *         contained in the token, or an empty list if no valid roles are found.
      */
@@ -133,7 +152,8 @@ public class JwtTokenService {
             return List.of();
         }
 
-        return roles.stream()
+        return roles
+                .stream()
                 .map(String::valueOf)
                 .map(SimpleGrantedAuthority::new)
                 .toList();
@@ -145,8 +165,9 @@ public class JwtTokenService {
      * and ensures the token has not expired.
      *
      * @param token the JWT token to validate.
-     * @param user the {@code UserDetails} object representing the authenticated user whose details
-     *             are compared against the token's payload.
+     * @param user  the {@code UserDetails} object representing the authenticated user whose details
+     *              are compared against the token's payload.
+     *
      * @return {@code true} if the token is valid, matches the user's username, and is not expired;
      *         {@code false} otherwise.
      */
@@ -164,7 +185,8 @@ public class JwtTokenService {
     }
 
     private Jws<Claims> parse(String token) {
-        return Jwts.parser()
+        return Jwts
+                .parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token);

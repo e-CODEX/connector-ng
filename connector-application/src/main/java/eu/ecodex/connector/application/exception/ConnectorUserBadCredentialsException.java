@@ -10,8 +10,11 @@
 
 package eu.ecodex.connector.application.exception;
 
-public class ConnectorUserBadCredentiaslException extends RuntimeException {
-    public ConnectorUserBadCredentiaslException(String message) {
+/**
+ * ConnectorUserBadCredentialsException is thrown when the user credentials are not valid.
+ */
+public class ConnectorUserBadCredentialsException extends RuntimeException {
+    public ConnectorUserBadCredentialsException(String message) {
         super(message);
     }
 }

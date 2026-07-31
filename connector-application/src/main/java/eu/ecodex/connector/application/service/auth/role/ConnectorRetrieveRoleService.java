@@ -24,7 +24,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service implementation for retrieving user roles within the Connector system.
- * This class provides methods to fetch user role details based on a unique identifier or a username.
+ * This class provides methods to fetch user role details based on a unique identifier or a
+ * username.
  * It interacts with the {@link ConnectorRoleRepository} to query the underlying data source.
  *
  * <p>
@@ -41,15 +42,18 @@ public class ConnectorRetrieveRoleService implements ConnectorRetrieveRole {
 
     @Override
     public ConnectorRole getById(String identifier) throws ConnectorUserNotFoundException {
-        return repository.findByUuid(identifier)
+        return repository
+                .findByUuid(identifier)
                 .orElseThrow(() -> new ConnectorUserNotFoundException(
                         String.format("User not found by identifier %s", identifier)));
     }
 
     @Override
     public ConnectorRole getByName(String name) throws ConnectorUserNotFoundException {
-        return repository.findByName(name).orElseThrow(() -> new ConnectorUserNotFoundException(
-                String.format("User not found by username %s", name)));
+        return repository
+                .findByName(name)
+                .orElseThrow(() -> new ConnectorUserNotFoundException(
+                        String.format("User not found by username %s", name)));
     }
 
     @Override

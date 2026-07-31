@@ -16,12 +16,14 @@ import java.util.Set;
 
 /**
  * Represents a data structure for a user in the Connector system.
+ *
  * <p>
  * This class provides information about the user, such as an identifier, username,
  * password, email, and roles, and includes metadata such as enabled status, creation
  * time, and last updated time.
  * It also encapsulates behavior for content comparison
- * and builder for creating immutable instances of the class.</li>
+ * and builder for creating immutable instances of the class.
+ *
  */
 public record ConnectorUser(
         String uuid,
@@ -38,17 +40,17 @@ public record ConnectorUser(
     public static final String DEFAULT_ADMIN_PASSWORD = "123456";
 
     /**
-     * Create default administrator user
+     * Create default administrator user.
      *
      * @return Default administrator
      */
     public static ConnectorUser defaultAdminUser() {
-        return ConnectorUser.builder()
+        return ConnectorUser
+                .builder()
                 .username(DEFAULT_ADMIN_USER_NAME)
                 .password(DEFAULT_ADMIN_PASSWORD)
                 .enabled(true)
-                .roles(Set.of(
-                        ConnectorRole.builder().name(ConnectorRole.DEFAULT_ADMIN_ROLE).build()))
+                .roles(Set.of(ConnectorRole.defaultAdminRole()))
                 .build();
     }
 
@@ -56,18 +58,28 @@ public record ConnectorUser(
         return new Builder();
     }
 
+    /**
+     * Check if the user is the default admin.
+     *
+     * @return true if the user is the default admin.
+     */
     public boolean isDefaultAdmin() {
-        return DEFAULT_ADMIN_USER_NAME.equals(username) && roles != null &&
-                roles.stream().anyMatch(ConnectorRole::isDefaultAdminRole);
+        return DEFAULT_ADMIN_USER_NAME.equals(username) && roles != null && roles
+                .stream()
+                .anyMatch(ConnectorRole::isDefaultAdminRole);
     }
 
     /**
-     * Compares the current {@code ConnectorUser} object with the specified {@code ConnectorUser} object
-     * to determine if they have identical content. The comparison is based on the values of the fields:
+     * Compares the current {@code ConnectorUser} object with the specified {@code ConnectorUser}
+     * object
+     * to determine if they have identical content. The comparison is based on the values of the
+     * fields:
      * {@code uuid}, {@code username}, {@code password}, {@code email}, and {@code enabled}.
      *
      * @param connectorUser the {@code ConnectorUser} object to compare with the current instance.
-     * @return {@code true} if all compared fields have the same values in both objects; {@code false} otherwise.
+     *
+     * @return {@code true} if all compared fields have the same values in both objects;
+     *         {@code false} otherwise.
      */
     // TODO fix me
     public boolean hasSameContent(ConnectorUser connectorUser) {
@@ -79,9 +91,11 @@ public record ConnectorUser(
     }
 
     /**
-     * Creates a new {@code Builder} instance pre-populated with the current state of the {@code ConnectorUser} object.
+     * Creates a new {@code Builder} instance pre-populated with the current state of the
+     * {@code ConnectorUser} object.
      *
-     * @return a {@code Builder} instance containing the fields of the current {@code ConnectorUser} object.
+     * @return a {@code Builder} instance containing the fields of the current {@code ConnectorUser}
+     *         object.
      */
     public Builder toBuilder() {
         return new Builder()
@@ -98,6 +112,7 @@ public record ConnectorUser(
 
     /**
      * Builder class for constructing instances of {@code ConnectorUser}.
+     *
      * <p>
      * This builder pattern enables the creation of immutable {@code ConnectorUser}
      * objects by providing methods to set various fields incrementally and

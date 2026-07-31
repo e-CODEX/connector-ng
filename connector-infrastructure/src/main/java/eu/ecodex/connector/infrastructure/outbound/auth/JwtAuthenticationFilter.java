@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.security.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -28,6 +28,9 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * Adds JWT authentication to the Spring Security filter chain.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -52,8 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             var username = jwtTokenService.extractUsername(token);
-            if (username != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (username != null && SecurityContextHolder
+                    .getContext()
+                    .getAuthentication() == null) {
                 var user = userDetailsService.loadUserByUsername(username);
 
                 if (jwtTokenService.isValidToken(token, user)) {
@@ -66,16 +70,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource()
                             .buildDetails(request));
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authentication);
                 }
             }
 
+            filterChain.doFilter(request, response);
         } catch (JwtException ex) {
-            log.error("Could not verify token, {}", ex.getMessage());
-            throw new RuntimeException(ex.getCause());
+            SecurityContextHolder.clearContext();
+            log.error("Could not verify JWT token, {}", ex.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
         }
-
-        filterChain.doFilter(request, response);
     }
 
 }

@@ -15,6 +15,9 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration properties for the admin user.
+ */
 @Getter
 @Setter
 @Configuration
@@ -26,6 +29,11 @@ public class ConnectorAdminUserProperties {
     String email;
     Boolean enabled;
 
+    /**
+     * Check if the user is empty.
+     *
+     * @return True if the user is empty, false otherwise.
+     */
     public boolean isEmpty() {
         return this.username == null
                 && this.password == null

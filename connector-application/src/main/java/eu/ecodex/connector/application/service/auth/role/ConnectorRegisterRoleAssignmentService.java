@@ -26,7 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Service implementation for registering and assigning roles to users within the Connector system.
  * This class is responsible for creating new user roles or updating existing ones based on the
- * provided identifier and role name. It serves as the bridge between the application's business logic
+ * provided identifier and role name. It serves as the bridge between the application's business
+ * logic
  * and the persistence layer through the {@link ConnectorRoleRepository}.
  *
  * <p>
@@ -39,7 +40,8 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * Exceptions:
  * - {@link ConnectorUserRoleNotFoundException}: Thrown if the specified role does not exist.
- * - {@link ConnectorUserNotFoundException}: Thrown if the specified user identifier does not exist.
+ * - {@link ConnectorUserNotFoundException}: Thrown if the specified user identifier does not
+ * exist.
  */
 @Slf4j
 @Component
@@ -55,42 +57,60 @@ public class ConnectorRegisterRoleAssignmentService implements ConnectorRegister
     public ConnectorUser register(String identifier, String roleName)
             throws ConnectorUserRoleNotFoundException, ConnectorUserNotFoundException {
 
-        var user = userRepository.findByUuid(identifier)
+        var user = userRepository
+                .findByUuid(identifier)
                 .orElseThrow(() ->
                         new ConnectorUserNotFoundException(identifier));
 
-        var role = roleRepository.findByName(roleName)
+        var role = roleRepository
+                .findByName(roleName)
                 .orElseThrow(() ->
                         new ConnectorUserRoleNotFoundException(roleName));
 
-        boolean found = user.roles().stream()
-                .anyMatch(r -> r.name().equals(role.name()));
+        boolean found = user
+                .roles()
+                .stream()
+                .anyMatch(r -> r
+                        .name()
+                        .equals(role.name()));
 
         if (found) {
             return user;
         }
-        user.roles().add(role);
+        user
+                .roles()
+                .add(role);
         return userRepository.save(user);
     }
 
     @Override
     public ConnectorUser remove(String identifier, String roleName)
             throws ConnectorUserRoleNotFoundException, ConnectorUserNotFoundException {
-        var user = userRepository.findByUuid(identifier)
+        var user = userRepository
+                .findByUuid(identifier)
                 .orElseThrow(() ->
                         new ConnectorUserNotFoundException(identifier));
 
-        var role = roleRepository.findByName(roleName)
+        var role = roleRepository
+                .findByName(roleName)
                 .orElseThrow(() ->
                         new ConnectorUserRoleNotFoundException(roleName));
 
-        boolean found = user.roles().stream()
-                .anyMatch(r -> r.name().equals(role.name()));
+        boolean found = user
+                .roles()
+                .stream()
+                .anyMatch(r -> r
+                        .name()
+                        .equals(role.name()));
 
         if (!found) {
             return user;
         }
-        user.roles().removeIf(r -> r.name().equals(role.name()));
+        user
+                .roles()
+                .removeIf(r -> r
+                        .name()
+                        .equals(role.name()));
         return userRepository.save(user);
     }
 }

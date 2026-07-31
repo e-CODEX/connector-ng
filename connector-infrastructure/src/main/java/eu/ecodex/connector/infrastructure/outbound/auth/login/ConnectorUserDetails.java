@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.security.auth.login;
+package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;

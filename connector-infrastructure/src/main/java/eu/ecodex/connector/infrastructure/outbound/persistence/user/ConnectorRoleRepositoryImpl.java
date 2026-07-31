@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Repository to handle user's roles
+ * Repository to handle user's roles.
  */
 @Slf4j
 @Service
@@ -69,32 +69,42 @@ public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
 
     @Override
     public List<ConnectorRole> findAll() {
-        return jpaRepository.findAll().stream().map(this::toDomain).toList();
+        return jpaRepository
+                .findAll()
+                .stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     @Override
     @Transactional
     public void deleteByUuid(String identifier) {
-        var entity = jpaRepository.findByUuid(identifier)
+        var entity = jpaRepository
+                .findByUuid(identifier)
                 .orElseThrow(() ->
                         new ConnectorUserNotFoundException(
                                 "No user role found with id " + identifier));
         emptyIfNull(entity.getUsers())
-                .forEach(user -> user.getRoles().remove(entity));
+                .forEach(user -> user
+                        .getRoles()
+                        .remove(entity));
 
         jpaRepository.delete(entity);
     }
 
     @Override
     public Set<ConnectorRole> findByNameIn(Set<String> names) {
-        return jpaRepository.findByNameIn(names).stream()
+        return jpaRepository
+                .findByNameIn(names)
+                .stream()
                 .map(this::toDomain)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
 
     private ConnectorRoleEntity toEntity(ConnectorRole domainUserRole) {
-        return ConnectorRoleEntity.builder()
+        return ConnectorRoleEntity
+                .builder()
                 .uuid(domainUserRole.uuid())
                 .name(domainUserRole.name())
                 .build();

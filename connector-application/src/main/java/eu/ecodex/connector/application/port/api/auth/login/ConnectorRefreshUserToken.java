@@ -37,19 +37,23 @@ public interface ConnectorRefreshUserToken {
      *
      * @param token the {@code ConnectorUser} instance representing the user
      *              for whom the refresh token will be created.
+     *
      * @return a {@code ConnectorRefreshToken} representing the newly created
-     * refresh token, which includes details such as the user, token
-     * identifier, expiration time, and creation time.
+     *         refresh token, which includes details such as the user, token
+     *         identifier, expiration time, and creation time.
      */
     ConnectorRefreshToken create(ConnectorUser token);
 
     /**
      * Verifies the authenticity and validity of a given refresh token within the Connector system.
-     * This method checks whether the provided token is valid, not expired, and has not been revoked.
+     * This method checks whether the provided token is valid, not expired, and has not been
+     * revoked.
      *
      * @param token the refresh token to be verified
-     * @return a {@code ConnectorRefreshToken} instance representing the details of the verified token,
-     * including user information, expiration, and revocation status
+     *
+     * @return a {@code ConnectorRefreshToken} instance representing the details of the verified
+     *         token,
+     *         including user information, expiration, and revocation status
      */
     ConnectorRefreshToken verify(String userId, String token);
 
@@ -58,7 +62,7 @@ public interface ConnectorRefreshUserToken {
      * This method ensures that the provided refresh token is disabled and
      * cannot be used to refresh an authentication session.
      *
-     * @param userId authenticated user
+     * @param userId       authenticated user
      * @param refreshToken the refresh token to be revoked
      */
     void revoke(String userId, String refreshToken);
@@ -70,8 +74,9 @@ public interface ConnectorRefreshUserToken {
      *
      * @param userId authenticated user
      * @param token  the refresh token used to obtain a new access token
+     *
      * @return a {@code LoginResponse} containing the new access token,
-     * refresh token, and expiration details of the session
+     *         refresh token, and expiration details of the session
      */
     LoginResponse refresh(String userId, String token);
 

@@ -31,8 +31,10 @@ public interface ConnectorRegisterRole {
      *
      * @param userRole the {@link ConnectorRole} object to be registered.
      *                 It must contain valid role information to be persisted.
+     *
      * @return the registered {@link ConnectorRole} instance, including any
-     * additional fields populated during the registration process (e.g., identifier, timestamps).
+     *         additional fields populated during the registration process (e.g., identifier,
+     *         timestamps).
      */
     ConnectorRole register(ConnectorRole userRole) throws
             ConnectorUserRoleAlreadyExistsException;
@@ -48,8 +50,9 @@ public interface ConnectorRegisterRole {
      *                 It must correspond to an existing user role in the system.
      * @param userRole the {@link ConnectorRole} object containing the updated role
      *                 information. It must include valid details for the update process.
+     *
      * @return the updated {@link ConnectorRole} instance, reflecting all modifications
-     * made during the update process.
+     *         made during the update process.
      */
     ConnectorRole update(String id, ConnectorRole userRole);
 }

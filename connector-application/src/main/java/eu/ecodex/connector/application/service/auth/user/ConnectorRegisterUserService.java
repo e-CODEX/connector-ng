@@ -23,14 +23,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Service implementation for managing the registration and updates of {@link ConnectorUser} entities.
- * This class provides methods for creating, updating, and partially updating user information while ensuring
+ * Service implementation for managing the registration and updates of {@link ConnectorUser}
+ * entities.
+ * This class provides methods for creating, updating, and partially updating user information while
+ * ensuring
  * data integrity and validation.
+ *
  * <p>
  * It handles the following operations:
  * - Validating user data before registration or updates.
  * - Enforcing uniqueness constraints on usernames and email addresses.
  * - Performing full or partial updates on existing users.
+ *
  * <p>
  * The class is annotated with {@code @Component} to indicate that it's a Spring-managed bean and
  * {@code @Slf4j} for logging purposes. It requires {@link ConnectorUserRepository} as a dependency
@@ -104,7 +108,8 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
             throw new ConnectorUserBadRequestException("Connector user id should not be blank");
         }
 
-        var existingUser = repository.findByUuid(identifier)
+        var existingUser = repository
+                .findByUuid(identifier)
                 .orElseThrow(() -> new ConnectorUserNotFoundException(
                         "No existing user found with id " + identifier));
 
@@ -120,9 +125,11 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
      * If a user with the same username already exists and their UUID differs from the provided ID,
      * an exception is thrown to indicate that the username is already taken.
      *
-     * @param identifier the unique identifier of the user being checked; used to verify if the username belongs
+     * @param identifier the unique identifier of the user being checked; used to verify if the
+     *                   username belongs
      *                   to the same existing user or a different one
      * @param user       the ConnectorUser object containing the username to be validated
+     *
      * @throws ConnectorUserAlreadyExistsException if a user with the same username exists, and
      *                                             their UUID is different from the provided ID
      */
@@ -147,13 +154,17 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
     }
 
     /**
-     * Validates whether the email associated with a given user is unique among existing users in the system.
-     * If a user with the same email already exists and their UUID differs from the provided ID, an exception is thrown
+     * Validates whether the email associated with a given user is unique among existing users in
+     * the system.
+     * If a user with the same email already exists and their UUID differs from the provided ID, an
+     * exception is thrown
      * to indicate that the email is already taken.
      *
-     * @param identifier the unique identifier of the user being checked; used to verify if the email belongs to
+     * @param identifier the unique identifier of the user being checked; used to verify if the
+     *                   email belongs to
      *                   the same existing user or a different one
      * @param user       the ConnectorUser object containing the email to be validated
+     *
      * @throws ConnectorUserAlreadyExistsException if a user with the same email exists,
      *                                             and their UUID is different from the provided ID
      */

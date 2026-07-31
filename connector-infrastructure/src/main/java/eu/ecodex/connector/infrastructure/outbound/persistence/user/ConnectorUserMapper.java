@@ -19,17 +19,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 
+/**
+ * Helper class to map domain user into entity user and vice versa.
+ */
 @UtilityClass
 public class ConnectorUserMapper {
 
     /**
-     * Map domain user into entity user
+     * Map a domain user into an entity user.
      *
      * @param domainUser domain user
+     *
      * @return entity user
      */
     public ConnectorUserEntity toEntity(ConnectorUser domainUser) {
-        return ConnectorUserEntity.builder()
+        return ConnectorUserEntity
+                .builder()
                 .uuid(domainUser.uuid())
                 .username(domainUser.username())
                 .password(domainUser.password())
@@ -40,13 +45,15 @@ public class ConnectorUserMapper {
 
 
     /**
-     * Map an entity user into a domain user
+     * Map an entity user into a domain user.
      *
      * @param entity entity user
+     *
      * @return domain user
      */
     public ConnectorUser toDomain(ConnectorUserEntity entity) {
-        return ConnectorUser.builder()
+        return ConnectorUser
+                .builder()
                 .uuid(entity.getUuid())
                 .username(entity.getUsername())
                 .password(entity.getPassword())
@@ -60,23 +67,28 @@ public class ConnectorUserMapper {
 
 
     /**
-     * Map a user entity role
+     * Map a user entity role.
      *
      * @param entity entity to map
+     *
      * @return Set of domain roles
      */
     public static Set<ConnectorRole> getUserRoles(ConnectorUserEntity entity) {
         return entity.getRoles() == null ? null :
-                entity.getRoles().stream()
+                entity
+                        .getRoles()
+                        .stream()
                         .map(toRoleDomain())
                         .collect(Collectors.toSet());
     }
 
     private static Function<ConnectorRoleEntity, ConnectorRole> toRoleDomain() {
         return role ->
-                ConnectorRole.builder()
+                ConnectorRole
+                        .builder()
                         .uuid(role.getUuid())
-                        .name(role.getName()).build();
+                        .name(role.getName())
+                        .build();
 
     }
 

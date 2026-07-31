@@ -32,18 +32,22 @@ import org.hibernate.annotations.UuidGenerator;
  * Represents a user role entity within the connector's identity and access management system.
  * This entity is used to define roles that can be assigned to users and persists the mapping
  * between roles and users in the database.
+ *
  * <p>
  * Features:
  * - Each role entity has a unique identifier and a unique role name.
  * - Roles are associated with users via a many-to-many relationship.
  * - The class is extensible from the BaseEntity to inherit creation and update timestamp fields.
+ *
  * <p>
  * Annotations used:
  * - @Entity: Specifies that this class is a JPA entity.
  * - @Table: Maps the entity to the "CONNECTOR_USERS_ROLES" table in the database.
  * - @Id and @GeneratedValue: Define the primary key and its generation strategy.
- * - @ManyToMany: Establishes a bidirectional many-to-many relationship with the ConnectorUserEntity class.
- * - @Builder, @Getter, @NoArgsConstructor, @AllArgsConstructor: Lombok annotations for simplifying the class structure.
+ * - @ManyToMany: Establishes a bidirectional many-to-many relationship with the ConnectorUserEntity
+ * class.
+ * - @Builder, @Getter, @NoArgsConstructor, @AllArgsConstructor: Lombok annotations for simplifying
+ * the class structure.
  */
 @Builder
 @Entity
@@ -53,6 +57,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Table(name = "CONNECTOR_ROLES",
         indexes = {
                 @Index(name = "IDX_CONNECTOR_ROLES_UUID", columnList = "UUID"),
+                @Index(name = "IDX_CONNECTOR_ROLES_NAME", columnList = "NAME"),
         })
 public class ConnectorRoleEntity extends BaseEntity {
     @Id
@@ -69,6 +74,7 @@ public class ConnectorRoleEntity extends BaseEntity {
     @Column(name = "NAME", unique = true, nullable = false)
     private String name;
 
+    @Setter
     @ManyToMany(mappedBy = "roles")
     private Set<ConnectorUserEntity> users = new HashSet<>();
 }

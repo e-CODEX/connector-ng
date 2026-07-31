@@ -94,6 +94,7 @@ dependencies {
     runtimeOnly(libs.jjwt.jackson)
     // test
     testImplementation(testFixtures(project(":connector-domain")))
+    testFixturesImplementation(project(":connector-domain"))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-data-jpa-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")

@@ -10,6 +10,9 @@
 
 package eu.ecodex.connector.application.exception;
 
+/**
+ *  ConnectorUserAlreadyExistsException will be thrown when a user already exists.
+ */
 public class ConnectorUserAlreadyExistsException extends RuntimeException {
     public ConnectorUserAlreadyExistsException(String message) {
         super(message);

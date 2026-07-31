@@ -28,7 +28,7 @@ public interface ConnectorListRole {
      * Retrieves a list of all user roles associated with the Connector system.
      *
      * @return a list of {@link ConnectorRole} representing all user roles stored
-     * in the underlying data source.
+     *         in the underlying data source.
      */
     List<ConnectorRole> findAll();
 }

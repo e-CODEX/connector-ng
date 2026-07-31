@@ -40,8 +40,9 @@ public interface ConnectorRefreshTokenRepository {
      * @param token the unique string value of the refresh token to be retrieved.
      *              This value is used as a key to identify and fetch the corresponding
      *              token entity from the persistence layer.
+     *
      * @return an {@link Optional} containing the {@link ConnectorRefreshToken} if it exists;
-     * an empty {@link Optional} if no matching token is found.
+     *         an empty {@link Optional} if no matching token is found.
      */
     Optional<ConnectorRefreshToken> findByToken(String token);
 
@@ -53,6 +54,7 @@ public interface ConnectorRefreshTokenRepository {
      * @param refreshToken the {@link ConnectorRefreshToken} entity to be stored.
      *                     Contains details about the token such as its unique identifier,
      *                     associated user, expiration timestamp, and creation timestamp.
+     *
      * @return a {@link ConnectorRefreshUserToken} instance representing the persisted token.
      */
     ConnectorRefreshToken save(ConnectorRefreshToken refreshToken);
@@ -72,11 +74,14 @@ public interface ConnectorRefreshTokenRepository {
      * Retrieves a list of {@link ConnectorRefreshToken} entities based on the provided user UUID
      * and revocation status.
      *
-     * @param uuid the unique identifier of the user whose refresh tokens are to be retrieved.
-     *             It is used to filter the tokens associated with the specified user.
-     * @param revoked a boolean flag indicating the revocation status of the tokens to be retrieved.
-     *                If true, only revoked tokens will be returned; if false, only non-revoked tokens
+     * @param uuid    the unique identifier of the user whose refresh tokens are to be retrieved.
+     *                It is used to filter the tokens associated with the specified user.
+     * @param revoked a boolean flag indicating the revocation status of the tokens to be
+     *                retrieved.
+     *                If true, only revoked tokens will be returned; if false, only non-revoked
+     *                tokens
      *                will be returned.
+     *
      * @return a list of {@link ConnectorRefreshToken} entities matching the provided user UUID and
      *         revocation status. The list may be empty if no matching tokens are found.
      */
@@ -89,6 +94,7 @@ public interface ConnectorRefreshTokenRepository {
      *
      * @param uuid the unique identifier of the user whose refresh tokens are to be revoked.
      *             It acts as a key to find and mark all associated tokens as revoked.
+     *
      * @return the number of refresh tokens that were successfully revoked.
      */
     int revokeAllByUserUuid(String uuid);

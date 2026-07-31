@@ -28,7 +28,8 @@ import org.springframework.stereotype.Service;
  * <p>
  * Responsibilities:
  * - Provides a mechanism for retrieving all user roles from the underlying data source.
- * - Acts as a bridge between the application's business logic and the persistence layer for user roles.
+ * - Acts as a bridge between the application's business logic and the persistence layer for user
+ * roles.
  */
 @Slf4j
 @Service

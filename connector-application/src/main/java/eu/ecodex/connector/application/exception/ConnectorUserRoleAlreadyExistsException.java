@@ -10,6 +10,9 @@
 
 package eu.ecodex.connector.application.exception;
 
+/**
+ * Representation of an exception thrown when a user role already exists.
+ */
 public class ConnectorUserRoleAlreadyExistsException extends RuntimeException {
     public ConnectorUserRoleAlreadyExistsException(String message) {
         super(message);

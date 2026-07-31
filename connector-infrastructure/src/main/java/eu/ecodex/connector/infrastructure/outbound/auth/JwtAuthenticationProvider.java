@@ -8,11 +8,11 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.security.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth;
 
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import java.time.Duration;
 import javax.crypto.SecretKey;
@@ -37,7 +37,8 @@ import org.springframework.stereotype.Service;
  *
  * <p>
  * Dependencies:
- * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration period.
+ * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration
+ * period.
  * - {@link UserDetails}: Represents authenticated user information, including roles and username.
  * - {@link SecretKey}: Used for cryptographic operations.
  *
@@ -70,12 +71,16 @@ public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenPr
 
     @Override
     public long accessTokenExpiresInSeconds() {
-        return jwtProperties.getExpiration().toSeconds();
+        return jwtProperties
+                .getExpiration()
+                .toSeconds();
     }
 
     @Override
     public Duration refreshTokenExpires() {
-        return jwtProperties.getRefreshToken().expiration();
+        return jwtProperties
+                .getRefreshToken()
+                .expiration();
     }
 
 }

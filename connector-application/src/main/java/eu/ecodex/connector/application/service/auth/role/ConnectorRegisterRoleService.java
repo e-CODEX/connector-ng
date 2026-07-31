@@ -40,6 +40,7 @@ import org.springframework.stereotype.Component;
  * - Role names must remain unique within the system.
  * - An existing user role must be identified either by its unique identifier or name
  * during updates.
+ *
  * <p>
  * Exception Handling:
  * - Throws {@link ConnectorUserRoleBadRequestException} for invalid input, such as a non-blank
@@ -72,13 +73,16 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
                     "Connector user role id should not be blank");
         }
 
-        var existingUserRole = repository.findByUuid(identifier)
+        var existingUserRole = repository
+                .findByUuid(identifier)
                 .orElseThrow(() -> new ConnectorUserRoleNotFoundException(
                         "No existing user role found with id " + identifier));
 
         checkRoleName(identifier, userRole);
 
-        if (existingUserRole.name().equalsIgnoreCase(userRole.name())) {
+        if (existingUserRole
+                .name()
+                .equalsIgnoreCase(userRole.name())) {
             log.info("Nothing to update");
             return existingUserRole;
         }
@@ -91,8 +95,9 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     private void checkRoleName(String identifier, ConnectorRole userRole) {
         var existingUser = repository.findByName(userRole.name());
 
-        if (existingUser.isPresent() &&
-                !Objects.equals(existingUser.get().uuid(), identifier)) {
+        if (existingUser.isPresent() && !Objects.equals(existingUser
+                .get()
+                .uuid(), identifier)) {
             throw new ConnectorUserRoleAlreadyExistsException(
                     "Role name '%s' already exists".formatted(userRole.name())
             );

@@ -14,9 +14,9 @@ import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTo
 import eu.ecodex.connector.domain.model.login.LoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshRequest;
-import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorLoginUserService;
-import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorLogoutUserService;
-import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller responsible for handling user login operations for the connector system.
- * This class implements the {@link ConnectorAuthenticationApi} interface, providing API functionality
+ * This class implements the {@link ConnectorAuthenticationApi} interface, providing API
+ * functionality
  * for authenticating users and returning an access token upon successful login.
  *
  * <p>
@@ -79,7 +80,9 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     }
 
     private String getAuthUserId() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
         assert authentication != null;
         return ((ConnectorUserDetails) Objects.requireNonNull(
                 authentication.getPrincipal())).getUserId();

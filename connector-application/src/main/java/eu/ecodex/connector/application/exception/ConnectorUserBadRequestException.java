@@ -10,6 +10,9 @@
 
 package eu.ecodex.connector.application.exception;
 
+/**
+ * ConnectorUserBadRequestException is thrown when a user request is not valid.
+ */
 public class ConnectorUserBadRequestException extends RuntimeException {
     public ConnectorUserBadRequestException(String message) {
         super(message);

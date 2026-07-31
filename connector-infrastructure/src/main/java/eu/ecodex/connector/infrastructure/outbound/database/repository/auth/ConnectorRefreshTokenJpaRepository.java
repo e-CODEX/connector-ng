@@ -53,29 +53,34 @@ public interface ConnectorRefreshTokenJpaRepository
      * value.
      *
      * @param token the unique token string used to identify the {@link ConnectorRefreshTokenEntity}
+     *
      * @return an {@link Optional} containing the {@link ConnectorRefreshTokenEntity} if found, or
-     * an empty {@link Optional} if no entity matches the provided token
+     *         an empty {@link Optional} if no entity matches the provided token
      */
     Optional<ConnectorRefreshTokenEntity> findByToken(String token);
 
     /**
-     * Retrieves a list of {@link ConnectorRefreshTokenEntity} instances based on the specified user's unique identifier
+     * Retrieves a list of {@link ConnectorRefreshTokenEntity} instances based on the specified
+     * user's unique identifier
      * (UUID) and revocation status.
      *
-     * @param userUuid the unique identifier (UUID) of the user whose refresh token entities are to be retrieved
+     * @param userUuid the unique identifier (UUID) of the user whose refresh token entities are to
+     *                 be retrieved
      * @param revoked  the revocation status used to filter the returned refresh token entities
-     * @return a list of {@link ConnectorRefreshTokenEntity} instances matching the provided user UUID and revocation status;
-     * if no entities match, an empty list is returned
+     *
+     * @return a list of {@link ConnectorRefreshTokenEntity} instances matching the provided user
+     *         UUID and revocation status;
+     *         if no entities match, an empty list is returned
      */
     List<ConnectorRefreshTokenEntity> findByUser_UuidAndRevoked(String userUuid, boolean revoked);
 
     @Modifying
     @Transactional
     @Query("""
-        update ConnectorRefreshTokenEntity rt
-           set rt.revoked = true
-         where rt.user.uuid = :userUuid
-           and rt.revoked = false
-        """)
+            update ConnectorRefreshTokenEntity rt
+               set rt.revoked = true
+             where rt.user.uuid = :userUuid
+               and rt.revoked = false
+            """)
     int revokeAllByUserUuid(@Param("userUuid") String userUuid);
 }

@@ -11,15 +11,10 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.infrastructure.config.DssConfig;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@EnableAutoConfiguration
 @Import(DssConfig.class)
-@SuppressWarnings("checkstyle:MissingJavadocType")
 @ComponentScan(
         basePackages = {
                 "eu.ecodex.connector.domain",
@@ -31,5 +26,5 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.infrastructure.outbound.security.util",
         }
 )
-public class TokenContextConfiguration {
+public class TokenContextConfiguration extends SecurityDisabledTestConfiguration {
 }

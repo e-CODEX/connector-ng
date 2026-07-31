@@ -15,15 +15,19 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 
 /**
  * Interface for removing {@link ConnectorUser} entities from the system.
+ *
  * <p>
- * Defines methods to delete a user by providing the {@link ConnectorUser} instance or by specifying its unique identifier.
- * Facilitates the removal of user entities while ensuring type safety and consistency in handling user operations.
+ * Defines methods to delete a user by providing the {@link ConnectorUser} instance or by specifying
+ * its unique identifier.
+ * Facilitates the removal of user entities while ensuring type safety and consistency in handling
+ * user operations.
  */
 public interface ConnectorRemoveUser {
     /**
      * Deletes a {@link ConnectorUser} entity identified by its unique identifier.
      *
-     * @param identifier the unique identifier of the {@link ConnectorUser} to be deleted; must not be null
+     * @param identifier the unique identifier of the {@link ConnectorUser} to be deleted; must not
+     *                   be null
      */
     void deleteById(String identifier) throws ConnectorUserNotFoundException;
 }

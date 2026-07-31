@@ -21,9 +21,10 @@ import java.time.Instant;
  * It is an immutable data structure designed to store and share
  * role-specific information across the Connector system.
  *
- *  <p>
+ * <p>
  * The class supports the builder pattern, offering a nested {@code Builder} class
- * that provides a flexible API for incrementally constructing instances of {@code ConnectorUserRole}.
+ * that provides a flexible API for incrementally constructing instances of
+ * {@code ConnectorUserRole}.
  * Additionally, it includes a method to create a pre-populated builder
  * from an existing object.
  *
@@ -36,19 +37,20 @@ public record ConnectorRole(String uuid,
                             Instant createdAt,
                             Instant updatedAt) {
 
+    public static final String DEFAULT_ADMIN_ROLE = "ROLE_ADMIN";
+
     public static Builder builder() {
         return new Builder();
     }
 
-    public static final String DEFAULT_ADMIN_ROLE = "ROLE_ADMIN";
-
     /**
-     * Create Default Administrator role
+     * Create Default Administrator role.
      *
-     * @return Default admin role
+     * @return Default admin role.
      */
     public static ConnectorRole defaultAdminRole() {
-        return ConnectorRole.builder()
+        return ConnectorRole
+                .builder()
                 .name(DEFAULT_ADMIN_ROLE)
                 .build();
     }
@@ -62,7 +64,7 @@ public record ConnectorRole(String uuid,
      * of this {@code ConnectorUserRole} instance.
      *
      * @return a {@code Builder} instance containing the fields of the current
-     * {@code ConnectorUserRole} object.
+     *         {@code ConnectorUserRole} object.
      */
     public Builder toBuilder() {
         return new Builder()
@@ -75,11 +77,13 @@ public record ConnectorRole(String uuid,
 
     /**
      * Builder class for constructing instances of {@code ConnectorUserRole}.
+     *
      * <p>
      * This builder implements a fluent API for incrementally setting the properties
      * of a {@code ConnectorUserRole} object and constructing a new immutable instance.
      * The builder is used to ensure that the resulting object is created in a
      * controlled, consistent manner.
+     *
      * <p>
      * Various methods are provided to set the individual fields of the builder.
      * Each setter method returns the builder itself, enabling method chaining.

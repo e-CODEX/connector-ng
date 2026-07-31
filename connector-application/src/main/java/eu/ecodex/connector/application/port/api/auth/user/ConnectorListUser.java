@@ -15,6 +15,7 @@ import java.util.List;
 
 /**
  * Interface for listing all registered {@link ConnectorUser} instances within the system.
+ *
  * <p>
  * Provides an operation to retrieve all {@link ConnectorUser} objects, enabling access
  * to the complete list of users available in the system.
@@ -24,7 +25,7 @@ public interface ConnectorListUser {
      * Retrieves all instances of {@link ConnectorUser} available in the system.
      *
      * @return a list of {@link ConnectorUser} objects representing all registered users.
-     * If no users are found, an empty list is returned.
+     *         If no users are found, an empty list is returned.
      */
     List<ConnectorUser> findAll();
 }

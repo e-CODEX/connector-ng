@@ -10,13 +10,14 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.List;
 
 /**
  * Represents a contract for listing all user roles associated with the Connector system.
  * Implementations of this interface are responsible for retrieving all instances of
- * {@link ConnectorUserRole}.
+ * {@link ConnectorRole}.
+ *
  * <p>
  * The primary use case of this interface is to provide a mechanism to fetch a collection
  * of user roles from the underlying data source, which could be a database or any other
@@ -26,8 +27,8 @@ public interface ConnectorListRole {
     /**
      * Retrieves a list of all user roles associated with the Connector system.
      *
-     * @return a list of {@link ConnectorUserRole} representing all user roles stored
+     * @return a list of {@link ConnectorRole} representing all user roles stored
      * in the underlying data source.
      */
-    List<ConnectorUserRole> findAll();
+    List<ConnectorRole> findAll();
 }

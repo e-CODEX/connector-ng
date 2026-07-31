@@ -10,11 +10,13 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
+import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
+
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserRoleJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,17 +28,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+/**
+ * Repository to handle user's roles
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
 
-    ConnectorUserRoleJpaRepository jpaRepository;
+    ConnectorRoleJpaRepository jpaRepository;
 
     @Override
-    public ConnectorUserRole save(ConnectorUserRole userRole) {
+    public ConnectorRole save(ConnectorRole userRole) {
         var existing = jpaRepository.findByUuid(
                 userRole.uuid()); // TODO check if this call could be optimized
         ConnectorRoleEntity entity;
@@ -52,19 +56,19 @@ public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
     }
 
     @Override
-    public Optional<ConnectorUserRole> findByUuid(String identifier) {
+    public Optional<ConnectorRole> findByUuid(String identifier) {
         var found = jpaRepository.findByUuid(identifier);
         return found.map(this::toDomain);
     }
 
     @Override
-    public Optional<ConnectorUserRole> findByName(String name) {
+    public Optional<ConnectorRole> findByName(String name) {
         var found = jpaRepository.findByName(name);
         return found.map(this::toDomain);
     }
 
     @Override
-    public List<ConnectorUserRole> findAll() {
+    public List<ConnectorRole> findAll() {
         return jpaRepository.findAll().stream().map(this::toDomain).toList();
     }
 
@@ -75,26 +79,29 @@ public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
                 .orElseThrow(() ->
                         new ConnectorUserNotFoundException(
                                 "No user role found with id " + identifier));
+        emptyIfNull(entity.getUsers())
+                .forEach(user -> user.getRoles().remove(entity));
+
         jpaRepository.delete(entity);
     }
 
     @Override
-    public Set<ConnectorUserRole> findByNameIn(Set<String> names) {
+    public Set<ConnectorRole> findByNameIn(Set<String> names) {
         return jpaRepository.findByNameIn(names).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
 
-    private ConnectorRoleEntity toEntity(ConnectorUserRole domainUserRole) {
+    private ConnectorRoleEntity toEntity(ConnectorRole domainUserRole) {
         return ConnectorRoleEntity.builder()
                 .uuid(domainUserRole.uuid())
                 .name(domainUserRole.name())
                 .build();
     }
 
-    private ConnectorUserRole toDomain(ConnectorRoleEntity entity) {
-        return new ConnectorUserRole(entity.getUuid(), entity.getName(), entity.getCreatedAt(),
+    private ConnectorRole toDomain(ConnectorRoleEntity entity) {
+        return new ConnectorRole(entity.getUuid(), entity.getName(), entity.getCreatedAt(),
                 entity.getUpdatedAt());
     }
 }

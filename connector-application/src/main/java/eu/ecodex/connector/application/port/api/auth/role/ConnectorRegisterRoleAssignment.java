@@ -12,13 +12,14 @@ package eu.ecodex.connector.application.port.api.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 
 /**
  * Defines a contract for registering and updating user roles within the Connector system.
- * Implementations of this interface handle the creation of new {@link ConnectorUserRole}
+ * Implementations of this interface handle the creation of new {@link ConnectorRole}
  * instances and the modification of existing ones.
+ *
  * <p>
  * The primary purpose of this interface is to manage user roles in the underlying
  * persistence mechanism, ensuring that each role is correctly registered or updated

@@ -11,22 +11,26 @@
 package eu.ecodex.connector.application.port.spi.auth.login;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import java.time.Duration;
 
 /**
  * A provider interface for managing authentication tokens used in the
  * Connector application. This interface defines methods for creating,
  * validating, and parsing authentication tokens, as well as extracting
  * user-related information.
+ *
  * <p>
  * Responsibilities:
  * - Generate authentication tokens based on user details.
  * - Validate tokens based on predefined criteria, such as matching user
  * details and expiration.
  * - Extract the username encoded within a token.
+ *
  * <p>
  * Thread-safety:
  * Implementations of this interface must ensure appropriate thread-safety
  * for use in concurrent environments.
+ *
  * <p>
  * Expected Implementations:
  * Classes implementing this interface should define the token generation
@@ -52,5 +56,14 @@ public interface ConnectorAuthenticationTokenProvider {
      * @return the expiration duration of the access token in seconds.
      */
     long accessTokenExpiresInSeconds();
+
+    /**
+     * Retrieves the duration in seconds for which a refresh token remains valid.
+     * This duration determines the token's expiration time, after which it will
+     * no longer be accepted for authentication or token renewal purposes.
+     *
+     * @return the expiration duration of the refresh token in seconds.
+     */
+    Duration refreshTokenExpires();
 
 }

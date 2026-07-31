@@ -11,52 +11,53 @@
 package eu.ecodex.connector.application.port.api.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Set;
 
 /**
  * Defines a contract for retrieving user roles within the Connector system.
  * Implementations of this interface are responsible for fetching user role details
  * based on either a unique identifier or a username.
+ *
  * <p>
- * This interface is primarily used to locate and retrieve specific {@link ConnectorUserRole}
+ * This interface is primarily used to locate and retrieve specific {@link ConnectorRole}
  * entities from the underlying persistence mechanism, allowing system components to work
  * with role information associated with connector users.
  */
 public interface ConnectorRetrieveRole {
     /**
      * Retrieves a user role identified by the specified unique identifier.
-     * This method fetches the {@link ConnectorUserRole} entity from the
+     * This method fetches the {@link ConnectorRole} entity from the
      * underlying data source using the provided identifier.
      *
      * @param identifier the unique identifier of the user role to be retrieved.
      *                   It must correspond to an existing user role in the system.
-     * @return the {@link ConnectorUserRole} instance matching the given identifier.
+     * @return the {@link ConnectorRole} instance matching the given identifier.
      * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified identifier.
      */
-    ConnectorUserRole getById(String identifier) throws ConnectorUserRoleNotFoundException;
+    ConnectorRole getById(String identifier) throws ConnectorUserRoleNotFoundException;
 
     /**
      * Retrieves a user role identified by the specified name.
-     * This method fetches the {@link ConnectorUserRole} entity from the
+     * This method fetches the {@link ConnectorRole} entity from the
      * underlying data source using the provided role name.
      *
      * @param roleName the name of the user role to be retrieved.
      *                 It must correspond to an existing user role in the system.
-     * @return the {@link ConnectorUserRole} instance matching the given role name.
+     * @return the {@link ConnectorRole} instance matching the given role name.
      * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified name.
      */
-    ConnectorUserRole getByName(String roleName) throws ConnectorUserRoleNotFoundException;
+    ConnectorRole getByName(String roleName) throws ConnectorUserRoleNotFoundException;
 
     /**
      * Retrieves a set of user roles based on the specified username.
-     * This method fetches all {@link ConnectorUserRole} entities that are
+     * This method fetches all {@link ConnectorRole} entities that are
      * associated with the given username from the underlying persistence source.
      *
      * @param username the username for which the user roles need to be retrieved.
      *                 It must correspond to a valid user in the system.
-     * @return a set of {@link ConnectorUserRole} associated with the specified username.
+     * @return a set of {@link ConnectorRole} associated with the specified username.
      * The returned set may be empty if no roles are found.
      */
-    Set<ConnectorUserRole> findByNameIn(Set<String> username);
+    Set<ConnectorRole> findByNameIn(Set<String> username);
 }

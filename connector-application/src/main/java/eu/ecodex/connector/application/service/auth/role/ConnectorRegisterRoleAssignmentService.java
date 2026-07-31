@@ -28,12 +28,14 @@ import org.springframework.transaction.annotation.Transactional;
  * This class is responsible for creating new user roles or updating existing ones based on the
  * provided identifier and role name. It serves as the bridge between the application's business logic
  * and the persistence layer through the {@link ConnectorRoleRepository}.
+ *
  * <p>
  * Responsibilities:
  * - Handles the creation and registration of new user roles in the data source.
  * - Updates existing user role assignments when applicable.
  * - Ensures that the provided role and user identifiers are valid, throwing exceptions
  * if the required entities are not found.
+ *
  * <p>
  * Exceptions:
  * - {@link ConnectorUserRoleNotFoundException}: Thrown if the specified role does not exist.

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,27 +27,30 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * API interface for managing connector user roles.
+ * 
  * <p>
  * This interface exposes endpoints for creating, updating, retrieving, and deleting
  * roles assigned to connector users. It allows for management of the roles within
  * the connector's authorization and role-based access control system.
+ * 
  * <p>
  * All endpoints consume and produce JSON data.
  */
+@PreAuthorize("hasRole(T(eu.ecodex.connector.domain.model.user.ConnectorRoleName.ADMIN))")
 @RequestMapping(path = "/api/v1/admin/users", consumes = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Users", description = "API for managing connector's users")
 public interface ConnectorRoleAssignmentAdminApi {
 
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user role assignments.")
-    @PostMapping(path = "/{id}/roles")
+    @PostMapping(path = "/{uuid}/roles")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    ConnectorUserDto register(@PathVariable("id") String identifier, @RequestBody String role);
+    ConnectorUserDto register(@PathVariable("uuid") String identifier, @RequestBody String role);
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user role assignment.")
-    @DeleteMapping(path = "/{id}/roles")
+    @DeleteMapping(path = "/{uuid}/roles")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
-    void delete(@PathVariable("id") String identifier, @RequestBody String role);
+    void delete(@PathVariable("uuid") String identifier, @RequestBody String role);
 
 }

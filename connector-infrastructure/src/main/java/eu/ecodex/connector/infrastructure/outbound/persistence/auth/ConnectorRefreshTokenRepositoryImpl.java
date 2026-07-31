@@ -15,9 +15,10 @@ import eu.ecodex.connector.application.port.spi.auth.login.ConnectorRefreshToken
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorRefreshTokenJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRefreshTokenJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.user.ConnectorUserMapper;
+import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +56,18 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
         var user = userRepository.findByUuid(refreshToken.user().uuid())
                 .orElseThrow();
         jpaRepository.delete(toEntity(refreshToken, user));
+    }
+
+    @Override
+    public List<ConnectorRefreshToken> findByUserUuidAndRevoked(String uuid, boolean revoked) {
+        return jpaRepository.findByUser_UuidAndRevoked(uuid, revoked).stream()
+                .map(this::toDomain)
+                .toList();
+    }
+
+    @Override
+    public int revokeAllByUserUuid(String uuid) {
+        return jpaRepository.revokeAllByUserUuid(uuid);
     }
 
     private ConnectorRefreshTokenEntity toEntity(ConnectorRefreshToken domain,

@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.initializer;
 
-import static eu.ecodex.connector.domain.model.user.ConnectorUserRole.DEFAULT_ADMIN_ROLE;
-import static eu.ecodex.connector.domain.model.user.ConnectorUserRole.builder;
-import static eu.ecodex.connector.domain.model.user.ConnectorUserRole.defaultAdminRole;
+import static eu.ecodex.connector.domain.model.user.ConnectorRole.DEFAULT_ADMIN_ROLE;
+import static eu.ecodex.connector.domain.model.user.ConnectorRole.builder;
+import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultAdminRole;
 
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
@@ -21,7 +21,7 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.ConnectorAdminUserProperties;
 import java.util.HashSet;
 import java.util.Set;
@@ -172,7 +172,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     }
 
     private ConnectorUser createAdminUser(ConnectorAdminUserProperties properties,
-                                          ConnectorUserRole adminRole) {
+                                          ConnectorRole adminRole) {
         var encodedPassword = passwordEncoder.encode(properties.getPassword());
         return ConnectorUser.builder()
                 .username(properties.getUsername())

@@ -16,7 +16,8 @@ import java.util.Optional;
 
 /**
  * Interface for managing ConnectorUser entities in the persistence layer.
- * <p>
+ *
+ *  <p>
  * This interface provides methods for creating, retrieving, updating,
  * and deleting instances of the ConnectorUser entity, as well as additional methods
  * for querying such as finding by username, email, or a combination of username and email.
@@ -38,6 +39,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Retrieves a ConnectorUser entity by its unique identifier.
+     *
      * <p>
      * This method queries the persistence layer to find and return a ConnectorUser
      * wrapped in an Optional. If no user with the given identifier is found, the method
@@ -50,6 +52,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Retrieves a {@code ConnectorUser} entity by its UUID.
+     *
      * <p>
      * This method queries the persistence layer to find and return a {@code ConnectorUser}
      * wrapped in an {@code Optional}. If no user with the given UUID is found, the method
@@ -62,6 +65,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Retrieves a ConnectorUser entity based on the provided username.
+     *
      * <p>
      * This method queries the persistence layer to find and return a ConnectorUser
      * wrapped in an Optional. If no user with the given username is found, the method
@@ -74,6 +78,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Retrieves a ConnectorUser entity based on the provided email.
+     *
      * <p>
      * This method queries the persistence layer to find and return a ConnectorUser
      * wrapped in an Optional. If no user with the given email is found, the method
@@ -86,6 +91,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Retrieves a {@code ConnectorUser} entity based on the provided username and email.
+     *
      * <p>
      * This method queries the persistence layer to find and return a {@code ConnectorUser}
      * wrapped in an {@code Optional}. If no user exists with the given username and email,
@@ -99,6 +105,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Retrieves a list of all {@code ConnectorUser} entities.
+     *
      * <p>
      * This method fetches all the {@code ConnectorUser} records from the persistence layer
      * and returns them as a {@code List}. If no users are found, the method will return an
@@ -110,6 +117,7 @@ public interface ConnectorUserRepository {
 
     /**
      * Deletes the ConnectorUser entity with the specified unique identifier.
+     *
      * <p>
      * This method removes the corresponding record from the persistence layer.
      * If no user exists with the given identifier, an exception may be thrown

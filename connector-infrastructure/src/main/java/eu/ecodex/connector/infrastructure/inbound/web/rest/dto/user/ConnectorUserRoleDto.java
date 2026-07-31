@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user;
 
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.time.Instant;
 import lombok.Builder;
 import lombok.NonNull;
@@ -31,7 +31,7 @@ public record ConnectorUserRoleDto(
         Instant updatedAt
 ) {
 
-    public static ConnectorUserRoleDto from(ConnectorUserRole userRole) {
+    public static ConnectorUserRoleDto from(ConnectorRole userRole) {
         return ConnectorUserRoleDto
                 .builder()
                 .identifier(userRole.uuid())
@@ -41,8 +41,8 @@ public record ConnectorUserRoleDto(
                 .build();
     }
 
-    public static ConnectorUserRole toDomain(ConnectorUserRoleDto userRoleDto) {
-        return ConnectorUserRole
+    public static ConnectorRole toDomain(ConnectorUserRoleDto userRoleDto) {
+        return ConnectorRole
                 .builder()
                 .uuid(userRoleDto.identifier())
                 .name(userRoleDto.name())

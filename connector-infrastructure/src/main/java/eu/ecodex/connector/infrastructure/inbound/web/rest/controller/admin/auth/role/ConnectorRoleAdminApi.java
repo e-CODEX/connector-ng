@@ -19,6 +19,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +31,16 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * API interface for managing connector user roles.
+ *
  * <p>
  * This interface exposes endpoints for creating, updating, retrieving, and deleting
  * roles assigned to connector users. It allows for management of the roles within
  * the connector's authorization and role-based access control system.
+ *
  * <p>
  * All endpoints consume and produce JSON data.
  */
+@PreAuthorize("hasRole(T(eu.ecodex.connector.domain.model.user.ConnectorRoleName.ADMIN))")
 @RequestMapping(path = "/api/v1/admin/users/roles", consumes = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Users", description = "API for managing connector's users")
 public interface ConnectorRoleAdminApi {
@@ -49,16 +53,16 @@ public interface ConnectorRoleAdminApi {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Update a connector user.")
-    @PutMapping("/{id}")
+    @PutMapping("/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    ConnectorUserRoleDto update(@PathVariable("id") String identifier,
+    ConnectorUserRoleDto update(@PathVariable("uuid") String identifier,
                                 @Valid @RequestBody ConnectorUserRoleDto userRoleDto);
 
     @ResponseStatus(HttpStatus.FOUND)
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
-    ConnectorUserRoleDto getById(@PathVariable("id") String identifier);
+    ConnectorUserRoleDto getByIdentifier(@PathVariable("uuid") String identifier);
 
     @ResponseStatus(HttpStatus.FOUND)
     @Operation(summary = "Retrieve all connector's user roles.")
@@ -68,8 +72,8 @@ public interface ConnectorRoleAdminApi {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user role by uuid identifier.")
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(path = "/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
-    void deleteById(@PathVariable("id") String identifier);
+    void deleteByIdentifier(@PathVariable("uuid") String identifier);
 
 }

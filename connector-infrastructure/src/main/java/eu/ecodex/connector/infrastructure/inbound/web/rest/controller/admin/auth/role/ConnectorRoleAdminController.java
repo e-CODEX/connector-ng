@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserRoleDto;
 import java.util.List;
 import lombok.AccessLevel;
@@ -28,25 +28,29 @@ import org.springframework.web.bind.annotation.RestController;
  * Provides functionality to create, update, retrieve, list, and delete user roles.
  * Implements the API defined in {@link ConnectorRoleAdminApi}.
  * Uses service-level components to execute business logic related to user roles.
+ *
  * <p>
  * Annotations:
  * - {@code @Slf4j}: For logging purposes.
  * - {@code @RestController}: Indicates that this class is a REST controller.
  * - {@code @RequiredArgsConstructor}: Generates a constructor with required dependencies.
- * - {@code @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)}: Ensures immutability and encapsulation of fields.
+ * - {@code @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)}: Ensures immutability
+ * and encapsulation of fields.
+ *
  * <p>
  * Dependencies:
  * - {@link ConnectorRegisterRole}: Handles the registration and updating of user roles.
  * - {@link ConnectorRetrieveRole}: Retrieves user roles by identifier.
  * - {@link ConnectorRemoveRole}: Manages the deletion of user roles.
  * - {@link ConnectorListRole}: Provides functionality to list all user roles.
+ *
  * <p>
  * Methods:
  * - {@link #register(ConnectorUserRoleDto)}: Registers a new user role in the system.
  * - {@link #update(String, ConnectorUserRoleDto)}: Updates an existing user role by its identifier.
- * - {@link #getById(String)}: Retrieves a specific user role by its unique identifier.
+ * - {@link #getByIdentifier(String)}: Retrieves a specific user role by its unique identifier.
  * - {@link #getAll()}: Fetches all user roles from the system.
- * - {@link #deleteById(String)}: Deletes a user role by its identifier.
+ * - {@link #deleteByIdentifier(String)}: Deletes a user role by its identifier.
  */
 @Slf4j
 @RestController
@@ -79,8 +83,8 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     }
 
     @Override
-    public ConnectorUserRoleDto getById(String identifier) {
-        ConnectorUserRole byId = connectorRetrieveRole.getById(identifier);
+    public ConnectorUserRoleDto getByIdentifier(String identifier) {
+        ConnectorRole byId = connectorRetrieveRole.getById(identifier);
         return ConnectorUserRoleDto.from(byId);
     }
 
@@ -92,8 +96,8 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     }
 
     @Override
-    public void deleteById(String identifier) {
-        connectorRemoveRole.deleteById(identifier);
+    public void deleteByIdentifier(String identifier) {
+        connectorRemoveRole.deleteByIdentifier(identifier);
         log.info("User deleted by id");
     }
 

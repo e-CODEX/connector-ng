@@ -12,12 +12,12 @@ package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.user.ConnectorUserRoleJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRoleJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -29,28 +29,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Implementation of the {@link ConnectorUserRepository} interface that provides
- * methods for managing ConnectorUser entities and their persistence using
- * a JPA-based repository.
- * <p>
- * This class acts as a bridge between the domain model representation of
- * ConnectorUser and the database representation, handling the required
- * conversions and delegation to the underlying JPA repository.
- * <p>
- * Responsibilities:
- * - Saving ConnectorUser entities into the database.
- * - Retrieving ConnectorUser entities by ID, username, email, or a combination of username and email.
- * - Listing all ConnectorUser entities.
- * - Deleting ConnectorUser entities by their ID or instance.
- * - Checking the existence of a ConnectorUser entity by its ID.
- * <p>
- * Utility Methods:
- * - Converts domain model objects to JPA entity objects for database persistence.
- * - Converts JPA entity objects back to domain model objects for application consumption.
- * - Handles conversion of roles associated with a ConnectorUser.
- */
 
+/**
+ * Implementation of the ConnectorUserRepository interface that provides
+ * operations for managing ConnectorUser entities in the database.
+ *
+ * <p>
+ * This class uses JPA repositories for persistence and mapping
+ * entities to domain objects and vice versa. It ensures consistency
+ * between the domain and persistence layers and includes functionality
+ * for saving, retrieving, updating, and deleting ConnectorUser entities.
+ *
+ * <p>
+ * Annotations Used:
+ * - {@code @Slf4j}: Enables logging.
+ * - {@code @Service}: Indicates that this class is a Spring service component.
+ * - {@code @RequiredArgsConstructor}: Generates a constructor with required
+ * arguments for dependencies marked as {@code final}.
+ * - {@code @FieldDefaults(makeFinal=true, level=AccessLevel.PRIVATE)}: Sets
+ * all fields to private final.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -58,7 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
 
     ConnectorUserJpaRepository jpaRepository;
-    ConnectorUserRoleJpaRepository roleRepository;
+    ConnectorRoleJpaRepository roleRepository;
 
     @Override
     public ConnectorUser save(ConnectorUser domainUser) {
@@ -161,7 +159,7 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
         if (domainUser.roles() != null) {
             Set<String> rolesNames = domainUser.roles()
                     .stream()
-                    .map(ConnectorUserRole::name)
+                    .map(ConnectorRole::name)
                     .collect(Collectors.toUnmodifiableSet());
 
             Set<ConnectorRoleEntity> managedRoles = roleRepository.findByNameIn(rolesNames);

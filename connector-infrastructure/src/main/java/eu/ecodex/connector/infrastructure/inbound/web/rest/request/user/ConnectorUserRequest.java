@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.user;
 
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import jakarta.validation.constraints.Email;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +31,12 @@ public record ConnectorUserRequest(@NonNull
                                    Set<String> roles
 ) {
 
+    /**
+     * Map a domain ser to a request user
+     *
+     * @param user user to map
+     * @return request user
+     */
     public static ConnectorUserRequest from(ConnectorUser user) {
         return ConnectorUserRequest
                 .builder()
@@ -42,6 +48,12 @@ public record ConnectorUserRequest(@NonNull
                 .build();
     }
 
+    /**
+     * Map a request user into a domain user
+     *
+     * @param userRequest user to map
+     * @return domain user
+     */
     public static ConnectorUser toDomain(ConnectorUserRequest userRequest) {
         return ConnectorUser
                 .builder()
@@ -55,16 +67,16 @@ public record ConnectorUserRequest(@NonNull
 
     private static Set<String> getRoles(ConnectorUser user) {
         return CollectionUtils.isEmpty(user.roles()) ? Set.of() :
-                user.roles().stream().map(ConnectorUserRole::name)
+                user.roles().stream().map(ConnectorRole::name)
                         .collect(Collectors.toUnmodifiableSet());
     }
 
-    private static Set<ConnectorUserRole> getRoles(ConnectorUserRequest request) {
-        if(request.roles() == null) {
+    private static Set<ConnectorRole> getRoles(ConnectorUserRequest request) {
+        if (request.roles() == null) {
             return null;
         }
 
         return request.roles().stream().map(role ->
-                ConnectorUserRole.builder().name(role).build()).collect(Collectors.toUnmodifiableSet());
+                ConnectorRole.builder().name(role).build()).collect(Collectors.toUnmodifiableSet());
     }
 }

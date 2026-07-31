@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
 import java.util.Set;
@@ -22,6 +22,12 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ConnectorUserMapper {
 
+    /**
+     * Map domain user into entity user
+     *
+     * @param domainUser domain user
+     * @return entity user
+     */
     public ConnectorUserEntity toEntity(ConnectorUser domainUser) {
         return ConnectorUserEntity.builder()
                 .uuid(domainUser.uuid())
@@ -33,6 +39,12 @@ public class ConnectorUserMapper {
     }
 
 
+    /**
+     * Map an entity user into a domain user
+     *
+     * @param entity entity user
+     * @return domain user
+     */
     public ConnectorUser toDomain(ConnectorUserEntity entity) {
         return ConnectorUser.builder()
                 .uuid(entity.getUuid())
@@ -47,16 +59,22 @@ public class ConnectorUserMapper {
     }
 
 
-    public static Set<ConnectorUserRole> getUserRoles(ConnectorUserEntity entity) {
+    /**
+     * Map a user entity role
+     *
+     * @param entity entity to map
+     * @return Set of domain roles
+     */
+    public static Set<ConnectorRole> getUserRoles(ConnectorUserEntity entity) {
         return entity.getRoles() == null ? null :
                 entity.getRoles().stream()
                         .map(toRoleDomain())
                         .collect(Collectors.toSet());
     }
 
-    private static Function<ConnectorRoleEntity, ConnectorUserRole> toRoleDomain() {
+    private static Function<ConnectorRoleEntity, ConnectorRole> toRoleDomain() {
         return role ->
-                ConnectorUserRole.builder()
+                ConnectorRole.builder()
                         .uuid(role.getUuid())
                         .name(role.getName()).build();
 

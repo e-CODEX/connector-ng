@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.auth.role;
 
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +28,7 @@ public interface ConnectorRoleRepository {
      * @param user the ConnectorUserRole entity to be saved or updated
      * @return the saved ConnectorUserRole entity, including any modifications or generated identifiers
      */
-    ConnectorUserRole save(ConnectorUserRole user);
+    ConnectorRole save(ConnectorRole user);
 
     /**
      * Retrieves a ConnectorUserRole entity by its unique UUID.
@@ -36,7 +36,7 @@ public interface ConnectorRoleRepository {
      * @param id the unique identifier (UUID) of the ConnectorUserRole entity to retrieve
      * @return an Optional containing the ConnectorUserRole entity if found, or an empty Optional if not found
      */
-    Optional<ConnectorUserRole> findByUuid(String id);
+    Optional<ConnectorRole> findByUuid(String id);
 
     /**
      * Searches for a ConnectorUserRole entity by its name.
@@ -44,14 +44,14 @@ public interface ConnectorRoleRepository {
      * @param name the name of the ConnectorUserRole to search for
      * @return an Optional containing the found ConnectorUserRole if it exists, or an empty Optional if no entity is found
      */
-    Optional<ConnectorUserRole> findByName(String name);
+    Optional<ConnectorRole> findByName(String name);
 
     /**
      * Retrieves all ConnectorUserRole entities from the repository.
      *
      * @return a list of all ConnectorUserRole entities
      */
-    List<ConnectorUserRole> findAll();
+    List<ConnectorRole> findAll();
 
     /**
      * Deletes a user role from the repository based on its unique UUID.
@@ -67,5 +67,5 @@ public interface ConnectorRoleRepository {
      * @param names a set of role names to search for
      * @return a set of {@code ConnectorUserRole} entities matching the provided names
      */
-    Set<ConnectorUserRole> findByNameIn(Set<String> names);
+    Set<ConnectorRole> findByNameIn(Set<String> names);
 }

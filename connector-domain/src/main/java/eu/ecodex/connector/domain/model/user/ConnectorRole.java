@@ -14,24 +14,27 @@ import java.time.Instant;
 
 /**
  * Represents a role assigned to a user in the Connector system.
+ *
  * <p>
  * This record provides metadata about the role, including a unique identifier,
  * the role's name, and its creation and last updated timestamps.
  * It is an immutable data structure designed to store and share
  * role-specific information across the Connector system.
- * <p>
+ *
+ *  <p>
  * The class supports the builder pattern, offering a nested {@code Builder} class
  * that provides a flexible API for incrementally constructing instances of {@code ConnectorUserRole}.
  * Additionally, it includes a method to create a pre-populated builder
  * from an existing object.
+ *
  * <p>
  * This record is used as a field in other classes, such as {@code ConnectorUser},
  * to represent the roles associated with a user.
  */
-public record ConnectorUserRole(String uuid,
-                                String name,
-                                Instant createdAt,
-                                Instant updatedAt) {
+public record ConnectorRole(String uuid,
+                            String name,
+                            Instant createdAt,
+                            Instant updatedAt) {
 
     public static Builder builder() {
         return new Builder();
@@ -39,9 +42,13 @@ public record ConnectorUserRole(String uuid,
 
     public static final String DEFAULT_ADMIN_ROLE = "ROLE_ADMIN";
 
-
-    public static ConnectorUserRole defaultAdminRole() {
-        return ConnectorUserRole.builder()
+    /**
+     * Create Default Administrator role
+     *
+     * @return Default admin role
+     */
+    public static ConnectorRole defaultAdminRole() {
+        return ConnectorRole.builder()
                 .name(DEFAULT_ADMIN_ROLE)
                 .build();
     }
@@ -107,8 +114,8 @@ public record ConnectorUserRole(String uuid,
             return this;
         }
 
-        public ConnectorUserRole build() {
-            return new ConnectorUserRole(uuid, name, createdAt, updatedAt);
+        public ConnectorRole build() {
+            return new ConnectorRole(uuid, name, createdAt, updatedAt);
         }
     }
 

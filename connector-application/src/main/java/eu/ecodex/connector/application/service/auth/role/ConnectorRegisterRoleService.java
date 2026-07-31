@@ -15,7 +15,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserRoleBadRequestExce
 import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +27,13 @@ import org.springframework.stereotype.Component;
  * Service responsible for managing the registration and updating of user roles within
  * the Connector system. This implementation interacts with the underlying persistence
  * layer through the {@link ConnectorRoleRepository}.
+ *
  * <p>
  * The primary goals of this service include:
  * - Ensuring new user roles are correctly registered in the persistence layer.
  * - Updating existing user roles while validating role uniqueness and integrity.
  * - Logging relevant actions and ensuring the system's constraints are respected.
+ *
  * <p>
  * Constraints:
  * - A new user role must not have its identifier field set during registration.
@@ -54,7 +56,7 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     ConnectorRoleRepository repository;
 
     @Override
-    public ConnectorUserRole register(ConnectorUserRole userRole) {
+    public ConnectorRole register(ConnectorRole userRole) {
         if (userRole.uuid() != null) {
             throw new ConnectorUserRoleBadRequestException(
                     "Connector user role id should be blank");
@@ -64,7 +66,7 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     }
 
     @Override
-    public ConnectorUserRole update(String identifier, ConnectorUserRole userRole) {
+    public ConnectorRole update(String identifier, ConnectorRole userRole) {
         if (identifier == null && userRole.uuid() == null) {
             throw new ConnectorUserRoleBadRequestException(
                     "Connector user role id should not be blank");
@@ -86,7 +88,7 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
         return repository.save(userBuilder.build());
     }
 
-    private void checkRoleName(String identifier, ConnectorUserRole userRole) {
+    private void checkRoleName(String identifier, ConnectorRole userRole) {
         var existingUser = repository.findByName(userRole.name());
 
         if (existingUser.isPresent() &&

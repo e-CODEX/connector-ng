@@ -12,18 +12,22 @@ package eu.ecodex.connector.application.port.spi.auth.login;
 
 import eu.ecodex.connector.application.port.api.auth.login.ConnectorRefreshUserToken;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
+import java.util.List;
 import java.util.Optional;
 
 /**
  * Repository interface for managing {@link ConnectorRefreshToken} entities.
+ *
  * <p>
  * Provides methods for performing CRUD operations on refresh tokens, such as
  * finding a token by its value, saving a new token, and deleting an existing token.
+ *
  * <p>
  * Responsibilities:
  * - Retrieve a refresh token based on its unique string value.
  * - Persist a refresh token entity in the persistence layer.
  * - Delete a refresh token from the persistence layer.
+ *
  * <p>
  * This interface is designed to interact with the underlying data storage
  * and handle persistence operations for {@link ConnectorRefreshToken} entities,
@@ -63,4 +67,29 @@ public interface ConnectorRefreshTokenRepository {
      *                     including its unique identifier and associated details.
      */
     void delete(ConnectorRefreshToken refreshToken);
+
+    /**
+     * Retrieves a list of {@link ConnectorRefreshToken} entities based on the provided user UUID
+     * and revocation status.
+     *
+     * @param uuid the unique identifier of the user whose refresh tokens are to be retrieved.
+     *             It is used to filter the tokens associated with the specified user.
+     * @param revoked a boolean flag indicating the revocation status of the tokens to be retrieved.
+     *                If true, only revoked tokens will be returned; if false, only non-revoked tokens
+     *                will be returned.
+     * @return a list of {@link ConnectorRefreshToken} entities matching the provided user UUID and
+     *         revocation status. The list may be empty if no matching tokens are found.
+     */
+    List<ConnectorRefreshToken> findByUserUuidAndRevoked(String uuid, boolean revoked);
+
+    /**
+     * Revokes all refresh tokens associated with the specified user UUID.
+     * This operation marks all tokens belonging to the user as invalid,
+     * ensuring they cannot be used for authentication or token renewal.
+     *
+     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked.
+     *             It acts as a key to find and mark all associated tokens as revoked.
+     * @return the number of refresh tokens that were successfully revoked.
+     */
+    int revokeAllByUserUuid(String uuid);
 }

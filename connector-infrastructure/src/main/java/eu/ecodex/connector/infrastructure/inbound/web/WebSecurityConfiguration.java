@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -38,6 +39,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class WebSecurityConfiguration {
@@ -83,13 +85,12 @@ public class WebSecurityConfiguration {
                                 "/api/v1/admin/configurations/queues",
                                 "/api/v1/admin/configurations/message-processing",
                                 "/api/v1/admin/jms/queues/stats",
-                                "/api/v1/admin/users/**",
                                 "/api/v1/services",
                                 "/api/v1/processing-modes/{identifier}/services",
                                 "/api/v1/processing-modes/{identifier}/actions",
                                 "/api/v1/processing-modes/{identifier}/parties",
                                 "/api/v1/link-partners",
-                                "/api/v1/auth/login/**",
+                                "/api/v1/auth/login",
                                 // SOAP
                                 "/services/backend",
                                 // actuator
@@ -100,7 +101,6 @@ public class WebSecurityConfiguration {
                                 "/swagger-resources/**"
                         ).permitAll()
                         .anyRequest().authenticated()
-
                 )
                 .addFilterBefore(jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class)

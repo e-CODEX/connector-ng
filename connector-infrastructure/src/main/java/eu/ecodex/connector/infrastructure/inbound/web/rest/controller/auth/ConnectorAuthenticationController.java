@@ -15,19 +15,25 @@ import eu.ecodex.connector.domain.model.login.LoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshRequest;
 import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorLoginUserService;
+import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorLogoutUserService;
+import eu.ecodex.connector.infrastructure.outbound.security.auth.login.ConnectorUserDetails;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Controller responsible for handling user login operations for the connector system.
  * This class implements the {@link ConnectorAuthenticationApi} interface, providing API functionality
  * for authenticating users and returning an access token upon successful login.
+ *
  * <p>
  * The login process involves validating user credentials and generating a token
  * using the provided {@code ConnectorLoginUserService}.
+ *
  * <p>
  * Annotations:
  * - {@code @Slf4j}: Enables logging within the class.
@@ -46,16 +52,37 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
 
     ConnectorLoginUserService connectorLoginUserService;
     ConnectorRefreshUserTokenService connectorRefreshUserTokenService;
+    ConnectorLogoutUserService connectorLogoutUserService;
 
     @Override
     public LoginResponse login(ConnectorLoginRequest connectorLoginRequest) {
-        return connectorLoginUserService.login(connectorLoginRequest.username(),
+        var loginResponse = connectorLoginUserService.login(connectorLoginRequest.username(),
                 connectorLoginRequest.password());
+        log.info("User {} successfully logged", connectorLoginRequest.username());
+        return loginResponse;
 
     }
 
     @Override
     public LoginResponse refresh(ConnectorRefreshRequest request) {
-        return connectorRefreshUserTokenService.refresh(request.refreshToken());
+        var userId = getAuthUserId();
+        var refresh = connectorRefreshUserTokenService.refresh(userId, request.refreshToken());
+        log.info("Successfully refreshed token");
+        return refresh;
     }
+
+    @Override
+    public void logout(ConnectorRefreshRequest request) {
+        var userId = getAuthUserId();
+        connectorLogoutUserService.logout(userId, request.refreshToken());
+        log.info("Successfully logged out");
+    }
+
+    private String getAuthUserId() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        assert authentication != null;
+        return ((ConnectorUserDetails) Objects.requireNonNull(
+                authentication.getPrincipal())).getUserId();
+    }
+
 }

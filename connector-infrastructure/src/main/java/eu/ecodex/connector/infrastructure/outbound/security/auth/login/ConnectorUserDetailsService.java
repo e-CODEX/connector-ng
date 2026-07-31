@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
  * Implementation of the {@link UserDetailsService} interface for loading user-specific data.
  * This class primarily uses the {@link ConnectorRetrieveUser} service to fetch user details
  * based on the provided username and adapt them to a format compatible with Spring Security.
+ *
  * <p>
  * Responsibilities:
  * - Retrieve user data from the {@link ConnectorRetrieveUser} service.

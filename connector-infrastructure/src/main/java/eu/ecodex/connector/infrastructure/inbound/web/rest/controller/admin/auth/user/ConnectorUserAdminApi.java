@@ -36,49 +36,45 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Provides operations for creating, updating, patching, retrieving, listing, and deleting users.
  * This interface defines the contract for user management-related endpoints.
  */
+@PreAuthorize("hasRole(T(eu.ecodex.connector.domain.model.user.ConnectorRoleName.ADMIN))")
 @RequestMapping(path = "/api/v1/admin/users", consumes = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Users", description = "API for managing connector's users")
+@Tag(name = "Admin Users", description = "API for managing connector's users")
 public interface ConnectorUserAdminApi {
+
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user.")
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorUserDto register(@Valid @RequestBody ConnectorUserRequest userRequest);
 
-    @ResponseStatus(HttpStatus.ACCEPTED)
+
     @Operation(summary = "Update a connector user.")
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PutMapping("/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    ConnectorUserDto update(@PathVariable("id") String identifier,
+    ConnectorUserDto update(@PathVariable("uuid") String identifier,
                             @Valid @RequestBody ConnectorUserRequest userRequest);
 
-    @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Update partially a connector user.")
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{id}")
+    @PatchMapping("/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    ConnectorUserDto patch(@PathVariable("id") String identifier,
+    ConnectorUserDto patch(@PathVariable("uuid") String identifier,
                            @Valid @RequestBody ConnectorUserRequest userRequest);
 
-    @ResponseStatus(HttpStatus.FOUND)
     @Operation(summary = "Retrieve a connector user.")
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
-    ConnectorUserDto getById(@PathVariable("id") String identifier);
+    ConnectorUserDto getById(@PathVariable("uuid") String identifier);
 
-    @ResponseStatus(HttpStatus.FOUND)
     @Operation(summary = "Retrieve all connector's users.")
     @GetMapping
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     List<ConnectorUserDto> getAll();
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user by Id.")
-    @DeleteMapping(path = "/{id}")
+    @DeleteMapping(path = "/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
-    void deleteById(@PathVariable("id") String userIdentifier);
+    void deleteByIdentifier(@PathVariable("uuid") String userIdentifier);
 
 }

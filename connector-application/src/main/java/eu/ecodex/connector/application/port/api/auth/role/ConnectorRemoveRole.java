@@ -16,6 +16,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundExcept
  * Provides a contract for removing user roles in the Connector system.
  * Implementations of this interface are responsible for deleting user roles
  * either through direct object references or by their unique identifier.
+ *
  * <p>
  * This interface is primarily used to manage user roles in the underlying
  * persistence mechanism by removing unwanted or obsolete entries.
@@ -30,5 +31,5 @@ public interface ConnectorRemoveRole {
      * @param uuid the unique identifier of the user role to be deleted.
      *             It must correspond to an existing user role in the system.
      */
-    void deleteById(String uuid) throws ConnectorUserRoleNotFoundException;
+    void deleteByIdentifier(String uuid) throws ConnectorUserRoleNotFoundException;
 }

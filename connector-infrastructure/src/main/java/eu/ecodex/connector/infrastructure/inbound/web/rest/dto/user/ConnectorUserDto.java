@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user;
 
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.domain.model.user.ConnectorUserRole;
 import java.time.Instant;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,7 +22,7 @@ import org.springframework.util.CollectionUtils;
  * A Data Transfer Object (DTO) that represents a user in the connector system.
  * This class is a record that encapsulates user-related data and performs
  * validation on some of its fields.
- * <p>
+ *
  * <ul>
  *   <li>It provides a builder for creating immutable instances of the class.</li>
  *   <li>Includes methods for mapping between the domain model {@code ConnectorUser}
@@ -53,9 +53,9 @@ public record ConnectorUserDto(
                 .build();
     }
 
-    private static  Set<String> getRoles(ConnectorUser user) {
+    private static Set<String> getRoles(ConnectorUser user) {
         return CollectionUtils.isEmpty(user.roles()) ? Set.of() :
-                user.roles().stream().map(ConnectorUserRole::name)
+                user.roles().stream().map(ConnectorRole::name)
                         .collect(Collectors.toUnmodifiableSet());
     }
 

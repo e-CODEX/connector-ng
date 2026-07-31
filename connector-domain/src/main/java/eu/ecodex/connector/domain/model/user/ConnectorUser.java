@@ -29,7 +29,7 @@ public record ConnectorUser(
         String password,
         String email,
         Boolean enabled,
-        Set<ConnectorUserRole> roles,
+        Set<ConnectorRole> roles,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -37,17 +37,28 @@ public record ConnectorUser(
     public static final String DEFAULT_ADMIN_USER_NAME = "admin";
     public static final String DEFAULT_ADMIN_PASSWORD = "123456";
 
-    public boolean isDefaultAdmin() {
-        return DEFAULT_ADMIN_USER_NAME.equals(username) && roles != null &&
-                roles.stream().anyMatch(ConnectorUserRole::isDefaultAdminRole);
-    }
+    /**
+     * Create default administrator user
+     *
+     * @return Default administrator
+     */
     public static ConnectorUser defaultAdminUser() {
         return ConnectorUser.builder()
                 .username(DEFAULT_ADMIN_USER_NAME)
                 .password(DEFAULT_ADMIN_PASSWORD)
                 .enabled(true)
-                .roles(Set.of(ConnectorUserRole.builder().name(ConnectorUserRole.DEFAULT_ADMIN_ROLE).build()))
+                .roles(Set.of(
+                        ConnectorRole.builder().name(ConnectorRole.DEFAULT_ADMIN_ROLE).build()))
                 .build();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public boolean isDefaultAdmin() {
+        return DEFAULT_ADMIN_USER_NAME.equals(username) && roles != null &&
+                roles.stream().anyMatch(ConnectorRole::isDefaultAdminRole);
     }
 
     /**
@@ -65,10 +76,6 @@ public record ConnectorUser(
                 && Objects.equals(this.password, connectorUser.password())
                 && Objects.equals(this.email, connectorUser.email())
                 && Objects.equals(this.enabled, connectorUser.enabled());
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     /**
@@ -102,7 +109,7 @@ public record ConnectorUser(
         String password;
         String email;
         Boolean enabled;
-        Set<ConnectorUserRole> roles;
+        Set<ConnectorRole> roles;
         Instant createdAt;
         Instant updatedAt;
 
@@ -145,7 +152,7 @@ public record ConnectorUser(
             return this;
         }
 
-        public Builder roles(Set<ConnectorUserRole> roles) {
+        public Builder roles(Set<ConnectorRole> roles) {
             this.roles = roles;
             return this;
         }

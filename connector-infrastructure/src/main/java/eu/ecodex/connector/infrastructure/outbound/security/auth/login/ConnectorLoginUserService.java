@@ -20,26 +20,29 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 /**
  * Service implementation responsible for handling user login operations within the connector system.
  * This class provides functionality to authenticate users based on their credentials and generate
  * an authentication token upon successful login.
+ *
  * <p>
  * Dependencies:
  * - {@link AuthenticationManager}: Facilitates the authentication of user credentials.
  * - {@link ConnectorAuthenticationTokenProvider}: Responsible for generating authentication tokens.
+ *
  * <p>
  * Core functionality:
  * - Verifies user credentials by authenticating through the {@link AuthenticationManager}.
  * - Retrieves the user details upon successful authentication.
  * - Generates an authentication token using the {@link ConnectorAuthenticationTokenProvider}.
  * - Returns a {@link LoginResponse} containing the token details.
+ *
  * <p>
  * Exceptions:
  * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after authentication.
+ *
  * <p>
  * Annotations:
  * - {@code @Slf4j}: Enables logging for debugging and monitoring purposes.
@@ -60,8 +63,7 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
 
     @Override
     public LoginResponse login(String username, String password) {
-
-        Authentication authentication =
+        var authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
                                 username,
@@ -69,13 +71,13 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
                         )
                 );
 
-        ConnectorUserDetails user = (ConnectorUserDetails) authentication.getPrincipal();
+        var user = (ConnectorUserDetails) authentication.getPrincipal();
         if (user == null) {
             throw new RuntimeException("Error reading principal");
         }
-        var accessToken = authenticationTokenProvider.generateToken(user.getConnectorUser());
-
-        var refreshToken = refreshTokenService.create(user.getConnectorUser());
+        var authenticatedUser = user.connectorUser();
+        var accessToken = authenticationTokenProvider.generateToken(authenticatedUser);
+        var refreshToken = refreshTokenService.create(authenticatedUser);
 
         return new LoginResponse(accessToken, refreshToken.uuid(),
                 authenticationTokenProvider.accessTokenExpiresInSeconds());

@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller for managing connector users. Provides APIs for operations such as registration,
  * updating, partial updates, retrieval, listing, and deletion of users.
+ *
  * <p>
  * This controller relies on service classes for handling user-related operations and
  * ensures additional processing like password encoding before delegation.
@@ -94,9 +95,9 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     }
 
     @Override
-    public void deleteById(String userIdentifier) {
+    public void deleteByIdentifier(String userIdentifier) {
         connectorRemoveUser.deleteById(userIdentifier);
-        log.info("User deleted by id");
+        log.info("User deleted by identifier");
     }
 
 

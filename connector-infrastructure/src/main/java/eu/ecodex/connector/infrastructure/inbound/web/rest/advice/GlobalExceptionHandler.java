@@ -20,6 +20,7 @@ import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNo
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorUserBadCredentiaslException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
@@ -47,6 +48,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(ConnectorUserBadCredentiaslException.class)
+    public ErrorResponse handleInvalidRefreshToken(ConnectorUserBadCredentiaslException exception) {
+        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
+    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)
@@ -81,7 +89,8 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler(ConnectorUserRoleNotFoundException.class)
-    public ErrorResponse handleUserRoleNotFoundException(ConnectorUserRoleNotFoundException exception) {
+    public ErrorResponse handleUserRoleNotFoundException(
+            ConnectorUserRoleNotFoundException exception) {
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
     }
 

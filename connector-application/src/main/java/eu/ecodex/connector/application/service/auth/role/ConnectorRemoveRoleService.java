@@ -22,13 +22,15 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service implementation for removing user roles associated with the Connector system.
- * This class provides the functionality to delete user roles based on their unique identifier (UUID),
- * interacting with the {@link ConnectorRoleRepository} to handle persistence operations.
+ * This class provides the functionality to delete user roles based on their unique identifier
+ * (UUID), interacting with the {@link ConnectorRoleRepository} to handle persistence operations.
+ *
  * <p>
  * Responsibilities:
  * - Validates the existence of a user role identified by a UUID before attempting deletion.
  * - Deletes a user role from the underlying data source using its unique identifier.
  * - Throws an exception if the specified user role is not found.
+ *
  * <p>
  * Exceptions:
  * - {@link ConnectorUserNotFoundException}: Thrown if no user role is found for the provided UUID.
@@ -42,7 +44,7 @@ public class ConnectorRemoveRoleService implements ConnectorRemoveRole {
     ConnectorRoleRepository repository;
 
     @Override
-    public void deleteById(String uuid) {
+    public void deleteByIdentifier(String uuid) {
         repository.deleteByUuid(uuid);
     }
 }

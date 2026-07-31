@@ -40,15 +40,7 @@ import eu.ecodex.connector.domain.model.login.LoginResponse;
  * - Tokens issued should be securely stored and transmitted to avoid
  * unauthorized access.
  */
-public interface ConnectorLoginUser {
-    /**
-     * Authenticates a user based on their provided username and password.
-     * Upon successful authentication, returns a {@link LoginResponse} containing the generated access token,
-     * token type, and expiration details.
-     *
-     * @param username the username of the user attempting to log in
-     * @param password the password of the user attempting to log in
-     * @return a {@link LoginResponse} object containing the authentication token details
-     */
-    LoginResponse login(String username, String password);
+public interface ConnectorLogoutUser {
+
+    void logout(String userId, String refreshToken);
 }

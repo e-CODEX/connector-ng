@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -52,16 +53,17 @@ public class ConnectorExportMessageReportIT extends AbstractIntegrationTest {
     @EnumSource(ConnectorMessageReportExportFormat.class)
     void should_export_report_of_connector_messages(ConnectorMessageReportExportFormat format) {
         byte[] body = apiClient.get()
-                               .uri(uriBuilder -> uriBuilder
-                                   .path("/api/v1/admin/messages/reports/export")
-                                   .queryParam("format", format)
-                                   .build())
-                               .exchange()
-                               .expectStatus().isOk()
-                               .expectHeader().contentType(format.getContentType())
-                               .expectBody(byte[].class)
-                               .returnResult()
-                               .getResponseBody();
+            .uri(uriBuilder -> uriBuilder
+                .path("/api/v1/admin/messages/reports/export")
+                .queryParam("format", format)
+                .build())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType(format.getContentType())
+            .expectBody(byte[].class)
+            .returnResult()
+            .getResponseBody();
 
         assertThat(body).isNotNull().isNotEmpty();
     }

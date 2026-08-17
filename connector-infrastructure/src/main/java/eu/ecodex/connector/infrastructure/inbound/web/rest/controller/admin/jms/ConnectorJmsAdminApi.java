@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.jms
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
         + " purposes."
 )
 @RequestMapping(value = "/api/v1/admin/jms/queues")
+@PreAuthorize("hasRole('ADMIN')")
 public interface ConnectorJmsAdminApi {
     @GetMapping("/stats")
     List<ConnectorQueueStats> retrieveQueuesStats();

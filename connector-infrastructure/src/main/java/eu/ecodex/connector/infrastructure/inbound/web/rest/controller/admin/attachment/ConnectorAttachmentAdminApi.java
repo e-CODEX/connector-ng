@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
     name = "MessageAttachmentAdmin",
     description = "Defines the API for managing message attachments for administrative purposes"
 )
+@PreAuthorize("hasRole('ADMIN')")
 public interface ConnectorAttachmentAdminApi {
     @GetMapping
     @Operation(summary = "Get paginated list of message attachments.")

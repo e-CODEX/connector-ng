@@ -20,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -28,7 +29,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
+class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
+
     @Autowired
     private RestTestClient apiClient;
 
@@ -50,18 +52,20 @@ public class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
     })
     void should_list_attachments_for_connector_messages() {
         apiClient.get()
-                 .uri("/api/v1/admin/attachments")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(14);
-                     assertThat(result.size()).isEqualTo(14);
-                     assertThat(result.totalElements()).isEqualTo(14);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri("/api/v1/admin/attachments")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(
+                new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
+                })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(14);
+                assertThat(result.size()).isEqualTo(14);
+                assertThat(result.totalElements()).isEqualTo(14);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 }

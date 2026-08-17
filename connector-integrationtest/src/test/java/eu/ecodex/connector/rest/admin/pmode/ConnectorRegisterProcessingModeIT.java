@@ -21,6 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
@@ -51,13 +52,13 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
     @Sql("classpath:sql/business-domain.sql")
     void should_return_201_when_creating_processing_mode() {
         var response = apiClient.post()
-                                .uri(URL)
-                                .contentType(MediaType.MULTIPART_FORM_DATA)
-                                .body(creationParts(BUSINESS_DOMAIN))
-                                .exchange()
-                                .expectStatus().isCreated()
-                                .returnResult(ConnectorProcessingModeDto.class)
-                                .getResponseBody();
+            .uri(URL)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(creationParts(BUSINESS_DOMAIN))
+            .exchange()
+            .expectStatus().isCreated()
+            .returnResult(ConnectorProcessingModeDto.class)
+            .getResponseBody();
 
         assertThat(response).isNotNull();
         assert response != null;
@@ -68,11 +69,12 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
     @Test
     void should_return_404_when_creating_pmode_with_non_existing_business_domain() {
         apiClient.post()
-                 .uri(URL)
-                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                 .body(creationParts("fake_business_domain"))
-                 .exchange()
-                 .expectStatus().isNotFound();
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(creationParts("fake_business_domain"))
+            .exchange()
+            .expectStatus().isNotFound();
     }
 
     @Test
@@ -82,11 +84,12 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
     })
     void should_fail_to_create_a_pmode_if_the_specified_business_domain_has_already_one() {
         apiClient.post()
-                 .uri(URL)
-                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                 .body(creationParts(BUSINESS_DOMAIN))
-                 .exchange()
-                 .expectStatus().isEqualTo(HttpStatus.CONFLICT);
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(creationParts(BUSINESS_DOMAIN))
+            .exchange()
+            .expectStatus().isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
@@ -96,11 +99,12 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
         parts.remove("truststore.truststoreFile");
 
         apiClient.post()
-                 .uri(URL)
-                 .contentType(MediaType.MULTIPART_FORM_DATA)
-                 .body(parts)
-                 .exchange()
-                 .expectStatus().isBadRequest();
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(parts)
+            .exchange()
+            .expectStatus().isBadRequest();
     }
 
     private MultiValueMap<String, Object> creationParts(String businessDomainIdentifier) {

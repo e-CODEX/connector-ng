@@ -20,6 +20,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -43,12 +44,13 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     void should_return_201_when_registering_business_domain() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
-                                .uri(URL)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(body)
-                                .exchange()
-                                .expectStatus().isCreated()
-                                .returnResult(ConnectorBusinessDomainDto.class);
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+            .exchange()
+            .expectStatus().isCreated()
+            .returnResult(ConnectorBusinessDomainDto.class);
 
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();
@@ -65,10 +67,11 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     void should_return_409_when_registering_business_domain_with_existing_identifier() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         apiClient.post()
-                 .uri(URL)
-                 .contentType(MediaType.APPLICATION_JSON)
-                 .body(body)
-                 .exchange()
-                 .expectStatus().is4xxClientError();
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(body)
+            .exchange()
+            .expectStatus().is4xxClientError();
     }
 }

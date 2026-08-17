@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
         + "purposes"
 )
 @RequestMapping("/api/v1/admin/messages")
+@PreAuthorize("hasRole('ADMIN')")
 public interface ConnectorMessageAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping

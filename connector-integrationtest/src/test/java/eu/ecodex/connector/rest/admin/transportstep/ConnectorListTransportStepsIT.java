@@ -15,10 +15,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +22,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -48,19 +45,21 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     @WithReferenceData
     void should_list_connector_messages_transport_steps() {
         apiClient.get()
-                 .uri(URL)
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(3);
-                     assertThat(result.size()).isEqualTo(3);
-                     assertThat(result.totalElements()).isEqualTo(3);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(
+                new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
+                })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(3);
+                assertThat(result.size()).isEqualTo(3);
+                assertThat(result.totalElements()).isEqualTo(3);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 
     @ParameterizedTest
@@ -71,21 +70,24 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
         // remote system identifier
     })
     @WithReferenceData
-    void should_list_transport_steps_for_connector_messages_filtered_by_identifier(String identifier) {
+    void should_list_transport_steps_for_connector_messages_filtered_by_identifier(
+        String identifier) {
         apiClient.get()
-                 .uri(String.format("%s?messageOrRemoteSystemIdentifier=%s", URL, identifier))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(1);
-                     assertThat(result.size()).isEqualTo(1);
-                     assertThat(result.totalElements()).isEqualTo(1);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri(String.format("%s?messageOrRemoteSystemIdentifier=%s", URL, identifier))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(
+                new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
+                })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(1);
+                assertThat(result.size()).isEqualTo(1);
+                assertThat(result.totalElements()).isEqualTo(1);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 
     @ParameterizedTest
@@ -100,24 +102,26 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
         String identifier,
         String backendName) {
         apiClient.get()
-                 .uri(String.format(
-                     "%s?messageOrRemoteSystemIdentifier=%s&linkPartnerName=%s",
-                     URL,
-                     identifier,
-                     backendName
-                 ))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(1);
-                     assertThat(result.size()).isEqualTo(1);
-                     assertThat(result.totalElements()).isEqualTo(1);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri(String.format(
+                "%s?messageOrRemoteSystemIdentifier=%s&linkPartnerName=%s",
+                URL,
+                identifier,
+                backendName
+            ))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(
+                new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageTransportStepDto>>() {
+                })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(1);
+                assertThat(result.size()).isEqualTo(1);
+                assertThat(result.totalElements()).isEqualTo(1);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 
     @Retention(RetentionPolicy.RUNTIME)

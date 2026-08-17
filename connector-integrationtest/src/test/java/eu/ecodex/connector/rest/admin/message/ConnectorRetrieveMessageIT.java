@@ -20,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -53,31 +54,44 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
     })
     void should_retrieve_connector_message() {
         var messageId = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
-        apiClient.get()
-                 .uri(buildUrl(messageId))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageDetailDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.identifier()).isNotNull();
-                     assertThat(result.identifier()).isEqualTo(messageId);
-                     assertThat(result.direction()).isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
-                     assertThat(!result.attachments().isEmpty()).isTrue();
-                     assertThat(!result.evidences().isEmpty()).isTrue();
-                     assertThat(result.errors().isEmpty()).isTrue();
-                 });
+        apiClient
+                .get()
+                .uri(buildUrl(messageId))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<ConnectorMessageDetailDto>() {
+                })
+                .value(result -> {
+                    assertThat(result).isNotNull();
+                    assert result != null;
+                    assertThat(result.identifier()).isNotNull();
+                    assertThat(result.identifier()).isEqualTo(messageId);
+                    assertThat(result.direction()).isEqualTo(
+                            ConnectorMessageDirection.BACKEND_TO_GATEWAY);
+                    assertThat(!result
+                            .attachments()
+                            .isEmpty()).isTrue();
+                    assertThat(!result
+                            .evidences()
+                            .isEmpty()).isTrue();
+                    assertThat(result
+                            .errors()
+                            .isEmpty()).isTrue();
+                });
     }
 
     @Test
     void should_return_404_when_retrieving_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
-        apiClient.get()
-                 .uri(buildUrl(messageId))
-                 .exchange()
-                 .expectStatus().isNotFound();
+        apiClient
+                .get()
+                .uri(buildUrl(messageId))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                .exchange()
+                .expectStatus()
+                .isNotFound();
     }
 
     private String buildUrl(String identifier) {

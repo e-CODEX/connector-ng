@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -51,31 +52,32 @@ public class ConnectorRetrieveMessageStatsIT extends AbstractIntegrationTest {
     })
     void should_retrieve_statistics_for_connector_messages() {
         apiClient.get()
-                 .uri("/api/v1/admin/messages/stats")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageStats>() {
-                 })
-                 .value(stats -> {
-                     assertThat(stats).isNotNull();
-                     assert stats != null;
-                     assertThat(stats.all()).isNotNull();
-                     assertThat(stats.all().total()).isEqualTo(4);
-                     assertThat(stats.all().delivered()).isEqualTo(0);
-                     assertThat(stats.all().rejected()).isEqualTo(0);
-                     assertThat(stats.all().pending()).isEqualTo(4);
+            .uri("/api/v1/admin/messages/stats")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorMessageStats>() {
+            })
+            .value(stats -> {
+                assertThat(stats).isNotNull();
+                assert stats != null;
+                assertThat(stats.all()).isNotNull();
+                assertThat(stats.all().total()).isEqualTo(4);
+                assertThat(stats.all().delivered()).isEqualTo(0);
+                assertThat(stats.all().rejected()).isEqualTo(0);
+                assertThat(stats.all().pending()).isEqualTo(4);
 
-                     assertThat(stats.outbound()).isNotNull();
-                     assertThat(stats.outbound().total()).isEqualTo(1);
-                     assertThat(stats.outbound().delivered()).isEqualTo(0);
-                     assertThat(stats.outbound().rejected()).isEqualTo(0);
-                     assertThat(stats.outbound().pending()).isEqualTo(1);
+                assertThat(stats.outbound()).isNotNull();
+                assertThat(stats.outbound().total()).isEqualTo(1);
+                assertThat(stats.outbound().delivered()).isEqualTo(0);
+                assertThat(stats.outbound().rejected()).isEqualTo(0);
+                assertThat(stats.outbound().pending()).isEqualTo(1);
 
-                     assertThat(stats.inbound()).isNotNull();
-                     assertThat(stats.inbound().total()).isEqualTo(3);
-                     assertThat(stats.inbound().delivered()).isEqualTo(0);
-                     assertThat(stats.inbound().rejected()).isEqualTo(0);
-                     assertThat(stats.inbound().pending()).isEqualTo(3);
-                 });
+                assertThat(stats.inbound()).isNotNull();
+                assertThat(stats.inbound().total()).isEqualTo(3);
+                assertThat(stats.inbound().delivered()).isEqualTo(0);
+                assertThat(stats.inbound().rejected()).isEqualTo(0);
+                assertThat(stats.inbound().pending()).isEqualTo(3);
+            });
     }
 }

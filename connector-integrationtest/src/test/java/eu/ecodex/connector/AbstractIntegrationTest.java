@@ -10,12 +10,15 @@
 
 package eu.ecodex.connector;
 
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageAcknowledgementListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsInboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
+import eu.ecodex.connector.infrastructure.outbound.auth.JwtTokenService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -23,6 +26,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -88,6 +92,8 @@ public abstract class AbstractIntegrationTest {
     ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JwtTokenService jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
@@ -161,5 +167,16 @@ public abstract class AbstractIntegrationTest {
             }
             return null;
         });
+    }
+
+    protected String generateDefaultAdminToken() {
+        var user = new ConnectorUserDetails(ConnectorUser
+                .defaultAdminUser()
+                .toBuilder()
+                .uuid(UUID
+                        .randomUUID()
+                        .toString())
+                .build());
+        return jwtTokenService.generateToken(user);
     }
 }

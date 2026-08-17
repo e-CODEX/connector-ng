@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -42,10 +43,11 @@ public class ConnectorListProcessingModeIT extends AbstractIntegrationTest {
     })
     void should_retrieve_processing_modes() {
         var response = apiClient.get()
-                                .uri("/api/v1/admin/business-domains")
-                                .exchange()
-                                .expectStatus().isOk()
-                                .returnResult(ConnectorProcessingModeDto[].class);
+            .uri("/api/v1/admin/business-domains")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .returnResult(ConnectorProcessingModeDto[].class);
 
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();

@@ -33,14 +33,12 @@ import org.hibernate.annotations.UuidGenerator;
  * This entity is used to define roles that can be assigned to users and persists the mapping
  * between roles and users in the database.
  *
- * <p>
- * Features:
+ * <p>Features:
  * - Each role entity has a unique identifier and a unique role name.
  * - Roles are associated with users via a many-to-many relationship.
  * - The class is extensible from the BaseEntity to inherit creation and update timestamp fields.
  *
- * <p>
- * Annotations used:
+ * <p>Annotations used:
  * - @Entity: Specifies that this class is a JPA entity.
  * - @Table: Maps the entity to the "CONNECTOR_USERS_ROLES" table in the database.
  * - @Id and @GeneratedValue: Define the primary key and its generation strategy.

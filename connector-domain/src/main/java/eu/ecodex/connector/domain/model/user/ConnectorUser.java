@@ -17,8 +17,7 @@ import java.util.Set;
 /**
  * Represents a data structure for a user in the Connector system.
  *
- * <p>
- * This class provides information about the user, such as an identifier, username,
+ * <p>This class provides information about the user, such as an identifier, username,
  * password, email, and roles, and includes metadata such as enabled status, creation
  * time, and last updated time.
  * It also encapsulates behavior for content comparison
@@ -113,8 +112,7 @@ public record ConnectorUser(
     /**
      * Builder class for constructing instances of {@code ConnectorUser}.
      *
-     * <p>
-     * This builder pattern enables the creation of immutable {@code ConnectorUser}
+     * <p>This builder pattern enables the creation of immutable {@code ConnectorUser}
      * objects by providing methods to set various fields incrementally and
      * eventually constructing a fully populated instance.
      */

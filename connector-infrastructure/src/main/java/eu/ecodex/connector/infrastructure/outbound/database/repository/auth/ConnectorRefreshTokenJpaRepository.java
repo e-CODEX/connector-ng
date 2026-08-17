@@ -25,21 +25,17 @@ import org.springframework.transaction.annotation.Transactional;
  * This interface extends {@link JpaRepository}, providing methods for CRUD operations and custom
  * queries.
  *
- * <p>
- * The {@link ConnectorRefreshTokenEntity} represents refresh tokens used for authentication
+ * <p>The {@link ConnectorRefreshTokenEntity} represents refresh tokens used for authentication
  * and authorization in the system.
  *
- * <p>
- * Key Responsibilities:
+ * <p>Key Responsibilities:
  * - Retrieve a refresh token by its unique token value using {@link #findByToken(String)}.
  *
- * <p>
- * Methods:
+ * <p>Methods:
  * - {@link #findByToken(String)}: Fetches an optional refresh token entity based on the token
  * string.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - Utilizes {@link ConnectorRefreshTokenEntity}, which contains details like the token,
  * expiration, and revocation status.
  * - Works within the persistence context provided by Spring Data JPA.

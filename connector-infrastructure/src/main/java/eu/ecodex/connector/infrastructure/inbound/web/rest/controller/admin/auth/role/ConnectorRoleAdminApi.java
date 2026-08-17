@@ -32,13 +32,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * API interface for managing connector user roles.
  *
- * <p>
- * This interface exposes endpoints for creating, updating, retrieving, and deleting
+ * <p>This interface exposes endpoints for creating, updating, retrieving, and deleting
  * roles assigned to connector users. It allows for management of the roles within
  * the connector's authorization and role-based access control system.
  *
- * <p>
- * All endpoints consume and produce JSON data.
+ * <p>All endpoints consume and produce JSON data.
  */
 @PreAuthorize("hasRole(T(eu.ecodex.connector.domain.model.user.ConnectorRoleName.ADMIN))")
 @RequestMapping(path = "/api/v1/admin/users/roles", consumes = MediaType.APPLICATION_JSON_VALUE)

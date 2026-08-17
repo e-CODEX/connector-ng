@@ -17,13 +17,11 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 /**
  * Defines methods for managing and verifying refresh tokens in the Connector system.
  *
- * <p>
- * This interface provides operations to create, verify, and revoke refresh tokens associated
+ * <p>This interface provides operations to create, verify, and revoke refresh tokens associated
  * with user authentication sessions. It is designed to handle secure token management
  * and lifecycle operations as part of the Connector authentication flow.
  *
- * <p>
- * Responsibilities of this interface include:
+ * <p>Responsibilities of this interface include:
  * - Generating a refresh token for a given user.
  * - Validating the authenticity and integrity of an existing token.
  * - Revoking an issued token to invalidate it, enhancing security by preventing its further use.

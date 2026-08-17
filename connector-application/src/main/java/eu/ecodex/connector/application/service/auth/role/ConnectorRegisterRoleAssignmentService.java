@@ -30,15 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
  * logic
  * and the persistence layer through the {@link ConnectorRoleRepository}.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Handles the creation and registration of new user roles in the data source.
  * - Updates existing user role assignments when applicable.
  * - Ensures that the provided role and user identifiers are valid, throwing exceptions
  * if the required entities are not found.
  *
- * <p>
- * Exceptions:
+ * <p>Exceptions:
  * - {@link ConnectorUserRoleNotFoundException}: Thrown if the specified role does not exist.
  * - {@link ConnectorUserNotFoundException}: Thrown if the specified user identifier does not
  * exist.

@@ -19,18 +19,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Repository interface for performing CRUD operations and custom queries on
  * {@link ConnectorRoleEntity} objects within the database.
  *
- * <p>
- * Extends the {@link JpaRepository} to inherit common JPA-based data access methods.
+ * <p>Extends the {@link JpaRepository} to inherit common JPA-based data access methods.
  * Provides additional methods for retrieving entities based on specific attributes.
  *
- * <p>
- * Key functionalities:
+ * <p>Key functionalities:
  * - Enables retrieval of roles by their unique name.
  * - Supports fetching roles based on their UUID.
  * - Allows finding multiple roles by a set of names.
  *
- * <p>
- * Methods:
+ * <p>Methods:
  * - {@code findByName}: Finds a role by its unique name.
  * - {@code findByUuid}: Finds a role by its UUID.
  * - {@code findByNameIn}: Retrieves a set of roles matching the provided set of names.

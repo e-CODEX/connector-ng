@@ -29,23 +29,20 @@ import org.springframework.web.bind.annotation.RestController;
  * Implements the API defined in {@link ConnectorRoleAdminApi}.
  * Uses service-level components to execute business logic related to user roles.
  *
- * <p>
- * Annotations:
+ * <p>Annotations:
  * - {@code @Slf4j}: For logging purposes.
  * - {@code @RestController}: Indicates that this class is a REST controller.
  * - {@code @RequiredArgsConstructor}: Generates a constructor with required dependencies.
  * - {@code @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)}: Ensures immutability
  * and encapsulation of fields.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - {@link ConnectorRegisterRole}: Handles the registration and updating of user roles.
  * - {@link ConnectorRetrieveRole}: Retrieves user roles by identifier.
  * - {@link ConnectorRemoveRole}: Manages the deletion of user roles.
  * - {@link ConnectorListRole}: Provides functionality to list all user roles.
  *
- * <p>
- * Methods:
+ * <p>Methods:
  * - {@link #register(ConnectorUserRoleDto)}: Registers a new user role in the system.
  * - {@link #update(String, ConnectorUserRoleDto)}: Updates an existing user role by its identifier.
  * - {@link #getByIdentifier(String)}: Retrieves a specific user role by its unique identifier.
@@ -90,7 +87,9 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
 
     @Override
     public List<ConnectorUserRoleDto> getAll() {
-        return connectorListRole.findAll().stream()
+        return connectorListRole
+                .findAll()
+                .stream()
                 .map(ConnectorUserRoleDto::from)
                 .toList();
     }

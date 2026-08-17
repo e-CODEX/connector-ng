@@ -31,12 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
  * functionality
  * for authenticating users and returning an access token upon successful login.
  *
- * <p>
- * The login process involves validating user credentials and generating a token
+ * <p>The login process involves validating user credentials and generating a token
  * using the provided {@code ConnectorLoginUserService}.
  *
- * <p>
- * Annotations:
+ * <p>Annotations:
  * - {@code @Slf4j}: Enables logging within the class.
  * - {@code @RestController}: Marks the class as a REST controller, allowing it
  * to handle HTTP requests and return responses in a RESTful manner.

@@ -15,8 +15,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
  * This request is used in authentication flows to initiate a login process and
  * obtain an authentication token upon successful validation.
  *
- * <p>
- * The request contains the following details:
+ * <p>The request contains the following details:
  * - username: The identifier for the user attempting to log in.
  * - password: The credential associated with the provided username.
  */

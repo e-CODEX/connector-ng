@@ -15,21 +15,18 @@ import java.time.Instant;
 /**
  * Represents a role assigned to a user in the Connector system.
  *
- * <p>
- * This record provides metadata about the role, including a unique identifier,
+ * <p>This record provides metadata about the role, including a unique identifier,
  * the role's name, and its creation and last updated timestamps.
  * It is an immutable data structure designed to store and share
  * role-specific information across the Connector system.
  *
- * <p>
- * The class supports the builder pattern, offering a nested {@code Builder} class
+ * <p>The class supports the builder pattern, offering a nested {@code Builder} class
  * that provides a flexible API for incrementally constructing instances of
  * {@code ConnectorUserRole}.
  * Additionally, it includes a method to create a pre-populated builder
  * from an existing object.
  *
- * <p>
- * This record is used as a field in other classes, such as {@code ConnectorUser},
+ * <p>This record is used as a field in other classes, such as {@code ConnectorUser},
  * to represent the roles associated with a user.
  */
 public record ConnectorRole(String uuid,
@@ -78,14 +75,12 @@ public record ConnectorRole(String uuid,
     /**
      * Builder class for constructing instances of {@code ConnectorUserRole}.
      *
-     * <p>
-     * This builder implements a fluent API for incrementally setting the properties
+     * <p>This builder implements a fluent API for incrementally setting the properties
      * of a {@code ConnectorUserRole} object and constructing a new immutable instance.
      * The builder is used to ensure that the resulting object is created in a
      * controlled, consistent manner.
      *
-     * <p>
-     * Various methods are provided to set the individual fields of the builder.
+     * <p>Various methods are provided to set the individual fields of the builder.
      * Each setter method returns the builder itself, enabling method chaining.
      */
     public static class Builder {

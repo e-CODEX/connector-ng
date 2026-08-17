@@ -16,15 +16,13 @@ import java.time.Instant;
 /**
  * Represents a refresh token used for managing user authentication sessions.
  *
- * <p>
- * This record encapsulates essential information about a refresh token:
+ * <p>This record encapsulates essential information about a refresh token:
  * - A unique identifier (`uuid`) for the token instance.
  * - The user (`ConnectorUser`) associated with the refresh token.
  * - The expiration timestamp (`expiresAt`) indicating when the token becomes invalid.
  * - The creation timestamp (`createdAt`) indicating when the token was issued.
  *
- * <p>
- * The `RefreshToken` class serves as an immutable data structure to securely and
+ * <p>The `RefreshToken` class serves as an immutable data structure to securely and
  * consistently handle refresh token details within the system.
  */
 public record ConnectorRefreshToken(
@@ -58,14 +56,12 @@ public record ConnectorRefreshToken(
     /**
      * A builder class for constructing instances of {@link ConnectorRefreshToken}.
      *
-     * <p>
-     * This builder provides a fluent interface for configuring and creating instances
+     * <p>This builder provides a fluent interface for configuring and creating instances
      * of the {@link ConnectorRefreshToken} class. It allows setting up various
      * properties such as the unique identifier, associated user, expiration timestamp,
      * creation timestamp, and revocation status.
      *
-     * <p>
-     * The builder ensures that a properly configured {@link ConnectorRefreshToken}
+     * <p>The builder ensures that a properly configured {@link ConnectorRefreshToken}
      * instance can be created with the desired state.
      */
     public static class Builder {

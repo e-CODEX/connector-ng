@@ -28,16 +28,13 @@ import org.springframework.security.core.userdetails.UserDetails;
  * with Spring Security. This class adapts the {@code ConnectorUser} structure to fulfill
  * the contract defined by the {@code UserDetails} interface.
  *
- * <p>
- * The {@code ConnectorUserDetails} class provides information about the authenticated user,
+ * <p>The {@code ConnectorUserDetails} class provides information about the authenticated user,
  * such as their username, password, and granted authorities (roles).
  *
- * <p>
- * This class is intended for use in security-related components, such as authentication
+ * <p>This class is intended for use in security-related components, such as authentication
  * and authorization within the Spring Security framework.
  *
- * <p>
- * Key responsibilities include:
+ * <p>Key responsibilities include:
  * - Adapting the roles of {@code ConnectorUser} to Spring Security's {@code GrantedAuthority}.
  * - Exposing user-specific information, such as the username and password.
  */

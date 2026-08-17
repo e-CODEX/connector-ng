@@ -19,8 +19,7 @@ import java.util.Set;
  * Implementations of this interface are responsible for fetching user role details
  * based on either a unique identifier or a username.
  *
- * <p>
- * This interface is primarily used to locate and retrieve specific {@link ConnectorRole}
+ * <p>This interface is primarily used to locate and retrieve specific {@link ConnectorRole}
  * entities from the underlying persistence mechanism, allowing system components to work
  * with role information associated with connector users.
  */

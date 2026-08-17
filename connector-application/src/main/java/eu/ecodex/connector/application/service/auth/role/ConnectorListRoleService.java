@@ -25,8 +25,7 @@ import org.springframework.stereotype.Service;
  * This class interacts with the {@link ConnectorRoleRepository} to query the data source
  * and fetch a list of all available {@link ConnectorRole} instances.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Provides a mechanism for retrieving all user roles from the underlying data source.
  * - Acts as a bridge between the application's business logic and the persistence layer for user
  * roles.

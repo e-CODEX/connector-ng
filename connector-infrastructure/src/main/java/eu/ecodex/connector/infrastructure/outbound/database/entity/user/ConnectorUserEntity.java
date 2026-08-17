@@ -36,16 +36,14 @@ import org.hibernate.annotations.UuidGenerator;
  * This entity is responsible for persisting user data and their associated roles
  * in the database.
  *
- * <p>
- * Features:
+ * <p>Features:
  * - Each user has a unique identifier and universally unique UUID.
  * - User credentials include a username and password, both of which are required and unique.
  * - An optional email address can also be associated with the user.
  * - Indicates whether the user account is enabled or disabled via a boolean flag.
  * - Maintains roles associated with the user through a many-to-many relationship.
  *
- * <p>
- * Annotations:
+ * <p>Annotations:
  * - @Entity: Marks this class as a JPA entity.
  * - @Table: Specifies the table "CONNECTOR_USERS" this entity is mapped to, along with indexes for
  * username and email.
@@ -56,16 +54,14 @@ import org.hibernate.annotations.UuidGenerator;
  * - @Builder, @Getter, @NoArgsConstructor, @AllArgsConstructor: Lombok annotations to simplify the
  * model.
  *
- * <p>
- * Table Mapping:
+ * <p>Table Mapping:
  * - Table name: CONNECTOR_USERS
  * - Indexes:
  * - IDX_CONNECTOR_USERS_EMAIL: Index on the "EMAIL" column.
  * - IDX_CONNECTOR_USERS_USERNAME: Index on the "USERNAME" column.
  * - IDX_CONNECTOR_USERS_UUID: Index on the "UUID" column.
  *
- * <p>
- * Relationships:
+ * <p>Relationships:
  * - Roles: Associated roles are managed in the "CONNECTOR_USERS_ROLES_ASSIGNMENTS" join table
  * using a many-to-many relationship with the ConnectorUserRoleEntity.
  */

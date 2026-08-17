@@ -25,14 +25,12 @@ import org.springframework.stereotype.Service;
  * This class provides the functionality to delete user roles based on their unique identifier
  * (UUID), interacting with the {@link ConnectorRoleRepository} to handle persistence operations.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Validates the existence of a user role identified by a UUID before attempting deletion.
  * - Deletes a user role from the underlying data source using its unique identifier.
  * - Throws an exception if the specified user role is not found.
  *
- * <p>
- * Exceptions:
+ * <p>Exceptions:
  * - {@link ConnectorUserNotFoundException}: Thrown if no user role is found for the provided UUID.
  */
 @Slf4j

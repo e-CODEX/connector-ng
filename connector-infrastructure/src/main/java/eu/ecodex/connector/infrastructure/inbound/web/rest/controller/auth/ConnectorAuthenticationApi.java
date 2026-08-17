@@ -27,13 +27,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Provides an operation for authenticating users and retrieving an access token upon successful
  * login. This interface serves as a contract for the implementation of user login services.
  *
- * <p>
- * Endpoints:
+ * <p>Endpoints:
  * - POST /api/v1/auth/login: Handles user login by accepting credentials in the request body
  * and responding with an authentication token.
  *
- * <p>
- * Annotations:
+ * <p>Annotations:
  * - The class is annotated with @RequestMapping to define the base path for all endpoints.
  * - The @Tag annotation is used for grouping and describing the API in documentation generated
  * via OpenAPI.

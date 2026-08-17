@@ -30,15 +30,13 @@ import org.springframework.stereotype.Service;
  * This service handles the creation, verification, revocation, and refreshing of
  * {@link ConnectorRefreshToken} objects.
  *
- * <p>
- * Responsibilities include:
+ * <p>Responsibilities include:
  * - Generating new refresh tokens for authenticated users.
  * - Validating and verifying the status of refresh tokens, including expiration and revocation.
  * - Revoking tokens explicitly when needed.
  * - Generating new access tokens for users via the refresh token process.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - {@link ConnectorRefreshTokenRepository}: Used for CRUD operations on refresh tokens.
  * - {@link ConnectorAuthenticationTokenProvider}: Provides mechanisms for generating new access
  * tokens.

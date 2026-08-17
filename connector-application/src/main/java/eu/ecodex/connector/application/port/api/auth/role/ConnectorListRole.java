@@ -18,8 +18,7 @@ import java.util.List;
  * Implementations of this interface are responsible for retrieving all instances of
  * {@link ConnectorRole}.
  *
- * <p>
- * The primary use case of this interface is to provide a mechanism to fetch a collection
+ * <p>The primary use case of this interface is to provide a mechanism to fetch a collection
  * of user roles from the underlying data source, which could be a database or any other
  * persistence mechanism.
  */

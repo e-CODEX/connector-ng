@@ -21,19 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST controller for managing connector role assignments.
  *
- * <p>
- * This controller provides endpoints to register and delete user-role associations
+ * <p>This controller provides endpoints to register and delete user-role associations
  * within the system. It acts as an implementation of the {@link ConnectorRoleAssignmentAdminApi}
  * interface and utilizes the {@link ConnectorRegisterRoleAssignment} service for performing
  * the core business logic related to role management.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Registering of roles assigned to a user in the connector system.
  * - Deleting of roles previously assigned to a user.
  *
- * <p>
- * Each operation delegates the actual persistence-level actions to the
+ * <p>Each operation delegates the actual persistence-level actions to the
  * {@link ConnectorRegisterRoleAssignment} service.
  */
 @Slf4j

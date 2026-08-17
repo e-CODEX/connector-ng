@@ -21,13 +21,11 @@ import org.springframework.stereotype.Service;
 /**
  * Service implementation for managing the removal of ConnectorUser entities.
  *
- * <p>
- * This class provides functionality to delete a user from the system by their unique identifier.
+ * <p>This class provides functionality to delete a user from the system by their unique identifier.
  * It interacts with the underlying persistence layer to ensure that the specified user exists
  * before performing the removal operation. If the user is not found, an exception is thrown.
  *
- * <p>
- * An instance of {@link ConnectorUserRepository} is used to perform database operations.
+ * <p>An instance of {@link ConnectorUserRepository} is used to perform database operations.
  */
 @Slf4j
 @Service

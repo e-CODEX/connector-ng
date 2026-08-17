@@ -23,34 +23,28 @@ import org.springframework.stereotype.Service;
 /**
  * A service implementation for managing user logout functionality in the connector system.
  *
- * <p>
- * This class handles user authentication via provided credentials and generates
+ * <p>This class handles user authentication via provided credentials and generates
  * authentication tokens upon successful login. It ensures that users are authenticated
  * securely and provides access and refresh tokens necessary for accessing protected resources.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Authenticate users via the provided username and password.
  * - Generate access and refresh tokens for authenticated users.
  * - Encapsulate the mechanisms for token creation and user token refresh workflows.
  *
- * <p>
- * Thread-safety:
- * This class is designed to be used in a multi-threaded environment and operates
+ * <p>Thread-safety:
+ * This class is designed to be used in a multithreaded environment and operates
  * within the application scope defined by the Spring framework.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - {@link AuthenticationManager} for authenticating user credentials.
  * - {@link ConnectorAuthenticationTokenProvider} for generating and managing access tokens.
  * - {@link ConnectorRefreshUserTokenService} for creating and handling refresh token functionality.
  *
- * <p>
- * Exceptions:
+ * <p>Exceptions:
  * Throws a {@link RuntimeException} if the principal cannot be retrieved after authentication.
  *
- * <p>
- * Implementation Details:
+ * <p>Implementation Details:
  * - Uses the {@link AuthenticationManager} to authenticate the user based on their credentials.
  * - Retrieves user details from the authenticated principal.
  * - Leverages the authentication token provider to generate a new access token.

@@ -18,8 +18,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
  * Implementations of this interface handle the creation of new {@link ConnectorRole}
  * instances and the modification of existing ones.
  *
- * <p>
- * The primary purpose of this interface is to manage user roles in the underlying
+ * <p>The primary purpose of this interface is to manage user roles in the underlying
  * persistence mechanism, ensuring that each role is correctly registered or updated
  * based on the provided data.
  */

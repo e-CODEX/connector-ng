@@ -5,15 +5,13 @@ package eu.ecodex.connector.domain.model.login;
  * This record encapsulates the authentication token details that are generated
  * and returned to the client upon successful authentication.
  *
- * <p>
- * Fields:
+ * <p>Fields:
  * - accessToken: The token issued to the authenticated user, used for
  * authorizing subsequent requests.
  * - expiresIn: The duration (in seconds) for which the token remains valid.
  * - refreshToken: An optional refresh token that can be used to obtain new
  *
- * <p>
- * This class is immutable and is designed to securely transport token-related
+ * <p>This class is immutable and is designed to securely transport token-related
  * data to ensure a proper authentication and authorization workflow within the
  * system.
  */

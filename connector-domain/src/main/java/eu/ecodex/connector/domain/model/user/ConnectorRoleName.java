@@ -13,15 +13,13 @@ package eu.ecodex.connector.domain.model.user;
 /**
  * Defines the various roles that can be assigned within the Connector system.
  *
- * <p>
- * This enumeration represents the roles available in the system, which define
+ * <p>This enumeration represents the roles available in the system, which define
  * the level of access and permissions for users interacting with the Connector.
  * Roles may be used to enforce authorization policies and control user actions
  * within the system. Each constant in this enumeration corresponds to a specific
  * role and its associated privileges.
  *
- * <p>
- * The enumeration is intended to facilitate role-based access control (RBAC)
+ * <p>The enumeration is intended to facilitate role-based access control (RBAC)
  * mechanisms by providing a centralized definition of the supported roles.
  */
 public enum ConnectorRoleName {

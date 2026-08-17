@@ -41,33 +41,28 @@ import org.springframework.stereotype.Component;
  * The class is designed to ensure that a default or configured admin user exists with appropriate
  * roles.
  *
- * <p>
- * This initializer performs the following steps:
+ * <p>This initializer performs the following steps:
  * 1. Checks if admin user properties are provided in the configuration.
  * 2. If no properties are provided, attempts to register a fallback default admin user.
  * 3. If properties are provided, uses them to initialize the admin user with the configured
  * username, password, email, and role.
  *
- * <p>
- * Key operations:
+ * <p>Key operations:
  * - Registers a new admin role if it does not already exist.
  * - Handles situations where the admin user or default admin role already exists.
  * - Updates an existing user with administrative privileges if necessary.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - {@link ConnectorRegisterUser}: Service for registering and updating user information.
  * - {@link ConnectorRegisterRole}: Service for registering user roles.
  * - {@link ConnectorRetrieveUser}: Service for retrieving existing user details.
  * - {@link ConnectorAdminUserProperties}: Configuration properties for the admin user.
  *
- * <p>
- * Implements:
+ * <p>Implements:
  * - {@link ApplicationRunner}: Allows the initialization logic to execute upon application
  * startup.
  *
- * <p>
- * Logging:
+ * <p>Logging:
  * - Logs events and outcomes during the initialization process for traceability and debugging.
  */
 @Slf4j

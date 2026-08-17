@@ -28,26 +28,22 @@ import org.springframework.stereotype.Service;
  * This class provides functionality to authenticate users based on their credentials and generate
  * an authentication token upon successful login.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - {@link AuthenticationManager}: Facilitates the authentication of user credentials.
  * - {@link ConnectorAuthenticationTokenProvider}: Responsible for generating authentication
  * tokens.
  *
- * <p>
- * Core functionality:
+ * <p>Core functionality:
  * - Verifies user credentials by authenticating through the {@link AuthenticationManager}.
  * - Retrieves the user details upon successful authentication.
  * - Generates an authentication token using the {@link ConnectorAuthenticationTokenProvider}.
  * - Returns a {@link LoginResponse} containing the token details.
  *
- * <p>
- * Exceptions:
+ * <p>Exceptions:
  * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after
  * authentication.
  *
- * <p>
- * Annotations:
+ * <p>Annotations:
  * - {@code @Slf4j}: Enables logging for debugging and monitoring purposes.
  * - {@code @Service}: Marks this class as a Spring service component.
  * - {@code @RequiredArgsConstructor}: Generates a constructor for final fields.

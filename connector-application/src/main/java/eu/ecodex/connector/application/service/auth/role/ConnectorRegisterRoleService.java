@@ -28,21 +28,18 @@ import org.springframework.stereotype.Component;
  * the Connector system. This implementation interacts with the underlying persistence
  * layer through the {@link ConnectorRoleRepository}.
  *
- * <p>
- * The primary goals of this service include:
+ * <p>The primary goals of this service include:
  * - Ensuring new user roles are correctly registered in the persistence layer.
  * - Updating existing user roles while validating role uniqueness and integrity.
  * - Logging relevant actions and ensuring the system's constraints are respected.
  *
- * <p>
- * Constraints:
+ * <p>Constraints:
  * - A new user role must not have its identifier field set during registration.
  * - Role names must remain unique within the system.
  * - An existing user role must be identified either by its unique identifier or name
  * during updates.
  *
- * <p>
- * Exception Handling:
+ * <p>Exception Handling:
  * - Throws {@link ConnectorUserRoleBadRequestException} for invalid input, such as a non-blank
  * identifier during registration.
  * - Throws {@link ConnectorUserRoleNotFoundException} if a user role to update is not found.

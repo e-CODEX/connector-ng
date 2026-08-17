@@ -17,8 +17,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundExcept
  * Implementations of this interface are responsible for deleting user roles
  * either through direct object references or by their unique identifier.
  *
- * <p>
- * This interface is primarily used to manage user roles in the underlying
+ * <p>This interface is primarily used to manage user roles in the underlying
  * persistence mechanism by removing unwanted or obsolete entries.
  */
 public interface ConnectorRemoveRole {

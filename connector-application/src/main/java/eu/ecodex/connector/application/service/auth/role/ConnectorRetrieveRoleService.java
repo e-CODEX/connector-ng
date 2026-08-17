@@ -28,8 +28,7 @@ import org.springframework.stereotype.Service;
  * username.
  * It interacts with the {@link ConnectorRoleRepository} to query the underlying data source.
  *
- * <p>
- * The service is designed to throw a {@link NotFoundException} if a requested user role
+ * <p>The service is designed to throw a {@link NotFoundException} if a requested user role
  * cannot be located by the provided identifier or name.
  */
 @Slf4j

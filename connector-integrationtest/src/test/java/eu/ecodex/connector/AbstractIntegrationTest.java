@@ -56,22 +56,22 @@ public abstract class AbstractIntegrationTest {
 
     static {
         minio = new MinIOContainer("minio/minio:RELEASE.2025-09-07T16-13-09Z")
-                .withUserName("testuser")
-                .withPassword("testpassword")
-                .withStartupTimeout(Duration.ofMinutes(2));
+            .withUserName("testuser")
+            .withPassword("testpassword")
+            .withStartupTimeout(Duration.ofMinutes(2));
 
         mysql = new MySQLContainer("mysql:8.0.33")
-                .withDatabaseName("connector")
-                .withUsername("connector")
-                .withPassword("connector");
+            .withDatabaseName("connector")
+            .withUsername("connector")
+            .withPassword("connector");
 
         Startables.deepStart(minio, mysql).join();
 
         try {
             minioClient = MinioClient.builder()
-                                     .endpoint(minio.getS3URL())
-                                     .credentials(minio.getUserName(), minio.getPassword())
-                                     .build();
+                .endpoint(minio.getS3URL())
+                .credentials(minio.getUserName(), minio.getPassword())
+                .build();
             createBucketIfNotExists();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MinIO client", e);
@@ -98,7 +98,7 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
         registry.add(
-                "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
+            "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
         );
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
@@ -116,11 +116,11 @@ public abstract class AbstractIntegrationTest {
 
     private static void createBucketIfNotExists() throws Exception {
         boolean exists = minioClient.bucketExists(
-                BucketExistsArgs.builder().bucket("attachments").build()
+            BucketExistsArgs.builder().bucket("attachments").build()
         );
         if (!exists) {
             minioClient.makeBucket(
-                    MakeBucketArgs.builder().bucket("attachments").build()
+                MakeBucketArgs.builder().bucket("attachments").build()
             );
         }
     }
@@ -129,12 +129,12 @@ public abstract class AbstractIntegrationTest {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
-                "attachments",
-                FilePartTestFixtures.filePart(
-                        "fake_file.pdf",
-                        FileTestFixtures.generateFakeFile(fileSize),
-                        MediaType.APPLICATION_PDF
-                )
+            "attachments",
+            FilePartTestFixtures.filePart(
+                "fake_file.pdf",
+                FileTestFixtures.generateFakeFile(fileSize),
+                MediaType.APPLICATION_PDF
+            )
         );
 
         return parts;
@@ -171,12 +171,12 @@ public abstract class AbstractIntegrationTest {
 
     protected String generateDefaultAdminToken() {
         var user = new ConnectorUserDetails(ConnectorUser
-                .defaultAdminUser()
-                .toBuilder()
-                .uuid(UUID
-                        .randomUUID()
-                        .toString())
-                .build());
+            .defaultAdminUser()
+            .toBuilder()
+            .uuid(UUID
+                .randomUUID()
+                .toString())
+            .build());
         return jwtTokenService.generateToken(user);
     }
 }

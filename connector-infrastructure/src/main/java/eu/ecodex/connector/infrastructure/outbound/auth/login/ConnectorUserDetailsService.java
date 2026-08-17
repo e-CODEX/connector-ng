@@ -28,8 +28,7 @@ import org.springframework.stereotype.Service;
  * This class primarily uses the {@link ConnectorRetrieveUser} service to fetch user details
  * based on the provided username and adapt them to a format compatible with Spring Security.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Retrieve user data from the {@link ConnectorRetrieveUser} service.
  * - Convert the retrieved {@link ConnectorUser} object into a {@link UserDetails} instance.
  * - Throw a {@link UsernameNotFoundException} if the user is not found.

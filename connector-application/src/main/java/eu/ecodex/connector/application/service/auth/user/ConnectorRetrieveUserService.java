@@ -26,12 +26,10 @@ import org.springframework.stereotype.Service;
  * {@link ConnectorUser} entities from a repository based on various attributes such as identifier,
  * username, email, or a combination of username and email.
  *
- * <p>
- * This service integrates with a {@link ConnectorUserRepository} to perform data operations and
+ * <p>This service integrates with a {@link ConnectorUserRepository} to perform data operations and
  * throws a {@link NotFoundException} when a user cannot be found based on the provided parameters.
  *
- * <p>
- * Thread safety: This class is designed as a stateless Spring {@code @Service}, and its methods
+ * <p>Thread safety: This class is designed as a stateless Spring {@code @Service}, and its methods
  * are thread-safe as long as the underlying {@link ConnectorUserRepository} is thread-safe.
  */
 @Slf4j

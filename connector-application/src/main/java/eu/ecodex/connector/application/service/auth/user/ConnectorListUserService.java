@@ -23,8 +23,7 @@ import org.springframework.stereotype.Service;
 /**
  * Service implementation for managing and retrieving {@link ConnectorUser} entities.
  *
- * <p>
- * This service provides functionality to retrieve all registered {@link ConnectorUser} instances
+ * <p>This service provides functionality to retrieve all registered {@link ConnectorUser} instances
  * by integrating with the underlying persistence layer through the
  * {@link ConnectorUserRepository}.
  * It acts as a bridge between the application logic and the data access layer for user data

@@ -29,14 +29,12 @@ import org.springframework.stereotype.Component;
  * ensuring
  * data integrity and validation.
  *
- * <p>
- * It handles the following operations:
+ * <p>It handles the following operations:
  * - Validating user data before registration or updates.
  * - Enforcing uniqueness constraints on usernames and email addresses.
  * - Performing full or partial updates on existing users.
  *
- * <p>
- * The class is annotated with {@code @Component} to indicate that it's a Spring-managed bean and
+ * <p>The class is annotated with {@code @Component} to indicate that it's a Spring-managed bean and
  * {@code @Slf4j} for logging purposes. It requires {@link ConnectorUserRepository} as a dependency
  * to perform data access operations.
  */

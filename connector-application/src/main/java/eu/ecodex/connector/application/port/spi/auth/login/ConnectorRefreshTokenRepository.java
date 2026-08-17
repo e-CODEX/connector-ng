@@ -18,18 +18,15 @@ import java.util.Optional;
 /**
  * Repository interface for managing {@link ConnectorRefreshToken} entities.
  *
- * <p>
- * Provides methods for performing CRUD operations on refresh tokens, such as
+ * <p>Provides methods for performing CRUD operations on refresh tokens, such as
  * finding a token by its value, saving a new token, and deleting an existing token.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Retrieve a refresh token based on its unique string value.
  * - Persist a refresh token entity in the persistence layer.
  * - Delete a refresh token from the persistence layer.
  *
- * <p>
- * This interface is designed to interact with the underlying data storage
+ * <p>This interface is designed to interact with the underlying data storage
  * and handle persistence operations for {@link ConnectorRefreshToken} entities,
  * ensuring proper data integrity and management.
  */

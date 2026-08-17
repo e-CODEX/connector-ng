@@ -32,8 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Controller for managing connector users. Provides APIs for operations such as registration,
  * updating, partial updates, retrieval, listing, and deletion of users.
  *
- * <p>
- * This controller relies on service classes for handling user-related operations and
+ * <p>This controller relies on service classes for handling user-related operations and
  * ensures additional processing like password encoding before delegation.
  */
 @Slf4j

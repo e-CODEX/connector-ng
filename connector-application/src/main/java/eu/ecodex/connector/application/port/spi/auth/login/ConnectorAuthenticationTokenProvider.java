@@ -19,20 +19,17 @@ import java.time.Duration;
  * validating, and parsing authentication tokens, as well as extracting
  * user-related information.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Generate authentication tokens based on user details.
  * - Validate tokens based on predefined criteria, such as matching user
  * details and expiration.
  * - Extract the username encoded within a token.
  *
- * <p>
- * Thread-safety:
+ * <p>Thread-safety:
  * Implementations of this interface must ensure appropriate thread-safety
  * for use in concurrent environments.
  *
- * <p>
- * Expected Implementations:
+ * <p>Expected Implementations:
  * Classes implementing this interface should define the token generation
  * and validation mechanisms appropriate for the application's chosen
  * authentication and authorization framework, such as JSON Web Tokens (JWT).

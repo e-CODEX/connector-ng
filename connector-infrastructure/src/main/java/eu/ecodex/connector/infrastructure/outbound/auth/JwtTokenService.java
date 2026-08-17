@@ -37,27 +37,22 @@ import org.springframework.stereotype.Service;
  * This class uses a symmetric key for signing and verifying tokens, as well as customizable
  * properties provided via {@link JwtProperties}.
  *
- * <p>
- * This implementation provides methods to create tokens, extract information
+ * <p>This implementation provides methods to create tokens, extract information
  * from tokens, and validate tokens against specific user details.
  *
- * <p>
- * It conforms to the {@link ConnectorAuthenticationTokenProvider} interface.
+ * <p>It conforms to the {@link ConnectorAuthenticationTokenProvider} interface.
  *
- * <p>
- * Dependencies:
+ * <p>Dependencies:
  * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration
  * period.
  * - {@link UserDetails}: Represents authenticated user information, including roles and username.
  * - {@link SecretKey}: Used for cryptographic operations.
  *
- * <p>
- * Thread-safety:
+ * <p>Thread-safety:
  * This class is thread-safe assuming the provided {@link JwtProperties}
  * have been correctly initialized and remain immutable during runtime.
  *
- * <p>
- * Responsibilities:
+ * <p>Responsibilities:
  * - Generate JWT tokens with user-specific claims and expiration times.
  * - Extract the username from an existing token payload.
  * - Validate if a token matches the user details and is not expired.

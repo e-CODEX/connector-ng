@@ -21,14 +21,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * managing the persistence and retrieval of ConnectorUserEntity instances
  * from the database.
  *
- * <p>
- * The interface includes queries to retrieve user data by various unique
+ * <p>The interface includes queries to retrieve user data by various unique
  * identifiers (UUID, username, email) and to check for their existence
  * within the database. Additionally, it uses EntityGraph annotations to
  * optimize fetching associated user roles.
  *
- * <p>
- * Methods:
+ * <p>Methods:
  * - `findByUuid(String uuid)`: Retrieves a user by their UUID,
  * loading their associated roles.
  * - `findByUsername(String username)`: Retrieves a user by their username,
@@ -47,14 +45,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * - `existsByEmailAndUuidNot(String email, String uuid)`: Validates the
  * uniqueness of an email while excluding a specific UUID.
  *
- * <p>
- * EntityGraph Annotations:
+ * <p>EntityGraph Annotations:
  * - These annotations are used to load the "roles" relationship of the
  * {@link ConnectorUserEntity} eagerly by specifying paths for associated
  * entities that need to be included in the query result set.
  *
- * <p>
- * Inheritance:
+ * <p>Inheritance:
  * - Extends {@link JpaRepository}, which provides basic CRUD functionality
  * and query method support.
  */

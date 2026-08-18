@@ -10,11 +10,12 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
+import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRoleAssignment;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  * if the required entities are not found.
  *
  * <p>Exceptions:
- * - {@link ConnectorUserRoleNotFoundException}: Thrown if the specified role does not exist.
+ * - {@link ConnectorRoleNotFoundException}: Thrown if the specified role does not exist.
  * - {@link ConnectorUserNotFoundException}: Thrown if the specified user identifier does not
  * exist.
  */
@@ -53,62 +54,43 @@ public class ConnectorRegisterRoleAssignmentService implements ConnectorRegister
 
     @Override
     public ConnectorUser register(String identifier, String roleName)
-            throws ConnectorUserRoleNotFoundException, ConnectorUserNotFoundException {
+        throws ConnectorRoleNotFoundException, ConnectorUserNotFoundException {
 
-        var user = userRepository
-                .findByUuid(identifier)
-                .orElseThrow(() ->
-                        new ConnectorUserNotFoundException(identifier));
+        var user = getUserByIdentifier(identifier);
+        var role = getRoleByName(roleName);
 
-        var role = roleRepository
-                .findByName(roleName)
-                .orElseThrow(() ->
-                        new ConnectorUserRoleNotFoundException(roleName));
+        var updated = user.addRole(role);
 
-        boolean found = user
-                .roles()
-                .stream()
-                .anyMatch(r -> r
-                        .name()
-                        .equals(role.name()));
-
-        if (found) {
-            return user;
-        }
-        user
-                .roles()
-                .add(role);
-        return userRepository.save(user);
+        return (user.equals(updated)) ? user : userRepository.save(updated);
     }
 
     @Override
     public ConnectorUser remove(String identifier, String roleName)
-            throws ConnectorUserRoleNotFoundException, ConnectorUserNotFoundException {
-        var user = userRepository
-                .findByUuid(identifier)
-                .orElseThrow(() ->
-                        new ConnectorUserNotFoundException(identifier));
+        throws ConnectorRoleNotFoundException, ConnectorUserNotFoundException {
 
-        var role = roleRepository
-                .findByName(roleName)
-                .orElseThrow(() ->
-                        new ConnectorUserRoleNotFoundException(roleName));
-
-        boolean found = user
-                .roles()
-                .stream()
-                .anyMatch(r -> r
-                        .name()
-                        .equals(role.name()));
-
-        if (!found) {
+        var user = getUserByIdentifier(identifier);
+        if (user.roles() == null) {
             return user;
         }
-        user
-                .roles()
-                .removeIf(r -> r
-                        .name()
-                        .equals(role.name()));
-        return userRepository.save(user);
+
+        var role = getRoleByName(roleName);
+
+        var updated = user.removeRole(role);
+
+        return (user.equals(updated)) ? user : userRepository.save(updated);
+    }
+
+
+    private ConnectorUser getUserByIdentifier(String identifier)
+        throws ConnectorUserNotFoundException {
+
+        return userRepository.findByUuid(identifier)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(identifier));
+    }
+
+    private ConnectorRole getRoleByName(String roleName) throws ConnectorRoleNotFoundException {
+
+        return roleRepository.findByName(roleName)
+            .orElseThrow(() -> new ConnectorRoleNotFoundException(roleName));
     }
 }

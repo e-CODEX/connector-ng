@@ -15,7 +15,6 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.experimental.UtilityClass;
 
@@ -24,24 +23,6 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class ConnectorUserMapper {
-
-    /**
-     * Map a domain user into an entity user.
-     *
-     * @param domainUser domain user
-     *
-     * @return entity user
-     */
-    public ConnectorUserEntity toEntity(ConnectorUser domainUser) {
-        return ConnectorUserEntity
-                .builder()
-                .uuid(domainUser.uuid())
-                .username(domainUser.username())
-                .password(domainUser.password())
-                .email(domainUser.email())
-                .enabled(domainUser.enabled())
-                .build();
-    }
 
 
     /**
@@ -53,16 +34,16 @@ public class ConnectorUserMapper {
      */
     public ConnectorUser toDomain(ConnectorUserEntity entity) {
         return ConnectorUser
-                .builder()
-                .uuid(entity.getUuid())
-                .username(entity.getUsername())
-                .password(entity.getPassword())
-                .email(entity.getEmail())
-                .enabled(entity.isEnabled())
-                .createdAt(entity.getCreatedAt())
-                .updatedAt(entity.getUpdatedAt())
-                .roles(getUserRoles(entity))
-                .build();
+            .builder()
+            .uuid(entity.getUuid())
+            .username(entity.getUsername())
+            .password(entity.getPassword())
+            .email(entity.getEmail())
+            .enabled(entity.isEnabled())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .roles(toDomainRoles(entity))
+            .build();
     }
 
 
@@ -73,23 +54,21 @@ public class ConnectorUserMapper {
      *
      * @return Set of domain roles
      */
-    public static Set<ConnectorRole> getUserRoles(ConnectorUserEntity entity) {
+    public Set<ConnectorRole> toDomainRoles(ConnectorUserEntity entity) {
         return entity.getRoles() == null ? null :
-                entity
-                        .getRoles()
-                        .stream()
-                        .map(toRoleDomain())
-                        .collect(Collectors.toSet());
+            entity.getRoles().stream()
+                .map(ConnectorUserMapper::toDomainRole)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
-    private static Function<ConnectorRoleEntity, ConnectorRole> toRoleDomain() {
-        return role ->
-                ConnectorRole
-                        .builder()
-                        .uuid(role.getUuid())
-                        .name(role.getName())
-                        .build();
-
+    private ConnectorRole toDomainRole(ConnectorRoleEntity role) {
+        return ConnectorRole
+            .builder()
+            .uuid(role.getUuid())
+            .name(role.getName())
+            .createdAt(role.getCreatedAt())
+            .updatedAt(role.getUpdatedAt())
+            .build();
     }
 
 }

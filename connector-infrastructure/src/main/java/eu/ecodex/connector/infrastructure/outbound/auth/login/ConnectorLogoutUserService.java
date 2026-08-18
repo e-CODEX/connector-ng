@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 import eu.ecodex.connector.application.port.api.auth.login.ConnectorLogoutUser;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
+import eu.ecodex.connector.application.service.auth.login.ConnectorRevokeUserTokenService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -56,10 +57,10 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorLogoutUserService implements ConnectorLogoutUser {
 
-    ConnectorRefreshUserTokenService refreshTokenService;
+    ConnectorRevokeUserTokenService revokeTokenService;
 
     @Override
     public void logout(String userId, String refreshToken) {
-        refreshTokenService.revoke(userId, refreshToken);
+        revokeTokenService.revoke(userId, refreshToken);
     }
 }

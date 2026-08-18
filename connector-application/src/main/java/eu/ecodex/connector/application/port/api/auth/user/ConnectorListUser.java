@@ -24,7 +24,7 @@ public interface ConnectorListUser {
      * Retrieves all instances of {@link ConnectorUser} available in the system.
      *
      * @return a list of {@link ConnectorUser} objects representing all registered users.
-     *         If no users are found, an empty list is returned.
+     *     If no users are found, an empty list is returned.
      */
-    List<ConnectorUser> findAll();
+    List<ConnectorUser> findAllWithRoles();
 }

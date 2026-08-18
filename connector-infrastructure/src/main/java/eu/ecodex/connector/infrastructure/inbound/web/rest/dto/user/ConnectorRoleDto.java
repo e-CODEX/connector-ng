@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import lombok.Builder;
 import lombok.NonNull;
@@ -23,12 +24,13 @@ import org.springframework.validation.annotation.Validated;
  */
 @Validated
 @Builder(toBuilder = true)
-public record ConnectorUserRoleDto(
-        String identifier,
-        @NonNull
-        String name,
-        Instant createdAt,
-        Instant updatedAt
+public record ConnectorRoleDto(
+    String identifier,
+    @NonNull
+    @NotBlank
+    String name,
+    Instant createdAt,
+    Instant updatedAt
 ) {
 
     /**
@@ -38,14 +40,14 @@ public record ConnectorUserRoleDto(
      *
      * @return dto
      */
-    public static ConnectorUserRoleDto from(ConnectorRole userRole) {
-        return ConnectorUserRoleDto
-                .builder()
-                .identifier(userRole.uuid())
-                .name(userRole.name())
-                .createdAt(userRole.createdAt())
-                .updatedAt(userRole.updatedAt())
-                .build();
+    public static ConnectorRoleDto from(ConnectorRole userRole) {
+        return ConnectorRoleDto
+            .builder()
+            .identifier(userRole.uuid())
+            .name(userRole.name())
+            .createdAt(userRole.createdAt())
+            .updatedAt(userRole.updatedAt())
+            .build();
     }
 
     /**
@@ -55,13 +57,13 @@ public record ConnectorUserRoleDto(
      *
      * @return domain role
      */
-    public static ConnectorRole toDomain(ConnectorUserRoleDto userRoleDto) {
+    public static ConnectorRole toDomain(ConnectorRoleDto userRoleDto) {
         return ConnectorRole
-                .builder()
-                .uuid(userRoleDto.identifier())
-                .name(userRoleDto.name())
-                .createdAt(userRoleDto.createdAt())
-                .updatedAt(userRoleDto.updatedAt())
-                .build();
+            .builder()
+            .uuid(userRoleDto.identifier())
+            .name(userRoleDto.name())
+            .createdAt(userRoleDto.createdAt())
+            .updatedAt(userRoleDto.updatedAt())
+            .build();
     }
 }

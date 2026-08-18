@@ -14,8 +14,8 @@ import static eu.ecodex.connector.domain.model.user.ConnectorRole.DEFAULT_ADMIN_
 import static eu.ecodex.connector.domain.model.user.ConnectorRole.builder;
 import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultAdminRole;
 
+import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
@@ -33,7 +33,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -75,7 +74,6 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     ConnectorRetrieveUser retrieveUserService;
     ConnectorRetrieveRole retrieveUserRoleService;
     ConnectorAdminUserProperties adminUserProperties;
-    PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -91,7 +89,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     private void registerFallbackAdminUser() {
         log.info("No Administrator user found in configuration; creating default admin user");
         var existingAdmin =
-                retrieveUserService.findByUsername(ConnectorUser.DEFAULT_ADMIN_USER_NAME);
+            retrieveUserService.findByUsername(ConnectorUser.DEFAULT_ADMIN_USER_NAME);
 
         if (existingAdmin.isEmpty()) {
             registerNewAdminUser();
@@ -112,30 +110,27 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
             registerUserRoleService.register(defaultAdminRole());
             log.info("{} successfully created.", DEFAULT_ADMIN_ROLE);
 
-        } catch (ConnectorUserRoleAlreadyExistsException e) {
+        } catch (ConnectorRoleAlreadyExistsException e) {
             log.info("{} already exists.", DEFAULT_ADMIN_ROLE);
         }
 
         var userRoles = new HashSet<>(
-                CollectionUtils.union(
-                        CollectionUtils.emptyIfNull(administrator.roles()),
-                        Set.of(defaultAdminRole())
-                )
+            CollectionUtils.union(
+                CollectionUtils.emptyIfNull(administrator.roles()),
+                Set.of(defaultAdminRole())
+            )
         );
 
-        registerUserService.patch(administrator.uuid(),
-                administrator
-                        .toBuilder()
-                        .roles(userRoles)
-                        .build());
+        registerUserService.patch(administrator.uuid(), administrator.toBuilder()
+            .roles(userRoles).build());
 
         log.info("{} added to Administrator user, admin user updated", DEFAULT_ADMIN_ROLE);
     }
 
     private void registerNewAdminUser() {
         log.info(
-                "No default Administrator user found and none registered yet; creating "
-                        + "default");
+            "No default Administrator user found and none registered yet; creating "
+                + "default");
         try {
             registerUserRoleService.register(defaultAdminRole());
             log.info("Default Administrator user successfully created.");
@@ -143,33 +138,23 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
             log.info("Default Administrator role already exists.");
         }
         var defaultAdminUser = ConnectorUser.defaultAdminUser();
-        defaultAdminUser = defaultAdminUser
-                .toBuilder()
-                .password(passwordEncoder.encode(defaultAdminUser.password()))
-                .build();
         registerUserService.register(defaultAdminUser);
     }
 
     private void initializeAdminUser(ConnectorAdminUserProperties properties) {
-        if (properties.getRole() == null || properties
-                .getRole()
-                .isBlank()
-                || properties.getUsername() == null || properties
-                .getUsername()
-                .isBlank()) {
+        if (properties.getRole() == null || properties.getRole().isBlank()
+            || properties.getUsername() == null || properties.getUsername().isBlank()) {
             registerFallbackAdminUser();
             return;
         }
 
         log.info("Initializing connector Administrator user with username: {}",
-                properties.getUsername());
-        var adminRole = builder()
-                .name(properties.getRole())
-                .build();
+            properties.getUsername());
+        var adminRole = builder().name(properties.getRole()).build();
         try {
             adminRole = registerUserRoleService.register(adminRole);
             log.info("Default Administrator {} successfully registered.", properties.getRole());
-        } catch (ConnectorUserRoleAlreadyExistsException e) {
+        } catch (ConnectorRoleAlreadyExistsException e) {
             log.info("Default Administrator {} already registered.", properties.getRole());
             adminRole = retrieveUserRoleService.getByName(properties.getRole());
         }
@@ -184,15 +169,14 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
 
     private ConnectorUser createAdminUser(ConnectorAdminUserProperties properties,
                                           ConnectorRole adminRole) {
-        var encodedPassword = passwordEncoder.encode(properties.getPassword());
         return ConnectorUser
-                .builder()
-                .username(properties.getUsername())
-                .password(encodedPassword)
-                .email(properties.getEmail())
-                .enabled(true)
-                .roles(Set.of(adminRole))
-                .build();
+            .builder()
+            .username(properties.getUsername())
+            .password(properties.getPassword())
+            .email(properties.getEmail())
+            .enabled(Boolean.TRUE)
+            .roles(Set.of(adminRole))
+            .build();
     }
 
 }

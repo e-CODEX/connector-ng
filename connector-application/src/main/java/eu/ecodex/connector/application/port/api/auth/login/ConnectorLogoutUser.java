@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.auth.login;
 
-import eu.ecodex.connector.domain.model.login.LoginResponse;
+import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 
 /**
  * Interface for handling user login functionality in the connector system.
@@ -22,7 +22,7 @@ import eu.ecodex.connector.domain.model.login.LoginResponse;
  *
  * <p>Responsibilities:
  * - Authenticate users based on their credentials (username and password).
- * - Generate and return a {@link LoginResponse} object containing the
+ * - Generate and return a {@link ConnectorLoginResponse} object containing the
  * access token, refresh token, and expiration details.
  *
  * <p>Typical Use Cases:

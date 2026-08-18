@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +41,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
     description = "API for managing processing modes for administrative purposes"
 )
 @RequestMapping("/api/v1/admin/processing-modes")
-@PreAuthorize("hasRole('ADMIN')")
 public interface ConnectorProcessingModeAdminApi {
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)

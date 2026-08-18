@@ -39,7 +39,8 @@ public class ConnectorListProcessingModeIT extends AbstractIntegrationTest {
     @Test
     @Sql({
         "classpath:sql/business-domain.sql",
-        "classpath:sql/processing-mode.sql"
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/user.sql",
     })
     void should_retrieve_processing_modes() {
         var response = apiClient.get()

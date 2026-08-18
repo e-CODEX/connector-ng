@@ -38,7 +38,7 @@ public class ConnectorListUserService implements ConnectorListUser {
     ConnectorUserRepository repository;
 
     @Override
-    public List<ConnectorUser> findAll() {
-        return repository.findAll();
+    public List<ConnectorUser> findAllWithRoles() {
+        return repository.findAllWithRoles();
     }
 }

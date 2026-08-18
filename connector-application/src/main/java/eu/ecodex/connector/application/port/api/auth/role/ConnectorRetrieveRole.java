@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Set;
 
@@ -34,10 +34,10 @@ public interface ConnectorRetrieveRole {
      *
      * @return the {@link ConnectorRole} instance matching the given identifier.
      *
-     * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified
-     *                                            identifier.
+     * @throws ConnectorRoleNotFoundException if no user role is found for the specified
+     *                                        identifier.
      */
-    ConnectorRole getById(String identifier) throws ConnectorUserRoleNotFoundException;
+    ConnectorRole getById(String identifier) throws ConnectorRoleNotFoundException;
 
     /**
      * Retrieves a user role identified by the specified name.
@@ -49,9 +49,9 @@ public interface ConnectorRetrieveRole {
      *
      * @return the {@link ConnectorRole} instance matching the given role name.
      *
-     * @throws ConnectorUserRoleNotFoundException if no user role is found for the specified name.
+     * @throws ConnectorRoleNotFoundException if no user role is found for the specified name.
      */
-    ConnectorRole getByName(String roleName) throws ConnectorUserRoleNotFoundException;
+    ConnectorRole getByName(String roleName) throws ConnectorRoleNotFoundException;
 
     /**
      * Retrieves a set of user roles based on the specified username.
@@ -62,7 +62,7 @@ public interface ConnectorRetrieveRole {
      *                 It must correspond to a valid user in the system.
      *
      * @return a set of {@link ConnectorRole} associated with the specified username.
-     *         The returned set may be empty if no roles are found.
+     *     The returned set may be empty if no roles are found.
      */
     Set<ConnectorRole> findByNameIn(Set<String> username);
 }

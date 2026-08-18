@@ -50,7 +50,8 @@ public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegratio
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
         "classpath:sql/message-transport-step.sql",
-        "classpath:sql/message-transport-step-statuses.sql"
+        "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/user.sql",
     })
     void should_retrieve_transport_steps_for_connector_message() {
         var messageId = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
@@ -73,6 +74,7 @@ public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegratio
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_return_404_when_retrieving_transport_steps_for_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient.get()

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 
 /**
  * Provides a contract for removing user roles in the Connector system.
@@ -30,5 +30,5 @@ public interface ConnectorRemoveRole {
      * @param uuid the unique identifier of the user role to be deleted.
      *             It must correspond to an existing user role in the system.
      */
-    void deleteByIdentifier(String uuid) throws ConnectorUserRoleNotFoundException;
+    void deleteByIdentifier(String uuid) throws ConnectorRoleNotFoundException;
 }

@@ -17,8 +17,10 @@ import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetai
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -61,10 +63,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class JwtTokenService {
+public class JwtService {
 
     SecretKey secretKey;
     JwtProperties jwtProperties;
+    Clock clock;
 
     /**
      * Constructor for JwtTokenService.
@@ -72,11 +75,12 @@ public class JwtTokenService {
      *
      * @param jwtProperties the JwtProperties object containing the secret key and other JWT-related
      */
-    public JwtTokenService(JwtProperties jwtProperties) {
+    public JwtService(JwtProperties jwtProperties, Clock clock) {
         this.secretKey = Keys.hmacShaKeyFor(jwtProperties
-                .getSecret()
-                .getBytes(UTF_8));
+            .getSecret()
+            .getBytes(UTF_8));
         this.jwtProperties = jwtProperties;
+        this.clock = clock;
     }
 
     /**
@@ -91,27 +95,27 @@ public class JwtTokenService {
      *             and granted roles.
      *
      * @return a {@code String} representing the generated JWT token encoded with the user's details
-     *         and cryptographically signed using the configured secret key.
+     *     and cryptographically signed using the configured secret key.
      */
     public String generateToken(ConnectorUserDetails user) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         var userRoles = user
-                .getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
+            .getAuthorities()
+            .stream()
+            .map(GrantedAuthority::getAuthority)
+            .toList();
 
         log.debug("Generating JWT token for user {} ", user.getUsername());
         return Jwts
-                .builder()
-                .subject(user.getUsername())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(jwtProperties
-                        .getExpiration()
-                        .toSeconds())))
-                .claims(Map.of("roles", userRoles, "userId", user.getUserId()))
-                .signWith(secretKey)
-                .compact();
+            .builder()
+            .subject(user.getUsername())
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plusSeconds(jwtProperties
+                .getExpiration()
+                .toSeconds())))
+            .claims(Map.of("roles", userRoles, "userId", user.getUserId()))
+            .signWith(secretKey)
+            .compact();
 
     }
 
@@ -125,8 +129,8 @@ public class JwtTokenService {
      */
     public String extractUsername(String token) {
         return parse(token)
-                .getPayload()
-                .getSubject();
+            .getPayload()
+            .getSubject();
     }
 
 
@@ -137,7 +141,7 @@ public class JwtTokenService {
      * @param token the JWT token from which the authorities are to be extracted.
      *
      * @return a list of {@code GrantedAuthority} objects representing the roles
-     *         contained in the token, or an empty list if no valid roles are found.
+     *     contained in the token, or an empty list if no valid roles are found.
      */
     public List<? extends GrantedAuthority> extractAuthorities(String token) {
         Claims claims = parse(token).getPayload();
@@ -148,12 +152,27 @@ public class JwtTokenService {
         }
 
         return roles
-                .stream()
-                .map(String::valueOf)
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+            .stream()
+            .map(String::valueOf)
+            .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+            .map(SimpleGrantedAuthority::new)
+            .toList();
     }
 
+    /**
+     * Extracts the user id from the payload of a given JWT token.
+     *
+     * @param token the JWT token from which the user id is to be extracted.
+     *
+     * @return extracted user id
+     */
+    public String extractUserId(String token) {
+        return
+            parse(token)
+                .getPayload()
+                .get("userId", String.class);
+
+    }
 
     /**
      * Validates the given JWT token by checking if it matches the username of the specified user
@@ -163,27 +182,35 @@ public class JwtTokenService {
      * @param user  the {@code UserDetails} object representing the authenticated user whose details
      *              are compared against the token's payload.
      *
-     * @return {@code true} if the token is valid, matches the user's username, and is not expired;
-     *         {@code false} otherwise.
+     * @return {@code true} if the token is valid, matches the user's username and is not expired;
+     *     {@code false} otherwise.
      */
     public boolean isValidToken(String token, UserDetails user) {
-        String username = extractUsername(token);
-        return username.equals(user.getUsername())
-                && !isExpired(token);
+        try {
+            var claims = parse(token).getPayload();
+
+            return claims
+                .getSubject()
+                .equals(user.getUsername());
+
+        } catch (JwtException ex) {
+            return false;
+        }
     }
 
     private boolean isExpired(String token) {
         return parse(token)
-                .getPayload()
-                .getExpiration()
-                .before(new Date());
+            .getPayload()
+            .getExpiration()
+            .before(Date.from(clock.instant()));
     }
 
     private Jws<Claims> parse(String token) {
         return Jwts
-                .parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token);
+            .parser()
+            .verifyWith(secretKey)
+            .clock(() -> Date.from(clock.instant()))
+            .build()
+            .parseSignedClaims(token);
     }
 }

@@ -42,19 +42,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Builder
 public record ConnectorUserDetails(ConnectorUser connectorUser) implements UserDetails {
 
-
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         if (connectorUser.roles() == null) {
             return List.of();
         }
         return connectorUser.roles()
-                .stream()
-                .filter(Objects::nonNull)
-                .map(ConnectorRole::name)
-                .filter(name -> name != null && !name.isBlank())
-                .map(SimpleGrantedAuthority::new)
-                .toList();
+            .stream()
+            .filter(Objects::nonNull)
+            .map(ConnectorRole::name)
+            .filter(name -> name != null && !name.isBlank())
+            .map(SimpleGrantedAuthority::new)
+            .toList();
     }
 
     @Override
@@ -67,7 +66,7 @@ public record ConnectorUserDetails(ConnectorUser connectorUser) implements UserD
         return connectorUser.username();
     }
 
-    public String getUserId() {
+    public @NonNull String getUserId() {
         return connectorUser.uuid();
     }
 }

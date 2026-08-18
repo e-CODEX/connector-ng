@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.auth.role;
 
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserRoleDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorRoleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,7 +19,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,35 +37,31 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  *
  * <p>All endpoints consume and produce JSON data.
  */
-@PreAuthorize("hasRole(T(eu.ecodex.connector.domain.model.user.ConnectorRoleName.ADMIN))")
-@RequestMapping(path = "/api/v1/admin/users/roles", consumes = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/api/v1/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Users", description = "API for managing connector's users")
 public interface ConnectorRoleAdminApi {
 
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user role.")
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    ConnectorUserRoleDto register(@Valid @RequestBody ConnectorUserRoleDto usrRoleDto);
+    ConnectorRoleDto register(@Valid @RequestBody ConnectorRoleDto usrRoleDto);
 
-    @ResponseStatus(HttpStatus.ACCEPTED)
     @Operation(summary = "Update a connector user.")
-    @PutMapping("/{uuid}")
+    @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    ConnectorUserRoleDto update(@PathVariable("uuid") String identifier,
-                                @Valid @RequestBody ConnectorUserRoleDto userRoleDto);
+    ConnectorRoleDto update(@PathVariable("uuid") String identifier,
+                            @Valid @RequestBody ConnectorRoleDto userRoleDto);
 
-    @ResponseStatus(HttpStatus.FOUND)
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
     @GetMapping(path = "/{uuid}")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
-    ConnectorUserRoleDto getByIdentifier(@PathVariable("uuid") String identifier);
+    ConnectorRoleDto getByIdentifier(@PathVariable("uuid") String identifier);
 
-    @ResponseStatus(HttpStatus.FOUND)
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
-    List<ConnectorUserRoleDto> getAll();
+    List<ConnectorRoleDto> getAll();
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user role by uuid identifier.")

@@ -22,13 +22,14 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -50,7 +51,7 @@ class ConnectorUpdateUserAdminControllerTest extends AbstractWebMvcTest {
     ConnectorListUser listUser;
 
     @MockitoBean
-    PasswordEncoder passwordEncoder;
+    ConnectorUserPasswordEncoder passwordEncoder;
 
     @Autowired
     private RestTestClient apiClient;
@@ -62,32 +63,32 @@ class ConnectorUpdateUserAdminControllerTest extends AbstractWebMvcTest {
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
 
         when(registerUser.update(anyString(), any())).thenReturn(connectorUser);
-        when(passwordEncoder.encode(any())).thenReturn("encoded");
+        when(passwordEncoder.encodePassword(any(ConnectorUser.class))).thenReturn(connectorUser);
 
         // When
         var response = apiClient
-                .put()
-                .uri(URL + "/" + connectorUser.uuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .returnResult(ConnectorUserDto.class);
+            .put()
+            .uri(URL + "/" + connectorUser.uuid())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .returnResult(ConnectorUserDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();
         assert responseBody != null;
         assertThat(responseBody)
-                .usingRecursiveComparison()
-                .isEqualTo(ConnectorUserTestFixtures.createUserDto());
+            .usingRecursiveComparison()
+            .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
         verify(registerUser).update(connectorUser.uuid(), connectorUser
-                .toBuilder()
-                .uuid(null)
-                .build());
-        verify(passwordEncoder).encode(connectorUserRequest.password());
+            .toBuilder()
+            .uuid(null)
+            .password("test_password")
+            .build());
 
         verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
     }

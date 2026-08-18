@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserRoleBadRequestException;
-import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
@@ -40,10 +40,10 @@ import org.springframework.stereotype.Component;
  * during updates.
  *
  * <p>Exception Handling:
- * - Throws {@link ConnectorUserRoleBadRequestException} for invalid input, such as a non-blank
+ * - Throws {@link ConnectorRoleBadRequestException} for invalid input, such as a non-blank
  * identifier during registration.
- * - Throws {@link ConnectorUserRoleNotFoundException} if a user role to update is not found.
- * - Throws {@link ConnectorUserRoleAlreadyExistsException} when a duplicate role name is detected.
+ * - Throws {@link ConnectorRoleNotFoundException} if a user role to update is not found.
+ * - Throws {@link ConnectorRoleAlreadyExistsException} when a duplicate role name is detected.
  */
 @Slf4j
 @Component
@@ -56,8 +56,8 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     @Override
     public ConnectorRole register(ConnectorRole userRole) {
         if (userRole.uuid() != null) {
-            throw new ConnectorUserRoleBadRequestException(
-                    "Connector user role id should be blank");
+            throw new ConnectorRoleBadRequestException(
+                "Connector user role id should be blank");
         }
         checkRoleName(null, userRole);
         return repository.save(userRole);
@@ -66,20 +66,17 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     @Override
     public ConnectorRole update(String identifier, ConnectorRole userRole) {
         if (identifier == null && userRole.uuid() == null) {
-            throw new ConnectorUserRoleBadRequestException(
-                    "Connector user role id should not be blank");
+            throw new ConnectorRoleBadRequestException(
+                "Connector user role id should not be blank");
         }
 
-        var existingUserRole = repository
-                .findByUuid(identifier)
-                .orElseThrow(() -> new ConnectorUserRoleNotFoundException(
-                        "No existing user role found with id " + identifier));
+        var existingUserRole = repository.findByUuid(identifier)
+            .orElseThrow(() -> new ConnectorRoleNotFoundException(
+                "No existing user role found with id " + identifier));
 
         checkRoleName(identifier, userRole);
 
-        if (existingUserRole
-                .name()
-                .equalsIgnoreCase(userRole.name())) {
+        if (existingUserRole.name().equalsIgnoreCase(userRole.name())) {
             log.info("Nothing to update");
             return existingUserRole;
         }
@@ -92,11 +89,9 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     private void checkRoleName(String identifier, ConnectorRole userRole) {
         var existingUser = repository.findByName(userRole.name());
 
-        if (existingUser.isPresent() && !Objects.equals(existingUser
-                .get()
-                .uuid(), identifier)) {
-            throw new ConnectorUserRoleAlreadyExistsException(
-                    "Role name '%s' already exists".formatted(userRole.name())
+        if (existingUser.isPresent() && !Objects.equals(existingUser.get().uuid(), identifier)) {
+            throw new ConnectorRoleAlreadyExistsException(
+                "Role name '%s' already exists".formatted(userRole.name())
             );
         }
 

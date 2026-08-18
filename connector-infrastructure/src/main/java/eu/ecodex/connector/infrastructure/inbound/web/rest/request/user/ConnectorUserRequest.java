@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.user;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -27,6 +28,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Builder(toBuilder = true)
 public record ConnectorUserRequest(@NonNull
+                                   @NotBlank
                                    String username,
                                    String password,
                                    @Email
@@ -39,40 +41,45 @@ public record ConnectorUserRequest(@NonNull
      * Map a domain ser to a request user.
      *
      * @param user user to map
+     *
      * @return request user
      */
     public static ConnectorUserRequest from(ConnectorUser user) {
         return ConnectorUserRequest
-                .builder()
-                .username(user.username())
-                .password(user.password())
-                .email(user.email())
-                .enabled(user.enabled())
-                .roles(getRoles(user))
-                .build();
+            .builder()
+            .username(user.username())
+            .password(user.password())
+            .email(user.email())
+            .enabled(user.enabled())
+            .roles(getRoles(user))
+            .build();
     }
 
     /**
      * Map a request user into a domain user.
      *
      * @param userRequest user to map
+     *
      * @return domain user
      */
     public static ConnectorUser toDomain(ConnectorUserRequest userRequest) {
         return ConnectorUser
-                .builder()
-                .username(userRequest.username())
-                .password(userRequest.password())
-                .email(userRequest.email())
-                .enabled(userRequest.enabled())
-                .roles(getRoles(userRequest))
-                .build();
+            .builder()
+            .username(userRequest.username())
+            .password(userRequest.password())
+            .email(userRequest.email())
+            .enabled(userRequest.enabled())
+            .roles(getRoles(userRequest))
+            .build();
     }
 
     private static Set<String> getRoles(ConnectorUser user) {
         return CollectionUtils.isEmpty(user.roles()) ? Set.of() :
-                user.roles().stream().map(ConnectorRole::name)
-                        .collect(Collectors.toUnmodifiableSet());
+            user
+                .roles()
+                .stream()
+                .map(ConnectorRole::name)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     private static Set<ConnectorRole> getRoles(ConnectorUserRequest request) {
@@ -80,7 +87,14 @@ public record ConnectorUserRequest(@NonNull
             return null;
         }
 
-        return request.roles().stream().map(role ->
-                ConnectorRole.builder().name(role).build()).collect(Collectors.toUnmodifiableSet());
+        return request
+            .roles()
+            .stream()
+            .map(role ->
+                ConnectorRole
+                    .builder()
+                    .name(role)
+                    .build())
+            .collect(Collectors.toUnmodifiableSet());
     }
 }

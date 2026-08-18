@@ -15,15 +15,21 @@ import static org.mockito.Mockito.doAnswer;
 
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.infrastructure.outbound.auth.JwtAuthenticationFilter;
-import eu.ecodex.connector.infrastructure.outbound.auth.JwtTokenService;
+import eu.ecodex.connector.infrastructure.outbound.auth.JwtService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 /**
  * Base abstract class for testing Spring MVC controllers.
@@ -42,7 +48,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 @AutoConfigureMockMvc(addFilters = false)
 public abstract class AbstractWebMvcTest {
     @MockitoBean
-    protected JwtTokenService jwtTokenService;
+    protected JwtService jwtTokenService;
 
     @MockitoBean
     protected JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -68,13 +74,22 @@ public abstract class AbstractWebMvcTest {
             ServletRequest request = invocation.getArgument(0);
             ServletResponse response = invocation.getArgument(1);
             FilterChain filterChain = invocation.getArgument(2);
-
             filterChain.doFilter(request, response);
             return null;
         })
-                .when(jwtAuthenticationFilter)
-                .doFilter(any(), any(), any());
+            .when(jwtAuthenticationFilter)
+            .doFilter(any(), any(), any());
     }
 
+    protected static RequestPostProcessor authenticatedAs(ConnectorUserDetails principal) {
+        return (MockHttpServletRequest request) -> {
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities())
+            );
+            SecurityContextHolder.setContext(context);
+            return request;
+        };
+    }
 
 }

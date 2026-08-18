@@ -15,9 +15,9 @@ import eu.ecodex.connector.application.port.api.auth.login.ConnectorRefreshUserT
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import eu.ecodex.connector.domain.model.login.LoginResponse;
+import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,43 +49,40 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
 
     ConnectorRefreshTokenRepository repository;
     ConnectorAuthenticationTokenProvider authenticationTokenProvider;
-
+    Clock clock;
 
     @Override
     public ConnectorRefreshToken create(ConnectorUser user) {
         log.debug("Creating refresh token for user {}", user.uuid());
 
         List<ConnectorRefreshToken> revoked =
-                repository.findByUserUuidAndRevoked(user.uuid(), false);
+            repository.findByUserUuidAndRevoked(user.uuid(), false);
 
         if (!revoked.isEmpty()) {
             repository.revokeAllByUserUuid(user.uuid());
         }
 
-        var refreshToken = ConnectorRefreshToken
-                .builder()
-                .revoked(false)
-                .user(user)
-                .expiresAt(Instant
-                        .now()
-                        .plus(authenticationTokenProvider.refreshTokenExpires()))
-                .build();
+        var refreshToken = ConnectorRefreshToken.builder()
+            .revoked(false)
+            .user(user)
+            .expiresAt(clock
+                .instant()
+                .plus(authenticationTokenProvider.refreshTokenExpires()))
+            .build();
 
         return repository.save(refreshToken);
     }
 
     @Override
-    public ConnectorRefreshToken verify(String userId, String token) {
-        var refreshToken =
-                repository
-                        .findByToken(token)
-                        .orElseThrow(() ->
-                                new ConnectorUserBadCredentialsException("Invalid refresh token"));
+    public ConnectorRefreshToken verify(String token) {
+        if (token == null || token.isBlank()) {
+            throw new ConnectorUserBadCredentialsException("Invalid refresh token");
+        }
+        var refreshToken = repository.findByToken(token)
+            .orElseThrow(() ->
+                new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
-        if (!refreshToken
-                .user()
-                .uuid()
-                .equals(userId)) {
+        if (refreshToken.user() == null || refreshToken.user().uuid() == null) {
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
         }
 
@@ -93,49 +90,22 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
             throw new ConnectorUserBadCredentialsException("Refresh token revoked");
         }
 
-        if (refreshToken
-                .expiresAt()
-                .isBefore(Instant.now())) {
+        if (!refreshToken.expiresAt().isAfter(clock.instant())) {
             throw new ConnectorUserBadCredentialsException("Refresh token expired");
         }
 
         return refreshToken;
     }
 
-    @Override
-    public void revoke(String userId, String token) {
-        var refreshToken =
-                repository
-                        .findByToken(token)
-                        .orElseThrow(() ->
-                                new ConnectorUserBadCredentialsException("Invalid refresh token"));
-
-        if (!refreshToken
-                .user()
-                .uuid()
-                .equals(userId)) {
-            throw new ConnectorUserBadCredentialsException(
-                    "Invalid refresh token for user " + userId);
-        }
-
-        log.info("Revoking refresh token {}", token);
-        if (refreshToken.revoked()) {
-            return;
-        }
-        refreshToken
-                .toBuilder()
-                .revoked(true);
-        repository.save(refreshToken);
-    }
 
     @Override
-    public LoginResponse refresh(String userId, String token) {
-        var refreshToken = this.verify(userId, token);
+    public ConnectorLoginResponse refresh(String token) {
+        var refreshToken = this.verify(token);
         var user = refreshToken.user();
         var accessToken = authenticationTokenProvider.generateToken(user);
 
-        return new LoginResponse(accessToken, token,
-                authenticationTokenProvider.accessTokenExpiresInSeconds()
+        return new ConnectorLoginResponse(accessToken, token,
+            authenticationTokenProvider.accessTokenExpiresInSeconds()
         );
     }
 

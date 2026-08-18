@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
@@ -40,19 +40,19 @@ public class ConnectorRetrieveRoleService implements ConnectorRetrieveRole {
     ConnectorRoleRepository repository;
 
     @Override
-    public ConnectorRole getById(String identifier) throws ConnectorUserNotFoundException {
+    public ConnectorRole getById(String identifier) throws ConnectorRoleNotFoundException {
         return repository
-                .findByUuid(identifier)
-                .orElseThrow(() -> new ConnectorUserNotFoundException(
-                        String.format("User not found by identifier %s", identifier)));
+            .findByUuid(identifier)
+            .orElseThrow(() -> new ConnectorRoleNotFoundException(
+                String.format("User not found by identifier %s", identifier)));
     }
 
     @Override
-    public ConnectorRole getByName(String name) throws ConnectorUserNotFoundException {
+    public ConnectorRole getByName(String name) throws ConnectorRoleNotFoundException {
         return repository
-                .findByName(name)
-                .orElseThrow(() -> new ConnectorUserNotFoundException(
-                        String.format("User not found by username %s", name)));
+            .findByName(name)
+            .orElseThrow(() -> new ConnectorRoleNotFoundException(
+                String.format("User not found by username %s", name)));
     }
 
     @Override

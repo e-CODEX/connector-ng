@@ -1,5 +1,7 @@
 package eu.ecodex.connector.domain.model.login;
 
+import lombok.Builder;
+
 /**
  * Represents the response resulting from a successful user login operation.
  * This record encapsulates the authentication token details that are generated
@@ -15,7 +17,8 @@ package eu.ecodex.connector.domain.model.login;
  * data to ensure a proper authentication and authorization workflow within the
  * system.
  */
-public record LoginResponse(
+@Builder
+public record ConnectorLoginResponse(
         String accessToken,
         String refreshToken,
         long expiresIn

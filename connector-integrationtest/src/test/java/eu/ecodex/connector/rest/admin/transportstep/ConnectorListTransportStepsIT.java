@@ -15,6 +15,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -135,7 +139,8 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
         "classpath:sql/message-transport-step.sql",
-        "classpath:sql/message-transport-step-statuses.sql"
+        "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/user.sql"
     })
     private @interface WithReferenceData {
     }

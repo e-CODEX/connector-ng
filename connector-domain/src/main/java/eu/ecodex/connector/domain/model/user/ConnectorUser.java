@@ -11,7 +11,7 @@
 package eu.ecodex.connector.domain.model.user;
 
 import java.time.Instant;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -25,14 +25,14 @@ import java.util.Set;
  *
  */
 public record ConnectorUser(
-        String uuid,
-        String username,
-        String password,
-        String email,
-        Boolean enabled,
-        Set<ConnectorRole> roles,
-        Instant createdAt,
-        Instant updatedAt
+    String uuid,
+    String username,
+    String password,
+    String email,
+    Boolean enabled,
+    Set<ConnectorRole> roles,
+    Instant createdAt,
+    Instant updatedAt
 ) {
 
     public static final String DEFAULT_ADMIN_USER_NAME = "admin";
@@ -45,12 +45,12 @@ public record ConnectorUser(
      */
     public static ConnectorUser defaultAdminUser() {
         return ConnectorUser
-                .builder()
-                .username(DEFAULT_ADMIN_USER_NAME)
-                .password(DEFAULT_ADMIN_PASSWORD)
-                .enabled(true)
-                .roles(Set.of(ConnectorRole.defaultAdminRole()))
-                .build();
+            .builder()
+            .username(DEFAULT_ADMIN_USER_NAME)
+            .password(DEFAULT_ADMIN_PASSWORD)
+            .enabled(true)
+            .roles(Set.of(ConnectorRole.defaultAdminRole()))
+            .build();
     }
 
     public static Builder builder() {
@@ -64,29 +64,41 @@ public record ConnectorUser(
      */
     public boolean isDefaultAdmin() {
         return DEFAULT_ADMIN_USER_NAME.equals(username) && roles != null && roles
-                .stream()
-                .anyMatch(ConnectorRole::isDefaultAdminRole);
+            .stream()
+            .anyMatch(ConnectorRole::isDefaultAdminRole);
     }
 
     /**
-     * Compares the current {@code ConnectorUser} object with the specified {@code ConnectorUser}
-     * object
-     * to determine if they have identical content. The comparison is based on the values of the
-     * fields:
-     * {@code uuid}, {@code username}, {@code password}, {@code email}, and {@code enabled}.
+     * Add a new role to the current user.
      *
-     * @param connectorUser the {@code ConnectorUser} object to compare with the current instance.
+     * @param role new role to add
      *
-     * @return {@code true} if all compared fields have the same values in both objects;
-     *         {@code false} otherwise.
+     * @return updated user
      */
-    // TODO fix me
-    public boolean hasSameContent(ConnectorUser connectorUser) {
-        return Objects.equals(this.uuid, connectorUser.uuid())
-                && Objects.equals(this.username, connectorUser.username())
-                && Objects.equals(this.password, connectorUser.password())
-                && Objects.equals(this.email, connectorUser.email())
-                && Objects.equals(this.enabled, connectorUser.enabled());
+    public ConnectorUser addRole(ConnectorRole role) {
+        var updatedRoles = roles == null
+            ? new HashSet<ConnectorRole>()
+            : new HashSet<>(roles);
+
+        boolean added = updatedRoles.add(role);
+        return added ? toBuilder().roles(updatedRoles).build() : this;
+    }
+
+    /**
+     * Remove a role from the current user.
+     *
+     * @param role role to remove
+     *
+     * @return updated user
+     */
+    public ConnectorUser removeRole(ConnectorRole role) {
+        if (roles == null) {
+            return this;
+        }
+        var updatedRoles = new HashSet<>(roles);
+        boolean removed = updatedRoles.remove(role);
+
+        return removed ? toBuilder().roles(updatedRoles).build() : this;
     }
 
     /**
@@ -94,18 +106,18 @@ public record ConnectorUser(
      * {@code ConnectorUser} object.
      *
      * @return a {@code Builder} instance containing the fields of the current {@code ConnectorUser}
-     *         object.
+     *     object.
      */
     public Builder toBuilder() {
         return new Builder()
-                .uuid(this.uuid)
-                .username(this.username)
-                .password(this.password)
-                .email(this.email)
-                .enabled(this.enabled)
-                .roles(this.roles)
-                .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt);
+            .uuid(this.uuid)
+            .username(this.username)
+            .password(this.password)
+            .email(this.email)
+            .enabled(this.enabled)
+            .roles(this.roles)
+            .createdAt(this.createdAt)
+            .updatedAt(this.updatedAt);
 
     }
 
@@ -172,7 +184,7 @@ public record ConnectorUser(
 
         public ConnectorUser build() {
             return new ConnectorUser(uuid, username, password, email, enabled, roles, createdAt,
-                    updatedAt);
+                updatedAt);
         }
     }
 }

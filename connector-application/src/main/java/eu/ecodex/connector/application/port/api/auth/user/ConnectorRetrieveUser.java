@@ -29,7 +29,7 @@ public interface ConnectorRetrieveUser {
      *
      * @throws ConnectorUserNotFoundException if no user is found with the specified identifier
      */
-    ConnectorUser getById(String identifier) throws ConnectorUserNotFoundException;
+    ConnectorUser getByIdentifier(String identifier) throws ConnectorUserNotFoundException;
 
     /**
      * Retrieves a {@link ConnectorUser} instance by its unique username.
@@ -65,7 +65,7 @@ public interface ConnectorRetrieveUser {
      *                                        address
      */
     ConnectorUser getByUsernameAndEmail(String username, String email) throws
-            ConnectorUserNotFoundException;
+        ConnectorUserNotFoundException;
 
     /**
      * Retrieves an {@link Optional} containing a {@link ConnectorUser} instance associated with the
@@ -75,7 +75,7 @@ public interface ConnectorRetrieveUser {
      * @param username the unique username of the user to retrieve
      *
      * @return an {@link Optional} containing the {@link ConnectorUser} if found, or an empty
-     *         {@link Optional} if not
+     *     {@link Optional} if not
      */
     Optional<ConnectorUser> findByUsername(String username);
 }

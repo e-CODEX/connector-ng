@@ -17,7 +17,7 @@ import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.Connector
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
-import eu.ecodex.connector.infrastructure.outbound.auth.JwtTokenService;
+import eu.ecodex.connector.infrastructure.outbound.auth.JwtService;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
@@ -93,7 +93,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private JwtTokenService jwtTokenService;
+    private JwtService jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
@@ -159,8 +159,13 @@ public abstract class AbstractIntegrationTest {
                     "connector_services",
                     "connector_actions",
                     "connector_processing_modes",
-                    "connector_processing_mode_truststores", // typo removed
-                    "connector_business_domains")) {
+                    "connector_processing_mode_truststores",
+                    "connector_business_domains",
+                    "connector_refresh_tokens",
+                    "connector_users",
+                    "connector_roles",
+                    "connector_users_roles"
+                    )) {
                     st.execute("TRUNCATE TABLE " + table);
                 }
                 st.execute("SET FOREIGN_KEY_CHECKS = 1");

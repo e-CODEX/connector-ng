@@ -47,7 +47,7 @@ public interface ConnectorUserRepository {
      * @param id the unique identifier of the ConnectorUser to retrieve; must not be null
      *
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
-     *         exists with the given identifier
+     *     exists with the given identifier
      */
     Optional<ConnectorUser> findById(Long id);
 
@@ -61,7 +61,7 @@ public interface ConnectorUserRepository {
      * @param identifier the UUID of the {@code ConnectorUser} to retrieve; must not be null
      *
      * @return an {@code Optional} containing the {@code ConnectorUser} if found, or an empty
-     *         {@code Optional} if no user exists with the given UUID
+     *     {@code Optional} if no user exists with the given UUID
      */
     Optional<ConnectorUser> findByUuid(String identifier);
 
@@ -75,7 +75,7 @@ public interface ConnectorUserRepository {
      * @param username the username of the ConnectorUser to retrieve; must not be null
      *
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
-     *         exists with the given username
+     *     exists with the given username
      */
     Optional<ConnectorUser> findByUsername(String username);
 
@@ -89,7 +89,7 @@ public interface ConnectorUserRepository {
      * @param email the email address of the ConnectorUser to retrieve; must not be null
      *
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
-     *         exists with the given email
+     *     exists with the given email
      */
     Optional<ConnectorUser> findByEmail(String email);
 
@@ -104,7 +104,7 @@ public interface ConnectorUserRepository {
      * @param email    the email address of the {@code ConnectorUser} to retrieve; must not be null
      *
      * @return an {@code Optional} containing the {@code ConnectorUser} if found, or an empty
-     *         {@code Optional} if no user exists with the given username and email
+     *     {@code Optional} if no user exists with the given username and email
      */
     Optional<ConnectorUser> findByUsernameAndEmail(String username, String email);
 
@@ -116,9 +116,9 @@ public interface ConnectorUserRepository {
      * empty {@code List}.
      *
      * @return a {@code List} of all {@code ConnectorUser} entities, or an empty {@code List} if no
-     *         users exist
+     *     users exist
      */
-    List<ConnectorUser> findAll();
+    List<ConnectorUser> findAllWithRoles();
 
     /**
      * Deletes the ConnectorUser entity with the specified unique identifier.
@@ -138,7 +138,7 @@ public interface ConnectorUserRepository {
      * @param uuid the UUID of the {@code ConnectorUser} to check for existence; must not be null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified UUID exists, {@code false}
-     *         otherwise
+     *     otherwise
      */
     boolean existsByUuid(String uuid);
 
@@ -149,7 +149,7 @@ public interface ConnectorUserRepository {
      *                 null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified username exists,
-     *         {@code false} otherwise
+     *     {@code false} otherwise
      */
     boolean existsByUsername(String username);
 
@@ -160,7 +160,7 @@ public interface ConnectorUserRepository {
      *              be null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified email exists,
-     *         {@code false} otherwise
+     *     {@code false} otherwise
      */
     boolean existsByEmail(String email);
 
@@ -174,8 +174,8 @@ public interface ConnectorUserRepository {
      *              null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified email exists and has a
-     *         different UUID
-     *         than the provided UUID, {@code false} otherwise
+     *     different UUID
+     *     than the provided UUID, {@code false} otherwise
      */
     boolean existsByEmailAndUuidNot(String email, String uuid);
 
@@ -189,8 +189,8 @@ public interface ConnectorUserRepository {
      *                 null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified username exists and has a
-     *         different UUID
-     *         than the provided UUID, {@code false} otherwise
+     *     different UUID
+     *     than the provided UUID, {@code false} otherwise
      */
     boolean existsByUsernameAndUuidNot(String username, String uuid);
 

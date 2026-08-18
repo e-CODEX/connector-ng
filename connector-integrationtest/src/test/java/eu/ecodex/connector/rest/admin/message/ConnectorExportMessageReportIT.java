@@ -48,6 +48,7 @@ public class ConnectorExportMessageReportIT extends AbstractIntegrationTest {
         "classpath:sql/attachment.sql",
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
+        "classpath:sql/user.sql"
     })
     @ParameterizedTest
     @EnumSource(ConnectorMessageReportExportFormat.class)

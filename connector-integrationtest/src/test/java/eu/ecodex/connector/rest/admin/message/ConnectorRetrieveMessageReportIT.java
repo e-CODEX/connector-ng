@@ -50,6 +50,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
         "classpath:sql/attachment.sql",
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
+        "classpath:sql/user.sql",
     })
     void should_retrieve_report_of_connector_messages() {
         apiClient.get()

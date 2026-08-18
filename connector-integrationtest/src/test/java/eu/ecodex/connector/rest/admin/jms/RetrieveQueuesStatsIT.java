@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @DisplayName("RetrieveQueuesStatsIT REST")
@@ -28,6 +29,7 @@ public class RetrieveQueuesStatsIT extends AbstractIntegrationTest {
     private RestTestClient apiClient;
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_retrieve_jms_queue_statistics() {
         apiClient.get()
             .uri("/api/v1/admin/jms/queues/stats")

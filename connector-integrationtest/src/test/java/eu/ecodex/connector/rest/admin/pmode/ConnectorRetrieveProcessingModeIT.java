@@ -43,40 +43,42 @@ public class ConnectorRetrieveProcessingModeIT extends AbstractIntegrationTest {
         "classpath:sql/processing-mode.sql",
         "classpath:sql/party.sql",
         "classpath:sql/service.sql",
-        "classpath:sql/action.sql"
+        "classpath:sql/action.sql",
+        "classpath:sql/user.sql",
     })
     void should_retrieve_connector_pmode() {
         var uuid = "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf";
         apiClient
-                .get()
-                .uri("/api/v1/admin/processing-modes/" + uuid)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(new ParameterizedTypeReference<ConnectorProcessingModeDetailDto>() {
-                })
-                .value(pmode -> {
-                    assertThat(pmode).isNotNull();
-                    assert pmode != null;
-                    assertThat(pmode.uuid()).isEqualTo(uuid);
-                    assertThat(pmode.description()).isNotNull();
-                    assertThat(pmode.content()).isNotEmpty();
-                    assertThat(pmode.parties()).isNotNull();
-                    assertThat(pmode.services()).isNotNull();
-                    assertThat(pmode.actions()).isNotNull();
-                });
+            .get()
+            .uri("/api/v1/admin/processing-modes/" + uuid)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorProcessingModeDetailDto>() {
+            })
+            .value(pmode -> {
+                assertThat(pmode).isNotNull();
+                assert pmode != null;
+                assertThat(pmode.uuid()).isEqualTo(uuid);
+                assertThat(pmode.description()).isNotNull();
+                assertThat(pmode.content()).isNotEmpty();
+                assertThat(pmode.parties()).isNotNull();
+                assertThat(pmode.services()).isNotNull();
+                assertThat(pmode.actions()).isNotNull();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_return_404_when_retrieving_non_existing_pmode() {
         var uuid = "ccafa470-c32b-4d69-be24-dbbf1b9fcad1";
         apiClient
-                .get()
-                .uri("/api/v1/admin/processing-modes/" + uuid)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-                .exchange()
-                .expectStatus()
-                .isNotFound();
+            .get()
+            .uri("/api/v1/admin/processing-modes/" + uuid)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .isNotFound();
     }
 }

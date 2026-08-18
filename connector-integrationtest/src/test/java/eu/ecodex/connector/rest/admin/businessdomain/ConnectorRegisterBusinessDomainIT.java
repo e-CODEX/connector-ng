@@ -41,6 +41,7 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_return_201_when_registering_business_domain() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         var response = apiClient.post()
@@ -63,7 +64,7 @@ public class ConnectorRegisterBusinessDomainIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql("classpath:sql/business-domain.sql")
+    @Sql({"classpath:sql/business-domain.sql", "classpath:sql/user.sql"})
     void should_return_409_when_registering_business_domain_with_existing_identifier() {
         var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
         apiClient.post()

@@ -11,10 +11,10 @@
 package eu.ecodex.connector.application.exception;
 
 /**
- * Representation of a bad request for a user role.
+ * Represents a not found exception for a user role.
  */
-public class ConnectorUserRoleBadRequestException extends RuntimeException {
-    public ConnectorUserRoleBadRequestException(String message) {
+public class ConnectorRoleNotFoundException extends NotFoundException {
+    public ConnectorRoleNotFoundException(String message) {
         super(message);
     }
 }

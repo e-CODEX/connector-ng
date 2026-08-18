@@ -55,7 +55,7 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
 
-    JwtTokenService jwtTokenService;
+    JwtService jwtTokenService;
     JwtProperties jwtProperties;
 
     @Override

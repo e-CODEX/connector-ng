@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
+import lombok.Builder;
+
 /**
  * Represents a request to log in to the connector system using user credentials.
  * This request is used in authentication flows to initiate a login process and
@@ -19,5 +21,6 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
  * - username: The identifier for the user attempting to log in.
  * - password: The credential associated with the provided username.
  */
+@Builder
 public record ConnectorLoginRequest(String username, String password) {
 }

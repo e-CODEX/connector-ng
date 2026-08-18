@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
+import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
@@ -41,37 +42,37 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
     ConnectorUserRepository repository;
 
     @Override
-    public ConnectorUser getById(String identifier) throws NotFoundException {
+    public ConnectorUser getByIdentifier(String identifier) throws ConnectorUserNotFoundException {
         return repository
-                .findByUuid(identifier)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("User not found by identifier %s", identifier)));
+            .findByUuid(identifier)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(
+                String.format("User not found by identifier %s", identifier)));
     }
 
     @Override
-    public ConnectorUser getByUsername(String username) throws NotFoundException {
+    public ConnectorUser getByUsername(String username) throws ConnectorUserNotFoundException {
         return repository
-                .findByUsername(username)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("User not found by username %s", username)));
+            .findByUsername(username)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(
+                String.format("User not found by username %s", username)));
     }
 
     @Override
-    public ConnectorUser getByEmail(String email) throws NotFoundException {
+    public ConnectorUser getByEmail(String email) throws ConnectorUserNotFoundException {
         return repository
-                .findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("User not found by email %s", email)));
+            .findByEmail(email)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(
+                String.format("User not found by email %s", email)));
     }
 
     @Override
     public ConnectorUser getByUsernameAndEmail(String username, String email)
-            throws NotFoundException {
+        throws ConnectorUserNotFoundException {
         return repository
-                .findByUsernameAndEmail(username, email)
-                .orElseThrow(() -> new NotFoundException(
-                        String.format("User not found by username %s and email %s", username,
-                                email)));
+            .findByUsernameAndEmail(username, email)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(
+                String.format("User not found by username %s and email %s", username,
+                    email)));
     }
 
     @Override

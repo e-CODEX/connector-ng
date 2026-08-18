@@ -50,48 +50,50 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
         "classpath:sql/attachment.sql",
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
-        "classpath:sql/evidence.sql"
+        "classpath:sql/evidence.sql",
+        "classpath:sql/user.sql"
     })
     void should_retrieve_connector_message() {
         var messageId = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
         apiClient
-                .get()
-                .uri(buildUrl(messageId))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(new ParameterizedTypeReference<ConnectorMessageDetailDto>() {
-                })
-                .value(result -> {
-                    assertThat(result).isNotNull();
-                    assert result != null;
-                    assertThat(result.identifier()).isNotNull();
-                    assertThat(result.identifier()).isEqualTo(messageId);
-                    assertThat(result.direction()).isEqualTo(
-                            ConnectorMessageDirection.BACKEND_TO_GATEWAY);
-                    assertThat(!result
-                            .attachments()
-                            .isEmpty()).isTrue();
-                    assertThat(!result
-                            .evidences()
-                            .isEmpty()).isTrue();
-                    assertThat(result
-                            .errors()
-                            .isEmpty()).isTrue();
-                });
+            .get()
+            .uri(buildUrl(messageId))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorMessageDetailDto>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.identifier()).isNotNull();
+                assertThat(result.identifier()).isEqualTo(messageId);
+                assertThat(result.direction()).isEqualTo(
+                    ConnectorMessageDirection.BACKEND_TO_GATEWAY);
+                assertThat(!result
+                    .attachments()
+                    .isEmpty()).isTrue();
+                assertThat(!result
+                    .evidences()
+                    .isEmpty()).isTrue();
+                assertThat(result
+                    .errors()
+                    .isEmpty()).isTrue();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_return_404_when_retrieving_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient
-                .get()
-                .uri(buildUrl(messageId))
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-                .exchange()
-                .expectStatus()
-                .isNotFound();
+            .get()
+            .uri(buildUrl(messageId))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .isNotFound();
     }
 
     private String buildUrl(String identifier) {

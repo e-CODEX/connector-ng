@@ -49,15 +49,15 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
     })
     void should_export_connector_messages_report() {
         byte[] body = apiClient.get()
-                               .uri(uriBuilder -> uriBuilder
-                                   .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                                   .build())
-                               .exchange()
-                               .expectStatus().isOk()
-                               .expectHeader().contentType(MediaType.APPLICATION_XML)
-                               .expectBody(byte[].class)
-                               .returnResult()
-                               .getResponseBody();
+            .uri(uriBuilder -> uriBuilder
+                .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
+                .build())
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType(MediaType.APPLICATION_XML)
+            .expectBody(byte[].class)
+            .returnResult()
+            .getResponseBody();
 
         assertThat(body).isNotNull().isNotEmpty();
     }
@@ -65,10 +65,10 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
     @Test
     void should_return_404_when_evidence_does_not_exist() {
         apiClient.get()
-                 .uri(uriBuilder -> uriBuilder
-                     .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                     .build())
-                 .exchange()
-                 .expectStatus().isNotFound();
+            .uri(uriBuilder -> uriBuilder
+                .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
+                .build())
+            .exchange()
+            .expectStatus().isNotFound();
     }
 }

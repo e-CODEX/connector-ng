@@ -25,5 +25,5 @@ package eu.ecodex.connector.domain.model.user;
 public enum ConnectorRoleName {
     ADMIN,
     USER,
-    OPERATOR;
+    OPERATOR
 }

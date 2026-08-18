@@ -148,7 +148,8 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
         "classpath:sql/attachment.sql",
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
-        "classpath:sql/evidence.sql"
+        "classpath:sql/evidence.sql",
+        "classpath:sql/user.sql",
     })
     private @interface WithMessageData {
     }

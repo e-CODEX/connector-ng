@@ -10,12 +10,15 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
+import lombok.Builder;
+
 /**
  * Represents a request to refresh a connector's access token using a provided refresh token.
  * This request is typically used in authentication flows to obtain a new access token
  * without requiring the user to re-authenticate.
  *
- * @param refreshToken The token used to refresh the authentication state.
+ * <p>The {@code refreshToken} field is the token used to refresh the authentication state.
  */
-public record ConnectorRefreshRequest(String refreshToken) {
+@Builder
+public record ConnectorRefreshTokenRequest(String refreshToken) {
 }

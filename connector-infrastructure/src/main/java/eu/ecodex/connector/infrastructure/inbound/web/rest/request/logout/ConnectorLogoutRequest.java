@@ -8,13 +8,15 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.exception;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout;
+
+import lombok.Builder;
 
 /**
- * Represents a not found exception for a user role.
+ * Represents a request to log out a connector's user.
+ *
+ * <p>The request carries a token used to log out the user, typically obtained from authentication.
  */
-public class ConnectorUserRoleNotFoundException extends NotFoundException {
-    public ConnectorUserRoleNotFoundException(String message) {
-        super(message);
-    }
+@Builder
+public record ConnectorLogoutRequest(String refreshToken) {
 }

@@ -10,16 +10,21 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
-import eu.ecodex.connector.domain.model.login.LoginResponse;
+import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -43,30 +48,32 @@ public interface ConnectorAuthenticationApi {
     @Operation(summary = "Login a connector user.")
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
-            @ApiResponse(responseCode = "204", description = "Successfully logged in"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
+        @ApiResponse(responseCode = "204", description = "Successfully logged in"),
     })
-    LoginResponse login(@RequestBody ConnectorLoginRequest connectorLoginRequest);
+    ConnectorLoginResponse login(@RequestBody ConnectorLoginRequest connectorLoginRequest);
 
 
     @Operation(summary = "Refresh a user token.")
     @PostMapping("/refresh")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "204", description = "Successfully refreshed"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "204", description = "Successfully refreshed"),
     })
-    LoginResponse refresh(@RequestBody ConnectorRefreshRequest request);
+    ConnectorLoginResponse refresh(@RequestBody ConnectorRefreshTokenRequest request);
 
 
     @Operation(summary = "Logout a user token.")
     @PostMapping("/logout")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
-            @ApiResponse(responseCode = "204", description = "Successfully logged out"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "204", description = "Successfully logged out"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
 
     })
-    void logout(@RequestBody ConnectorRefreshRequest request);
+    void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+                @AuthenticationPrincipal ConnectorUserDetails userDetails,
+                @RequestBody ConnectorLogoutRequest request);
 
 }

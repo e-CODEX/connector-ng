@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -57,13 +58,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserEntity, Long> {
 
     /**
+     * Retrieves all instances of the ConnectorUserEntity from the database,
+     * including their associated roles as specified by the defined entity graph.
+     *
+     * @return a list of ConnectorUserEntity objects along with their associated roles.
+     */
+    @Override
+    @EntityGraph(attributePaths = "roles")
+    List<ConnectorUserEntity> findAll();
+
+    /**
      * Retrieves a {@link ConnectorUserEntity} by its unique UUID, along with the associated roles.
      * This method uses an {@link EntityGraph} to fetch the "roles" relationship eagerly.
      *
      * @param uuid the unique identifier of the user; must not be null.
      *
      * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
-     *         {@link Optional} if no user is found with the given UUID.
+     *     {@link Optional} if no user is found with the given UUID.
      */
     @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUuid(String uuid);
@@ -75,8 +86,8 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @param username the username of the user to be retrieved; must not be null.
      *
      * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
-     *         {@link Optional}
-     *         if no user is found with the given username.
+     *     {@link Optional}
+     *     if no user is found with the given username.
      */
     @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUsername(String username);
@@ -88,8 +99,8 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @param email the email of the user to be retrieved; must not be null.
      *
      * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
-     *         {@link Optional}
-     *         if no user is found with the given email.
+     *     {@link Optional}
+     *     if no user is found with the given email.
      */
     @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByEmail(String email);
@@ -103,7 +114,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @param email    the email of the user to be retrieved; must not be null.
      *
      * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found,
-     *         or an empty {@link Optional} if no user is found with the given username and email.
+     *     or an empty {@link Optional} if no user is found with the given username and email.
      */
     @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUsernameAndEmail(String username, String email);
@@ -143,7 +154,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @param uuid     the UUID to exclude from the search; must not be null.
      *
      * @return true if a user with the given username exists but has a different UUID, false
-     *         otherwise.
+     *     otherwise.
      */
     boolean existsByUsernameAndUuidNot(String username, String uuid);
 

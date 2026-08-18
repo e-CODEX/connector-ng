@@ -20,7 +20,6 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.Con
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorQueuePropertiesDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
         + "administrative purposes."
 )
 @RequestMapping(value = "/api/v1/admin/configurations")
-@PreAuthorize("hasRole('ADMIN')")
 public interface ConnectorConfigurationAdminApi {
     @GetMapping("/business-domains")
     @Operation(summary = "List business domain configurations")

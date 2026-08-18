@@ -10,16 +10,18 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
+import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.login.ConnectorLoginUser;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
-import eu.ecodex.connector.domain.model.login.LoginResponse;
+import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,7 +39,7 @@ import org.springframework.stereotype.Service;
  * - Verifies user credentials by authenticating through the {@link AuthenticationManager}.
  * - Retrieves the user details upon successful authentication.
  * - Generates an authentication token using the {@link ConnectorAuthenticationTokenProvider}.
- * - Returns a {@link LoginResponse} containing the token details.
+ * - Returns a {@link ConnectorLoginResponse} containing the token details.
  *
  * <p>Exceptions:
  * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after
@@ -61,24 +63,31 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
 
 
     @Override
-    public LoginResponse login(String username, String password) {
-        var authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                username,
-                                password
-                        )
-                );
+    public ConnectorLoginResponse login(String username, String password) {
+        try {
+            var authentication =
+                    authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    username,
+                                    password
+                            )
+                    );
 
-        var user = (ConnectorUserDetails) authentication.getPrincipal();
-        if (user == null) {
-            throw new RuntimeException("Error reading principal");
+            var user = (ConnectorUserDetails) authentication.getPrincipal();
+            if (user == null) {
+                throw new RuntimeException("Error reading principal");
+            }
+            var authenticatedUser = user.connectorUser();
+            var accessToken = authenticationTokenProvider.generateToken(authenticatedUser);
+            var refreshToken = refreshTokenService.create(authenticatedUser);
+
+            return new ConnectorLoginResponse(accessToken, refreshToken.uuid(),
+                    authenticationTokenProvider.accessTokenExpiresInSeconds());
+
+        } catch (AuthenticationException exception) {
+            throw new ConnectorUserBadCredentialsException("Invalid username or password");
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
-        var authenticatedUser = user.connectorUser();
-        var accessToken = authenticationTokenProvider.generateToken(authenticatedUser);
-        var refreshToken = refreshTokenService.create(authenticatedUser);
-
-        return new LoginResponse(accessToken, refreshToken.uuid(),
-                authenticationTokenProvider.accessTokenExpiresInSeconds());
     }
 }

@@ -12,7 +12,6 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.aut
 
 import static eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest.toDomain;
 
-import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
@@ -25,7 +24,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,26 +42,20 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     ConnectorRetrieveUser connectorRetrieveUser;
     ConnectorRemoveUser connectorRemoveUser;
     ConnectorListUser connectorListUser;
-    PasswordEncoder passwordEncoder;
 
 
     @Override
     public ConnectorUserDto register(ConnectorUserRequest userRequest) {
         log.info("Registering new user");
-        userRequest = encodePassword(userRequest);
-
         var registered = connectorRegisterUser.register(toDomain(userRequest));
 
         log.info("New user registered");
         return ConnectorUserDto.from(registered);
     }
 
-
     @Override
     public ConnectorUserDto update(String identifier, ConnectorUserRequest userRequest) {
         log.info("Updating existing user");
-        userRequest = encodePassword(userRequest);
-
         var updated = connectorRegisterUser.update(identifier, toDomain(userRequest));
 
         log.info("User updated");
@@ -71,26 +63,23 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     }
 
     @Override
-    public ConnectorUserDto patch(String id, ConnectorUserRequest userRequest) {
+    public ConnectorUserDto patch(String identifier, ConnectorUserRequest userRequest) {
         log.info("Patching existing user");
-        if (userRequest.password() != null) {
-            userRequest = encodePassword(userRequest);
-        }
+        var registered = connectorRegisterUser.patch(identifier, toDomain(userRequest));
 
-        var registered = connectorRegisterUser.patch(id, toDomain(userRequest));
         log.info("User patched");
         return ConnectorUserDto.from(registered);
     }
 
     @Override
-    public ConnectorUserDto getById(String identifier) {
-        ConnectorUser userById = connectorRetrieveUser.getById(identifier);
+    public ConnectorUserDto getByIdentifier(String identifier) {
+        ConnectorUser userById = connectorRetrieveUser.getByIdentifier(identifier);
         return ConnectorUserDto.from(userById);
     }
 
     @Override
     public List<ConnectorUserDto> getAll() {
-        return connectorListUser.findAll().stream().map(ConnectorUserDto::from).toList();
+        return connectorListUser.findAllWithRoles().stream().map(ConnectorUserDto::from).toList();
     }
 
     @Override
@@ -99,15 +88,4 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         log.info("User deleted by identifier");
     }
 
-
-    private ConnectorUserRequest encodePassword(ConnectorUserRequest userRequest) {
-        var encodedPassword = passwordEncoder.encode(userRequest.password());
-        if (encodedPassword == null) {
-            throw new ConnectorUserBadRequestException("Error occurs during password encoding");
-        }
-        return userRequest.toBuilder()
-                .password(encodedPassword)
-                .build();
-
-    }
 }

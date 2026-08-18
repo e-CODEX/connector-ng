@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.auth.login;
 
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import eu.ecodex.connector.domain.model.login.LoginResponse;
+import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 
 /**
@@ -37,8 +37,8 @@ public interface ConnectorRefreshUserToken {
      *              for whom the refresh token will be created.
      *
      * @return a {@code ConnectorRefreshToken} representing the newly created
-     *         refresh token, which includes details such as the user, token
-     *         identifier, expiration time, and creation time.
+     *     refresh token, which includes details such as the user, token
+     *     identifier, expiration time, and creation time.
      */
     ConnectorRefreshToken create(ConnectorUser token);
 
@@ -50,32 +50,21 @@ public interface ConnectorRefreshUserToken {
      * @param token the refresh token to be verified
      *
      * @return a {@code ConnectorRefreshToken} instance representing the details of the verified
-     *         token,
-     *         including user information, expiration, and revocation status
+     *     token,
+     *     including user information, expiration, and revocation status
      */
-    ConnectorRefreshToken verify(String userId, String token);
-
-    /**
-     * Revokes a specified refresh token, invalidating it and preventing further use.
-     * This method ensures that the provided refresh token is disabled and
-     * cannot be used to refresh an authentication session.
-     *
-     * @param userId       authenticated user
-     * @param refreshToken the refresh token to be revoked
-     */
-    void revoke(String userId, String refreshToken);
+    ConnectorRefreshToken verify(String token);
 
     /**
      * Refreshes the authentication session by generating a new access token using
      * the provided refresh token. This method validates the given refresh token
      * and, if valid, issues a new access token while preserving the user's session.
      *
-     * @param userId authenticated user
-     * @param token  the refresh token used to obtain a new access token
+     * @param token the refresh token used to obtain a new access token
      *
      * @return a {@code LoginResponse} containing the new access token,
-     *         refresh token, and expiration details of the session
+     *     refresh token, and expiration details of the session
      */
-    LoginResponse refresh(String userId, String token);
+    ConnectorLoginResponse refresh(String token);
 
 }

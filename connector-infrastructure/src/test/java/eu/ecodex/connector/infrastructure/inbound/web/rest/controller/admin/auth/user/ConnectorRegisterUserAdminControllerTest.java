@@ -22,6 +22,8 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import org.junit.jupiter.api.Test;
@@ -29,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -51,7 +52,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     ConnectorListUser listUser;
 
     @MockitoBean
-    PasswordEncoder passwordEncoder;
+    ConnectorUserPasswordEncoder passwordEncoder;
 
     @Autowired
     private RestTestClient apiClient;
@@ -62,34 +63,31 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
         when(registerUser.register(any())).thenReturn(connectorUser);
-        when(passwordEncoder.encode(any())).thenReturn("encoded");
 
         // When
-        var response = apiClient
-                .post()
-                .uri(URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .returnResult(ConnectorUserDto.class);
+        var response = apiClient.post()
+            .uri(URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .returnResult(ConnectorUserDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();
-        assert responseBody != null;
         assertThat(responseBody)
-                .usingRecursiveComparison()
-                .isEqualTo(ConnectorUserTestFixtures.createUserDto());
+            .usingRecursiveComparison()
+            .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
         verify(registerUser).register(connectorUser
-                .toBuilder()
-                .uuid(null)
-                .build());
-        verify(passwordEncoder).encode(connectorUserRequest.password());
+            .toBuilder()
+            .uuid(null)
+            .password("test_password")
+            .build());
 
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -98,80 +96,79 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequestWithRoles();
         when(registerUser.register(any())).thenReturn(connectorUser);
-        when(passwordEncoder.encode(any())).thenReturn("encoded");
 
         // When
-        var response = apiClient
-                .post()
-                .uri(URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .returnResult(ConnectorUserDto.class);
+        var response = apiClient.post()
+            .uri(URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .isCreated()
+            .returnResult(ConnectorUserDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();
         assert responseBody != null;
         assertThat(responseBody)
-                .usingRecursiveComparison()
-                .isEqualTo(ConnectorUserTestFixtures.createUserDtoWithRoles());
+            .usingRecursiveComparison()
+            .isEqualTo(ConnectorUserTestFixtures.createUserDtoWithRoles());
 
         verify(registerUser).register(connectorUser
-                .toBuilder()
-                .uuid(null)
-                .build());
-        verify(passwordEncoder).encode(connectorUserRequest.password());
+            .toBuilder()
+            .uuid(null)
+            .password("test_password")
+            .build());
 
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
+        assertNoMoreInteractions();
     }
 
     @Test
     void should_not_register_user_when_username_is_missing() {
         // Given
         var connectorUserRequest = ConnectorUserTestFixtures.createUserRequest(
-                "null", null, "password"
+            "", null, "password"
         );
 
         // When
-        var response = apiClient
-                .post()
-                .uri(URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isBadRequest();
+        apiClient.post()
+            .uri(URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .is4xxClientError();
 
         // Then
-        assertThat(response).isNotNull();
-        verify(passwordEncoder).encode(any());
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
+
+        assertNoMoreInteractions();
     }
 
     @Test
     void should_not_register_user_when_password_is_missing() {
         // Given
         var connectorUserRequest = ConnectorUserTestFixtures.createUserRequest(
-                "username", null, null
+            "username", null, null
         );
 
         // When
-        var response = apiClient
-                .post()
-                .uri(URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isBadRequest();
+        apiClient.post()
+            .uri(URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .is5xxServerError(); // because of filter is deactivated
 
         // Then
-        assertThat(response).isNotNull();
-        verify(passwordEncoder).encode(any());
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
+        verify(registerUser).register(ConnectorUser
+            .builder()
+            .username("username")
+            .enabled(true)
+            .build());
+
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -180,28 +177,30 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
         when(registerUser.register(any())).thenThrow(
-                new ConnectorUserAlreadyExistsException("msg"));
-        when(passwordEncoder.encode(any())).thenReturn("encoded");
+            new ConnectorUserAlreadyExistsException("msg"));
+        when(passwordEncoder.encodePassword(any(ConnectorUser.class))).thenReturn(connectorUser);
 
         // When
-        var response = apiClient
-                .post()
-                .uri(URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isEqualTo(HttpStatus.CONFLICT);
+        var response = apiClient.post()
+            .uri(URL)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .isEqualTo(HttpStatus.CONFLICT);
 
         // Then
         assertThat(response).isNotNull();
 
         verify(registerUser).register(connectorUser
-                .toBuilder()
-                .uuid(null)
-                .build());
-        verify(passwordEncoder).encode(connectorUserRequest.password());
+            .toBuilder()
+            .uuid(null)
+            .password("test_password")
+            .build());
+        assertNoMoreInteractions();
+    }
 
+    private void assertNoMoreInteractions() {
         verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
     }
 

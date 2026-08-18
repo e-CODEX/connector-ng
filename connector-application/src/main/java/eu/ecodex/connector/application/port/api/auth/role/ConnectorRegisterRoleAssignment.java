@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
+import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorUserRoleNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 
@@ -27,9 +27,9 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 public interface ConnectorRegisterRoleAssignment {
 
     ConnectorUser register(String identifier, String role)
-            throws ConnectorUserRoleNotFoundException,
-            ConnectorUserNotFoundException;
+        throws ConnectorRoleNotFoundException,
+        ConnectorUserNotFoundException;
 
     ConnectorUser remove(String identifier, String role)
-            throws ConnectorUserRoleNotFoundException, ConnectorUserNotFoundException;
+        throws ConnectorRoleNotFoundException, ConnectorUserNotFoundException;
 }

@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -49,9 +48,6 @@ class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     ConnectorListUser listUser;
 
-    @MockitoBean
-    PasswordEncoder passwordEncoder;
-
     @Autowired
     private RestTestClient apiClient;
 
@@ -62,35 +58,31 @@ class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
 
         when(registerUser.patch(anyString(), any())).thenReturn(connectorUser);
-        when(passwordEncoder.encode(any())).thenReturn("encoded");
 
         // When
-        var response = apiClient
-                .patch()
-                .uri(URL + "/" + connectorUser.uuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(connectorUserRequest)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .returnResult(ConnectorUserDto.class);
+        var response = apiClient.patch()
+            .uri(URL + "/" + connectorUser.uuid())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(connectorUserRequest)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .returnResult(ConnectorUserDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();
-        assert responseBody != null;
         assertThat(responseBody)
-                .usingRecursiveComparison()
-                .isEqualTo(ConnectorUserTestFixtures.createUserDto());
+            .usingRecursiveComparison()
+            .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
         verify(registerUser).patch(connectorUser.uuid(), connectorUser
-                .toBuilder()
-                .uuid(null)
-                .build());
-        verify(passwordEncoder).encode(connectorUserRequest.password());
+            .toBuilder()
+            .uuid(null)
+            .password("test_password")
+            .build());
 
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
+        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser);
     }
-
 
 }

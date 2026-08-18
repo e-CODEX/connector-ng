@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -49,10 +50,12 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
         "classpath:sql/attachment.sql",
+        "classpath:sql/user.sql"
     })
     void should_list_attachments_for_connector_messages() {
         apiClient.get()
             .uri("/api/v1/admin/attachments")
+            .header("Accept", MediaType.APPLICATION_JSON_VALUE)
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .exchange()
             .expectStatus().isOk()

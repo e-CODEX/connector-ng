@@ -36,51 +36,67 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    JwtTokenService jwtTokenService;
+    JwtService jwtTokenService;
     UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        var header = request.getHeader(HttpHeaders.AUTHORIZATION);
+        var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (header == null || !header.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
-        var token = header.substring(7);
+        var token = authHeader.substring(7);
 
         try {
             var username = jwtTokenService.extractUsername(token);
-            if (username != null && SecurityContextHolder
-                    .getContext()
-                    .getAuthentication() == null) {
-                var user = userDetailsService.loadUserByUsername(username);
 
-                if (jwtTokenService.isValidToken(token, user)) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    user,
-                                    null,
-                                    jwtTokenService.extractAuthorities(token));
-
-                    authentication.setDetails(new WebAuthenticationDetailsSource()
-                            .buildDetails(request));
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(authentication);
-                }
+            if (username == null) {
+                SecurityContextHolder.clearContext();
+                log.warn("JWT authentication failed: token does not contain a username");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+                return;
             }
 
+            var userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (!jwtTokenService.isValidToken(token, userDetails)) {
+                SecurityContextHolder.clearContext();
+                log.warn("JWT authentication failed: token is not valid for user {}", username);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                    "Invalid or expired JWT token");
+                return;
+            }
+
+            var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
+                userDetails.getAuthorities());
+
+            authentication.setDetails(new WebAuthenticationDetailsSource()
+                .buildDetails(request));
+
+            SecurityContextHolder
+                .getContext()
+                .setAuthentication(authentication);
+
+            log.info("JWT authentication set: principal={}, authenticated={}, "
+                    + "authorities={}",
+                authentication.getName(),
+                authentication.isAuthenticated(),
+                authentication.getAuthorities()
+            );
+
             filterChain.doFilter(request, response);
+
         } catch (JwtException ex) {
             SecurityContextHolder.clearContext();
-            log.error("Could not verify JWT token, {}", ex.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
+            log.error("Could not authenticate JWT token, {}", ex.getMessage());
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                "Invalid or expired JWT token");
         }
     }
 

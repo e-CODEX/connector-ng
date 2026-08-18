@@ -22,8 +22,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -71,11 +73,11 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "CONNECTOR_USERS",
-        indexes = {
-                @Index(name = "IDX_CONNECTOR_USERS_EMAIL", columnList = "EMAIL"),
-                @Index(name = "IDX_CONNECTOR_USERS_USERNAME", columnList = "USERNAME"),
-                @Index(name = "IDX_CONNECTOR_USERS_UUID", columnList = "UUID"),
-        })
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_USERS_EMAIL", columnList = "EMAIL"),
+        @Index(name = "IDX_CONNECTOR_USERS_USERNAME", columnList = "USERNAME"),
+        @Index(name = "IDX_CONNECTOR_USERS_UUID", columnList = "UUID"),
+    })
 public class ConnectorUserEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -106,9 +108,47 @@ public class ConnectorUserEntity extends BaseEntity {
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "CONNECTOR_USERS_ROLES",
-            joinColumns = @JoinColumn(name = "USER_ID"),
-            inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
+        name = "CONNECTOR_USERS_ROLES",
+        joinColumns = @JoinColumn(name = "USER_ID"),
+        inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Set<ConnectorRoleEntity> roles = new HashSet<>();
+
+    /**
+     * Returns the immutable roles associated with the user.
+     *
+     * @return roles
+     */
+    public Set<ConnectorRoleEntity> getRoles() {
+        return roles == null ? null : Collections.unmodifiableSet(roles);
+    }
+
+    /**
+     * Sets the roles associated with the user.
+     * This method replaces any existing roles with the provided set.
+     * If the provided set is null, it clears the existing roles.
+     *
+     * @param roles roles to set
+     */
+    public void setRoles(Set<ConnectorRoleEntity> roles) {
+        this.roles.clear();
+        if (roles != null) {
+            this.roles.addAll(roles);
+        }
+    }
+
+    /**
+     * Remove a role to the user's roles.
+     *
+     * @param role role to remove
+     */
+    public void removeRole(ConnectorRoleEntity role) {
+        if (roles == null) {
+            return;
+        }
+        roles.remove(role);
+    }
+
 }

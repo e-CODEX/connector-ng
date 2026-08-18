@@ -27,7 +27,7 @@ public interface ConnectorRegisterUser {
      *             valid user information
      *
      * @return the registered {@link ConnectorUser} with updated metadata (e.g., generated UUID,
-     *         creation timestamp)
+     *     creation timestamp)
      */
     ConnectorUser register(ConnectorUser user) throws ConnectorUserAlreadyExistsException;
 
@@ -42,8 +42,8 @@ public interface ConnectorRegisterUser {
      * @return the updated {@link ConnectorUser} object after applying the changes
      */
     ConnectorUser update(String identifier, ConnectorUser user)
-            throws ConnectorUserAlreadyExistsException,
-            ConnectorUserNotFoundException;
+        throws ConnectorUserAlreadyExistsException,
+        ConnectorUserNotFoundException;
 
     /**
      * Partially updates an existing {@link ConnectorUser} entity identified by the given ID with
@@ -58,8 +58,6 @@ public interface ConnectorRegisterUser {
      * @return the updated {@link ConnectorUser} object after applying the specified changes
      */
     ConnectorUser patch(String identifier, ConnectorUser user)
-            throws ConnectorUserAlreadyExistsException,
-            ConnectorUserNotFoundException;
-
-
+        throws ConnectorUserAlreadyExistsException,
+        ConnectorUserNotFoundException;
 }

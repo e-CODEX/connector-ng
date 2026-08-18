@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.auth.roleassignment;
 
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRoleAssignment;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,12 +44,13 @@ public class ConnectorRoleAssignmentController implements ConnectorRoleAssignmen
 
     @Override
     public ConnectorUserDto register(String identifier, String role) {
-        var registered = registerRoleAssignment.register(identifier, role);
-        return ConnectorUserDto.from(registered);
+        var connectorUser = registerRoleAssignment.register(identifier, role);
+        return ConnectorUserDto.from(connectorUser);
     }
 
     @Override
-    public void delete(String identifier, String role) {
-        registerRoleAssignment.remove(identifier, role);
+    public ConnectorUserDto delete(String identifier, String role) {
+        ConnectorUser connectorUser = registerRoleAssignment.remove(identifier, role);
+        return ConnectorUserDto.from(connectorUser);
     }
 }

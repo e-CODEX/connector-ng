@@ -10,8 +10,10 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web;
 
+import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.infrastructure.outbound.auth.JwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.property.ConnectorCorsProperties;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -52,45 +54,55 @@ public class WebSecurityConfiguration {
      * @param http the {@code HttpSecurity} object used to configure the security settings
      *
      * @return the {@code SecurityFilterChain} object representing the configured security filter
-     *         chain
+     *     chain
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) {
         return http
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(
-                                "/api/v1/attachments/upload",
-                                "/api/v1/messages/outbound",
-                                "/api/v1/messages/evidence-trigger",
-                                "/api/v1/evidences/{uuid}/download",
-                                "/api/v1/services",
-                                "/api/v1/processing-modes/{identifier}/services",
-                                "/api/v1/processing-modes/{identifier}/actions",
-                                "/api/v1/processing-modes/{identifier}/parties",
-                                "/api/v1/link-partners",
-                                "/api/v1/auth/login",
-                                // SOAP
-                                "/services/backend",
-                                // actuator
-                                "/actuator/**",
-                                // swagger ui
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**",
-                                "/swagger-resources/**"
-                        )
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated()
+            .csrf(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .cors(Customizer.withDefaults())
+            .authorizeHttpRequests(request -> request
+                .requestMatchers("/api/v1/admin/**")
+                .hasRole(ConnectorRoleName.ADMIN.name())
+                .requestMatchers("/api/v1/users/me")
+                .authenticated()
+                .requestMatchers(
+                    "/api/v1/attachments/upload",
+                    "/api/v1/messages/outbound",
+                    "/api/v1/messages/evidence-trigger",
+                    "/api/v1/evidences/{uuid}/download",
+                    "/api/v1/services",
+                    "/api/v1/processing-modes/{identifier}/services",
+                    "/api/v1/processing-modes/{identifier}/actions",
+                    "/api/v1/processing-modes/{identifier}/parties",
+                    "/api/v1/link-partners",
+                    "/api/v1/auth/login",
+                    "/api/v1/auth/refresh",
+                    // SOAP
+                    "/services/backend",
+                    // actuator
+                    "/actuator/**",
+                    // swagger ui
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/swagger-resources/**"
                 )
-                .addFilterBefore(jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS))
-                .build();
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+            )
+            .addFilterBefore(jwtAuthenticationFilter,
+                UsernamePasswordAuthenticationFilter.class)
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint((req, resp, ex)
+                    -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                .accessDeniedHandler((req, resp, ex)
+                    -> resp.sendError(HttpServletResponse.SC_FORBIDDEN))
+            )
+            .build();
     }
 
     @Bean

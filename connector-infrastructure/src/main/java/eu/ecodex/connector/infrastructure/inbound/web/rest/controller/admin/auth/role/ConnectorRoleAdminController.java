@@ -14,8 +14,7 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
-import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserRoleDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorRoleDto;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,8 +42,8 @@ import org.springframework.web.bind.annotation.RestController;
  * - {@link ConnectorListRole}: Provides functionality to list all user roles.
  *
  * <p>Methods:
- * - {@link #register(ConnectorUserRoleDto)}: Registers a new user role in the system.
- * - {@link #update(String, ConnectorUserRoleDto)}: Updates an existing user role by its identifier.
+ * - {@link #register(ConnectorRoleDto)}: Registers a new user role in the system.
+ * - {@link #update(String, ConnectorRoleDto)}: Updates an existing user role by its identifier.
  * - {@link #getByIdentifier(String)}: Retrieves a specific user role by its unique identifier.
  * - {@link #getAll()}: Fetches all user roles from the system.
  * - {@link #deleteByIdentifier(String)}: Deletes a user role by its identifier.
@@ -61,37 +60,37 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
 
 
     @Override
-    public ConnectorUserRoleDto register(ConnectorUserRoleDto usrRoleDto) {
+    public ConnectorRoleDto register(ConnectorRoleDto usrRoleDto) {
         log.info("Registering new user role");
 
         var registered =
-                connectorRegisterRole.register(ConnectorUserRoleDto.toDomain(usrRoleDto));
+            connectorRegisterRole.register(ConnectorRoleDto.toDomain(usrRoleDto));
         log.info("New user registered");
-        return ConnectorUserRoleDto.from(registered);
+        return ConnectorRoleDto.from(registered);
     }
 
     @Override
-    public ConnectorUserRoleDto update(String identifier, ConnectorUserRoleDto userRoleDto) {
+    public ConnectorRoleDto update(String identifier, ConnectorRoleDto userRoleDto) {
         log.info("Updating existing user");
         var updated = connectorRegisterRole.update(identifier,
-                ConnectorUserRoleDto.toDomain(userRoleDto));
+            ConnectorRoleDto.toDomain(userRoleDto));
         log.info("Existing user updated");
-        return ConnectorUserRoleDto.from(updated);
+        return ConnectorRoleDto.from(updated);
     }
 
     @Override
-    public ConnectorUserRoleDto getByIdentifier(String identifier) {
-        ConnectorRole byId = connectorRetrieveRole.getById(identifier);
-        return ConnectorUserRoleDto.from(byId);
+    public ConnectorRoleDto getByIdentifier(String identifier) {
+        var found = connectorRetrieveRole.getById(identifier);
+        return ConnectorRoleDto.from(found);
     }
 
     @Override
-    public List<ConnectorUserRoleDto> getAll() {
+    public List<ConnectorRoleDto> getAll() {
         return connectorListRole
-                .findAll()
-                .stream()
-                .map(ConnectorUserRoleDto::from)
-                .toList();
+            .findAll()
+            .stream()
+            .map(ConnectorRoleDto::from)
+            .toList();
     }
 
     @Override

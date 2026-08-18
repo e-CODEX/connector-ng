@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorUserRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 
 /**
@@ -32,11 +32,11 @@ public interface ConnectorRegisterRole {
      *                 It must contain valid role information to be persisted.
      *
      * @return the registered {@link ConnectorRole} instance, including any
-     *         additional fields populated during the registration process (e.g., identifier,
-     *         timestamps).
+     *     additional fields populated during the registration process (e.g., identifier,
+     *     timestamps).
      */
     ConnectorRole register(ConnectorRole userRole) throws
-            ConnectorUserRoleAlreadyExistsException;
+        ConnectorRoleAlreadyExistsException;
 
     /**
      * Updates an existing user role in the Connector system.
@@ -51,7 +51,7 @@ public interface ConnectorRegisterRole {
      *                 information. It must include valid details for the update process.
      *
      * @return the updated {@link ConnectorRole} instance, reflecting all modifications
-     *         made during the update process.
+     *     made during the update process.
      */
     ConnectorRole update(String id, ConnectorRole userRole);
 }

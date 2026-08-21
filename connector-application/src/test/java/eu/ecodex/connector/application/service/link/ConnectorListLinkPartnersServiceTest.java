@@ -17,6 +17,7 @@ import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerReposit
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorListLinkPartnersService")
 public class ConnectorListLinkPartnersServiceTest {
     @Mock
     private ConnectorLinkPartnerRepository linkPartnerRepository;
@@ -43,7 +45,7 @@ public class ConnectorListLinkPartnersServiceTest {
     }
 
     @Test
-    void should_return_empty_list_if_no_link_partners_match_the_link_type() {
+    void should_return_empty_list_when_no_link_partners_match_link_type() {
         when(linkPartnerRepository.findAll())
             .thenReturn(List.of(LinkPartnerTestFixtures.createDefaultGatewayLinkPartner()));
 

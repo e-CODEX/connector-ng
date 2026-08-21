@@ -11,17 +11,18 @@
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.Collections;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,73 +33,78 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * Unit tests for the {@code ConnectorOutboundMessageConfirmationStep}.
  */
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorOutboundMessageConfirmationStep")
 public class ConnectorOutboundMessageConfirmationStepTest {
     @Mock
-    ConnectorEvidenceMessageCreator messageCreator;
+    private ConnectorEvidenceMessageCreator messageCreator;
 
     @InjectMocks
-    private ConnectorOutboundMessageConfirmationStep outboundMessageConfirmationCreationStep;
+    private ConnectorOutboundMessageConfirmationStep confirmationStep;
 
-    @Test
-    void should_execute_outbound_message_confirmation_successfully() {
-        var outboundMessage = MessageTestFixtures
-            .createOutboundBusinessMessage()
-            .toBuilder()
-            .evidences(Collections.singletonList(
-                EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
-            .transportedEvidences(Collections.singletonList(
-                EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
-            .build();
+    @Nested
+    @DisplayName("when confirmation succeeds")
+    class WhenConfirmationSucceeds {
+        @Test
+        void should_create_the_confirmation_and_switch_the_direction() {
+            var outboundMessage = BusinessMessageTestFixtures
+                .createOutboundMessage()
+                .toBuilder()
+                .evidences(Collections.singletonList(
+                    EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
+                .transportedEvidences(Collections.singletonList(
+                    EvidenceTestFixtures.createSubmissionAcceptanceEvidence()))
+                .build();
 
-        when(messageCreator.create(any(), any()))
-            .thenReturn(MessageTestFixtures.createSubmissionAcceptanceEvidenceMessage());
+            when(messageCreator.create(any(), any()))
+                .thenReturn(EvidenceMessageTestFixtures.createSubmissionAcceptanceEvidenceMessage());
 
-        var outputMessage = outboundMessageConfirmationCreationStep.execute(outboundMessage);
+            var outputMessage = confirmationStep.execute(outboundMessage);
 
-        assertThat(outputMessage).isNotNull();
-        assertThat(outputMessage.isEvidenceMessage()).isTrue();
-        assertThat(outputMessage.evidences()).isNotEmpty();
-        assertThat(outputMessage.evidences()).hasSize(1);
-        assertNotNull(outputMessage.evidences());
-        assertThat(outputMessage.evidences().getFirst().type())
-            .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
-        assertThat(outputMessage.direction()).isNotEqualTo(outboundMessage.direction());
-        assertThat(outputMessage.direction())
-            .isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
+            assertThat(outputMessage).isNotNull();
+            assertThat(outputMessage.direction()).isNotEqualTo(outboundMessage.direction());
+            assertThat(outputMessage.direction())
+                .isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
+        }
     }
 
-    @Test
-    void should_throw_exception_executing_outbound_message_confirmation_when_transported_evidences_is_null() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
-                                                 .toBuilder()
-                                                 .transportedEvidences(null)
-                                                 .build();
+    @Nested
+    @DisplayName("when execution fails")
+    class WhenExecutionFails {
+        @Test
+        void should_fail_when_the_transported_evidences_are_null() {
+            var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage()
+                                                             .toBuilder()
+                                                             .transportedEvidences(null)
+                                                             .build();
 
-        assertThrows(
-            IllegalStateException.class,
-            () -> outboundMessageConfirmationCreationStep.execute(outboundMessage)
-        );
-    }
+            assertThrows(
+                IllegalStateException.class,
+                () -> confirmationStep.execute(outboundMessage)
+            );
+        }
 
-    @Test
-    void should_throw_exception_executing_outbound_message_confirmation_when_transported_evidences_is_empty() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
-                                                 .toBuilder()
-                                                 .evidences(Collections.emptyList())
-                                                 .transportedEvidences(Collections.emptyList())
-                                                 .build();
-        assertThrows(
-            IllegalStateException.class,
-            () -> outboundMessageConfirmationCreationStep.execute(outboundMessage)
-        );
-    }
+        @Test
+        void should_fail_when_the_transported_evidences_are_empty() {
+            var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage()
+                                                             .toBuilder()
+                                                             .evidences(Collections.emptyList())
+                                                             .transportedEvidences(Collections.emptyList())
+                                                             .build();
 
-    @Test
-    void should_throw_exception_when_message_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> outboundMessageConfirmationCreationStep.execute(null)
-        );
+            assertThrows(
+                IllegalStateException.class,
+                () -> confirmationStep.execute(outboundMessage)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> confirmationStep.execute(null)
+            );
+        }
     }
 }

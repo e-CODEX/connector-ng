@@ -12,32 +12,34 @@ package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@code ConnectorNotExpression}.
  */
+@DisplayName("ConnectorMessageRoutingNotExpression")
 public class ConnectorNotExpressionTest {
     @Test
-    void expression_should_not_equals_is_true() {
+    void should_return_true_when_expression_matches() {
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest");
         var notExpression = new ConnectorNotExpression(equalsExpression, null);
 
         var evaluationResult = notExpression.evaluate(
-                MessageTestFixtures.createOutboundBusinessMessage()
+            BusinessMessageTestFixtures.createOutboundMessage()
         );
 
         assertThat(evaluationResult).isTrue();
     }
 
     @Test
-    void expression_should_not_equals_is_false() {
+    void should_return_false_when_expression_does_not_match() {
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form");
         var notExpression = new ConnectorNotExpression(equalsExpression, null);
 
         var evaluationResult = notExpression.evaluate(
-                MessageTestFixtures.createOutboundBusinessMessage()
+            BusinessMessageTestFixtures.createOutboundMessage()
         );
 
         assertThat(evaluationResult).isFalse();

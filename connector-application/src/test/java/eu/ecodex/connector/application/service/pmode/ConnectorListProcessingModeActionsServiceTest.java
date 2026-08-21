@@ -35,7 +35,7 @@ public class ConnectorListProcessingModeActionsServiceTest {
     private ConnectorListProcessingModeActionsService listProcessingModeActionsService;
 
     @Test
-    void should_throw_exception_if_processing_mode_identifier_is_null() {
+    void should_fail_when_the_processing_mode_identifier_is_null() {
         assertThrows(
             NullPointerException.class,
             () -> this.listProcessingModeActionsService.execute(null)
@@ -43,7 +43,7 @@ public class ConnectorListProcessingModeActionsServiceTest {
     }
 
     @Test
-    void should_return_all_processing_mode_services_successfully() {
+    void should_return_all_the_actions() {
         when(actionRepository.findAllByBusinessDomainIdentifier(any()))
             .thenReturn(List.of(ActionTestFixtures.createAction()));
 

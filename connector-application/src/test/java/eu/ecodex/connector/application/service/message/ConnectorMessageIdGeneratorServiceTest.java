@@ -24,11 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorMessageIdGeneratorService")
-public class ConnectorMessageIdGeneratorTest {
+public class ConnectorMessageIdGeneratorServiceTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider messageProcessingConfigProvider;
     @InjectMocks
-    private ConnectorMessageIdGenerator messageIdGenerator;
+    private ConnectorMessageIdGeneratorService messageIdGeneratorService;
 
     @Test
     void should_generate_message_identifier() {
@@ -40,7 +40,7 @@ public class ConnectorMessageIdGeneratorTest {
                     .build()
             );
 
-        var generatedIdentifier = messageIdGenerator.generateIdentifier();
+        var generatedIdentifier = messageIdGeneratorService.generateIdentifier();
 
         assertThat(generatedIdentifier).isNotNull();
         assertThat(generatedIdentifier).isNotBlank();

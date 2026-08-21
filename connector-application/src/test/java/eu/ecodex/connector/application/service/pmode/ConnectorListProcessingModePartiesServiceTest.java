@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorListProcessingModePartiesService")
 public class ConnectorListProcessingModePartiesServiceTest {
     @Mock
     private ConnectorPartyRepository partyRepository;
@@ -35,15 +37,7 @@ public class ConnectorListProcessingModePartiesServiceTest {
     private ConnectorListProcessingModePartiesService listProcessingModePartiesService;
 
     @Test
-    void should_throw_exception_if_business_domain_identifier_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.listProcessingModePartiesService.execute(null)
-        );
-    }
-
-    @Test
-    void should_list_processing_mode_parties_successfully() {
+    void should_return_all_the_parties() {
         when(partyRepository.findAllByBusinessDomainIdentifier(any()))
             .thenReturn(List.of(PartyTestFixtures.createToParty()));
 
@@ -51,5 +45,13 @@ public class ConnectorListProcessingModePartiesServiceTest {
 
         assertThat(parties).isNotNull();
         assertThat(parties).hasSize(1);
+    }
+
+    @Test
+    void should_fail_when_the_business_domain_identifier_is_null() {
+        assertThrows(
+            NullPointerException.class,
+            () -> listProcessingModePartiesService.execute(null)
+        );
     }
 }

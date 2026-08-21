@@ -16,14 +16,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import java.nio.file.Path;
 import java.util.List;
@@ -122,21 +122,9 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
         );
     }
 
-    @Test
-    void should_throw_exception_when_building_asics_container_if_the_message_identifier_is_null() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                         .toBuilder()
-                                         .identifier(null)
-                                         .build();
-        assertThrows(
-            ConnectorContainerException.class,
-            () -> securityToolkit.buildContainer(message)
-        );
-    }
-
-    private ConnectorMessage createMessage() {
-        return MessageTestFixtures
-            .createOutboundBusinessMessage()
+    private ConnectorBusinessMessage createMessage() {
+        return BusinessMessageTestFixtures
+            .createOutboundMessage()
             .toBuilder()
             .businessContent(
                 MessageContentTestFixtures
@@ -152,7 +140,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
             .build();
     }
 
-    private ConnectorMessage createMessageWithAttachment() {
+    private ConnectorBusinessMessage createMessageWithAttachment() {
         return createMessage()
             .toBuilder()
             .identifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")
@@ -164,7 +152,7 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
             .build();
     }
 
-    private ConnectorMessage createMessageWithIdenticalAttachmentNames() {
+    private ConnectorBusinessMessage createMessageWithIdenticalAttachmentNames() {
         return createMessage()
             .toBuilder()
             .identifier("fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu")

@@ -18,21 +18,23 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorMessageErrorType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 
+@DisplayName("ConnectorAcknowledgeMessageIT SOAP")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     @LocalServerPort
     private int port;
 
@@ -54,22 +56,11 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
         request.setResponseForMessageId("unknown-transport-id");
 
         assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
-                .isInstanceOf(SOAPFaultException.class);
+            .isInstanceOf(SOAPFaultException.class);
     }
 
     @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/evidence.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
-    })
+    @WithMessageData
     void should_acknowledge_message_with_success_status_successfully() {
         var request = acknowledgeMessage(true);
         var response = soapClient.acknowledgeMessage(request);
@@ -77,38 +68,16 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
     }
 
     @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/evidence.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
-    })
+    @WithMessageData
     void should_failed_to_acknowledge_message_with_failed_status_and_no_error() {
         var request = acknowledgeMessage(false);
 
         assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
-                .isInstanceOf(SOAPFaultException.class);
+            .isInstanceOf(SOAPFaultException.class);
     }
 
     @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/evidence.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
-    })
+    @WithMessageData
     void should_acknowledge_message_with_failed_status_successfully() {
         var error = new DomibusConnectorMessageErrorType();
         error.setErrorMessage("Error message");
@@ -127,8 +96,28 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
         ackResponse.setResult(result);
         ackResponse.setAssignedMessageId("ebf72de4-05d2-4a7b-838a-5018923996da");
         ackResponse.setResponseForMessageId(
-                "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+            "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
         ackResponse.setResultMessage("Message acknowledged successfully");
         return ackResponse;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/evidence.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
+    })
+    private @interface WithMessageData {
     }
 }

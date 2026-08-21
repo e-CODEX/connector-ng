@@ -12,21 +12,23 @@ package eu.ecodex.connector.infrastructure.dss;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssDataLoaderFactory")
 public class ConnectorDssDataLoaderFactoryTest extends BaseDssTest {
     @Autowired
     private ConnectorDssDataLoaderFactory dataLoaderFactory;
 
     @Test
-    void should_create_online_data_loader_successfully() {
+    void should_create_online_data_loader() {
         var onlineDataLoader = dataLoaderFactory.createOnlineDataLoader();
         assertThat(onlineDataLoader).isNotNull();
     }
 
     @Test
-    void should_create_file_cache_data_loader_successfully() {
+    void should_create_file_cache_data_loader() {
         var fileCacheDataLoader = dataLoaderFactory.createFileCacheDataLoader();
         assertThat(fileCacheDataLoader).isNotNull();
     }

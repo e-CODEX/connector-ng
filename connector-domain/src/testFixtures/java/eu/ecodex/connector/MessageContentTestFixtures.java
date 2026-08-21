@@ -16,10 +16,10 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 public class MessageContentTestFixtures {
     public static ConnectorMessageBusinessContent createContent() {
         return ConnectorMessageBusinessContent
-                .builder()
-                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
-                .businessDocument(
-                        ConnectorMessageDocumentTestFixtures.createSignatureBasedDocument())
-                .build();
+            .builder()
+            .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
+            .businessDocument(
+                ConnectorMessageDocumentTestFixtures.createSignatureBasedDocument())
+            .build();
     }
 }

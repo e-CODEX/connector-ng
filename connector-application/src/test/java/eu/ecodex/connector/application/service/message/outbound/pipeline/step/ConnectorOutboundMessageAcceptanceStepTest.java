@@ -11,18 +11,18 @@
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorOutboundMessageAcceptanceStep")
 public class ConnectorOutboundMessageAcceptanceStepTest {
     @Mock
     private ConnectorMessageEvidenceCreator evidenceCreator;
@@ -41,24 +42,20 @@ public class ConnectorOutboundMessageAcceptanceStepTest {
     private ConnectorMessageEvidenceVerifier evidenceVerifier;
 
     @InjectMocks
-    private ConnectorOutboundMessageAcceptanceStep outboundMessageSubmissionAcceptanceCreationStep;
+    private ConnectorOutboundMessageAcceptanceStep acceptanceStep;
 
     @Test
-    void should_create_outbound_message_execute_relay_remmd_acceptance_evidence() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
-
+    void should_create_the_submission_acceptance_evidence() {
+        var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
 
         when(evidenceCreator.createSuccess(any(), any())).thenReturn(evidence);
         doNothing().when(evidenceVerifier).verify(any(), any());
 
-        var outputMessage = outboundMessageSubmissionAcceptanceCreationStep.execute(outboundMessage);
+        var outputMessage = acceptanceStep.execute(outboundMessage);
 
         assertThat(outputMessage).isNotNull();
-        assertThat(outputMessage.isBusinessMessage()).isTrue();
-        assertThat(outputMessage.evidences()).isNotEmpty();
         assertThat(outputMessage.evidences()).hasSize(1);
-        assertNotNull(outputMessage.evidences());
         assertThat(outputMessage.evidences().getFirst().type())
             .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
         assertThat(outputMessage.direction()).isEqualTo(outboundMessage.direction());
@@ -67,10 +64,10 @@ public class ConnectorOutboundMessageAcceptanceStepTest {
     }
 
     @Test
-    void should_throw_exception_when_message_is_null() {
+    void should_fail_when_the_message_is_null() {
         assertThrows(
             NullPointerException.class,
-            () -> outboundMessageSubmissionAcceptanceCreationStep.execute(null)
+            () -> acceptanceStep.execute(null)
         );
     }
 }

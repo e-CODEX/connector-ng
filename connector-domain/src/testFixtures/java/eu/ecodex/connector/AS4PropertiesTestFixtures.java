@@ -27,6 +27,10 @@ public class AS4PropertiesTestFixtures {
             .action(ActionTestFixtures.createAction());
     }
 
+    public static ConnectorMessageAS4Properties createAS4Properties() {
+        return defaultAS4Properties().build();
+    }
+
     public static ConnectorMessageAS4Properties createAS4PropertiesWithoutFromParty() {
         return defaultAS4Properties().fromParty(null).build();
     }

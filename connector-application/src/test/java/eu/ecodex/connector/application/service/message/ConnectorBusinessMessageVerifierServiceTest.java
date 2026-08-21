@@ -18,7 +18,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.AS4PropertiesTestFixtures;
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
@@ -41,7 +40,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 
 @DisplayName("ConnectorMessageVerifierService")
-public class ConnectorMessageVerifierServiceTest {
+public class ConnectorBusinessMessageVerifierServiceTest {
     @Mock
     private ConnectorServiceRepository serviceRepository;
     @Mock
@@ -50,7 +49,7 @@ public class ConnectorMessageVerifierServiceTest {
     private ConnectorPartyRepository partyRepository;
 
     @InjectMocks
-    private ConnectorMessageVerifierService verifierService;
+    private ConnectorBusinessMessageVerifierService verifierService;
 
     @Nested
     @DisplayName("in STRICT verification mode")

@@ -1,4 +1,5 @@
 insert into connector_message_attachments (
+    id,
     identifier,
     content_type,
     description,
@@ -12,6 +13,7 @@ insert into connector_message_attachments (
 )
 values
     (
+        1,
         'd98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file',
         'application/pdf',
         'Persisting file to S3 bucket',
@@ -24,6 +26,7 @@ values
         now()
     ),
     (
+        2,
         '6aeef356-d580-4b94-a569-250435ac3ec5_fake_file',
         'application/pdf',
         'Persisting file to S3 bucket',
@@ -36,6 +39,7 @@ values
         now()
     ),
     (
+        3,
         'c12f879b-3c9a-4d26-b36c-b6d67a84f0ed_test_attachment',
         'application/pdf',
         'Persisting file to S3 bucket',
@@ -48,6 +52,7 @@ values
         now()
     ),
     (
+        4,
         'd9368fda-92f2-498f-95bf-1ca6f4985b85_ASIC-S',
         'application/vnd.etsi.asic-s+zip',
         'File from gateway',
@@ -60,6 +65,7 @@ values
         now()
     ),
     (
+        5,
         '0f942a85-1e4d-4e36-9432-1625a582b20c_tokenXML',
         'application/xml',
         'File from gateway',
@@ -72,6 +78,7 @@ values
         now()
     ),
     (
+        6,
         'c3e18064-e0da-4170-9733-1e7e2768e0bb_SUBMISSION_ACCEPTANCE',
         'application/xml',
         'File from gateway',
@@ -83,7 +90,9 @@ values
         now(),
         now()
     ),
+    -- Business content
     (
+        7,
         '104ebc70-abd5-45da-8c74-940d687501b3_messageContent',
         'application/xml',
         'File from gateway',
@@ -92,6 +101,98 @@ values
         'S3_BUCKET',
         'BUSINESS_CONTENT',
         2,
+        now(),
+        now()
+    ),
+    (
+        8,
+        '1875f1b7-5ea2-494d-8932-29966189f02c_messageContent',
+        'application/xml',
+        'Outgoing message business content',
+        'messageContent.xml',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_CONTENT',
+        1,
+        now(),
+        now()
+    ),
+    (
+        9,
+        'b9bd63c7-5a5a-4701-a23c-e5e714436585_messageContent',
+        'application/xml',
+        'File from gateway',
+        'messageContent.xml',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_CONTENT',
+        3,
+        now(),
+        now()
+    ),
+    (
+        10,
+        'c8bb2032-22cc-411a-969d-68f1c526f0ad_messageContent',
+        'application/xml',
+        'File from gateway',
+        'messageContent.xml',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_CONTENT',
+        4,
+        now(),
+        now()
+    ),
+    -- Business document
+    (
+        11,
+        'dd5a7178-c1aa-4723-bc7b-d3f007ccd7ac_messageContent',
+        'application/pdf',
+        'Business document',
+        'Form_A.pdf',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_DOCUMENT',
+        1,
+        now(),
+        now()
+    ),
+    (
+        12,
+        'd0b094c0-3058-4800-af91-96f89c60c9c0_messageContent',
+        'application/pdf',
+        'Business document',
+        'Form_A.pdf',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_DOCUMENT',
+        2,
+        now(),
+        now()
+    ),
+    (
+        13,
+        '99969b4f-ed87-489b-aa77-9525ad9d1b42_messageContent',
+        'application/pdf',
+        'Business document',
+        'Form_A.pdf',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_DOCUMENT',
+        3,
+        now(),
+        now()
+    ),
+    (
+        14,
+        '890a990c-1ce9-4b96-8c07-5836f8f0da33_messageContent',
+        'application/pdf',
+        'Business document',
+        'Form_A.pdf',
+        6613,
+        'S3_BUCKET',
+        'BUSINESS_DOCUMENT',
+        4,
         now(),
         now()
     );

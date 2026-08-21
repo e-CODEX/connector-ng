@@ -23,6 +23,7 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport.ConnectorMessageTransportStepAdminController;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -30,16 +31,19 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@DisplayName("ConnectorMessageTransportStepAdminController")
 @WebMvcTest(ConnectorMessageTransportStepAdminController.class)
 public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/transport-steps";
+
     @MockitoBean
     private ConnectorListTransportSteps listTransportStepsService;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void should_return_200_when_listing_messages_transport_steps() throws Exception {
+    void should_return_200_with_the_paged_transport_steps() throws Exception {
         var pageResult = new ConnectorPageResult<>(
             List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
         );

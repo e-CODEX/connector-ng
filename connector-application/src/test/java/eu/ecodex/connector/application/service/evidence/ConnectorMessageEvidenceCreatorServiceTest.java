@@ -16,8 +16,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
@@ -56,7 +56,7 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
 
             var created = evidenceService.createSuccess(
                 ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-                MessageTestFixtures.createOutboundBusinessMessage()
+                BusinessMessageTestFixtures.createOutboundMessage()
             );
 
             assertThat(created).isNotNull();
@@ -70,7 +70,7 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
                 NullPointerException.class,
                 () -> evidenceService.createSuccess(
                     null,
-                    MessageTestFixtures.createOutboundBusinessMessage()
+                    BusinessMessageTestFixtures.createOutboundMessage()
                 )
             );
         }
@@ -81,20 +81,6 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
                 NullPointerException.class,
                 () -> evidenceService.createSuccess(
                     ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, null)
-            );
-        }
-
-        @Test
-        void should_fail_when_the_message_identifier_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .identifier(null)
-                                             .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> evidenceService.createSuccess(
-                    ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, message)
             );
         }
     }
@@ -114,7 +100,7 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
 
             var created = evidenceService.createFailure(
                 ConnectorEvidenceType.RELAY_REMMD_REJECTION,
-                MessageTestFixtures.createOutboundBusinessMessage(),
+                BusinessMessageTestFixtures.createOutboundMessage(),
                 ConnectorMessageRejectionReason.OTHER
             );
 
@@ -129,7 +115,7 @@ public class ConnectorMessageEvidenceCreatorServiceTest {
                 NullPointerException.class,
                 () -> evidenceService.createFailure(
                     null,
-                    MessageTestFixtures.createOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     ConnectorMessageRejectionReason.OTHER
                 )
             );

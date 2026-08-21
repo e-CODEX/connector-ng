@@ -15,17 +15,19 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("RetrieveQueuesStatsIT REST")
 public class RetrieveQueuesStatsIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
     @Test
-    void should_retrieve_queues_stats_successfully() {
+    void should_retrieve_jms_queue_statistics() {
         apiClient.get()
                  .uri("/api/v1/admin/jms/queues/stats")
                  .exchange()

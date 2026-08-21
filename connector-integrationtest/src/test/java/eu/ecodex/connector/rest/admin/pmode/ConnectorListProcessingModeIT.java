@@ -15,14 +15,16 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorListProcessingModeIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorListProcessingModeIT extends AbstractIntegrationTest {
     @Autowired
@@ -35,10 +37,10 @@ public class ConnectorListProcessingModeIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql"
     })
-    void should_succeed_to_get_processing_modes() {
+    void should_retrieve_processing_modes() {
         var response = apiClient.get()
                                 .uri("/api/v1/admin/business-domains")
                                 .exchange()

@@ -16,12 +16,14 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorListProcessingModeServicesIT REST")
 @Sql(
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
@@ -41,7 +43,7 @@ public class ConnectorListProcessingModeServicesIT extends AbstractIntegrationTe
         "classpath:sql/processing-mode.sql",
         "classpath:sql/service.sql",
     })
-    void should_list_connector_pmode_services_successfully() {
+    void should_list_connector_pmode_services() {
         apiClient.get()
                  .uri("/api/v1/processing-modes/default_business_domain/services")
                  .exchange()

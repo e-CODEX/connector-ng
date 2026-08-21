@@ -21,6 +21,8 @@ import eu.ecodex.connector.application.service.attachement.ConnectorListAttachme
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorListAttachmentsService")
 public class ConnectorListAttachmentsServiceTest {
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
@@ -36,50 +39,58 @@ public class ConnectorListAttachmentsServiceTest {
     @InjectMocks
     private ConnectorListAttachmentsService connectorListAttachmentsService;
 
-    @Test
-    void should_retrieve_attachments_successfully() {
-        var pageResult = ConnectorPageResult.of(
-            List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
-        );
-        when(attachmentRepository.findAll(any())).thenReturn(pageResult);
+    @Nested
+    @DisplayName("when retrieving succeeds")
+    class WhenRetrievingSucceeds {
+        @Test
+        void should_return_the_paged_attachments() {
+            var pageResult = ConnectorPageResult.of(
+                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
+            );
+            when(attachmentRepository.findAll(any())).thenReturn(pageResult);
 
-        var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
-        var result = connectorListAttachmentsService.execute(pageRequest);
+            var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
+            var result = connectorListAttachmentsService.execute(pageRequest);
 
-        assertThat(result).isNotNull();
-        assertThat(result.content()).isNotEmpty();
-        assertThat(result.totalElements()).isEqualTo(1L);
-        assertThat(result.totalPages()).isEqualTo(1);
-        assertThat(result.size()).isEqualTo(1);
+            assertThat(result).isNotNull();
+            assertThat(result.content()).isNotEmpty();
+            assertThat(result.totalElements()).isEqualTo(1L);
+            assertThat(result.totalPages()).isEqualTo(1);
+            assertThat(result.size()).isEqualTo(1);
+        }
     }
 
-    @Test
-    void should_throw_illegal_argument_exception_when_retrieving_attachments_if_page_request_page_is_negative() {
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                var pageRequest = ConnectorPageRequest.builder().page(-1).size(20).build();
-                connectorListAttachmentsService.execute(pageRequest);
-            }
-        );
-    }
+    @Nested
+    @DisplayName("when the page request is invalid")
+    class WhenThePageRequestIsInvalid {
+        @Test
+        void should_fail_when_the_page_is_negative() {
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> {
+                    var pageRequest = ConnectorPageRequest.builder().page(-1).size(20).build();
+                    connectorListAttachmentsService.execute(pageRequest);
+                }
+            );
+        }
 
-    @Test
-    void should_throw_illegal_argument_exception_when_retrieving_attachments_if_page_request_size_is_over_100() {
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                var pageRequest = ConnectorPageRequest.builder().page(0).size(101).build();
-                connectorListAttachmentsService.execute(pageRequest);
-            }
-        );
-    }
+        @Test
+        void should_fail_when_the_size_exceeds_100() {
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> {
+                    var pageRequest = ConnectorPageRequest.builder().page(0).size(101).build();
+                    connectorListAttachmentsService.execute(pageRequest);
+                }
+            );
+        }
 
-    @Test
-    void should_throw_null_pointer_exception_when_retrieving_attachments_if_page_request_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> connectorListAttachmentsService.execute(null)
-        );
+        @Test
+        void should_fail_when_the_page_request_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> connectorListAttachmentsService.execute(null)
+            );
+        }
     }
 }

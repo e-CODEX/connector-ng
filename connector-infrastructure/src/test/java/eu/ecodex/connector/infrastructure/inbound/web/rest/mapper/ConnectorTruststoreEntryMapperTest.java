@@ -17,8 +17,12 @@ import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorCertificateInfoDto;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+
+@DisplayName("ConnectorTruststoreEntryMapper")
 public class ConnectorTruststoreEntryMapperTest {
     private static ConnectorTruststore truststoreFrom() {
         return new ConnectorTruststore(
@@ -29,43 +33,49 @@ public class ConnectorTruststoreEntryMapperTest {
         );
     }
 
-    @Test
-    void maps_certificate_fields() {
-        var truststore = truststoreFrom();
-        var dto = ConnectorTruststoreEntryMapper.toEntries(truststore).getFirst();
-        assertThat(dto.alias()).isEqualTo("connector_blue");
-        assertThat(dto.subject()).contains("CN=connector_blue,C=BL");
-        assertThat(dto.issuer()).contains("CN=connector_blue,C=BL");
-        assertThat(dto.signatureAlgorithm()).isEqualTo("SHA256withRSA");
-        assertThat(dto.keyAlgorithm()).isEqualTo("RSA");
+    @Nested
+    @DisplayName("when the truststore is valid")
+    class WhenTruststoreIsValid {
+        @Test
+        void should_map_the_certificate_fields() {
+            var dto = ConnectorTruststoreEntryMapper.toEntries(truststoreFrom()).getFirst();
+
+            assertThat(dto.alias()).isEqualTo("connector_blue");
+            assertThat(dto.subject()).contains("CN=connector_blue,C=BL");
+            assertThat(dto.issuer()).contains("CN=connector_blue,C=BL");
+            assertThat(dto.signatureAlgorithm()).isEqualTo("SHA256withRSA");
+            assertThat(dto.keyAlgorithm()).isEqualTo("RSA");
+        }
+
+        @Test
+        void should_mark_the_entries_as_trusted_certificates() {
+            assertThat(ConnectorTruststoreEntryMapper.toEntries(truststoreFrom()))
+                .hasSize(2)
+                .extracting(ConnectorCertificateInfoDto::entryType)
+                .isEqualTo(List.of("TRUSTED_CERTIFICATE", "TRUSTED_CERTIFICATE"));
+        }
+
+        @Test
+        void should_return_all_the_entries() {
+            assertThat(ConnectorTruststoreEntryMapper.toEntries(truststoreFrom()))
+                .extracting(ConnectorCertificateInfoDto::alias)
+                .containsExactlyInAnyOrder("connector_blue", "connector_red");
+        }
     }
 
-    @Test
-    void resolves_trusted_certificate_entry() {
-        var truststore = truststoreFrom();
-        assertThat(ConnectorTruststoreEntryMapper.toEntries(truststore))
-            .hasSize(2)
-            .extracting(ConnectorCertificateInfoDto::entryType)
-            .isEqualTo(List.of("TRUSTED_CERTIFICATE", "TRUSTED_CERTIFICATE"));
-    }
+    @Nested
+    @DisplayName("when there is nothing to map")
+    class WhenNothingToMap {
+        @Test
+        void should_return_an_empty_list_when_the_truststore_is_null() {
+            assertThat(ConnectorTruststoreEntryMapper.toEntries(null)).isEmpty();
+        }
 
-    @Test
-    void returns_all_entries() {
-        var truststore = truststoreFrom();
-        assertThat(ConnectorTruststoreEntryMapper.toEntries(truststore))
-            .extracting(ConnectorCertificateInfoDto::alias)
-            .containsExactlyInAnyOrder("connector_blue", "connector_red");
-    }
+        @Test
+        void should_return_an_empty_list_when_the_content_is_null() {
+            var truststore = truststoreFrom().toBuilder().content(null).build();
 
-    @Test
-    void returns_empty_list_for_null_truststore() {
-        assertThat(ConnectorTruststoreEntryMapper.toEntries(null)).isEmpty();
-    }
-
-    @Test
-    void returns_empty_list_for_null_content() {
-        var truststore = truststoreFrom()
-            .toBuilder().content(null).build();
-        assertThat(ConnectorTruststoreEntryMapper.toEntries(truststore)).isEmpty();
+            assertThat(ConnectorTruststoreEntryMapper.toEntries(truststore)).isEmpty();
+        }
     }
 }

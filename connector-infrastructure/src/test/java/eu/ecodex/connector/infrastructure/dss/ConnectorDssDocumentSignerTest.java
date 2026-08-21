@@ -25,13 +25,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssDocumentSigner")
 public class ConnectorDssDocumentSignerTest extends BaseDssTest {
-    private final ConnectorDssSigningTokenProvider signingTokenProvider;
     @Autowired
     private ConnectorDssDocumentSigner documentSigner;
+
+    private final ConnectorDssSigningTokenProvider signingTokenProvider;
 
     {
         var keystoreProperties = new KeystoreProperties();
@@ -49,7 +52,7 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
     }
 
     @Test
-    void should_sign_with_pades_successfully() {
+    void should_sign_document_with_pades() {
         var pdf = FileTestFixtures.readAsBytes("raw/test-pdf.pdf");
         var document = new InMemoryDocument(pdf);
         var signedDocument = documentSigner.signWithPadES(
@@ -64,7 +67,7 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
     }
 
     @Test
-    void should_sign_with_xades_successfully() {
+    void should_sign_document_with_xades() {
         var xml = FileTestFixtures.readAsBytes("raw/test-xml.xml");
         var document = new InMemoryDocument(xml);
         var signedDocument = documentSigner.signWithXAdES(
@@ -79,7 +82,7 @@ public class ConnectorDssDocumentSignerTest extends BaseDssTest {
     }
 
     @Test
-    void should_sign_with_xades_asic_successfully() throws IOException {
+    void should_sign_document_with_xades_asic() throws IOException {
         var signedContentBytes = new ByteArrayOutputStream();
         var signedContentZip = new ZipOutputStream(signedContentBytes);
         signedContentZip.setLevel(ZipEntry.DEFLATED);

@@ -25,11 +25,13 @@ import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
+@DisplayName("ConnectorGetPendingMessageIT SOAP")
 @Sql(
         statements = "DELETE FROM connector_business_domains WHERE id > 0",
         executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
@@ -68,7 +70,7 @@ public class ConnectorGetPendingMessageIT extends BackendServiceTest {
             "classpath:sql/message-transport-step.sql",
             "classpath:sql/message-transport-step-statuses.sql",
     })
-    void should_retrieve_a_pending_message_by_transport_step_identifier_successfully() {
+    void should_retrieve_pending_message_by_transport_step_identifier() {
         when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
                 ConnectorMessageTransportStep.class));
         when(s3FileStorageProvider.findByIdentifier(any())).thenReturn(new byte[] {1, 2, 3});
@@ -91,10 +93,13 @@ public class ConnectorGetPendingMessageIT extends BackendServiceTest {
             "classpath:sql/action.sql",
             "classpath:sql/message.sql",
             "classpath:sql/message-as4-properties.sql",
+            "classpath:sql/attachment.sql",
+            "classpath:sql/message-business-content.sql",
+            "classpath:sql/message-business-document.sql",
             "classpath:sql/message-transport-step.sql",
             "classpath:sql/message-transport-step-statuses.sql",
     })
-    void should_failed_to_retrieve_a_pending_message_by_transport_step_identifier() {
+    void should_fail_when_identifier_does_not_exist() {
         when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
                 ConnectorMessageTransportStep.class));
 

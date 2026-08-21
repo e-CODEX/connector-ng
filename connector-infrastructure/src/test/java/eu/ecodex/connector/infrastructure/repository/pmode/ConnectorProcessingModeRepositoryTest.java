@@ -18,123 +18,147 @@ import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
+@DisplayName("ConnectorProcessingModeRepository")
 public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTest {
+    private static final String PROCESSING_MODE_UUID = "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf";
+    private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
+        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
     @Autowired
     private ConnectorProcessingModeRepository repository;
 
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    void should_save_pmode_successfully_to_database() {
-        var processingMode = ProcessingModeTestFixtures.createWithBusinessDomain();
-
-        var savedProcessingMode = repository.save(
-            processingMode, processingMode.businessDomain().identifier()
-        );
-
-        assertThat(savedProcessingMode).isNotNull();
+    /**
+     * Reference data plus a seeded processing mode.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+    })
+    private @interface WithProcessingModeData {
     }
 
-    @Test
-    void should_throw_null_pointer_exception_when_saving_pmode_with_a_null_pmode_and_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.save(null, null)
-        );
-    }
+    @Nested
+    @DisplayName("save a processing mode")
+    class Save {
+        @Test
+        @Sql("classpath:sql/business-domain.sql")
+        void should_save_the_processing_mode() {
+            var processingMode = ProcessingModeTestFixtures.createWithBusinessDomain();
 
-    @Test
-    void should_throw_null_pointer_exception_when_saving_pmode_with_a_null_pmode() {
-        assertThrows(
-            NullPointerException.class, () -> repository.save(
-                null,
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_saving_pmode_with_a_null_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.save(
-                ProcessingModeTestFixtures.createWithBusinessDomain(), null
-            )
-        );
-    }
-
-    // find by uuid
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    void should_find_pmode_by_uuid_successfully_from_database() {
-        var processingMode = repository.findByUuid(
-            "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf"
-        );
-
-        assertThat(processingMode).isNotNull();
-        assertThat(processingMode.uuid()).isNotNull();
-    }
-
-    @Test
-    void should_return_null_when_searching_pmode_by_unknown_uuid_from_database() {
-        var processingMode = repository.findByUuid("unknown-uuid");
-        assertThat(processingMode).isNull();
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_pmode_with_a_null_uuid() {
-        assertThrows(
-            NullPointerException.class, () -> repository.findByUuid(null)
-        );
-    }
-
-    // find by business domain identifier
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    void should_find_pmode_by_business_domain_identifier_successfully_from_database() {
-        var processingMode = repository.findByBusinessDomainIdentifier(
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(processingMode).isNotNull();
-        assertThat(processingMode.businessDomain().identifier())
-            .isEqualTo(
-                BusinessDomainIdentifierTestFixtures
-                    .createDefaultBusinessDomainIdentifier()
+            var savedProcessingMode = repository.save(
+                processingMode, processingMode.businessDomain().identifier()
             );
+
+            assertThat(savedProcessingMode).isNotNull();
+        }
+
+        @Test
+        void should_fail_when_the_processing_mode_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.save(null, DEFAULT_BUSINESS_DOMAIN)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.save(ProcessingModeTestFixtures.createWithBusinessDomain(), null)
+            );
+        }
+
+        @Test
+        void should_fail_when_both_arguments_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.save(null, null)
+            );
+        }
     }
 
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    void should_return_null_when_searching_pmode_by_unknown_business_domain_identifier_from_database() {
-        var processingMode = repository.findByBusinessDomainIdentifier(
-            ConnectorBusinessDomainIdentifier.builder().build()
-        );
+    @Nested
+    @DisplayName("find by uuid")
+    class FindByUuid {
+        @Test
+        @WithProcessingModeData
+        void should_find_the_processing_mode() {
+            var processingMode = repository.findByUuid(PROCESSING_MODE_UUID);
 
-        assertThat(processingMode).isNull();
+            assertThat(processingMode).isNotNull();
+            assertThat(processingMode.uuid()).isNotNull();
+        }
+
+        @Test
+        void should_return_null_when_the_uuid_is_unknown() {
+            var processingMode = repository.findByUuid("unknown-uuid");
+
+            assertThat(processingMode).isNull();
+        }
+
+        @Test
+        void should_fail_when_the_uuid_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByUuid(null)
+            );
+        }
     }
 
-    @Test
-    void should_throw_null_pointer_exception_when_searching_pmode_with_a_null_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.repository.findByBusinessDomainIdentifier(null)
-        );
+    @Nested
+    @DisplayName("find by business domain identifier")
+    class FindByBusinessDomainIdentifier {
+        @Test
+        @WithProcessingModeData
+        void should_find_the_processing_mode() {
+            var processingMode = repository.findByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(processingMode).isNotNull();
+            assertThat(processingMode.businessDomain().identifier())
+                .isEqualTo(DEFAULT_BUSINESS_DOMAIN);
+        }
+
+        @Test
+        @WithProcessingModeData
+        void should_return_null_when_the_business_domain_is_unknown() {
+            var processingMode = repository.findByBusinessDomainIdentifier(
+                ConnectorBusinessDomainIdentifier.builder().build()
+            );
+
+            assertThat(processingMode).isNull();
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByBusinessDomainIdentifier(null)
+            );
+        }
     }
 
-    // find all
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    void should_find_all_pmodes_successfully_from_database() {
-        var processingModes = repository.findAll();
+    @Nested
+    @DisplayName("find all")
+    class FindAll {
+        @Test
+        @WithProcessingModeData
+        void should_find_all_the_processing_modes() {
+            var processingModes = repository.findAll();
 
-        assertThat(processingModes).isNotNull();
-        assertThat(processingModes).hasSize(1);
+            assertThat(processingModes).isNotNull();
+            assertThat(processingModes).hasSize(1);
+        }
     }
 }

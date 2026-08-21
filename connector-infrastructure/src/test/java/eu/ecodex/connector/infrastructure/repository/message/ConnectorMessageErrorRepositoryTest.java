@@ -17,45 +17,20 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageErrorRep
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings("DataFlowIssue")
+
+@DisplayName("ConnectorMessageErrorRepository")
 public class ConnectorMessageErrorRepositoryTest extends AbstractRepositoryTest {
+    private static final String MESSAGE_ID =
+        "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu";
+
     @Autowired
     private ConnectorMessageErrorRepository repository;
-
-    // saving
-
-    @Test
-    void should_throw_exception_when_saving_error_with_null_message_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.save(null, List.of())
-        );
-    }
-
-    @Test
-    void should_throw_exception_when_saving_error_with_null_errors() {
-        assertThrows(
-            NullPointerException.class, () -> repository.save("message-identifier", null)
-        );
-    }
-
-    @Test
-    void should_throw_exception_when_saving_error_with_null_message_identifier_and_errors() {
-        assertThrows(
-            NullPointerException.class, () -> repository.save(null, null)
-        );
-    }
-
-    @Test
-    void should_throw_exception_when_saving_error_with_empty_errors() {
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> repository.save("message-identifier", List.of())
-        );
-    }
 
     @Test
     @Sql({
@@ -67,15 +42,44 @@ public class ConnectorMessageErrorRepositoryTest extends AbstractRepositoryTest 
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
     })
-    void should_save_message_errors_successfully() {
-        var savedErrors = repository.save(
-            "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu",
-            errors()
-        );
+    void should_save_the_errors() {
+        var savedErrors = repository.save(MESSAGE_ID, errors());
 
         assertThat(savedErrors).isNotNull();
         assertThat(savedErrors).hasSize(1);
         assertThat(savedErrors.getFirst().label()).isEqualTo("error-label");
+    }
+
+    @Test
+    void should_throw_when_the_message_identifier_is_null() {
+        assertThrows(
+            NullPointerException.class,
+            () -> repository.save(null, List.of())
+        );
+    }
+
+    @Test
+    void should_throw_when_the_errors_are_null() {
+        assertThrows(
+            NullPointerException.class,
+            () -> repository.save("message-identifier", null)
+        );
+    }
+
+    @Test
+    void should_throw_when_both_arguments_are_null() {
+        assertThrows(
+            NullPointerException.class,
+            () -> repository.save(null, null)
+        );
+    }
+
+    @Test
+    void should_throw_when_the_errors_are_empty() {
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> repository.save("message-identifier", List.of())
+        );
     }
 
     private List<ConnectorMessageError> errors() {

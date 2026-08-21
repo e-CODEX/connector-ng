@@ -19,6 +19,8 @@ import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorRegisterBusinessDomainService")
 public class ConnectorRegisterBusinessDomainServiceTest {
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
@@ -34,44 +37,50 @@ public class ConnectorRegisterBusinessDomainServiceTest {
     @InjectMocks
     private ConnectorRegisterBusinessDomainService registerBusinessDomainService;
 
-    @Test
-    void should_register_a_business_domain_successfully() {
-        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+    @Nested
+    @DisplayName("when registration succeeds")
+    class WhenRegistrationSucceeds {
+        @Test
+        void should_register_the_business_domain() {
+            var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
-        when(businessDomainRepository.findByIdentifier(any()))
-            .thenReturn(null);
-        when(businessDomainRepository.save(any()))
-            .thenReturn(BusinessDomainTestFixtures.createdDefaultBusinessDomain());
+            when(businessDomainRepository.findByIdentifier(any())).thenReturn(null);
+            when(businessDomainRepository.save(any()))
+                .thenReturn(BusinessDomainTestFixtures.createdDefaultBusinessDomain());
 
-        var createdBusinessDomain = registerBusinessDomainService.execute(businessDomain);
+            var createdBusinessDomain = registerBusinessDomainService.execute(businessDomain);
 
-        assertThat(createdBusinessDomain).isNotNull();
-        assertThat(createdBusinessDomain.identifier()).isEqualTo(businessDomain.identifier());
-        assertThat(createdBusinessDomain.source())
-            .isEqualTo(ConnectorConfigurationSource.IMPLEMENTATION);
-        assertThat(createdBusinessDomain.uuid()).isNotEmpty();
-        assertThat(createdBusinessDomain.createdAt()).isNotNull();
-        assertThat(createdBusinessDomain.updatedAt()).isNotNull();
+            assertThat(createdBusinessDomain).isNotNull();
+            assertThat(createdBusinessDomain.identifier()).isEqualTo(businessDomain.identifier());
+            assertThat(createdBusinessDomain.source())
+                .isEqualTo(ConnectorConfigurationSource.IMPLEMENTATION);
+            assertThat(createdBusinessDomain.uuid()).isNotEmpty();
+            assertThat(createdBusinessDomain.createdAt()).isNotNull();
+            assertThat(createdBusinessDomain.updatedAt()).isNotNull();
+        }
     }
 
-    @Test
-    void should_throw_exception_when_saving_business_domain_with_already_existing_identifier() {
-        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+    @Nested
+    @DisplayName("when registration fails")
+    class WhenRegistrationFails {
+        @Test
+        void should_fail_when_the_identifier_already_exists() {
+            var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
 
-        when(businessDomainRepository.findByIdentifier(any()))
-            .thenReturn(businessDomain);
+            when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
 
-        assertThrows(
-            ConnectorBusinessDomainAlreadyExistsException.class,
-            () -> registerBusinessDomainService.execute(businessDomain)
-        );
-    }
+            assertThrows(
+                ConnectorBusinessDomainAlreadyExistsException.class,
+                () -> registerBusinessDomainService.execute(businessDomain)
+            );
+        }
 
-    @Test
-    void should_throw_exception_if_business_domain_is_null_when_saving() {
-        assertThrows(
-            NullPointerException.class,
-            () -> registerBusinessDomainService.execute(null)
-        );
+        @Test
+        void should_fail_when_the_business_domain_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> registerBusinessDomainService.execute(null)
+            );
+        }
     }
 }

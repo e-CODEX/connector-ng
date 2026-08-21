@@ -12,15 +12,17 @@ package eu.ecodex.connector.infrastructure.dss;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssTimeStampingProtocol")
 public class ConnectorDssTimeStampingProtocolTest extends BaseDssTest {
     @Autowired
     private ConnectorDssTimeStampingProtocol timeStampingProtocol;
 
     @Test
-    void should_build_composite_source_successfully() {
+    void should_build_composite_source() {
         var compositeSource = timeStampingProtocol.getCompositeTspSource();
 
         assertThat(compositeSource).isNotNull();

@@ -16,15 +16,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.certificate.ConnectorCertificateVerifierProperties;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssCertificateVerifier")
 public class ConnectorDssCertificateVerifierTest extends BaseDssTest {
     @Autowired
     private ConnectorDssCertificateVerifier certificateVerifier;
 
     @Test
-    void should_create_common_certificate_verifier_successfully() {
+    void should_create_common_certificate_verifier() {
         var truststore = new KeystoreProperties();
         truststore.setPath("classpath:keystores/connector-keystore.jks");
         truststore.setPassword("12345");
@@ -42,7 +44,7 @@ public class ConnectorDssCertificateVerifierTest extends BaseDssTest {
     }
 
     @Test
-    void should_throw_exception_creating_common_trusted_certificate_source_if_validation_is_malformed_1() {
+    void should_fail_when_truststore_is_not_configured() {
         var verifier = new ConnectorCertificateVerifierProperties();
         assertThat(verifier).isNotNull();
 
@@ -57,7 +59,7 @@ public class ConnectorDssCertificateVerifierTest extends BaseDssTest {
     }
 
     @Test
-    void should_throw_exception_creating_common_trusted_certificate_source_if_validation_is_malformed_2() {
+    void should_fail_when_ignore_store_is_enabled_without_truststore() {
         var verifier = new ConnectorCertificateVerifierProperties();
         assertThat(verifier).isNotNull();
 

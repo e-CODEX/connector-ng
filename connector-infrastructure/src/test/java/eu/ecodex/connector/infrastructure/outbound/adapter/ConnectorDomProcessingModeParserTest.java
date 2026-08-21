@@ -209,7 +209,6 @@ public class ConnectorDomProcessingModeParserTest {
     @Nested
     @DisplayName("when the definition cannot be read")
     class UnreadableDefinition {
-
         static Stream<Arguments> emptyContents() {
             return Stream.of(
                 Arguments.of((Object) null),
@@ -245,7 +244,6 @@ public class ConnectorDomProcessingModeParserTest {
     @Nested
     @DisplayName("when the definition is structurally invalid")
     class InvalidDefinition {
-
         @Test
         void should_reject_a_root_element_without_a_party_attribute() {
             assertThatThrownBy(() -> parser.parse(xml("""

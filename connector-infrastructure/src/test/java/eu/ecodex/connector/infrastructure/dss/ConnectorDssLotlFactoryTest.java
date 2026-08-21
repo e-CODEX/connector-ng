@@ -12,15 +12,17 @@ package eu.ecodex.connector.infrastructure.dss;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssLotlFactory")
 public class ConnectorDssLotlFactoryTest extends BaseDssTest {
     @Autowired
     private ConnectorDssLotlFactory lotlFactory;
 
     @Test
-    void should_get_lotl_successfully() {
+    void should_retrieve_lotl() {
         var lotl = lotlFactory.getLotlSources();
         assertThat(lotl).isNotEmpty();
         assertThat(lotl.size()).isEqualTo(1);

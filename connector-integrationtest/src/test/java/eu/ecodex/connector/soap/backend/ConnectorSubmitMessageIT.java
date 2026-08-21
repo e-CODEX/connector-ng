@@ -17,13 +17,15 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.jdbc.Sql;
 
+@DisplayName("ConnectorSubmitMessageIT SOAP")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorSubmitMessageIT extends BackendServiceTest {
     @LocalServerPort
@@ -43,13 +45,13 @@ public class ConnectorSubmitMessageIT extends BackendServiceTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql"
     })
-    void should_submit_soap_outbound_message_successfully() {
+    void should_submit_outbound_message_via_soap() {
         var message = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
 
         var ack = soapClient.submitMessage(message);
@@ -61,14 +63,15 @@ public class ConnectorSubmitMessageIT extends BackendServiceTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql"
     })
-    void should_submit_soap_outbound_message_without_attachment_successfully() {
-        var message = SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();
+    void should_submit_soap_outbound_message_without_attachment() {
+        var message =
+            SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();
 
         var ack = soapClient.submitMessage(message);
 

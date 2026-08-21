@@ -13,12 +13,14 @@ package eu.ecodex.connector.domain.routing;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for the {@code ConnectorExpressionParser}.
  */
+@DisplayName("ConnectorMessageRoutingExpressionParser")
 public class ConnectorExpressionParserTest {
     @ParameterizedTest
     @ValueSource(strings = {

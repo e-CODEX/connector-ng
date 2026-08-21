@@ -16,136 +16,151 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
+@DisplayName("ConnectorActionRepository")
 @SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
 public class ConnectorActionRepositoryTest extends AbstractRepositoryTest {
+    private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
+        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
     @Autowired
     private ConnectorActionRepository repository;
 
-    // bulk saving
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    void should_bulk_save_actions_to_database() {
-        var action = ActionTestFixtures.createAction();
-
-        var savedAction = repository.saveAll(
-            List.of(action),
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(savedAction).isNotNull();
-        assertThat(savedAction).hasSize(1);
+    /**
+     * Reference data (business domain + processing mode), without actions.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+    })
+    private @interface WithProcessingModeData {
     }
 
-    @Test
-    void should_throw_null_pointer_exception_when_bulk_saving_actions_with_null_list_of_actions() {
-        assertThrows(
-            NullPointerException.class, () -> repository.saveAll(
-                null,
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_bulk_saving_actions_with_null_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.saveAll(
-                List.of(ActionTestFixtures.createAction()),
-                null
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_bulk_saving_actions_with_null_list_of_actions_and_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.saveAll(
-                null,
-                null
-            )
-        );
-    }
-
-    // find by name and business domain identifier
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/action.sql")
-    void should_find_action_by_name_and_business_domain_identifier_successfully_from_database() {
-        var action = repository.findByNameAndBusinessDomain(
-            "Test_Form",
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(action).isNotNull();
-        assertThat(action.name()).isEqualTo("Test_Form");
-    }
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/action.sql")
-    void should_return_null_when_searching_action_by_unknown_name_and_business_domain_identifier_from_database() {
-        var action = repository.findByNameAndBusinessDomain(
-            "Test_Form_Unknown",
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(action).isNull();
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_action_with_a_null_name_from_database() {
-        assertThrows(
-            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                null,
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_action_with_a_null_business_domain_identifier_from_database() {
-        assertThrows(
-            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                "Test_Form",
-                null
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_action_with_a_null_name_and_business_domain_identifier_from_database() {
-        assertThrows(
-            NullPointerException.class, () -> repository.findByNameAndBusinessDomain(
-                null,
-                null
-            )
-        );
-    }
-
-    // find all by business domain identifier
-
-    @Test
+    /**
+     * Reference data plus seeded actions.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
         "classpath:sql/action.sql",
     })
-    void should_find_all_actions_by_business_domain_identifier_successfully_from_database() {
-        var actions = repository.findAllByBusinessDomainIdentifier(
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
+    private @interface WithActionData {
+    }
 
-        assertThat(actions).isNotNull();
-        assertThat(actions).hasSize(31);
+    @Nested
+    @DisplayName("save all")
+    class SaveAll {
+        @Test
+        @WithProcessingModeData
+        void should_save_all_the_actions() {
+            var action = ActionTestFixtures.createAction();
+
+            var savedAction = repository.saveAll(List.of(action), DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(savedAction).isNotNull();
+            assertThat(savedAction).hasSize(1);
+        }
+
+        @Test
+        void should_fail_when_the_actions_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.saveAll(null, DEFAULT_BUSINESS_DOMAIN)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.saveAll(List.of(ActionTestFixtures.createAction()), null)
+            );
+        }
+
+        @Test
+        void should_fail_when_both_arguments_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.saveAll(null, null)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("find by name and business domain")
+    class FindByNameAndBusinessDomain {
+        @Test
+        @WithActionData
+        void should_find_the_action() {
+            var action =
+                repository.findByNameAndBusinessDomain("Test_Form", DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(action).isNotNull();
+            assertThat(action.name()).isEqualTo("Test_Form");
+        }
+
+        @Test
+        @WithActionData
+        void should_return_null_when_the_action_name_is_unknown() {
+            var action =
+                repository.findByNameAndBusinessDomain(
+                    "Test_Form_Unknown",
+                    DEFAULT_BUSINESS_DOMAIN
+                );
+
+            assertThat(action).isNull();
+        }
+
+        @Test
+        void should_fail_when_the_name_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByNameAndBusinessDomain(null, DEFAULT_BUSINESS_DOMAIN)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByNameAndBusinessDomain("Test_Form", null)
+            );
+        }
+
+        @Test
+        void should_fail_when_both_arguments_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByNameAndBusinessDomain(null, null)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("find all by business domain identifier")
+    class FindAllByBusinessDomainIdentifier {
+        @Test
+        @WithActionData
+        void should_find_all_the_actions() {
+            var actions = repository.findAllByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(actions).isNotNull();
+            assertThat(actions).hasSize(31);
+        }
     }
 }

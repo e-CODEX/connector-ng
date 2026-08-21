@@ -157,7 +157,7 @@ class ConnectorRegisterProcessingModeServiceTest {
     @DisplayName("when the registration is rejected")
     class Rejection {
         @Test
-        void should_throw_when_the_business_domain_does_not_exist() {
+        void should_fail_when_the_business_domain_does_not_exist() {
             when(businessDomainRepository.findByIdentifier(any())).thenReturn(null);
 
             assertThatExceptionOfType(ConnectorBusinessDomainNotFoundException.class)
@@ -173,7 +173,7 @@ class ConnectorRegisterProcessingModeServiceTest {
         }
 
         @Test
-        void should_throw_when_the_business_domain_already_has_a_processing_mode() {
+        void should_fail_when_the_business_domain_already_has_a_processing_mode() {
             when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
             when(processingModeRepository.findByBusinessDomainIdentifier(any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
@@ -209,7 +209,7 @@ class ConnectorRegisterProcessingModeServiceTest {
     @DisplayName("when arguments are null")
     class NullArguments {
         @Test
-        void should_throw_when_the_business_domain_identifier_is_null() {
+        void should_fail_when_the_business_domain_identifier_is_null() {
             assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> registerProcessingModeService.execute(null, processingMode));
 
@@ -220,7 +220,7 @@ class ConnectorRegisterProcessingModeServiceTest {
         }
 
         @Test
-        void should_throw_when_the_processing_mode_is_null() {
+        void should_fail_when_the_processing_mode_is_null() {
             assertThatExceptionOfType(NullPointerException.class)
                 .isThrownBy(() -> registerProcessingModeService.execute(
                     businessDomain.identifier(), null));

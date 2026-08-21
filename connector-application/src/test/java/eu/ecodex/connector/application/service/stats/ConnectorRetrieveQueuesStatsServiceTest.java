@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.QueuesStatsTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorQueueStatsProvider;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorRetrieveQueuesStatsService")
 public class ConnectorRetrieveQueuesStatsServiceTest {
     @Mock
     private ConnectorQueueStatsProvider queueStatsProvider;
@@ -31,7 +33,7 @@ public class ConnectorRetrieveQueuesStatsServiceTest {
     private ConnectorRetrieveQueuesStatsService service;
 
     @Test
-    void should_retrieve_queues_stats_successfully() {
+    void should_retrieve_queues_stats() {
         when(queueStatsProvider.getAllStats()).thenReturn(List.of(QueuesStatsTestFixtures.create()));
 
         var stats = service.execute();

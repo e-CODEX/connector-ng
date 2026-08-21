@@ -15,15 +15,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorRetrieveMessageStatsIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveMessageStatsIT extends AbstractIntegrationTest {
     @Autowired
@@ -36,15 +38,18 @@ public class ConnectorRetrieveMessageStatsIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
     })
-    void should_retrieve_connector_messages_stats_successfully() {
+    void should_retrieve_statistics_for_connector_messages() {
         apiClient.get()
                  .uri("/api/v1/admin/messages/stats")
                  .exchange()

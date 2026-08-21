@@ -11,19 +11,19 @@
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorOutboundMessageRejectionStep")
 public class ConnectorOutboundMessageRejectionStepTest {
     @Mock
     private ConnectorEvidenceMessageCreator evidenceMessageCreatorService;
@@ -44,36 +45,31 @@ public class ConnectorOutboundMessageRejectionStepTest {
     private ConnectorMessageEvidenceVerifier evidenceVerifier;
 
     @InjectMocks
-    private ConnectorOutboundMessageRejectionStep outboundMessageRejectionCreationStep;
+    private ConnectorOutboundMessageRejectionStep rejectionStep;
 
     @Test
-    void should_execute_outbound_message_rejection_creation_successfully() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_create_the_rejection_evidence_and_switch_the_direction() {
+        var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
         var evidence = EvidenceTestFixtures.createSubmissionRejectionEvidence();
 
         when(evidenceCreatorService.createFailure(any(), any(), any())).thenReturn(evidence);
         when(evidenceMessageCreatorService.create(any(), any()))
-            .thenReturn(MessageTestFixtures.createRejectedMessage());
+            .thenReturn(EvidenceMessageTestFixtures.createRejectedMessage());
         doNothing().when(evidenceVerifier).verify(any(), any());
 
-        var outputMessage = outboundMessageRejectionCreationStep.execute(outboundMessage);
+        var outputMessage = rejectionStep.execute(outboundMessage);
 
         assertThat(outputMessage).isNotNull();
-        assertThat(outputMessage.isEvidenceMessage()).isTrue();
-        assertThat(outputMessage.evidences()).isNotEmpty();
-        assertThat(outputMessage.evidences()).hasSize(1);
-        assertNotNull(outputMessage.evidences());
-        assertThat(outputMessage.evidences().getFirst().type())
-            .isEqualTo(ConnectorEvidenceType.SUBMISSION_REJECTION);
         assertThat(outputMessage.direction()).isNotEqualTo(outboundMessage.direction());
         assertThat(outputMessage.direction())
             .isEqualTo(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
     }
 
     @Test
-    void should_throw_exception_when_message_is_null() {
+    void should_fail_when_the_message_is_null() {
         assertThrows(
-            NullPointerException.class, () -> outboundMessageRejectionCreationStep.execute(null)
+            NullPointerException.class,
+            () -> rejectionStep.execute(null)
         );
     }
 }

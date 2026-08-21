@@ -18,6 +18,7 @@ import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+@DisplayName("ConnectorRegisterProcessingModeIT REST")
 @Sql(
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
@@ -47,7 +49,7 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
 
     @Test
     @Sql("classpath:sql/business-domain.sql")
-    void should_succeed_to_create_processing_mode() {
+    void should_return_201_when_creating_processing_mode() {
         var response = apiClient.post()
                                 .uri(URL)
                                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -58,12 +60,13 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
                                 .getResponseBody();
 
         assertThat(response).isNotNull();
+        assert response != null;
         assertThat(response.businessDomainIdentifier()).isEqualTo(BUSINESS_DOMAIN);
         assertThat(response.description()).isEqualTo(DESCRIPTION);
     }
 
     @Test
-    void should_fail_to_create_a_pmode_if_the_specified_business_domain_does_not_exist() {
+    void should_return_404_when_creating_pmode_with_non_existing_business_domain() {
         apiClient.post()
                  .uri(URL)
                  .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -88,7 +91,7 @@ public class ConnectorRegisterProcessingModeIT extends AbstractIntegrationTest {
 
     @Test
     @Sql("classpath:sql/business-domain.sql")
-    void should_fail_to_create_a_pmode_if_the_truststore_is_missing() {
+    void should_return_404_when_creating_pmode_with_missing_truststore() {
         var parts = creationParts(BUSINESS_DOMAIN);
         parts.remove("truststore.truststoreFile");
 

@@ -14,23 +14,22 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
 import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.application.service.message.ConnectorListPendingMessagesService;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
@@ -48,6 +47,8 @@ import org.apache.cxf.interceptor.InterceptorChain;
 import org.apache.cxf.jaxws.context.WrappedMessageContext;
 import org.apache.cxf.message.Message;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -56,10 +57,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorBackendWebServiceController")
 public class ConnectorBackendWebServiceControllerTest {
-    private static final String TRANSPORT_ID = "2921bed4-5587-488b-93a2-c048bc130a12@connector.ecodex.eu_backend_alice";
+    private static final String TRANSPORT_ID =
+        "2921bed4-5587-488b-93a2-c048bc130a12@connector.ecodex.eu_backend_alice";
+
     @Mock
-    private ConnectorOutboundMessageReceiver messageStagingService;
+    private ConnectorOutboundBusinessMessageReceiver messageStagingService;
+    @Mock
+    private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
     @Mock
     private ConnectorListPendingMessageIds listPendingMessageIdsService;
     @Mock
@@ -91,6 +97,7 @@ public class ConnectorBackendWebServiceControllerTest {
     void setUp() {
         backendWebService = new ConnectorBackendWebServiceController(
             messageStagingService,
+            outboundEvidenceMessageProcessor,
             listPendingMessageIdsService,
             listPendingMessagesService,
             retrieveMessageByTransportIdService,
@@ -100,161 +107,166 @@ public class ConnectorBackendWebServiceControllerTest {
             backendClientVerifierService,
             legacyMessageHelper
         );
-        // Inject @Resource field manually via reflection
+        // @Resource field isn't constructor-injected, so set it manually
         ReflectionTestUtils.setField(backendWebService, "webServiceContext", webServiceContext);
     }
 
-    // submit message from backend to the connector
-
-    @Test
-    void should_return_successful_ack_when_submitting_message_from_backend_to_the_connector() {
+    private void stubAuthenticatedBackendClient() {
         when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
         when(backendClientVerifierService.getBackendClient(any()))
             .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-        when(uploadAttachmentsService.execute(any()))
-            .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
-        // TODO set appropriate response
-        when(messageStagingService.execute(any()))
-            .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
-        when(backendClientVerifierService.getBackendClient(any()))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-
-        var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
-        var ack = backendWebService.submitMessage(payload);
-
-        assertThat(ack).isNotNull();
-        assertThat(ack.getMessageId()).isNotNull();
-        assertThat(ack.getMessageId()).isEqualTo(
-            "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
-        assertThat(ack.getMessageId()).isNotEmpty();
-        assertThat(ack.getResultMessage()).isNullOrEmpty();
-        assertThat(ack.isResult()).isTrue();
     }
 
-    @Test
-    void should_return_failure_ack_when_submitting_message_from_backend_to_the_connector_if_an_exception_occurs() {
-        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
-        when(backendClientVerifierService.getBackendClient(any()))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-        when(uploadAttachmentsService.execute(any()))
-            .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
+    @Nested
+    @DisplayName("submitMessage (backend -> connector)")
+    class SubmitMessage {
+        @Test
+        void should_return_a_successful_ack() {
+            stubAuthenticatedBackendClient();
+            when(uploadAttachmentsService.execute(any()))
+                .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
+            when(messageStagingService.execute(any()))
+                .thenReturn(BusinessMessageTestFixtures.createOutboundMessage());
 
-        when(messageStagingService.execute(any()))
-            .thenThrow(new RuntimeException("Error"));
+            var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
+            var ack = backendWebService.submitMessage(payload);
 
-        var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();
-        var ack = backendWebService.submitMessage(payload);
+            assertThat(ack).isNotNull();
+            assertThat(ack.getMessageId())
+                .isEqualTo("223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
+            assertThat(ack.getResultMessage()).isNullOrEmpty();
+            assertThat(ack.isResult()).isTrue();
+        }
 
-        assertThat(ack).isNotNull();
-        assertThat(ack.getMessageId()).isNullOrEmpty();
-        assertThat(ack.getResultMessage()).isNotNull();
-        assertThat(ack.isResult()).isFalse();
+        @Test
+        void should_return_a_failure_ack_when_an_exception_occurs() {
+            stubAuthenticatedBackendClient();
+            when(uploadAttachmentsService.execute(any()))
+                .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
+            when(messageStagingService.execute(any()))
+                .thenThrow(new RuntimeException("Error"));
+
+            var payload =
+                SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();
+            var ack = backendWebService.submitMessage(payload);
+
+            assertThat(ack).isNotNull();
+            assertThat(ack.getMessageId()).isNullOrEmpty();
+            assertThat(ack.getResultMessage()).isNotNull();
+            assertThat(ack.isResult()).isFalse();
+        }
     }
 
-    // list pending messages transport identifiers
+    @Nested
+    @DisplayName("listPendingMessageIds")
+    class ListPendingMessageIds {
+        @Test
+        void should_return_the_pending_message_ids() {
+            stubAuthenticatedBackendClient();
+            when(listPendingMessageIdsService.execute(any())).thenReturn(List.of(TRANSPORT_ID));
 
-    @Test
-    void should_list_pending_messages_identifiers_successfully() {
-        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
-        when(backendClientVerifierService.getBackendClient(any()))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-        when(listPendingMessageIdsService.execute(any())).thenReturn(List.of(TRANSPORT_ID));
+            var response = backendWebService.listPendingMessageIds(new EmptyRequestType());
 
-        var response = backendWebService.listPendingMessageIds(new EmptyRequestType());
-
-        assertThat(response).isNotNull();
-        assertThat(response.getMessageTransportIds()).isNotNull();
-        assertThat(response.getMessageTransportIds().size()).isEqualTo(1);
-        assertThat(response.getMessageTransportIds().getFirst())
-            .isEqualTo(TRANSPORT_ID);
+            assertThat(response).isNotNull();
+            assertThat(response.getMessageTransportIds()).containsExactly(TRANSPORT_ID);
+        }
     }
 
-    // get message by transport id
-    @Test
-    void should_retrieve_message_by_transport_id_successfully() {
-        var connectorMessage = mock(ConnectorMessage.class);
-        var expectedResult = new DomibusConnectorMessageType();
+    @Nested
+    @DisplayName("getMessageById")
+    class GetMessageById {
+        @Test
+        void should_return_the_message() {
+            var connectorMessage = BusinessMessageTestFixtures.createInboundMessage();
 
-        when(retrieveMessageByTransportIdService.execute(TRANSPORT_ID)).thenReturn(connectorMessage);
-        when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
-        when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
-        when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
-        when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
+            when(retrieveMessageByTransportIdService.execute(TRANSPORT_ID))
+                .thenReturn(connectorMessage);
+            when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
+            when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
+            when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
 
-        var request = new GetMessageByIdRequest();
-        request.setMessageTransportId(TRANSPORT_ID);
+            var expectedResult = new DomibusConnectorMessageType();
+            when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
 
-        var response = backendWebService.getMessageById(request);
+            var request = new GetMessageByIdRequest();
+            request.setMessageTransportId(TRANSPORT_ID);
 
-        assertThat(response).isNotNull();
-        verify(retrieveMessageByTransportIdService).execute(TRANSPORT_ID);
-        verify(legacyMessageHelper).convertMessage(connectorMessage);
+            var response = backendWebService.getMessageById(request);
 
-        var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessageAfterDownload.class);
-        verify(interceptorChain).add(interceptorCaptor.capture());
-        assertThat(interceptorCaptor.getValue()).isInstanceOf(ProcessMessageAfterDownload.class);
+            assertThat(response).isNotNull();
+            verify(retrieveMessageByTransportIdService).execute(TRANSPORT_ID);
+            verify(legacyMessageHelper).convertMessage(connectorMessage);
+
+            var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessageAfterDownload.class);
+            verify(interceptorChain).add(interceptorCaptor.capture());
+            assertThat(interceptorCaptor.getValue()).isInstanceOf(ProcessMessageAfterDownload.class);
+        }
+
+        @Test
+        void should_fail_when_the_message_is_not_found() {
+            var request = new GetMessageByIdRequest();
+            request.setMessageTransportId("UNKNOWN-ID");
+
+            when(retrieveMessageByTransportIdService.execute("UNKNOWN-ID"))
+                .thenThrow(new NotFoundException("not found"));
+
+            assertThatThrownBy(() -> backendWebService.getMessageById(request))
+                .isInstanceOf(NotFoundException.class);
+
+            verifyNoInteractions(webServiceContext, legacyMessageHelper);
+        }
     }
 
-    @Test
-    void should_throw_exception_when_retrieving_unknown_message_by_transport_id() {
-        var request = new GetMessageByIdRequest();
-        request.setMessageTransportId("UNKNOWN-ID");
+    @Nested
+    @DisplayName("requestMessages (list pending messages)")
+    class RequestMessages {
+        @Test
+        void should_return_the_pending_messages() {
+            var connectorMessage = BusinessMessageTestFixtures.createInboundMessage();
 
-        when(retrieveMessageByTransportIdService.execute("UNKNOWN-ID"))
-            .thenThrow(new NotFoundException("not found"));
+            when(listPendingMessagesService.execute("backend_alice"))
+                .thenReturn(List.of(connectorMessage));
+            stubAuthenticatedBackendClient();
+            when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
+            when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
+            when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
 
-        assertThatThrownBy(() -> backendWebService.getMessageById(request))
-            .isInstanceOf(NotFoundException.class);
+            var expectedResult = new DomibusConnectorMessageType();
+            when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
 
-        verifyNoInteractions(webServiceContext, legacyMessageHelper);
+            var response = backendWebService.requestMessages(new EmptyRequestType());
+
+            assertThat(response).isNotNull();
+            verify(listPendingMessagesService).execute("backend_alice");
+            verify(legacyMessageHelper).convertMessage(connectorMessage);
+
+            var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessagesAfterDownload.class);
+            verify(interceptorChain).add(interceptorCaptor.capture());
+            assertThat(interceptorCaptor.getValue())
+                .isInstanceOf(ProcessMessagesAfterDownload.class);
+        }
     }
 
-    // list pending messages
+    @Nested
+    @DisplayName("acknowledgeMessage")
+    class AcknowledgeMessage {
+        @Test
+        void should_acknowledge_a_successful_message() {
+            doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
 
-    @Test
-    void should_list_pending_messages_successfully() {
-        var connectorMessage = mock(ConnectorMessage.class);
-        var expectedResult = new DomibusConnectorMessageType();
+            var response = backendWebService.acknowledgeMessage(acknowledgeMessage(true));
 
-        when(listPendingMessagesService.execute("backend_alice")).thenReturn(List.of(
-            connectorMessage));
-        when(backendClientVerifierService.getBackendClient(any()))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-        when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
-        when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
-        when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
-        when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
-        when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
+            assertThat(response).isNotNull();
+        }
 
-        var response = backendWebService.requestMessages(new EmptyRequestType());
+        @Test
+        void should_acknowledge_a_failed_message() {
+            doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
 
-        assertThat(response).isNotNull();
-        verify(listPendingMessagesService).execute("backend_alice");
-        verify(legacyMessageHelper).convertMessage(connectorMessage);
+            var response = backendWebService.acknowledgeMessage(acknowledgeMessage(false));
 
-        var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessagesAfterDownload.class);
-        verify(interceptorChain).add(interceptorCaptor.capture());
-        assertThat(interceptorCaptor.getValue()).isInstanceOf(ProcessMessagesAfterDownload.class);
-    }
-
-    // acknowledge message
-
-    @Test
-    void should_acknowledge_message_with_success_status_successfully() {
-        doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
-
-        var response = backendWebService.acknowledgeMessage(acknowledgeMessage(true));
-
-        assertThat(response).isNotNull();
-    }
-
-    @Test
-    void should_acknowledge_message_with_failed_status_successfully() {
-        doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
-
-        var response = backendWebService.acknowledgeMessage(acknowledgeMessage(false));
-
-        assertThat(response).isNotNull();
+            assertThat(response).isNotNull();
+        }
     }
 
     private DomibusConnectorMessageResponseType acknowledgeMessage(boolean result) {

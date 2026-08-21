@@ -17,11 +17,13 @@ import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorLinkPartnerDto;
 import java.util.Arrays;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorListLinkPartnersIT REST")
 @Sql(
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
@@ -38,7 +40,7 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_list_the_connector_link_partners_successfully() {
+    void should_list_the_connector_link_partners() {
         var response = apiClient.get()
                                 .uri(URL)
                                 .exchange()
@@ -51,7 +53,7 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_list_the_connector_link_partners_based_on_filtering_successfully() {
+    void should_list_connector_link_partners_matching_filter() {
         var response = apiClient.get()
                                 .uri(URL.concat("?linkType=BACKEND"))
                                 .exchange()

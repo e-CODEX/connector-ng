@@ -16,11 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SuppressWarnings("DataFlowIssue")
+@DisplayName("ConnectorLinkPartnerRepository")
 @SpringBootTest(
     classes = RepositoryContextConfiguration.class,
     properties = {
@@ -55,47 +58,57 @@ public class ConnectorLinkPartnerRepositoryTest {
     @Autowired
     private ConnectorLinkPartnerRepository repository;
 
-    @Test
-    void should_load_link_partners_from_properties_successfully() {
-        var partners = repository.findAll();
+    @Nested
+    @DisplayName("find all")
+    class FindAll {
+        @Test
+        void should_load_all_the_link_partners_from_properties() {
+            var partners = repository.findAll();
 
-        assertThat(partners).isNotNull();
-        assertThat(partners).hasSize(2);
+            assertThat(partners).isNotNull();
+            assertThat(partners).hasSize(2);
+        }
     }
 
-    // find by name
+    @Nested
+    @DisplayName("find by name")
+    class FindByName {
+        @Test
+        void should_find_the_link_partner() {
+            var name = ConnectorLinkPartnerName.builder().name("backend_alice").build();
 
-    @Test
-    void should_find_link_partner_by_name_successfully() {
-        var name = ConnectorLinkPartnerName.builder().name("backend_alice").build();
+            var partner = repository.findByName(name);
 
-        var partner = this.repository.findByName(name);
+            assertThat(partner).isNotNull();
+            assertThat(partner.name()).isEqualTo(name);
+        }
 
-        assertThat(partner).isNotNull();
-        assertThat(partner.name()).isEqualTo(name);
+        @Test
+        void should_throw_when_the_name_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByName(null)
+            );
+        }
     }
 
-    @Test
-    void should_throw_null_pointer_exception_when_searching_link_partner_by_null_partner_name() {
-        assertThrows(
-            NullPointerException.class, () -> this.repository.findByName(null)
-        );
-    }
+    @Nested
+    @DisplayName("find by certificate DN")
+    class FindByCertificateDn {
+        @Test
+        void should_find_the_link_partner() {
+            var partner = repository.findByCertificateDn("cn=alice");
 
-    // find by certificate DN
+            assertThat(partner).isNotNull();
+            assertThat(partner.name().name()).isEqualTo("backend_alice");
+        }
 
-    @Test
-    void should_find_link_partner_by_certificate_dn_successfully() {
-        var partner = this.repository.findByCertificateDn("cn=alice");
-
-        assertThat(partner).isNotNull();
-        assertThat(partner.name().name()).isEqualTo("backend_alice");
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_link_partner_by_null_certificate_dn() {
-        assertThrows(
-            NullPointerException.class, () -> this.repository.findByCertificateDn(null)
-        );
+        @Test
+        void should_throw_when_the_certificate_dn_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByCertificateDn(null)
+            );
+        }
     }
 }

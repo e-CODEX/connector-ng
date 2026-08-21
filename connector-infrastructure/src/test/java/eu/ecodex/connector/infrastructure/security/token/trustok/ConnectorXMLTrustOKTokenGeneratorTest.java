@@ -12,8 +12,8 @@ package eu.ecodex.connector.infrastructure.security.token.trustok;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.infrastructure.outbound.security.token.trustok.xml.ConnectorXMLTrustOKTokenGenerator;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.ConnectorTokenValidationGenerator;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenValidationFactory;
@@ -21,10 +21,11 @@ import eu.ecodex.connector.infrastructure.security.SecurityUtil;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.InMemoryDocument;
-import java.io.IOException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorXMLTrustOKTokenGenerator")
 public class ConnectorXMLTrustOKTokenGeneratorTest extends BaseTokenTest {
     @Autowired
     private ConnectorXMLTrustOKTokenGenerator trustOKTokenGenerator;
@@ -34,8 +35,8 @@ public class ConnectorXMLTrustOKTokenGeneratorTest extends BaseTokenTest {
     private ConnectorTokenValidationFactory validationFactory;
 
     @Test
-    void should_create_xml_trust_ok_token_and_sign_it_successfully() throws IOException {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_create_and_sign_xml_trust_ok_token() {
+        var message = BusinessMessageTestFixtures.createOutboundMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);

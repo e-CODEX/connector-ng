@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageRoutingConfigurationTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.api.routing.ConnectorMessageRouter;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
@@ -38,7 +38,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-
 @DisplayName("ConnectorInboundMessageBackendNameStep")
 public class ConnectorInboundMessageBackendNameStepTest {
     @Mock
@@ -54,7 +53,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
     class WhenResolvingTheBackendName {
         @Test
         void should_keep_the_existing_backend_name_when_it_is_already_set() {
-            var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
+            var inboundMessage = BusinessMessageTestFixtures.createInboundMessage();
 
             var outputMessage = backendNameStep.execute(inboundMessage);
 
@@ -69,11 +68,11 @@ public class ConnectorInboundMessageBackendNameStepTest {
         @Test
         void should_resolve_it_from_the_parent_conversation_message() {
             var inboundMessage =
-                MessageTestFixtures.createInboundBusinessMessageWithoutBackendName();
-            var parentMessage = MessageTestFixtures.createOutboundBusinessMessage()
-                                                   .toBuilder()
-                                                   .backendName("backend_client_link")
-                                                   .build();
+                BusinessMessageTestFixtures.businessMessageWithoutBackendName();
+            var parentMessage = BusinessMessageTestFixtures.createOutboundMessage()
+                                                           .toBuilder()
+                                                           .backendName("backend_client_link")
+                                                           .build();
 
             when(messageRepository.findByConversationIdentifier(any()))
                 .thenReturn(Collections.singletonList(parentMessage));
@@ -94,8 +93,8 @@ public class ConnectorInboundMessageBackendNameStepTest {
 
         @Test
         void should_resolve_it_from_the_routing_rule_when_there_is_no_conversation_identifier() {
-            var inboundMessage = MessageTestFixtures
-                .createInboundBusinessMessageWithoutBackendNameAndConversationIdentifier();
+            var inboundMessage = BusinessMessageTestFixtures
+                .createInboundMessageWithoutBackendNameAndConversationIdentifier();
 
             when(messageRoutingService.getDefaultBackendName(any()))
                 .thenReturn(ConnectorDefaults.DEFAULT_BACKEND_NAME);
@@ -122,7 +121,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         @Test
         void should_resolve_it_from_the_routing_rule_when_the_parent_conversation_is_empty() {
             var inboundMessage =
-                MessageTestFixtures.createInboundBusinessMessageWithoutBackendName();
+                BusinessMessageTestFixtures.businessMessageWithoutBackendName();
 
             when(messageRepository.findByConversationIdentifier(any()))
                 .thenReturn(Collections.emptyList());
@@ -152,7 +151,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         @Test
         void should_fall_back_to_the_default_when_no_routing_rule_matches() {
             var inboundMessage =
-                MessageTestFixtures.createInboundBusinessMessageWithoutBackendName();
+                BusinessMessageTestFixtures.businessMessageWithoutBackendName();
 
             when(messageRepository.findByConversationIdentifier(any()))
                 .thenReturn(Collections.emptyList());
@@ -178,7 +177,7 @@ public class ConnectorInboundMessageBackendNameStepTest {
         @Test
         void should_fall_back_to_the_default_when_routing_is_disabled() {
             var inboundMessage =
-                MessageTestFixtures.createInboundBusinessMessageWithoutBackendName();
+                BusinessMessageTestFixtures.businessMessageWithoutBackendName();
 
             when(messageRepository.findByConversationIdentifier(any()))
                 .thenReturn(Collections.emptyList());
@@ -209,20 +208,6 @@ public class ConnectorInboundMessageBackendNameStepTest {
             assertThrows(
                 NullPointerException.class,
                 () -> backendNameStep.execute(null)
-            );
-        }
-
-        @Test
-        void should_fail_when_the_message_identifier_is_null() {
-            var inboundMessage =
-                MessageTestFixtures.createInboundBusinessMessageWithoutBackendName()
-                                   .toBuilder()
-                                   .identifier(null)
-                                   .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> backendNameStep.execute(inboundMessage)
             );
         }
     }

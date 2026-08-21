@@ -19,6 +19,8 @@ import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,9 +28,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorRetrieveTransportStepService")
 public class ConnectorRetrieveTransportStepServiceTest {
-    private static final String MESSAGE_ID = "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
+    private static final String MESSAGE_ID =
+        "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
 
     @Mock
     private ConnectorMessageTransportStepRepository transportStepRepository;
@@ -36,34 +41,44 @@ public class ConnectorRetrieveTransportStepServiceTest {
     @InjectMocks
     private ConnectorRetrieveTransportStepService retrieveTransportStepService;
 
-    @Test
-    void should_throw_exception_if_message_identifier_is_null() {
-        assertThrows(
-            NullPointerException.class, () -> retrieveTransportStepService.execute(null)
-        );
+    @Nested
+    @DisplayName("when retrieval succeeds")
+    class WhenRetrievalSucceeds {
+        @Test
+        void should_retrieve_the_transport_step() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(TransportStepFixtures.createTransportStep());
+
+            var transportStep = retrieveTransportStepService.execute(MESSAGE_ID);
+
+            assertThat(transportStep).isNotNull();
+            assertThat(transportStep.transportedMessageIdentifier()).isEqualTo(MESSAGE_ID);
+            assertThat(transportStep.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
+            assertThat(transportStep.statuses()).isNotEmpty();
+            assertThat(transportStep.numberOfAttempts()).isEqualTo(0);
+        }
     }
 
-    @Test
-    void should_throw_exception_if_message_transport_step_is_not_found() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any())).thenReturn(null);
+    @Nested
+    @DisplayName("when retrieval fails")
+    class WhenRetrievalFails {
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> retrieveTransportStepService.execute(null)
+            );
+        }
 
-        assertThrows(
-            ConnectorMessageTransportStepNotFoundException.class,
-            () -> retrieveTransportStepService.execute(MESSAGE_ID)
-        );
-    }
+        @Test
+        void should_fail_when_the_transport_step_is_not_found() {
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any()))
+                .thenReturn(null);
 
-    @Test
-    void should_retrieve_message_transport_step_successfully() {
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
-            .thenReturn(TransportStepFixtures.createTransportStep());
-
-        var transportStep = retrieveTransportStepService.execute(MESSAGE_ID);
-
-        assertThat(transportStep).isNotNull();
-        assertThat(transportStep.transportedMessageIdentifier()).isEqualTo(MESSAGE_ID);
-        assertThat(transportStep.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
-        assertThat(transportStep.statuses()).isNotEmpty();
-        assertThat(transportStep.numberOfAttempts()).isEqualTo(0);
+            assertThrows(
+                ConnectorMessageTransportStepNotFoundException.class,
+                () -> retrieveTransportStepService.execute(MESSAGE_ID)
+            );
+        }
     }
 }

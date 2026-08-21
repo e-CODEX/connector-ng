@@ -13,27 +13,33 @@ package eu.ecodex.connector.soap.backend;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
+@DisplayName("ConnectorGetPendingMessagesIT SOAP")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorGetPendingMessagesIT extends BackendServiceTest {
     @LocalServerPort
     private int port;
     @MockitoBean
     private ConnectorSetMessagesTransportStepToDownload setMessagesTransportStepToDownloadService;
+    @MockitoBean
+    private ConnectorFileStorageProvider fileStorageProvider;
 
     private DomibusConnectorBackendWebService soapClient;
 
@@ -49,18 +55,22 @@ public class ConnectorGetPendingMessagesIT extends BackendServiceTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
     })
-    void should_retrieve_all_pending_messages_successfully() {
+    void should_retrieve_all_pending_messages() {
         doNothing().when(setMessagesTransportStepToDownloadService).execute(any());
+        when(fileStorageProvider.findByIdentifier(any())).thenReturn(new byte[3]);
 
         var response = soapClient.requestMessages(new EmptyRequestType());
 

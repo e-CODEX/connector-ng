@@ -12,18 +12,21 @@ package eu.ecodex.connector.infrastructure.dss;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssTrustedListFactory")
 public class ConnectorDssTrustedListFactoryTest extends BaseDssTest {
     @Autowired
     private ConnectorDssTrustedListFactory trustedListFactory;
 
     @Test
-    void should_get_trusted_list_sources_successfully() {
+    void should_get_trusted_list_sources() {
         var trustedLists = trustedListFactory.getTrustedListSources();
         assertThat(trustedLists).isNotEmpty();
         assertThat(trustedLists.size()).isEqualTo(1);
-        assertThat(trustedLists.getFirst().getUrl()).isEqualTo("https://www.signature.rtr.at/currenttl.xml");
+        assertThat(trustedLists.getFirst().getUrl())
+            .isEqualTo("https://www.signature.rtr.at/currenttl.xml");
     }
 }

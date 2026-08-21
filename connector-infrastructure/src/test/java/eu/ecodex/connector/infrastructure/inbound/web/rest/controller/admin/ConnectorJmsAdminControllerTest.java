@@ -21,6 +21,7 @@ import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesSta
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.jms.ConnectorJmsAdminController;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -28,6 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@DisplayName("ConnectorJmsAdminController")
 @WebMvcTest(ConnectorJmsAdminController.class)
 public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
     private static final String BASE_URL = "/api/v1/admin/jms/queues/stats";
@@ -39,7 +41,7 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
     private MockMvc mockMvc;
 
     @Test
-    void should_retrieve_jms_queues_stats() throws Exception {
+    void should_return_200_with_the_queue_stats() throws Exception {
         when(retrieveQueuesStatsService.execute())
             .thenReturn(List.of(QueuesStatsTestFixtures.create()));
 

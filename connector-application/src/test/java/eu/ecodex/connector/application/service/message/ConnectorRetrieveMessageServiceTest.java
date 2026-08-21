@@ -15,9 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorRetrieveMessageService")
 public class ConnectorRetrieveMessageServiceTest {
     @Mock
     private ConnectorMessageRepository messageRepository;
@@ -33,33 +36,41 @@ public class ConnectorRetrieveMessageServiceTest {
     @InjectMocks
     private ConnectorRetrieveMessageService retrieveMessageService;
 
-    @Test
-    void should_throw_null_pointer_exception_if_message_identifier_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> retrieveMessageService.execute(null)
-        );
+    @Nested
+    @DisplayName("when retrieval succeeds")
+    class WhenRetrievalSucceeds {
+        @Test
+        void should_return_the_message() {
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
+            when(messageRepository.findByIdentifier(any())).thenReturn(message);
+
+            var retrievedMessage = retrieveMessageService.execute(
+                "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
+
+            assertThat(retrievedMessage).isNotNull();
+            assertThat(retrievedMessage).isEqualTo(message);
+        }
     }
 
-    @Test
-    void should_throw_exception_if_message_is_not_found() {
-        when(messageRepository.findByIdentifier(any())).thenReturn(null);
+    @Nested
+    @DisplayName("when retrieval fails")
+    class WhenRetrievalFails {
+        @Test
+        void should_fail_when_the_message_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> retrieveMessageService.execute(null)
+            );
+        }
 
-        assertThrows(
-            ConnectorMessageNotFoundException.class,
-            () -> retrieveMessageService.execute("message-identifier")
-        );
-    }
+        @Test
+        void should_fail_when_the_message_is_not_found() {
+            when(messageRepository.findByIdentifier(any())).thenReturn(null);
 
-    @Test
-    void should_retrieve_message_by_identifier_successfully() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        when(messageRepository.findByIdentifier(any())).thenReturn(message);
-
-        var retrievedMessage = retrieveMessageService.execute(
-            "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu");
-
-        assertThat(retrievedMessage).isNotNull();
-        assertThat(retrievedMessage).isEqualTo(message);
+            assertThrows(
+                ConnectorMessageNotFoundException.class,
+                () -> retrieveMessageService.execute("message-identifier")
+            );
+        }
     }
 }

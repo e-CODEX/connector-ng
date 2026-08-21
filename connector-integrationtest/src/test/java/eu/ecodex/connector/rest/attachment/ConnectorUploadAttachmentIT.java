@@ -18,8 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-@DisplayName("ConnectorAttachmentIT REST")
-public class ConnectorAttachmentIT extends AbstractIntegrationTest {
+@DisplayName("ConnectorUploadAttachmentIT REST")
+public class ConnectorUploadAttachmentIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 
@@ -30,7 +30,7 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
 
     @Test
     void should_return_201_when_uploading_attachment() {
-        var parts = produceAttachmentPart(MediaType.APPLICATION_PDF, 150);
+        var parts = produceAttachmentPart(150);
 
         apiClient.post()
                  .uri("/api/v1/attachments/upload")
@@ -43,7 +43,7 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
 
     @Test
     void should_fail_to_upload_attachment_when_payload_exceeds_200_mb() {
-        var parts = produceAttachmentPart(MediaType.APPLICATION_PDF, 201);
+        var parts = produceAttachmentPart(201);
 
         apiClient.post()
                  .uri("/api/v1/attachments/upload")

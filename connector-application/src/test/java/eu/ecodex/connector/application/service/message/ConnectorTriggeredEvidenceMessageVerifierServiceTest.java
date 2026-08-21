@@ -13,174 +13,107 @@ package eu.ecodex.connector.application.service.message;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import org.junit.jupiter.api.BeforeEach;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
 @ExtendWith(MockitoExtension.class)
-public class ConnectorVerifyTriggeredEvidenceServiceTest {
+@DisplayName("ConnectorTriggeredEvidenceMessageVerifierService")
+public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
     private static final String REF_ID = "ref-message-001";
+    private static final String BACKEND_ID =
+        "b27c88a3-31f8-4a09-baec-80361f813aeb@connector.ecodex.eu";
     private static final ConnectorMessageDirection TRIGGER_DIRECTION =
         ConnectorMessageDirection.BACKEND_TO_GATEWAY;
-
-    private static final ConnectorMessageDirection INVERTED_DIRECTION =
-        ConnectorMessageDirection.GATEWAY_TO_BACKEND;
 
     @Mock
     private ConnectorMessageRepository messageRepository;
 
     @InjectMocks
-    private ConnectorVerifyTriggeredEvidenceService service;
+    private ConnectorTriggeredEvidenceMessageVerifierService service;
 
-    private ConnectorEvidenceMessage triggerMessage;
-    private ConnectorBusinessMessage businessMessage;
-
-    @BeforeEach
-    void setUp() {
-        triggerMessage = mock(ConnectorEvidenceMessage.class);
-        businessMessage = mock(ConnectorBusinessMessage.class);
-
-        var as4Properties = mock(ConnectorMessageAS4Properties.class);
-        lenient().when(triggerMessage.as4Properties()).thenReturn(as4Properties);
-        lenient().when(as4Properties.referenceToIdentifier()).thenReturn(REF_ID);
-        lenient().when(triggerMessage.direction()).thenReturn(TRIGGER_DIRECTION);
-        lenient().when(businessMessage.direction()).thenReturn(INVERTED_DIRECTION);
+    private ConnectorBusinessMessage inboundBusinessMessage() {
+        return BusinessMessageTestFixtures.createInboundMessage();
     }
 
-    @Test
-    void verify_should_throw_exception_when_both_ref_ids_are_blank() {
-        var as4Properties = mock(ConnectorMessageAS4Properties.class);
-        when(triggerMessage.as4Properties()).thenReturn(as4Properties);
-        when(as4Properties.referenceToIdentifier()).thenReturn("");
-        when(triggerMessage.referenceToBackendMessageIdentifier()).thenReturn("  ");
-
-        assertThatThrownBy(() -> service.verify(triggerMessage))
-            .isInstanceOf(ConnectorEvidenceException.class)
-            .hasMessageContaining("refToMessageId");
+    private ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage(
+        String referenceToIdentifier,
+        String backendMessageIdentifier) {
+        return ConnectorTriggeredEvidenceMessage
+            .builder()
+            .identifier("2df7c881-5548-4edd-8bcd-868af750b859@connector.ecodex.eu")
+            .backendMessageIdentifier(backendMessageIdentifier)
+            .referenceToBackendMessageIdentifier(backendMessageIdentifier)
+            .backendName("backend_alice")
+            .direction(TRIGGER_DIRECTION)
+            .evidenceType(ConnectorEvidenceType.DELIVERY)
+            .referenceToIdentifier(referenceToIdentifier)
+            .build();
     }
 
-    @Test
-    void should_fallback_to_backend_message_id_when_as4_ref_id_is_blank() {
-        var as4Properties = mock(ConnectorMessageAS4Properties.class);
-        when(triggerMessage.as4Properties()).thenReturn(as4Properties);
-        when(as4Properties.referenceToIdentifier()).thenReturn("");
-        when(triggerMessage.referenceToBackendMessageIdentifier()).thenReturn(REF_ID);
-        when(triggerMessage.direction()).thenReturn(TRIGGER_DIRECTION);
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(businessMessage);
-
-        assertThatNoException().isThrownBy(() -> service.verify(triggerMessage));
+    @Nested
+    @DisplayName("when the reference is invalid")
+    class WhenReferenceIsInvalid {
+        @Test
+        void should_fail_when_both_reference_ids_are_blank() {
+            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage("", "")))
+                .isInstanceOf(ConnectorEvidenceException.class)
+                .hasMessageContaining("refToMessageId");
+        }
     }
 
-    @Test
-    void should_throw_exception_when_direction_is_null() {
-        when(triggerMessage.direction()).thenReturn(null);
+    @Nested
+    @DisplayName("when no referenced message is found")
+    class WhenNoMessageIsFound {
+        @Test
+        void should_fail_when_no_message_matches() {
+            when(messageRepository.findReferencedBusinessMessage(REF_ID, TRIGGER_DIRECTION))
+                .thenReturn(null);
 
-        assertThatThrownBy(() -> service.verify(triggerMessage))
-            .isInstanceOf(ConnectorEvidenceException.class)
-            .hasMessageContaining("direction");
+            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage(REF_ID, "")))
+                .isInstanceOf(ConnectorMessageNotFoundException.class)
+                .hasMessageContaining(REF_ID);
+        }
     }
 
-    @Test
-    void should_find_by_ebms_id_first() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(businessMessage);
+    @Nested
+    @DisplayName("when the referenced message is found")
+    class WhenMessageIsFound {
+        @Test
+        void should_succeed_when_the_direction_is_gateway_to_backend() {
+            when(messageRepository.findReferencedBusinessMessage(BACKEND_ID, TRIGGER_DIRECTION))
+                .thenReturn(inboundBusinessMessage());
 
-        assertThatNoException().isThrownBy(() -> service.verify(triggerMessage));
+            assertThatNoException()
+                .isThrownBy(() -> service.verify(triggeredEvidenceMessage("", BACKEND_ID)));
+        }
 
-        verify(messageRepository).findByEbmsMessageIdentifierAndDirection(
-            REF_ID,
-            INVERTED_DIRECTION
-        );
-        verify(messageRepository, never()).findByBackendMessageIdentifier(any());
-        verify(messageRepository, never()).findByIdentifier(any());
-    }
+        @Test
+        void should_fail_when_the_direction_is_not_gateway_to_backend() {
+            when(messageRepository.findReferencedBusinessMessage(BACKEND_ID, TRIGGER_DIRECTION))
+                .thenReturn(inboundBusinessMessage().toBuilder()
+                                                    .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                                                    .build());
 
-    @Test
-    void should_find_by_backend_id_when_ebms_returns_null() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(null);
-        when(messageRepository.findByBackendMessageIdentifier(REF_ID))
-            .thenReturn(businessMessage);
-
-        assertThatNoException().isThrownBy(() -> service.verify(triggerMessage));
-
-        verify(messageRepository).findByBackendMessageIdentifier(REF_ID);
-        verify(messageRepository, never()).findByIdentifier(any());
-    }
-
-    @Test
-    void should_find_by_connector_id_when_ebms_and_backend_return_null() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(null);
-        when(messageRepository.findByBackendMessageIdentifier(REF_ID))
-            .thenReturn(null);
-        when(messageRepository.findByIdentifier(REF_ID))
-            .thenReturn(businessMessage);
-
-        assertThatNoException().isThrownBy(() -> service.verify(triggerMessage));
-
-        verify(messageRepository).findByIdentifier(REF_ID);
-    }
-
-    @Test
-    void should_throw_exception_when_no_message_found_by_any_strategy() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(any(), any()))
-            .thenReturn(null);
-        when(messageRepository.findByBackendMessageIdentifier(any())).thenReturn(null);
-        when(messageRepository.findByIdentifier(any())).thenReturn(null);
-
-        assertThatThrownBy(() -> service.verify(triggerMessage))
-            .isInstanceOf(ConnectorMessageNotFoundException.class)
-            .hasMessageContaining(REF_ID);
-    }
-
-    @Test
-    void should_succeed_when_business_message_direction_is_gateway_to_backend() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(businessMessage);
-        when(businessMessage.direction()).thenReturn(ConnectorMessageDirection.GATEWAY_TO_BACKEND);
-
-        assertThatNoException().isThrownBy(() -> service.verify(triggerMessage));
-    }
-
-    @Test
-    void should_throw_exception_when_business_message_direction_is_null() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(businessMessage);
-        when(businessMessage.direction()).thenReturn(null);
-
-        assertThatThrownBy(() -> service.verify(triggerMessage))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("direction cannot be null");
-    }
-
-    @Test
-    void should_throw_exception_when_business_message_direction_is_not_gateway_to_backend() {
-        when(messageRepository.findByEbmsMessageIdentifierAndDirection(REF_ID, INVERTED_DIRECTION))
-            .thenReturn(businessMessage);
-        when(businessMessage.direction()).thenReturn(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
-
-        assertThatThrownBy(() -> service.verify(triggerMessage))
-            .isInstanceOf(ConnectorEvidenceException.class)
-            .hasMessageContaining("GATEWAY_TO_BACKEND")
-            .hasMessageContaining("BACKEND_TO_GATEWAY");
+            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage("", BACKEND_ID)))
+                .isInstanceOf(ConnectorEvidenceException.class)
+                .hasMessageContaining("GATEWAY_TO_BACKEND")
+                .hasMessageContaining("BACKEND_TO_GATEWAY");
+        }
     }
 }

@@ -16,15 +16,17 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorRetrieveMessageIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
     @Autowired
@@ -37,17 +39,19 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/attachment.sql",
-            "classpath:sql/evidence.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/evidence.sql"
     })
-    void should_retrieve_a_connector_messages_successfully() {
+    void should_retrieve_connector_message() {
         var messageId = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
         apiClient.get()
                  .uri(buildUrl(messageId))
@@ -68,7 +72,7 @@ public class ConnectorRetrieveMessageIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_throw_404_not_found_when_retrieving_a_non_existing_connector_message() {
+    void should_return_404_when_retrieving_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient.get()
                  .uri(buildUrl(messageId))

@@ -10,95 +10,113 @@
 
 package eu.ecodex.connector.infrastructure.dss;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.domain.model.security.KeystoreType;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import eu.europa.esig.dss.enumerations.CertificateSourceType;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssCertificateSourceLoader")
 public class ConnectorDssCertificateSourceLoaderTest extends BaseDssTest {
     @Autowired
     private ConnectorDssCertificateSourceLoader certificateSourceLoader;
 
-    // certificate source
-
-    @Test
-    void should_create_certificate_source_successfully() {
+    private KeystoreProperties keystoreProperties(
+        String path,
+        KeystoreType type
+    ) {
         var properties = new KeystoreProperties();
-        properties.setPath("classpath:keystores/connector-keystore.jks");
+        properties.setPath(path);
         properties.setPassword("12345");
-        properties.setType(KeystoreType.JKS);
-
-        var source = certificateSourceLoader.createCertificateSource(properties);
-        assertThat(source).isNotNull();
-
-        var token = source.getCertificate("connector_blue");
-
-        assertThat(token).isNotNull();
-        assertThat(token.isSelfSigned()).isTrue();
+        properties.setType(type);
+        return properties;
     }
 
-    @Test
-    void should_fail_to_create_certificate_source_if_path_is_null() {
-        var properties = new KeystoreProperties();
-        properties.setPath(null);
-        properties.setPassword("12345");
-        properties.setType(KeystoreType.PKCS12);
+    @Nested
+    @DisplayName("certificate source")
+    class CertificateSource {
+        @Test
+        void should_create_certificate_source() {
+            var properties = keystoreProperties(
+                "classpath:keystores/connector-keystore.jks",
+                KeystoreType.JKS
+            );
 
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> certificateSourceLoader.createCertificateSource(properties)
-        );
+            var source = certificateSourceLoader.createCertificateSource(properties);
+
+            assertThat(source).isNotNull();
+
+            var token = source.getCertificate("connector_blue");
+
+            assertThat(token).isNotNull();
+            assertThat(token.isSelfSigned()).isTrue();
+        }
+
+        @Test
+        void should_fail_when_keystore_path_is_null() {
+            var properties = keystoreProperties(
+                null,
+                KeystoreType.PKCS12
+            );
+
+            assertThatThrownBy(
+                () -> certificateSourceLoader.createCertificateSource(properties)
+            )
+                .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void should_fail_when_keystore_path_is_empty() {
+            var properties = keystoreProperties("", KeystoreType.PKCS12);
+
+            assertThatThrownBy(
+                () -> certificateSourceLoader.createCertificateSource(properties)
+            )
+                .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void should_fail_when_keystore_path_is_invalid() {
+            var properties = keystoreProperties(
+                "classpath:keystores/unknown-keystore.jks",
+                KeystoreType.PKCS12
+            );
+
+            assertThatThrownBy(
+                () -> certificateSourceLoader.createCertificateSource(properties)
+            )
+                .isInstanceOf(IllegalStateException.class);
+        }
     }
 
-    @Test
-    void should_fail_to_create_certificate_source_if_path_is_empty() {
-        var properties = new KeystoreProperties();
-        properties.setPath("");
-        properties.setPassword("12345");
-        properties.setType(KeystoreType.PKCS12);
+    @Nested
+    @DisplayName("common trusted certificate source")
+    class CommonTrustedCertificateSource {
+        @Test
+        void should_create_trusted_certificate_source() {
+            var properties = keystoreProperties(
+                "classpath:keystores/connector-keystore.jks",
+                KeystoreType.JKS
+            );
 
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> certificateSourceLoader.createCertificateSource(properties)
-        );
-    }
+            var trustedCertificateSource =
+                certificateSourceLoader.createCommonTrustedCertificateSource(properties);
 
-    @Test
-    void should_fail_to_create_certificate_source_if_path_is_invalid() {
-        var properties = new KeystoreProperties();
-        properties.setPath("classpath:keystores/unknown-keystore.jks");
-        properties.setPassword("12345");
-        properties.setType(KeystoreType.PKCS12);
+            assertThat(trustedCertificateSource).isNotNull();
+            assertThat(trustedCertificateSource.getCertificateSourceType())
+                .isEqualTo(CertificateSourceType.TRUSTED_STORE);
 
-        assertThrows(
-            IllegalStateException.class,
-            () -> certificateSourceLoader.createCertificateSource(properties)
-        );
-    }
+            var token = certificateSourceLoader
+                .createCertificateSource(properties)
+                .getCertificate("connector_blue");
 
-    // common trusted source
-
-    @Test
-    void should_create_common_trusted_certificate_source_successfully() {
-        var properties = new KeystoreProperties();
-        properties.setPath("classpath:keystores/connector-keystore.jks");
-        properties.setPassword("12345");
-        properties.setType(KeystoreType.JKS);
-
-        var trustedCertificateSource = certificateSourceLoader.createCommonTrustedCertificateSource(
-            properties);
-        assertThat(trustedCertificateSource).isNotNull();
-        assertThat(trustedCertificateSource.getCertificateSourceType()).isEqualTo(
-            CertificateSourceType.TRUSTED_STORE);
-
-        var token = certificateSourceLoader.createCertificateSource(properties).getCertificate(
-            "connector_blue");
-
-        assertThat(trustedCertificateSource.isTrusted(token)).isTrue();
+            assertThat(trustedCertificateSource.isTrusted(token)).isTrue();
+        }
     }
 }
 

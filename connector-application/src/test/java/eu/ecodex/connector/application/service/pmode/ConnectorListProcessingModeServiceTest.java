@@ -31,7 +31,7 @@ public class ConnectorListProcessingModeServiceTest {
     private ConnectorListProcessingModeService processingModeService;
 
     @Test
-    void should_return_all_processing_modes_successfully() {
+    void should_return_all_processing_modes() {
         when(processingModeRepository.findAll())
             .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
 

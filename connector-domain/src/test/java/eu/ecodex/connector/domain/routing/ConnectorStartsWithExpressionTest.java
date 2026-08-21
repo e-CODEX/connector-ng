@@ -12,26 +12,28 @@ package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@code ConnectorStartsWithExpression}.
  */
+@DisplayName("ConnectorMessageRoutingStartsWithExpression")
 public class ConnectorStartsWithExpressionTest {
     @Test
-    void should_successfully_check_if_as4_attribute_starts_with_the_given_value() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_return_true_when_as4_attribute_starts_with_given_value() {
+        var message = BusinessMessageTestFixtures.createOutboundMessage();
         var startsWithExpression = new ConnectorStartsWithExpression(
-                TokenType.AS4_ACTION, "ConTest"
+            TokenType.AS4_ACTION, "ConTest"
         );
         var evaluationResult = startsWithExpression.evaluate(message);
         assertThat(evaluationResult).isTrue();
     }
 
     @Test
-    void should_fail_to_check_if_as4_attribute_starts_with_the_given_value() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_return_false_when_as4_attribute_does_not_start_with_given_value() {
+        var message = BusinessMessageTestFixtures.createOutboundMessage();
         var startsWithExpression = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Hello");
         var evaluationResult = startsWithExpression.evaluate(message);
         assertThat(evaluationResult).isFalse();

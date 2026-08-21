@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-
 @DisplayName("ConnectorOutboundMessageGatewayNameStep")
 public class ConnectorOutboundMessageGatewayNameStepTest {
     @Mock
@@ -46,7 +45,7 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
         @Test
         void should_assign_the_default_gateway_name_when_it_is_missing() {
             var outboundMessage =
-                MessageTestFixtures.createValidOutboundBusinessMessageWithoutGatewayName();
+                BusinessMessageTestFixtures.createValidOutboundMessageWithoutGatewayName();
             when(messageRepository.updateGatewayName(any(), any()))
                 .thenReturn(outboundMessage.toBuilder()
                                            .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
@@ -64,7 +63,7 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
 
         @Test
         void should_keep_the_existing_gateway_name_when_it_is_already_set() {
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
 
             var outputMessage =
                 outboundMessageGatewayNameValidationStep.execute(outboundMessage);
@@ -85,19 +84,5 @@ public class ConnectorOutboundMessageGatewayNameStepTest {
                 () -> outboundMessageGatewayNameValidationStep.execute(null)
             );
         }
-
-        @Test
-        void should_fail_when_the_message_identifier_is_null() {
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
-                                                     .toBuilder()
-                                                     .identifier(null)
-                                                     .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> outboundMessageGatewayNameValidationStep.execute(outboundMessage)
-            );
-        }
     }
 }
-

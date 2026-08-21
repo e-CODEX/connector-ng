@@ -60,9 +60,11 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.core.io.DefaultResourceLoader;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorBusinessDomainInitializer")
 public class ConnectorBusinessDomainInitializerTest {
-    private static final String PMODE_CONTENT = "<configuration party=\"blue_gw\"/>";
-    private static final byte[] TRUSTSTORE_CONTENT = "keystore-bytes".getBytes(StandardCharsets.UTF_8);
+    private static final String P_MODE_CONTENT = "<configuration party=\"blue_gw\"/>";
+    private static final byte[] TRUSTSTORE_CONTENT =
+        "keystore-bytes".getBytes(StandardCharsets.UTF_8);
     private static final String TRUSTSTORE_PASSWORD = "changeit";
 
     @Mock
@@ -89,15 +91,15 @@ public class ConnectorBusinessDomainInitializerTest {
         return props;
     }
 
-    private static DefaultBusinessDomainProperties withProcessingMode(
-        String identifier, Path tempDir) throws IOException {
-        var pmodeFile = tempDir.resolve("pmode.xml");
+    private static DefaultBusinessDomainProperties withProcessingMode(Path tempDir)
+        throws IOException {
+        var processingModeFile = tempDir.resolve("pmode.xml");
         var truststoreFile = tempDir.resolve("truststore.jks");
-        Files.writeString(pmodeFile, PMODE_CONTENT);
+        Files.writeString(processingModeFile, P_MODE_CONTENT);
         Files.write(truststoreFile, TRUSTSTORE_CONTENT);
 
-        var props = properties(identifier, "Domain " + identifier, true);
-        props.getPmode().setFile("file:" + pmodeFile);
+        var props = properties("domain-a", "Domain " + "domain-a", true);
+        props.getPmode().setFile("file:" + processingModeFile);
         props.getPmode().setTruststore("file:" + truststoreFile);
         props.getPmode().setTruststorePassword(TRUSTSTORE_PASSWORD);
 
@@ -228,10 +230,11 @@ public class ConnectorBusinessDomainInitializerTest {
     @DisplayName("when a processing mode is configured")
     class ProcessingModeConfigured {
         @Test
-        void should_register_the_processing_mode_with_its_content_and_truststore(@TempDir Path tempDir)
+        void should_register_the_processing_mode_with_its_content_and_truststore(
+            @TempDir Path tempDir)
             throws IOException {
             when(domainProperties.getDefaults())
-                .thenReturn(List.of(withProcessingMode("domain-a", tempDir)));
+                .thenReturn(List.of(withProcessingMode(tempDir)));
 
             initializer.run(applicationArguments);
 
@@ -243,7 +246,7 @@ public class ConnectorBusinessDomainInitializerTest {
             assertThat(identifier.getValue().messageLaneIdentifier()).isEqualTo("domain-a");
 
             var registered = processingMode.getValue();
-            assertThat(registered.content()).isEqualTo(PMODE_CONTENT);
+            assertThat(registered.content()).isEqualTo(P_MODE_CONTENT);
             assertThat(registered.filename()).isEqualTo("pmode.xml");
             assertThat(registered.description()).contains("domain-a");
 
@@ -259,7 +262,7 @@ public class ConnectorBusinessDomainInitializerTest {
         void should_register_the_domain_before_its_processing_mode(@TempDir Path tempDir)
             throws IOException {
             when(domainProperties.getDefaults())
-                .thenReturn(List.of(withProcessingMode("domain-a", tempDir)));
+                .thenReturn(List.of(withProcessingMode(tempDir)));
 
             initializer.run(applicationArguments);
 
@@ -273,7 +276,7 @@ public class ConnectorBusinessDomainInitializerTest {
         void should_skip_a_processing_mode_that_is_already_registered(@TempDir Path tempDir)
             throws IOException {
             when(domainProperties.getDefaults())
-                .thenReturn(List.of(withProcessingMode("domain-a", tempDir)));
+                .thenReturn(List.of(withProcessingMode(tempDir)));
 
             doThrow(new ConnectorProcessingModeException("already linked"))
                 .when(registerProcessingModeService).execute(any(), any());
@@ -288,7 +291,7 @@ public class ConnectorBusinessDomainInitializerTest {
         @Test
         void should_fail_startup_when_the_processing_mode_file_does_not_exist(@TempDir Path tempDir)
             throws IOException {
-            var props = withProcessingMode("domain-a", tempDir);
+            var props = withProcessingMode(tempDir);
             props.getPmode().setFile("file:" + tempDir.resolve("does-not-exist.xml"));
             when(domainProperties.getDefaults()).thenReturn(List.of(props));
 
@@ -303,7 +306,7 @@ public class ConnectorBusinessDomainInitializerTest {
         @Test
         void should_fail_startup_when_the_truststore_is_not_configured(@TempDir Path tempDir)
             throws IOException {
-            var props = withProcessingMode("domain-a", tempDir);
+            var props = withProcessingMode(tempDir);
             props.getPmode().setTruststore(null);
             when(domainProperties.getDefaults()).thenReturn(List.of(props));
 
@@ -315,12 +318,13 @@ public class ConnectorBusinessDomainInitializerTest {
         }
 
         @Test
-        void should_fail_startup_when_the_truststore_type_cannot_be_determined(@TempDir Path tempDir)
+        void should_fail_startup_when_the_truststore_type_cannot_be_determined(
+            @TempDir Path tempDir)
             throws IOException {
             var truststoreFile = tempDir.resolve("truststore.unknown");
             Files.write(truststoreFile, TRUSTSTORE_CONTENT);
 
-            var props = withProcessingMode("domain-a", tempDir);
+            var props = withProcessingMode(tempDir);
             props.getPmode().setTruststore("file:" + truststoreFile);
             when(domainProperties.getDefaults()).thenReturn(List.of(props));
 
@@ -333,7 +337,7 @@ public class ConnectorBusinessDomainInitializerTest {
         void should_fail_startup_when_the_processing_mode_is_rejected(@TempDir Path tempDir)
             throws IOException {
             when(domainProperties.getDefaults())
-                .thenReturn(List.of(withProcessingMode("domain-a", tempDir)));
+                .thenReturn(List.of(withProcessingMode(tempDir)));
 
             doThrow(new ConnectorProcessingModeParsingException("malformed definition"))
                 .when(registerProcessingModeService).execute(any(), any());

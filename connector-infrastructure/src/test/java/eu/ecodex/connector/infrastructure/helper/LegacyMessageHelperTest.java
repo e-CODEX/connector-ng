@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.helper;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,9 +20,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
+import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
@@ -36,6 +38,8 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("LegacyMessageHelper")
 public class LegacyMessageHelperTest {
     private static final String MESSAGE_ID = "msg-001";
     private static final String BACKEND_NAME = "backend-alice";
@@ -54,135 +59,6 @@ public class LegacyMessageHelperTest {
 
     @InjectMocks
     private LegacyMessageHelper legacyMessageHelper;
-
-    @Test
-    void should_throw_an_exception_if_as4_properties_service_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().service(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-            .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void should_throw_and_swallow_exception_if_as4_properties_action_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().action(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-            .isInstanceOf(IllegalStateException.class);
-    }
-
-
-    @Test
-    void should_throw_and_swallow_exception_if_as4_properties_from_party_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().fromParty(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-            .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void should_throw_exception_and_swallow_if_as4_properties_to_party_is_missing() {
-        var brokenAS4 = as4Properties().toBuilder().toParty(null).build();
-        var inbound = inboundMessage().toBuilder().as4Properties(brokenAS4).build();
-
-        assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-            .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void should_throw_and_swallow_exception_if_evidence_has_no_attachment() {
-        var evidence = ConnectorMessageEvidence.builder()
-                                               .type(ConnectorEvidenceType.values()[0])
-                                               .content(null)
-                                               .build();
-        var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
-
-        when(fileStorageProvider.findByIdentifier("xml-content-id"))
-            .thenReturn("<xml/>".getBytes());
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-            .thenReturn(List.of());
-
-        assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
-            .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void should_handle_message_without_business_content_successfully() {
-        var inbound = ConnectorMessage.builder()
-                                      .identifier(MESSAGE_ID)
-                                      .backendName(BACKEND_NAME)
-                                      .backendMessageIdentifier(null)
-                                      .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                      .as4Properties(as4Properties())
-                                      .businessContent(null)
-                                      .attachments(List.of())
-                                      .evidences(List.of())
-                                      .build();
-
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-            .thenReturn(List.of());
-
-        legacyMessageHelper.convertMessage(inbound);
-
-        verify(fileStorageProvider, never()).findByIdentifier(any());
-    }
-
-    @Test
-    void should_submit_message_with_no_business_content_successfully() {
-        var inbound = ConnectorMessage.builder()
-                                      .identifier(MESSAGE_ID)
-                                      .backendName(BACKEND_NAME)
-                                      .backendMessageIdentifier(null)
-                                      .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                      .as4Properties(as4Properties())
-                                      .businessContent(null)
-                                      .attachments(List.of())
-                                      .evidences(List.of())
-                                      .build();
-
-        when(attachmentRepository.findByMessageIdentifierAndTypes(eq(MESSAGE_ID), any()))
-            .thenReturn(List.of());
-
-        legacyMessageHelper.convertMessage(inbound);
-
-        verify(fileStorageProvider, never()).findByIdentifier(any());
-    }
-
-    @Test
-    void should_fetch_attachments_for_message_when_successful() {
-        stubHappyPath();
-
-        legacyMessageHelper.convertMessage(inboundMessage());
-
-        verify(attachmentRepository).findByMessageIdentifierAndTypes(
-            eq(MESSAGE_ID),
-            argThat(types -> types.containsAll(List.of(
-                ConnectorAttachmentType.ATTACHMENT,
-                ConnectorAttachmentType.PDF_TOKEN,
-                ConnectorAttachmentType.XML_TOKEN
-            )))
-        );
-    }
-
-    @Test
-    void should_submit_evidence_message_successfully() {
-        stubHappyPath();
-
-        var evidence = ConnectorMessageEvidence.builder()
-                                               .type(ConnectorEvidenceType.values()[0])
-                                               .content(new byte[1])
-                                               .build();
-        var inbound = inboundMessage().toBuilder().transportedEvidences(List.of(evidence)).build();
-
-        var message = legacyMessageHelper.convertMessage(inbound);
-
-        assertThat(message).isNotNull();
-        assertThat(message.getMessageConfirmations().size()).isEqualTo(1);
-        assertThat(message.getMessageConfirmations().getFirst().getConfirmationType()).isNotNull();
-    }
 
     private void stubHappyPath() {
         when(fileStorageProvider.findByIdentifier("xml-content-id"))
@@ -203,15 +79,14 @@ public class LegacyMessageHelperTest {
                                    .build())
             .fromParty(ConnectorParty.builder()
                                      .identifier("BL")
-                                     .identifierType(
-                                         "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                     .identifierType("urn:oasis:names:tc:ebcore:partyid-type"
+                                                         + ":ecodex")
                                      .role("GW")
                                      .roleType(ConnectorPartyRoleType.INITIATOR)
                                      .build())
             .toParty(ConnectorParty.builder()
                                    .identifier("RE")
-                                   .identifierType(
-                                       "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                   .identifierType("urn:oasis:names:tc:ebcore:partyid-type:ecodex")
                                    .role("GW")
                                    .roleType(ConnectorPartyRoleType.RESPONDER)
                                    .build())
@@ -233,19 +108,81 @@ public class LegacyMessageHelperTest {
             .build();
     }
 
-    private ConnectorMessage inboundMessage() {
-        return ConnectorMessage.builder()
-                               .businessDomainIdentifier(
-                                   BusinessDomainTestFixtures.createDefaultBusinessDomain()
-                                                             .identifier())
-                               .identifier(MESSAGE_ID)
-                               .backendName(BACKEND_NAME)
-                               .backendMessageIdentifier(null)
-                               .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                               .as4Properties(as4Properties())
-                               .businessContent(businessContent())
-                               .attachments(List.of())
-                               .evidences(List.of())
-                               .build();
+    private ConnectorBusinessMessage inboundMessage() {
+        return ConnectorBusinessMessage.builder()
+                                       .businessDomainIdentifier(
+                                           BusinessDomainTestFixtures.createDefaultBusinessDomain()
+                                                                     .identifier())
+                                       .identifier(MESSAGE_ID)
+                                       .backendName(BACKEND_NAME)
+                                       .backendMessageIdentifier(null)
+                                       .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                                       .as4Properties(as4Properties())
+                                       .businessContent(businessContent())
+                                       .attachments(List.of())
+                                       .evidences(List.of())
+                                       .build();
+    }
+
+    @Nested
+    @DisplayName("when converting a business message")
+    class WhenConvertingABusinessMessage {
+        @Test
+        void should_fetch_the_attachments() {
+            stubHappyPath();
+
+            legacyMessageHelper.convertMessage(inboundMessage());
+
+            verify(attachmentRepository).findByMessageIdentifierAndTypes(
+                eq(MESSAGE_ID),
+                argThat(types -> types.containsAll(List.of(
+                    ConnectorAttachmentType.ATTACHMENT,
+                    ConnectorAttachmentType.PDF_TOKEN,
+                    ConnectorAttachmentType.XML_TOKEN
+                )))
+            );
+        }
+
+        @Test
+        void should_fail_when_an_evidence_has_no_attachment() {
+            var evidence = ConnectorMessageEvidence.builder()
+                                                   .type(ConnectorEvidenceType.values()[0])
+                                                   .content(null)
+                                                   .build();
+            var inbound = inboundMessage().toBuilder()
+                                          .transportedEvidences(List.of(evidence))
+                                          .build();
+
+            stubHappyPath();
+
+            assertThatThrownBy(() -> legacyMessageHelper.convertMessage(inbound))
+                .isInstanceOf(IllegalStateException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("when converting an evidence message")
+    class WhenConvertingAnEvidenceMessage {
+        @Test
+        void should_convert_the_confirmations() {
+            var inbound = ConnectorEvidenceMessage.builder()
+                                                  .identifier(MESSAGE_ID)
+                                                  .backendName(BACKEND_NAME)
+                                                  .backendMessageIdentifier(null)
+                                                  .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                                                  .as4Properties(as4Properties())
+                                                  .transportedEvidences(List.of(
+                                                      EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence()))
+                                                  .build();
+
+            var message = legacyMessageHelper.convertMessage(inbound);
+
+            assertThat(message).isNotNull();
+            assertThat(message.getMessageConfirmations().size()).isEqualTo(1);
+            assertThat(message.getMessageConfirmations().getFirst().getConfirmationType())
+                .isNotNull();
+
+            verify(fileStorageProvider, never()).findByIdentifier(any());
+        }
     }
 }

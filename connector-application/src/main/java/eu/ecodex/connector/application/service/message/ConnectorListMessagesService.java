@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import org.jspecify.annotations.NonNull;
@@ -30,7 +30,7 @@ public class ConnectorListMessagesService implements ConnectorListMessages {
     }
 
     @Override
-    public ConnectorPageResult<ConnectorMessage> execute(
+    public ConnectorPageResult<ConnectorBusinessMessage> execute(
         @NonNull ConnectorPageRequest pageRequest,
         String identifier,
         String backendName,

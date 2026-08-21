@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.link;
 
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkTransportStrategy;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -25,14 +25,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ConnectorLinkTransportStrategyImpl implements ConnectorLinkTransportStrategy {
-    private final ConnectorEventPublisher gatewayLinkEventPublisher;
-    private final ConnectorEventPublisher backendLinkEventPublisher;
+    private final ConnectorMessageEventPublisher<ConnectorMessage> gatewayLinkEventPublisher;
+    private final ConnectorMessageEventPublisher<ConnectorMessage> backendLinkEventPublisher;
 
     public ConnectorLinkTransportStrategyImpl(
         @Qualifier("connectorJmsGatewayLinkPublisher")
-        ConnectorEventPublisher gatewayLinkEventPublisher,
+        ConnectorMessageEventPublisher<ConnectorMessage> gatewayLinkEventPublisher,
         @Qualifier("connectorJmsBackendLinkPublisher")
-        ConnectorEventPublisher backendLinkEventPublisher) {
+        ConnectorMessageEventPublisher<ConnectorMessage> backendLinkEventPublisher) {
         this.gatewayLinkEventPublisher = gatewayLinkEventPublisher;
         this.backendLinkEventPublisher = backendLinkEventPublisher;
     }

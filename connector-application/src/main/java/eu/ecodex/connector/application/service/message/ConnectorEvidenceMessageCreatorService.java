@@ -11,9 +11,11 @@
 package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
@@ -29,12 +31,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidenceMessageCreator {
-    private final ConnectorMessageIdGenerator messageIdGenerator;
-    private final ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator;
+    private final ConnectorMessageIdGeneratorService messageIdGenerator;
+    private final ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator;
 
     public ConnectorEvidenceMessageCreatorService(
-        ConnectorMessageIdGenerator messageIdGenerator,
-        ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator) {
+        ConnectorMessageIdGeneratorService messageIdGenerator,
+        ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator) {
         this.messageIdGenerator = messageIdGenerator;
         this.messageEbmsIdGenerator = messageEbmsIdGenerator;
     }
@@ -65,8 +67,8 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
     }
 
     @Override
-    public ConnectorMessage create(
-        @Nonnull ConnectorMessage businessMessage,
+    public ConnectorEvidenceMessage create(
+        @Nonnull ConnectorBusinessMessage businessMessage,
         @NonNull ConnectorMessageEvidence evidence) {
         var action = getEvidenceAction(evidence.type());
         var businessAs4 = businessMessage.as4Properties();
@@ -74,7 +76,8 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         var as4Properties = ConnectorMessageAS4Properties
             .builder()
             .conversationIdentifier(businessAs4.conversationIdentifier())
-            .ebmsMessageIdentifier(resolveEbmsIdentifier(businessMessage))
+            .ebmsMessageIdentifier(
+                resolveEbmsIdentifier(businessMessage))
             .finalRecipient(businessAs4.finalRecipient())
             .originalSender(businessAs4.originalSender())
             .fromParty(copyParty(businessAs4.fromParty()))
@@ -84,7 +87,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             .action(action)
             .build();
 
-        return ConnectorMessage
+        return ConnectorEvidenceMessage
             .builder()
             .identifier(messageIdGenerator.generateIdentifier())
             .backendMessageIdentifier(businessMessage.backendMessageIdentifier())
@@ -99,18 +102,21 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
     }
 
     @Override
-    public ConnectorMessage createForTrigger(
-        @Nonnull ConnectorMessage businessMessage,
+    public ConnectorEvidenceMessage createForTrigger(
+        @Nonnull ConnectorBusinessMessage businessMessage,
         @NonNull ConnectorMessageEvidence evidence,
-        @NonNull ConnectorMessage triggerMessage) {
+        @NonNull ConnectorTriggeredEvidenceMessage triggeredMessage) {
         var action = getEvidenceAction(evidence.type());
         var businessAs4 = businessMessage.as4Properties();
 
         var as4Properties = ConnectorMessageAS4Properties
             .builder()
             .conversationIdentifier(businessAs4.conversationIdentifier())
-            // will cross the gateway, so we need to generate a new ebms identifier
-            .ebmsMessageIdentifier(messageEbmsIdGenerator.generateIdentifier())
+            // will cross the gateway, so we need to
+            // generate a new ebms
+            // identifier
+            .ebmsMessageIdentifier(
+                messageEbmsIdGenerator.generateIdentifier())
             .originalSender(businessAs4.finalRecipient())
             .finalRecipient(businessAs4.originalSender())
             .fromParty(copyParty(businessAs4.toParty()))
@@ -120,14 +126,14 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             .action(action)
             .build();
 
-        return ConnectorMessage
+        return ConnectorEvidenceMessage
             .builder()
             .identifier(messageIdGenerator.generateIdentifier())
-            .backendMessageIdentifier(triggerMessage.backendMessageIdentifier())
-            .businessDomainIdentifier(triggerMessage.businessDomainIdentifier())
+            .backendMessageIdentifier(triggeredMessage.backendMessageIdentifier())
+            .businessDomainIdentifier(businessMessage.businessDomainIdentifier())
             .referenceToBackendMessageIdentifier(businessMessage.backendMessageIdentifier())
-            .direction(triggerMessage.direction())
-            .backendName(triggerMessage.backendName())
+            .direction(triggeredMessage.direction())
+            .backendName(triggeredMessage.backendName())
             .gatewayName(businessMessage.gatewayName())
             .as4Properties(as4Properties)
             .transportedEvidences(List.of(evidence))
@@ -142,20 +148,18 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         return party.toBuilder().build();
     }
 
-    private String extractRefToMessageId(ConnectorMessage businessMessage) {
+    private String extractRefToMessageId(ConnectorBusinessMessage businessMessage) {
         if (businessMessage.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
             return businessMessage.backendMessageIdentifier();
         } else if (businessMessage.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
             return businessMessage.as4Properties().ebmsMessageIdentifier();
         } else {
-            throw new IllegalStateException(
-                "Invalid message direction for the business message : ["
-                    + businessMessage.identifier() + "]"
-            );
+            throw new IllegalStateException("Invalid message direction for the business message : ["
+                                                + businessMessage.identifier() + "]");
         }
     }
 
-    private String resolveEbmsIdentifier(ConnectorMessage businessMessage) {
+    private String resolveEbmsIdentifier(ConnectorBusinessMessage businessMessage) {
         if (businessMessage.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
             return null;
         } else if (businessMessage.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
@@ -165,9 +169,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         } else {
             throw new IllegalStateException(
                 "Invalid message direction for the business message : [%s]".formatted(
-                    businessMessage.identifier()
-                )
-            );
+                    businessMessage.identifier()));
         }
     }
 }

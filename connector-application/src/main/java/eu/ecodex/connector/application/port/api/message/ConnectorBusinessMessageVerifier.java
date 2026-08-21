@@ -12,12 +12,13 @@ package eu.ecodex.connector.application.port.api.message;
 
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
 
 /**
- * Defines a contract for verifying {@link ConnectorMessage} instances according to a specific
- * {@link ProcessingModeVerificationMode}.
+ * Defines a contract for verifying {@link ConnectorBusinessMessage} instances according to a
+ * specific {@link ProcessingModeVerificationMode}.
  *
  * <p>
  * Implementations are responsible for validating that a message complies with the required
@@ -33,7 +34,7 @@ import lombok.NonNull;
  * </ul>
  * </p>
  */
-public interface ConnectorMessageVerifier {
+public interface ConnectorBusinessMessageVerifier {
     /**
      * Verifies the given {@link ConnectorMessage} according to the provided
      * {@link ProcessingModeVerificationMode}.

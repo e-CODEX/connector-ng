@@ -11,11 +11,12 @@
 package eu.ecodex.connector.application.port.api.message;
 
 import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Verifier responsible for validating the parties involved in a {@link ConnectorMessage}.
+ * Verifier responsible for validating the parties involved in a {@link ConnectorBusinessMessage}.
  *
  * <p>This component ensures that the sender, receiver, and any other
  * relevant parties contained in the message meet the expected requirements (e.g. presence, format,

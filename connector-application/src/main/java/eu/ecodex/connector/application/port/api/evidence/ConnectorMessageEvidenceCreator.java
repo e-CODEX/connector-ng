@@ -11,14 +11,14 @@
 package eu.ecodex.connector.application.port.api.evidence;
 
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import lombok.NonNull;
 
 /**
  * Responsible for creating {@link ConnectorMessageEvidence} instances based on the outcome of
- * processing a {@link ConnectorMessage}.
+ * processing a {@link ConnectorBusinessMessage}.
  *
  * <p>This creator encapsulates the logic for generating evidence records that
  * represent either a successful or failed handling of a connector message. The resulting
@@ -28,7 +28,7 @@ import lombok.NonNull;
 public interface ConnectorMessageEvidenceCreator {
     /**
      * Creates a {@link ConnectorMessageEvidence} representing successful processing of a
-     * {@link ConnectorMessage}.
+     * {@link ConnectorBusinessMessage}.
      *
      * @param evidenceType the type of evidence to create
      * @param message      the connector message that was successfully processed
@@ -37,12 +37,12 @@ public interface ConnectorMessageEvidenceCreator {
      */
     ConnectorMessageEvidence createSuccess(
         @NonNull ConnectorEvidenceType evidenceType,
-        @NonNull ConnectorMessage message
+        @NonNull ConnectorBusinessMessage message
     );
 
     /**
      * Creates a {@link ConnectorMessageEvidence} representing failed processing of a
-     * {@link ConnectorMessage}.
+     * {@link ConnectorBusinessMessage}.
      *
      * @param evidenceType the type of evidence to create
      * @param message      the connector message whose processing failed
@@ -52,7 +52,7 @@ public interface ConnectorMessageEvidenceCreator {
      */
     ConnectorMessageEvidence createFailure(
         @NonNull ConnectorEvidenceType evidenceType,
-        @NonNull ConnectorMessage message,
+        @NonNull ConnectorBusinessMessage message,
         ConnectorMessageRejectionReason reason
     );
 }

@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.spi;
 
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
@@ -19,7 +19,7 @@ import jakarta.annotation.Nullable;
 
 /**
  * Interface for creating instances of {@link ConnectorMessageEvidence} to represent the results of
- * operations performed on {@link ConnectorMessage}.
+ * operations performed on {@link ConnectorBusinessMessage}.
  *
  * <p>This toolkit provides methods to create evidence objects for both successful and failed
  * operations. These evidences are associated with specific message operations and categorized by
@@ -39,8 +39,8 @@ public interface ConnectorEvidenceToolkit {
      * evidence type, and optional rejection reason. The evidence represents the outcome of an
      * operation performed on a message within the connector domain.
      *
-     * @param message         The {@link ConnectorMessage} object to which the evidence is linked.
-     *                        Must not be null.
+     * @param message         The {@link ConnectorBusinessMessage} object to which the evidence is
+     *                        linked. Must not be null.
      * @param evidenceType    The {@link ConnectorEvidenceType} categorizing the type of evidence.
      *                        Must not be null.
      * @param rejectionReason The {@link ConnectorMessageRejectionReason} describing the reason for
@@ -50,7 +50,7 @@ public interface ConnectorEvidenceToolkit {
      * @return A {@link ConnectorMessageEvidence} instance representing the operation result.
      */
     ConnectorMessageEvidence create(
-        @Nonnull ConnectorMessage message,
+        @Nonnull ConnectorBusinessMessage message,
         @Nonnull ConnectorEvidenceType evidenceType,
         @Nullable ConnectorMessageRejectionReason rejectionReason
     );

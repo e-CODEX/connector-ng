@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.security;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -64,13 +64,13 @@ public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
     }
 
     @Override
-    public void validateMessage(@NonNull ConnectorMessage message) {
+    public void validateMessage(@NonNull ConnectorBusinessMessage message) {
         log.debug("Validating message [{}] ASIC-S container", message.identifier());
         this.asicContainerValidator.validate(message);
     }
 
     @Override
-    public ConnectorMessage buildContainer(@NonNull ConnectorMessage message) {
+    public ConnectorBusinessMessage buildContainer(@NonNull ConnectorBusinessMessage message) {
         var messageIdentifier = message.identifier();
 
         if (messageIdentifier == null) {

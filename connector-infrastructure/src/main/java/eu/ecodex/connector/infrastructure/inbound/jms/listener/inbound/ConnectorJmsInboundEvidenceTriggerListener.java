@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound;
 
-import eu.ecodex.connector.application.port.api.evidence.ConnectorInboundEvidenceMessageProcessor;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageProcessor;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -24,7 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
-public class ConnectorJmsInboundEvidenceTriggerListener implements ConnectorEventHandler {
+public class ConnectorJmsInboundEvidenceTriggerListener
+    implements ConnectorEventHandler<ConnectorEvidenceMessage> {
     private final ConnectorInboundEvidenceMessageProcessor confirmationMessageProcessor;
 
     public ConnectorJmsInboundEvidenceTriggerListener(
@@ -35,7 +36,7 @@ public class ConnectorJmsInboundEvidenceTriggerListener implements ConnectorEven
     @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.inbound-evidence-trigger-queue}")
-    public void handle(@NonNull ConnectorMessage message) {
+    public void handle(@NonNull ConnectorEvidenceMessage message) {
         log.info("Processing gateway evidence trigger message [{}]", message.identifier());
         confirmationMessageProcessor.process(message);
     }

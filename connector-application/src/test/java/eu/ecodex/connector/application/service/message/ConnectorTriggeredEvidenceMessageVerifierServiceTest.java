@@ -23,7 +23,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,6 @@ public class ConnectorVerifyTriggeredEvidenceServiceTest {
     private static final ConnectorMessageDirection TRIGGER_DIRECTION =
         ConnectorMessageDirection.BACKEND_TO_GATEWAY;
 
-    // --- Test fixtures ---
     private static final ConnectorMessageDirection INVERTED_DIRECTION =
         ConnectorMessageDirection.GATEWAY_TO_BACKEND;
 
@@ -49,13 +49,13 @@ public class ConnectorVerifyTriggeredEvidenceServiceTest {
     @InjectMocks
     private ConnectorVerifyTriggeredEvidenceService service;
 
-    private ConnectorMessage triggerMessage;
-    private ConnectorMessage businessMessage;
+    private ConnectorEvidenceMessage triggerMessage;
+    private ConnectorBusinessMessage businessMessage;
 
     @BeforeEach
     void setUp() {
-        triggerMessage = mock(ConnectorMessage.class);
-        businessMessage = mock(ConnectorMessage.class);
+        triggerMessage = mock(ConnectorEvidenceMessage.class);
+        businessMessage = mock(ConnectorBusinessMessage.class);
 
         var as4Properties = mock(ConnectorMessageAS4Properties.class);
         lenient().when(triggerMessage.as4Properties()).thenReturn(as4Properties);

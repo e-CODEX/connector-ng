@@ -10,33 +10,31 @@
 
 package eu.ecodex.connector.infrastructure.inbound;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.ConnectorPublishable;
 import jakarta.annotation.Nonnull;
 
 
 /**
- * Represents a handler for processing {@link ConnectorMessage} events within the connector system.
+ * Represents a handler for processing connector-specific events. This interface serves as a
+ * contract for handling messages that implement the {@link ConnectorPublishable} marker interface.
  *
- * <p>This interface defines the contract for handling incoming {@link ConnectorMessage}
- * instances. Implementations of this interface are expected to process the provided messages and
- * perform necessary operations such as validation, transformation, or further distribution within
- * the processing workflow.
+ * <p>Implementations of this interface are expected to provide the logic for processing
+ * various types of connector-related messages. This could involve operations such as validation,
+ * transformation, routing, or triggering specific workflows within the system.
  *
- * <p>Thread Safety:
- * Implementations of this interface should ensure thread safety if instances are expected to be
- * used in a multithreaded environment.
+ * @param <T> The type of the message to process, which must extend {@link ConnectorPublishable}.
  */
-public interface ConnectorEventHandler {
+public interface ConnectorEventHandler<T extends ConnectorPublishable> {
     /**
-     * Handles the given {@link ConnectorMessage} to facilitate processing, validation, or other
+     * Handles the given {@link ConnectorPublishable} to facilitate processing, validation, or other
      * operations required by the connector system.
      *
      * <p>This method is designed to process incoming messages represented by
-     * {@link ConnectorMessage}. Implementations of this method should define specific behaviours
-     * for handling these messages, including tasks such as validation, transformation, or routing
-     * within the system.
+     * {@link ConnectorPublishable}. Implementations of this method should define specific
+     * behaviours for handling these messages, including tasks such as validation, transformation,
+     * or routing within the system.
      *
-     * @param message The {@link ConnectorMessage} to be processed. Must not be null.
+     * @param message The {@link ConnectorPublishable} to be processed. Must not be null.
      */
-    void handle(@Nonnull ConnectorMessage message);
+    void handle(@Nonnull T message);
 }

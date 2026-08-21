@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
@@ -26,5 +26,5 @@ public interface ConnectorRetrieveMessage {
      *
      * @return the retrieved ConnectorMessage associated with the given identifier
      */
-    ConnectorMessage execute(@Nonnull String identifier);
+    ConnectorBusinessMessage execute(@Nonnull String identifier);
 }

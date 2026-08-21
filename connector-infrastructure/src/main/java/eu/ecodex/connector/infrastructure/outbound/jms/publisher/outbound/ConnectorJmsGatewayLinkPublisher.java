@@ -11,9 +11,10 @@
 package eu.ecodex.connector.infrastructure.outbound.jms.publisher.outbound;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
@@ -22,7 +23,6 @@ import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import jakarta.jms.Session;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +31,12 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Gateway Implementation of the {@link ConnectorEventPublisher}.
+ * Gateway Implementation of the {@link ConnectorMessageEventPublisher}.
  */
 @Slf4j
 @Component("connectorJmsGatewayLinkPublisher")
-public class ConnectorJmsGatewayLinkPublisher implements ConnectorEventPublisher {
+public class ConnectorJmsGatewayLinkPublisher
+    implements ConnectorMessageEventPublisher<ConnectorMessage> {
     private static final String CONTENT_TYPE_XML = "application/xml";
     private static final String GATEWAY_MESSAGE_TYPE = "submitMessage";
 
@@ -100,8 +101,8 @@ public class ConnectorJmsGatewayLinkPublisher implements ConnectorEventPublisher
         mapMessage.setStringProperty(
             "messageId",
             message.as4Properties().ebmsMessageIdentifier() == null
-                ? message.identifier()
-                : message.as4Properties().ebmsMessageIdentifier()
+            ? message.identifier()
+            : message.as4Properties().ebmsMessageIdentifier()
         );
         mapMessage.setStringProperty("originalSender", as4Properties.originalSender());
         mapMessage.setStringProperty("finalRecipient", as4Properties.finalRecipient());
@@ -139,7 +140,7 @@ public class ConnectorJmsGatewayLinkPublisher implements ConnectorEventPublisher
         return mapMessage;
     }
 
-    private int buildContent(MapMessage mapMessage, ConnectorMessage message, int counter)
+    private int buildContent(MapMessage mapMessage, ConnectorBusinessMessage message, int counter)
         throws JMSException {
         var content = message.businessContent();
         var evidences = message.transportedEvidences();
@@ -201,28 +202,31 @@ public class ConnectorJmsGatewayLinkPublisher implements ConnectorEventPublisher
         // TODO: with gateway v5.2, consider passing S3 identifier instead of byte[]
         int counter = 0;
 
-        counter = buildContent(mapMessage, message, counter);
+        if (message instanceof ConnectorBusinessMessage businessMessage) {
+            counter = buildContent(mapMessage, businessMessage, counter);
+
+            var attachments = this.attachmentRepository.findByMessageIdentifierAndTypes(
+                message.identifier(),
+                List.of(ConnectorAttachmentType.ASICS, ConnectorAttachmentType.XML_TOKEN)
+            );
+
+            for (var attachment : attachments) {
+                counter++;
+                var payload = this.fileStorageProvider.findByIdentifier(attachment.identifier());
+                writePayload(
+                    mapMessage,
+                    counter,
+                    attachment.contentType(),
+                    describeAttachment(attachment.type()),
+                    attachment.name(),
+                    payload
+                );
+            }
+        }
+
         counter = buildEvidences(mapMessage, message, counter);
 
         assert message.identifier() != null;
-
-        var attachments = this.attachmentRepository.findByMessageIdentifierAndTypes(
-            message.identifier(),
-            List.of(ConnectorAttachmentType.ASICS, ConnectorAttachmentType.XML_TOKEN)
-        );
-
-        for (var attachment : attachments) {
-            counter++;
-            var payload = this.fileStorageProvider.findByIdentifier(attachment.identifier());
-            writePayload(
-                mapMessage,
-                counter,
-                attachment.contentType(),
-                describeAttachment(attachment.type()),
-                attachment.name(),
-                payload
-            );
-        }
 
         return counter;
     }

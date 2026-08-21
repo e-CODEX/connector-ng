@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Generates unique identifiers for connector messages.
@@ -32,11 +32,11 @@ import org.springframework.stereotype.Component;
  * environment-specific properties.
  */
 @Slf4j
-@Component
-public class ConnectorMessageIdGenerator {
+@Service
+public class ConnectorMessageIdGeneratorService {
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
-    public ConnectorMessageIdGenerator(
+    public ConnectorMessageIdGeneratorService(
         ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
         this.processingConfigurationProvider = processingConfigurationProvider;
     }

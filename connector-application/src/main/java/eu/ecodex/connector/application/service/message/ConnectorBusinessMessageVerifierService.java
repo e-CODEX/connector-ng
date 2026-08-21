@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorActionNotFoundExceptio
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.application.exception.ConnectorServiceNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
-import eu.ecodex.connector.application.port.api.message.ConnectorMessageVerifier;
+import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
@@ -25,11 +25,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorMessageVerifier} service.
+ * Implementation of the {@link ConnectorBusinessMessageVerifier} service.
  */
 @Slf4j
 @Service
-public class ConnectorMessageVerifierService implements ConnectorMessageVerifier {
+public class ConnectorBusinessMessageVerifierService implements ConnectorBusinessMessageVerifier {
     private final ConnectorPartyRepository partyRepository;
     private final ConnectorServiceRepository serviceRepository;
     private final ConnectorActionRepository actionRepository;
@@ -41,7 +41,7 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
      * @param serviceRepository repository used to resolve and validate message services
      * @param actionRepository  repository used to resolve and validate message actions
      */
-    public ConnectorMessageVerifierService(
+    public ConnectorBusinessMessageVerifierService(
         ConnectorPartyRepository partyRepository,
         ConnectorServiceRepository serviceRepository,
         ConnectorActionRepository actionRepository) {
@@ -79,55 +79,51 @@ public class ConnectorMessageVerifierService implements ConnectorMessageVerifier
 
         var toParty = message.as4Properties().toParty();
 
-        if (toParty != null) {
-            if (toParty.identifierType().isBlank()) {
-                log.warn(
-                    "Message with identifier [{}] verification mode is RELAXED. "
-                        + "Assuming ToParty IdentifierType [{}] as empty!",
-                    message.identifier(), toParty.identifierType()
-                );
-            }
-
-            // TODO improve the verification
-            var foundToParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                toParty.identifier(), toParty.roleType(), message.businessDomainIdentifier()
+        if (toParty.identifierType().isBlank()) {
+            log.warn(
+                "Message with identifier [{}] verification mode is RELAXED. "
+                    + "Assuming ToParty IdentifierType [{}] as empty!",
+                message.identifier(), toParty.identifierType()
             );
+        }
 
-            if (foundToParty == null) {
-                throw new ConnectorProcessingModeVerificationException(
-                    String.format(
-                        "Message toParty [%s] is not configured on the connector! "
-                            + "Check the P-Mode linked to business domain with uuid [%s]",
-                        toParty, message.businessDomainIdentifier()
-                    )
-                );
-            }
+        // TODO improve the verification
+        var foundToParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+            toParty.identifier(), toParty.roleType(), message.businessDomainIdentifier()
+        );
+
+        if (foundToParty == null) {
+            throw new ConnectorProcessingModeVerificationException(
+                String.format(
+                    "Message toParty [%s] is not configured on the connector! "
+                        + "Check the P-Mode linked to business domain with uuid [%s]",
+                    toParty, message.businessDomainIdentifier()
+                )
+            );
         }
 
         var fromParty = message.as4Properties().fromParty();
 
-        if (fromParty != null) {
-            if (fromParty.identifierType().isBlank()) {
-                log.warn(
-                    "Message with identifier [{}] verification mode is RELAXED. "
-                        + "Assuming FromParty IdentifierType [{}] as empty!",
-                    message.identifier(), fromParty.identifierType()
-                );
-            }
-
-            var foundFromParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                fromParty.identifier(), fromParty.roleType(), message.businessDomainIdentifier()
+        if (fromParty.identifierType().isBlank()) {
+            log.warn(
+                "Message with identifier [{}] verification mode is RELAXED. "
+                    + "Assuming FromParty IdentifierType [{}] as empty!",
+                message.identifier(), fromParty.identifierType()
             );
+        }
 
-            if (foundFromParty == null) {
-                throw new ConnectorProcessingModeVerificationException(
-                    String.format(
-                        "Message fromParty [%s] is not configured on the connector! "
-                            + "Check the P-Mode linked to business domain with uuid [%s]",
-                        fromParty, message.businessDomainIdentifier()
-                    )
-                );
-            }
+        var foundFromParty = this.partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(
+            fromParty.identifier(), fromParty.roleType(), message.businessDomainIdentifier()
+        );
+
+        if (foundFromParty == null) {
+            throw new ConnectorProcessingModeVerificationException(
+                String.format(
+                    "Message fromParty [%s] is not configured on the connector! "
+                        + "Check the P-Mode linked to business domain with uuid [%s]",
+                    fromParty, message.businessDomainIdentifier()
+                )
+            );
         }
     }
 

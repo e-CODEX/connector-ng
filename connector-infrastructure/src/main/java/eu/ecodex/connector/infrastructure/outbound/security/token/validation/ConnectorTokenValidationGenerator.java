@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.security.token.validation;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssCertificateVerifier;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssTrustedListLoader;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorTokenException;
@@ -125,7 +125,7 @@ public class ConnectorTokenValidationGenerator {
      * @throws ConnectorTokenException if validation or token construction fails
      */
     public ConnectorToken createToken(
-        ConnectorMessage message,
+        ConnectorBusinessMessage message,
         DSSDocument businessDocument,
         DSSDocument detachedSignature,
         ConnectorTokenIssuer issuer) {

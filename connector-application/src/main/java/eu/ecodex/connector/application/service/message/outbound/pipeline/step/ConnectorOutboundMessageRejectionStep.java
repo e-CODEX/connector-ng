@@ -15,7 +15,8 @@ import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessage
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.List;
 import lombok.NonNull;
@@ -40,7 +41,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageRejectionStep implements ConnectorMessageStep {
+public class ConnectorOutboundMessageRejectionStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> {
     private final ConnectorEvidenceMessageCreator evidenceMessageCreator;
     private final ConnectorMessageEvidenceCreator evidenceCreator;
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
@@ -64,7 +66,7 @@ public class ConnectorOutboundMessageRejectionStep implements ConnectorMessageSt
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
+    public ConnectorEvidenceMessage execute(@NonNull ConnectorBusinessMessage outboundMessage) {
         log.debug(
             "Processing outbound message [{}] rejection creation",
             outboundMessage.identifier()

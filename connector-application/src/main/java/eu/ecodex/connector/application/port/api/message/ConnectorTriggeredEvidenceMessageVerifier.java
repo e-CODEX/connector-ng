@@ -10,28 +10,25 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import jakarta.annotation.Nonnull;
 
 /**
  * Defines a contract for a verification process triggered by evidence messages.
  *
- * <p>
- * This interface represents a component responsible for performing verification operations related
- * to evidence messages in the context of connector functionality. Implementers of this interface
- * are expected to provide the concrete logic for the `verify` method to handle validation and
- * business rule verification processes.
+ * <p>This interface represents a component responsible for performing verification operations
+ * related to evidence messages in the context of connector functionality. Implementers of this
+ * interface are expected to provide the concrete logic for the `verify` method to handle validation
+ * and business rule verification processes.
  */
-public interface ConnectorVerifyTriggeredEvidence {
+public interface ConnectorTriggeredEvidenceMessageVerifier {
     /**
      * Performs verification based on the provided trigger message.
      *
-     * <p>
-     * This method validates and processes the given trigger message to ensure compliance with
+     * <p>This method validates and processes the given trigger message to ensure compliance with
      * predefined rules and criteria.
      *
-     * @param triggerMessage the message triggering the verification process, containing the
-     *                       necessary data for validation.
+     * @param triggeredEvidenceMessage the trigger message to be verified
      */
-    void verify(@Nonnull ConnectorMessage triggerMessage);
+    void verify(@Nonnull ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage);
 }

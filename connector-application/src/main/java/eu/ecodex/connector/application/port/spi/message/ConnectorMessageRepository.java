@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -22,65 +22,71 @@ import java.util.List;
  */
 public interface ConnectorMessageRepository {
     /**
-     * Persists a given {@link ConnectorMessage} instance in the repository.
+     * Persists a given {@link ConnectorBusinessMessage} instance in the repository.
      *
-     * @param message the {@link ConnectorMessage} to be saved; must not be null. This object
-     *                contains the detailed metadata and businessContent of the connector message.
+     * @param message the {@link ConnectorBusinessMessage} to be saved; must not be null. This
+     *                object contains the detailed metadata and businessContent of the connector
+     *                message.
      *
-     * @return the saved {@link ConnectorMessage}, including any automatically generated fields such
-     *     as timestamps or identifiers. If the save operation fails, this method may throw an
-     *     exception.
+     * @return the saved {@link ConnectorBusinessMessage}, including any automatically generated
+     *     fields such as timestamps or identifiers. If the save operation fails, this method may
+     *     throw an exception.
      */
-    ConnectorMessage save(@Nonnull ConnectorMessage message);
+    ConnectorBusinessMessage save(@Nonnull ConnectorBusinessMessage message);
 
-    ConnectorMessage updateGatewayName(@Nonnull String identifier, @Nonnull String name);
+    ConnectorBusinessMessage updateGatewayName(@Nonnull String identifier, @Nonnull String name);
 
 
-    ConnectorMessage updateBackendName(@Nonnull String identifier, @Nonnull String name);
+    ConnectorBusinessMessage updateBackendName(@Nonnull String identifier, @Nonnull String name);
 
-    ConnectorMessage updateEbmsIdentifier(
+    ConnectorBusinessMessage updateEbmsIdentifier(
         @Nonnull String identifier, @Nonnull String ebmsIdentifier);
 
     /**
-     * Updates the backend identifier of a {@link ConnectorMessage} with the given identifier. This
-     * method modifies the backend-specific identification for the message in the repository.
+     * Updates the backend identifier of a {@link ConnectorBusinessMessage} with the given
+     * identifier. This method modifies the backend-specific identification for the message in the
+     * repository.
      *
-     * @param identifier        the unique identifier of the {@link ConnectorMessage} to be updated;
-     *                          must not be null.
+     * @param identifier        the unique identifier of the {@link ConnectorBusinessMessage} to be
+     *                          updated; must not be null.
      * @param backendIdentifier the new backend identifier to associate with the
-     *                          {@link ConnectorMessage}; must not be null.
+     *                          {@link ConnectorBusinessMessage}; must not be null.
      *
-     * @return the updated {@link ConnectorMessage} after the backend identifier has been modified.
+     * @return the updated {@link ConnectorBusinessMessage} after the backend identifier has been
+     *     modified.
      */
-    ConnectorMessage updateBackendIdentifier(
+    ConnectorBusinessMessage updateBackendIdentifier(
         @Nonnull String identifier, @Nonnull String backendIdentifier);
 
     /**
-     * Retrieves a paginated result of {@link ConnectorMessage} objects that match the provided
-     * criteria based on the specified {@code request}, {@code identifier}, and {@code backendName}.
-     * This method facilitates fetching connector messages that match the given filters.
+     * Retrieves a paginated result of {@link ConnectorBusinessMessage} objects that match the
+     * provided criteria based on the specified {@code request}, {@code identifier}, and
+     * {@code backendName}. This method facilitates fetching connector messages that match the given
+     * filters.
      *
      * @param request                  the pagination and sorting information for the retrieval
      *                                 operation. This includes details such as page size, page
      *                                 number, and sorting order; must not be null.
-     * @param identifier               a unique identifier to filter {@link ConnectorMessage}
-     *                                 objects. This can be used to narrow down the search results
-     *                                 to messages associated with a specific identifier; may be
-     *                                 null or empty if no filtering by identifier is needed.
-     * @param backendName              the name of the backend to filter {@link ConnectorMessage}
-     *                                 objects. This allows for scoping the search results to
-     *                                 messages associated with a specific backend name; may be null
-     *                                 or empty if no backend filtering is required.
+     * @param identifier               a unique identifier to filter
+     *                                 {@link ConnectorBusinessMessage} objects. This can be used to
+     *                                 narrow down the search results to messages associated with a
+     *                                 specific identifier; may be null or empty if no filtering by
+     *                                 identifier is needed.
+     * @param backendName              the name of the backend to filter
+     *                                 {@link ConnectorBusinessMessage} objects. This allows for
+     *                                 scoping the search results to messages associated with a
+     *                                 specific backend name; may be null or empty if no backend
+     *                                 filtering is required.
      * @param businessDomainIdentifier the identifier of the business domain to filter
      * @param service                  the service name to filter messages
      * @param action                   the action name to filter messages
      *
-     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} instances
-     *     that match the specified criteria. The result includes pagination details such as total
-     *     elements and total pages. If no messages match the criteria, an empty result is
+     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorBusinessMessage}
+     *     instances that match the specified criteria. The result includes pagination details such
+     *     as total elements and total pages. If no messages match the criteria, an empty result is
      *     returned.
      */
-    ConnectorPageResult<ConnectorMessage> findAll(
+    ConnectorPageResult<ConnectorBusinessMessage> findAll(
         ConnectorPageRequest request,
         String identifier,
         String backendName,
@@ -90,37 +96,38 @@ public interface ConnectorMessageRepository {
     );
 
     /**
-     * Retrieves a list of all {@link ConnectorMessage} instances associated with the provided
-     * identifiers.
+     * Retrieves a list of all {@link ConnectorBusinessMessage} instances associated with the
+     * provided identifiers.
      *
-     * @param identifiers a list of unique identifiers used to filter {@link ConnectorMessage}
-     *                    instances. Each identifier represents a target message; must not be null
-     *                    or empty. If the list is empty or null, no results will be returned.
+     * @param identifiers a list of unique identifiers used to filter
+     *                    {@link ConnectorBusinessMessage} instances. Each identifier represents a
+     *                    target message; must not be null or empty. If the list is empty or null,
+     *                    no results will be returned.
      *
-     * @return a list of {@link ConnectorMessage} instances that match one or more of the specified
-     *     identifiers. If no messages match, an empty list is returned.
+     * @return a list of {@link ConnectorBusinessMessage} instances that match one or more of the
+     *     specified identifiers. If no messages match, an empty list is returned.
      */
-    List<ConnectorMessage> findAllByIdentifier(@Nonnull List<String> identifiers);
+    List<ConnectorBusinessMessage> findAllByIdentifier(@Nonnull List<String> identifiers);
 
     /**
-     * Finds a {@link ConnectorMessage} by its unique identifier.
+     * Finds a {@link ConnectorBusinessMessage} by its unique identifier.
      *
      * @param identifier the unique identifier of the connector message; must not be null or blank.
      *
-     * @return the {@link ConnectorMessage} matching the specified identifier, or null if no such
-     *     message exists in the repository.
+     * @return the {@link ConnectorBusinessMessage} matching the specified identifier, or null if no
+     *     such message exists in the repository.
      */
-    ConnectorMessage findByIdentifier(@Nonnull String identifier);
+    ConnectorBusinessMessage findByIdentifier(@Nonnull String identifier);
 
     /**
-     * Finds a {@link ConnectorMessage} by its ebMS message identifier.
+     * Finds a {@link ConnectorBusinessMessage} by its ebMS message identifier.
      *
      * @param ebmsMessageIdentifier the ebMS message identifier; must not be null or blank
      * @param direction             the direction of the message; must not be null
      *
-     * @return the matching {@link ConnectorMessage}, or null if no such message exists
+     * @return the matching {@link ConnectorBusinessMessage}, or null if no such message exists
      */
-    ConnectorMessage findByEbmsMessageIdentifierAndDirection(
+    ConnectorBusinessMessage findByEbmsMessageIdentifierAndDirection(
         @Nonnull String ebmsMessageIdentifier, @Nonnull ConnectorMessageDirection direction);
 
     /**
@@ -130,62 +137,50 @@ public interface ConnectorMessageRepository {
      *
      * @return matching message, or null
      */
-    ConnectorMessage findByBackendMessageIdentifier(@Nonnull String backendMessageIdentifier);
+    ConnectorBusinessMessage findByBackendMessageIdentifier(
+        @Nonnull String backendMessageIdentifier);
+
+    ConnectorBusinessMessage findReferencedBusinessMessage(
+        String referenceToMessageIdentifier, ConnectorMessageDirection triggerDirection);
 
     /**
-     * Updates backend routing metadata required to deliver a gateway confirmation message to the
-     * originating backend system.
-     *
-     * @param identifier                          the confirmation message identifier; must not be
-     *                                            null
-     * @param backendName                         the backend link partner name; must not be null
-     * @param referenceToBackendMessageIdentifier the backend identifier of the referenced business
-     *                                            message; must not be null
-     *
-     * @return the updated {@link ConnectorMessage}
-     */
-    ConnectorMessage updateBackendContext(
-        @Nonnull String identifier,
-        @Nonnull String backendName,
-        @Nonnull String referenceToBackendMessageIdentifier
-    );
-
-    /**
-     * Retrieves a list of {@link ConnectorMessage} objects associated with the specified
+     * Retrieves a list of {@link ConnectorBusinessMessage} objects associated with the specified
      * conversation uuid.
      *
      * @param conversationIdentifier the unique uuid of the conversation; must not be null or
      *                               blank.
      *
-     * @return a list of {@link ConnectorMessage} instances associated with the given conversation
-     *     uuid, or an empty list if no such messages exist.
+     * @return a list of {@link ConnectorBusinessMessage} instances associated with the given
+     *     conversation uuid, or an empty list if no such messages exist.
      */
-    List<ConnectorMessage> findByConversationIdentifier(@Nonnull String conversationIdentifier);
+    List<ConnectorBusinessMessage> findByConversationIdentifier(
+        @Nonnull String conversationIdentifier);
 
     /**
-     * Marks the provided {@link ConnectorMessage} as rejected. This typically involves updating the
-     * status of the message to indicate that it has been rejected, and may include additional
-     * actions such as logging or persisting this state change in the repository.
+     * Marks the provided {@link ConnectorBusinessMessage} as rejected. This typically involves
+     * updating the status of the message to indicate that it has been rejected, and may include
+     * additional actions such as logging or persisting this state change in the repository.
      *
-     * @param identifier the identifier of {@link ConnectorMessage} to be marked as rejected; must
-     *                   not be null.
+     * @param identifier the identifier of {@link ConnectorBusinessMessage} to be marked as
+     *                   rejected; must not be null.
      *
-     * @return the updated {@link ConnectorMessage} instance reflecting the rejected status.
+     * @return the updated {@link ConnectorBusinessMessage} instance reflecting the rejected status.
      */
-    ConnectorMessage setAsRejected(@Nonnull String identifier);
+    ConnectorBusinessMessage setAsRejected(@Nonnull String identifier);
 
     /**
-     * Marks the provided {@link ConnectorMessage} as confirmed. This typically involves updating
-     * the status of the message to reflect a confirmed state and may include additional persistence
-     * or logging actions.
+     * Marks the provided {@link ConnectorBusinessMessage} as confirmed. This typically involves
+     * updating the status of the message to reflect a confirmed state and may include additional
+     * persistence or logging actions.
      *
-     * @param identifier the identifier of the {@link ConnectorMessage} to be marked as confirmed;
-     *                   must not be null. This object contains the detailed metadata and content of
-     *                   the connector message.
+     * @param identifier the identifier of the {@link ConnectorBusinessMessage} to be marked as
+     *                   confirmed; must not be null. This object contains the detailed metadata and
+     *                   content of the connector message.
      *
-     * @return the updated {@link ConnectorMessage} instance after being marked as confirmed.
+     * @return the updated {@link ConnectorBusinessMessage} instance after being marked as
+     *     confirmed.
      */
-    ConnectorMessage setAsConfirmed(@Nonnull String identifier);
+    ConnectorBusinessMessage setAsConfirmed(@Nonnull String identifier);
 
     /**
      * Sets the timestamp indicating when the item was delivered to the link partner, identified by
@@ -194,5 +189,5 @@ public interface ConnectorMessageRepository {
      * @param identifier A non-null unique identifier for the link partner to whom the item delivery
      *                   should be recorded.
      */
-    ConnectorMessage setDeliveredToLinkPartnerAt(@Nonnull String identifier);
+    ConnectorBusinessMessage setDeliveredToLinkPartnerAt(@Nonnull String identifier);
 }

@@ -8,20 +8,22 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.port.api.evidence;
+package eu.ecodex.connector.application.port.api.message.outbound;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import jakarta.annotation.Nonnull;
 
 /**
  * Processes backend evidence trigger messages: creates signed REM evidence for a referenced
  * business message and submits the resulting evidence message to the gateway.
  */
-public interface ConnectorEvidenceTriggerProcessor {
+public interface ConnectorOutboundEvidenceMessageProcessor {
     /**
-     * Handles an evidence trigger submitted by the backend.
+     * Processes a backend evidence trigger message by creating signed REM evidence for a referenced
+     * business message and submitting the resulting evidence message to the gateway.
      *
-     * @param triggerMessage trigger payload (no business content, single evidence type, no XML)
+     * @param triggeredEvidenceMessage the backend evidence trigger message to process; must not be
+     *                                 null
      */
-    void process(@Nonnull ConnectorMessage triggerMessage);
+    void execute(@Nonnull ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage);
 }

@@ -24,7 +24,7 @@ public abstract class ConnectorExpression {
      *                evaluation and determines whether the condition is met.
      *
      * @return {@code true} if the {@code ConnectorMessage} meets the evaluation criteria;
-     *         {@code false} otherwise.
+     *     {@code false} otherwise.
      */
     abstract boolean evaluate(ConnectorMessage message);
 }

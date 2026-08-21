@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,13 +21,14 @@ import org.springframework.stereotype.Component;
 
 /**
  * Represents a processing step in the outbound message workflow for the connector system,
- * specifically aimed at validating the gateway name of a {@link ConnectorMessage}. This step is
- * used to ensure that the message adheres to the required gateway naming conventions before
+ * specifically aimed at validating the gateway name of a {@link ConnectorBusinessMessage}. This
+ * step is used to ensure that the message adheres to the required gateway naming conventions before
  * proceeding further in the processing pipeline.
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageGatewayNameStep implements ConnectorMessageStep {
+public class ConnectorOutboundMessageGatewayNameStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
     private final ConnectorMessageRepository messageRepository;
 
     public ConnectorOutboundMessageGatewayNameStep(ConnectorMessageRepository messageRepository) {
@@ -35,12 +36,8 @@ public class ConnectorOutboundMessageGatewayNameStep implements ConnectorMessage
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage outboundMessage) {
         var identifier = outboundMessage.identifier();
-
-        if (identifier == null) {
-            throw new IllegalStateException("Message identifier is null");
-        }
 
         log.debug(
             "Processing outbound message [{}] gateway name validation",

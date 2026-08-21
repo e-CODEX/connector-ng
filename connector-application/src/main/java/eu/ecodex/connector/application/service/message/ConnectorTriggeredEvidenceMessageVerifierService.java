@@ -12,46 +12,52 @@ package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.application.port.api.message.ConnectorVerifyTriggeredEvidence;
+import eu.ecodex.connector.application.port.api.message.ConnectorTriggeredEvidenceMessageVerifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import lombok.NonNull;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
+import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the {@link ConnectorVerifyTriggeredEvidence} interface.
+ * Default implementation of the {@link ConnectorTriggeredEvidenceMessageVerifier} interface.
  */
 @Service
-public class ConnectorVerifyTriggeredEvidenceService implements ConnectorVerifyTriggeredEvidence {
+public class ConnectorTriggeredEvidenceMessageVerifierService
+    implements ConnectorTriggeredEvidenceMessageVerifier {
     private static final ConnectorMessageDirection EXPECTED_BUSINESS_MSG_DIRECTION =
         ConnectorMessageDirection.GATEWAY_TO_BACKEND;
 
     private final ConnectorMessageRepository messageRepository;
 
-    public ConnectorVerifyTriggeredEvidenceService(
+    public ConnectorTriggeredEvidenceMessageVerifierService(
         ConnectorMessageRepository messageRepository) {
         this.messageRepository = messageRepository;
     }
 
     @Override
-    public void verify(@NonNull ConnectorMessage triggerMessage) {
-        var referenceToMessageId = resolveReferenceToMessageId(triggerMessage);
-        var triggerDirection = triggerMessage.direction();
+    public void verify(@Nonnull ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage) {
+        var referenceToMessageId = resolveReferenceToMessageIdentifier(
+            triggeredEvidenceMessage.referenceToBackendMessageIdentifier(),
+            triggeredEvidenceMessage.referenceToIdentifier()
+        );
 
-        validateTriggerMessage(referenceToMessageId, triggerDirection);
+        var direction = triggeredEvidenceMessage.direction();
 
-        var businessMessage = findReferencedBusinessMessage(referenceToMessageId, triggerDirection);
+        validateTriggerMessage(referenceToMessageId, direction);
+
+        var businessMessage = findReferencedBusinessMessage(referenceToMessageId, direction);
         checkRelatedBusinessMessageDirection(businessMessage);
     }
 
-    private String resolveReferenceToMessageId(ConnectorMessage triggerMessage) {
-        var identifier = triggerMessage.as4Properties().referenceToIdentifier();
-
-        return StringUtils.hasText(identifier)
-            ? identifier
-            : triggerMessage.referenceToBackendMessageIdentifier();
+    private String resolveReferenceToMessageIdentifier(
+        String referenceToBackendMessageIdentifier,
+        String referenceToIdentifier) {
+        return StringUtils.hasText(referenceToIdentifier)
+               ? referenceToIdentifier
+               : referenceToBackendMessageIdentifier;
     }
 
     private void validateTriggerMessage(
@@ -77,22 +83,11 @@ public class ConnectorVerifyTriggeredEvidenceService implements ConnectorVerifyT
      *   <li>Connector-internal identifier</li>
      * </ol>
      */
-    private ConnectorMessage findReferencedBusinessMessage(
+    private ConnectorBusinessMessage findReferencedBusinessMessage(
         String referenceToMessageId,
         ConnectorMessageDirection triggerDirection) {
-        var invertedDirection = ConnectorMessageDirection.revert(triggerDirection);
-
-        var relatedBusinessMessage = messageRepository.findByEbmsMessageIdentifierAndDirection(
-            referenceToMessageId, invertedDirection);
-
-        if (relatedBusinessMessage == null) {
-            relatedBusinessMessage = messageRepository.findByBackendMessageIdentifier(
-                referenceToMessageId);
-        }
-
-        if (relatedBusinessMessage == null) {
-            relatedBusinessMessage = messageRepository.findByIdentifier(referenceToMessageId);
-        }
+        var relatedBusinessMessage = messageRepository.findReferencedBusinessMessage(
+            referenceToMessageId, triggerDirection);
 
         if (relatedBusinessMessage == null) {
             throw new ConnectorMessageNotFoundException(
@@ -103,13 +98,8 @@ public class ConnectorVerifyTriggeredEvidenceService implements ConnectorVerifyT
         return relatedBusinessMessage;
     }
 
-    private void checkRelatedBusinessMessageDirection(ConnectorMessage businessMessage) {
+    private void checkRelatedBusinessMessageDirection(ConnectorBusinessMessage businessMessage) {
         var direction = businessMessage.direction();
-
-        if (direction == null) {
-            throw new IllegalStateException(
-                "The business message direction cannot be null for a connector message");
-        }
 
         if (direction != EXPECTED_BUSINESS_MSG_DIRECTION) {
             throw new ConnectorEvidenceException(

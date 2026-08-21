@@ -8,15 +8,16 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.evidence;
+package eu.ecodex.connector.application.service.message.inbound;
 
 import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
-import eu.ecodex.connector.application.port.api.evidence.ConnectorInboundEvidenceMessageProcessor;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageProcessor;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.util.ArrayList;
@@ -61,13 +62,7 @@ public class ConnectorInboundEvidenceMessageProcessorService
     }
 
     @Override
-    public void process(@NonNull ConnectorMessage confirmationMessage) {
-        if (!confirmationMessage.isEvidenceMessage()) {
-            throw new IllegalArgumentException(
-                "Message [" + confirmationMessage.identifier()
-                    + "] is not a gateway confirmation"
-            );
-        }
+    public void process(@NonNull ConnectorEvidenceMessage confirmationMessage) {
 
         var referencedBusinessMessage = findReferencedBusinessMessage(confirmationMessage);
 
@@ -94,20 +89,12 @@ public class ConnectorInboundEvidenceMessageProcessorService
         linkSubmitter.submit(confirmationMessage);
     }
 
-    private ConnectorMessage findReferencedBusinessMessage(ConnectorMessage confirmationMessage) {
+    private ConnectorBusinessMessage findReferencedBusinessMessage(
+        ConnectorEvidenceMessage confirmationMessage) {
         var referenceToMessageId = confirmationMessage.as4Properties().referenceToIdentifier();
         if (!StringUtils.hasText(referenceToMessageId)) {
             log.warn(
                 "Confirmation message [{}] has no refToMessageId, skipping lifecycle update",
-                confirmationMessage.identifier()
-            );
-
-            return null;
-        }
-
-        if (confirmationMessage.direction() == null) {
-            log.warn(
-                "Confirmation message [{}] has no direction, skipping lifecycle update",
                 confirmationMessage.identifier()
             );
 
@@ -122,11 +109,8 @@ public class ConnectorInboundEvidenceMessageProcessorService
     }
 
     private List<ConnectorMessageEvidence> applyEvidencesToReferencedBusinessMessage(
-        ConnectorMessage confirmationMessage,
-        ConnectorMessage referencedBusinessMessage) {
-        if (referencedBusinessMessage.identifier() == null) {
-            throw new IllegalStateException("Referenced business message has no identifier");
-        }
+        ConnectorEvidenceMessage confirmationMessage,
+        ConnectorBusinessMessage referencedBusinessMessage) {
 
         var referencedBusinessMessageIdentifier = referencedBusinessMessage.identifier();
         log.info(
@@ -137,8 +121,8 @@ public class ConnectorInboundEvidenceMessageProcessorService
         );
 
         var accumulatedEvidences = referencedBusinessMessage.evidences() != null
-            ? new ArrayList<>(referencedBusinessMessage.evidences())
-            : new ArrayList<ConnectorMessageEvidence>();
+                                   ? new ArrayList<>(referencedBusinessMessage.evidences())
+                                   : new ArrayList<ConnectorMessageEvidence>();
 
 
         var appliedEvidences = new LinkedList<ConnectorMessageEvidence>();
@@ -146,13 +130,6 @@ public class ConnectorInboundEvidenceMessageProcessorService
         // confirmationMessage.transportedEvidences() cannot be null because
         // of the !confirmationMessage.isEvidenceMessage() in the process method
         var transportedEvidences = confirmationMessage.transportedEvidences();
-
-        if (transportedEvidences == null) {
-            throw new IllegalStateException(
-                "Confirmation message [%s] has no transported evidences"
-                    .formatted(confirmationMessage.identifier())
-            );
-        }
 
         for (var incomingEvidence : transportedEvidences) {
             var appliedEvidence = applyEvidence(
@@ -169,13 +146,9 @@ public class ConnectorInboundEvidenceMessageProcessorService
     }
 
     private ConnectorMessageEvidence applyEvidence(
-        ConnectorMessage referencedMessage,
+        ConnectorBusinessMessage referencedMessage,
         List<ConnectorMessageEvidence> accumulatedEvidences,
         ConnectorMessageEvidence incomingEvidence) {
-
-        if (referencedMessage.identifier() == null) {
-            throw new IllegalStateException("Referenced message has no identifier");
-        }
 
         var evidencesForVerification = new ArrayList<>(accumulatedEvidences);
         evidencesForVerification.add(incomingEvidence);
@@ -207,8 +180,8 @@ public class ConnectorInboundEvidenceMessageProcessorService
     }
 
     private void forwardToBackend(
-        ConnectorMessage confirmationMessage,
-        ConnectorMessage referencedMessage) {
+        ConnectorEvidenceMessage confirmationMessage,
+        ConnectorBusinessMessage referencedMessage) {
         var backendMessageIdentifier = referencedMessage.backendMessageIdentifier();
 
         if (!StringUtils.hasText(backendMessageIdentifier)) {

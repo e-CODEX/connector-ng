@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorMessageIdGeneratorService")
 public class ConnectorMessageIdGeneratorTest {
     @Mock
     private ConnectorMessageProcessingConfigurationProvider messageProcessingConfigProvider;
@@ -29,7 +31,7 @@ public class ConnectorMessageIdGeneratorTest {
     private ConnectorMessageIdGenerator messageIdGenerator;
 
     @Test
-    void should_generate_message_identifier_successfully() {
+    void should_generate_message_identifier() {
         when(messageProcessingConfigProvider.getConfiguration())
             .thenReturn(
                 ConnectorMessageProcessingConfiguration

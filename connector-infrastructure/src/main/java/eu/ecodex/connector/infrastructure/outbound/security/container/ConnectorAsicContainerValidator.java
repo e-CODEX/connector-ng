@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.security.container;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -88,15 +88,7 @@ public class ConnectorAsicContainerValidator {
      * @throws ConnectorContainerException if an error occurs while processing the attachments, such
      *                                     as I/O issues or XML parsing errors
      */
-    public void validate(@NonNull ConnectorMessage message) {
-        if (message.identifier() == null) {
-            throw new IllegalStateException("Message identifier is null");
-        }
-
-        if (message.businessContent() == null) {
-            throw new IllegalStateException("Message business content is null");
-        }
-
+    public void validate(@NonNull ConnectorBusinessMessage message) {
         log.info("Validating ASIC-S container for message {}", message.identifier());
         var attachments = message.attachments();
 
@@ -242,14 +234,16 @@ public class ConnectorAsicContainerValidator {
                           .findFirst();
     }
 
-    private void persistAsicsContent(ConnectorContainer container, ConnectorMessage message)
+    private void persistAsicsContent(ConnectorContainer container, ConnectorBusinessMessage message)
         throws IOException {
         persistPdfTrustToken(container, message);
         persistBusinessContent(container, message);
         persistAdditionalAttachments(container, message);
     }
 
-    private void persistPdfTrustToken(ConnectorContainer container, ConnectorMessage message)
+    private void persistPdfTrustToken(
+        ConnectorContainer container,
+        ConnectorBusinessMessage message)
         throws IOException {
         persistAttachment(
             newAttachmentMetadata(
@@ -264,15 +258,13 @@ public class ConnectorAsicContainerValidator {
         );
     }
 
-    private void persistBusinessContent(ConnectorContainer container, ConnectorMessage message)
+    private void persistBusinessContent(
+        ConnectorContainer container,
+        ConnectorBusinessMessage message)
         throws IOException {
         var businessDssDocument = container.businessContent().getDocument();
         if (businessDssDocument == null) {
             return;
-        }
-
-        if (message.businessContent() == null || message.businessContent().uuid() == null) {
-            throw new IllegalStateException("Message business content is null");
         }
 
         var businessDocumentAttachment = newAttachmentMetadata(
@@ -306,7 +298,7 @@ public class ConnectorAsicContainerValidator {
 
     private DetachedSignature persistDetachedSignature(
         DSSDocument detachedDssSignature,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws IOException {
         if (detachedDssSignature == null) {
             return null;
@@ -337,7 +329,7 @@ public class ConnectorAsicContainerValidator {
 
     private void persistAdditionalAttachments(
         ConnectorContainer container,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws IOException {
         for (var attachment : container.businessContent().getAttachments()) {
             persistAttachment(

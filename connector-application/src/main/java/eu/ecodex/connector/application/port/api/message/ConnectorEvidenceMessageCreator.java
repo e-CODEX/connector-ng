@@ -10,15 +10,17 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
 
 /**
- * Responsible for creating a {@link ConnectorMessage} that contains or represents a
+ * Responsible for creating a {@link ConnectorBusinessMessage} that contains or represents a
  * {@link ConnectorMessageEvidence} related to an existing business message.
  *
- * <p>This component transforms a processed business {@link ConnectorMessage}
+ * <p>This component transforms a processed business {@link ConnectorBusinessMessage}
  * and its associated {@link ConnectorMessageEvidence} into a new connector message that can be
  * sent, stored, or further processed as evidence of the original message handling.</p>
  */
@@ -29,23 +31,24 @@ public interface ConnectorEvidenceMessageCreator {
      * @param businessMessage the original connector message that was processed
      * @param evidence        the evidence describing the outcome of the message processing
      *
-     * @return a {@link ConnectorMessage} representing the evidence message
+     * @return a {@link ConnectorBusinessMessage} representing the evidence message
      */
-    ConnectorMessage create(
-        @Nonnull ConnectorMessage businessMessage, @Nonnull ConnectorMessageEvidence evidence);
+    ConnectorEvidenceMessage create(
+        @Nonnull ConnectorBusinessMessage businessMessage,
+        @Nonnull ConnectorMessageEvidence evidence);
 
     /**
      * Builds an outbound evidence message for a backend trigger (parties and recipients swapped
      * relative to the referenced business message).
      *
-     * @param businessMessage referenced gateway-to-backend business message
-     * @param evidence        generated signed evidence to transport
-     * @param triggerMessage  original trigger submitted by the backend
+     * @param businessMessage  referenced a gateway-to-backend business message
+     * @param evidence         generated signed evidence to transport
+     * @param triggeredMessage original trigger submitted by the backend
      *
      * @return evidence message ready for gateway submission
      */
-    ConnectorMessage createForTrigger(
-        @Nonnull ConnectorMessage businessMessage,
+    ConnectorEvidenceMessage createForTrigger(
+        @Nonnull ConnectorBusinessMessage businessMessage,
         @Nonnull ConnectorMessageEvidence evidence,
-        @Nonnull ConnectorMessage triggerMessage);
+        @Nonnull ConnectorTriggeredEvidenceMessage triggeredMessage);
 }

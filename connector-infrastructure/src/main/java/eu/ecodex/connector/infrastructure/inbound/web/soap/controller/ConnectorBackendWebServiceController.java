@@ -11,15 +11,15 @@
 package eu.ecodex.connector.infrastructure.inbound.web.soap.controller;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
 import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
-import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
 import eu.ecodex.connector.application.service.message.ConnectorListPendingMessagesService;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
@@ -67,7 +67,8 @@ import org.springframework.util.StringUtils;
 @MTOM
 @Component
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
-    private final ConnectorOutboundMessageReceiver messageStagingService;
+    private final ConnectorOutboundBusinessMessageReceiver businessMessageReceiver;
+    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
     private final ConnectorListPendingMessageIds listPendingMessageIdsService;
     private final ConnectorListPendingMessagesService listPendingMessagesService;
     private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
@@ -83,8 +84,10 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      * Controller class for handling backend web service operations related to message
      * transportation, management, and interaction with external services.
      *
-     * @param messageStagingService               Service for handling outbound message processing
+     * @param businessMessageReceiver             Service for handling outbound message processing
      *                                            before dispatch.
+     * @param outboundEvidenceMessageProcessor    Service for handling outbound evidence message
+     *                                            processing.
      * @param listPendingMessageIdsService        Service for retrieving a list of pending message
      *                                            IDs.
      * @param listPendingMessagesService          Service for retrieving a list of pending
@@ -102,7 +105,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      *                                            message formats.
      */
     public ConnectorBackendWebServiceController(
-        ConnectorOutboundMessageReceiver messageStagingService,
+        ConnectorOutboundBusinessMessageReceiver businessMessageReceiver,
+        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor,
         ConnectorListPendingMessageIds listPendingMessageIdsService,
         ConnectorListPendingMessagesService listPendingMessagesService,
         ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService,
@@ -111,7 +115,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         ConnectorAckMessageTransportStep ackMessageTransportStepService,
         ConnectorBackendClientVerifier backendClientVerifierService,
         LegacyMessageHelper legacyMessageHelper) {
-        this.messageStagingService = messageStagingService;
+        this.businessMessageReceiver = businessMessageReceiver;
+        this.outboundEvidenceMessageProcessor = outboundEvidenceMessageProcessor;
         this.listPendingMessageIdsService = listPendingMessageIdsService;
         this.listPendingMessagesService = listPendingMessagesService;
         this.retrieveMessageByTransportIdService = retrieveMessageByTransportIdService;
@@ -223,11 +228,15 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         try {
             var backendClientName = getBackendClientName();
 
-            final ConnectorMessage parsedMessage;
             if (MessageHelpers.isEvidenceTriggerRequest(submitMessageRequest)) {
-                parsedMessage = MessageHelpers.toDomain(
-                    submitMessageRequest, null, null, null, backendClientName
+                var evidenceMessageCommand = MessageHelpers.toEvidenceTriggerCommand(
+                    submitMessageRequest,
+                    backendClientName
                 );
+                var createdMessage = this.outboundEvidenceMessageProcessor.execute(
+                    evidenceMessageCommand
+                );
+                answer.setMessageId(createdMessage.identifier());
             } else {
                 var attachmentIdentifiers = persistAttachments(
                     submitMessageRequest.getMessageAttachments()
@@ -237,18 +246,18 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                     businessContent.getDocument()
                 );
                 var businessContentAttachmentIdentifier = persistBusinessContent(businessContent);
-                parsedMessage = MessageHelpers.toDomain(
+                var parsedMessage = MessageHelpers.toBusinessCommand(
                     submitMessageRequest,
                     attachmentIdentifiers,
                     businessContentAttachmentIdentifier,
                     businessDocumentAttachmentIdentifier,
                     backendClientName
                 );
+
+                var createdMessage = this.businessMessageReceiver.execute(parsedMessage);
+                answer.setMessageId(createdMessage.identifier());
             }
 
-            var createdMessage = this.messageStagingService.execute(parsedMessage);
-
-            answer.setMessageId(createdMessage.identifier());
             answer.setResult(true);
         } catch (Exception e) {
             log.error("Error submitting message to the connector via SOAP endpoint", e);

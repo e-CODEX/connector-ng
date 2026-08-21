@@ -8,9 +8,9 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.port.api.evidence;
+package eu.ecodex.connector.application.port.api.message.inbound;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import lombok.NonNull;
 
 /**
@@ -27,5 +27,5 @@ public interface ConnectorInboundEvidenceMessageProcessor {
      * @param confirmationMessage the persisted gateway confirmation message; must not be
      *                            {@code null}
      */
-    void process(@NonNull ConnectorMessage confirmationMessage);
+    void process(@NonNull ConnectorEvidenceMessage confirmationMessage);
 }

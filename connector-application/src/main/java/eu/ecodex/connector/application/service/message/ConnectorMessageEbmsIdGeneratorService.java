@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Generates unique ebMS message identifiers for connector messages.
@@ -29,8 +29,8 @@ import org.springframework.stereotype.Component;
  * the ebMS specification.
  */
 @Slf4j
-@Component
-public class ConnectorMessageEbmsIdGenerator {
+@Service
+public class ConnectorMessageEbmsIdGeneratorService {
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
     /**
@@ -39,7 +39,7 @@ public class ConnectorMessageEbmsIdGenerator {
      * @param processingConfigurationProvider provider used to retrieve the message processing
      *                                        configuration, including the ebMS identifier suffix
      */
-    public ConnectorMessageEbmsIdGenerator(
+    public ConnectorMessageEbmsIdGeneratorService(
         ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
         this.processingConfigurationProvider = processingConfigurationProvider;
     }

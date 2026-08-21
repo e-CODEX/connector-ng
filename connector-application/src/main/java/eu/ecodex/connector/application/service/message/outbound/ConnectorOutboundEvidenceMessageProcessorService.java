@@ -8,22 +8,22 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.evidence;
+package eu.ecodex.connector.application.service.message.outbound;
 
 import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.application.port.api.evidence.ConnectorEvidenceTriggerProcessor;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageProcessor;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.util.ConnectorBusinessDomainUtil;
 import java.util.ArrayList;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,8 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Service
 @Transactional
-public class ConnectorEvidenceTriggerProcessorService implements ConnectorEvidenceTriggerProcessor {
+public class ConnectorOutboundEvidenceMessageProcessorService
+    implements ConnectorOutboundEvidenceMessageProcessor {
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceCreator evidenceCreator;
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
@@ -56,7 +57,7 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
      * @param linkSubmitter                   forwards messages to partners
      * @param processingConfigurationProvider message processing configuration
      */
-    public ConnectorEvidenceTriggerProcessorService(
+    public ConnectorOutboundEvidenceMessageProcessorService(
         ConnectorMessageRepository messageRepository,
         ConnectorMessageEvidenceCreator evidenceCreator,
         ConnectorMessageEvidenceVerifier evidenceVerifier,
@@ -72,29 +73,16 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
     }
 
     @Override
-    public void process(@NonNull ConnectorMessage triggerMessage) {
-        log.info("Processing outbound evidence trigger message [{}]", triggerMessage.identifier());
+    public void execute(@NonNull ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage) {
+        log.info(
+            "Processing outbound evidence trigger message [{}]",
+            triggeredEvidenceMessage.identifier()
+        );
 
         try {
-            ConnectorBusinessDomainUtil.setCurrentBusinessDomain(
-                triggerMessage.businessDomainIdentifier()
-            );
+            var evidenceType = triggeredEvidenceMessage.evidenceType();
 
-            checkEvidentness(triggerMessage);
-
-            // triggerEvidence cannot be null because of the checkEvidentness
-            var transportedEvidences = triggerMessage.transportedEvidences();
-
-            if (transportedEvidences == null || transportedEvidences.size() != 1) {
-                throw new ConnectorEvidenceException(
-                    "Evidence trigger message must contain exactly one evidence"
-                );
-            }
-
-            var triggerEvidence = transportedEvidences.getFirst();
-            var evidenceType = triggerEvidence.type();
-
-            var businessMessage = findReferencedBusinessMessage(triggerMessage);
+            var businessMessage = findReferencedBusinessMessage(triggeredEvidenceMessage);
 
             if (businessMessage.direction() != ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
                 throw new ConnectorEvidenceException(
@@ -109,7 +97,7 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
             applyEvidenceToBusinessMessage(businessMessage, createdEvidence);
 
             var evidenceForGatewayMessage = evidenceMessageCreator.createForTrigger(
-                businessMessage, createdEvidence, triggerMessage
+                businessMessage, createdEvidence, triggeredEvidenceMessage
             );
 
             linkSubmitter.submit(evidenceForGatewayMessage);
@@ -125,64 +113,33 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
                 evidenceType,
                 businessMessage.identifier()
             );
-        } finally {
-            ConnectorBusinessDomainUtil.setCurrentBusinessDomain(null);
+        } catch (Exception e) {
+            log.error("Failed to process evidence trigger [{}]", triggeredEvidenceMessage, e);
+            throw e;
         }
     }
 
-    private void checkEvidentness(ConnectorMessage triggerMessage) {
-        if (!triggerMessage.isEvidenceTriggerMessage()) {
-            log.warn("The message is not an evidence trigger message");
-            throw new ConnectorEvidenceException(
-                "The message is not an evidence trigger message"
-            );
-        }
-
-        if (!triggerMessage.isEvidenceTriggeringAllowed()) {
-            log.warn("Only backend can generate trigger messages");
-            throw new ConnectorEvidenceException("Only backend can generate trigger messages");
-        }
-    }
-
-    private ConnectorMessage findReferencedBusinessMessage(ConnectorMessage triggerMessage) {
-        var referenceToMessageId = triggerMessage.as4Properties().referenceToIdentifier();
+    private ConnectorBusinessMessage findReferencedBusinessMessage(
+        ConnectorTriggeredEvidenceMessage triggerMessage) {
+        var referenceToMessageId = triggerMessage.referenceToIdentifier();
 
         if (!StringUtils.hasText(referenceToMessageId)) {
             referenceToMessageId = triggerMessage.referenceToBackendMessageIdentifier();
         }
+
         if (!StringUtils.hasText(referenceToMessageId)) {
             throw new ConnectorEvidenceException(
                 "Evidence trigger must set refToMessageId to the referenced business message"
             );
         }
 
-        if (triggerMessage.direction() == null) {
-            throw new ConnectorEvidenceException(
-                "Evidence trigger must set direction to the referenced business message"
-            );
-        }
-
-        // the sorting by criteria because two messages can have the same ebms identifier
-
-        var byEbms = messageRepository.findByEbmsMessageIdentifierAndDirection(
+        var referencedBusinessMessage = messageRepository.findReferencedBusinessMessage(
             referenceToMessageId,
-            ConnectorMessageDirection.revert(triggerMessage.direction())
+            triggerMessage.direction()
         );
 
-        if (byEbms != null) {
-            return byEbms;
-        }
-
-        var byBackendId = messageRepository.findByBackendMessageIdentifier(referenceToMessageId);
-
-        if (byBackendId != null) {
-            return byBackendId;
-        }
-
-        var byIdentifier = messageRepository.findByIdentifier(referenceToMessageId);
-
-        if (byIdentifier != null) {
-            return byIdentifier;
+        if (referencedBusinessMessage != null) {
+            return referencedBusinessMessage;
         }
 
         throw new ConnectorMessageNotFoundException(
@@ -191,16 +148,13 @@ public class ConnectorEvidenceTriggerProcessorService implements ConnectorEviden
     }
 
     private void applyEvidenceToBusinessMessage(
-        ConnectorMessage businessMessage,
+        ConnectorBusinessMessage businessMessage,
         ConnectorMessageEvidence createdEvidence) {
-        if (businessMessage.identifier() == null) {
-            throw new IllegalStateException("Business message identifier is null");
-        }
 
         var reloaded = messageRepository.findByIdentifier(businessMessage.identifier());
         var accumulated = reloaded.evidences() != null
-            ? new ArrayList<>(reloaded.evidences())
-            : new ArrayList<ConnectorMessageEvidence>();
+                          ? new ArrayList<>(reloaded.evidences())
+                          : new ArrayList<ConnectorMessageEvidence>();
         accumulated.add(createdEvidence);
 
         var messageForVerification = reloaded.toBuilder()

@@ -11,18 +11,20 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
-import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
+import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageCommand;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
@@ -51,24 +53,30 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorMessageController implements ConnectorMessageApi {
-    private final ConnectorOutboundMessageReceiver outboundMessageReceiver;
+    private final ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService;
+    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
     private final ConnectorUploadAttachments uploadAttachmentsService;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
      *
-     * @param outboundMessageReceiver      The service responsible for receiving and managing
-     *                                     outbound messages.
-     * @param backendClientVerifierService The service used for verifying backend clients.
-     * @param uploadAttachmentsService     The service for handling file attachments during message
-     *                                     processing.
+     * @param outboundBusinessMessageReceiverService The service responsible for receiving and
+     *                                               managing outbound messages.
+     * @param outboundEvidenceMessageReceiverService The service responsible for processing outbound
+     *                                               evidence messages.
+     * @param backendClientVerifierService           The service used for verifying backend
+     *                                               clients.
+     * @param uploadAttachmentsService               The service for handling file attachments
+     *                                               during message processing.
      */
     public ConnectorMessageController(
-        ConnectorOutboundMessageReceiver outboundMessageReceiver,
+        ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService,
+        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService,
         ConnectorBackendClientVerifier backendClientVerifierService,
         ConnectorUploadAttachments uploadAttachmentsService) {
-        this.outboundMessageReceiver = outboundMessageReceiver;
+        this.outboundBusinessMessageReceiverService = outboundBusinessMessageReceiverService;
+        this.outboundEvidenceMessageReceiverService = outboundEvidenceMessageReceiverService;
         this.backendClientVerifierService = backendClientVerifierService;
         this.uploadAttachmentsService = uploadAttachmentsService;
     }
@@ -76,10 +84,10 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     @Override
     public ConnectorOutboundMessageDto submitOutboundMessage(
         ConnectorOutboundMessageRequest request) throws IOException {
-        var message = toDomain(request);
-        var registeredMessage = outboundMessageReceiver.execute(message);
+        var command = toCommand(request);
+        var registeredMessage = outboundBusinessMessageReceiverService.execute(command);
 
-        return toDto(registeredMessage);
+        return toDto((ConnectorBusinessMessage) registeredMessage);
     }
 
     @Override
@@ -87,38 +95,21 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         ConnectorEvidenceTriggerMessageRequest request) {
         // TODO current cn is fake, retrieve the certificate dn from user principal
         var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
-        var transportedEvidences = List.of(
-            ConnectorMessageEvidence.builder()
-                                    .type(request.evidenceType())
-                                    .build()
-        );
-        var message = ConnectorMessage
+
+        var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
+            .evidenceType(request.evidenceType())
             .backendMessageIdentifier(request.identifiers().backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(
-                request.identifiers().backendMessageIdentifier()
-            )
+            .referenceToIdentifier(request.identifiers().referenceToIdentifier())
             .backendName(backendClientName)
-            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-            .as4Properties(
-                ConnectorMessageAS4Properties
-                    .builder()
-                    .referenceToIdentifier(
-                        request.identifiers().referenceToIdentifier()
-                    )
-                    .build()
-            )
-            .businessContent(null)
-            .attachments(null)
-            .transportedEvidences(transportedEvidences)
             .build();
 
-        var registeredMessage = outboundMessageReceiver.execute(message);
+        var registeredMessage = outboundEvidenceMessageReceiverService.execute(message);
 
         return ConnectorEvidenceMessageDto.of(registeredMessage.identifier());
     }
 
-    private ConnectorOutboundMessageDto toDto(ConnectorMessage message) {
+    private ConnectorOutboundMessageDto toDto(ConnectorBusinessMessage message) {
         return ConnectorOutboundMessageDto
             .builder()
             .identifier(message.identifier())
@@ -128,10 +119,12 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             .build();
     }
 
-    private ConnectorMessage toDomain(ConnectorOutboundMessageRequest request) throws IOException {
+    private ConnectorOutboundBusinessMessageCommand toCommand(
+        ConnectorOutboundMessageRequest request)
+        throws IOException {
         // TODO current cn is fake, retrieve the certificate dn from user principal
         var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
-        return ConnectorMessage
+        return ConnectorOutboundBusinessMessageCommand
             .builder()
             .businessDomainIdentifier(
                 resolveBusinessDomainIdentifier(request.businessDomainIdentifier())

@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.application.port.api.attachment;
 
-import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import jakarta.annotation.Nonnull;
 import java.util.List;

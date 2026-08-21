@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.jms.publisher.inbound;
 
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -19,11 +19,12 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Inbound Message Pipeline Implementation of the {@link ConnectorEventPublisher}.
+ * Inbound Message Pipeline Implementation of the {@link ConnectorMessageEventPublisher}.
  */
 @Slf4j
 @Component("connectorJmsInboundMessagePipelinePublisher")
-public class ConnectorJmsInboundMessagePipelineEventPublisher implements ConnectorEventPublisher {
+public class ConnectorJmsInboundMessagePipelineEventPublisher
+    implements ConnectorMessageEventPublisher<ConnectorBusinessMessage> {
     private final JmsTemplate jmsTemplate;
     private final ConnectorQueueProperties queueProperties;
 
@@ -35,7 +36,7 @@ public class ConnectorJmsInboundMessagePipelineEventPublisher implements Connect
     }
 
     @Override
-    public void publish(@NonNull ConnectorMessage message) {
+    public void publish(@NonNull ConnectorBusinessMessage message) {
         log.info(
             "Submitting message [{}] to inbound message processing queue",
             message.identifier()

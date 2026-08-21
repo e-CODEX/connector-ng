@@ -10,23 +10,23 @@
 
 package eu.ecodex.connector.application.port.api.message.pipeline;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Represents a processing pipeline for handling {@link ConnectorMessage} instances.
+ * Represents a processing pipeline for handling {@link ConnectorBusinessMessage} instances.
  *
  * <p>This interface defines a single method for processing messages within the pipeline.
  * Implementations of this interface are responsible for applying specific logic or transformations
  * to the message as part of a larger workflow.
  *
  * <p>The processing pipeline plays a critical role in coordinating the flow of
- * {@link ConnectorMessage} objects through various stages, ensuring compliance with business and
- * technical requirements.
+ * {@link ConnectorBusinessMessage} objects through various stages, ensuring compliance with
+ * business and technical requirements.
  *
  * <p>Each implementation of the pipeline may encapsulate one or more processing steps,
  * such as validation, transformation, routing, or persistence.
  */
 public interface ConnectorMessagePipeline {
-    void process(@Nonnull ConnectorMessage message);
+    void process(@Nonnull ConnectorBusinessMessage message);
 }

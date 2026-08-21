@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.attachement;
+package eu.ecodex.connector.application.port.api.attachment;
 
 import jakarta.annotation.Nonnull;
 import java.io.IOException;

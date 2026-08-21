@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.helper;
 
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -44,7 +45,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.springframework.stereotype.Component;
 
 /**
- * Helper class for converting {@link ConnectorMessage} instances to legacy message types.
+ * Helper class for converting {@link ConnectorBusinessMessage} instances to legacy message types.
  */
 @Component
 public class LegacyMessageHelper {
@@ -59,31 +60,30 @@ public class LegacyMessageHelper {
     }
 
     /**
-     * Converts a {@link ConnectorMessage} into a {@link DomibusConnectorMessageType}.
+     * Converts a {@link ConnectorBusinessMessage} into a {@link DomibusConnectorMessageType}.
      *
-     * @param message the {@link ConnectorMessage} instance to be converted
+     * @param message the {@link ConnectorBusinessMessage} instance to be converted
      *
      * @return a {@link DomibusConnectorMessageType} instance containing the converted data from the
      *     input message
      */
     public DomibusConnectorMessageType convertMessage(ConnectorMessage message) {
         var details = convertDetails(message);
+
         var messageType = new DomibusConnectorMessageType();
         messageType.setMessageDetails(details);
 
-        if (message.businessContent() != null) {
-            messageType.setMessageContent(toContent(message.businessContent()));
+        if (message instanceof ConnectorBusinessMessage businessMessage) {
+            messageType.setMessageContent(toContent(businessMessage.businessContent()));
+            messageType.getMessageErrors().addAll(toErrors(businessMessage.errors()));
+            messageType.getMessageAttachments().addAll(
+                toAttachments(message.identifier())
+            );
         }
-
-        messageType.getMessageAttachments().addAll(
-            toAttachments(message.identifier())
-        );
 
         messageType.getMessageConfirmations().addAll(
             toConfirmations(message.transportedEvidences())
         );
-
-        messageType.getMessageErrors().addAll(toErrors(message.errors()));
 
         return messageType;
     }

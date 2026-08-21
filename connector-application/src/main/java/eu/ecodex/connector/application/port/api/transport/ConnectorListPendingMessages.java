@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.transport;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
@@ -25,8 +25,8 @@ public interface ConnectorListPendingMessages {
      *
      * @param backendName the name of the backend system for which pending messages are requested.
      *
-     * @return a list of {@link ConnectorMessage} representing the pending messages, or an empty
-     *     list if there are no pending messages.
+     * @return a list of {@link ConnectorBusinessMessage} representing the pending messages, or an
+     *     empty list if there are no pending messages.
      */
-    List<ConnectorMessage> execute(@Nonnull String backendName);
+    List<ConnectorBusinessMessage> execute(@Nonnull String backendName);
 }

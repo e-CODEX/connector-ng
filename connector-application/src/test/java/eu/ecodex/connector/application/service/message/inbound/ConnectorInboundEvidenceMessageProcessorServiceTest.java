@@ -18,17 +18,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.AS4PropertiesTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.evidence.ConnectorInboundEvidenceMessageProcessorService;
+import eu.ecodex.connector.application.service.message.inbound.ConnectorInboundEvidenceMessageProcessorService;
 import eu.ecodex.connector.domain.model.ConnectorErrorCode;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
@@ -39,7 +40,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     private static final String REFERENCED_EBMS_ID = "original-ebms-id@domibus.eu";
@@ -61,40 +61,43 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
     @InjectMocks
     private ConnectorInboundEvidenceMessageProcessorService processor;
 
-    private static ConnectorMessage referencedBusinessMessage() {
-        return MessageTestFixtures.createOutboundBusinessMessage()
-                                  .toBuilder()
-                                  .identifier(REFERENCED_MESSAGE_ID)
-                                  .backendMessageIdentifier(BACKEND_MESSAGE_ID)
-                                  .as4Properties(
-                                      MessageTestFixtures.createOutboundBusinessMessage()
-                                                         .as4Properties()
-                                                         .toBuilder()
-                                                         .ebmsMessageIdentifier(REFERENCED_EBMS_ID)
-                                                         .build()
-                                  )
-                                  .build();
+    private static ConnectorBusinessMessage referencedBusinessMessage() {
+        return BusinessMessageTestFixtures.createOutboundMessage()
+                                          .toBuilder()
+                                          .identifier(REFERENCED_MESSAGE_ID)
+                                          .backendMessageIdentifier(BACKEND_MESSAGE_ID)
+                                          .as4Properties(
+                                              BusinessMessageTestFixtures.createOutboundMessage()
+                                                                         .as4Properties()
+                                                                         .toBuilder()
+                                                                         .ebmsMessageIdentifier(
+                                                                             REFERENCED_EBMS_ID)
+                                                                         .build()
+                                          )
+                                          .build();
     }
 
-    private static ConnectorMessage gatewayConfirmationMessage(
+    private static ConnectorEvidenceMessage gatewayConfirmationMessage(
         List<ConnectorMessageEvidence> evidences) {
-        return ConnectorMessage.builder()
-                               .identifier(CONFIRMATION_MESSAGE_ID)
-                               .businessDomainIdentifier(
-                                   MessageTestFixtures.createOutboundBusinessMessage()
-                                                      .businessDomainIdentifier()
-                               )
-                               .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                               .as4Properties(
-                                   ConnectorMessageAS4Properties.builder()
-                                                                .referenceToIdentifier(
-                                                                    ConnectorInboundEvidenceMessageProcessorServiceTest.REFERENCED_EBMS_ID)
-                                                                .ebmsMessageIdentifier(
-                                                                    "evidence-ebms@domibus.eu")
-                                                                .build()
-                               )
-                               .transportedEvidences(evidences)
-                               .build();
+        return ConnectorEvidenceMessage.builder()
+                                       .identifier(CONFIRMATION_MESSAGE_ID)
+                                       .businessDomainIdentifier(
+                                           BusinessMessageTestFixtures.createOutboundMessage()
+                                                                      .businessDomainIdentifier()
+                                       )
+                                       .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                                       .as4Properties(
+                                           AS4PropertiesTestFixtures.createAS4Properties()
+                                                                        .toBuilder()
+                                                                    .referenceToIdentifier(
+                                                                        ConnectorInboundEvidenceMessageProcessorServiceTest.REFERENCED_EBMS_ID)
+                                                                    .ebmsMessageIdentifier(
+                                                                        "evidence-ebms"
+                                                                            + "@domibus.eu")
+                                                                    .build()
+                                       )
+                                       .transportedEvidences(evidences)
+                                       .build();
     }
 
     @Test
@@ -115,7 +118,7 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
 
         verify(evidenceVerifier).verify(
             eq(ConnectorEvidenceType.DELIVERY),
-            any(ConnectorMessage.class)
+            any(ConnectorBusinessMessage.class)
         );
         verify(evidenceRepository).save(deliveryEvidence, REFERENCED_MESSAGE_ID);
     }
@@ -149,7 +152,7 @@ public class ConnectorInboundEvidenceMessageProcessorServiceTest {
         doThrow(new ConnectorEvidenceNotRelevantException(
             ConnectorErrorCode.EVIDENCE_IGNORED_DUE_HIGHER_PRIORITY
         )).when(evidenceVerifier)
-          .verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorMessage.class));
+          .verify(eq(ConnectorEvidenceType.DELIVERY), any(ConnectorBusinessMessage.class));
 
         processor.process(confirmationMessage);
 

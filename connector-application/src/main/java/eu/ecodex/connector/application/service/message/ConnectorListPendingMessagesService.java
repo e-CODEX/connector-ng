@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingMessages;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import java.util.List;
 import lombok.NonNull;
@@ -36,7 +37,8 @@ public class ConnectorListPendingMessagesService implements ConnectorListPending
     }
 
     @Override
-    public List<ConnectorMessage> execute(@NonNull String backendName) {
+    public List<ConnectorBusinessMessage> execute(@NonNull String backendName) {
+        // TODO retireve message from transport step repository
         var pendingIds = this.transportStepRepository.findPendingMessagesIds(backendName);
         return this.messageRepository.findAllByIdentifier(pendingIds);
     }

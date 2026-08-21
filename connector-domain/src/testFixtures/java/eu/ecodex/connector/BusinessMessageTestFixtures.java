@@ -1,6 +1,6 @@
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
@@ -10,12 +10,12 @@ import java.util.List;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "LineLength"})
 public class MessageTestFixtures {
-    public static ConnectorMessage createOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createOutboundBusinessMessage() {
         var builder = backendToGatewayMessage();
         return builder.build();
     }
 
-    public static ConnectorMessage createEvidenceMessage() {
+    public static ConnectorBusinessMessage createEvidenceMessage() {
         var builder = backendToGatewayMessage();
         return builder
             .businessContent(null)
@@ -26,7 +26,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createOutboundStagingBusinessMessage() {
+    public static ConnectorBusinessMessage createOutboundStagingBusinessMessage() {
         return backendToGatewayMessage()
             .identifier(null)
             .backendName(null)
@@ -44,7 +44,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createInboundBusinessMessage() {
+    public static ConnectorBusinessMessage createInboundBusinessMessage() {
         return backendToGatewayMessage()
             .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
             .transportedEvidences(
@@ -52,13 +52,13 @@ public class MessageTestFixtures {
             ).build();
     }
 
-    public static ConnectorMessage createInboundBusinessMessageWithoutBackendName() {
+    public static ConnectorBusinessMessage createInboundBusinessMessageWithoutBackendName() {
         return createInboundBusinessMessage().toBuilder()
                                              .backendName(null)
                                              .build();
     }
 
-    public static ConnectorMessage createInboundBusinessMessageWithoutBackendNameAndConversationIdentifier() {
+    public static ConnectorBusinessMessage createInboundBusinessMessageWithoutBackendNameAndConversationIdentifier() {
         return createInboundBusinessMessageWithoutBackendName()
             .toBuilder()
             .backendName(null)
@@ -68,17 +68,17 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createValidOutboundBusinessMessageWithoutGatewayName() {
+    public static ConnectorBusinessMessage createValidOutboundBusinessMessageWithoutGatewayName() {
         return backendToGatewayMessage().gatewayName(null).build();
     }
 
-    public static ConnectorMessage createNullFromPartyOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createNullFromPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
             .as4Properties(AS4PropertiesTestFixtures.createAS4PropertiesWithoutFromParty())
             .build();
     }
 
-    public static ConnectorMessage createEmptyFromPartyOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createEmptyFromPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
             .as4Properties(
                 AS4PropertiesTestFixtures.defaultAS4Properties()
@@ -92,13 +92,13 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createNullToPartyOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createNullToPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
             .as4Properties(AS4PropertiesTestFixtures.createAS4PropertiesWithoutToParty())
             .build();
     }
 
-    public static ConnectorMessage createEmptyToPartyOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createEmptyToPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
             .as4Properties(
                 AS4PropertiesTestFixtures.defaultAS4Properties()
@@ -111,7 +111,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createInvalidFromPartyOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createInvalidFromPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
             .as4Properties(
                 AS4PropertiesTestFixtures.defaultAS4Properties()
@@ -121,7 +121,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createInvalidToPartyOutboundBusinessMessage() {
+    public static ConnectorBusinessMessage createInvalidToPartyOutboundBusinessMessage() {
         return backendToGatewayMessage()
             .as4Properties(
                 AS4PropertiesTestFixtures.defaultAS4Properties()
@@ -130,7 +130,7 @@ public class MessageTestFixtures {
             ).build();
     }
 
-    public static ConnectorMessage createSubmissionAcceptanceEvidenceMessage() {
+    public static ConnectorBusinessMessage createSubmissionAcceptanceEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
@@ -142,7 +142,7 @@ public class MessageTestFixtures {
                                               .build();
     }
 
-    public static ConnectorMessage createRelayRMMDAcceptanceEvidenceMessage() {
+    public static ConnectorBusinessMessage createRelayRMMDAcceptanceEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
@@ -154,7 +154,7 @@ public class MessageTestFixtures {
                                              .build();
     }
 
-    public static ConnectorMessage createNonDeliveryEvidenceMessage() {
+    public static ConnectorBusinessMessage createNonDeliveryEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createNonDeliveryEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
@@ -166,7 +166,7 @@ public class MessageTestFixtures {
                                              .build();
     }
 
-    public static ConnectorMessage createDeliveryEvidenceMessage() {
+    public static ConnectorBusinessMessage createDeliveryEvidenceMessage() {
         var evidence = EvidenceTestFixtures.createDeliveryEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
@@ -178,7 +178,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createEvidenceTriggerMessage() {
+    public static ConnectorBusinessMessage createEvidenceTriggerMessage() {
         var evidence = EvidenceTestFixtures.createEvidenceTrigger();
         var transported = new ArrayList<ConnectorMessageEvidence>();
         transported.add(evidence);
@@ -189,7 +189,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createRejectedMessage() {
+    public static ConnectorBusinessMessage createRejectedMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionRejectionEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
@@ -202,7 +202,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    public static ConnectorMessage createConfirmedMessage() {
+    public static ConnectorBusinessMessage createConfirmedMessage() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
         var evidences = new ArrayList<ConnectorMessageEvidence>();
         evidences.add(evidence);
@@ -215,7 +215,7 @@ public class MessageTestFixtures {
             .build();
     }
 
-    private static ConnectorMessage.ConnectorMessageBuilder evidencesMessage() {
+    private static ConnectorBusinessMessage.ConnectorMessageBuilder evidencesMessage() {
         var builder = backendToGatewayMessage();
         return builder
             .identifier(null)
@@ -243,8 +243,8 @@ public class MessageTestFixtures {
     }
 
     // is considered as an outgoing message
-    private static ConnectorMessage.ConnectorMessageBuilder backendToGatewayMessage() {
-        return ConnectorMessage
+    private static ConnectorBusinessMessage.ConnectorMessageBuilder backendToGatewayMessage() {
+        return ConnectorBusinessMessage
             .builder()
             .businessDomainIdentifier(
                 BusinessDomainTestFixtures.createDefaultBusinessDomain()

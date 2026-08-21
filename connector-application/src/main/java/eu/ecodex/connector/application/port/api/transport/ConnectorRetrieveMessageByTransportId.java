@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.transport;
 
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 
 /**
@@ -27,7 +28,7 @@ public interface ConnectorRetrieveMessageByTransportId {
      * @param transportIdentifier the identifier used to locate the corresponding
      *                            {@link ConnectorMessage}
      *
-     * @return the {@link ConnectorMessage} associated with the given transport identifier
+     * @return the {@link ConnectorBusinessMessage} associated with the given transport identifier
      */
     ConnectorMessage execute(String transportIdentifier);
 }

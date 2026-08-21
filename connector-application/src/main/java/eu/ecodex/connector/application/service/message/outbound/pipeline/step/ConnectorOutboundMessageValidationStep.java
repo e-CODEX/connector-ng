@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageValidationStep implements ConnectorMessageStep {
+public class ConnectorOutboundMessageValidationStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
     private final ConnectorMessagePartiesVerifier partiesVerifierService;
 
     public ConnectorOutboundMessageValidationStep(
@@ -36,7 +37,7 @@ public class ConnectorOutboundMessageValidationStep implements ConnectorMessageS
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage outboundMessage) {
         log.debug("Processing outbound message [{}] validation", outboundMessage.identifier());
 
         this.partiesVerifierService.verify(outboundMessage);

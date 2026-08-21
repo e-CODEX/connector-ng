@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.routing;
 
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import lombok.Getter;
@@ -51,17 +52,6 @@ public class ConnectorRoutingRulePattern {
 
     static String extractAs4Value(ConnectorMessage message, TokenType as4Attribute) {
         ConnectorMessageAS4Properties as4Properties = message.as4Properties();
-        if (as4Properties.service() == null) {
-            throw new IllegalStateException("Cannot extract AS4 value without a service");
-        }
-
-        if (as4Properties.fromParty() == null) {
-            throw new IllegalStateException("Cannot extract AS4 value without a fromParty");
-        }
-
-        if (as4Properties.action() == null) {
-            throw new IllegalStateException("Cannot extract AS4 value without a action");
-        }
 
         return switch (as4Attribute) {
             case TokenType.AS4_SERVICE_NAME -> as4Properties.service().name();

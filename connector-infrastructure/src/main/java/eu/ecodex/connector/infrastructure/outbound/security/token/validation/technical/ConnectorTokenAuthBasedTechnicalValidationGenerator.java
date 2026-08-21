@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorTokenException;
 import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenAuthenticationData;
 import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenTechnicalTrustLevel;
@@ -30,11 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 public class ConnectorTokenAuthBasedTechnicalValidationGenerator implements
     ConnectorTokenTechnicalValidationGenerator {
     private final String identityProvider;
-    private final ConnectorMessage message;
+    private final ConnectorBusinessMessage message;
 
     public ConnectorTokenAuthBasedTechnicalValidationGenerator(
         String identityProvider,
-        ConnectorMessage message) {
+        ConnectorBusinessMessage message) {
         this.identityProvider = identityProvider;
         this.message = message;
     }
@@ -62,7 +62,7 @@ public class ConnectorTokenAuthBasedTechnicalValidationGenerator implements
         return true;
     }
 
-    private ConnectorTokenValidation create(ConnectorMessage message)
+    private ConnectorTokenValidation create(ConnectorBusinessMessage message)
         throws DatatypeConfigurationException {
         var datatypeFactory = DatatypeFactory.newInstance(); // create once
         var now = datatypeFactory.newXMLGregorianCalendar(new GregorianCalendar());

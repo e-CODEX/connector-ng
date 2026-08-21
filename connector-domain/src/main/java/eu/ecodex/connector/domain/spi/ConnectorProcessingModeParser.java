@@ -53,13 +53,6 @@ public interface ConnectorProcessingModeParser {
         /**
          * Constructs an instance of ParsedProcessingMode while ensuring the immutability of the
          * provided sets.
-         *
-         * @param parties  The set of connector parties involved in the processing mode. Each party
-         *                 represents an entity with a role in the processing.
-         * @param services The set of connector services offered in the processing mode. Each
-         *                 service defines a specific functionality provided by the connector.
-         * @param actions  The set of connector actions associated with the processing mode. Each
-         *                 action specifies a task or operation related to the message exchange.
          */
         public ParsedProcessingMode {
             parties = Set.copyOf(parties);

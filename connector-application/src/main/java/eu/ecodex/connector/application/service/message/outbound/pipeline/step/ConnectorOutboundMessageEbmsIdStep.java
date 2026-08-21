@@ -13,21 +13,22 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGenerator;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGeneratorService;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
  * A processing step in the connector's outbound message workflow that creates and assigns a unique
- * EBMS message ID to the specified {@link ConnectorMessage}, if the EBMS ID generator is enabled in
- * the configuration.
+ * EBMS message ID to the specified {@link ConnectorBusinessMessage}, if the EBMS ID generator is
+ * enabled in the configuration.
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageEbmsIdStep implements ConnectorMessageStep {
-    private final ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator;
+public class ConnectorOutboundMessageEbmsIdStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
+    private final ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
@@ -42,7 +43,7 @@ public class ConnectorOutboundMessageEbmsIdStep implements ConnectorMessageStep 
      *                                        whether ebMS ID generation is enabled
      */
     public ConnectorOutboundMessageEbmsIdStep(
-        ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator,
+        ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator,
         ConnectorMessageRepository messageRepository,
         ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
         this.messageEbmsIdGenerator = messageEbmsIdGenerator;
@@ -51,12 +52,8 @@ public class ConnectorOutboundMessageEbmsIdStep implements ConnectorMessageStep 
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage message) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage message) {
         var identifier = message.identifier();
-
-        if (identifier == null) {
-            throw new IllegalStateException("Message identifier is null");
-        }
 
         log.info("Creating EBMS ID for outbound message: [{}]", identifier);
 

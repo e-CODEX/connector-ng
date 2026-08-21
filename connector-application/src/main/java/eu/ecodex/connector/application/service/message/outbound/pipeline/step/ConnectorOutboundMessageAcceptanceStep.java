@@ -10,11 +10,10 @@
 
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageNotBusinessException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.List;
 import lombok.NonNull;
@@ -34,7 +33,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageAcceptanceStep implements ConnectorMessageStep {
+public class ConnectorOutboundMessageAcceptanceStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
     private final ConnectorMessageEvidenceCreator evidenceCreator;
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
 
@@ -46,28 +46,21 @@ public class ConnectorOutboundMessageAcceptanceStep implements ConnectorMessageS
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage outboundMessage) {
         log.debug(
             "Processing outbound message [{}] with submission acceptance evidence",
             outboundMessage.identifier()
         );
-
-        if (!outboundMessage.isBusinessMessage()) {
-            throw new ConnectorMessageNotBusinessException(
-                "The message must be a business message"
-            );
-        }
 
         // persist and attach the submission evidence to the message
         var submissionEvidence = this.evidenceCreator.createSuccess(
             ConnectorEvidenceType.SUBMISSION_ACCEPTANCE, outboundMessage
         );
 
-        var messageWithEvidence = outboundMessage
-            .toBuilder()
-            .evidences(List.of(submissionEvidence))
-            .transportedEvidences(List.of(submissionEvidence))
-            .build();
+        var messageWithEvidence = outboundMessage.toBuilder()
+                                                 .evidences(List.of(submissionEvidence))
+                                                 .transportedEvidences(List.of(submissionEvidence))
+                                                 .build();
 
         this.evidenceVerifier.verify(submissionEvidence.type(), messageWithEvidence);
 

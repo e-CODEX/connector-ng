@@ -12,11 +12,13 @@ package eu.ecodex.connector.rest.attachment;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorAttachmentIT REST")
 public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
@@ -27,7 +29,7 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_succeed_to_upload_attachment() {
+    void should_return_201_when_uploading_attachment() {
         var parts = produceAttachmentPart(MediaType.APPLICATION_PDF, 150);
 
         apiClient.post()
@@ -40,7 +42,7 @@ public class ConnectorAttachmentIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_fail_to_upload_attachment_if_payload_is_over_200_MB() {
+    void should_fail_to_upload_attachment_when_payload_exceeds_200_mb() {
         var parts = produceAttachmentPart(MediaType.APPLICATION_PDF, 201);
 
         apiClient.post()

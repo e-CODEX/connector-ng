@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ public class ConnectorRetrieveMessageService implements ConnectorRetrieveMessage
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull String identifier) {
+    public ConnectorBusinessMessage execute(@NonNull String identifier) {
         var message = messageRepository.findByIdentifier(identifier);
 
         if (message == null) {

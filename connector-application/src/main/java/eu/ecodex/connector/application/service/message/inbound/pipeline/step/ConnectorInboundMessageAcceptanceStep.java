@@ -14,7 +14,8 @@ import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenc
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.List;
 import lombok.NonNull;
@@ -23,19 +24,21 @@ import org.springframework.stereotype.Component;
 
 /**
  * {@link ConnectorMessageStep} responsible for generating acceptance evidence for an inbound
- * {@link ConnectorMessage}.
+ * {@link ConnectorBusinessMessage}.
  *
  * <p>This step is executed when an inbound message has been successfully received and accepted by
  * the connector. It creates a {@link ConnectorEvidenceType#RELAY_REMMD_ACCEPTANCE} evidence,
  * attaches it to the message, verifies that the message satisfies the requirements for the evidence
- * type, and produces a confirmation {@link ConnectorMessage} containing the generated evidence.
+ * type, and produces a confirmation {@link ConnectorBusinessMessage} containing the generated
+ * evidence.
  *
  * <p>The resulting confirmation message has its direction switched so it can be sent back to the
  * originating party as proof of successful reception and acceptance.
  */
 @Slf4j
 @Component
-public class ConnectorInboundMessageAcceptanceStep implements ConnectorMessageStep {
+public class ConnectorInboundMessageAcceptanceStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> {
     private final ConnectorEvidenceMessageCreator evidenceMessageCreator;
     private final ConnectorMessageEvidenceCreator evidenceCreator;
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
@@ -60,7 +63,7 @@ public class ConnectorInboundMessageAcceptanceStep implements ConnectorMessageSt
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
+    public ConnectorEvidenceMessage execute(@NonNull ConnectorBusinessMessage inboundMessage) {
         log.debug(
             "Processing inbound message acceptance creation for: [{}]",
             inboundMessage.identifier()

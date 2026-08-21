@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.jms.publisher.outbound;
 
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -21,8 +21,9 @@ import org.springframework.stereotype.Component;
 /**
  * Event publisher responsible for emitting an outbound message staging events.
  *
- * <p>This class implements {@link ConnectorEventPublisher} and is used to publish events when a
- * {@link ConnectorMessage} enters the outbound staging phase.
+ * <p>This class implements {@link ConnectorMessageEventPublisher} and is used to publish events
+ * when a
+ * {@link ConnectorBusinessMessage} enters the outbound staging phase.
  *
  * <p>The published events are typically consumed asynchronously by components such as JMS
  * listeners that continue the outbound message processing workflow.
@@ -31,7 +32,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component("connectorJmsOutboundMessageStagingPublisher")
-public class ConnectorJmsOutboundMessageStagingPublisher implements ConnectorEventPublisher {
+public class ConnectorJmsOutboundMessageStagingPublisher
+    implements ConnectorMessageEventPublisher<ConnectorBusinessMessage> {
     private final JmsTemplate jmsTemplate;
     private final ConnectorQueueProperties queueProperties;
 
@@ -43,7 +45,7 @@ public class ConnectorJmsOutboundMessageStagingPublisher implements ConnectorEve
     }
 
     @Override
-    public void publish(@NonNull ConnectorMessage message) {
+    public void publish(@NonNull ConnectorBusinessMessage message) {
         log.info("Submitting message [{}] to outbound message staging queue", message.identifier());
 
         this.jmsTemplate.convertAndSend(

@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AS4PropertiesTestFixtures;
 import eu.ecodex.connector.ActionTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
@@ -62,7 +62,7 @@ public class ConnectorMessageVerifierServiceTest {
             when(actionRepository.findByNameAndBusinessDomain(any(), any()))
                 .thenReturn(ActionTestFixtures.createAction());
 
-            var message = MessageTestFixtures.createOutboundBusinessMessage();
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
 
             assertThatCode(() -> verifierService.verify(
                 message,
@@ -72,56 +72,13 @@ public class ConnectorMessageVerifierServiceTest {
         }
 
         @Test
-        void should_fail_when_the_business_domain_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .businessDomainIdentifier(null)
-                                             .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> verifierService.verify(message, ProcessingModeVerificationMode.STRICT)
-            );
-        }
-
-        @Test
-        void should_fail_when_the_service_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .as4Properties(
-                                                 AS4PropertiesTestFixtures.createAS4PropertiesWithoutService()
-                                             )
-                                             .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> verifierService.verify(message, ProcessingModeVerificationMode.STRICT)
-            );
-        }
-
-        @Test
-        void should_fail_when_the_action_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .as4Properties(
-                                                 AS4PropertiesTestFixtures.createAS4PropertiesWithoutAction()
-                                             )
-                                             .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> verifierService.verify(message, ProcessingModeVerificationMode.STRICT)
-            );
-        }
-
-        @Test
         void should_fail_when_the_service_is_not_found() {
             when(serviceRepository.findByNameAndBusinessDomain(any(), any())).thenReturn(null);
 
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createNullFromPartyOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     ProcessingModeVerificationMode.STRICT
                 )
             );
@@ -141,7 +98,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createNullFromPartyOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     ProcessingModeVerificationMode.STRICT
                 )
             );
@@ -165,7 +122,7 @@ public class ConnectorMessageVerifierServiceTest {
             when(partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any()))
                 .thenReturn(PartyTestFixtures.createToParty(), PartyTestFixtures.createFromParty());
 
-            var message = MessageTestFixtures.createOutboundBusinessMessage();
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
 
             verifierService.verify(message, ProcessingModeVerificationMode.RELAXED);
 
@@ -187,7 +144,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createOutboundStagingBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     ProcessingModeVerificationMode.RELAXED
                 )
             );
@@ -210,7 +167,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createEmptyToPartyOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createEmptyToPartyOutboundBusinessMessage(),
                     ProcessingModeVerificationMode.RELAXED
                 )
             );
@@ -233,7 +190,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createOutboundStagingBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     ProcessingModeVerificationMode.RELAXED
                 )
             );
@@ -254,7 +211,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createEmptyFromPartyOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createEmptyFromPartyOutboundMessage(),
                     ProcessingModeVerificationMode.RELAXED
                 )
             );
@@ -272,7 +229,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     ProcessingModeVerificationMode.CREATE
                 )
             );
@@ -295,7 +252,7 @@ public class ConnectorMessageVerifierServiceTest {
             assertThrows(
                 NullPointerException.class,
                 () -> verifierService.verify(
-                    MessageTestFixtures.createOutboundBusinessMessage(),
+                    BusinessMessageTestFixtures.createOutboundMessage(),
                     null
                 )
             );

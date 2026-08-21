@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.link;
 
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 

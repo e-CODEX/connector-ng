@@ -15,7 +15,8 @@ import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantExc
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.ConnectorErrorCode;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.util.Comparator;
@@ -52,16 +53,12 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
     @Override
     public void verify(
         @NonNull ConnectorEvidenceType evidenceType,
-        @NonNull ConnectorMessage message) {
+        @NonNull ConnectorBusinessMessage message) {
         log.debug("Processing message [{}] with evidence [{}]", message.identifier(), evidenceType);
-
-        if (message.identifier() == null) {
-            throw new IllegalStateException("Message identifier is required");
-        }
 
         var transportedEvidences = message.transportedEvidences();
 
-        if (transportedEvidences == null || transportedEvidences.isEmpty()) {
+        if (transportedEvidences.isEmpty()) {
             throw new ConnectorEvidenceException(
                 "Message [{" + message.identifier() + "}] has no evidences!"
             );

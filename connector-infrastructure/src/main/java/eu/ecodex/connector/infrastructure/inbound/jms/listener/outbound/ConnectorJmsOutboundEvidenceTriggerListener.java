@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
 
-import eu.ecodex.connector.application.port.api.evidence.ConnectorEvidenceTriggerProcessor;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageProcessor;
+import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -24,19 +24,20 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
-public class ConnectorJmsOutboundEvidenceTriggerListener implements ConnectorEventHandler {
-    private final ConnectorEvidenceTriggerProcessor evidenceTriggerProcessor;
+public class ConnectorJmsOutboundEvidenceTriggerListener
+    implements ConnectorEventHandler<ConnectorTriggeredEvidenceMessage> {
+    private final ConnectorOutboundEvidenceMessageProcessor evidenceTriggerProcessor;
 
     public ConnectorJmsOutboundEvidenceTriggerListener(
-        ConnectorEvidenceTriggerProcessor evidenceTriggerProcessor) {
+        ConnectorOutboundEvidenceMessageProcessor evidenceTriggerProcessor) {
         this.evidenceTriggerProcessor = evidenceTriggerProcessor;
     }
 
     @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.outbound-evidence-trigger-queue}")
-    public void handle(@NonNull ConnectorMessage message) {
+    public void handle(@NonNull ConnectorTriggeredEvidenceMessage message) {
         log.info("Processing evidence trigger message [{}]", message.identifier());
-        evidenceTriggerProcessor.process(message);
+        evidenceTriggerProcessor.execute(message);
     }
 }

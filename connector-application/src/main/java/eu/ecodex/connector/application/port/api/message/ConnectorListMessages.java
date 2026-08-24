@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
@@ -35,10 +35,10 @@ public interface ConnectorListMessages {
      * @param service                  the service name of the message.
      * @param action                   the action name of the message.
      *
-     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessage} objects
-     *     and pagination metadata.
+     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorBusinessMessage}
+     *     objects and pagination metadata.
      */
-    ConnectorPageResult<ConnectorMessage> execute(
+    ConnectorPageResult<ConnectorBusinessMessage> execute(
         @Nonnull ConnectorPageRequest pageRequest,
         String identifier,
         String backendName,

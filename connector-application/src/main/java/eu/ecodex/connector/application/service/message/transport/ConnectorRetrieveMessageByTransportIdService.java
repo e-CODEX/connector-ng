@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ConnectorRetrieveMessageByTransportIdService implements
-    ConnectorRetrieveMessageByTransportId {
+                                                          ConnectorRetrieveMessageByTransportId {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
 
     public ConnectorRetrieveMessageByTransportIdService(

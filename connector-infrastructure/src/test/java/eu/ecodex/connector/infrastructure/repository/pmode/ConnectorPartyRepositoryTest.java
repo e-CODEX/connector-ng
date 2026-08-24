@@ -16,157 +16,175 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
 
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
+@DisplayName("ConnectorPartyRepository")
 public class ConnectorPartyRepositoryTest extends AbstractRepositoryTest {
+    private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
+        BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
     @Autowired
     private ConnectorPartyRepository repository;
 
-    // bulk saving
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    void should_bulk_save_parties_to_database_successfully() {
-        var party = PartyTestFixtures.createToParty();
-
-        var savedParties = repository.saveAll(
-            List.of(party),
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(savedParties).isNotNull();
-        assertThat(savedParties).hasSize(1);
+    /**
+     * Reference data (business domain + processing mode), without parties.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+    })
+    private @interface WithProcessingModeData {
     }
 
-    @Test
-    void should_throw_null_pointer_exception_when_bulk_saving_parties_with_null_list_of_parties() {
-        assertThrows(
-            NullPointerException.class, () -> repository.saveAll(
-                null,
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_bulk_saving_parties_with_null_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.saveAll(
-                List.of(PartyTestFixtures.createToParty()),
-                null
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_bulk_saving_parties_with_null_list_of_parties_and_business_domain_identifier() {
-        assertThrows(
-            NullPointerException.class, () -> repository.saveAll(
-                null,
-                null
-            )
-        );
-    }
-
-    // find by identifier, role and business domain identifier
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    void should_find_party_by_identifier_role_and_business_domain_identifier_successfully_from_database() {
-        var found = this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-            "BL",
-            ConnectorPartyRoleType.INITIATOR,
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(found).isNotNull();
-    }
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/party.sql")
-    void should_return_null_when_searching_party_by_unknown_party_identifier_from_database() {
-        var found = this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-            "AT",
-            ConnectorPartyRoleType.INITIATOR,
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
-
-        assertThat(found).isNull();
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_party_by_null_identifier_from_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                null,
-                ConnectorPartyRoleType.INITIATOR,
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_party_by_null_role_type_from_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                "AT",
-                null,
-                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_party_by_null_business_domain_identifier_from_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                "AT",
-                ConnectorPartyRoleType.INITIATOR,
-                null
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_searching_party_by_null_identifier_role_and_business_domain_identifier_from_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                null,
-                null,
-                null
-            )
-        );
-    }
-
-    // find all by business domain identifier
-
-    @Test
+    /**
+     * Reference data plus seeded parties.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
         "classpath:sql/party.sql",
     })
-    void should_find_all_parties_by_business_domain_identifier_successfully_from_database() {
-        var parties = this.repository.findAllByBusinessDomainIdentifier(
-            BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
-        );
+    private @interface WithPartyData {
+    }
 
-        assertThat(parties).isNotNull();
-        assertThat(parties).hasSize(4);
+    @Nested
+    @DisplayName("save all")
+    class SaveAll {
+        @Test
+        @WithProcessingModeData
+        void should_save_all_the_parties() {
+            var party = PartyTestFixtures.createToParty();
+
+            var savedParties = repository.saveAll(List.of(party), DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(savedParties).isNotNull();
+            assertThat(savedParties).hasSize(1);
+        }
+
+        @Test
+        void should_fail_when_the_parties_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.saveAll(null, DEFAULT_BUSINESS_DOMAIN)
+            );
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.saveAll(List.of(PartyTestFixtures.createToParty()), null)
+            );
+        }
+
+        @Test
+        void should_fail_when_both_arguments_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.saveAll(null, null)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("find by identifier, role and business domain")
+    class FindByIdentifierRoleAndBusinessDomain {
+        @Test
+        @WithPartyData
+        void should_find_the_party() {
+            var found = repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                "BL",
+                ConnectorPartyRoleType.INITIATOR,
+                DEFAULT_BUSINESS_DOMAIN
+            );
+
+            assertThat(found).isNotNull();
+        }
+
+        @Test
+        @WithPartyData
+        void should_return_null_when_the_party_identifier_is_unknown() {
+            var found = repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                "AT",
+                ConnectorPartyRoleType.INITIATOR,
+                DEFAULT_BUSINESS_DOMAIN
+            );
+
+            assertThat(found).isNull();
+        }
+
+        @Test
+        void should_fail_when_the_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                    null,
+                    ConnectorPartyRoleType.INITIATOR,
+                    DEFAULT_BUSINESS_DOMAIN
+                )
+            );
+        }
+
+        @Test
+        void should_fail_when_the_role_type_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                    "AT",
+                    null,
+                    DEFAULT_BUSINESS_DOMAIN
+                )
+            );
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(
+                    "AT",
+                    ConnectorPartyRoleType.INITIATOR,
+                    null
+                )
+            );
+        }
+
+        @Test
+        void should_fail_when_all_arguments_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(null, null, null)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("find all by business domain identifier")
+    class FindAllByBusinessDomainIdentifier {
+        @Test
+        @WithPartyData
+        void should_find_all_the_parties() {
+            var parties = repository.findAllByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(parties).isNotNull();
+            assertThat(parties).hasSize(4);
+        }
     }
 }

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorTokenException;
 import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenAESType;
@@ -38,7 +38,7 @@ import org.springframework.util.StringUtils;
  *
  * <p>The AES type resolution follows this precedence:
  * <ol>
- *     <li>Value provided in the {@link ConnectorMessage}</li>
+ *     <li>Value provided in the {@link ConnectorBusinessMessage}</li>
  *     <li>Default value from {@link ConnectorBusinessDocumentProperties}</li>
  * </ol>
  *
@@ -49,7 +49,7 @@ import org.springframework.util.StringUtils;
 public class ConnectorTokenValidationFactory {
     private final ConnectorTokenTechnicalValidationGenerator signatureBasedTechnicalValidation;
     private final ConnectorBusinessDocumentProperties businessDocumentProperties;
-    private final Function<ConnectorMessage, ConnectorTokenTechnicalValidationGenerator>
+    private final Function<ConnectorBusinessMessage, ConnectorTokenTechnicalValidationGenerator>
         authValidationGeneratorFactory;
 
     /**
@@ -84,7 +84,7 @@ public class ConnectorTokenValidationFactory {
      * @throws IllegalArgumentException if the AES type is not allowed
      */
     public ConnectorTokenTechnicalValidationGenerator createTechnicalValidation(
-        @NonNull ConnectorMessage message) {
+        @NonNull ConnectorBusinessMessage message) {
         return switch (resolveAESType(message)) {
             case SIGNATURE_BASED -> signatureBasedTechnicalValidation;
             case AUTHENTICATION_BASED -> authValidationGeneratorFactory.apply(message);
@@ -107,7 +107,7 @@ public class ConnectorTokenValidationFactory {
      *
      * @throws ConnectorTokenException if the required configuration is missing
      */
-    public ConnectorTokenIssuer getTokenIssuer(ConnectorMessage message) {
+    public ConnectorTokenIssuer getTokenIssuer(ConnectorBusinessMessage message) {
         var country = businessDocumentProperties.getCountry();
         var serviceProvider = businessDocumentProperties.getServiceProvider();
 
@@ -133,7 +133,7 @@ public class ConnectorTokenValidationFactory {
      * and falling back to the configured default. Validates the resolved type against the
      * configured allowlist.
      */
-    private ConnectorTokenAESType resolveAESType(@NonNull ConnectorMessage message) {
+    private ConnectorTokenAESType resolveAESType(@NonNull ConnectorBusinessMessage message) {
         var content = message.businessContent();
         ConnectorBusinessDocumentAESType aesType = null;
 

@@ -14,149 +14,161 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenTechnicalTrustLevel;
+import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenValidation;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenSignatureBasedTechnicalValidationGenerator;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorTokenSignatureBasedTechnicalValidationGenerator")
 public class ConnectorTokenSignatureBasedTechnicalValidationGeneratorTest extends BaseTokenTest {
     @Autowired
     private ConnectorTokenSignatureBasedTechnicalValidationGenerator validationGenerator;
 
-    @Test
-    void should_validate_document_with_no_embedded_or_detached_signature_successfully()
-            throws Exception {
+    private ConnectorTokenValidation validateDocument(String documentPath) throws Exception {
+        var document = FileTestFixtures.readAsBytes(documentPath);
+        var businessDocument = new InMemoryDocument(document);
+
+        return validationGenerator.generate(businessDocument, null);
+    }
+
+    private ConnectorTokenValidation validateDocumentWithDetachedSignature(
+        String signaturePath
+    ) throws Exception {
         var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
-        var businessDocument = new InMemoryDocument(document);
+        var detached = FileTestFixtures.readAsBytes(signaturePath);
 
-        var validation = validationGenerator.generate(businessDocument, null);
-        assertThat(validation).isNotNull();
-
-        var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        assertThat(technicalResult.getComment()).isEqualTo("Unable to find a signature.");
-    }
-
-    @Test
-    void should_validate_document_with_mathematically_incorrect_embedded_signature_successfully()
-            throws Exception {
-        var document = FileTestFixtures.readAsBytes("raw/document/Signed.pdf");
-        var businessDocument = new InMemoryDocument(document);
-
-        var validation = validationGenerator.generate(businessDocument, null);
-        assertThat(validation).isNotNull();
-
-        var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        assertThat(technicalResult.getComment()).isEqualTo(
-                "The signature is not mathematically correct.");
-
-        var originalReport = validation.getOriginalValidationReport();
-        assertThat(originalReport).isNotNull();
-        assertThat(originalReport.getReports()).isNotNull();
-        assertThat(originalReport.getAny()).isNotNull();
-    }
-
-    @Test
-    void should_validate_document_with_non_sufficient_conclusion_embedded_signature_successfully()
-            throws Exception {
-        var document = FileTestFixtures.readAsBytes("raw/document/Signed_Visible.pdf");
-        var businessDocument = new InMemoryDocument(document);
-
-        var validation = validationGenerator.generate(businessDocument, null);
-        assertThat(validation).isNotNull();
-
-        var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        assertThat(technicalResult.getComment()).isEqualTo(
-                "The signature conclusion is not sufficient.");
-
-        var originalReport = validation.getOriginalValidationReport();
-        assertThat(originalReport).isNotNull();
-        assertThat(originalReport.getReports()).isNotNull();
-        assertThat(originalReport.getAny()).isNotNull();
-    }
-
-    @Test
-    void should_validate_document_with_two_embedded_signatures_successfully() throws Exception {
-        var document = FileTestFixtures.readAsBytes("raw/document/Two_Signatures.pdf");
-        var businessDocument = new InMemoryDocument(document);
-
-        var validation = validationGenerator.generate(businessDocument, null);
-        assertThat(validation).isNotNull();
-
-        var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        assertThat(technicalResult.getComment()).isEqualTo(
-                "The signature is not mathematically correct.");
-
-        var originalReport = validation.getOriginalValidationReport();
-        assertThat(originalReport).isNotNull();
-        assertThat(originalReport.getReports()).isNotNull();
-        assertThat(originalReport.getAny()).isNotNull();
-    }
-
-    @Test
-    void should_validate_document_with_expired_embedded_signature_successfully() throws Exception {
-        var document = FileTestFixtures.readAsBytes("raw/document/SignExpired.pdf");
-        var businessDocument = new InMemoryDocument(document);
-
-        var validation = validationGenerator.generate(businessDocument, null);
-        assertThat(validation).isNotNull();
-
-        var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        assertThat(technicalResult.getComment()).isEqualTo(
-                "The signature is not mathematically correct.");
-
-        var originalReport = validation.getOriginalValidationReport();
-        assertThat(originalReport).isNotNull();
-        assertThat(originalReport.getReports()).isNotNull();
-        assertThat(originalReport.getAny()).isNotNull();
-    }
-
-    @Test
-    void should_validate_document_with_xades_detached_signature_successfully() throws Exception {
-        var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
-        // XADES Signature
-        var detached = FileTestFixtures.readAsBytes("raw/signature/DetachedNonSigned.xml");
         var businessDocument = new InMemoryDocument(document);
         var detachedSignature = new InMemoryDocument(detached);
 
-        var validation = validationGenerator.generate(businessDocument, detachedSignature);
-        assertThat(validation).isNotNull();
-
-        var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        // Filter out XAdES signatures — detected by DSS but not providing enough information
-        assertThat(technicalResult.getComment()).isEqualTo("Unable to find a signature.");
-
-        var originalReport = validation.getOriginalValidationReport();
-        assertThat(originalReport).isNotNull();
-        assertThat(originalReport.getReports()).isNotNull();
-        assertThat(originalReport.getAny()).isNotNull();
+        return validationGenerator.generate(
+            businessDocument,
+            detachedSignature
+        );
     }
 
-    @Test
-    void should_validate_document_with_p7s_detached_signature_successfully() throws Exception {
-        var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
-        // P7S Signature
-        var detached = FileTestFixtures.readAsBytes("raw/signature/DetachedNonSigned.p7s");
-        var businessDocument = new InMemoryDocument(document);
-        var detachedSignature = new InMemoryDocument(detached);
+    private void assertTechnicalFailure(
+        ConnectorTokenValidation validation,
+        String expectedComment
+    ) {
+        assertTechnicalFailure(validation, expectedComment, true);
+    }
 
-        var validation = validationGenerator.generate(businessDocument, detachedSignature);
+    private void assertTechnicalFailure(
+        ConnectorTokenValidation validation,
+        String expectedComment,
+        boolean assertOriginalReport
+    ) {
         assertThat(validation).isNotNull();
 
         var technicalResult = validation.getTechnicalResult();
-        assertThat(technicalResult.getTrustLevel()).isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
-        assertThat(technicalResult.getComment()).isEqualTo(
-                "The signature conclusion is not sufficient.");
 
-        var originalReport = validation.getOriginalValidationReport();
-        assertThat(originalReport).isNotNull();
-        assertThat(originalReport.getReports()).isNotNull();
-        assertThat(originalReport.getAny()).isNotNull();
+        assertThat(technicalResult.getTrustLevel())
+            .isEqualTo(ConnectorTokenTechnicalTrustLevel.FAIL);
+
+        assertThat(technicalResult.getComment())
+            .isEqualTo(expectedComment);
+
+        if (assertOriginalReport) {
+            assertThat(validation.getOriginalValidationReport()).isNotNull();
+            assertThat(validation.getOriginalValidationReport().getReports())
+                .isNotNull();
+            assertThat(validation.getOriginalValidationReport().getAny())
+                .isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("embedded signatures")
+    class EmbeddedSignatures {
+        @Test
+        void should_fail_when_document_has_no_signature() throws Exception {
+            var validation = validateDocument("raw/document/NonSigned.pdf");
+
+            assertTechnicalFailure(
+                validation,
+                "Unable to find a signature.",
+                false
+            );
+        }
+
+        @Test
+        void should_fail_when_embedded_signature_is_mathematically_incorrect()
+            throws Exception {
+            var validation = validateDocument("raw/document/Signed.pdf");
+
+            assertTechnicalFailure(
+                validation,
+                "The signature is not mathematically correct."
+            );
+        }
+
+        @Test
+        void should_fail_when_embedded_signature_conclusion_is_not_sufficient()
+            throws Exception {
+            var validation = validateDocument("raw/document/Signed_Visible.pdf");
+
+            assertTechnicalFailure(
+                validation,
+                "The signature conclusion is not sufficient."
+            );
+        }
+
+        @Test
+        void should_fail_when_document_has_two_embedded_signatures()
+            throws Exception {
+            var validation = validateDocument("raw/document/Two_Signatures.pdf");
+
+            assertTechnicalFailure(
+                validation,
+                "The signature is not mathematically correct."
+            );
+        }
+
+        @Test
+        void should_fail_when_embedded_signature_is_expired()
+            throws Exception {
+            var validation = validateDocument("raw/document/SignExpired.pdf");
+
+            assertTechnicalFailure(
+                validation,
+                "The signature is not mathematically correct."
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("detached signatures")
+    class DetachedSignatures {
+        @Test
+        void should_fail_when_xades_detached_signature_is_present()
+            throws Exception {
+            var validation = validateDocumentWithDetachedSignature(
+                "raw/signature/DetachedNonSigned.xml"
+            );
+
+            // XAdES signatures are detected by DSS but do not provide
+            // enough information for signature-based validation.
+            assertTechnicalFailure(
+                validation,
+                "Unable to find a signature."
+            );
+        }
+
+        @Test
+        void should_fail_when_p7s_detached_signature_conclusion_is_not_sufficient()
+            throws Exception {
+            var validation = validateDocumentWithDetachedSignature(
+                "raw/signature/DetachedNonSigned.p7s"
+            );
+
+            assertTechnicalFailure(
+                validation,
+                "The signature conclusion is not sufficient."
+            );
+        }
     }
 }

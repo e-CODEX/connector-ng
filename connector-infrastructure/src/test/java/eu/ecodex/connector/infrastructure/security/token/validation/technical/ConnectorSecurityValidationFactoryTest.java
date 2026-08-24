@@ -12,66 +12,84 @@ package eu.ecodex.connector.infrastructure.security.token.validation.technical;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenValidationFactory;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorSecurityValidationFactory")
 public class ConnectorSecurityValidationFactoryTest extends BaseTokenTest {
     @Autowired
     private ConnectorTokenValidationFactory validationFactory;
 
-    @Test
-    void should_provide_default_technical_validation_generator_if_business_document_has_detached_signature() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var validator = validationFactory.createTechnicalValidation(message);
+    @Nested
+    @DisplayName("detached signature")
+    class DetachedSignature {
+        @Test
+        void should_provide_default_technical_validation_generator() {
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
 
-        assertThat(validator.supportsAuthenticationBased()).isFalse();
+            var validator = validationFactory.createTechnicalValidation(message);
+
+            assertThat(validator.supportsAuthenticationBased()).isFalse();
+        }
     }
 
-    @Test
-    void should_provide_aes_technical_validation_generator_if_business_document_has_auth_based_signature() {
-        var message = MessageTestFixtures
-                .createOutboundBusinessMessage()
+    @Nested
+    @DisplayName("authentication-based signature")
+    class AuthenticationBasedSignature {
+        @Test
+        void should_provide_aes_technical_validation_generator() {
+            var message = BusinessMessageTestFixtures
+                .createOutboundMessage()
                 .toBuilder()
                 .businessContent(
-                        MessageContentTestFixtures
-                                .createContent()
-                                .toBuilder()
-                                .businessDocument(
-                                        ConnectorMessageDocumentTestFixtures
-                                                .createAuthenticationBasedDocument()
-                                )
-                                .build()
+                    MessageContentTestFixtures
+                        .createContent()
+                        .toBuilder()
+                        .businessDocument(
+                            ConnectorMessageDocumentTestFixtures
+                                .createAuthenticationBasedDocument()
+                        )
+                        .build()
                 )
                 .build();
-        var validator = validationFactory.createTechnicalValidation(message);
 
-        assertThat(validator.supportsAuthenticationBased()).isTrue();
+            var validator = validationFactory.createTechnicalValidation(message);
+
+            assertThat(validator.supportsAuthenticationBased()).isTrue();
+        }
     }
 
-    @Test
-    void should_provide_aes_technical_validation_generator_if_no_signature_is_present() {
-        // default AES type is set to AUTHENTICATION_BASED in the application.properties
-        var message = MessageTestFixtures
-                .createOutboundBusinessMessage()
+    @Nested
+    @DisplayName("no signature")
+    class NoSignature {
+        @Test
+        void should_provide_aes_technical_validation_generator() {
+            // default AES type is set to AUTHENTICATION_BASED in application.properties.
+            var message = BusinessMessageTestFixtures
+                .createOutboundMessage()
                 .toBuilder()
                 .businessContent(
-                        MessageContentTestFixtures
-                                .createContent()
-                                .toBuilder()
-                                .businessDocument(
-                                        ConnectorMessageDocumentTestFixtures
-                                                .createDocumentWithoutSignature()
-                                )
-                                .build()
+                    MessageContentTestFixtures
+                        .createContent()
+                        .toBuilder()
+                        .businessDocument(
+                            ConnectorMessageDocumentTestFixtures
+                                .createDocumentWithoutSignature()
+                        )
+                        .build()
                 )
                 .build();
-        var validator = validationFactory.createTechnicalValidation(message);
 
-        assertThat(validator.supportsAuthenticationBased()).isTrue();
+            var validator = validationFactory.createTechnicalValidation(message);
+
+            assertThat(validator.supportsAuthenticationBased()).isTrue();
+        }
     }
 }

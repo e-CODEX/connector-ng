@@ -24,6 +24,7 @@ import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.linkpartner.ConnectorLinkPartnerController;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -31,18 +32,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@DisplayName("ConnectorLinkPartnerController")
 @WebMvcTest(ConnectorLinkPartnerController.class)
 public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/link-partners";
 
     @MockitoBean
     private ConnectorListLinkPartners listLinkPartnersService;
-
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void should_list_all_link_partners_successfully() throws Exception {
+    void should_return_200_with_all_the_link_partners() throws Exception {
         when(listLinkPartnersService.execute(any()))
             .thenReturn(List.of(LinkPartnerTestFixtures.createAliceBackendLinkPartner()));
 
@@ -55,11 +56,13 @@ public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
     }
 
     @Test
-    void should_return_empty_list_if_no_link_partners_match_the_link_type() throws Exception {
+    void should_return_an_empty_list_when_no_link_partner_matches_the_type() throws Exception {
         when(listLinkPartnersService.execute(any()))
             .thenReturn(List.of());
 
-        mockMvc.perform(get(URL.concat("?linkType=BACKEND")).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(URL)
+                            .param("linkType", "BACKEND")
+                            .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$", hasSize(0)));

@@ -16,9 +16,10 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkPartnerVerifier;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkTransportStrategy;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * Unit tests for the {@code ConnectorLinkSubmissionService} implementation.
  */
 @SuppressWarnings("DataFlowIssue")
+@DisplayName("ConnectorLinkSubmitterService")
 @ExtendWith(MockitoExtension.class)
 class ConnectorLinkSubmitterServiceTest {
     @Mock
@@ -44,7 +46,7 @@ class ConnectorLinkSubmitterServiceTest {
         doNothing().when(linkVerifier).verify(any());
         doNothing().when(transportStrategy).transport(any());
 
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+        var message = BusinessMessageTestFixtures.createOutboundMessage();
         linkSubmissionService.submit(message);
 
         verify(linkVerifier, times(1)).verify(any());

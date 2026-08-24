@@ -12,24 +12,26 @@ package eu.ecodex.connector.infrastructure.security.token.validation.technical;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorTokenTechnicalTrustLevel;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenAuthBasedTechnicalValidationGenerator;
 import eu.ecodex.connector.infrastructure.property.businessdocument.ConnectorBusinessDocumentProperties;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorTokenAuthBasedTechnicalValidationGenerator")
 public class ConnectorTokenAuthBasedTechnicalValidationGeneratorTest extends BaseTokenTest {
     @Autowired
     private ConnectorBusinessDocumentProperties businessDocumentProperties;
 
     @Test
-    void should_build_validation_successfully() throws Exception {
-        var message = MessageTestFixtures
-            .createOutboundBusinessMessage()
+    void should_build_valid_validation() throws Exception {
+        var message = BusinessMessageTestFixtures
+            .createOutboundMessage()
             .toBuilder()
             .businessContent(
                 MessageContentTestFixtures

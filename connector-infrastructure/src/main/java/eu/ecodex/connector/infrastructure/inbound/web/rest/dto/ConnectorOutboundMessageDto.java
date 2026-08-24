@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -18,7 +18,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 /**
- * Data Transfer Object (DTO) representing an outbound {@link ConnectorMessage}.
+ * Data Transfer Object (DTO) representing an outbound {@link ConnectorBusinessMessage}.
  *
  * <p>This DTO is used to transfer message metadata between layers, services, or external
  * components. It includes identifiers, message direction, and an optional reference to a related

@@ -19,11 +19,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +34,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorRegisterMessageTransportStepService")
 public class ConnectorRegisterMessageTransportStepServiceTest {
     private static final String MESSAGE_ID = "msg-001";
     private static final String BACKEND_NAME = "backend-a";
@@ -45,79 +50,72 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
     @InjectMocks
     private ConnectorRegisterMessageTransportStepService service;
 
-    @Test
-    void should_throw_exception_if_message_is_null() {
-        assertThatThrownBy(() -> service.execute(
-            null,
-            ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
-        ))
-            .isInstanceOf(NullPointerException.class);
-
-        verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
-    }
-
-    @Test
-    void should_throw_exception_if_status_is_null() {
-        assertThatThrownBy(() -> service.execute(message(), null))
-            .isInstanceOf(NullPointerException.class);
-
-        verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
-    }
-
-    @Test
-    void should_throw_exception_if_message_identifier_is_null() {
-        var message = ConnectorMessage.builder().identifier(null).build();
-
-        assertThatThrownBy(() -> service.execute(
-            message,
-            ConnectorMessageTransportStatus.SUBMITTED
-        ))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Message identifier must not be null");
-
-        verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
-    }
-
-    @Test
-    void should_throw_exception_if_status_for_registration_is_not_allowed() {
-        var message = ConnectorMessage.builder().identifier(null).build();
-
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> service.execute(message, ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
-        );
-
-        verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
-    }
-
-    @Test
-    void should_register_new_message_transport_step_successfully() {
-        when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
-        when(transportStepRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-
-        var result = service.execute(message(), ConnectorMessageTransportStatus.SUBMITTED);
-
-        assertThat(result.numberOfAttempts()).isEqualTo(1);
-        assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
-
-        verify(transportStepRepository).save(
-            argThat(
-                step ->
-                    step.numberOfAttempts() == 1
-                        && step.status() == ConnectorMessageTransportStatus.SUBMITTED
-            ));
-    }
-
-    private ConnectorMessage message() {
-        return ConnectorMessage.builder()
-                               .identifier(MESSAGE_ID)
-                               .backendName(BACKEND_NAME)
-                               .build();
+    private ConnectorBusinessMessage message() {
+        return BusinessMessageTestFixtures.createInboundMessage().toBuilder()
+                                          .identifier(MESSAGE_ID)
+                                          .backendName(BACKEND_NAME)
+                                          .build();
     }
 
     private ConnectorMessageProcessingConfiguration configuration() {
         return ConnectorMessageProcessingConfiguration.builder()
                                                       .transportIdSuffix(TRANSPORT_SUFFIX)
                                                       .build();
+    }
+
+    @Nested
+    @DisplayName("when registration succeeds")
+    class WhenRegistrationSucceeds {
+        @Test
+        void should_register_the_transport_step() {
+            when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
+            when(transportStepRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+
+            var result = service.execute(message(), ConnectorMessageTransportStatus.SUBMITTED);
+
+            assertThat(result.numberOfAttempts()).isEqualTo(1);
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
+
+            verify(transportStepRepository).save(
+                argThat(step ->
+                            step.numberOfAttempts() == 1
+                                && step.status() == ConnectorMessageTransportStatus.SUBMITTED
+                )
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("when the input is invalid")
+    class WhenInputIsInvalid {
+        @Test
+        void should_fail_when_the_message_is_null() {
+            assertThatThrownBy(() -> service.execute(
+                null,
+                ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
+            )).isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
+        }
+
+        @Test
+        void should_fail_when_the_status_is_null() {
+            assertThatThrownBy(() -> service.execute(message(), null))
+                .isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
+        }
+
+        @Test
+        void should_fail_when_the_status_is_not_allowed_for_registration() {
+            var message = BusinessMessageTestFixtures.createInboundMessage();
+
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> service.execute(message, ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+            );
+
+            verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
+        }
     }
 }

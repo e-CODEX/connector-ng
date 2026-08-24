@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachment;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.service.attachement.FileUploadCommand;
+import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
 import java.io.IOException;

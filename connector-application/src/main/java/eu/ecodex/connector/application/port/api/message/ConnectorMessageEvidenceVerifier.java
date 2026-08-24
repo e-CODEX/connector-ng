@@ -10,12 +10,13 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import lombok.NonNull;
 
 /**
- * Verifies that a {@link ConnectorMessage} is valid for a given {@link ConnectorEvidenceType}.
+ * Verifies that a {@link ConnectorBusinessMessage} is valid for a given
+ * {@link ConnectorEvidenceType}.
  *
  * <p>This component performs validation checks before evidence is created or
  * processed. Implementations may ensure that the message contains the required information,
@@ -26,8 +27,8 @@ import lombok.NonNull;
  */
 public interface ConnectorMessageEvidenceVerifier {
     /**
-     * Verifies that the provided {@link ConnectorMessage} satisfies the requirements for the given
-     * {@link ConnectorEvidenceType}.
+     * Verifies that the provided {@link ConnectorBusinessMessage} satisfies the requirements for
+     * the given {@link ConnectorEvidenceType}.
      *
      * @param evidenceType the type of evidence the message is expected to support
      * @param message      the connector message to verify
@@ -36,5 +37,5 @@ public interface ConnectorMessageEvidenceVerifier {
      */
     void verify(
         @NonNull ConnectorEvidenceType evidenceType,
-        @NonNull ConnectorMessage message);
+        @NonNull ConnectorBusinessMessage message);
 }

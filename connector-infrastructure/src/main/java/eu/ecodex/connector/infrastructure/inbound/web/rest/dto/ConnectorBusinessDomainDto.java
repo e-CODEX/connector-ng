@@ -34,7 +34,8 @@ import lombok.Builder;
 public record ConnectorBusinessDomainDto(
     String uuid,
     String identifier,
-    String description, boolean enabled,
+    String description,
+    boolean enabled,
     ConnectorConfigurationSource source,
     Instant createdAt,
     Instant updatedAt

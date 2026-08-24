@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import jakarta.annotation.Nonnull;
@@ -27,7 +27,7 @@ public interface ConnectorMessageBusinessContentRepository {
      * Persists the provided message businessContent in the underlying data store.
      *
      * @param businessContent   the {@link ConnectorMessageBusinessContent} instance to be saved;
-     * @param messageIdentifier the {@link ConnectorMessage} identifier;
+     * @param messageIdentifier the {@link ConnectorBusinessMessage} identifier;
      *
      * @return the persisted {@link ConnectorMessageBusinessContent} instance, potentially with
      *     additional metadata or state changes applied during the save operation.

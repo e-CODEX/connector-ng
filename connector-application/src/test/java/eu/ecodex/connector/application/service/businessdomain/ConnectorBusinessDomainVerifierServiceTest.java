@@ -21,6 +21,8 @@ import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabl
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,55 +30,65 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorBusinessDomainVerifierService")
 public class ConnectorBusinessDomainVerifierServiceTest {
     private static final ConnectorBusinessDomainIdentifier BUSINESS_DOMAIN_IDENTIFIER =
         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
+
     @InjectMocks
     protected ConnectorBusinessDomainVerifierService businessDomainVerifierService;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
 
-    @Test
-    void should_throw_exception_if_business_domain_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> businessDomainVerifierService.execute(null)
-        );
+    @Nested
+    @DisplayName("when verification succeeds")
+    class WhenVerificationSucceeds {
+        @Test
+        void should_verify_the_business_domain() {
+            var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
+            when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
+
+            assertThatNoException().isThrownBy(
+                () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
+            );
+        }
     }
 
-    @Test
-    void should_throw_exception_if_business_domain_does_not_exist() {
-        when(businessDomainRepository.findByIdentifier(any())).thenReturn(null);
+    @Nested
+    @DisplayName("when verification fails")
+    class WhenVerificationFails {
+        @Test
+        void should_fail_when_the_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> businessDomainVerifierService.execute(null)
+            );
+        }
 
-        assertThrows(
-            ConnectorBusinessDomainNotFoundException.class,
-            () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
-        );
-    }
+        @Test
+        void should_fail_when_the_business_domain_does_not_exist() {
+            when(businessDomainRepository.findByIdentifier(any())).thenReturn(null);
 
-    @Test
-    void should_throw_exception_if_business_domain_is_disabled() {
-        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain()
-                                                       .toBuilder()
-                                                       .enabled(false)
-                                                       .build();
-        when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
+            assertThrows(
+                ConnectorBusinessDomainNotFoundException.class,
+                () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
+            );
+        }
 
-        assertThrows(
-            ConnectorBusinessDomainNotEnabledException.class,
-            () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
-        );
-    }
+        @Test
+        void should_fail_when_the_business_domain_is_disabled() {
+            var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain()
+                                                           .toBuilder()
+                                                           .enabled(false)
+                                                           .build();
+            when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
 
-    @Test
-    void should_verify_business_domain_successfully() {
-        var businessDomain = BusinessDomainTestFixtures.createDefaultBusinessDomain();
-        when(businessDomainRepository.findByIdentifier(any())).thenReturn(businessDomain);
-
-        businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER);
-
-        assertThatNoException().isThrownBy(() -> businessDomainVerifierService.execute(
-            BUSINESS_DOMAIN_IDENTIFIER));
+            assertThrows(
+                ConnectorBusinessDomainNotEnabledException.class,
+                () -> businessDomainVerifierService.execute(BUSINESS_DOMAIN_IDENTIFIER)
+            );
+        }
     }
 }

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport;
 
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
@@ -82,7 +83,7 @@ public record ConnectorMessageTransportStepDto(
     }
 
     private static String getTransportedMessageType(ConnectorMessage transportedMessage) {
-        return transportedMessage.isBusinessMessage() ? "BUSINESS" : "EVIDENCE";
+        return transportedMessage instanceof ConnectorBusinessMessage ? "BUSINESS" : "EVIDENCE";
     }
 
     private static Set<ConnectorMessageTransportStepStatusDto> toStatuses(

@@ -18,6 +18,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,38 +28,50 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorRetrieveEvidenceService")
 public class ConnectorRetrieveEvidenceServiceTest {
+    private static final String EVIDENCE_UUID = "12345678-1234-1234-1234-123456789012";
+
     @Mock
     private ConnectorMessageEvidenceRepository evidenceRepository;
 
     @InjectMocks
     private ConnectorRetrieveEvidenceService evidenceService;
 
-    @Test
-    void should_throw_exception_if_evidence_uuid_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> evidenceService.execute(null)
-        );
+    @Nested
+    @DisplayName("when retrieval succeeds")
+    class WhenRetrievalSucceeds {
+        @Test
+        void should_retrieve_the_evidence() {
+            when(evidenceRepository.findByUuid(any()))
+                .thenReturn(EvidenceTestFixtures.createSubmissionAcceptanceEvidence());
+
+            var evidence = evidenceService.execute(EVIDENCE_UUID);
+
+            assertThat(evidence).isNotNull();
+            assertThat(evidence.uuid()).isEqualTo(EVIDENCE_UUID);
+        }
     }
 
-    @Test
-    void should_throw_exception_if_evidence_does_not_exist() {
-        when(evidenceRepository.findByUuid(any())).thenReturn(null);
-        assertThrows(
-            ConnectorEvidenceNotFoundException.class,
-            () -> evidenceService.execute("non-existing-uuid")
-        );
-    }
+    @Nested
+    @DisplayName("when retrieval fails")
+    class WhenRetrievalFails {
+        @Test
+        void should_fail_when_the_uuid_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> evidenceService.execute(null)
+            );
+        }
 
-    @Test
-    void should_retrieve_evidence_successfully() {
-        when(evidenceRepository.findByUuid(any()))
-            .thenReturn(EvidenceTestFixtures.createSubmissionAcceptanceEvidence());
+        @Test
+        void should_fail_when_the_evidence_does_not_exist() {
+            when(evidenceRepository.findByUuid(any())).thenReturn(null);
 
-        var evidence = evidenceService.execute("12345678-1234-1234-1234-123456789012");
-
-        assertThat(evidence).isNotNull();
-        assertThat(evidence.uuid()).isEqualTo("12345678-1234-1234-1234-123456789012");
+            assertThrows(
+                ConnectorEvidenceNotFoundException.class,
+                () -> evidenceService.execute("non-existing-uuid")
+            );
+        }
     }
 }

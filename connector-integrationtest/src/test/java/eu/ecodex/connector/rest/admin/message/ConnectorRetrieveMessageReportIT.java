@@ -16,15 +16,17 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorRetrieveMessageReportIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
     @Autowired
@@ -37,15 +39,18 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
     })
-    void should_retrieve_connector_messages_report_successfully() {
+    void should_retrieve_report_of_connector_messages() {
         apiClient.get()
                  .uri("/api/v1/admin/messages/reports")
                  .exchange()
@@ -72,7 +77,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
                      assertThat(month1.totalInbound()).isEqualTo(3);
                      assertThat(month1.totalOutbound()).isEqualTo(1);
                      assertThat(month1.total())
-                             .isEqualTo(month1.totalOutbound() + month1.totalInbound());
+                         .isEqualTo(month1.totalOutbound() + month1.totalInbound());
 
 
                      assertThat(month1.reports().size()).isEqualTo(2);
@@ -83,7 +88,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
                      assertThat(monthReport1.inbound()).isEqualTo(3);
                      assertThat(monthReport1.outbound()).isEqualTo(0);
                      assertThat(monthReport1.total())
-                             .isEqualTo(monthReport1.inbound() + monthReport1.outbound());
+                         .isEqualTo(monthReport1.inbound() + monthReport1.outbound());
 
                      var monthReport2 = month1.reports().get(1);
                      assertThat(monthReport2).isNotNull();
@@ -92,7 +97,7 @@ public class ConnectorRetrieveMessageReportIT extends AbstractIntegrationTest {
                      assertThat(monthReport2.inbound()).isEqualTo(0);
                      assertThat(monthReport2.outbound()).isEqualTo(1);
                      assertThat(monthReport2.total())
-                             .isEqualTo(monthReport2.inbound() + monthReport2.outbound());
+                         .isEqualTo(monthReport2.inbound() + monthReport2.outbound());
                  });
     }
 }

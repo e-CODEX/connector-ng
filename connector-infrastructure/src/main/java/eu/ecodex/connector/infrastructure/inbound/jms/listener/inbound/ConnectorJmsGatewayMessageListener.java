@@ -10,15 +10,16 @@
 
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound;
 
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -68,13 +69,14 @@ public class ConnectorJmsGatewayMessageListener {
               .collect(Collectors.toUnmodifiableSet());
 
     private final ConnectorMessageRepository messageRepository;
-    private final ConnectorMessageBusinessContentRepository businessContentRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
-    private final ConnectorEventPublisher inboundMessagePipelinePublisher;
-    private final ConnectorMessageIdGenerator messageIdGenerator;
-    private final ConnectorEventPublisher inboundEvidenceTriggerPublisher;
+    private final ConnectorMessageEventPublisher<ConnectorBusinessMessage>
+        inboundMessagePipelinePublisher;
+    private final ConnectorMessageIdGeneratorService messageIdGenerator;
+    private final ConnectorMessageEventPublisher<ConnectorEvidenceMessage>
+        inboundEvidenceTriggerPublisher;
 
     /**
      * Creates a new listener instance.
@@ -83,17 +85,15 @@ public class ConnectorJmsGatewayMessageListener {
      */
     public ConnectorJmsGatewayMessageListener(
         ConnectorMessageRepository messageRepository,
-        ConnectorMessageBusinessContentRepository businessContentRepository,
         ConnectorMessageAttachmentRepository attachmentRepository,
         ConnectorMessageEvidenceRepository evidenceRepository,
         ConnectorFileStorageProvider fileStorageProvider,
         @Qualifier("connectorJmsInboundMessagePipelinePublisher")
-        ConnectorEventPublisher inboundMessagePipelinePublisher,
-        ConnectorMessageIdGenerator messageIdGenerator,
+        ConnectorMessageEventPublisher<ConnectorBusinessMessage> inboundMessagePipelinePublisher,
+        ConnectorMessageIdGeneratorService messageIdGenerator,
         @Qualifier("connectorJmsInboundEvidenceTriggerPublisher")
-        ConnectorEventPublisher inboundEvidenceTriggerPublisher) {
+        ConnectorMessageEventPublisher<ConnectorEvidenceMessage> inboundEvidenceTriggerPublisher) {
         this.messageRepository = messageRepository;
-        this.businessContentRepository = businessContentRepository;
         this.attachmentRepository = attachmentRepository;
         this.evidenceRepository = evidenceRepository;
         this.fileStorageProvider = fileStorageProvider;
@@ -123,46 +123,24 @@ public class ConnectorJmsGatewayMessageListener {
 
         var as4Properties = parseAS4Properties(message);
         var payloads = parsePayloads(message);
-        var isConfirmationMessage = payloads.businessContent() == null
-            && !payloads.evidences.isEmpty();
-
-        if (isConfirmationMessage) {
-            log.info("Received message from the gateway is a confirmation message");
-        } else if (payloads.businessContent() != null) {
-            log.info("Received message from the gateway is a business message");
-        } else {
-            log.info(
-                "Received message from the gateway is neither evidence nor a business message"
-            );
-            throw new IllegalStateException(
-                "Received message from the gateway is neither evidence nor a business message"
-            );
-        }
 
         var messageIdentifier = messageIdGenerator.generateIdentifier();
 
-        var inboundMessage = ConnectorMessage
-            .builder()
-            .identifier(messageIdentifier)
-            .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
-            .backendMessageIdentifier(null)
-            .as4Properties(as4Properties)
-            .direction(
-                ConnectorMessageDirection.GATEWAY_TO_BACKEND
-            )
-            .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
-            .businessContent(payloads.businessContent())
-            .attachments(payloads.attachments())
-            .evidences(null)
-            .transportedEvidences(payloads.evidences())
-            .build();
+        var inboundMessage = toInboundMessage(messageIdentifier, as4Properties, payloads);
 
-        if (isConfirmationMessage) {
-            inboundEvidenceTriggerPublisher.publish(inboundMessage);
-        } else {
-            // TODO move to outbound message stager service in the application module
-            var persistedMessage = persistMessage(inboundMessage, payloads, messageIdentifier);
-            inboundMessagePipelinePublisher.publish(persistedMessage);
+        switch (inboundMessage) {
+            case ConnectorEvidenceMessage evidence -> {
+                log.info("Received message from the gateway is an evidence message");
+                inboundEvidenceTriggerPublisher.publish(evidence);
+            }
+            case ConnectorBusinessMessage business -> {
+                // TODO move to outbound message stager service in the application module
+                log.info("Received message from the gateway is a business message");
+                var persisted = persistMessage(business, payloads);
+                inboundMessagePipelinePublisher.publish(persisted);
+            }
+            default -> throw new IllegalArgumentException("Invalid Inbound Gateway reception "
+                                                              + "messageType: " + inboundMessage);
         }
     }
 
@@ -245,6 +223,42 @@ public class ConnectorJmsGatewayMessageListener {
             .build();
     }
 
+    private ConnectorMessage toInboundMessage(
+        String identifier,
+        ConnectorMessageAS4Properties as4Properties,
+        ParsedPayloads payloads) {
+
+        if (payloads.businessContent() != null) {
+            return ConnectorBusinessMessage
+                .builder()
+                .identifier(identifier)
+                .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
+                .as4Properties(as4Properties)
+                .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
+                .businessContent(payloads.businessContent())
+                .attachments(payloads.attachments())
+                .transportedEvidences(payloads.evidences())
+                .build();
+        }
+
+        if (!payloads.evidences().isEmpty()) {
+            return ConnectorEvidenceMessage
+                .builder()
+                .identifier(identifier)
+                .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
+                .as4Properties(as4Properties)
+                .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
+                .transportedEvidences(payloads.evidences())
+                .build();
+        }
+
+        throw new IllegalArgumentException(
+            "Gateway message %s carries neither business content nor evidence".formatted(identifier)
+        );
+    }
+
     private ParsedPayloads parsePayloads(MapMessage message) throws JMSException {
         int total = message.getIntProperty("totalNumberOfPayloads");
         var attachments = new ArrayList<ConnectorMessageAttachment>();
@@ -259,8 +273,8 @@ public class ConnectorJmsGatewayMessageListener {
 
 
             var resolvedName = StringUtils.hasText(name)
-                ? name
-                : description.toLowerCase(Locale.ROOT);
+                               ? name
+                               : description.toLowerCase(Locale.ROOT);
 
             if (!StringUtils.hasText(description)) {
                 throw new IllegalArgumentException(
@@ -313,19 +327,15 @@ public class ConnectorJmsGatewayMessageListener {
         return new ParsedPayloads(businessContent, attachments, evidences);
     }
 
-    private ConnectorMessage persistMessage(
-        ConnectorMessage message,
-        ParsedPayloads payloads,
-        String messageIdentifier) {
+    private ConnectorBusinessMessage persistMessage(
+        ConnectorBusinessMessage message,
+        ParsedPayloads payloads) {
         messageRepository.save(message);
 
-        if (payloads.businessContent != null) {
-            businessContentRepository.save(payloads.businessContent, messageIdentifier);
-            attachmentRepository.attachToMessage(
-                payloads.businessContent().xmlContent().identifier(),
-                messageIdentifier
-            );
-        }
+        attachmentRepository.attachToMessage(
+            message.businessContent().xmlContent().identifier(),
+            message.identifier()
+        );
 
         var transportedEvidences = payloads.evidences().stream().map(evidence -> {
             if (evidence.content() == null) {
@@ -334,15 +344,15 @@ public class ConnectorJmsGatewayMessageListener {
                 );
             }
 
-            return evidenceRepository.save(evidence, messageIdentifier);
+            return evidenceRepository.save(evidence, message.identifier());
         }).toList();
 
-        payloads.attachments().forEach(attachment ->
-                                           attachmentRepository.attachToMessage(
-                                               attachment.identifier(), messageIdentifier
-                                           ));
+        payloads.attachments().forEach(
+            attachment ->
+                attachmentRepository.attachToMessage(attachment.identifier(), message.identifier())
+        );
 
-        var persistedMessage = messageRepository.findByIdentifier(messageIdentifier);
+        var persistedMessage = messageRepository.findByIdentifier(message.identifier());
 
         return persistedMessage.toBuilder()
                                .transportedEvidences(transportedEvidences).build();

@@ -12,10 +12,10 @@ package eu.ecodex.connector.infrastructure.security.token.trustok;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.infrastructure.outbound.security.token.trustok.pdf.ConnectorPDFTrustOKTokenGenerator;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.ConnectorTokenValidationGenerator;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenValidationFactory;
@@ -24,9 +24,12 @@ import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import java.io.IOException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorPDFTrustOKTokenGenerator")
 public class ConnectorPDFTrustOKTokenGeneratorTest extends BaseTokenTest {
     @Autowired
     private ConnectorPDFTrustOKTokenGenerator trustOKTokenGenerator;
@@ -35,116 +38,133 @@ public class ConnectorPDFTrustOKTokenGeneratorTest extends BaseTokenTest {
     @Autowired
     private ConnectorTokenValidationFactory validationFactory;
 
-    @Test
-    void should_create_pdf_trust_ok_token_for_signature_based_document_and_sign_it_successfully()
-        throws IOException {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
-        var businessDocument = new InMemoryDocument(document);
-        var issuer = validationFactory.getTokenIssuer(message);
+    @Nested
+    @DisplayName("signature-based documents")
+    class SignatureBasedDocuments {
+        @Test
+        void should_create_signed_pdf_trust_ok_token() throws IOException {
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
+            var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
+            var businessDocument = new InMemoryDocument(document);
+            var issuer = validationFactory.getTokenIssuer(message);
 
-        var token = validationGenerator.createToken(
-            message,
-            businessDocument,
-            null,
-            issuer
-        );
+            var token = validationGenerator.createToken(
+                message,
+                businessDocument,
+                null,
+                issuer
+            );
 
-        var pdfToken = trustOKTokenGenerator.generate(token);
+            var pdfToken = trustOKTokenGenerator.generate(token);
 
-        assertThat(pdfToken).isNotNull();
-        assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
-        assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
-        try (var stream = pdfToken.openStream()) {
-            assertThat(SecurityUtil.getPageNumbers(stream.readAllBytes())).isGreaterThanOrEqualTo(2);
+            assertThat(pdfToken).isNotNull();
+            assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
+            assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
+
+            try (var stream = pdfToken.openStream()) {
+                assertThat(
+                    SecurityUtil.getPageNumbers(stream.readAllBytes())
+                ).isGreaterThanOrEqualTo(2);
+            }
+        }
+
+        @Test
+        void should_create_signed_pdf_trust_ok_token_with_appendix() throws IOException {
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
+            var document = FileTestFixtures.readAsBytes("raw/document/Signed_Visible.pdf");
+            var businessDocument = new InMemoryDocument(document);
+            var issuer = validationFactory.getTokenIssuer(message);
+
+            var token = validationGenerator.createToken(
+                message,
+                businessDocument,
+                null,
+                issuer
+            );
+
+            var pdfToken = trustOKTokenGenerator.generate(token);
+
+            assertThat(pdfToken).isNotNull();
+            assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
+            assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
+
+            try (var stream = pdfToken.openStream()) {
+                assertThat(
+                    SecurityUtil.getPageNumbers(stream.readAllBytes())
+                ).isEqualTo(3);
+            }
+        }
+
+        @Test
+        void should_create_signed_pdf_trust_ok_token_for_multiple_signatures() throws IOException {
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
+            var document = FileTestFixtures.readAsBytes("raw/document/Two_Signatures.pdf");
+            var businessDocument = new InMemoryDocument(document);
+            var issuer = validationFactory.getTokenIssuer(message);
+
+            var token = validationGenerator.createToken(
+                message,
+                businessDocument,
+                null,
+                issuer
+            );
+
+            var pdfToken = trustOKTokenGenerator.generate(token);
+
+            assertThat(pdfToken).isNotNull();
+            assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
+            assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
+
+            try (var stream = pdfToken.openStream()) {
+                assertThat(
+                    SecurityUtil.getPageNumbers(stream.readAllBytes())
+                ).isEqualTo(5);
+            }
         }
     }
 
-    @Test
-    void should_create_pdf_trust_ok_token_with_appendix_for_signature_based_document_and_sign_it_successfully()
-        throws IOException {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var document = FileTestFixtures.readAsBytes("raw/document/Signed_Visible.pdf");
-        var businessDocument = new InMemoryDocument(document);
-        var issuer = validationFactory.getTokenIssuer(message);
+    @Nested
+    @DisplayName("auth-based documents")
+    class AuthBasedDocuments {
+        @Test
+        void should_create_signed_pdf_trust_ok_token() throws IOException {
+            var message = BusinessMessageTestFixtures
+                .createOutboundMessage()
+                .toBuilder()
+                .businessContent(
+                    MessageContentTestFixtures
+                        .createContent()
+                        .toBuilder()
+                        .businessDocument(
+                            ConnectorMessageDocumentTestFixtures
+                                .createDocumentWithoutSignature()
+                        )
+                        .build()
+                )
+                .build();
 
-        var token = validationGenerator.createToken(
-            message,
-            businessDocument,
-            null,
-            issuer
-        );
+            var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
+            var businessDocument = new InMemoryDocument(document);
+            var issuer = validationFactory.getTokenIssuer(message);
 
-        var pdfToken = trustOKTokenGenerator.generate(token);
+            var token = validationGenerator.createToken(
+                message,
+                businessDocument,
+                null,
+                issuer
+            );
 
-        assertThat(pdfToken).isNotNull();
-        assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
-        assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
-        try (var stream = pdfToken.openStream()) {
-            assertThat(SecurityUtil.getPageNumbers(stream.readAllBytes())).isEqualTo(3);
-        }
-    }
+            var pdfToken = trustOKTokenGenerator.generate(token);
 
-    @Test
-    void should_create_pdf_trust_ok_token_for_signature_based_document_with_two_signatures_and_sign_it_successfully()
-        throws IOException {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var document = FileTestFixtures.readAsBytes("raw/document/Two_Signatures.pdf");
-        var businessDocument = new InMemoryDocument(document);
-        var issuer = validationFactory.getTokenIssuer(message);
+            assertThat(pdfToken).isNotNull();
+            assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
+            assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
 
-        var token = validationGenerator.createToken(
-            message,
-            businessDocument,
-            null,
-            issuer
-        );
-
-        var pdfToken = trustOKTokenGenerator.generate(token);
-
-        assertThat(pdfToken).isNotNull();
-        assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
-        assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
-        try (var stream = pdfToken.openStream()) {
-            assertThat(SecurityUtil.getPageNumbers(stream.readAllBytes())).isEqualTo(5);
-        }
-    }
-
-    @Test
-    void should_create_pdf_trust_ok_token_for_auth_based_document_and_sign_it_successfully()
-        throws IOException {
-        var message = MessageTestFixtures
-            .createOutboundBusinessMessage()
-            .toBuilder()
-            .businessContent(
-                MessageContentTestFixtures
-                    .createContent()
-                    .toBuilder()
-                    .businessDocument(
-                        ConnectorMessageDocumentTestFixtures
-                            .createDocumentWithoutSignature()
-                    )
-                    .build()
-            )
-            .build();
-        var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
-        var businessDocument = new InMemoryDocument(document);
-        var issuer = validationFactory.getTokenIssuer(message);
-
-        var token = validationGenerator.createToken(
-            message,
-            businessDocument,
-            null,
-            issuer
-        );
-
-        var pdfToken = trustOKTokenGenerator.generate(token);
-
-        assertThat(pdfToken).isNotNull();
-        assertThat(pdfToken.getMimeType()).isEqualTo(MimeTypeEnum.PDF);
-        assertThat(SecurityUtil.hasSignature(pdfToken)).isTrue();
-        try (var stream = pdfToken.openStream()) {
-            assertThat(SecurityUtil.getPageNumbers(stream.readAllBytes())).isGreaterThanOrEqualTo(2);
+            try (var stream = pdfToken.openStream()) {
+                assertThat(
+                    SecurityUtil.getPageNumbers(stream.readAllBytes())
+                ).isGreaterThanOrEqualTo(2);
+            }
         }
     }
 }

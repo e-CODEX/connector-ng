@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound;
 
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.application.service.message.inbound.pipeline.ConnectorInboundMessagePipeline;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JMS listener responsible for triggering the inbound message processing pipeline when a
- * {@link ConnectorMessage} processing event is received from the gateway.
+ * {@link ConnectorBusinessMessage} processing event is received from the gateway.
  *
  * <p>This component listens to the configured inbound message processing queue and delegates the
  * received message to the {@link  ConnectorInboundMessagePipeline}. The pipeline then executes the
@@ -35,7 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
-public class ConnectorJmsInboundMessagePipelineListener implements ConnectorEventHandler {
+public class ConnectorJmsInboundMessagePipelineListener
+    implements ConnectorEventHandler<ConnectorBusinessMessage> {
     private final ConnectorMessagePipeline inboundMessagePipeline;
 
     public ConnectorJmsInboundMessagePipelineListener(
@@ -47,7 +48,7 @@ public class ConnectorJmsInboundMessagePipelineListener implements ConnectorEven
     @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.inbound-message-processing-queue}")
-    public void handle(@NonNull ConnectorMessage message) {
+    public void handle(@NonNull ConnectorBusinessMessage message) {
         log.info("Entering inbound message [{}] processing pipeline ", message.identifier());
         this.inboundMessagePipeline.process(message);
     }

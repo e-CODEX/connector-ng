@@ -16,15 +16,17 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorListBusinessDomainsIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorListBusinessDomainsIT extends AbstractIntegrationTest {
     @Autowired
@@ -37,9 +39,9 @@ public class ConnectorListBusinessDomainsIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
+        "classpath:sql/business-domain.sql",
     })
-    void should_list_connector_messages_successfully() {
+    void should_list_connector_business_domains() {
         apiClient.get()
                  .uri("/api/v1/admin/business-domains")
                  .exchange()

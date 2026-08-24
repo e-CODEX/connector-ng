@@ -14,20 +14,22 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.ConnectorMessageDocumentTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorAsicContainerBuilder;
 import eu.ecodex.connector.infrastructure.security.BaseContainerTest;
 import eu.ecodex.connector.infrastructure.security.SecurityUtil;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+@DisplayName("ConnectorAsicContainerBuilder")
 public class ConnectorAsicContainerBuilderTest extends BaseContainerTest {
     @Autowired
     private ConnectorAsicContainerBuilder asicContainerBuilder;
@@ -35,26 +37,26 @@ public class ConnectorAsicContainerBuilderTest extends BaseContainerTest {
     private ConnectorFileStorageProvider fileStorageProvider;
 
     @Test
-    void should_create_asics_container_and_sign_it_successfully() {
+    void should_create_and_sign_asics_container() {
         when(fileStorageProvider.findByIdentifier(any()))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
-                .thenReturn(FileTestFixtures.readAsBytes("raw/test-xml.xml"));
+            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
+            .thenReturn(FileTestFixtures.readAsBytes("raw/test-xml.xml"));
 
-        var message = MessageTestFixtures
-                .createOutboundBusinessMessage()
-                .toBuilder()
-                .businessContent(
-                        MessageContentTestFixtures
-                                .createContent()
-                                .toBuilder()
-                                .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
-                                .businessDocument(
-                                        ConnectorMessageDocumentTestFixtures
-                                                .createDocumentWithoutSignature()
-                                )
-                                .build()
-                )
-                .build();
+        var message = BusinessMessageTestFixtures
+            .createOutboundMessage()
+            .toBuilder()
+            .businessContent(
+                MessageContentTestFixtures
+                    .createContent()
+                    .toBuilder()
+                    .xmlContent(MessageAttachmentTestFixtures.createBusinessContentAttachment())
+                    .businessDocument(
+                        ConnectorMessageDocumentTestFixtures
+                            .createDocumentWithoutSignature()
+                    )
+                    .build()
+            )
+            .build();
 
         var container = asicContainerBuilder.createAsicContainer(message);
 

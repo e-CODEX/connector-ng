@@ -48,4 +48,14 @@ public class MessageAttachmentTestFixtures {
                 .name("businessContent.xml")
                 .build();
     }
+
+    public static ConnectorMessageAttachment createBusinessDocumentAttachment() {
+        return createAttachment()
+            .toBuilder()
+            .identifier("f79623a9-3792-4c6e-a96b-819bd4b69879_messageContent")
+            .type(ConnectorAttachmentType.BUSINESS_DOCUMENT)
+            .contentType("application/pdf")
+            .name("Form_A.pdf")
+            .build();
+    }
 }

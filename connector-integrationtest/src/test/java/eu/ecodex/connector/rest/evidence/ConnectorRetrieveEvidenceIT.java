@@ -14,15 +14,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorRetrieveEvidenceIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
     private static final String URL = "/api/v1/evidences/%s/download";
@@ -36,20 +38,20 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/evidence.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/evidence.sql"
     })
-    void should_export_connector_messages_report_successfully() {
+    void should_export_connector_messages_report() {
         byte[] body = apiClient.get()
                                .uri(uriBuilder -> uriBuilder
-                                       .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                                       .build())
+                                   .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
+                                   .build())
                                .exchange()
                                .expectStatus().isOk()
                                .expectHeader().contentType(MediaType.APPLICATION_XML)
@@ -61,11 +63,11 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_return_404_if_evidence_does_not_exist() {
+    void should_return_404_when_evidence_does_not_exist() {
         apiClient.get()
                  .uri(uriBuilder -> uriBuilder
-                         .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                         .build())
+                     .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
+                     .build())
                  .exchange()
                  .expectStatus().isNotFound();
     }

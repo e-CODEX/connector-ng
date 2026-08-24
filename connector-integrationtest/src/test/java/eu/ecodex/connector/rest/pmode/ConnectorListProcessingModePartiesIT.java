@@ -13,13 +13,15 @@ package eu.ecodex.connector.rest.pmode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorListProcessingModePartiesIT REST")
 @Sql(
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
@@ -39,12 +41,12 @@ public class ConnectorListProcessingModePartiesIT extends AbstractIntegrationTes
         "classpath:sql/processing-mode.sql",
         "classpath:sql/party.sql",
     })
-    void should_list_a_connector_pmode_actions_successfully() {
+    void should_list_connector_pmode_parties() {
         var response = apiClient.get()
                                 .uri("/api/v1/processing-modes/default_business_domain/parties")
                                 .exchange()
                                 .expectStatus().isOk()
-                                .returnResult(ConnectorAction[].class);
+                                .returnResult(ConnectorParty[].class);
 
         var parties = response.getResponseBody();
         assertThat(parties).isNotNull();

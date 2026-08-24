@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.port.api.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -24,9 +25,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorBackendClientVerifier")
 public class ConnectorBackendClientVerifierTest {
     @Mock
     private ConnectorFindLinkPartner findLinkPartnerService;
+
     private ConnectorBackendClientVerifier verifier;
 
     @BeforeEach
@@ -35,21 +38,20 @@ public class ConnectorBackendClientVerifierTest {
     }
 
     @Test
-    void should_return_backend_client_name_successfully() {
-        when(this.findLinkPartnerService.findByCertificateDn("cn=alice"))
-                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
+    void should_return_the_backend_client_name() {
+        when(findLinkPartnerService.findByCertificateDn("cn=alice"))
+            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
 
-        var name = this.verifier.getBackendClient("cn=alice");
+        var name = verifier.getBackendClient("cn=alice");
 
-        assertThat(name).isNotNull();
         assertThat(name).isEqualTo("backend_alice");
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_searching_backend_client_by_null_certificate_dn() {
+    void should_fail_when_the_certificate_dn_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> this.verifier.getBackendClient(null)
+            NullPointerException.class,
+            () -> verifier.getBackendClient(null)
         );
     }
 }

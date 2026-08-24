@@ -17,6 +17,8 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageErrorRep
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -132,15 +134,15 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         ConnectorMessageTransportStep existingStep,
         UpdateMessageTransportCommand command) {
 
+        var transportedMessage = existingStep.transportedMessage();
         switch (command.status()) {
             case DELIVERED -> updateMessage(
-                existingStep.transportedMessage(),
+                transportedMessage,
                 command.remoteMessageIdentifier()
             );
-            case FAILED -> registerErrors(existingStep.transportedMessage(), command.errors());
-            default -> {
-                log.debug("No action required for transport status [{}]", command.status());
-            }
+            case FAILED ->
+                registerErrors((ConnectorBusinessMessage) transportedMessage, command.errors());
+            default -> log.debug("No action required for transport status [{}]", command.status());
         }
     }
 
@@ -150,21 +152,16 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         String remoteMessageIdentifier) {
         var identifier = transportedMessage.identifier();
 
-        if (identifier == null) {
-            throw new IllegalStateException(
-                "The message identifier is not set for the transported message"
-            );
-        }
-
-        if (transportedMessage.isBusinessMessage()) {
-            updateBusinessMessage(transportedMessage, identifier, remoteMessageIdentifier);
-        } else {
-            updateEvidenceMessage(transportedMessage, identifier);
+        switch (transportedMessage) {
+            case ConnectorBusinessMessage businessMessage ->
+                updateBusinessMessage(businessMessage, identifier, remoteMessageIdentifier);
+            case ConnectorEvidenceMessage evidenceMessage ->
+                updateEvidenceMessage(evidenceMessage, identifier);
         }
     }
 
     private void updateBusinessMessage(
-        ConnectorMessage message,
+        ConnectorBusinessMessage message,
         String identifier,
         String remoteMessageIdentifier) {
         if (messageRepository.findByIdentifier(identifier) == null) {
@@ -182,13 +179,8 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         messageRepository.setDeliveredToLinkPartnerAt(identifier);
     }
 
-    private void updateEvidenceMessage(ConnectorMessage message, String identifier) {
+    private void updateEvidenceMessage(ConnectorEvidenceMessage message, String identifier) {
         var evidences = message.transportedEvidences();
-
-        if (evidences == null || evidences.isEmpty()) {
-            throw new IllegalStateException(
-                "Evidence message [%s] contains no transported evidence".formatted(identifier));
-        }
 
         var evidenceUuid = evidences.getFirst().uuid();
 
@@ -201,17 +193,9 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
     }
 
     private void registerErrors(
-        ConnectorMessage transportedMessage,
+        ConnectorBusinessMessage transportedMessage,
         List<ConnectorMessageError> errors) {
         // TODO for evidence messages, the errors should be registered to the step
-        if (transportedMessage.isBusinessMessage()) {
-            if (transportedMessage.identifier() == null) {
-                throw new IllegalStateException(
-                    "The message identifier is not set for the transported message"
-                );
-            }
-
-            this.messageErrorRepository.save(transportedMessage.identifier(), errors);
-        }
+        this.messageErrorRepository.save(transportedMessage.identifier(), errors);
     }
 }

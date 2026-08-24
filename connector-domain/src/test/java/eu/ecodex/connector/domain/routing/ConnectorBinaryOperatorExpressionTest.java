@@ -11,142 +11,155 @@
 package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.MessageTestFixtures;
-import org.junit.jupiter.api.Assertions;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@code ConnectorBinaryOperatorExpression}.
  */
+
+@DisplayName("ConnectorMessageRoutingBinaryOperatorExpression")
 public class ConnectorBinaryOperatorExpressionTest {
-    // OR expression
-    @Test
-    void expression_or_is_evaluated_positively_if_expressions_1_and_2_are_true() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
+    private final ConnectorBusinessMessage message =
+        BusinessMessageTestFixtures.createOutboundMessage();
 
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.OR, expression1, expression2
-        );
+    @Nested
+    @DisplayName("OR operator")
+    class OrOperator {
+        @Test
+        void should_be_true_when_both_expressions_are_true() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
 
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isTrue();
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.OR, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isTrue();
+        }
+
+        @Test
+        void should_be_true_when_only_the_first_expression_is_true() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_FINAL_RECIPIENT, "bob");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Incorrect");
+
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.OR, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isTrue();
+        }
+
+        @Test
+        void should_be_true_when_only_the_second_expression_is_true() {
+            var expression1 =
+                new ConnectorEqualsExpression(
+                    TokenType.AS4_FROM_PARTY_ID_TYPE,
+                    "Connector-Incorrect"
+                );
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
+
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.OR, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isTrue();
+        }
+
+        @Test
+        void should_be_false_when_both_expressions_are_false() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Incorrect");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_FROM_PARTY_ROLE, "Incorrect");
+
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.OR, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isFalse();
+        }
     }
 
-    @Test
-    void expression_or_is_evaluated_positively_if_only_expression_1_is_true() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_FINAL_RECIPIENT, "bob");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Incorrect");
+    @Nested
+    @DisplayName("AND operator")
+    class AndOperator {
+        @Test
+        void should_be_true_when_both_expressions_are_true() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
 
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.OR, expression1, expression2
-        );
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.AND, expression1, expression2);
 
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isTrue();
+            assertThat(binaryExpression.evaluate(message)).isTrue();
+        }
+
+        @Test
+        void should_be_false_when_only_the_first_expression_is_true() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Incorrect");
+
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.AND, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isFalse();
+        }
+
+        @Test
+        void should_be_false_when_only_the_second_expression_is_true() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Incorrect");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
+
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.AND, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isFalse();
+        }
+
+        @Test
+        void should_be_false_when_both_expressions_are_false() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Incorrect");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Incorrect");
+
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.AND, expression1, expression2);
+
+            assertThat(binaryExpression.evaluate(message)).isFalse();
+        }
     }
 
-    @Test
-    void expression_or_is_evaluated_positively_if_only_expression_2_is_true() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_FROM_PARTY_ID_TYPE, "Connector-Incorrect");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
+    @Nested
+    @DisplayName("unsupported operator")
+    class UnsupportedOperator {
+        @Test
+        void should_fail_when_the_operator_is_neither_and_nor_or() {
+            var expression1 =
+                new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
+            var expression2 =
+                new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
 
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.OR, expression1, expression2
-        );
+            var binaryExpression =
+                new ConnectorBinaryOperatorExpression(TokenType.NOT, expression1, expression2);
 
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isTrue();
-    }
-
-    // AND expression
-    @Test
-    void expression_and_is_evaluated_positively_if_expressions_1_and_2_are_true() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
-
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.AND, expression1, expression2
-        );
-
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isTrue();
-    }
-
-    @Test
-    void expression_or_is_evaluated_negatively_if_expressions_1_and_2_are_false() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Incorrect");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_FROM_PARTY_ROLE, "Incorrect");
-
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.OR, expression1, expression2
-        );
-
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isFalse();
-    }
-
-    @Test
-    void expression_and_is_evaluated_negatively_if_only_expression_1_is_true() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Incorrect");
-
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.AND, expression1, expression2
-        );
-
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isFalse();
-    }
-
-    @Test
-    void expression_and_is_evaluated_negatively_if_only_expression_2_is_true() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Incorrect");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
-
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.AND, expression1, expression2
-        );
-
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isFalse();
-    }
-
-    @Test
-    void expression_and_is_evaluated_negatively_if_expressions_1_and_2_are_false() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Incorrect");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "Incorrect");
-
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.AND, expression1, expression2
-        );
-
-        var evaluationResult = binaryOrExpression.evaluate(message);
-        assertThat(evaluationResult).isFalse();
-    }
-
-    @Test
-    void should_throw_exception_if_binary_expression_operand_is_different_from_and_or_or() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
-        var expression1 = new ConnectorEqualsExpression(TokenType.AS4_SERVICE_NAME, "Connector-TEST");
-        var expression2 = new ConnectorStartsWithExpression(TokenType.AS4_ACTION, "ConTest");
-
-        var binaryOrExpression = new ConnectorBinaryOperatorExpression(
-                TokenType.NOT, expression1, expression2
-        );
-
-        Assertions.assertThrows(
+            assertThrows(
                 RuntimeException.class,
-                () -> binaryOrExpression.evaluate(message)
-        );
+                () -> binaryExpression.evaluate(message)
+            );
+        }
     }
 }

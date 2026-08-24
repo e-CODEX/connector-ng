@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.security.container;
 
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssDocumentSigner;
 import eu.ecodex.connector.infrastructure.dss.ConnectorDssSigningTokenProvider;
@@ -112,7 +112,7 @@ public class ConnectorAsicContainerBuilder {
      *
      * @throws ConnectorContainerException if the business content or issuer validation fails
      */
-    public ConnectorContainer createAsicContainer(ConnectorMessage message) {
+    public ConnectorContainer createAsicContainer(ConnectorBusinessMessage message) {
         var businessContent = toContainerBusinessContent(message);
 
         if (!businessContent.isValid()) {
@@ -143,7 +143,7 @@ public class ConnectorAsicContainerBuilder {
     }
 
     private ConnectorContainerBusinessContent toContainerBusinessContent(
-        @NonNull ConnectorMessage message) {
+        @NonNull ConnectorBusinessMessage message) {
         if (message.identifier() == null) {
             throw new ConnectorContainerException("Message identifier is null: %s"
                                                       .formatted(message));

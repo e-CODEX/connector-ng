@@ -18,6 +18,12 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachme
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
@@ -27,130 +33,146 @@ import org.springframework.test.context.jdbc.Sql;
     statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
+@DisplayName("ConnectorMessageAttachmentRepository")
 public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepositoryTest {
+    private static final String MESSAGE_ID =
+        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
     @Autowired
     private ConnectorMessageAttachmentRepository repository;
 
-    // saving
-    @Test
-    void should_save_attachment_to_database_successfully() {
-        var attachment = MessageAttachmentTestFixtures.createAttachment();
-
-        var savedAttachment = this.repository.save(attachment);
-
-        assertThat(savedAttachment).isNotNull();
-        assertThat(savedAttachment.identifier()).contains("_test_attachment");
-        assertThat(savedAttachment.name()).isEqualTo("test_attachment.txt");
-        assertThat(savedAttachment.size()).isEqualTo(100L);
-        assertThat(savedAttachment.contentType()).isEqualTo("text/plain");
-        assertThat(savedAttachment.description()).isNotBlank();
-        assertThat(savedAttachment.storage()).isEqualTo(ConnectorAttachmentStorage.S3_BUCKET);
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/attachment.sql",
+    })
+    private @interface WithMessageAndAttachmentData {
     }
 
-    // finding by identifier
-    @Test
-    void should_find_attachment_by_identifier_successfully_from_database() {
-        var attachment = MessageAttachmentTestFixtures.createAttachment();
+    @Nested
+    @DisplayName("save an attachment")
+    class Save {
+        @Test
+        void should_save_the_attachment() {
+            var attachment = MessageAttachmentTestFixtures.createAttachment();
 
-        this.repository.save(attachment);
-        var foundAttachment = this.repository.findByIdentifier(attachment.identifier());
+            var savedAttachment = repository.save(attachment);
 
-        assertThat(foundAttachment).isNotNull();
-        assertThat(foundAttachment.identifier()).isEqualTo(attachment.identifier());
+            assertThat(savedAttachment).isNotNull();
+            assertThat(savedAttachment.identifier()).contains("_test_attachment");
+            assertThat(savedAttachment.name()).isEqualTo("test_attachment.txt");
+            assertThat(savedAttachment.size()).isEqualTo(100L);
+            assertThat(savedAttachment.contentType()).isEqualTo("text/plain");
+            assertThat(savedAttachment.description()).isNotBlank();
+            assertThat(savedAttachment.storage()).isEqualTo(ConnectorAttachmentStorage.S3_BUCKET);
+        }
     }
 
-    @Test
-    void should_return_null_when_searching_unknown_attachment_by_identifier_from_database() {
-        var attachment = MessageAttachmentTestFixtures.createAttachment();
+    @Nested
+    @DisplayName("find by identifier")
+    class FindByIdentifier {
+        @Test
+        void should_find_the_attachment() {
+            var attachment = MessageAttachmentTestFixtures.createAttachment();
+            repository.save(attachment);
 
-        var foundAttachment = this.repository.findByIdentifier(attachment.identifier());
+            var foundAttachment = repository.findByIdentifier(attachment.identifier());
 
-        assertThat(foundAttachment).isNull();
+            assertThat(foundAttachment).isNotNull();
+            assertThat(foundAttachment.identifier()).isEqualTo(attachment.identifier());
+        }
+
+        @Test
+        void should_return_null_when_the_identifier_is_unknown() {
+            var attachment = MessageAttachmentTestFixtures.createAttachment();
+
+            var foundAttachment = repository.findByIdentifier(attachment.identifier());
+
+            assertThat(foundAttachment).isNull();
+        }
+
+        @Test
+        void should_throw_when_the_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByIdentifier(null)
+            );
+        }
     }
 
-    @Test
-    void should_throw_null_pointer_exception_when_searching_attachment_by_null_identifier_from_database() {
-        assertThrows(
-            NullPointerException.class, () -> this.repository.findByIdentifier(null)
-        );
+    @Nested
+    @DisplayName("find all")
+    class FindAll {
+        @Test
+        void should_return_all_the_attachments() {
+            var attachment = MessageAttachmentTestFixtures.createAttachment();
+            repository.save(attachment);
+
+            var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
+            var attachments = repository.findAll(pageRequest);
+
+            assertThat(attachments).isNotNull();
+            assertThat(attachments.content()).hasSize(1);
+            assertThat(attachments.size()).isEqualTo(1);
+            assertThat(attachments.totalElements()).isEqualTo(1L);
+            assertThat(attachments.totalPages()).isEqualTo(1);
+        }
     }
 
-    // finding all
+    @Nested
+    @DisplayName("attach to message")
+    class AttachToMessage {
+        @Test
+        @WithMessageAndAttachmentData
+        void should_attach_the_message_to_the_attachment() {
+            repository.attachToMessage(
+                "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file",
+                MESSAGE_ID
+            );
+        }
 
-    @Test
-    void should_find_all_attachments_successfully_from_database() {
-        var attachment = MessageAttachmentTestFixtures.createAttachment();
-        this.repository.save(attachment);
+        @Test
+        @WithMessageAndAttachmentData
+        void should_fail_when_the_attachment_is_already_attached() {
+            assertThrows(
+                RuntimeException.class,
+                () -> repository.attachToMessage(
+                    "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
+                    MESSAGE_ID
+                )
+            );
+        }
 
-        var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
-        var attachments = this.repository.findAll(pageRequest);
+        @Test
+        void should_throw_when_the_message_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.attachToMessage(
+                    "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
+                    null
+                )
+            );
+        }
 
-        assertThat(attachments).isNotNull();
-        assertThat(attachments.content()).hasSize(1);
-        assertThat(attachments.size()).isEqualTo(1);
-        assertThat(attachments.totalElements()).isEqualTo(1L);
-        assertThat(attachments.totalPages()).isEqualTo(1);
-    }
+        @Test
+        void should_throw_when_the_attachment_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.attachToMessage(
+                    null,
+                    "e4d9a3a5-42e8-4eeb-9236-678ecfbc0eb4"
+                )
+            );
+        }
 
-    // attach to message
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/attachment.sql")
-    void should_attach_a_message_to_an_attachment_successfully_in_database() {
-        repository.attachToMessage(
-            "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file",
-            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
-        );
-    }
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/attachment.sql")
-    void should_fail_to_attach_a_message_to_an_attachment_if_it_has_already_been_attached_in_database() {
-        assertThrows(
-            RuntimeException.class,
-            () -> repository.attachToMessage(
-                "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
-                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_attaching_a_message_to_an_attachment_with_a_null_message_identifier_in_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> repository.attachToMessage(
-                "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
-                null
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_attaching_a_message_to_an_attachment_with_a_null_attachment_identifier_in_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> repository.attachToMessage(
-                null,
-                "e4d9a3a5-42e8-4eeb-9236-678ecfbc0eb4"
-            )
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_attaching_a_message_to_an_attachment_with_a_null_message_and_attachment_identifiers_in_database() {
-        assertThrows(
-            NullPointerException.class,
-            () -> repository.attachToMessage(
-                null,
-                null
-            )
-        );
+        @Test
+        void should_throw_when_both_identifiers_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.attachToMessage(null, null)
+            );
+        }
     }
 }

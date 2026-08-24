@@ -13,19 +13,19 @@ package eu.ecodex.connector.rest.admin.message;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorRetrieveMessageTransportStepsIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegrationTest {
     @Autowired
@@ -38,18 +38,20 @@ public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegratio
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/attachment.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql"
     })
-    void should_retrieve_a_connector_messages_transport_steps_successfully() {
+    void should_retrieve_transport_steps_for_connector_message() {
         var messageId = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
         apiClient.get()
                  .uri(buildUrl(messageId))
@@ -64,12 +66,12 @@ public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegratio
                      assertThat(step.transportedMessageIdentifier()).isEqualTo(messageId);
                      assertThat(step.numberOfAttempts()).isEqualTo(1);
                      assertThat(step.status()).isEqualTo("SUBMITTED");
-                     assertThat(step.messageType()).isEqualTo("EVIDENCE");
+                     assertThat(step.messageType()).isEqualTo("BUSINESS");
                  });
     }
 
     @Test
-    void should_throw_404_not_found_when_retrieving_a_non_existing_connector_message_transport_steps() {
+    void should_return_404_when_retrieving_transport_steps_for_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient.get()
                  .uri(buildUrl(messageId))

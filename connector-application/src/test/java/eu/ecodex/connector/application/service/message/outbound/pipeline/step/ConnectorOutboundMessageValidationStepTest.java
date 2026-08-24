@@ -15,8 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,29 +29,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorOutboundMessageValidationStep")
 public class ConnectorOutboundMessageValidationStepTest {
     @Mock
     private ConnectorMessagePartiesVerifier partiesVerifierService;
 
     @InjectMocks
-    private ConnectorOutboundMessageValidationStep outboundMessageValidationStep;
+    private ConnectorOutboundMessageValidationStep validationStep;
 
     @Test
-    void should_execute_outbound_message_validation_successfully() {
-        var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_verify_the_parties_and_return_the_message_unchanged() {
+        var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
 
         doNothing().when(partiesVerifierService).verify(any());
 
-        var outputMessage = outboundMessageValidationStep.execute(outboundMessage);
+        var outputMessage = validationStep.execute(outboundMessage);
 
         assertThat(outputMessage).isNotNull();
         assertThat(outputMessage).isEqualTo(outboundMessage);
     }
 
     @Test
-    void should_throw_exception_when_message_is_null() {
+    void should_fail_when_the_message_is_null() {
         assertThrows(
-            NullPointerException.class, () -> outboundMessageValidationStep.execute(null)
+            NullPointerException.class,
+            () -> validationStep.execute(null)
         );
     }
 }

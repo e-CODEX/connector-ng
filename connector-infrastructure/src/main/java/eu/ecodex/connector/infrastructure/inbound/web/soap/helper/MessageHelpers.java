@@ -10,8 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.soap.helper;
 
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageCommand;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -21,7 +22,6 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
@@ -31,7 +31,6 @@ import eu.ecodex.connector.domain.transition.DomibusConnectorMessageConfirmation
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDetailsType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
-import java.util.ArrayList;
 import java.util.List;
 import javax.xml.transform.stream.StreamSource;
 import lombok.experimental.UtilityClass;
@@ -60,22 +59,17 @@ public class MessageHelpers {
             && isEmptyConfirmationPayload(confirmations.getFirst());
     }
 
-    public static ConnectorMessage toDomain(
+    public static ConnectorOutboundBusinessMessageCommand toBusinessCommand(
         DomibusConnectorMessageType message,
         List<String> attachments,
         String businessContentAttachmentIdentifier,
         String businessDocumentAttachmentIdentifier,
         String backendClientName
-    ) throws Exception {
-        if (isEvidenceTriggerRequest(message)) {
-            return toEvidenceTriggerDomain(message, backendClientName);
-        }
-
+    ) {
         var details = message.getMessageDetails();
-
         var incomingBusinessContent = message.getMessageContent();
 
-        return ConnectorMessage
+        return ConnectorOutboundBusinessMessageCommand
             .builder()
             .backendMessageIdentifier(details.getBackendMessageId())
             .backendName(backendClientName)
@@ -92,38 +86,19 @@ public class MessageHelpers {
             .build();
     }
 
-    private static ConnectorMessage toEvidenceTriggerDomain(
+    public static ConnectorOutboundEvidenceMessageCommand toEvidenceTriggerCommand(
         DomibusConnectorMessageType message,
         String backendClientName) {
         var details = message.getMessageDetails();
         var confirmation = message.getMessageConfirmations().getFirst();
 
-        var triggerEvidence = ConnectorMessageEvidence.builder()
-                                                      .type(ConnectorEvidenceType.valueOf(
-                                                          confirmation.getConfirmationType()
-                                                                      .value()))
-                                                      .content(null)
-                                                      .build();
-
-        var transportedEvidences = new ArrayList<ConnectorMessageEvidence>();
-        transportedEvidences.add(triggerEvidence);
-
-        return ConnectorMessage
+        return ConnectorOutboundEvidenceMessageCommand
             .builder()
-            .backendMessageIdentifier(details.getBackendMessageId())
+            .evidenceType(ConnectorEvidenceType.valueOf(confirmation.getConfirmationType().value()))
             .backendName(backendClientName)
-            .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
-            .as4Properties(toTriggerAS4Properties(details))
-            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-            .transportedEvidences(transportedEvidences)
+            .backendMessageIdentifier(details.getBackendMessageId())
+            .referenceToIdentifier(details.getRefToMessageId())
             .build();
-    }
-
-    private static ConnectorMessageAS4Properties toTriggerAS4Properties(
-        DomibusConnectorMessageDetailsType details) {
-        return toAS4Properties(details).toBuilder()
-                                       .referenceToIdentifier(details.getRefToMessageId())
-                                       .build();
     }
 
     public static ConnectorMessageAS4Properties toAS4Properties(
@@ -176,8 +151,8 @@ public class MessageHelpers {
             .detachedSignature(toDetachedSignature(document.getDetachedSignature()))
             .aesType(ConnectorBusinessDocumentAESType.from(
                          document.getAesType() != null
-                             ? document.getAesType().value()
-                             : null
+                         ? document.getAesType().value()
+                         : null
                      )
             )
             .build();

@@ -15,11 +15,14 @@ import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.Connector
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 @SuppressWarnings("DataFlowIssue")
+@DisplayName("ConnectorJmsGatewayMessageAcknowledgementListener")
 public class ConnectorJmsGatewayMessageAcknowledgementListenerTest extends BaseJmsMessageTest {
     private static final String MESSAGE_ID = "msg-001";
 
@@ -33,48 +36,74 @@ public class ConnectorJmsGatewayMessageAcknowledgementListenerTest extends BaseJ
     @InjectMocks
     private ConnectorJmsGatewayMessageAcknowledgementListener listener;
 
-    @Test
-    void should_throw_null_pointer_exception_if_the_jms_message_is_null() {
-        assertThatThrownBy(() -> listener.handle(null))
-            .isInstanceOf(NullPointerException.class);
+    @Nested
+    @DisplayName("invalid JMS message")
+    class InvalidMessages {
+        @Test
+        void should_reject_null_jms_message() {
+            assertThatThrownBy(() -> listener.handle(null))
+                .isInstanceOf(NullPointerException.class);
 
-        verifyNoInteractions(transportStepRepository, acknowledgeMessageTransportStep);
+            verifyNoInteractions(
+                transportStepRepository,
+                acknowledgeMessageTransportStep
+            );
+        }
+
+        @Test
+        void should_fail_when_message_identifier_is_missing() throws JMSException {
+            when(mapMessage.getStringProperty("messageId")).thenReturn(null);
+
+            assertThatThrownBy(() -> listener.handle(mapMessage))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Message identifier not found");
+
+            verifyNoInteractions(
+                transportStepRepository,
+                acknowledgeMessageTransportStep
+            );
+        }
     }
 
-    @Test
-    void should_throw_exception_if_the_connector_message_identifier_is_null() throws JMSException {
-        when(mapMessage.getStringProperty("messageId")).thenReturn(null);
+    @Nested
+    @DisplayName("gateway acknowledgements")
+    class GatewayAcknowledgement {
+        @Test
+        void should_acknowledge_gateway_reply_successfully() throws JMSException {
+            when(mapMessage.getStringProperty("messageId"))
+                .thenReturn(MESSAGE_ID);
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any()))
+                .thenReturn(ConnectorMessageTransportStep.builder().build());
+            doNothing()
+                .when(acknowledgeMessageTransportStep)
+                .execute(any(), any());
 
-        assertThatThrownBy(() -> listener.handle(mapMessage))
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Message identifier not found");
+            listener.handle(mapMessage);
 
-        verifyNoInteractions(transportStepRepository, acknowledgeMessageTransportStep);
+            verify(transportStepRepository)
+                .findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID);
+            verify(acknowledgeMessageTransportStep)
+                .execute(any(), any());
+        }
     }
 
-    @Test
-    void should_handle_message_submission_to_gateway_reply_successfully() throws JMSException {
-        when(mapMessage.getStringProperty("messageId")).thenReturn(MESSAGE_ID);
-        when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any()))
-            .thenReturn(ConnectorMessageTransportStep.builder().build());
-        doNothing().when(acknowledgeMessageTransportStep).execute(any(), any());
+    @Nested
+    @DisplayName("Jms failures")
+    class JmsFailures {
+        @Test
+        void should_fail_when_broker_is_unavailable() throws JMSException {
+            when(mapMessage.getStringProperty("messageId"))
+                .thenThrow(new JMSException("broker unavailable"));
 
-        listener.handle(mapMessage);
+            assertThatThrownBy(() -> listener.handle(mapMessage))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Failed to parse Domibus reply")
+                .hasCauseInstanceOf(JMSException.class);
 
-        verify(transportStepRepository).findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID);
-        verify(acknowledgeMessageTransportStep).execute(any(), any());
-    }
-
-    @Test
-    void should_throw_exception_if_the_broker_is_unavailable() throws JMSException {
-        when(mapMessage.getStringProperty("messageId"))
-            .thenThrow(new JMSException("broker unavailable"));
-
-        assertThatThrownBy(() -> listener.handle(mapMessage))
-            .isInstanceOf(RuntimeException.class)
-            .hasMessageContaining("Failed to parse Domibus reply")
-            .hasCauseInstanceOf(JMSException.class);
-
-        verifyNoInteractions(transportStepRepository, acknowledgeMessageTransportStep);
+            verifyNoInteractions(
+                transportStepRepository,
+                acknowledgeMessageTransportStep
+            );
+        }
     }
 }

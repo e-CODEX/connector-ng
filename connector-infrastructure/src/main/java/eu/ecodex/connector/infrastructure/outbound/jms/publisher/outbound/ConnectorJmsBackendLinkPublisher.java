@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.jms.publisher.outbound;
 
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import lombok.extern.slf4j.Slf4j;
@@ -19,11 +19,12 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Backend Implementation of the {@link ConnectorEventPublisher}.
+ * Backend Implementation of the {@link ConnectorMessageEventPublisher}.
  */
 @Slf4j
 @Component("connectorJmsBackendLinkPublisher")
-public class ConnectorJmsBackendLinkPublisher implements ConnectorEventPublisher {
+public class ConnectorJmsBackendLinkPublisher
+    implements ConnectorMessageEventPublisher<ConnectorMessage> {
     private final JmsTemplate jmsTemplate;
     private final ConnectorQueueProperties queueProperties;
 

@@ -36,7 +36,7 @@ public class ConnectorListTransportStepsServiceTest {
     private ConnectorListTransportStepsService listTransportStepsService;
 
     @Test
-    void should_throw_exception_if_page_request_is_null() {
+    void should_fail_when_the_page_request_is_null() {
         assertThrows(
             NullPointerException.class,
             () -> listTransportStepsService.execute(null, null, null)
@@ -44,7 +44,7 @@ public class ConnectorListTransportStepsServiceTest {
     }
 
     @Test
-    void should_list_paginated_transport_steps_successfully() {
+    void should_return_paginated_transport_steps() {
         var pageResult = ConnectorPageResult.of(
             List.of(TransportStepFixtures.createTransportStep()),
             1,

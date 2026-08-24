@@ -12,27 +12,29 @@ package eu.ecodex.connector.infrastructure.dss;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorDssServiceFactory")
 public class ConnectorDssServiceFactoryTest extends BaseDssTest {
     @Autowired
     private ConnectorDssServiceFactory serviceFactory;
 
     @Test
-    void should_create_pades_service_successfully() {
+    void should_create_pades_service() {
         var padesService = serviceFactory.createPadESSService();
         assertThat(padesService).isNotNull();
     }
 
     @Test
-    void should_create_xades_service_successfully() {
+    void should_create_xades_service() {
         var xadesService = serviceFactory.createXadESSService();
         assertThat(xadesService).isNotNull();
     }
 
     @Test
-    void should_create_asic_with_xades_service_successfully() {
+    void should_create_asic_with_xades_service() {
         var asicWithXAdESService = serviceFactory.createAsicWithXAdESService();
         assertThat(asicWithXAdESService).isNotNull();
     }

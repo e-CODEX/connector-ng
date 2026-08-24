@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.port.api.link.ConnectorLinkPartnerVerifie
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkTransportStrategy;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Implementation of the {@link ConnectorLinkSubmitter} interface responsible for handling the
- * submission of {@link ConnectorMessage} instances to appropriate connector link partners.
+ * submission of {@link ConnectorBusinessMessage} instances to appropriate connector link partners.
  *
  * <p>This service processes connector messages by determining the target link partner based on the
  * message's direction and associated partner information. It retrieves the corresponding

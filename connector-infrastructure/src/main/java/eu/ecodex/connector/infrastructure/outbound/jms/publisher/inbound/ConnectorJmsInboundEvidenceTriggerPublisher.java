@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.jms.publisher.inbound;
 
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -23,7 +23,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component("connectorJmsInboundEvidenceTriggerPublisher")
-public class ConnectorJmsInboundEvidenceTriggerPublisher implements ConnectorEventPublisher {
+public class ConnectorJmsInboundEvidenceTriggerPublisher
+    implements ConnectorMessageEventPublisher<ConnectorEvidenceMessage> {
     private final JmsTemplate jmsTemplate;
     private final ConnectorQueueProperties queueProperties;
 
@@ -35,7 +36,7 @@ public class ConnectorJmsInboundEvidenceTriggerPublisher implements ConnectorEve
     }
 
     @Override
-    public void publish(@NonNull ConnectorMessage message) {
+    public void publish(@NonNull ConnectorEvidenceMessage message) {
         log.info(
             "Submitting gateway evidence trigger message [{}] to processing queue",
             message.identifier()

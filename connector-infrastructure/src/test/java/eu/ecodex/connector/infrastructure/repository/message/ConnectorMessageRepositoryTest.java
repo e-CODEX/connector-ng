@@ -13,8 +13,7 @@ package eu.ecodex.connector.infrastructure.repository.message;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.AS4PropertiesTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
@@ -35,7 +34,8 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DisplayName("ConnectorMessageRepository")
 public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
-    private static final String MESSAGE_ID = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+    private static final String MESSAGE_ID = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector"
+        + ".ecodex.eu";
 
     @Autowired
     private ConnectorMessageRepository repository;
@@ -71,6 +71,8 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
         "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
         "classpath:sql/evidence.sql",
     })
     private @interface WithMessageData {
@@ -87,92 +89,20 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
         }
 
         @Test
-        void should_fail_if_the_business_domain_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .businessDomainIdentifier(null)
-                                             .build();
-            assertThrows(
-                IllegalArgumentException.class, () -> repository.save(message)
-            );
-        }
-
-        @Test
-        void should_fail_if_the_identifier_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .identifier(null)
-                                             .build();
-            assertThrows(
-                IllegalArgumentException.class, () -> repository.save(message)
-            );
-        }
-
-        @Test
-        void should_fail_if_the_as4_properties_service_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .as4Properties(
-                                                 AS4PropertiesTestFixtures.createAS4PropertiesWithoutService()
-                                             )
-                                             .build();
-            assertThrows(
-                IllegalArgumentException.class, () -> repository.save(message)
-            );
-        }
-
-        @Test
-        void should_fail_if_the_as4_properties_action_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .as4Properties(
-                                                 AS4PropertiesTestFixtures.createAS4PropertiesWithoutAction()
-                                             )
-                                             .build();
-            assertThrows(
-                IllegalArgumentException.class, () -> repository.save(message)
-            );
-        }
-
-        @Test
-        void should_fail_if_the_as4_properties_from_party_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .as4Properties(
-                                                 AS4PropertiesTestFixtures.createAS4PropertiesWithoutFromParty()
-                                             )
-                                             .build();
-            assertThrows(
-                IllegalArgumentException.class, () -> repository.save(message)
-            );
-        }
-
-        @Test
-        void should_fail_if_the_as4_properties_to_party_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .as4Properties(
-                                                 AS4PropertiesTestFixtures.createAS4PropertiesWithoutToParty()
-                                             )
-                                             .build();
-            assertThrows(
-                IllegalArgumentException.class, () -> repository.save(message)
-            );
-        }
-
-        @Test
         @WithReferenceData
+        @Sql({
+            "classpath:sql/attachment2.sql",
+        })
         void should_save_the_message_successfully() {
-            var message = MessageTestFixtures.createOutboundStagingBusinessMessage()
-                                             .toBuilder()
-                                             .identifier(
-                                                 "2adede33-41cf-4509-b0c1-0c83ad96eed7@connector.ecodex.eu")
-                                             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                                             .build();
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
 
             var saved = repository.save(message);
 
             assertThat(saved).isNotNull();
+            assertThat(saved.identifier()).isNotNull();
+            assertThat(saved.as4Properties()).isNotNull();
+            assertThat(saved.businessContent()).isNotNull();
+            assertThat(saved.direction()).isNotNull();
         }
     }
 
@@ -462,6 +392,61 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
                 () -> repository.findByIdentifier(null)
             );
         }
+    }
+
+    @Nested
+    @DisplayName("find referenced business message")
+    class FindReferencedBusinessMessage {
+        @Test
+        @WithMessageData
+        void should_return_the_referenced_business_message_using_backend_identifier() {
+            var message = repository.findReferencedBusinessMessage(
+                "1f30e203-f89c-4568-a076-469c4f8b35a5",
+                ConnectorMessageDirection.BACKEND_TO_GATEWAY
+            );
+
+            assertThat(message).isNotNull();
+            assertThat(message.backendMessageIdentifier()).isEqualTo(
+                "1f30e203-f89c-4568-a076-469c4f8b35a5");
+        }
+
+        @Test
+        @WithMessageData
+        void should_return_the_referenced_business_message_using_ebms_identifier() {
+            var message = repository.findReferencedBusinessMessage(
+                "25873d6d-cfa8-4983-b39a-ffe38860872e@connector.ecodex.eu",
+                ConnectorMessageDirection.BACKEND_TO_GATEWAY
+            );
+
+            assertThat(message).isNotNull();
+            assertThat(message.as4Properties().ebmsMessageIdentifier()).isEqualTo(
+                "25873d6d-cfa8-4983-b39a-ffe38860872e@connector.ecodex.eu");
+        }
+
+        @Test
+        @WithMessageData
+        void should_return_the_referenced_business_message_using_connector_identifier() {
+            var message = repository.findReferencedBusinessMessage(
+                "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu",
+                ConnectorMessageDirection.BACKEND_TO_GATEWAY
+            );
+
+            assertThat(message).isNotNull();
+            assertThat(message.identifier()).isEqualTo(
+                "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu");
+        }
+
+        @Test
+        @WithMessageData
+        void should_return_null_if_the_referenced_business_message_is_not_found() {
+            var message = repository.findReferencedBusinessMessage(
+                "non-existing-message@connector.ecodex.eu",
+                ConnectorMessageDirection.BACKEND_TO_GATEWAY
+            );
+
+            assertThat(message).isNull();
+        }
+
     }
 
     @Nested

@@ -12,7 +12,8 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ import org.springframework.stereotype.Component;
  *
  * <p>Key responsibilities:
  * <ul>
- *     <li> Ensures that the provided {@link ConnectorMessage} contains exactly one business
+ *     <li> Ensures that the provided {@link ConnectorBusinessMessage} contains exactly one business
  *     evidence before processing.
  *     <li> Creates a confirmation message based on the submission evidence contained in the
  *     original message.
@@ -36,7 +37,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageConfirmationStep implements ConnectorMessageStep {
+public class ConnectorOutboundMessageConfirmationStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> {
     private final ConnectorEvidenceMessageCreator evidenceMessageCreator;
 
     public ConnectorOutboundMessageConfirmationStep(
@@ -45,7 +47,8 @@ public class ConnectorOutboundMessageConfirmationStep implements ConnectorMessag
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage submissionEvidenceMessage) {
+    public ConnectorEvidenceMessage execute(
+        @NonNull ConnectorBusinessMessage submissionEvidenceMessage) {
         log.debug(
             "Processing outbound message with submission confirmation message "
                 + "[{}]", submissionEvidenceMessage.identifier()

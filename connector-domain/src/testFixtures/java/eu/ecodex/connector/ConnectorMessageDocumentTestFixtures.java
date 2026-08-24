@@ -18,7 +18,7 @@ public class ConnectorMessageDocumentTestFixtures {
     public static ConnectorMessageBusinessDocument createSignatureBasedDocument() {
         return ConnectorMessageBusinessDocument
                 .builder()
-                .attachment(MessageAttachmentTestFixtures.createAttachment())
+                .attachment(MessageAttachmentTestFixtures.createBusinessDocumentAttachment())
                 .aesType(ConnectorBusinessDocumentAESType.SIGNATURE_BASED)
                 .detachedSignature(DetachedSignatureTestFixtures.createDetachedSignature())
                 .build();
@@ -27,7 +27,7 @@ public class ConnectorMessageDocumentTestFixtures {
     public static ConnectorMessageBusinessDocument createAuthenticationBasedDocument() {
         return ConnectorMessageBusinessDocument
                 .builder()
-                .attachment(MessageAttachmentTestFixtures.createAttachment())
+                .attachment(MessageAttachmentTestFixtures.createBusinessDocumentAttachment())
                 .aesType(ConnectorBusinessDocumentAESType.AUTHENTICATION_BASED)
                 .detachedSignature(DetachedSignatureTestFixtures.createDetachedSignature())
                 .build();
@@ -36,14 +36,7 @@ public class ConnectorMessageDocumentTestFixtures {
     public static ConnectorMessageBusinessDocument createDocumentWithoutSignature() {
         return ConnectorMessageBusinessDocument
                 .builder()
-                .attachment(MessageAttachmentTestFixtures.createAttachment())
-                .build();
-    }
-
-    public static ConnectorMessageBusinessDocument createSavedDocument() {
-        return createSignatureBasedDocument()
-                .toBuilder()
-                .uuid("05768e36-dc7d-48e4-a403-1eceeecc1788")
+                .attachment(MessageAttachmentTestFixtures.createBusinessDocumentAttachment())
                 .build();
     }
 }

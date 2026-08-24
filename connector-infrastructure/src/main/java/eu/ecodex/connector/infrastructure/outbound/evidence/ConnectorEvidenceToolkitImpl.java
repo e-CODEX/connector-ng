@@ -15,7 +15,7 @@ import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.infrastructure.outbound.evidence.builder.ConnectorEvidenceBuilder;
@@ -33,7 +33,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 /**
- * Domain implementation that produces signed ETSI REM evidence XML for a {@link ConnectorMessage}.
+ * Domain implementation that produces signed ETSI REM evidence XML for a
+ * {@link ConnectorBusinessMessage}.
  *
  * <p>Maps each {@link ConnectorEvidenceType} to
  * the corresponding REM chain step, reuses prior evidences from {@code message.evidences()} where
@@ -72,7 +73,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     @Override
     public ConnectorMessageEvidence create(
-        @NonNull ConnectorMessage message,
+        @NonNull ConnectorBusinessMessage message,
         @NonNull ConnectorEvidenceType evidenceType,
         @Nullable ConnectorMessageRejectionReason rejectionReason) {
         byte[] content;
@@ -90,7 +91,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private byte[] generateEvidenceBytes(
         ConnectorEvidenceType type,
-        ConnectorMessage message,
+        ConnectorBusinessMessage message,
         ConnectorMessageRejectionReason rejectionReason)
         throws ConnectorEvidenceBuilderException {
 
@@ -107,7 +108,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         };
     }
 
-    private byte[] createSubmissionAcceptance(ConnectorMessage message)
+    private byte[] createSubmissionAcceptance(ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         String hash = checkPayloadAndBuildHashHex(message);
         return createSubmissionAcceptanceRejection(true, null, message, hash);
@@ -115,7 +116,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private byte[] createSubmissionRejection(
         ConnectorMessageRejectionReason rejectionReason,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
         var event = mapRejectionReason(rejectionReason);
@@ -127,19 +128,19 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         var event = new EventReasonType();
         event.setCode(rejectionReason.getErrorCode());
         var details = StringUtils.isNotBlank(rejectionReason.getReason())
-            ? rejectionReason.getReason()
-            : rejectionReason.name();
+                      ? rejectionReason.getReason()
+                      : rejectionReason.name();
         event.setDetails(details);
         return event;
     }
 
     private byte[] requirePriorEvidence(
         ConnectorEvidenceType requiredType,
-        ConnectorMessage message) {
+        ConnectorBusinessMessage message) {
         return findPriorEvidence(requiredType, message);
     }
 
-    private byte[] createRelayRemmdAcceptance(ConnectorMessage message)
+    private byte[] createRelayRemmdAcceptance(ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         return evidenceBuilder.createRelayREMMDAcceptanceRejection(
             true,
@@ -154,7 +155,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private byte[] createRelayRemmdRejection(
         ConnectorMessageRejectionReason rejectionReason,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
         return evidenceBuilder.createRelayREMMDAcceptanceRejection(
@@ -165,7 +166,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         );
     }
 
-    private byte[] createDeliveryEvidence(ConnectorMessage message)
+    private byte[] createDeliveryEvidence(ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         return evidenceBuilder.createDeliveryNonDeliveryToRecipient(
             true,
@@ -180,7 +181,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private byte[] createNonDeliveryEvidence(
         ConnectorMessageRejectionReason rejectionReason,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
         return evidenceBuilder.createDeliveryNonDeliveryToRecipient(
@@ -191,7 +192,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         );
     }
 
-    private byte[] createRetrievalEvidence(ConnectorMessage message)
+    private byte[] createRetrievalEvidence(ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         return evidenceBuilder.createRetrievalNonRetrievalByRecipient(
             true,
@@ -206,7 +207,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private byte[] createNonRetrievalEvidence(
         ConnectorMessageRejectionReason rejectionReason,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
         return evidenceBuilder.createRetrievalNonRetrievalByRecipient(
@@ -219,7 +220,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private byte[] createRelayRemmdFailure(
         ConnectorMessageRejectionReason rejectionReason,
-        ConnectorMessage message)
+        ConnectorBusinessMessage message)
         throws ConnectorEvidenceBuilderException {
         requireRejectionReason(rejectionReason);
         return evidenceBuilder.createRelayREMMDFailure(
@@ -235,7 +236,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     private byte[] createSubmissionAcceptanceRejection(
         boolean isAcceptance,
         EventReasonType eventReason,
-        ConnectorMessage message,
+        ConnectorBusinessMessage message,
         String hashHex)
         throws ConnectorEvidenceBuilderException {
         var issuerDetails = buildEDeliveryDetails();
@@ -254,7 +255,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         }
     }
 
-    private String checkPayloadAndBuildHashHex(ConnectorMessage message) {
+    private String checkPayloadAndBuildHashHex(ConnectorBusinessMessage message) {
         var businessContent = message.businessContent();
 
         if (businessContent == null) {
@@ -280,7 +281,9 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
         }
     }
 
-    private byte[] findPriorEvidence(ConnectorEvidenceType requiredType, ConnectorMessage message) {
+    private byte[] findPriorEvidence(
+        ConnectorEvidenceType requiredType,
+        ConnectorBusinessMessage message) {
         var evidences = message.evidences();
 
         if (evidences == null) {
@@ -299,7 +302,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
 
     private String missingPredecessorMessage(
         ConnectorEvidenceType requiredType,
-        ConnectorMessage message) {
+        ConnectorBusinessMessage message) {
         return "message [%s] has no prior evidence of type [%s] required for the next step"
             .formatted(message.identifier(), requiredType);
     }
@@ -325,7 +328,7 @@ public class ConnectorEvidenceToolkitImpl implements ConnectorEvidenceToolkit {
     }
 
     private ConnectorEvidenceMessageDetails buildMessageDetails(
-        ConnectorMessage message,
+        ConnectorBusinessMessage message,
         String hashHex) {
         var messageDetails = new ConnectorEvidenceMessageDetails();
         messageDetails.setHashAlgorithm(hashValueBuilder.getAlgorithm());

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.entity.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.ConnectorBusinessDomainEntity;
@@ -42,7 +42,7 @@ import lombok.Setter;
 
 /**
  * Represents the Connector Message entity used to manage and store information about connector
- * {@link ConnectorMessage} within the system.
+ * {@link ConnectorBusinessMessage} within the system.
  */
 @Entity
 @Getter
@@ -98,6 +98,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @JoinColumn(name = "BUSINESS_DOMAIN_ID", nullable = false)
     private ConnectorBusinessDomainEntity businessDomain;
 
+    @Setter
     @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private ConnectorMessageBusinessContentEntity businessContent;
 

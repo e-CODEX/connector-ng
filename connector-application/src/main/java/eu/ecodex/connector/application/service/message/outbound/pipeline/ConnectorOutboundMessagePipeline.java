@@ -13,6 +13,8 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline;
 import eu.ecodex.connector.application.exception.ConnectorGatewaySubmissionException;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.util.ConnectorBusinessDomainUtil;
@@ -32,14 +34,21 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipeline {
-    private final ConnectorMessageStep validationStep;
-    private final ConnectorMessageStep securityStep;
-    private final ConnectorMessageStep gatewayValidationStep;
-    private final ConnectorMessageStep ebmsIdStep;
-    private final ConnectorMessageStep acceptanceStep;
-    private final ConnectorMessageStep confirmationStep;
-    private final ConnectorMessageStep rejectionStep;
-    private final ConnectorMessageStep linkSubmissionStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        validationStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        securityStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        gatewayValidationStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        ebmsIdStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        acceptanceStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage>
+        confirmationStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage>
+        rejectionStep;
+    private final ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep;
 
     /**
      * Constructor for the ConnectorOutboundMessagePipeline class.
@@ -62,14 +71,15 @@ public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipelin
      *                              the appropriate endpoint or next stage; must not be null.
      */
     public ConnectorOutboundMessagePipeline(
-        ConnectorMessageStep validationStep,
-        ConnectorMessageStep securityStep,
-        ConnectorMessageStep gatewayValidationStep,
-        ConnectorMessageStep ebmsIdStep,
-        ConnectorMessageStep acceptanceStep,
-        ConnectorMessageStep confirmationStep,
-        ConnectorMessageStep rejectionStep,
-        ConnectorMessageStep linkSubmissionStep) {
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> validationStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> securityStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+            gatewayValidationStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> ebmsIdStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> acceptanceStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> confirmationStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> rejectionStep,
+        ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep) {
         this.validationStep = validationStep;
         this.securityStep = securityStep;
         this.gatewayValidationStep =
@@ -83,8 +93,10 @@ public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipelin
     }
 
     @Override
-    public void process(@NonNull ConnectorMessage message) {
-        log.info("Start processing outbound connector message: [{}]", message.identifier());
+    public void process(@NonNull ConnectorBusinessMessage message) {
+        log.info(
+            "Start processing outbound connector business message: [{}]", message.identifier()
+        );
 
         try {
             ConnectorBusinessDomainUtil.setCurrentBusinessDomain(

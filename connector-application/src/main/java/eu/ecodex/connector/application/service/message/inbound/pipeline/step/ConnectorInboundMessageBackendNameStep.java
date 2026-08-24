@@ -15,7 +15,7 @@ import eu.ecodex.connector.application.port.api.routing.ConnectorMessageRouter;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * {@link ConnectorMessageStep} responsible for resolving and assigning the backend name for an
- * inbound {@link ConnectorMessage}.
+ * inbound {@link ConnectorBusinessMessage}.
  *
  * <p>This step ensures that every inbound message is associated with the correct backend system.
  * If the backend name is already present on the message, the step skips processing. Otherwise, it
@@ -42,7 +42,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageStep {
+public class ConnectorInboundMessageBackendNameStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageRouter messageRoutingService;
 
@@ -61,12 +62,8 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage inboundMessage) {
         var identifier = inboundMessage.identifier();
-
-        if (identifier == null) {
-            throw new IllegalStateException("Message identifier is null");
-        }
 
         log.debug(
             "Processing inbound message [{}] backend name validation ",
@@ -114,7 +111,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
     }
 
     private String resolveBackendNameFromConversation(
-        ConnectorMessage inboundMessage, String conversationId) {
+        ConnectorBusinessMessage inboundMessage, String conversationId) {
         if (StringUtils.isEmpty(conversationId)) {
             return null;
         }
@@ -128,7 +125,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
 
         String backendName = conversationIdMessages
             .stream()
-            .map(ConnectorMessage::backendName)
+            .map(ConnectorBusinessMessage::backendName)
             .filter(StringUtils::isNotEmpty)
             .findAny()
             .orElse(null);
@@ -145,7 +142,7 @@ public class ConnectorInboundMessageBackendNameStep implements ConnectorMessageS
     }
 
     private String resolveBackendNameFromRouting(
-        ConnectorMessage inboundMessage,
+        ConnectorBusinessMessage inboundMessage,
         ConnectorBusinessDomainIdentifier businessDomainIdentifier,
         String defaultBackendName
     ) {

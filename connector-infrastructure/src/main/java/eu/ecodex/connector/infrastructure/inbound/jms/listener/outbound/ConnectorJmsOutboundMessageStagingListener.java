@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
 
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageStager;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -23,15 +23,16 @@ import org.springframework.transaction.annotation.Transactional;
  * JMS listener responsible for handling outbound message staging events.
  *
  * <p>This class implements {@link ConnectorEventHandler} and is triggered
- * asynchronously via a JMS queue when an outbound {@link ConnectorMessage} enters the staging
- * phase.
+ * asynchronously via a JMS queue when an outbound {@link ConnectorBusinessMessage} enters the
+ * staging phase.
  *
  * <p>The listener is expected to process the staged message and initiate
  * further outbound handling steps (e.g. validation, transformation, AS4 dispatch, etc.).
  */
 @Slf4j
 @Component
-public class ConnectorJmsOutboundMessageStagingListener implements ConnectorEventHandler {
+public class ConnectorJmsOutboundMessageStagingListener
+    implements ConnectorEventHandler<ConnectorBusinessMessage> {
     private final ConnectorOutboundMessageStager messageStager;
 
     public ConnectorJmsOutboundMessageStagingListener(
@@ -42,8 +43,8 @@ public class ConnectorJmsOutboundMessageStagingListener implements ConnectorEven
     @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.outbound-message-staging-queue}")
-    public void handle(@NonNull ConnectorMessage message) {
+    public void handle(@NonNull ConnectorBusinessMessage message) {
         log.info("Entering outbound message [{}] staging process", message.identifier());
-        messageStager.stage(message);
+        messageStager.execute(message);
     }
 }

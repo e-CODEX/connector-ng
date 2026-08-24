@@ -13,6 +13,8 @@ package eu.ecodex.connector.application.service.message.inbound.pipeline;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessagePipeline;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.util.ConnectorBusinessDomainUtil;
 import lombok.NonNull;
@@ -22,8 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Represents an inbound message processing pipeline for a connector system.
  *
- * <p>This class orchestrates the processing of inbound {@link ConnectorMessage} instances by
- * executing a predefined sequence of processing steps. The pipeline ensures that messages are
+ * <p>This class orchestrates the processing of inbound {@link ConnectorBusinessMessage} instances
+ * by executing a predefined sequence of processing steps. The pipeline ensures that messages are
  * validated, checked for security compliance, processed for acceptance, and submitted to their
  * intended backends or endpoints. In the event of processing failures, the pipeline also handles
  * non-delivery processing.
@@ -33,11 +35,15 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline {
-    private final ConnectorMessageStep backendNameStep;
-    private final ConnectorMessageStep acceptanceStep;
-    private final ConnectorMessageStep securityStep;
-    private final ConnectorMessageStep nonDeliveryStep;
-    private final ConnectorMessageStep linkSubmissionStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        backendNameStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage>
+        acceptanceStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage>
+        securityStep;
+    private final ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage>
+        nonDeliveryStep;
+    private final ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep;
 
     /**
      * Constructs an instance of {@code ConnectorInboundMessagePipeline} to facilitate the handling
@@ -54,11 +60,11 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
      *                           appropriate endpoint or next stage; must not be null.
      */
     public ConnectorInboundMessagePipeline(
-        ConnectorMessageStep backendNameStep,
-        ConnectorMessageStep acceptanceStep,
-        ConnectorMessageStep securityStep,
-        ConnectorMessageStep nonDeliveryStep,
-        ConnectorMessageStep linkSubmissionStep) {
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> backendNameStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> acceptanceStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> securityStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> nonDeliveryStep,
+        ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep) {
         this.backendNameStep = backendNameStep;
         this.acceptanceStep = acceptanceStep;
         this.securityStep = securityStep;
@@ -67,7 +73,7 @@ public class ConnectorInboundMessagePipeline implements ConnectorMessagePipeline
     }
 
     @Override
-    public void process(@NonNull ConnectorMessage message) {
+    public void process(@NonNull ConnectorBusinessMessage message) {
         log.info("Start processing inbound message: [{}]", message.identifier());
 
         try {

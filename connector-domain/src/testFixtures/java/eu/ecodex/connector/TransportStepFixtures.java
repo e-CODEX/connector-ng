@@ -32,16 +32,16 @@ public class TransportStepFixtures {
                 .builder()
                 .identifier(TRANSPORT_STEP_ID)
                 .transportedMessageIdentifier(
-                        MessageTestFixtures.createEvidenceMessage().identifier()
+                    BusinessMessageTestFixtures.createEvidenceMessage().identifier()
                 )
                 .remoteSystemIdentifier(
-                        MessageTestFixtures.createEvidenceMessage().backendMessageIdentifier()
+                    BusinessMessageTestFixtures.createEvidenceMessage().backendMessageIdentifier()
                 )
                 .numberOfAttempts(0)
                 .status(ConnectorMessageTransportStatus.SUBMITTED)
                 .statuses(statuses)
                 .linkPartnerName("backend_alice")
-                .transportedMessage(MessageTestFixtures.createEvidenceMessage())
+                .transportedMessage(BusinessMessageTestFixtures.createEvidenceMessage())
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();

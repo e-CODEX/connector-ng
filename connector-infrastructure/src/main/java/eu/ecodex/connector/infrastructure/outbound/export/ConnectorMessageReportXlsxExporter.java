@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
+import lombok.NonNull;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -118,7 +119,7 @@ public class ConnectorMessageReportXlsxExporter implements ConnectorMessageRepor
     }
 
     @Override
-    public byte[] export(ConnectorMessageReportSummary summary) {
+    public byte[] export(@NonNull ConnectorMessageReportSummary summary) {
         return write(summary);
     }
 

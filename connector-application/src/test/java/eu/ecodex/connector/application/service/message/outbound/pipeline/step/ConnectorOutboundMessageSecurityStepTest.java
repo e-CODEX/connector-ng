@@ -17,7 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-
 @DisplayName("ConnectorOutboundMessageSecurityStep")
 public class ConnectorOutboundMessageSecurityStepTest {
     @Mock
@@ -49,7 +48,7 @@ public class ConnectorOutboundMessageSecurityStepTest {
     class WhenExecutingSuccessfully {
         @Test
         void should_build_the_security_container() {
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
             when(securityToolkit.buildContainer(any())).thenReturn(outboundMessage);
             when(messageRepository.findByIdentifier(any())).thenReturn(outboundMessage);
 
@@ -69,19 +68,6 @@ public class ConnectorOutboundMessageSecurityStepTest {
             assertThrows(
                 NullPointerException.class,
                 () -> outboundMessageSecurityStep.execute(null)
-            );
-        }
-
-        @Test
-        void should_fail_when_the_message_identifier_is_null() {
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
-                                                     .toBuilder()
-                                                     .identifier(null)
-                                                     .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> outboundMessageSecurityStep.execute(outboundMessage)
             );
         }
     }

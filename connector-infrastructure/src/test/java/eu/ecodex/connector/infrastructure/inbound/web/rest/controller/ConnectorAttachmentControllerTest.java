@@ -23,6 +23,7 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.attachment.ConnectorAttachmentController;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -33,22 +34,25 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ConnectorAttachmentController.class)
+@DisplayName("ConnectorAttachmentController")
 public class ConnectorAttachmentControllerTest extends AbstractWebMvcTest {
+    private static final String URL = "/api/v1/attachments/upload";
+
     @MockitoBean
     private ConnectorUploadAttachments uploadAttachmentsService;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void should_send_201_when_uploading_attachments() throws Exception {
+    void should_return_201_when_uploading_attachments() throws Exception {
         when(uploadAttachmentsService.execute(any()))
             .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
-        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/attachments/upload")
+        mockMvc.perform(multipart(HttpMethod.POST, URL)
                             .file(getAttachment("raw/fake_file.pdf", "fake_file.pdf"))
                             .file(getAttachment("raw/fake_file.txt", "fake_file.txt"))
-                            .contentType(MediaType.MULTIPART_FORM_DATA)
-               )
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
                .andExpect(status().isCreated())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$", hasSize(1)));

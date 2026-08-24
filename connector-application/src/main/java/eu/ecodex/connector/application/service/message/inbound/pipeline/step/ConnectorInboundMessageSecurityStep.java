@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.message.inbound.pipeline.step;
 
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorInboundMessageSecurityStep implements ConnectorMessageStep {
+public class ConnectorInboundMessageSecurityStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
     private final ConnectorSecurityToolkit securityToolkit;
 
     /**
@@ -38,7 +39,7 @@ public class ConnectorInboundMessageSecurityStep implements ConnectorMessageStep
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage inboundMessage) {
         log.debug(
             "Processing inbound message [{}] ASIC-S container verification: ",
             inboundMessage.identifier()

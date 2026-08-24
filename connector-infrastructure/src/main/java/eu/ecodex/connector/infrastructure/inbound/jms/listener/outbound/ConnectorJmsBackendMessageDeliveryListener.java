@@ -10,23 +10,22 @@
 
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
 
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendDeliveryServiceClient;
-import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,14 +39,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @Transactional
-public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEventHandler {
+public class ConnectorJmsBackendMessageDeliveryListener
+    implements ConnectorEventHandler<ConnectorMessage> {
     private final ConnectorRegisterMessageTransportStep messageTransportStep;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
     private final ConnectorLinkPartnerRepository linkPartnerRepository;
     private final LegacyMessageHelper legacyMessageHelper;
-    private final ConnectorOutboundMessageReceiver outboundMessageReceiverService;
+    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
 
     @Value("${connector.message-processing.auto-trigger-delivery-evidences:false}")
     private boolean autoTriggerDeliveryEvidences;
@@ -72,14 +72,14 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
         ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
         ConnectorLinkPartnerRepository linkPartnerRepository,
         LegacyMessageHelper legacyMessageHelper,
-        ConnectorOutboundMessageReceiver outboundMessageReceiverService) {
+        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
         this.evidenceRepository = evidenceRepository;
         this.backendDeliveryServiceClient = backendDeliveryServiceClient;
         this.linkPartnerRepository = linkPartnerRepository;
         this.legacyMessageHelper = legacyMessageHelper;
-        this.outboundMessageReceiverService = outboundMessageReceiverService;
+        this.outboundEvidenceMessageReceiverService = outboundEvidenceMessageReceiverService;
     }
 
     @Override
@@ -89,7 +89,8 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
             throw new IllegalArgumentException("Message identifier cannot be null");
         }
 
-        if (!message.isBusinessMessage() && !message.isEvidenceMessage()) {
+        if (!(message instanceof ConnectorBusinessMessage)
+            && !(message instanceof ConnectorEvidenceMessage)) {
             throw new IllegalStateException(
                 "Received message is neither evidence nor a business message"
             );
@@ -133,7 +134,7 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
             var acknowledgment = deliveryWebService.deliverMessage(backendMessage);
 
             if (acknowledgment.isResult()) {
-                if (message.isBusinessMessage()) {
+                if (message instanceof ConnectorBusinessMessage) {
                     if (autoTriggerDeliveryEvidences) {
                         triggerDeliveryConfirmation(
                             message.backendMessageIdentifier(),
@@ -197,7 +198,7 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
                     identifier,
                     acknowledgment.getResultMessage()
                 );
-                if (message.isBusinessMessage()) {
+                if (message instanceof ConnectorBusinessMessage) {
                     // TODO: if message is a business message and state is failed
                     // trigger NON_DELIVERY
                     messageRepository.setAsRejected(identifier);
@@ -217,29 +218,15 @@ public class ConnectorJmsBackendMessageDeliveryListener implements ConnectorEven
         String backendMessageIdentifier,
         String referenceToIdentifier,
         String backendClientName) {
-        var transportedEvidences = List.of(
-            ConnectorMessageEvidence.builder()
-                                    .type(ConnectorEvidenceType.DELIVERY)
-                                    .build()
-        );
 
-        var message = ConnectorMessage
+        var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
+            .evidenceType(ConnectorEvidenceType.DELIVERY)
             .backendMessageIdentifier(backendMessageIdentifier)
-            .referenceToBackendMessageIdentifier(backendMessageIdentifier)
+            .referenceToIdentifier(referenceToIdentifier)
             .backendName(backendClientName)
-            .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-            .as4Properties(
-                ConnectorMessageAS4Properties
-                    .builder()
-                    .referenceToIdentifier(referenceToIdentifier)
-                    .build()
-            )
-            .businessContent(null)
-            .attachments(null)
-            .transportedEvidences(transportedEvidences)
             .build();
 
-        outboundMessageReceiverService.execute(message);
+        outboundEvidenceMessageReceiverService.execute(message);
     }
 }

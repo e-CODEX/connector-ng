@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenc
 import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import lombok.NonNull;
@@ -40,7 +40,7 @@ public class ConnectorMessageEvidenceCreatorService implements ConnectorMessageE
     @Override
     public ConnectorMessageEvidence createSuccess(
         @NonNull ConnectorEvidenceType evidenceType,
-        @NonNull ConnectorMessage message) {
+        @NonNull ConnectorBusinessMessage message) {
         log.info(
             "Creating success evidence for message [{}] with type [{}]",
             message.identifier(), evidenceType
@@ -51,7 +51,7 @@ public class ConnectorMessageEvidenceCreatorService implements ConnectorMessageE
     @Override
     public ConnectorMessageEvidence createFailure(
         @NonNull ConnectorEvidenceType evidenceType,
-        @NonNull ConnectorMessage message,
+        @NonNull ConnectorBusinessMessage message,
         ConnectorMessageRejectionReason reason) {
         log.info(
             "Creating failure evidence for message [{}] with type [{}]",
@@ -63,11 +63,8 @@ public class ConnectorMessageEvidenceCreatorService implements ConnectorMessageE
 
     private ConnectorMessageEvidence create(
         ConnectorEvidenceType evidenceType,
-        ConnectorMessage message,
+        ConnectorBusinessMessage message,
         ConnectorMessageRejectionReason rejectionReason) {
-        if (message.identifier() == null) {
-            throw new IllegalStateException("Message identifier is required");
-        }
 
         var evidence = this.evidenceToolkit.create(message, evidenceType, rejectionReason);
 

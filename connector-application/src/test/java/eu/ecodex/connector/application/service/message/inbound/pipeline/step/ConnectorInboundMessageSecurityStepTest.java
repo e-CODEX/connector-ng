@@ -15,8 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorInboundMessageSecurityStep")
 public class ConnectorInboundMessageSecurityStepTest {
     @Mock
     private ConnectorSecurityToolkit securityToolkit;
@@ -36,8 +38,8 @@ public class ConnectorInboundMessageSecurityStepTest {
     private ConnectorInboundMessageSecurityStep securityStep;
 
     @Test
-    void should_execute_inbound_message_security_check_successfully() {
-        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
+    void should_validate_the_message_and_return_it_unchanged() {
+        var inboundMessage = BusinessMessageTestFixtures.createInboundMessage();
 
         doNothing().when(securityToolkit).validateMessage(any());
 
@@ -47,9 +49,10 @@ public class ConnectorInboundMessageSecurityStepTest {
     }
 
     @Test
-    void should_throw_exception_when_message_is_null() {
+    void should_fail_when_the_message_is_null() {
         assertThrows(
-            NullPointerException.class, () -> securityStep.execute(null)
+            NullPointerException.class,
+            () -> securityStep.execute(null)
         );
     }
 }

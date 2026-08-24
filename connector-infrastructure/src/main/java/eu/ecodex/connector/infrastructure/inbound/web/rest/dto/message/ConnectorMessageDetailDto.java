@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -77,18 +77,14 @@ public record ConnectorMessageDetailDto(
     List<ConnectorMessageError> errors
 ) {
     /**
-     * Converts a {@link ConnectorMessage} object into a {@link ConnectorMessageDetailDto}.
+     * Converts a {@link ConnectorBusinessMessage} object into a {@link ConnectorMessageDetailDto}.
      *
-     * @param message the {@link ConnectorMessage} object to be converted
+     * @param message the {@link ConnectorBusinessMessage} object to be converted
      *
      * @return a newly created {@link ConnectorMessageDetailDto} based on the values of the provided
-     *     {@link ConnectorMessage}
+     *     {@link ConnectorBusinessMessage}
      */
-    public static ConnectorMessageDetailDto from(ConnectorMessage message) {
-        if (message.businessDomainIdentifier() == null) {
-            throw new IllegalArgumentException("Message must have a business domain identifier");
-        }
-
+    public static ConnectorMessageDetailDto from(ConnectorBusinessMessage message) {
         return ConnectorMessageDetailDto
             .builder()
             .businessDomainIdentifier(
@@ -97,7 +93,7 @@ public record ConnectorMessageDetailDto(
             .backendMessageIdentifier(message.backendMessageIdentifier())
             .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
             .direction(Objects.requireNonNull(message.direction()))
-            .isBusiness(message.isBusinessMessage())
+            .isBusiness(true)
             .backendName(message.backendName())
             .gatewayName(message.gatewayName())
             .businessContent(message.businessContent())

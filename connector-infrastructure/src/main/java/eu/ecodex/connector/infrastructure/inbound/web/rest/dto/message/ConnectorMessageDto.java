@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import java.time.Instant;
@@ -70,17 +70,14 @@ public record ConnectorMessageDto(
     Instant deliveredToLinkPartnerAt
 ) {
     /**
-     * Converts a {@link ConnectorMessage} instance into a {@link ConnectorMessageDto} instance.
+     * Converts a {@link ConnectorBusinessMessage} instance into a {@link ConnectorMessageDto}
+     * instance.
      *
-     * @param message the {@link ConnectorMessage} to be converted
+     * @param message the {@link ConnectorBusinessMessage} to be converted
      *
      * @return a new {@link ConnectorMessageDto} instance containing the mapped values
      */
-    public static ConnectorMessageDto from(ConnectorMessage message) {
-        if (message.businessDomainIdentifier() == null) {
-            throw new IllegalArgumentException("Message must have a business domain identifier");
-        }
-        
+    public static ConnectorMessageDto from(ConnectorBusinessMessage message) {
         return ConnectorMessageDto
             .builder()
             .businessDomainIdentifier(
@@ -102,7 +99,7 @@ public record ConnectorMessageDto(
             .build();
     }
 
-    private static boolean isDelivered(ConnectorMessage message) {
+    private static boolean isDelivered(ConnectorBusinessMessage message) {
         return message.deliveredToLinkPartnerAt() != null;
     }
 }

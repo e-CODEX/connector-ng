@@ -29,7 +29,7 @@ values
     ),
     (
         '9085a015-06f3-4631-96e6-55a216e900ff',
-        null,
+        '25873d6d-cfa8-4983-b39a-ffe38860872e@connector.ecodex.eu',
         null,
         'alice',
         'bob',
@@ -43,7 +43,7 @@ values
     ),
     (
         '9a3f6d38-6235-4f63-a9c6-9f6c63b89463',
-        null,
+        '6e769521-74f0-48e5-ac9c-b97e75d17ca7@connector.ecodex.eu',
         null,
         'alice',
         'bob',
@@ -57,7 +57,7 @@ values
     ),
     (
         '7b62367e-bd12-42ea-baba-b7f62288f1ab',
-        null,
+        '0e5ed776-98f5-4219-a6d3-349730e8c653@connector.ecodex.eu',
         null,
         'alice',
         'bob',

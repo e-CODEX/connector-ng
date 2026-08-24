@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
 
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessagePipeline;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * JMS listener responsible for triggering the outbound message processing pipeline when a
- * {@link ConnectorMessage} processing event is received from the backend.
+ * {@link ConnectorBusinessMessage} processing event is received from the backend.
  *
  * <p>This component listens to the configured outbound message processing queue and delegates the
  * received message to the {@code connectorOutboundMessagePipeline}. The pipeline then executes the
@@ -34,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
-public class ConnectorJmsOutboundMessagePipelineListener implements ConnectorEventHandler {
+public class ConnectorJmsOutboundMessagePipelineListener
+    implements ConnectorEventHandler<ConnectorBusinessMessage> {
     private final ConnectorMessagePipeline outboundMessagePipeline;
 
     public ConnectorJmsOutboundMessagePipelineListener(
@@ -46,7 +47,7 @@ public class ConnectorJmsOutboundMessagePipelineListener implements ConnectorEve
     @Override
     @Transactional
     @JmsListener(destination = "${connector.queues.outbound-message-processing-queue}")
-    public void handle(@NonNull ConnectorMessage message) {
+    public void handle(@NonNull ConnectorBusinessMessage message) {
         log.info("Entering outbound message [{}] processing pipeline ", message.identifier());
         this.outboundMessagePipeline.process(message);
     }

@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorSetMessagesTransportStepToDownloadService")
 public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
     private static final String BACKEND_NAME = "backend_alice";
     @Mock
@@ -33,7 +35,7 @@ public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
     private ConnectorSetMessagesTransportStepToDownloadService changePendingMessagesStatusService;
 
     @Test
-    void should_change_pending_messages_status_successfully() {
+    void should_update_pending_message_status() {
         var pendingMessagesIds = List.of("1", "2");
         when(transportStepRepository.findPendingTransportSteps(BACKEND_NAME))
             .thenReturn(pendingMessagesIds);

@@ -14,6 +14,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
@@ -63,8 +65,9 @@ public class ConnectorMessageTransportStepRepositoryImpl
         this.transportStepJpaRepository = transportStepJpaRepository;
         this.stepStatusJpaRepository = stepStatusJpaRepository;
         this.paginationMapper = paginationMapper;
-        this.objectMapper = objectMapper;
-        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        this.objectMapper = objectMapper
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
@@ -168,10 +171,7 @@ public class ConnectorMessageTransportStepRepositoryImpl
         }
 
         try {
-            var transportedMessage = objectMapper.readValue(
-                entity.getTransportedMessage(),
-                ConnectorMessage.class
-            );
+            var transportedMessage = deserializeMessage(entity.getTransportedMessage());
 
             return ConnectorMessageTransportStep
                 .builder()
@@ -236,5 +236,24 @@ public class ConnectorMessageTransportStepRepositoryImpl
                            .createdAt(status.getCreatedAt())
                            .build())
                        .collect(Collectors.toSet());
+    }
+
+    private ConnectorMessage deserializeMessage(String json)
+        throws JsonProcessingException {
+
+        var node = objectMapper.readTree(json);
+
+        if (node.hasNonNull("businessContent")) {
+            return objectMapper.treeToValue(node, ConnectorBusinessMessage.class);
+        }
+
+        if (node.hasNonNull("transportedEvidences")) {
+            return objectMapper.treeToValue(node, ConnectorEvidenceMessage.class);
+        }
+
+        throw new IllegalStateException(
+            "Cannot classify transported message: neither businessContent nor "
+                + "transportedEvidences present"
+        );
     }
 }

@@ -17,6 +17,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.exception.ConnectorLinkPartnerException;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +26,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorFindLinkPartnerService")
 public class ConnectorFindLinkPartnerServiceTest {
     @Mock
     private ConnectorLinkPartnerRepository linkPartnerRepository;
@@ -32,33 +36,37 @@ public class ConnectorFindLinkPartnerServiceTest {
     @InjectMocks
     private ConnectorFindLinkPartnerService findLinkPartnerService;
 
-    @Test
-    void should_find_link_partner_by_certificate_dn_successfully() {
-        when(linkPartnerRepository.findByCertificateDn("cn=alice"))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
+    @Nested
+    @DisplayName("find by certificate DN")
+    class FindByCertificateDn {
+        @Test
+        void should_return_the_matching_link_partner() {
+            when(linkPartnerRepository.findByCertificateDn("cn=alice"))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
 
-        var linkPartner = this.findLinkPartnerService.findByCertificateDn("cn=alice");
+            var linkPartner = findLinkPartnerService.findByCertificateDn("cn=alice");
 
-        assertThat(linkPartner).isNotNull();
-        assertThat(linkPartner.name().name()).isEqualTo("backend_alice");
-        assertThat(linkPartner.certificateDn()).isEqualTo("cn=alice");
-    }
+            assertThat(linkPartner).isNotNull();
+            assertThat(linkPartner.name().name()).isEqualTo("backend_alice");
+            assertThat(linkPartner.certificateDn()).isEqualTo("cn=alice");
+        }
 
-    @Test
-    void should_throw_null_link_partner_exception_when_searching_link_partner_by_null_certificate_dn() {
-        when(linkPartnerRepository.findByCertificateDn("cn=alice")).thenReturn(null);
+        @Test
+        void should_fail_when_no_link_partner_matches() {
+            when(linkPartnerRepository.findByCertificateDn("cn=alice")).thenReturn(null);
 
-        assertThrows(
-            ConnectorLinkPartnerException.class,
-            () -> this.findLinkPartnerService.findByCertificateDn("cn=alice")
-        );
-    }
+            assertThrows(
+                ConnectorLinkPartnerException.class,
+                () -> findLinkPartnerService.findByCertificateDn("cn=alice")
+            );
+        }
 
-    @Test
-    void should_throw_null_pointer_exception_when_searching_link_partner_by_null_certificate_dn() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.findLinkPartnerService.findByCertificateDn(null)
-        );
+        @Test
+        void should_fail_when_the_certificate_dn_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> findLinkPartnerService.findByCertificateDn(null)
+            );
+        }
     }
 }

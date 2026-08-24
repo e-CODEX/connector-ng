@@ -25,6 +25,8 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.businessdomain.ConnectorBusinessDomainAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -34,6 +36,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @SuppressWarnings("checkstyle:MissingJavadocType")
+@DisplayName("ConnectorBusinessDomainAdminController")
 @WebMvcTest(ConnectorBusinessDomainAdminController.class)
 public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/business-domains";
@@ -45,67 +48,75 @@ public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTe
     @MockitoBean
     private ConnectorListBusinessDomain listBusinessDomain;
 
-    @Test
-    void should_send_200_response_when_creating_business_domain() {
-        when(registerBusinessDomain.execute(any()))
-            .thenReturn(BusinessDomainTestFixtures.createDefaultBusinessDomain());
+    @Nested
+    @DisplayName("POST (create a business domain)")
+    class CreateBusinessDomain {
+        @Test
+        void should_return_201_when_the_business_domain_is_created() {
+            when(registerBusinessDomain.execute(any()))
+                .thenReturn(BusinessDomainTestFixtures.createDefaultBusinessDomain());
 
-        var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
-        var response = apiClient.post()
-                                .uri(URL)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(body)
-                                .exchange()
-                                .expectStatus().isCreated()
-                                .returnResult(ConnectorBusinessDomainDto.class);
+            var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
+            var response = apiClient.post()
+                                    .uri(URL)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .body(body)
+                                    .exchange()
+                                    .expectStatus().isCreated()
+                                    .returnResult(ConnectorBusinessDomainDto.class);
 
-        var responseBody = response.getResponseBody();
+            var responseBody = response.getResponseBody();
 
-        assertThat(responseBody).isNotNull();
-        assert responseBody != null;
-        assertThat(responseBody.enabled()).isTrue();
-        assertThat(responseBody.identifier())
-            .isEqualTo("default_business_domain");
-        assertThat(responseBody.source())
-            .isEqualTo(ConnectorConfigurationSource.IMPLEMENTATION);
+            assertThat(responseBody).isNotNull();
+            assert responseBody != null;
+
+            assertThat(responseBody.enabled()).isTrue();
+            assertThat(responseBody.identifier()).isEqualTo("default_business_domain");
+            assertThat(responseBody.source())
+                .isEqualTo(ConnectorConfigurationSource.IMPLEMENTATION);
+        }
+
+        @Test
+        void should_return_409_when_the_identifier_already_exists() {
+            doThrow(ConnectorBusinessDomainAlreadyExistsException.class)
+                .when(registerBusinessDomain).execute(any());
+
+            var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
+            var response = apiClient.post()
+                                    .uri(URL)
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .body(body)
+                                    .exchange()
+                                    .expectStatus().is4xxClientError()
+                                    .returnResult(ErrorResponse.class);
+
+            var responseBody = response.getResponseBody();
+
+            assertThat(responseBody).isNotNull();
+            assert responseBody != null;
+            assertThat(responseBody.status()).isEqualTo(HttpStatus.CONFLICT.value());
+        }
+
+        @Test
+        void should_return_400_when_the_request_body_is_invalid() {
+            apiClient.post()
+                     .uri(URL)
+                     .contentType(MediaType.APPLICATION_JSON)
+                     .body("{}")
+                     .exchange()
+                     .expectStatus().isBadRequest();
+        }
     }
 
-    @Test
-    void should_send_409_response_when_creating_business_domain_with_already_existing_identifier() {
-        doThrow(ConnectorBusinessDomainAlreadyExistsException.class)
-            .when(registerBusinessDomain).execute(any());
-
-        var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
-        var response = apiClient.post()
-                                .uri(URL)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(body)
-                                .exchange()
-                                .expectStatus().is4xxClientError()
-                                .returnResult(ErrorResponse.class);
-
-        var responseBody = response.getResponseBody();
-
-        assertThat(responseBody).isNotNull();
-        assert responseBody != null;
-        assertThat(responseBody.status()).isEqualTo(HttpStatus.CONFLICT.value());
-    }
-
-    @Test
-    void should_send_400_response_if_request_body_is_invalid_when_creating_business_domain() {
-        apiClient.post()
-                 .uri(URL)
-                 .contentType(MediaType.APPLICATION_JSON)
-                 .body("{}")
-                 .exchange()
-                 .expectStatus().isBadRequest();
-    }
-
-    @Test
-    void should_send_200_response_when_retrieving_business_domains() {
-        apiClient.get()
-                 .uri(URL)
-                 .exchange()
-                 .expectStatus().isOk();
+    @Nested
+    @DisplayName("GET (list the business domains)")
+    class ListBusinessDomains {
+        @Test
+        void should_return_200_when_listing_the_business_domains() {
+            apiClient.get()
+                     .uri(URL)
+                     .exchange()
+                     .expectStatus().isOk();
+        }
     }
 }

@@ -19,7 +19,10 @@ import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.Connecto
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.time.Duration;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -116,9 +119,7 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    protected MultiValueMap<String, Object> produceAttachmentPart(
-            MediaType mediaType,
-            int fileSize) {
+    protected MultiValueMap<String, Object> produceAttachmentPart(int fileSize) {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
@@ -126,7 +127,7 @@ public abstract class AbstractIntegrationTest {
                 FilePartTestFixtures.filePart(
                         "fake_file.pdf",
                         FileTestFixtures.generateFakeFile(fileSize),
-                        mediaType
+                        MediaType.APPLICATION_PDF
                 )
         );
 
@@ -134,21 +135,31 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void cleanDb() {
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 0");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_step_statuses");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_transport_steps");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_document_signatures");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_documents");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_business_contents");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_as4_properties");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_attachments");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_message_evidences");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_messages");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_parties");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_services");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_actions");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_processing_modes");
-        jdbcTemplate.execute("TRUNCATE TABLE connector_business_domains");
-        jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS = 1");
+        jdbcTemplate.execute((Connection con) -> {
+            try (Statement st = con.createStatement()) {
+                st.execute("SET FOREIGN_KEY_CHECKS = 0");
+                for (String table : List.of(
+                    "connector_message_transport_step_statuses",
+                    "connector_message_transport_steps",
+                    "connector_message_evidences",
+                    "connector_message_errors",
+                    "connector_message_business_document_signatures",
+                    "connector_message_business_documents",
+                    "connector_message_business_contents",
+                    "connector_message_as4_properties",
+                    "connector_message_attachments",
+                    "connector_messages",
+                    "connector_parties",
+                    "connector_services",
+                    "connector_actions",
+                    "connector_processing_modes",
+                    "connector_processing_mode_truststores", // typo removed
+                    "connector_business_domains")) {
+                    st.execute("TRUNCATE TABLE " + table);
+                }
+                st.execute("SET FOREIGN_KEY_CHECKS = 1");
+            }
+            return null;
+        });
     }
 }

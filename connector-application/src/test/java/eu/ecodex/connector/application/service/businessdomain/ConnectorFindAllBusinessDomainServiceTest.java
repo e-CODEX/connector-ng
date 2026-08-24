@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorFindAllBusinessDomainService")
 public class ConnectorFindAllBusinessDomainServiceTest {
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
@@ -31,7 +33,7 @@ public class ConnectorFindAllBusinessDomainServiceTest {
     private ConnectorListBusinessDomainService connectorBusinessDomainService;
 
     @Test
-    void should_find_all_business_domains_successfully() {
+    void should_return_all_business_domains() {
         var businessDomain = BusinessDomainTestFixtures.createdDefaultBusinessDomain();
 
         when(businessDomainRepository.findAll()).thenReturn(List.of(businessDomain));

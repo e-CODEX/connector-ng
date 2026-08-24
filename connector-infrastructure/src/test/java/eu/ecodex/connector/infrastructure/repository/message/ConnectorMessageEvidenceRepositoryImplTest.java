@@ -16,29 +16,31 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings("DataFlowIssue")
+
+@DisplayName("ConnectorMessageEvidenceRepository")
 public class ConnectorMessageEvidenceRepositoryImplTest extends AbstractRepositoryTest {
+    private static final String MESSAGE_ID =
+        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+
     @Autowired
     private ConnectorMessageEvidenceRepository repository;
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/attachment.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/message.sql",
     })
-    void should_save_evidence_successfully_to_database() {
+    void should_save_the_evidence() {
         var evidence = EvidenceTestFixtures.createSubmissionAcceptanceEvidence();
 
-        var saved = repository.save(
-                evidence,
-                "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
-        );
+        var saved = repository.save(evidence, MESSAGE_ID);
 
         assertThat(saved).isNotNull();
         assertThat(saved.uuid()).isNotNull();
@@ -47,24 +49,21 @@ public class ConnectorMessageEvidenceRepositoryImplTest extends AbstractReposito
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_saving_evidence_with_null_message_identifier() {
+    void should_throw_when_the_message_identifier_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> repository.save(
-                        EvidenceTestFixtures.createSubmissionAcceptanceEvidence(),
-                        null
-                )
+            NullPointerException.class,
+            () -> repository.save(
+                EvidenceTestFixtures.createSubmissionAcceptanceEvidence(),
+                null
+            )
         );
     }
 
     @Test
-    void should_throw_null_pointer_exception_when_saving_evidence_with_null_evidence() {
+    void should_throw_when_the_evidence_is_null() {
         assertThrows(
-                NullPointerException.class,
-                () -> repository.save(
-                        null,
-                        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu"
-                )
+            NullPointerException.class,
+            () -> repository.save(null, MESSAGE_ID)
         );
     }
 }

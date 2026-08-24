@@ -15,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGenerator;
+import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGeneratorService;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,11 +34,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-
 @DisplayName("ConnectorOutboundMessageEbmsIdStep")
 public class ConnectorOutboundMessageEbmsIdStepTest {
     @Mock
-    private ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator;
+    private ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator;
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
@@ -59,7 +58,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
                 .build();
             var ebmsIdentifier =
                 String.format("%s@%s", UUID.randomUUID(), configuration.ebmsIdSuffix());
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
             var as4Properties = outboundMessage.as4Properties()
                                                .toBuilder()
                                                .ebmsMessageIdentifier(ebmsIdentifier)
@@ -80,7 +79,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
 
         @Test
         void should_not_set_the_ebms_id_when_the_generator_is_disabled() {
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage();
+            var outboundMessage = BusinessMessageTestFixtures.createOutboundMessage();
             when(processingConfigurationProvider.getConfiguration())
                 .thenReturn(
                     ConnectorMessageProcessingConfiguration
@@ -107,19 +106,5 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
                 () -> outboundMessageEbmsIdCreationStep.execute(null)
             );
         }
-
-        @Test
-        void should_fail_when_the_message_identifier_is_null() {
-            var outboundMessage = MessageTestFixtures.createOutboundBusinessMessage()
-                                                     .toBuilder()
-                                                     .identifier(null)
-                                                     .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> outboundMessageEbmsIdCreationStep.execute(outboundMessage)
-            );
-        }
     }
 }
-

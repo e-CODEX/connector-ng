@@ -12,15 +12,17 @@ package eu.ecodex.connector.infrastructure.security.token.validation;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.ConnectorTokenValidationGenerator;
 import eu.ecodex.connector.infrastructure.outbound.security.token.validation.technical.ConnectorTokenValidationFactory;
 import eu.ecodex.connector.infrastructure.security.token.BaseTokenTest;
 import eu.europa.esig.dss.model.InMemoryDocument;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@DisplayName("ConnectorTokenValidationGenerator")
 public class ConnectorTokenValidationGeneratorTest extends BaseTokenTest {
     @Autowired
     private ConnectorTokenValidationGenerator validationGenerator;
@@ -28,8 +30,8 @@ public class ConnectorTokenValidationGeneratorTest extends BaseTokenTest {
     private ConnectorTokenValidationFactory validationFactory;
 
     @Test
-    void should_generate_token_successfully() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_generate_valid_token() {
+        var message = BusinessMessageTestFixtures.createOutboundMessage();
         var document = FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf");
         var businessDocument = new InMemoryDocument(document);
         var issuer = validationFactory.getTokenIssuer(message);

@@ -15,7 +15,8 @@ import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessage
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import java.util.List;
 import lombok.NonNull;
@@ -24,20 +25,21 @@ import org.springframework.stereotype.Component;
 
 /**
  * {@link ConnectorMessageStep} responsible for generating non-delivery evidence for an inbound
- * {@link ConnectorMessage}.
+ * {@link ConnectorBusinessMessage}.
  *
  * <p>This step is executed when an inbound message cannot be delivered to the
  * intended backend system. It creates a {@link ConnectorEvidenceType#NON_DELIVERY} evidence
  * describing the failure, attaches it to the message, verifies that the message satisfies the
  * requirements for this evidence type, and produces a corresponding evidence
- * {@link ConnectorMessage}.
+ * {@link ConnectorBusinessMessage}.
  *
  * <p>The generated evidence message has its direction switched so it can be returned to the
  * originating party as proof that the message could not be delivered.
  */
 @Slf4j
 @Component
-public class ConnectorInboundMessageNonDeliveryStep implements ConnectorMessageStep {
+public class ConnectorInboundMessageNonDeliveryStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> {
     private final ConnectorEvidenceMessageCreator evidenceMessageCreator;
     private final ConnectorMessageEvidenceCreator evidenceCreator;
     private final ConnectorMessageEvidenceVerifier evidenceVerifier;
@@ -62,7 +64,7 @@ public class ConnectorInboundMessageNonDeliveryStep implements ConnectorMessageS
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage inboundMessage) {
+    public ConnectorEvidenceMessage execute(@NonNull ConnectorBusinessMessage inboundMessage) {
         log.debug(
             "Processing inbound message [{}] non delivery creation",
             inboundMessage.identifier()

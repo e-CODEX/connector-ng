@@ -12,26 +12,31 @@ package eu.ecodex.connector.domain.routing;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for the {@code ConnectorEqualsExpression}.
  */
+@DisplayName("ConnectorMessageRoutingEqualsExpression")
 public class ConnectorEqualsExpressionTest {
+
+    private final ConnectorBusinessMessage message =
+        BusinessMessageTestFixtures.createOutboundMessage();
+
     @Test
-    void should_successfully_check_if_as4_attribute_matches_with_the_given_value() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_return_true_when_the_attribute_matches_the_value() {
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form");
-        var evaluationResult = equalsExpression.evaluate(message);
-        assertThat(evaluationResult).isTrue();
+
+        assertThat(equalsExpression.evaluate(message)).isTrue();
     }
 
     @Test
-    void should_fail_to_check_if_as4_attribute_matches_with_the_given_value() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    void should_return_false_when_the_attribute_does_not_match_the_value() {
         var equalsExpression = new ConnectorEqualsExpression(TokenType.AS4_ACTION, "ConTest_Form2");
-        var evaluationResult = equalsExpression.evaluate(message);
-        assertThat(evaluationResult).isFalse();
+
+        assertThat(equalsExpression.evaluate(message)).isFalse();
     }
 }

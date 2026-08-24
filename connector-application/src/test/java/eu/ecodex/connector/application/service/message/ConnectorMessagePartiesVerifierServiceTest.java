@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import eu.ecodex.connector.MessageTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -35,7 +35,7 @@ public class ConnectorMessagePartiesVerifierServiceTest {
     class WhenValid {
         @Test
         void should_verify_the_message_without_error() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage();
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
             // no exception means the from and to parties are set correctly
             assertThatCode(() -> partiesVerifierService.verify(message))
                 .doesNotThrowAnyException();
@@ -46,28 +46,8 @@ public class ConnectorMessagePartiesVerifierServiceTest {
     @DisplayName("when the message parties are invalid")
     class WhenPartiesAreInvalid {
         @Test
-        void should_fail_when_the_from_party_is_null() {
-            var message = MessageTestFixtures.createNullFromPartyOutboundBusinessMessage();
-
-            assertThrows(
-                ConnectorMessagePartyException.class,
-                () -> partiesVerifierService.verify(message)
-            );
-        }
-
-        @Test
         void should_fail_when_the_from_party_is_incorrect() {
-            var message = MessageTestFixtures.createInvalidFromPartyOutboundBusinessMessage();
-
-            assertThrows(
-                ConnectorMessagePartyException.class,
-                () -> partiesVerifierService.verify(message)
-            );
-        }
-
-        @Test
-        void should_fail_when_the_to_party_is_null() {
-            var message = MessageTestFixtures.createNullToPartyOutboundBusinessMessage();
+            var message = BusinessMessageTestFixtures.createInvalidFromPartyOutboundBusinessMessage();
 
             assertThrows(
                 ConnectorMessagePartyException.class,
@@ -77,7 +57,7 @@ public class ConnectorMessagePartiesVerifierServiceTest {
 
         @Test
         void should_fail_when_the_to_party_is_incorrect() {
-            var message = MessageTestFixtures.createInvalidToPartyOutboundBusinessMessage();
+            var message = BusinessMessageTestFixtures.createInvalidToPartyOutboundBusinessMessage();
 
             assertThrows(
                 ConnectorMessagePartyException.class,
@@ -98,24 +78,11 @@ public class ConnectorMessagePartiesVerifierServiceTest {
         }
 
         @Test
-        void should_fail_when_the_direction_is_null() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .direction(null)
-                                             .build();
-
-            assertThrows(
-                IllegalStateException.class,
-                () -> partiesVerifierService.verify(message)
-            );
-        }
-
-        @Test
         void should_fail_when_the_direction_is_not_outbound() {
-            var message = MessageTestFixtures.createOutboundBusinessMessage()
-                                             .toBuilder()
-                                             .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                             .build();
+            var message = BusinessMessageTestFixtures.createOutboundMessage()
+                                                     .toBuilder()
+                                                     .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                                                     .build();
 
             assertThrows(
                 UnsupportedOperationException.class,

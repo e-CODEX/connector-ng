@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorListProcessingModeServicesService")
 public class ConnectorListProcessingModeServicesTest {
     @Mock
     private ConnectorServiceRepository serviceRepository;
@@ -35,23 +38,23 @@ public class ConnectorListProcessingModeServicesTest {
     private ConnectorListProcessingModeServicesService listProcessingModeServices;
 
     @Test
-    void should_throw_exception_if_business_domain_identifier_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> this.listProcessingModeServices.execute(null)
-        );
-    }
-
-    @Test
-    void should_return_all_processing_mode_services_successfully() {
+    void should_return_all_the_services() {
         when(serviceRepository.findAllByBusinessDomainIdentifier(any()))
             .thenReturn(List.of(ServiceTestFixtures.createService()));
 
-        var services = this.listProcessingModeServices.execute("default_business_domain");
+        var services = listProcessingModeServices.execute("default_business_domain");
 
         assertThat(services).isNotEmpty();
         assertThat(services).hasSize(1);
 
         verify(serviceRepository).findAllByBusinessDomainIdentifier(any());
+    }
+
+    @Test
+    void should_fail_when_the_business_domain_identifier_is_null() {
+        assertThrows(
+            NullPointerException.class,
+            () -> listProcessingModeServices.execute(null)
+        );
     }
 }

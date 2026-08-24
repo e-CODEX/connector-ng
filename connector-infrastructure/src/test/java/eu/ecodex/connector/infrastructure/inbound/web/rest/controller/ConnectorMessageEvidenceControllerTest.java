@@ -22,6 +22,7 @@ import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.evidence.ConnectorEvidenceController;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -30,8 +31,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ConnectorEvidenceController.class)
+
+@DisplayName("ConnectorMessageEvidenceController")
 public class ConnectorMessageEvidenceControllerTest extends AbstractWebMvcTest {
     private static final String URL_DOWNLOAD = "/api/v1/evidences/%s/download";
+    private static final String EVIDENCE_UUID = "12345678-1234-1234-1234-123456789012";
 
     @MockitoBean
     private ConnectorRetrieveEvidence downloadEvidenceService;
@@ -39,24 +43,22 @@ public class ConnectorMessageEvidenceControllerTest extends AbstractWebMvcTest {
     private MockMvc mockMvc;
 
     @Test
-    void should_download_evidence_successfully() throws Exception {
-        when(downloadEvidenceService.execute(any())).thenReturn(
-            EvidenceTestFixtures.createSubmissionAcceptanceEvidence()
-        );
+    void should_return_200_with_the_evidence() throws Exception {
+        when(downloadEvidenceService.execute(any()))
+            .thenReturn(EvidenceTestFixtures.createSubmissionAcceptanceEvidence());
 
-        mockMvc.perform(get(URL_DOWNLOAD.formatted("12345678-1234-1234-1234-123456789012"))
+        mockMvc.perform(get(URL_DOWNLOAD.formatted(EVIDENCE_UUID))
                             .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_XML));
 
-        verify(downloadEvidenceService).execute("12345678-1234-1234-1234-123456789012");
+        verify(downloadEvidenceService).execute(EVIDENCE_UUID);
     }
 
     @Test
-    void should_return_404_not_found_when_downloading_an_evidence_with_unknown_identifier()
-        throws Exception {
-        doThrow(ConnectorEvidenceNotFoundException.class).when(downloadEvidenceService)
-                                                         .execute(any());
+    void should_return_404_when_the_evidence_is_not_found() throws Exception {
+        doThrow(ConnectorEvidenceNotFoundException.class)
+            .when(downloadEvidenceService).execute(any());
 
         mockMvc.perform(get(URL_DOWNLOAD.formatted("unknown-identifier"))
                             .contentType(MediaType.APPLICATION_JSON))

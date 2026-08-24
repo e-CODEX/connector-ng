@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,8 +21,8 @@ import org.springframework.stereotype.Component;
 /**
  * Represents a processing step in the outbound message workflow for the connector system, aimed at
  * ensuring the security of outgoing messages before they are sent or processed further. This class
- * is responsible for wrapping an outbound {@link ConnectorMessage} into a secured container to
- * comply with the connector's security and transport standards.
+ * is responsible for wrapping an outbound {@link ConnectorBusinessMessage} into a secured container
+ * to comply with the connector's security and transport standards.
  *
  * <p>Key responsibilities:
  * <ul>
@@ -41,12 +41,13 @@ import org.springframework.stereotype.Component;
  * <p>Dependencies:
  * <ul>
  *   <li>{@link ConnectorSecurityToolkit}: Provides the necessary methods to build a secured
- *       container from a {@link ConnectorMessage}.</li>
+ *       container from a {@link ConnectorBusinessMessage}.</li>
  * </ul>
  */
 @Slf4j
 @Component
-public class ConnectorOutboundMessageSecurityStep implements ConnectorMessageStep {
+public class ConnectorOutboundMessageSecurityStep
+    implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
     private final ConnectorSecurityToolkit securityToolkit;
     private final ConnectorMessageRepository messageRepository;
 
@@ -58,8 +59,9 @@ public class ConnectorOutboundMessageSecurityStep implements ConnectorMessageSte
      * for outbound messages.
      *
      * @param securityToolkit the {@link ConnectorSecurityToolkit} instance responsible for
-     *                        executing security-related operations on {@link ConnectorMessage}
-     *                        instances, such as building secured message containers.
+     *                        executing security-related operations on
+     *                        {@link ConnectorBusinessMessage} instances, such as building secured
+     *                        message containers.
      */
     public ConnectorOutboundMessageSecurityStep(
         ConnectorSecurityToolkit securityToolkit,
@@ -69,7 +71,7 @@ public class ConnectorOutboundMessageSecurityStep implements ConnectorMessageSte
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorMessage outboundMessage) {
+    public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage outboundMessage) {
         var identifier = outboundMessage.identifier();
 
         if (identifier == null) {

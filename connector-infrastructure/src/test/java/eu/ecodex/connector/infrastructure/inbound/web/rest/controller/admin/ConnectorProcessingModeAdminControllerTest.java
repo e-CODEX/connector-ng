@@ -30,6 +30,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorPr
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.client.RestTestClient;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 
+@DisplayName("ConnectorProcessingModeAdminController")
 @WebMvcTest(ConnectorProcessingModeAdminController.class)
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength"})
 public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTest {
@@ -68,6 +70,133 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     @MockitoBean
     private ConnectorRetrieveProcessingMode retrieveProcessingModeService;
 
+    @Nested
+    @DisplayName("POST (create a processing mode)")
+    class Creation {
+        @ParameterizedTest
+        @ValueSource(strings = {MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE})
+        void should_return_201_when_the_processing_mode_is_created(String contentType)
+            throws Exception {
+            when(registerProcessingModeService.execute(any(), any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+
+            mockMvc.perform(creationRequest()
+                                .file(processingModeFile(contentType))
+                                .file(truststoreFile())
+                                .param("truststore.password", TRUSTSTORE_PASSWORD))
+                   .andExpect(status().isCreated());
+
+            verify(registerProcessingModeService).execute(any(), any());
+        }
+
+        @Test
+        void should_return_400_when_the_processing_mode_file_is_not_xml() throws Exception {
+            mockMvc.perform(creationRequest()
+                                .file(processingModeFile(MediaType.TEXT_PLAIN_VALUE))
+                                .file(truststoreFile())
+                                .param("truststore.password", TRUSTSTORE_PASSWORD))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(registerProcessingModeService);
+        }
+
+        @Test
+        void should_return_400_when_the_processing_mode_file_is_missing() throws Exception {
+            mockMvc.perform(creationRequest()
+                                .file(truststoreFile())
+                                .param("truststore.password", TRUSTSTORE_PASSWORD))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(registerProcessingModeService);
+        }
+
+        @Test
+        void should_return_400_when_the_truststore_file_is_missing() throws Exception {
+            mockMvc.perform(creationRequest()
+                                .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
+                                .param("truststore.password", TRUSTSTORE_PASSWORD))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(registerProcessingModeService);
+        }
+
+        @ParameterizedTest
+        @EmptySource
+        @ValueSource(strings = {"   "})
+        void should_return_400_when_the_truststore_password_is_blank(String password)
+            throws Exception {
+            mockMvc.perform(creationRequest()
+                                .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
+                                .file(truststoreFile())
+                                .param("truststore.password", password))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(registerProcessingModeService);
+        }
+
+        @Test
+        void should_return_400_when_the_business_domain_identifier_is_missing() throws Exception {
+            mockMvc.perform(multipart(HttpMethod.POST, URL)
+                                .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
+                                .file(truststoreFile())
+                                .param("description", DESCRIPTION)
+                                .param("truststore.password", TRUSTSTORE_PASSWORD)
+                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(registerProcessingModeService);
+        }
+    }
+
+    @Nested
+    @DisplayName("GET (list processing modes)")
+    class Listing {
+        @Test
+        void should_return_200_with_the_processing_modes() {
+            when(listProcessingModeService.execute())
+                .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
+
+            var responseBody = apiClient.get()
+                                        .uri(URL)
+                                        .exchange()
+                                        .expectStatus().isOk()
+                                        .returnResult(ConnectorProcessingModeDto[].class)
+                                        .getResponseBody();
+
+            assertThat(responseBody).isNotNull().hasSize(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("GET (retrieve a processing mode)")
+    class Retrieval {
+        @Test
+        void should_return_200_with_the_processing_mode() {
+            when(retrieveProcessingModeService.execute(any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
+
+            var responseBody = apiClient.get()
+                                        .uri(URL + "/{identifier}", "test-identifier")
+                                        .exchange()
+                                        .expectStatus().isOk()
+                                        .returnResult(ConnectorProcessingModeDetailDto.class)
+                                        .getResponseBody();
+
+            assertThat(responseBody).isNotNull();
+        }
+
+        @Test
+        void should_return_404_when_the_processing_mode_is_not_found() {
+            doThrow(ConnectorProcessingModeNotFoundException.class)
+                .when(retrieveProcessingModeService).execute(any());
+
+            apiClient.get()
+                     .uri(URL + "/unknown-identifier")
+                     .exchange()
+                     .expectStatus().isNotFound();
+        }
+    }
+
     private static MockMultipartFile processingModeFile(String contentType) {
         return new MockMultipartFile(
             "processingModeFile", "processing-mode.xml", contentType, PMODE_CONTENT);
@@ -85,130 +214,5 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .param("businessDomainIdentifier", BUSINESS_DOMAIN)
             .param("description", DESCRIPTION);
-    }
-
-    @Nested
-    class Creation {
-        @ParameterizedTest
-        @ValueSource(strings = {MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE})
-        void should_send_201_response_when_creating_processing_mode(String contentType)
-            throws Exception {
-            when(registerProcessingModeService.execute(any(), any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
-
-            mockMvc.perform(creationRequest()
-                                .file(processingModeFile(contentType))
-                                .file(truststoreFile())
-                                .param("truststore.password", TRUSTSTORE_PASSWORD))
-                   .andExpect(status().isCreated());
-
-            verify(registerProcessingModeService).execute(any(), any());
-        }
-
-        @Test
-        void should_send_400_response_when_processing_mode_file_is_not_xml() throws Exception {
-            mockMvc.perform(creationRequest()
-                                .file(processingModeFile(MediaType.TEXT_PLAIN_VALUE))
-                                .file(truststoreFile())
-                                .param("truststore.password", TRUSTSTORE_PASSWORD))
-                   .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(registerProcessingModeService);
-        }
-
-        @Test
-        void should_send_400_response_when_processing_mode_file_is_missing() throws Exception {
-            mockMvc.perform(creationRequest()
-                                .file(truststoreFile())
-                                .param("truststore.password", TRUSTSTORE_PASSWORD))
-                   .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(registerProcessingModeService);
-        }
-
-        @Test
-        void should_send_400_response_when_truststore_file_is_missing() throws Exception {
-            mockMvc.perform(creationRequest()
-                                .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
-                                .param("truststore.password", TRUSTSTORE_PASSWORD))
-                   .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(registerProcessingModeService);
-        }
-
-        @ParameterizedTest
-        @ValueSource(strings = {"", "   "})
-        @EmptySource
-        void should_send_400_response_when_truststore_password_is_blank(String password)
-            throws Exception {
-            mockMvc.perform(creationRequest()
-                                .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
-                                .file(truststoreFile())
-                                .param("truststore.password", password))
-                   .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(registerProcessingModeService);
-        }
-
-        @Test
-        void should_send_400_response_when_business_domain_identifier_is_missing()
-            throws Exception {
-            mockMvc.perform(multipart(HttpMethod.POST, URL)
-                                .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
-                                .file(truststoreFile())
-                                .param("description", DESCRIPTION)
-                                .param("truststore.password", TRUSTSTORE_PASSWORD)
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
-                   .andExpect(status().isBadRequest());
-
-            verifyNoInteractions(registerProcessingModeService);
-        }
-    }
-
-    @Nested
-    class Listing {
-        @Test
-        void should_list_processing_modes_successfully() {
-            when(listProcessingModeService.execute())
-                .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
-
-            var responseBody = apiClient.get()
-                                        .uri(URL)
-                                        .exchange()
-                                        .expectStatus().isOk()
-                                        .returnResult(ConnectorProcessingModeDto[].class)
-                                        .getResponseBody();
-
-            assertThat(responseBody).isNotNull().hasSize(1);
-        }
-    }
-
-    @Nested
-    class Retrieval {
-        @Test
-        void should_retrieve_a_processing_mode_successfully() {
-            when(retrieveProcessingModeService.execute(any()))
-                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
-
-            var responseBody = apiClient.get()
-                                        .uri(URL + "/{identifier}", "test-identifier")
-                                        .exchange()
-                                        .expectStatus().isOk()
-                                        .returnResult(ConnectorProcessingModeDetailDto.class)
-                                        .getResponseBody();
-
-            assertThat(responseBody).isNotNull();
-        }
-
-        @Test
-        void should_return_404_not_found_when_retrieving_a_processing_mode_with_unknown_identifier() {
-            doThrow(ConnectorProcessingModeNotFoundException.class)
-                .when(retrieveProcessingModeService).execute(any());
-
-            apiClient.get()
-                     .uri(URL + "/unknown-identifier")
-                     .exchange()
-                     .expectStatus().isNotFound();
-        }
     }
 }

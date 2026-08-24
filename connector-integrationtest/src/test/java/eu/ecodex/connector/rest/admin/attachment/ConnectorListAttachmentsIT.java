@@ -15,17 +15,18 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorListAttachmentsIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
     @Autowired
@@ -38,16 +39,16 @@ public class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/attachment.sql",
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
     })
-    void should_list_connector_messages_transport_steps_successfully() {
+    void should_list_attachments_for_connector_messages() {
         apiClient.get()
                  .uri("/api/v1/admin/attachments")
                  .exchange()
@@ -57,9 +58,9 @@ public class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
                  .value(result -> {
                      assertThat(result).isNotNull();
                      assert result != null;
-                     assertThat(result.content().size()).isEqualTo(7);
-                     assertThat(result.size()).isEqualTo(7);
-                     assertThat(result.totalElements()).isEqualTo(7);
+                     assertThat(result.content().size()).isEqualTo(14);
+                     assertThat(result.size()).isEqualTo(14);
+                     assertThat(result.totalElements()).isEqualTo(14);
                      assertThat(result.totalPages()).isEqualTo(1);
                  });
     }

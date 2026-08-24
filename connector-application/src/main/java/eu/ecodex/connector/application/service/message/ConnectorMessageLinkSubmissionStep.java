@@ -12,14 +12,15 @@ package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * {@link ConnectorMessageStep} responsible for submitting a {@link ConnectorMessage} to a link
- * partner.
+ * {@link ConnectorMessageStep} responsible for submitting a {@link ConnectorBusinessMessage} to a
+ * link partner.
  *
  * <p>This step is part of the connector message processing pipeline. It delegates
  * the submission of the message to {@link ConnectorLinkSubmitter}, which handles the communication
@@ -29,7 +30,8 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorMessageLinkSubmissionStep implements ConnectorMessageStep {
+public class ConnectorMessageLinkSubmissionStep
+    implements ConnectorMessageStep<ConnectorMessage, ConnectorMessage> {
     private final ConnectorLinkSubmitter linkSubmissionService;
 
     public ConnectorMessageLinkSubmissionStep(

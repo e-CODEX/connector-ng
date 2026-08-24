@@ -10,10 +10,12 @@
 
 package eu.ecodex.connector.application.port.api.message.outbound;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for staging a {@link ConnectorMessage} within a processing workflow.
+ * Defines the contract for staging a {@link ConnectorBusinessMessage} within a processing
+ * workflow.
  *
  * <p>Staging typically represents an intermediate persistence or preparation step before the
  * message proceeds to the next phase of processing (e.g. transmission, validation, or archival).
@@ -23,12 +25,12 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
  */
 public interface ConnectorOutboundMessageStager {
     /**
-     * Stages the given {@link ConnectorMessage}.
+     * Stages the given {@link ConnectorBusinessMessage}.
      *
      * @param message the message to stage; must not be {@code null}
      *
      * @throws RuntimeException if staging fails (implementations should document specific exception
      *                          types where appropriate)
      */
-    void stage(ConnectorMessage message);
+    void execute(@Nonnull ConnectorBusinessMessage message);
 }

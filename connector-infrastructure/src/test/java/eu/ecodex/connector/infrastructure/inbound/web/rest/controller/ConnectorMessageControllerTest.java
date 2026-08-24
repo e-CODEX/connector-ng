@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -18,11 +19,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.MultipartFileTestFixtures;
+import eu.ecodex.connector.TriggeredEvidenceMessageTestFixtures;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message.ConnectorMessageController;
@@ -30,6 +33,8 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evide
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -39,16 +44,18 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 @WebMvcTest(ConnectorMessageController.class)
+@DisplayName("ConnectorMessageController")
 public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
     private static final String OUTBOUND_MESSAGE_URL = "/api/v1/messages/outbound";
     private static final String EVIDENCE_TRIGGER_URL = "/api/v1/messages/evidence-trigger";
 
     @MockitoBean
-    private ConnectorOutboundMessageReceiver messageStagingService;
+    private ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService;
+    @MockitoBean
+    private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
     @MockitoBean
     private ConnectorBackendClientVerifier backendClientVerifierService;
     @MockitoBean
@@ -59,102 +66,13 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // outbound message
-    @Test
-    void should_send_201_created_when_submitting_outbound_message() throws Exception {
-        when(messageStagingService.execute(any()))
-            .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
+    private void stubOutboundSubmissionSuccess() {
+        when(outboundBusinessMessageReceiverService.execute(any()))
+            .thenReturn(BusinessMessageTestFixtures.createOutboundMessage());
         when(backendClientVerifierService.getBackendClient(any()))
             .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-        when(uploadAttachmentsService.execute(any())).thenReturn(
-            List.of(MessageAttachmentTestFixtures.createAttachment())
-        );
-
-        mockMvc.perform(buildValidOutboundMessageRequest().contentType(MediaType.MULTIPART_FORM_DATA))
-               .andExpect(status().isCreated())
-               .andExpect(content().contentType(MediaType.APPLICATION_JSON));
-    }
-
-    @Test
-    void should_send_201_created_when_submitting_outbound_message_with_detached_signature()
-        throws Exception {
-        when(messageStagingService.execute(any()))
-            .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
-        when(backendClientVerifierService.getBackendClient(any()))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-        when(uploadAttachmentsService.execute(any())).thenReturn(
-            List.of(MessageAttachmentTestFixtures.createAttachment())
-        );
-
-        var detachedSignature = new MockMultipartFile(
-            "businessContent.businessDocument.document.detachedSignature.signature",
-            "signature.xml",
-            MediaType.APPLICATION_XML_VALUE,
-            "<document>signature</document>".getBytes()
-        );
-
-        var request = buildValidOutboundMessageRequest()
-            .file(detachedSignature)
-            .param("businessContent.businessDocument.detachedSignature.mimeType", "XML");
-
-        mockMvc.perform(request.contentType(MediaType.MULTIPART_FORM_DATA))
-               .andExpect(status().isCreated())
-               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$.identifier").isNotEmpty());
-    }
-
-    @Test
-    void should_send_400_response_when_submitting_non_valid_outbound_message() throws Exception {
-        mockMvc.perform(
-                   multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
-                       .file(MultipartFileTestFixtures.createPart(
-                           "businessXMLDocument",
-                           MediaType.TEXT_XML_VALUE,
-                           "raw/Form_A.xml",
-                           "Form_A.xml"
-                       ))
-                       .file(MultipartFileTestFixtures.createPart(
-                           "businessPDFDocument",
-                           MediaType.APPLICATION_PDF_VALUE,
-                           "raw/Form_A.pdf",
-                           "Form_A.pdf"
-                       ))
-                       .contentType(MediaType.MULTIPART_FORM_DATA)
-               )
-               .andExpect(status().isBadRequest());
-    }
-
-    // evidence trigger message
-
-    @Test
-    void should_send_201_created_when_submitting_evidence_trigger_message() throws Exception {
-        when(messageStagingService.execute(any()))
-            .thenReturn(MessageTestFixtures.createOutboundBusinessMessage());
-        when(backendClientVerifierService.getBackendClient(any()))
-            .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
-
-        mockMvc.perform(
-                   post(EVIDENCE_TRIGGER_URL)
-                       .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(buildValidEvidenceTriggerRequest()))
-               )
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.identifier").isNotEmpty());
-    }
-
-    @Test
-    void should_return_400_bad_request_when_submitting_evidence_trigger_message_with_invalid_payload()
-        throws Exception {
-        var request = ConnectorEvidenceTriggerMessageRequest
-            .builder()
-            .evidenceType(null)
-            .identifiers(buildValidEvidenceTriggerRequest().identifiers())
-            .build();
-
-        mockMvc.perform(post(EVIDENCE_TRIGGER_URL)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request)))
-               .andExpect(status().isBadRequest());
+        when(uploadAttachmentsService.execute(any()))
+            .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
     }
 
     private MockMultipartHttpServletRequestBuilder buildValidOutboundMessageRequest() {
@@ -172,41 +90,38 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             "<document>test</document>".getBytes()
         );
 
-        return MockMvcRequestBuilders.multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
-                                     .file(businessContent)
-                                     .file(businessDocument)
-                                     .param("businessDomainIdentifier", "default_business_domain")
-                                     .param(
-                                         "backendMessageIdentifier",
-                                         "56ed1a8f-b089-4615-9ddd-da302a665a11@backend_system"
-                                     )
-                                     // business content properties
-                                     .param(
-                                         "businessContent.businessDocument.aesType",
-                                         "SIGNATURE_BASED"
-                                     )
-                                     // AS4 properties — add all @NotNull nested fields here
-                                     .param(
-                                         "as4Properties.conversationIdentifier",
-                                         "e6a173ec-de21-46dc-8a19-63a6cb74915d"
-                                     )
-                                     .param("as4Properties.originalSender", "alice")
-                                     .param("as4Properties.finalRecipient", "bob")
-                                     .param("as4Properties.service.name", "Connector-TEST")
-                                     .param("as4Properties.service.type", "urn:e-codex:services:")
-                                     .param("as4Properties.action.name", "ConTest_Form")
-                                     .param("as4Properties.fromParty.identifier", "BL")
-                                     .param(
-                                         "as4Properties.fromParty.identifierType",
-                                         "urn:oasis:names:tc:ebcore:partyid-type:ecodex"
-                                     )
-                                     .param("as4Properties.fromParty.role", "GW")
-                                     .param("as4Properties.toParty.identifier", "RE")
-                                     .param(
-                                         "as4Properties.toParty.identifierType",
-                                         "urn:oasis:names:tc:ebcore:partyid-type:ecodex"
-                                     )
-                                     .param("as4Properties.toParty.role", "GW");
+        return multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
+            .file(businessContent)
+            .file(businessDocument)
+            .param("businessDomainIdentifier", "default_business_domain")
+            .param(
+                "backendMessageIdentifier",
+                "56ed1a8f-b089-4615-9ddd-da302a665a11@backend_system"
+            )
+            // business content properties
+            .param("businessContent.businessDocument.aesType", "SIGNATURE_BASED")
+            // AS4 properties — add all @NotNull nested fields here
+            .param(
+                "as4Properties.conversationIdentifier",
+                "e6a173ec-de21-46dc-8a19-63a6cb74915d"
+            )
+            .param("as4Properties.originalSender", "alice")
+            .param("as4Properties.finalRecipient", "bob")
+            .param("as4Properties.service.name", "Connector-TEST")
+            .param("as4Properties.service.type", "urn:e-codex:services:")
+            .param("as4Properties.action.name", "ConTest_Form")
+            .param("as4Properties.fromParty.identifier", "BL")
+            .param(
+                "as4Properties.fromParty.identifierType",
+                "urn:oasis:names:tc:ebcore:partyid-type:ecodex"
+            )
+            .param("as4Properties.fromParty.role", "GW")
+            .param("as4Properties.toParty.identifier", "RE")
+            .param(
+                "as4Properties.toParty.identifierType",
+                "urn:oasis:names:tc:ebcore:partyid-type:ecodex"
+            )
+            .param("as4Properties.toParty.role", "GW");
     }
 
     private ConnectorEvidenceTriggerMessageRequest buildValidEvidenceTriggerRequest() {
@@ -219,5 +134,111 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
                              .build()
             )
             .build();
+    }
+
+    @Nested
+    @DisplayName("POST (submit an outbound message)")
+    class SubmitOutboundMessage {
+        @Test
+        void should_return_201_when_the_message_is_submitted() throws Exception {
+            stubOutboundSubmissionSuccess();
+
+            mockMvc.perform(buildValidOutboundMessageRequest()
+                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isCreated())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
+            verifyNoInteractions(outboundEvidenceMessageReceiverService);
+        }
+
+        @Test
+        void should_return_201_when_the_message_has_a_detached_signature() throws Exception {
+            stubOutboundSubmissionSuccess();
+
+            var detachedSignature = new MockMultipartFile(
+                "businessContent.businessDocument.document.detachedSignature.signature",
+                "signature.xml",
+                MediaType.APPLICATION_XML_VALUE,
+                "<document>signature</document>".getBytes()
+            );
+
+            var request = buildValidOutboundMessageRequest()
+                .file(detachedSignature)
+                .param("businessContent.businessDocument.detachedSignature.mimeType", "XML");
+
+            mockMvc.perform(request.contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isCreated())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(jsonPath("$.identifier").isNotEmpty());
+
+            verifyNoInteractions(outboundEvidenceMessageReceiverService);
+        }
+
+        @Test
+        void should_return_400_when_the_message_is_invalid() throws Exception {
+            mockMvc.perform(
+                       multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
+                           .file(MultipartFileTestFixtures.createPart(
+                               "businessXMLDocument",
+                               MediaType.TEXT_XML_VALUE,
+                               "raw/Form_A.xml",
+                               "Form_A.xml"
+                           ))
+                           .file(MultipartFileTestFixtures.createPart(
+                               "businessPDFDocument",
+                               MediaType.APPLICATION_PDF_VALUE,
+                               "raw/Form_A.pdf",
+                               "Form_A.pdf"
+                           ))
+                           .contentType(MediaType.MULTIPART_FORM_DATA)
+                   )
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(
+                outboundBusinessMessageReceiverService,
+                outboundEvidenceMessageReceiverService
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("POST (submit an evidence trigger message)")
+    class SubmitEvidenceTrigger {
+        @Test
+        void should_return_201_when_the_trigger_is_submitted() throws Exception {
+            when(outboundEvidenceMessageReceiverService.execute(any()))
+                .thenReturn(TriggeredEvidenceMessageTestFixtures.createDeliveryTriggeredEvidenceMessage());
+            when(backendClientVerifierService.getBackendClient(any()))
+                .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
+
+            mockMvc.perform(
+                       post(EVIDENCE_TRIGGER_URL)
+                           .contentType(MediaType.APPLICATION_JSON)
+                           .content(objectMapper.writeValueAsString(buildValidEvidenceTriggerRequest()))
+                   )
+                   .andExpect(status().isCreated())
+                   .andExpect(jsonPath("$.identifier").isNotEmpty());
+
+            verifyNoInteractions(outboundBusinessMessageReceiverService);
+        }
+
+        @Test
+        void should_return_400_when_the_payload_is_invalid() throws Exception {
+            var request = ConnectorEvidenceTriggerMessageRequest
+                .builder()
+                .evidenceType(null)
+                .identifiers(buildValidEvidenceTriggerRequest().identifiers())
+                .build();
+
+            mockMvc.perform(post(EVIDENCE_TRIGGER_URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(
+                outboundBusinessMessageReceiverService,
+                outboundEvidenceMessageReceiverService
+            );
+        }
     }
 }

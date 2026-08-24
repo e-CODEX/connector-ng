@@ -14,13 +14,13 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceContextConfiguration;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.ConnectorMessageRejectionReason;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +45,10 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles({"evidence", "dss"})
 @SpringBootTest(classes = EvidenceContextConfiguration.class)
 @Import(ConnectorEvidenceToolkitImplTest.MockAttachmentBeans.class)
+@DisplayName("ConnectorEvidenceToolkit")
 class ConnectorEvidenceToolkitImplTest {
     private final Map<String, byte[]> storedContent = new ConcurrentHashMap<>();
+
     @Autowired
     private ConnectorEvidenceToolkit evidenceToolkit;
     @Autowired
@@ -56,6 +60,7 @@ class ConnectorEvidenceToolkitImplTest {
     void wireAttachmentStorage() {
         Mockito.reset(attachmentRepository, fileStorageProvider);
         storedContent.clear();
+
         when(attachmentRepository.save(any(ConnectorMessageAttachment.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
         when(fileStorageProvider.save(any(ConnectorMessageAttachment.class), any(byte[].class)))
@@ -69,107 +74,104 @@ class ConnectorEvidenceToolkitImplTest {
             .thenAnswer(invocation -> storedContent.get(invocation.getArgument(0)));
     }
 
-    private byte[] evidenceBytes(ConnectorMessageEvidence evidence) {
-        return evidence.content();
+    @Nested
+    @DisplayName("creating a single evidence")
+    class SingleEvidence {
+        @Test
+        void should_sign_the_submission_acceptance() {
+            var message = messageWithEbmsId("urn:test:ebms:001");
+
+            var evidence = evidenceToolkit.create(
+                message,
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                null
+            );
+
+            assertSigned(evidence);
+        }
+
+        @Test
+        void should_sign_the_submission_rejection() {
+            var message = messageWithEbmsId("urn:test:ebms:002");
+
+            var evidence = evidenceToolkit.create(
+                message,
+                ConnectorEvidenceType.SUBMISSION_REJECTION,
+                ConnectorMessageRejectionReason.BACKEND_REJECTION
+            );
+
+            assertSigned(evidence);
+        }
     }
 
-    @Test
-    void submission_acceptance_contains_enveloped_signature_bytes() {
-        var base = MessageTestFixtures.createOutboundBusinessMessage();
-        var as4 = base.as4Properties().toBuilder()
-                      .ebmsMessageIdentifier("urn:test:ebms:001")
-                      .build();
-        ConnectorMessage message = base.toBuilder().as4Properties(as4).build();
+    @Nested
+    @DisplayName("creating evidence in a chain")
+    class EvidenceChain {
+        @Test
+        void should_sign_every_step_of_the_acceptance_chain() {
+            var message = messageWithEbmsId("urn:test:ebms:chain");
 
-        var evidence = evidenceToolkit.create(
-            message,
-            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-            null
-        );
+            var chain = new ArrayList<ConnectorMessageEvidence>();
+            for (var step : List.of(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
+                ConnectorEvidenceType.DELIVERY,
+                ConnectorEvidenceType.RETRIEVAL
+            )) {
+                var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
 
-        byte[] bytes = evidenceBytes(evidence);
-        assertThat(bytes).isNotNull();
-        assertThat(bytes.length).isPositive();
-        String asUtf8 = new String(bytes, StandardCharsets.UTF_8);
-        assertThat(asUtf8).contains("ds:Signature");
+                var next = evidenceToolkit.create(withPrior, step, null);
+
+                assertThat(next.type()).isEqualTo(step);
+                assertSigned(next);
+                chain.add(next);
+            }
+        }
+
+        @Test
+        void should_sign_the_non_delivery_after_a_relay_chain() {
+            var message = messageWithEbmsId("urn:test:ebms:reject-chain");
+
+            var chain = new ArrayList<ConnectorMessageEvidence>();
+            for (var step : List.of(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
+            )) {
+                var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
+                chain.add(evidenceToolkit.create(withPrior, step, null));
+            }
+
+            var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
+            var evidence = evidenceToolkit.create(
+                withPrior,
+                ConnectorEvidenceType.NON_DELIVERY,
+                ConnectorMessageRejectionReason.UNREACHABLE
+            );
+
+            assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.NON_DELIVERY);
+            assertSigned(evidence);
+        }
     }
 
-    @Test
-    void submission_rejection_contains_enveloped_signature_bytes() {
-        var base = MessageTestFixtures.createOutboundBusinessMessage();
-        var as4 = base.as4Properties().toBuilder()
-                      .ebmsMessageIdentifier("urn:test:ebms:002")
+    private ConnectorBusinessMessage messageWithEbmsId(String ebmsMessageIdentifier) {
+        var base = BusinessMessageTestFixtures.createOutboundMessage();
+        var as4 = base.as4Properties()
+                      .toBuilder()
+                      .ebmsMessageIdentifier(ebmsMessageIdentifier)
                       .build();
-        ConnectorMessage message = base.toBuilder().as4Properties(as4).build();
+        return base.toBuilder().as4Properties(as4).build();
+    }
 
-        var evidence = evidenceToolkit.create(
-            message,
-            ConnectorEvidenceType.SUBMISSION_REJECTION,
-            ConnectorMessageRejectionReason.BACKEND_REJECTION
-        );
+    private void assertSigned(ConnectorMessageEvidence evidence) {
+        var bytes = evidence.content();
 
-        byte[] bytes = evidenceBytes(evidence);
-        assertThat(bytes).isNotNull();
-        assertThat(bytes.length).isPositive();
+        assertThat(bytes).isNotEmpty();
         assertThat(new String(bytes, StandardCharsets.UTF_8)).contains("ds:Signature");
-    }
-
-    @Test
-    void each_step_in_submission_relay_delivery_retrieval_chain_produces_signed_evidence() {
-        var base = MessageTestFixtures.createOutboundBusinessMessage();
-        var as4 = base.as4Properties().toBuilder()
-                      .ebmsMessageIdentifier("urn:test:ebms:chain")
-                      .build();
-        var message = base.toBuilder().as4Properties(as4).build();
-
-        var chain = new ArrayList<ConnectorMessageEvidence>();
-        for (var step : List.of(
-            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-            ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE,
-            ConnectorEvidenceType.DELIVERY,
-            ConnectorEvidenceType.RETRIEVAL
-        )) {
-            var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
-            var next = evidenceToolkit.create(withPrior, step, null);
-            assertThat(next.type()).isEqualTo(step);
-            byte[] bytes = evidenceBytes(next);
-            assertThat(bytes).isNotEmpty();
-            assertThat(new String(bytes, StandardCharsets.UTF_8)).contains("ds:Signature");
-            chain.add(next);
-        }
-    }
-
-    @Test
-    void non_delivery_after_relay_chain_contains_enveloped_signature_bytes() {
-        var base = MessageTestFixtures.createOutboundBusinessMessage();
-        var as4 = base.as4Properties().toBuilder()
-                      .ebmsMessageIdentifier("urn:test:ebms:reject-chain")
-                      .build();
-        var message = base.toBuilder().as4Properties(as4).build();
-
-        var chain = new ArrayList<ConnectorMessageEvidence>();
-        for (var step : List.of(
-            ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
-            ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
-        )) {
-            var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
-            chain.add(evidenceToolkit.create(withPrior, step, null));
-        }
-
-        var withPrior = message.toBuilder().evidences(new ArrayList<>(chain)).build();
-        var evidence = evidenceToolkit.create(
-            withPrior,
-            ConnectorEvidenceType.NON_DELIVERY,
-            ConnectorMessageRejectionReason.UNREACHABLE
-        );
-
-        assertThat(evidence.type()).isEqualTo(ConnectorEvidenceType.NON_DELIVERY);
-        assertThat(new String(evidenceBytes(evidence), StandardCharsets.UTF_8)).contains(
-            "ds:Signature");
     }
 
     @TestConfiguration
     static class MockAttachmentBeans {
+
         @Bean
         @Primary
         ConnectorMessageAttachmentRepository attachmentRepository() {

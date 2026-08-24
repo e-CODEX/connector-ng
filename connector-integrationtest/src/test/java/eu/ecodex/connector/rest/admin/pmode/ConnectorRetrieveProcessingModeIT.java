@@ -15,15 +15,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
+@DisplayName("ConnectorRetrieveProcessingModeIT REST")
 @Sql(
-        statements = "DELETE FROM connector_business_domains WHERE id > 0",
-        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
+    statements = "DELETE FROM connector_business_domains WHERE id > 0",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveProcessingModeIT extends AbstractIntegrationTest {
     @Autowired
@@ -36,13 +38,13 @@ public class ConnectorRetrieveProcessingModeIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql"
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql"
     })
-    void should_retrieve_a_connector_p_mode_successfully() {
+    void should_retrieve_connector_pmode() {
         var uuid = "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf";
         apiClient.get()
                  .uri("/api/v1/admin/processing-modes/" + uuid)
@@ -63,7 +65,7 @@ public class ConnectorRetrieveProcessingModeIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void should_throw_404_not_found_when_retrieving_a_non_existing_p_mode() {
+    void should_return_404_when_retrieving_non_existing_pmode() {
         var uuid = "ccafa470-c32b-4d69-be24-dbbf1b9fcad1";
         apiClient.get()
                  .uri("/api/v1/admin/processing-modes/" + uuid)

@@ -18,6 +18,7 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import lombok.Builder;
+import lombok.NonNull;
 
 
 /**
@@ -27,14 +28,13 @@ import lombok.Builder;
  * including message identifiers and information about the sender, recipient, and involved parties.
  *
  * <p>Instances of this record are used as part of the
- * {@link ConnectorMessage} to store the AS4-specific properties for message tracking, routing, and
- * processing purposes.
+ * {@link ConnectorBusinessMessage} to store the AS4-specific properties for message tracking,
+ * routing, and processing purposes.
  *
  * @param ebmsMessageIdentifier  The unique uuid of the ebMS message. Maybe null.
- * @param referenceToIdentifier  The uuid of a referenced message, if applicable. Maybe
+ * @param referenceToIdentifier  The uuid of a referenced message, if applicable. Maybe null.
+ * @param conversationIdentifier The uuid of the conversation to which this message belongs. Maybe
  *                               null.
- * @param conversationIdentifier The uuid of the conversation to which this message belongs.
- *                               Maybe null.
  * @param originalSender         The original sender uuid for the message. Must not be blank.
  * @param finalRecipient         The final recipient uuid for the message. Must not be blank.
  * @param service                The service associated with this message. Must not be null.
@@ -45,25 +45,25 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageAS4Properties(
-        @Nullable String ebmsMessageIdentifier,
-        @Nullable String referenceToIdentifier,
-        @Nullable String conversationIdentifier,
-        @NotBlank String originalSender,
-        @NotBlank String finalRecipient,
-        @Nullable ConnectorService service,
-        @Nullable ConnectorAction action,
-        @Nullable ConnectorParty fromParty,
-        @Nullable ConnectorParty toParty
+    @Nullable String ebmsMessageIdentifier,
+    @Nullable String referenceToIdentifier,
+    @Nullable String conversationIdentifier,
+    @NotBlank String originalSender,
+    @NotBlank String finalRecipient,
+    @NonNull ConnectorService service,
+    @NonNull ConnectorAction action,
+    @NonNull ConnectorParty fromParty,
+    @NonNull ConnectorParty toParty
 ) implements Serializable {
     @Override
     @Nonnull
     public String toString() {
         return String.format(
-                "{ebmsMessageIdentifier=%s, referenceToIdentifier=%s, conversationIdentifier=%s, "
+            "{ebmsMessageIdentifier=%s, referenceToIdentifier=%s, conversationIdentifier=%s, "
                 + "originalSender=%s, finalRecipient=%s, service=%s, action=%s, fromParty=%s, "
                 + "toParty=%s}",
-                ebmsMessageIdentifier, referenceToIdentifier, conversationIdentifier,
-                originalSender, finalRecipient, service, action, fromParty, toParty
+            ebmsMessageIdentifier, referenceToIdentifier, conversationIdentifier,
+            originalSender, finalRecipient, service, action, fromParty, toParty
         );
     }
 }

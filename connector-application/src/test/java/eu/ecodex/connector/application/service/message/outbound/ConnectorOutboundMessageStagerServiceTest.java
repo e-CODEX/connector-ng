@@ -16,18 +16,16 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessageException;
-import eu.ecodex.connector.application.port.spi.ConnectorEventPublisher;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -38,23 +36,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-
 @DisplayName("ConnectorOutboundMessageStagerService")
 public class ConnectorOutboundMessageStagerServiceTest {
     @Mock
-    private ConnectorEventPublisher outboundMessagePipelinePublisher;
+    private ConnectorMessageEventPublisher<ConnectorBusinessMessage> outboundMessagePipelinePublisher;
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
-    @Mock
-    private ConnectorMessageBusinessContentRepository businessContentRepository;
 
     @InjectMocks
     private ConnectorOutboundMessageStagerService outboundMessageStagerService;
 
-    private ConnectorMessage createMessage() {
-        var message = MessageTestFixtures.createOutboundBusinessMessage();
+    private ConnectorBusinessMessage createMessage() {
+        var message = BusinessMessageTestFixtures.createOutboundMessage();
 
         return message
             .toBuilder()
@@ -72,10 +67,8 @@ public class ConnectorOutboundMessageStagerServiceTest {
             when(attachmentRepository.findByIdentifier(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
             doNothing().when(attachmentRepository).attachToMessage(any(), any());
-            when(businessContentRepository.save(any(), any()))
-                .thenReturn(MessageContentTestFixtures.createContent());
 
-            outboundMessageStagerService.stage(createMessage());
+            outboundMessageStagerService.execute(createMessage());
 
             verify(messageRepository).save(any());
             verify(attachmentRepository, times(3)).findByIdentifier(any());
@@ -95,38 +88,22 @@ public class ConnectorOutboundMessageStagerServiceTest {
             when(attachmentRepository.findByIdentifier(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
             doNothing().when(attachmentRepository).attachToMessage(any(), any());
-            when(businessContentRepository.save(any(), any()))
-                .thenReturn(MessageContentTestFixtures.createContent());
 
-            outboundMessageStagerService.stage(createMessage());
+            outboundMessageStagerService.execute(createMessage());
 
             verify(outboundMessagePipelinePublisher).publish(any());
         }
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Nested
     @DisplayName("when the message cannot be staged")
     class WhenTheMessageCannotBeStaged {
         @Test
-        void should_fail_when_the_message_is_an_evidence_message() {
-            when(messageRepository.save(any())).thenReturn(
-                createMessage()
-                    .toBuilder()
-                    .attachments(null)
-                    .build()
-            );
-
+        void should_fail_if_the_message_is_null() {
             assertThrows(
-                ConnectorMessageException.class,
-                () -> outboundMessageStagerService.stage(
-                    MessageTestFixtures.createEvidenceMessage()
-                )
-            );
-
-            verifyNoInteractions(
-                attachmentRepository,
-                businessContentRepository,
-                outboundMessagePipelinePublisher
+                NullPointerException.class,
+                () -> outboundMessageStagerService.execute(null)
             );
         }
 
@@ -137,32 +114,13 @@ public class ConnectorOutboundMessageStagerServiceTest {
 
             assertThrows(
                 IllegalStateException.class,
-                () -> outboundMessageStagerService.stage(createMessage())
+                () -> outboundMessageStagerService.execute(createMessage())
             );
 
             verify(messageRepository).save(any());
             verify(attachmentRepository).findByIdentifier(any());
             verify(attachmentRepository, never()).attachToMessage(any(), any());
             verify(attachmentRepository, never()).updateType(any(), any());
-        }
-
-        @Test
-        void should_fail_when_the_business_content_is_null() {
-            when(messageRepository.save(any())).thenReturn(createMessage());
-
-            var message = createMessage()
-                .toBuilder()
-                .businessContent(null)
-                .attachments(null)
-                .build();
-
-            assertThrows(
-                ConnectorMessageException.class,
-                () -> outboundMessageStagerService.stage(message)
-            );
-
-            verify(messageRepository).save(any());
-            verify(businessContentRepository, never()).save(any(), any());
         }
 
         @Test
@@ -182,11 +140,10 @@ public class ConnectorOutboundMessageStagerServiceTest {
 
             assertThrows(
                 ConnectorMessageException.class,
-                () -> outboundMessageStagerService.stage(message)
+                () -> outboundMessageStagerService.execute(message)
             );
 
             verify(messageRepository).save(any());
-            verify(businessContentRepository, never()).save(any(), any());
         }
     }
 }

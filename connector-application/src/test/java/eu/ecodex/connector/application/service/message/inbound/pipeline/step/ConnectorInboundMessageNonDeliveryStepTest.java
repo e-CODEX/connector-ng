@@ -16,13 +16,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.MessageTestFixtures;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +34,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * Unit tests for the {@code ConnectorInboundMessageNonDeliveryStep}.
  */
 @SuppressWarnings("DataFlowIssue")
+
 @ExtendWith(MockitoExtension.class)
+@DisplayName("ConnectorInboundMessageNonDeliveryStep")
 public class ConnectorInboundMessageNonDeliveryStepTest {
     @Mock
     private ConnectorEvidenceMessageCreator evidenceMessageCreatorService;
@@ -46,30 +49,30 @@ public class ConnectorInboundMessageNonDeliveryStepTest {
     private ConnectorInboundMessageNonDeliveryStep nonDeliveryCreationStep;
 
     @Test
-    void should_create_inbound_message_non_delivery_evidence_successfully() {
-        var inboundMessage = MessageTestFixtures.createInboundBusinessMessage();
+    void should_create_the_non_delivery_evidence() {
+        var inboundMessage = BusinessMessageTestFixtures.createInboundMessage();
         var evidence = EvidenceTestFixtures.createNonDeliveryEvidence();
 
         when(evidenceCreatorService.createFailure(any(), any(), any())).thenReturn(evidence);
         when(evidenceMessageCreatorService.create(any(), any()))
-            .thenReturn(MessageTestFixtures.createNonDeliveryEvidenceMessage());
+            .thenReturn(
+                EvidenceMessageTestFixtures.createNonDeliveryEvidenceMessage()
+                                           .toBuilder()
+                                           .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+                                           .build()
+            );
         doNothing().when(evidenceVerifierService).verify(any(), any());
 
         var outputMessage = nonDeliveryCreationStep.execute(inboundMessage);
 
         assertThat(outputMessage).isNotNull();
-        assertThat(outputMessage.isEvidenceMessage()).isTrue();
-        assertThat(outputMessage.evidences()).isNotEmpty();
-        assertThat(outputMessage.evidences()).hasSize(1);
-        assertThat(outputMessage.evidences().getFirst().type())
-            .isEqualTo(ConnectorEvidenceType.NON_DELIVERY);
         assertThat(outputMessage.direction()).isNotEqualTo(inboundMessage.direction());
         assertThat(outputMessage.direction())
             .isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
     }
 
     @Test
-    void should_throw_exception_when_message_is_null() {
+    void should_fail_when_the_message_is_null() {
         assertThrows(
             NullPointerException.class,
             () -> nonDeliveryCreationStep.execute(null)

@@ -66,7 +66,7 @@ class ConnectorRefreshUserTokenServiceTest {
 
         when(refreshTokenRepository.findByUserUuidAndRevoked(any(), anyBoolean())).thenReturn(
             List.of());
-        when(authenticationTokenProvider.refreshTokenExpires()).thenReturn(duration);
+        when(authenticationTokenProvider.getRefreshTokenExpiresIn()).thenReturn(duration);
         when(clock.instant()).thenReturn(loginTime);
         when(refreshTokenRepository.save(any())).thenReturn(expectedRefreshToken);
 
@@ -97,7 +97,7 @@ class ConnectorRefreshUserTokenServiceTest {
 
         when(refreshTokenRepository.findByUserUuidAndRevoked(any(), anyBoolean())).thenReturn(
             List.of(ConnectorRefreshToken.builder().build()));
-        when(authenticationTokenProvider.refreshTokenExpires()).thenReturn(duration);
+        when(authenticationTokenProvider.getRefreshTokenExpiresIn()).thenReturn(duration);
         when(clock.instant()).thenReturn(loginTime);
         when(refreshTokenRepository.save(any())).thenReturn(expectedRefreshToken);
 
@@ -202,7 +202,7 @@ class ConnectorRefreshUserTokenServiceTest {
         when(refreshTokenRepository.findByToken(any())).thenReturn(
             Optional.of(expectedRefreshToken));
         when(authenticationTokenProvider.generateToken(any())).thenReturn("new-access-token");
-        when(authenticationTokenProvider.accessTokenExpiresInSeconds()).thenReturn(
+        when(authenticationTokenProvider.getAccessTokenExpiresInSeconds()).thenReturn(
             accessTokenDuration.getSeconds());
 
         // When
@@ -217,7 +217,7 @@ class ConnectorRefreshUserTokenServiceTest {
         );
         verify(refreshTokenRepository).findByToken(token);
         verify(authenticationTokenProvider).generateToken(user);
-        verify(authenticationTokenProvider).accessTokenExpiresInSeconds();
+        verify(authenticationTokenProvider).getAccessTokenExpiresInSeconds();
 
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
     }

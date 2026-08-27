@@ -26,7 +26,7 @@ import java.time.Instant;
  * consistently handle refresh token details within the system.
  */
 public record ConnectorRefreshToken(
-        String uuid,
+        String token,
         ConnectorUser user,
         Instant expiresAt,
         Instant createdAt,
@@ -46,7 +46,7 @@ public record ConnectorRefreshToken(
      */
     public Builder toBuilder() {
         return new Builder()
-                .uuid(uuid)
+                .token(token)
                 .user(user)
                 .expiresAt(expiresAt)
                 .createdAt(createdAt)
@@ -65,14 +65,14 @@ public record ConnectorRefreshToken(
      * instance can be created with the desired state.
      */
     public static class Builder {
-        private String uuid;
+        private String token;
         private ConnectorUser user;
         private boolean revoked;
         private Instant expiresAt;
         private Instant createdAt;
 
-        public Builder uuid(String uuid) {
-            this.uuid = uuid;
+        public Builder token(String token) {
+            this.token = token;
             return this;
         }
 
@@ -97,7 +97,7 @@ public record ConnectorRefreshToken(
         }
 
         public ConnectorRefreshToken build() {
-            return new ConnectorRefreshToken(uuid, user, expiresAt, createdAt, revoked);
+            return new ConnectorRefreshToken(token, user, expiresAt, createdAt, revoked);
         }
     }
 }

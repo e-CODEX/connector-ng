@@ -61,21 +61,17 @@ public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenPr
     @Override
     public String generateToken(ConnectorUser connectorUser) {
         var user = new ConnectorUserDetails(connectorUser);
-        return jwtTokenService.generateToken(user);
+        return jwtTokenService.generateAccessToken(user);
     }
 
     @Override
-    public long accessTokenExpiresInSeconds() {
-        return jwtProperties
-                .getExpiration()
-                .toSeconds();
+    public long getAccessTokenExpiresInSeconds() {
+        return jwtProperties.getExpiration().toSeconds();
     }
 
     @Override
-    public Duration refreshTokenExpires() {
-        return jwtProperties
-                .getRefreshToken()
-                .expiration();
+    public Duration getRefreshTokenExpiresIn() {
+        return jwtProperties.getRefreshToken().expiration();
     }
 
 }

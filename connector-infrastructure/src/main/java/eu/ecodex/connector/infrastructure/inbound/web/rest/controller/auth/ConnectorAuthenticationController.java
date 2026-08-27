@@ -22,10 +22,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -72,8 +71,8 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     }
 
     @Override
-    public void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-                       @AuthenticationPrincipal ConnectorUserDetails userDetails,
+    @PreAuthorize("isAuthenticated()")
+    public void logout(@AuthenticationPrincipal ConnectorUserDetails userDetails,
                        @RequestBody ConnectorLogoutRequest request) {
         logoutUserService.logout(userDetails.getUserId(), request.refreshToken());
         log.info("Successfully logged out");

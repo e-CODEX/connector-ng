@@ -52,7 +52,7 @@ public interface ConnectorAuthenticationTokenProvider {
      *
      * @return the expiration duration of the access token in seconds.
      */
-    long accessTokenExpiresInSeconds();
+    long getAccessTokenExpiresInSeconds();
 
     /**
      * Retrieves the duration in seconds for which a refresh token remains valid.
@@ -61,6 +61,6 @@ public interface ConnectorAuthenticationTokenProvider {
      *
      * @return the expiration duration of the refresh token in seconds.
      */
-    Duration refreshTokenExpires();
+    Duration getRefreshTokenExpiresIn();
 
 }

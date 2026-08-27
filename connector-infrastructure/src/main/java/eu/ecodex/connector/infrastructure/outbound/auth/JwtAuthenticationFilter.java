@@ -79,9 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource()
                 .buildDetails(request));
 
-            SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
             log.info("JWT authentication set: principal={}, authenticated={}, "
                     + "authorities={}",

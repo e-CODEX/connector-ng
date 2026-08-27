@@ -182,6 +182,6 @@ public abstract class AbstractIntegrationTest {
                 .randomUUID()
                 .toString())
             .build());
-        return jwtTokenService.generateToken(user);
+        return jwtTokenService.generateAccessToken(user);
     }
 }

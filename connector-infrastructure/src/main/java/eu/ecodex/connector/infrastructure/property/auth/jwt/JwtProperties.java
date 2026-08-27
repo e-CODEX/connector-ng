@@ -11,10 +11,14 @@
 package eu.ecodex.connector.infrastructure.property.auth.jwt;
 
 import java.time.Duration;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
 
 /**
  * Configuration properties for the JWT authentication.
@@ -22,7 +26,10 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
+@AllArgsConstructor
+@NoArgsConstructor
 @ConfigurationProperties(prefix = "connector.auth.security.jwt")
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class JwtProperties {
     String secret;
     Duration expiration;

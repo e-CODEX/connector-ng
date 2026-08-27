@@ -81,8 +81,8 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
             var accessToken = authenticationTokenProvider.generateToken(authenticatedUser);
             var refreshToken = refreshTokenService.create(authenticatedUser);
 
-            return new ConnectorLoginResponse(accessToken, refreshToken.uuid(),
-                    authenticationTokenProvider.accessTokenExpiresInSeconds());
+            return new ConnectorLoginResponse(accessToken, refreshToken.token(),
+                    authenticationTokenProvider.getAccessTokenExpiresInSeconds());
 
         } catch (AuthenticationException exception) {
             throw new ConnectorUserBadCredentialsException("Invalid username or password");

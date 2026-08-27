@@ -67,7 +67,7 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
             .user(user)
             .expiresAt(clock
                 .instant()
-                .plus(authenticationTokenProvider.refreshTokenExpires()))
+                .plus(authenticationTokenProvider.getRefreshTokenExpiresIn()))
             .build();
 
         return repository.save(refreshToken);
@@ -105,7 +105,7 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
         var accessToken = authenticationTokenProvider.generateToken(user);
 
         return new ConnectorLoginResponse(accessToken, token,
-            authenticationTokenProvider.accessTokenExpiresInSeconds()
+            authenticationTokenProvider.getAccessTokenExpiresInSeconds()
         );
     }
 

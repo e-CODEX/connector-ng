@@ -18,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Service implementation for encoding passwords of {@link ConnectorUser} entities.
@@ -46,16 +47,15 @@ public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
             return user;
         }
         var encodedPassword = encodePassword(user.password());
-        return user
-            .toBuilder()
+        return user.toBuilder()
             .password(encodedPassword)
             .build();
     }
 
     @Override
     public String encodePassword(String password) {
-        if (password == null) {
-            return null;
+        if (!StringUtils.hasText(password)) {
+            return password;
         }
         return passwordEncoder.encode(password);
     }

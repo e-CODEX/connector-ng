@@ -19,12 +19,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -72,8 +70,7 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
 
     })
-    void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-                @AuthenticationPrincipal ConnectorUserDetails userDetails,
+    void logout(@AuthenticationPrincipal ConnectorUserDetails userDetails,
                 @RequestBody ConnectorLogoutRequest request);
 
 }

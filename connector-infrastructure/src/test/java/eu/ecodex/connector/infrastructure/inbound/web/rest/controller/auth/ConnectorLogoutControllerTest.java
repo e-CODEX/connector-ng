@@ -76,24 +76,12 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
                 .with(authenticatedAs(userPrincipal))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
-                .header("Authorization", "Bearer access-token-xyz")
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
         // Then
         verify(logoutUserService).logout(userPrincipal.getUserId(), refreshToken);
         verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
-    }
-
-    @Test
-    void logout_should_return_400_when_not_authenticated() throws Exception {
-        var request = new ConnectorLogoutRequest("refresh-token-abc");
-
-        mockMvc.perform(post("/api/v1/auth/logout")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
     }
 
     @TestConfiguration

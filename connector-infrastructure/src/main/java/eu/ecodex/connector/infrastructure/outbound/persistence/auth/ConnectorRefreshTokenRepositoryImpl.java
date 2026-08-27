@@ -76,7 +76,7 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
                                                  ConnectorUserEntity user) {
 
         return ConnectorRefreshTokenEntity.builder()
-                .token(domain.uuid())
+                .token(domain.token())
                 .revoked(domain.revoked())
                 .user(user)
                 .expiresAt(domain.expiresAt())
@@ -86,7 +86,7 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
 
     private ConnectorRefreshToken toDomain(ConnectorRefreshTokenEntity entity) {
         return ConnectorRefreshToken.builder()
-                .uuid(entity.getToken())
+                .token(entity.getToken())
                 .user(ConnectorUserMapper.toDomain(entity.getUser()))
                 .revoked(entity.isRevoked())
                 .createdAt(entity.getCreatedAt())

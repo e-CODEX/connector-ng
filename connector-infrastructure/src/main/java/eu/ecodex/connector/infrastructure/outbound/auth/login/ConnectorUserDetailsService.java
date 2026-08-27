@@ -45,7 +45,7 @@ public class ConnectorUserDetailsService implements UserDetailsService {
     public @NonNull UserDetails loadUserByUsername(@NonNull String username)
             throws ConnectorUserNotFoundException {
 
-        ConnectorUser connectorUser = retrieveUser.getByUsername(username);
+        var connectorUser = retrieveUser.getByUsername(username);
         return new ConnectorUserDetails(connectorUser);
     }
 }

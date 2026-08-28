@@ -11,6 +11,8 @@
 package eu.ecodex.connector.infrastructure.property.common;
 
 import eu.ecodex.connector.domain.model.security.KeystoreType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,8 +24,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class KeystoreProperties {
+    @NotBlank
     private String path;
+    @NotBlank
     private String password;
+    @NotNull
     private KeystoreType type = KeystoreType.JKS;
 
     @Override

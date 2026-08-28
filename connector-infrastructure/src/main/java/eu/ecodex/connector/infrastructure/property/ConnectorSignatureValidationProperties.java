@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.property;
 
 import eu.ecodex.connector.infrastructure.property.certificate.ConnectorCertificateVerifierProperties;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,5 +21,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ConnectorSignatureValidationProperties extends ConnectorCertificateVerifierProperties {
+    @NotBlank
     private String constraintsXml = "classpath:/102853/constraint.xml";
 }

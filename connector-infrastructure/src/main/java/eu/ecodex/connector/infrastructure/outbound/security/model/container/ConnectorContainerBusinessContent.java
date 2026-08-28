@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.security.model.container;
 
 import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorContainerFileDefinitions;
 import eu.europa.esig.dss.model.DSSDocument;
+import eu.europa.esig.dss.spi.DSSUtils;
 import java.util.LinkedList;
 import java.util.List;
 import lombok.Getter;
@@ -88,8 +89,8 @@ public class ConnectorContainerBusinessContent {
     }
 
     private boolean hasData(@NonNull final DSSDocument document) {
-        try (var in = document.openStream()) {
-            return in.read() != -1;
+        try {
+            return !DSSUtils.isEmpty(document);
         } catch (final Exception e) {
             log.debug("Failed to open stream for document [{}]", document.getName(), e);
             return false;

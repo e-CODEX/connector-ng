@@ -26,10 +26,12 @@ import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,79 +49,19 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute("DELETE FROM connector_message_attachments");
-        jdbcTemplate.execute("DELETE FROM connector_messages");
-        jdbcTemplate.execute("DELETE FROM connector_processing_modes");
-        jdbcTemplate.execute("DELETE FROM connector_business_domains");
-    }
-
-    @Test
-    void should_build_asics_container_sign_it_and_push_for_process_successfully() {
-        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
-                                                                           .toString());
-        when(fileStorageProvider.findByIdentifier(any()))
-            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
-
-        var message = createMessage();
-
-        var outputMessage = securityToolkit.buildContainer(message);
-
-        assertThat(outputMessage).isNotNull();
-    }
-
-    @Test
-    void should_build_asics_container_sign_it_and_push_for_process_successfully_2() {
-        // message with attachment
-        when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
-                                                                           .toString());
-        when(fileStorageProvider.findByIdentifier(any()))
-            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
-            .thenReturn(FileTestFixtures.readAsBytes("raw/attachment/Attachment.png"));
-
-        var message = createMessageWithAttachment();
-
-        var outputMessage = securityToolkit.buildContainer(message);
-
-        assertThat(outputMessage).isNotNull();
-    }
-
-    @Test
-    @Sql("classpath:sql/business-domain.sql")
-    @Sql("classpath:sql/processing-mode.sql")
-    @Sql("classpath:sql/message.sql")
-    @Sql("classpath:sql/attachment.sql")
-    @Disabled("This test is not working, but it should")
-    void should_throw_exception_when_building_asics_container_if_the_message_has_two_identical_attachments() {
-        // message with attachment
-        var message = createMessageWithIdenticalAttachmentNames();
-
-        assertThrows(
-            ConnectorContainerException.class,
-            () -> securityToolkit.buildContainer(message)
-        );
-    }
-
-    @Test
-    void should_throw_exception_when_building_asics_container_if_the_s3_provider_is_not_available() {
-        // message with attachment
-        doThrow(RuntimeException.class).when(fileStorageProvider).save(any(), (Path) any());
-        when(fileStorageProvider.findByIdentifier(any()))
-            .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
-
-        var message = createMessage();
-
-        assertThrows(
-            ConnectorContainerException.class,
-            () -> securityToolkit.buildContainer(message)
-        );
-    }
-
-    @Test
-    void should_throw_null_pointer_exception_when_building_asics_container_if_the_message_is_null() {
-        assertThrows(
-            NullPointerException.class,
-            () -> securityToolkit.buildContainer(null)
-        );
+        jdbcTemplate.execute((Connection con) -> {
+            try (var statement = con.createStatement()) {
+                for (String table : List.of(
+                    "connector_message_attachments",
+                    "connector_messages",
+                    "connector_processing_modes",
+                    "connector_business_domains"
+                )) {
+                    statement.execute("DELETE FROM %s WHERE id IS NOT NULL".formatted(table));
+                }
+            }
+            return null;
+        });
     }
 
     private ConnectorBusinessMessage createMessage() {
@@ -165,4 +107,80 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
             )
             .build();
     }
+
+    @Nested
+    @DisplayName("When building a container")
+    class BuildContainer {
+        @Test
+        void should_build_container_when_message_has_no_attachments() {
+            when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
+                                                                               .toString());
+            when(fileStorageProvider.findByIdentifier(any()))
+                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
+
+            var message = createMessage();
+
+            var outputMessage = securityToolkit.buildContainer(message);
+
+            assertThat(outputMessage).isNotNull();
+        }
+
+        @Test
+        void should_build_container_when_message_has_an_attachment() {
+            when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
+                                                                               .toString());
+            when(fileStorageProvider.findByIdentifier(any()))
+                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
+                .thenReturn(FileTestFixtures.readAsBytes("raw/attachment/Attachment.png"));
+
+            var message = createMessageWithAttachment();
+
+            var outputMessage = securityToolkit.buildContainer(message);
+
+            assertThat(outputMessage).isNotNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("When the container cannot be built")
+    class BuildContainerFailures {
+        @Test
+        @Sql({
+            "classpath:sql/business-domain.sql",
+            "classpath:sql/processing-mode.sql",
+            "classpath:sql/message.sql",
+            "classpath:sql/attachment.sql"
+        })
+        void should_fail_when_message_has_duplicate_attachment_names() {
+            var message = createMessageWithIdenticalAttachmentNames();
+
+            assertThrows(
+                ConnectorContainerException.class,
+                () -> securityToolkit.buildContainer(message)
+            );
+        }
+
+        @Test
+        void should_fail_when_file_storage_provider_is_unavailable() {
+            doThrow(RuntimeException.class).when(fileStorageProvider).save(any(), (Path) any());
+            when(fileStorageProvider.findByIdentifier(any()))
+                .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
+
+            var message = createMessage();
+
+            assertThrows(
+                ConnectorContainerException.class,
+                () -> securityToolkit.buildContainer(message)
+            );
+        }
+
+        @Test
+        void should_fail_when_message_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> securityToolkit.buildContainer(null)
+            );
+        }
+    }
 }
+

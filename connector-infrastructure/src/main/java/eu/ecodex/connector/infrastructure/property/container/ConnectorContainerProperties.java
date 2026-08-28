@@ -10,18 +10,24 @@
 
 package eu.ecodex.connector.infrastructure.property.container;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for the connector container.
  */
 @Getter
 @Setter
+@Validated
 @Configuration
 @ConfigurationProperties(prefix = "connector.container")
 public class ConnectorContainerProperties {
+    @Valid
+    @NotNull
     private ContainerSignatureProperties signature;
 }

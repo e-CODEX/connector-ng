@@ -17,8 +17,8 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorAsicContainerBuilder;
-import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorAsicContainerValidator;
+import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorContainerBuilder;
+import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorContainerValidator;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainer;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -38,27 +38,27 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
-    private final ConnectorAsicContainerBuilder asicContainerBuilder;
-    private final ConnectorAsicContainerValidator asicContainerValidator;
+public class ConnectorDssSecurityToolkit implements ConnectorSecurityToolkit {
+    private final ConnectorContainerBuilder containerBuilder;
+    private final ConnectorContainerValidator containerValidator;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
 
     /**
      * Constructor for the ConnectorSecurityToolkitImpl.
      *
-     * @param asicContainerBuilder   the builder used for creating ASiC containers
-     * @param asicContainerValidator the validator used for validating ASiC containers
-     * @param attachmentRepository   the repository for managing message attachments
-     * @param fileStorageProvider    the provider for handling file storage operations
+     * @param containerBuilder     the builder used for creating ASiC containers
+     * @param containerValidator   the validator used for validating ASiC containers
+     * @param attachmentRepository the repository for managing message attachments
+     * @param fileStorageProvider  the provider for handling file storage operations
      */
-    public ConnectorSecurityToolkitImpl(
-        ConnectorAsicContainerBuilder asicContainerBuilder,
-        ConnectorAsicContainerValidator asicContainerValidator,
+    public ConnectorDssSecurityToolkit(
+        ConnectorContainerBuilder containerBuilder,
+        ConnectorContainerValidator containerValidator,
         ConnectorMessageAttachmentRepository attachmentRepository,
         ConnectorFileStorageProvider fileStorageProvider) {
-        this.asicContainerBuilder = asicContainerBuilder;
-        this.asicContainerValidator = asicContainerValidator;
+        this.containerBuilder = containerBuilder;
+        this.containerValidator = containerValidator;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
     }
@@ -66,21 +66,17 @@ public class ConnectorSecurityToolkitImpl implements ConnectorSecurityToolkit {
     @Override
     public void validateMessage(@NonNull ConnectorBusinessMessage message) {
         log.debug("Validating message [{}] ASIC-S container", message.identifier());
-        this.asicContainerValidator.validate(message);
+        this.containerValidator.validate(message);
     }
 
     @Override
     public ConnectorBusinessMessage buildContainer(@NonNull ConnectorBusinessMessage message) {
         var messageIdentifier = message.identifier();
 
-        if (messageIdentifier == null) {
-            throw new ConnectorContainerException("The message identifier is null");
-        }
-
         try {
             this.validateUniqueAttachmentNames(messageIdentifier);
 
-            var container = this.asicContainerBuilder.createAsicContainer(message);
+            var container = this.containerBuilder.createAsicContainer(message);
             this.saveContainer(messageIdentifier, container);
             this.saveXmlToken(messageIdentifier, container);
 

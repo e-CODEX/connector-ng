@@ -40,7 +40,6 @@ import eu.europa.esig.dss.spi.tsl.TrustedListsCertificateSource;
 import eu.europa.esig.dss.spi.x509.CertificateValidity;
 import eu.europa.esig.dss.validation.SignedDocumentValidator;
 import eu.europa.esig.xmldsig.jaxb.DigestMethodType;
-import java.io.IOException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -58,7 +57,7 @@ import org.springframework.stereotype.Component;
  * This class is responsible for:
  * <ul>
  *     <li>Executing technical validation of the business document</li>
- *     <li>Enriching validation data (e.g. authentication-based handling)</li>
+ *     <li>Enriching validation data (e.g., authentication-based handling)</li>
  *     <li>Constructing the token document metadata (digest, filenames, etc.)</li>
  *     <li>Executing legal validation</li>
  *     <li>Ensuring consistency and completeness of the resulting token</li>
@@ -238,7 +237,7 @@ public class ConnectorTokenValidationGenerator {
      * @return the populated token document descriptor
      */
     private ConnectorTokenDocument createTokenDocument(
-        DSSDocument businessDocument, DSSDocument detachedSignature) throws IOException {
+        DSSDocument businessDocument, DSSDocument detachedSignature) {
         var tokenDocument = new ConnectorTokenDocument();
         tokenDocument.setFilename(businessDocument.getName());
 

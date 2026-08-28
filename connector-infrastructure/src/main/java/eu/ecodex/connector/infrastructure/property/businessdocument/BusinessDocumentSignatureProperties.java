@@ -11,6 +11,8 @@
 package eu.ecodex.connector.infrastructure.property.businessdocument;
 
 import eu.ecodex.connector.infrastructure.property.ConnectorSignatureValidationProperties;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,5 +22,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BusinessDocumentSignatureProperties {
-    private ConnectorSignatureValidationProperties validation;
+    @Valid
+    @NotNull
+    private ConnectorSignatureValidationProperties validation =
+        new ConnectorSignatureValidationProperties();
 }

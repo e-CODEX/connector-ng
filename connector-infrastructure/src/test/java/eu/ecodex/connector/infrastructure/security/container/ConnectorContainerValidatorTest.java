@@ -14,6 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -27,8 +28,10 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorAsicContainerValidator;
 import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorContainerFileDefinitions;
+import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorContainerValidator;
+import eu.ecodex.connector.infrastructure.outbound.security.container.checks.ConnectorContainerDocumentSignatureChecker;
+import eu.ecodex.connector.infrastructure.outbound.security.container.checks.ConnectorMessageContainerChecker;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainer;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainerBusinessContent;
@@ -41,21 +44,35 @@ import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import org.jspecify.annotations.NonNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ConnectorAsicContainerValidator")
-public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
-    private static final String MESSAGE_ID = "msg-001";
+@DisplayName("ConnectorContainerValidator")
+public class ConnectorContainerValidatorTest extends BaseContainerTest {
+    private static final String MESSAGE_ID = "cfd0ff14-2b59-499f-b307-f37df0496d8d@connector.ecodex.eu";
     private static final String ASICS_ID = "asics-attachment-id";
     private static final String XML_TOKEN_ID = "xml-token-attachment-id";
+
+    @MockitoBean
+    private ConnectorContainerDocumentSignatureChecker signatureChecker;
+
+    @MockitoBean(name = "ConnectorContainerChecker")
+    private ConnectorMessageContainerChecker containerChecker;
+    @MockitoBean(name = "ConnectorContainerTokenIssuerChecker")
+    private ConnectorMessageContainerChecker tokenIssuerChecker;
+    @MockitoBean(name = "ConnectorContainerBusinessContentNamesChecker")
+    private ConnectorMessageContainerChecker businessContentNamesChecker;
+    @MockitoBean(name = "ConnectorContainerBusinessContentDigestChecker")
+    private ConnectorMessageContainerChecker businessContentDigestChecker;
 
     @Mock
     private ConnectorMessageBusinessContentRepository businessContentRepository;
@@ -64,10 +81,25 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
 
-    // We subclass to intercept buildContainer and inject a controlled container,
-    // bypassing all DSS/ZIP/XML static utility calls.
-    @InjectMocks
-    private ConnectorAsicContainerValidator validator;
+    private List<ConnectorMessageContainerChecker> checkers;
+    private ConnectorContainerValidator validator;
+
+    @BeforeEach
+    void setUpValidator() {
+        checkers = List.of(
+            containerChecker,
+            tokenIssuerChecker,
+            businessContentNamesChecker,
+            businessContentDigestChecker
+        );
+        validator = new ConnectorContainerValidator(
+            checkers,
+            signatureChecker,
+            businessContentRepository,
+            attachmentRepository,
+            fileStorageProvider
+        );
+    }
 
     private ConnectorMessageAttachment asicsAttachment() {
         return ConnectorMessageAttachment
@@ -113,10 +145,12 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
             .build();
     }
 
-    private ConnectorAsicContainerValidator validatorWithContainer(
+    private ConnectorContainerValidator validatorWithContainer(
         ConnectorContainer container
     ) {
-        return new ConnectorAsicContainerValidator(
+        return new ConnectorContainerValidator(
+            checkers,
+            signatureChecker,
             businessContentRepository,
             attachmentRepository,
             fileStorageProvider
@@ -342,11 +376,12 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
                 ))
             );
 
-            verify(attachmentRepository).save(argThat(attachment ->
-                                                          attachment.type()
-                                                              == ConnectorAttachmentType.PDF_TOKEN
-                                                              && "application/pdf".equals(attachment.contentType())
-            ));
+            verify(attachmentRepository).save(
+                argThat(attachment ->
+                            attachment.type()
+                                == ConnectorAttachmentType.PDF_TOKEN
+                                && "application/pdf".equals(attachment.contentType())
+                ));
 
             verify(attachmentRepository).attachToMessage(
                 argThat(id ->
@@ -415,17 +450,92 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
                 ))
             );
 
-            verify(attachmentRepository).save(argThat(attachment ->
-                                                          attachment.type()
-                                                              == ConnectorAttachmentType.DETACHED_SIGNATURE
-            ));
+            verify(attachmentRepository).save(
+                argThat(attachment -> attachment.type() == ConnectorAttachmentType.DETACHED_SIGNATURE
+                )
+            );
 
             verify(businessContentRepository).assignBusinessDocument(
                 any(),
-                argThat(document ->
-                            document.detachedSignature() != null
-                )
+                argThat(document -> document.detachedSignature() != null)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("container checks")
+    class ContainerChecks {
+        private static @NonNull ConnectorContainer getContainer(ConnectorToken token) {
+            var tokenXml = new InMemoryDocument(
+                "<token/>".getBytes(),
+                ConnectorContainerFileDefinitions.TOKEN_XML_REF
+            );
+            var tokenPdf = new InMemoryDocument(
+                new byte[]{1, 2, 3},
+                ConnectorContainerFileDefinitions.TOKEN_PDF_REF
+            );
+            var asicDocument = new InMemoryDocument(
+                new byte[]{4, 5, 6},
+                ConnectorContainerFileDefinitions.SIGNED_CONTENT_ASIC_REF
+            );
+
+
+            return new ConnectorContainer(
+                new ConnectorContainerBusinessContent(),
+                token,
+                tokenXml,
+                tokenPdf,
+                asicDocument
+            );
+        }
+
+        @Test
+        void should_run_every_check_against_the_container() {
+            var token = mock(ConnectorToken.class);
+
+            var container = getContainer(token);
+
+            validator = validatorWithContainer(container);
+            stubContainerAttachments();
+
+            validator.validate(
+                messageWith(List.of(
+                    asicsAttachment(),
+                    xmlTokenAttachment()
+                ))
+            );
+
+            verify(containerChecker).check(container);
+            verify(tokenIssuerChecker).check(container);
+            verify(businessContentNamesChecker).check(container);
+            verify(businessContentDigestChecker).check(container);
+            verify(signatureChecker).check(
+                container,
+                BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier()
+            );
+        }
+
+        @Test
+        void should_wrap_check_failure_as_container_exception_and_skip_persistence() {
+            var container = minimalContainer();
+            validator = validatorWithContainer(container);
+            stubContainerAttachments();
+
+            doThrow(new IllegalStateException("business content digest mismatch"))
+                .when(businessContentDigestChecker).check(any());
+
+            assertThatThrownBy(() ->
+                                   validator.validate(
+                                       messageWith(List.of(
+                                           asicsAttachment(),
+                                           xmlTokenAttachment()
+                                       ))
+                                   )
+            )
+                .isInstanceOf(ConnectorContainerException.class)
+                .hasCauseInstanceOf(IllegalStateException.class);
+
+            verifyNoInteractions(attachmentRepository, businessContentRepository);
         }
     }
 
@@ -434,7 +544,9 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
     class ContainerBuildingFailures {
         @Test
         void should_wrap_io_exception_as_container_exception() {
-            validator = new ConnectorAsicContainerValidator(
+            validator = new ConnectorContainerValidator(
+                checkers,
+                signatureChecker,
                 businessContentRepository,
                 attachmentRepository,
                 fileStorageProvider
@@ -450,13 +562,11 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
 
             stubContainerAttachments();
 
-            assertThatThrownBy(() ->
-                                   validator.validate(
-                                       messageWith(List.of(
-                                           asicsAttachment(),
-                                           xmlTokenAttachment()
-                                       ))
-                                   )
+            assertThatThrownBy(
+                () ->
+                    validator.validate(
+                        messageWith(List.of(asicsAttachment(), xmlTokenAttachment()))
+                    )
             )
                 .isInstanceOf(ConnectorContainerException.class)
                 .hasCauseInstanceOf(IOException.class);
@@ -464,7 +574,9 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
 
         @Test
         void should_wrap_jaxb_exception_as_container_exception() {
-            validator = new ConnectorAsicContainerValidator(
+            validator = new ConnectorContainerValidator(
+                checkers,
+                signatureChecker,
                 businessContentRepository,
                 attachmentRepository,
                 fileStorageProvider
@@ -490,6 +602,40 @@ public class ConnectorAsicContainerValidatorTest extends BaseContainerTest {
             )
                 .isInstanceOf(ConnectorContainerException.class)
                 .hasCauseInstanceOf(JAXBException.class);
+        }
+
+        @Test
+        void should_wrap_runtime_exception_from_build_as_container_exception() {
+            // buildContainer's own ConnectorContainerException is a RuntimeException, so it is
+            // caught and re-wrapped: the specific message ends up on the cause, not the top level.
+            validator = new ConnectorContainerValidator(
+                checkers,
+                signatureChecker,
+                businessContentRepository,
+                attachmentRepository,
+                fileStorageProvider
+            ) {
+                @Override
+                protected ConnectorContainer buildContainer(
+                    byte[] asicsBytes,
+                    byte[] xmlTokenBytes
+                ) {
+                    throw new ConnectorContainerException("ASiC-S container is empty");
+                }
+            };
+
+            stubContainerAttachments();
+
+            assertThatThrownBy(() ->
+                                   validator.validate(
+                                       messageWith(List.of(
+                                           asicsAttachment(),
+                                           xmlTokenAttachment()
+                                       ))
+                                   )
+            )
+                .isInstanceOf(ConnectorContainerException.class)
+                .hasCauseInstanceOf(ConnectorContainerException.class);
         }
     }
 }

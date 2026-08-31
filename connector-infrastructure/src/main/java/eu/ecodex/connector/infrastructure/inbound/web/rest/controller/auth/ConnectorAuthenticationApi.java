@@ -40,7 +40,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * via OpenAPI.
  */
 @RequestMapping("/api/v1/auth")
-@Tag(name = "Users", description = "API for managing connector's users")
+@Tag(name = "Authenticate a user", description = "API for managing connector's users "
+    + "authentication")
 public interface ConnectorAuthenticationApi {
 
     @Operation(summary = "Login a connector user.")

@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * <p>All endpoints consume and produce JSON data.
  */
 @RequestMapping(path = "/api/v1/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Users", description = "API for managing connector's users")
+@Tag(name = "Admin Users roles", description = "API for managing connector's users roles")
 public interface ConnectorRoleAdminApi {
 
     @ResponseStatus(HttpStatus.CREATED)
@@ -47,7 +47,7 @@ public interface ConnectorRoleAdminApi {
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorRoleDto register(@Valid @RequestBody ConnectorRoleDto usrRoleDto);
 
-    @Operation(summary = "Update a connector user.")
+    @Operation(summary = "Update a connector user role.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorRoleDto update(@PathVariable("uuid") String identifier,

@@ -31,16 +31,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * This interface defines the contract for user management-related endpoints.
  */
 @RequestMapping(path = "/api/v1/users/me", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Users", description = "API for managing connector's users")
+@Tag(name = "Account or User profile", description = "API for managing connector's current user")
 public interface ConnectorUserApi {
 
-    @Operation(summary = "Update partially a connector userDetails.")
+    @Operation(summary = "Update partially the currently connected user profile.")
     @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorUserDto patch(@AuthenticationPrincipal ConnectorUserDetails userDetails,
                            @Valid @RequestBody ConnectorUserRequest userRequest);
 
-    @Operation(summary = "Retrieve a connector userDetails.")
+    @Operation(summary = "Get the currently authenticated user account.")
     @GetMapping
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
     ConnectorUserDto getByIdentifier(@AuthenticationPrincipal ConnectorUserDetails userDetails);

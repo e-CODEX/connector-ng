@@ -32,15 +32,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * <p>All endpoints consume and produce JSON data.
  */
 @RequestMapping(path = "/api/v1/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Users", description = "API for managing connector's users")
+@Tag(name = "Assign Users roles", description = "API for managing connector's users")
 public interface ConnectorRoleAssignmentAdminApi {
 
-    @Operation(summary = "Persist a connector user role assignment.")
+    @Operation(summary = "Assign an existing role to user.")
     @PostMapping(path = "/{uuid}/roles")
     @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
     ConnectorUserDto register(@PathVariable("uuid") String identifier, @RequestBody String role);
 
-    @Operation(summary = "Delete a connector user role assignment.")
+    @Operation(summary = "Unassign a user role.")
     @DeleteMapping(path = "/{uuid}/roles")
     @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
     ConnectorUserDto delete(@PathVariable("uuid") String identifier, @RequestBody String role);

@@ -12,7 +12,6 @@ package eu.ecodex.connector.infrastructure.outbound.security.util;
 
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.spi.DSSUtils;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -30,33 +29,12 @@ public class DSSDocumentUtil {
      *
      * @return a byte array containing the full content of the document
      *
-     * @throws RuntimeException if an error occurs while reading the document stream
      */
-    public static byte[] getDocumentData(DSSDocument document) throws IOException {
+    public static byte[] getDocumentData(DSSDocument document) {
         if (document == null) {
             throw new IllegalArgumentException("document must not be null");
         }
 
         return DSSUtils.toByteArray(document.openStream());
-    }
-
-    /**
-     * Returns {@code true} if {@code document} contains at least one byte of data.
-     *
-     * @param document the document to probe (must not be null)
-     *
-     * @return {@code true} if data is present, {@code false} if the document is empty or the stream
-     *     cannot be opened
-     */
-    public static boolean hasData(DSSDocument document) {
-        if (document == null) {
-            throw new IllegalArgumentException("document must not be null");
-        }
-
-        try (var inputStream = document.openStream()) {
-            return inputStream.read() != -1;
-        } catch (Exception e) {
-            return false;
-        }
     }
 }

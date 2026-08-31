@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.property.businessdocument;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +20,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AuthenticationValidationProperties {
+    @NotBlank
     private String identityProvider;
 }

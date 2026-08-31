@@ -13,14 +13,12 @@ package eu.ecodex.connector.infrastructure.property.certificate;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Configuration properties for the certificate verifier.
  */
 @Getter
 @Setter
-@Configuration
 public class ConnectorCertificateVerifierProperties {
     /**
      * should ocsp be queried?.

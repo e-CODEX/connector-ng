@@ -10,10 +10,12 @@
 
 package eu.ecodex.connector.infrastructure.dss;
 
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import eu.ecodex.connector.infrastructure.util.ResourceStreams;
 import eu.europa.esig.dss.spi.x509.CommonTrustedCertificateSource;
 import eu.europa.esig.dss.spi.x509.KeyStoreCertificateSource;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -54,6 +56,29 @@ public class ConnectorDssCertificateSourceLoader {
     }
 
     /**
+     * Creates a {@link KeyStoreCertificateSource} from the given truststore configuration.
+     *
+     * @param truststore the truststore configuration containing filename, content, password, and
+     *                   type of the truststore
+     *
+     * @return a {@link KeyStoreCertificateSource} initialized from the provided truststore
+     *
+     * @throws IllegalStateException if the truststore cannot be loaded
+     */
+    public KeyStoreCertificateSource createCertificateSource(ConnectorTruststore truststore) {
+        try (var stream = new ByteArrayInputStream(truststore.content())) {
+            return new KeyStoreCertificateSource(
+                stream,
+                truststore.type().name(),
+                truststore.password().toCharArray()
+            );
+        } catch (IOException e) {
+            log.error("Unable to load truststore [{}] from the database", truststore.filename());
+            throw new IllegalStateException("Failed to load message truststore", e);
+        }
+    }
+
+    /**
      * Creates a {@link CommonTrustedCertificateSource} using the provided keystore.
      *
      * <p>All certificates from the keystore are imported and marked as trusted.
@@ -66,6 +91,25 @@ public class ConnectorDssCertificateSourceLoader {
         KeystoreProperties keystore) {
         var trustedCertSource = new CommonTrustedCertificateSource();
         trustedCertSource.importAsTrusted(createCertificateSource(keystore));
+
+        return trustedCertSource;
+    }
+
+    /**
+     * Creates a {@link CommonTrustedCertificateSource} using the provided truststore.
+     *
+     * <p>All certificates from the keystore are imported and marked as trusted.
+     *
+     * @param truststore the truststore configuration containing filename, content, password, and
+     *                   type of the truststore
+     *
+     * @return a {@link CommonTrustedCertificateSource} containing all trusted certificates imported
+     *     from the provided truststore
+     */
+    public CommonTrustedCertificateSource createCommonTrustedCertificateSource(
+        ConnectorTruststore truststore) {
+        var trustedCertSource = new CommonTrustedCertificateSource();
+        trustedCertSource.importAsTrusted(createCertificateSource(truststore));
 
         return trustedCertSource;
     }

@@ -20,7 +20,7 @@ import eu.ecodex.connector.FileTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorAsicContainerBuilder;
+import eu.ecodex.connector.infrastructure.outbound.security.container.ConnectorContainerBuilder;
 import eu.ecodex.connector.infrastructure.security.BaseContainerTest;
 import eu.ecodex.connector.infrastructure.security.SecurityUtil;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
@@ -29,10 +29,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@DisplayName("ConnectorAsicContainerBuilder")
-public class ConnectorAsicContainerBuilderTest extends BaseContainerTest {
+@DisplayName("ConnectorContainerBuilder")
+public class ConnectorContainerBuilderTest extends BaseContainerTest {
     @Autowired
-    private ConnectorAsicContainerBuilder asicContainerBuilder;
+    private ConnectorContainerBuilder asicContainerBuilder;
     @MockitoBean
     private ConnectorFileStorageProvider fileStorageProvider;
 

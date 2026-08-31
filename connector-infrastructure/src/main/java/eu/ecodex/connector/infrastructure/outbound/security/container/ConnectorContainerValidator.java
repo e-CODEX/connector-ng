@@ -20,11 +20,12 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
+import eu.ecodex.connector.infrastructure.outbound.security.container.checks.ConnectorContainerDocumentSignatureChecker;
+import eu.ecodex.connector.infrastructure.outbound.security.container.checks.ConnectorMessageContainerChecker;
 import eu.ecodex.connector.infrastructure.outbound.security.exception.ConnectorContainerException;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainer;
 import eu.ecodex.connector.infrastructure.outbound.security.model.container.ConnectorContainerBusinessContent;
 import eu.ecodex.connector.infrastructure.outbound.security.model.token.ConnectorToken;
-import eu.ecodex.connector.infrastructure.outbound.security.util.DSSDocumentUtil;
 import eu.ecodex.connector.infrastructure.outbound.security.util.XMLStreamUtil;
 import eu.ecodex.connector.infrastructure.outbound.security.util.ZipStreamUtil;
 import eu.europa.esig.dss.model.DSSDocument;
@@ -44,7 +45,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * The ConnectorAsicContainerValidator is responsible for validating ASIC-S containers in incoming
+ * The ConnectorAsicContainerValidator is responsible for validating containers in incoming
  * messages. It ensures that the provided message contains valid ASIC-S and XML trust OK token
  * attachments and processes the container contents. This class interacts with a file storage
  * provider to retrieve attachment contents, validates the structure and type of the container, and
@@ -52,7 +53,9 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Component
-public class ConnectorAsicContainerValidator {
+public class ConnectorContainerValidator {
+    private final List<ConnectorMessageContainerChecker> checkers;
+    private final ConnectorContainerDocumentSignatureChecker signatureChecker;
     private final ConnectorMessageBusinessContentRepository businessContentRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
@@ -60,6 +63,10 @@ public class ConnectorAsicContainerValidator {
     /**
      * Constructor for the ConnectorAsicContainerValidator.
      *
+     * @param checkers                  the list of checkers to be used for validating the
+     *                                  container
+     * @param signatureChecker          the signature checker responsible for validating the
+     *                                  document signature
      * @param businessContentRepository the repository for managing and querying the business
      *                                  content of a connector message
      * @param attachmentRepository      the repository for managing and querying attachments
@@ -67,10 +74,14 @@ public class ConnectorAsicContainerValidator {
      * @param fileStorageProvider       the service provider responsible for storage operations
      *                                  related to attachments and metadata
      */
-    public ConnectorAsicContainerValidator(
+    public ConnectorContainerValidator(
+        List<ConnectorMessageContainerChecker> checkers,
+        ConnectorContainerDocumentSignatureChecker signatureChecker,
         ConnectorMessageBusinessContentRepository businessContentRepository,
         ConnectorMessageAttachmentRepository attachmentRepository,
         ConnectorFileStorageProvider fileStorageProvider) {
+        this.checkers = checkers;
+        this.signatureChecker = signatureChecker;
         this.businessContentRepository = businessContentRepository;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
@@ -114,8 +125,11 @@ public class ConnectorAsicContainerValidator {
             var xmlTokenBytes = fileStorageProvider.findByIdentifier(
                 xmlTokenAttachment.identifier());
             container = buildContainer(asicsBytes, xmlTokenBytes);
-        } catch (IOException | JAXBException e) {
-            throw new ConnectorContainerException("Failed to load or parse ASiC-S container", e);
+            checkContainer(container, message);
+        } catch (IOException | JAXBException | RuntimeException e) {
+            throw new ConnectorContainerException(
+                "Failed to load or parse incoming connector container", e
+            );
         }
 
         try {
@@ -138,11 +152,11 @@ public class ConnectorAsicContainerValidator {
             ConnectorContainerFileDefinitions.TOKEN_XML_REF
         );
 
-        if (!DSSDocumentUtil.hasData(asicsDocument)) {
+        if (DSSUtils.isEmpty(asicsDocument)) {
             throw new ConnectorContainerException("ASiC-S container is empty");
         }
 
-        if (!DSSDocumentUtil.hasData(xmlTokenDocument)) {
+        if (DSSUtils.isEmpty(xmlTokenDocument)) {
             throw new ConnectorContainerException("XML trust OK token is empty");
         }
 
@@ -401,5 +415,10 @@ public class ConnectorAsicContainerValidator {
     private String mimeTypeString(DSSDocument document) {
         var mimeType = document.getMimeType();
         return mimeType == null ? null : mimeType.getMimeTypeString();
+    }
+
+    private void checkContainer(ConnectorContainer container, ConnectorBusinessMessage message) {
+        checkers.forEach(checker -> checker.check(container));
+        signatureChecker.check(container, message.businessDomainIdentifier());
     }
 }

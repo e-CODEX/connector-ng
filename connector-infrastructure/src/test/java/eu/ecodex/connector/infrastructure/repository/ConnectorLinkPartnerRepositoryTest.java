@@ -21,36 +21,38 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SuppressWarnings("DataFlowIssue")
 @DisplayName("ConnectorLinkPartnerRepository")
+@ActiveProfiles(value = {"dss", "security"})
 @SpringBootTest(
     classes = RepositoryContextConfiguration.class,
     properties = {
         """
-                # backends
-                connector.link.backend[0].link-config.name=default_backend_config
-                connector.link.backend[0].link-config.properties.endpoint.keystore.path=file:config/keystores/backend-keystore.jks
-                connector.link.backend[0].link-config.properties.endpoint.keystore.password=*****
-                connector.link.backend[0].link-config.properties.endpoint.private-key.alias=connector_blue
-                connector.link.backend[0].link-config.properties.endpoint.private-key.password=*****
-                connector.link.backend[0].link-config.properties.endpoint.truststore.path=file:config/keystores/backend-truststore.jks
-                connector.link.backend[0].link-config.properties.endpoint.truststore.password=*****
-                connector.link.backend[0].link-config.properties.endpoint.encrypt-alias=alice
-                connector.link.backend[0].link-config.properties.logging-enabled=true
-                # link partner 0 specific configuration
-                # this name must match any message routing config
-                # this name will also be stored into the DB to the specific message as its backend name
-                connector.link.backend[0].link-partners[0].name=backend_alice
-                connector.link.backend[0].link-partners[0].description=backend alice
-                connector.link.backend[0].link-partners[0].enabled=true
-                #this linkPartner operates in push receiveMode (connector pushes new messages to backend)
-                connector.link.backend[0].link-partners[0].sender-mode=push
-                # this must match the certificate alias within the trust-store
-                connector.link.backend[0].link-partners[0].properties.encryption-alias=alice
-                # this must match the certificate DN (lower- or UPPERcase is ignored)
-                connector.link.backend[0].link-partners[0].properties.certificate-dn=cn=alice
-                spring.autoconfigure.exclude=org.apache.cxf.spring.boot.autoconfigure.micrometer.MicrometerMetricsAutoConfiguration
+            # backends
+            connector.link.backend[0].link-config.name=default_backend_config
+            connector.link.backend[0].link-config.properties.endpoint.keystore.path=file:config/keystores/backend-keystore.jks
+            connector.link.backend[0].link-config.properties.endpoint.keystore.password=*****
+            connector.link.backend[0].link-config.properties.endpoint.private-key.alias=connector_blue
+            connector.link.backend[0].link-config.properties.endpoint.private-key.password=*****
+            connector.link.backend[0].link-config.properties.endpoint.truststore.path=file:config/keystores/backend-truststore.jks
+            connector.link.backend[0].link-config.properties.endpoint.truststore.password=*****
+            connector.link.backend[0].link-config.properties.endpoint.encrypt-alias=alice
+            connector.link.backend[0].link-config.properties.logging-enabled=true
+            # link partner 0 specific configuration
+            # this name must match any message routing config
+            # this name will also be stored into the DB to the specific message as its backend name
+            connector.link.backend[0].link-partners[0].name=backend_alice
+            connector.link.backend[0].link-partners[0].description=backend alice
+            connector.link.backend[0].link-partners[0].enabled=true
+            #this linkPartner operates in push receiveMode (connector pushes new messages to backend)
+            connector.link.backend[0].link-partners[0].sender-mode=push
+            # this must match the certificate alias within the trust-store
+            connector.link.backend[0].link-partners[0].properties.encryption-alias=alice
+            # this must match the certificate DN (lower- or UPPERcase is ignored)
+            connector.link.backend[0].link-partners[0].properties.certificate-dn=cn=alice
+            spring.autoconfigure.exclude=org.apache.cxf.spring.boot.autoconfigure.micrometer.MicrometerMetricsAutoConfiguration
             """
     }
 )

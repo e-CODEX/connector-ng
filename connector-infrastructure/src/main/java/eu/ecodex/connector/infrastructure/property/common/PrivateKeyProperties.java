@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.property.common;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,6 +23,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PrivateKeyProperties {
+    @NotBlank
     private String alias;
+    @NotBlank
     private String password;
 }

@@ -40,11 +40,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Builder class responsible for creating ASiC containers from business messages.
+ * Builder class responsible for creating containers from business messages.
  */
 @Slf4j
 @Component
-public class ConnectorAsicContainerBuilder {
+public class ConnectorContainerBuilder {
     private final ConnectorTokenValidationFactory tokenValidationFactory;
     private final ConnectorTokenValidationGenerator validationTokenGenerator;
     private final ConnectorTrustOKTokenGenerator pdfTrustOKTokenGenerator;
@@ -74,7 +74,7 @@ public class ConnectorAsicContainerBuilder {
      * @param containerProperties        Configuration properties required for constructing ASiC
      *                                   containers.
      */
-    public ConnectorAsicContainerBuilder(
+    public ConnectorContainerBuilder(
         ConnectorTokenValidationFactory tokenValidationFactory,
         ConnectorTokenValidationGenerator validationTokenGenerator,
         @Qualifier("connectorPDFTrustOKTokenGenerator")
@@ -144,17 +144,7 @@ public class ConnectorAsicContainerBuilder {
 
     private ConnectorContainerBusinessContent toContainerBusinessContent(
         @NonNull ConnectorBusinessMessage message) {
-        if (message.identifier() == null) {
-            throw new ConnectorContainerException("Message identifier is null: %s"
-                                                      .formatted(message));
-        }
-
         var businessContent = message.businessContent();
-
-        if (businessContent == null) {
-            throw new ConnectorContainerException(
-                "No business content found in message: " + message.identifier());
-        }
 
         var containerBusinessContent = new ConnectorContainerBusinessContent();
         var businessDocument = businessContent.businessDocument();

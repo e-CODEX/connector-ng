@@ -15,13 +15,13 @@ import eu.europa.esig.dss.model.DSSDocument;
 import lombok.Builder;
 
 /**
- * Immutable container aggregating all artefacts related to a Connector exchange.
+ * Immutable container aggregating all artifacts related to a Connector exchange.
  *
  * @param businessContent the original business payload
  * @param token           the connector token containing validation and metadata
  * @param tokenXML        XML representation of the trust OK token
- * @param tokenPDF        PDF representation of the trust OK token (e.g. human-readable report)
- * @param asicDocument    final ASiC container including signed artefacts
+ * @param tokenPDF        PDF representation of the trust OK token (e.g., human-readable report)
+ * @param asicDocument    final ASiC container including signed artifacts
  */
 @Builder
 public record ConnectorContainer(

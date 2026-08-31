@@ -14,6 +14,8 @@ import eu.ecodex.connector.infrastructure.property.ConnectorSignatureProperties;
 import eu.ecodex.connector.infrastructure.property.ConnectorSignatureValidationProperties;
 import eu.ecodex.connector.infrastructure.property.common.KeystoreProperties;
 import eu.ecodex.connector.infrastructure.property.common.PrivateKeyProperties;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,7 +25,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ContainerSignatureProperties extends ConnectorSignatureProperties {
+    @NotNull
     private KeystoreProperties keystore;
+    @NotNull
     private PrivateKeyProperties privateKey;
-    private ConnectorSignatureValidationProperties validation;
+    @Valid
+    @NotNull
+    private ConnectorSignatureValidationProperties validation =
+        new ConnectorSignatureValidationProperties();
 }

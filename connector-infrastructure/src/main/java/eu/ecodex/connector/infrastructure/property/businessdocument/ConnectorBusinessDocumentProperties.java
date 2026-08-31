@@ -11,6 +11,8 @@
 package eu.ecodex.connector.infrastructure.property.businessdocument;
 
 import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,20 +20,26 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for the business document.
  */
 @Getter
 @Setter
+@Validated
 @Configuration
 @ConfigurationProperties(prefix = "connector.business-document")
 public class ConnectorBusinessDocumentProperties {
+    @NotBlank
     String country;
+    @NotBlank
     String serviceProvider;
     ConnectorBusinessDocumentAESType defaultAdvancedSystemType;
     AuthenticationValidationProperties authenticationValidation;
+    @NotNull
     BusinessDocumentSignatureProperties signature;
+    @NotNull
     Set<ConnectorBusinessDocumentAESType> allowedAdvancedSystemTypes =
         new HashSet<>(List.of(ConnectorBusinessDocumentAESType.values()));
 }

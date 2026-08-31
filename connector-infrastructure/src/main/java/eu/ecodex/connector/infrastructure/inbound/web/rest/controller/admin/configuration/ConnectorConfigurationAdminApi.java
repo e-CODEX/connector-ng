@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
     description = "API for managing configuration within the connector system for "
         + "administrative purposes."
 )
-@RequestMapping(value = "/api/v1/admin/configurations")
+@RequestMapping(value = "/admin/configurations")
 public interface ConnectorConfigurationAdminApi {
     @GetMapping("/business-domains")
     @Operation(summary = "List business domain configurations")

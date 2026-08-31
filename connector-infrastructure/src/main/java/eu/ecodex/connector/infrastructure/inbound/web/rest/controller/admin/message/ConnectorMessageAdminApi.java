@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
     description = "API for managing messages within the connector system for administrative "
         + "purposes"
 )
-@RequestMapping("/api/v1/admin/messages")
+@RequestMapping("/admin/messages")
 public interface ConnectorMessageAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping

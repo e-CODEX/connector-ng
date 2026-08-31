@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
     description = "API for managing JMS queues within the connector system for administrative"
         + " purposes."
 )
-@RequestMapping(value = "/api/v1/admin/jms/queues")
+@RequestMapping(value = "/admin/jms/queues")
 public interface ConnectorJmsAdminApi {
     @GetMapping("/stats")
     List<ConnectorQueueStats> retrieveQueuesStats();

@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  *
  * <p>All endpoints consume and produce JSON data.
  */
-@RequestMapping(path = "/api/v1/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Admin Users roles", description = "API for managing connector's users roles")
 public interface ConnectorRoleAdminApi {
 

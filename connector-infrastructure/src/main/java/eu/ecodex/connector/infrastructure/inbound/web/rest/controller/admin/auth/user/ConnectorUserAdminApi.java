@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Provides operations for creating, updating, patching, retrieving, listing, and deleting users.
  * This interface defines the contract for user management-related endpoints.
  */
-@RequestMapping(path = "/api/v1/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Admin Users", description = "API for managing connector's users")
 public interface ConnectorUserAdminApi {
 

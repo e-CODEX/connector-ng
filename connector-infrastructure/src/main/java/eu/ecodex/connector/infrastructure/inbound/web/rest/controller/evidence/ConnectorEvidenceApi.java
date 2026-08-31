@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Defines the REST API for managing connector messages evidence.
  */
 @Tag(name = "Evidence", description = "API for managing message evidence.")
-@RequestMapping("/api/v1/evidences")
+@RequestMapping("/evidences")
 public interface ConnectorEvidenceApi {
     @ResponseStatus(HttpStatus.CREATED)
     @GetMapping(value = "/{uuid}/download")

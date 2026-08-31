@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.property.evidence;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,8 +27,10 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 @ConfigurationProperties(prefix = "connector.evidences")
 public class ConnectorEvidencesProperties {
+    @Valid
     @NotNull
     private EvidencesSignatureProperties signature = new EvidencesSignatureProperties();
+    @Valid
     @NotNull
     private EvidencesIssuerProperties issuer = new EvidencesIssuerProperties();
 }

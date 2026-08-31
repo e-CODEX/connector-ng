@@ -42,7 +42,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles({"evidence", "dss"})
+@ActiveProfiles({"evidence", "dss", "security"})
 @SpringBootTest(classes = EvidenceContextConfiguration.class)
 @Import(ConnectorEvidenceToolkitImplTest.MockAttachmentBeans.class)
 @DisplayName("ConnectorEvidenceToolkit")

@@ -14,7 +14,7 @@ import eu.ecodex.connector.ContainerContextConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles(value = {"dss", "security"})
+@ActiveProfiles(value = {"dss", "security", "evidence"})
 @SpringBootTest(classes = ContainerContextConfiguration.class)
 public class BaseContainerTest {
 }

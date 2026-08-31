@@ -22,14 +22,13 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 @Getter
 @Setter
 public class EvidencesIssuerProperties {
-
     @Valid
     @NotNull
     @NestedConfigurationProperty
     private PostalAddressProperties postalAddress = new PostalAddressProperties();
 
-    @NotNull
     @Valid
+    @NotNull
     @NestedConfigurationProperty
     private As4IssuerPartyProperties as4Party = new As4IssuerPartyProperties();
 }

@@ -12,16 +12,18 @@ package eu.ecodex.connector.infrastructure.repository;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
+@ActiveProfiles(value = {"dss", "security"})
 @SpringBootTest(
-        classes = RepositoryContextConfiguration.class,
-        properties = {
-                """
-                    spring.autoconfigure.exclude=org.apache.cxf.spring.boot.autoconfigure.micrometer.MicrometerMetricsAutoConfiguration
-                """
-        }
+    classes = RepositoryContextConfiguration.class,
+    properties = {
+        """
+                spring.autoconfigure.exclude=org.apache.cxf.spring.boot.autoconfigure.micrometer.MicrometerMetricsAutoConfiguration
+            """
+    }
 )
 public abstract class AbstractRepositoryTest {
 }

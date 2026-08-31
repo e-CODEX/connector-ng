@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
 import java.util.List;
 import java.util.Optional;
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -65,6 +66,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      */
     @Override
     @EntityGraph(attributePaths = "roles")
+    @NonNull
     List<ConnectorUserEntity> findAll();
 
     /**
@@ -91,6 +93,19 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      */
     @EntityGraph(attributePaths = {"roles"})
     Optional<ConnectorUserEntity> findByUsername(String username);
+
+
+    /**
+     * Retrieves an active {@link ConnectorUserEntity} by its username along with the associated
+     * roles.
+     * This method uses an {@link EntityGraph} to fetch the "roles" relationship eagerly.
+     *
+     * @param username the username of the user to be retrieved; must not be null.
+     *
+     * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
+     */
+    @EntityGraph(attributePaths = {"roles"})
+    Optional<ConnectorUserEntity> findByUsernameAndEnabledIsTrue(String username);
 
     /**
      * Retrieves a {@link ConnectorUserEntity} by its email along with the associated roles.

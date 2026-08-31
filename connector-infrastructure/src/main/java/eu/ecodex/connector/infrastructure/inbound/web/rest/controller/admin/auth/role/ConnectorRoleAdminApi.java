@@ -38,35 +38,55 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * <p>All endpoints consume and produce JSON data.
  */
 @RequestMapping(path = "/api/v1/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Admin Users roles", description = "API for managing connector's users roles")
+@Tag(name = "AdministrateRoles", description = "API for managing connector's users roles")
 public interface ConnectorRoleAdminApi {
 
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user role.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ConnectorRoleDto register(@Valid @RequestBody ConnectorRoleDto usrRoleDto);
 
     @Operation(summary = "Update a connector user role.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Updated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ConnectorRoleDto update(@PathVariable("uuid") String identifier,
                             @Valid @RequestBody ConnectorRoleDto userRoleDto);
 
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
     @GetMapping(path = "/{uuid}")
-    @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Found"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+    })
     ConnectorRoleDto getByIdentifier(@PathVariable("uuid") String identifier);
 
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Found"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+    })
     List<ConnectorRoleDto> getAll();
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user role by uuid identifier.")
     @DeleteMapping(path = "/{uuid}")
-    @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Deleted"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
+    })
     void deleteByIdentifier(@PathVariable("uuid") String identifier);
 
 }

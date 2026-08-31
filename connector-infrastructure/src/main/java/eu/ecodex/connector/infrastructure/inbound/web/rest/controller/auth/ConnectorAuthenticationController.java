@@ -60,7 +60,6 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
         var loginResponse = loginUserService.login(request.username(), request.password());
         log.info("User {} successfully logged", request.username());
         return loginResponse;
-
     }
 
     @Override

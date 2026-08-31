@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
+import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.login.ConnectorLoginUser;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
@@ -56,7 +58,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorLoginUserService implements ConnectorLoginUser {
-
     AuthenticationManager authenticationManager;
     ConnectorAuthenticationTokenProvider authenticationTokenProvider;
     ConnectorRefreshUserTokenService refreshTokenService;
@@ -66,25 +67,27 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
     public ConnectorLoginResponse login(String username, String password) {
         try {
             var authentication =
-                    authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    username,
-                                    password
-                            )
-                    );
+                authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                        username,
+                        password
+                    )
+                );
 
             var user = (ConnectorUserDetails) authentication.getPrincipal();
             if (user == null) {
-                throw new RuntimeException("Error reading principal");
+                throw new RuntimeException("Error reading user principal");
             }
             var authenticatedUser = user.connectorUser();
             var accessToken = authenticationTokenProvider.generateToken(authenticatedUser);
             var refreshToken = refreshTokenService.create(authenticatedUser);
 
             return new ConnectorLoginResponse(accessToken, refreshToken.token(),
-                    authenticationTokenProvider.getAccessTokenExpiresInSeconds());
-
-        } catch (AuthenticationException exception) {
+                authenticationTokenProvider.getAccessTokenExpiresInSeconds());
+        } catch (DisabledException exception) {
+            throw new ConnectorUserAccountInactiveException(
+                "Your account is inactive. Please contact support.");
+        } catch (AuthenticationException e) {
             throw new ConnectorUserBadCredentialsException("Invalid username or password");
         } catch (RuntimeException e) {
             throw new RuntimeException(e);

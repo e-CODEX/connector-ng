@@ -93,6 +93,12 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     }
 
     @Override
+    public Optional<ConnectorUser> findByUsernameAndActiveIsTrue(String username) {
+        var found = jpaRepository.findByUsernameAndEnabledIsTrue(username);
+        return found.map(ConnectorUserMapper::toDomain);
+    }
+
+    @Override
     public Optional<ConnectorUser> findByEmail(String email) {
         var found = jpaRepository.findByEmail(email);
         return found.map(ConnectorUserMapper::toDomain);

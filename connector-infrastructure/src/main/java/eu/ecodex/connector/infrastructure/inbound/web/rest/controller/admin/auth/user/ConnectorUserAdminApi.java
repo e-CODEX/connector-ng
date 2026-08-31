@@ -36,43 +36,68 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * This interface defines the contract for user management-related endpoints.
  */
 @RequestMapping(path = "/api/v1/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Admin Users", description = "API for managing connector's users")
+@Tag(name = "AdministrateUsers", description = "API for managing connector's users")
 public interface ConnectorUserAdminApi {
-
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Created"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ConnectorUserDto register(@Valid @RequestBody ConnectorUserRequest userRequest);
 
 
     @Operation(summary = "Update a connector user.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Updated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ConnectorUserDto update(@PathVariable("uuid") String identifier,
                             @Valid @RequestBody ConnectorUserRequest userRequest);
 
     @Operation(summary = "Update partially a connector user.")
     @PatchMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Updated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ConnectorUserDto patch(@PathVariable("uuid") String identifier,
                            @Valid @RequestBody ConnectorUserRequest userRequest);
 
     @Operation(summary = "Retrieve a connector user.")
     @GetMapping(path = "/{uuid}")
-    @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "User found"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
+    })
     ConnectorUserDto getByIdentifier(@PathVariable("uuid") String identifier);
 
     @Operation(summary = "Retrieve all connector's users.")
     @GetMapping
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Users found"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+    })
     List<ConnectorUserDto> getAll();
-
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user by Identifier.")
     @DeleteMapping(path = "/{uuid}")
-    @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Deleted"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+    })
     void deleteByIdentifier(@PathVariable("uuid") String userIdentifier);
 
 }

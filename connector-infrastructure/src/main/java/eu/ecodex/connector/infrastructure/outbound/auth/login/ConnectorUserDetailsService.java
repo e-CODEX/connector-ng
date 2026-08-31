@@ -38,12 +38,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorUserDetailsService implements UserDetailsService {
-
     ConnectorRetrieveUser retrieveUser;
 
     @Override
     public @NonNull UserDetails loadUserByUsername(@NonNull String username)
-            throws ConnectorUserNotFoundException {
+        throws ConnectorUserNotFoundException {
 
         var connectorUser = retrieveUser.getByUsername(username);
         return new ConnectorUserDetails(connectorUser);

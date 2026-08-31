@@ -32,6 +32,17 @@ public interface ConnectorRetrieveUser {
     ConnectorUser getByIdentifier(String identifier) throws ConnectorUserNotFoundException;
 
     /**
+     * Retrieves the active user by username.
+     *
+     * @param username username to use
+     *
+     * @return active user
+     *
+     * @throws ConnectorUserNotFoundException if no active user is found with the specified username
+     */
+    ConnectorUser getActiveUserByUsername(String username) throws ConnectorUserNotFoundException;
+
+    /**
      * Retrieves a {@link ConnectorUser} instance by its unique username.
      *
      * @param username the unique username of the user to retrieve

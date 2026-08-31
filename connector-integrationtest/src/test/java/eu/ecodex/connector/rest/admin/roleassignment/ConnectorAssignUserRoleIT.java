@@ -70,7 +70,7 @@ class ConnectorAssignUserRoleIT extends AbstractIntegrationTest {
         assertThat(existing).isNotEmpty();
 
         registeredUser = apiClient.post()
-            .uri(String.format(PATH, registeredUser.identifier()))
+            .uri(String.format(PATH, registeredUser.uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .contentType(MediaType.APPLICATION_JSON)
             .body("ROLE_USER")

@@ -78,7 +78,7 @@ class ConnectorRetrieveUserIT extends AbstractIntegrationTest {
         assertThat(response.username()).isEqualTo(username);
         assertThat(response.enabled()).isEqualTo(existing.get().enabled());
         assertThat(response.roles().size()).isEqualTo(existing.get().roles().size());
-        assertThat(response.identifier()).isEqualTo(existing.get().uuid());
+        assertThat(response.uuid()).isEqualTo(existing.get().uuid());
         assertThat(response.email()).isEqualTo(existing.get().email());
     }
 

@@ -28,7 +28,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 class ConnectorRetrieveMeIT extends AbstractIntegrationTest {
-    public static final String PATH = "/api/v1/users/me";
+    public static final String PATH = "/api/v1/auth/me";
     @Autowired
     private RestTestClient apiClient;
 
@@ -60,7 +60,7 @@ class ConnectorRetrieveMeIT extends AbstractIntegrationTest {
         assertThat(response.username()).isEqualTo(username);
         assertThat(response.enabled()).isEqualTo(existing.get().enabled());
         assertThat(response.roles().size()).isEqualTo(existing.get().roles().size());
-        assertThat(response.identifier()).isEqualTo(existing.get().uuid());
+        assertThat(response.uuid()).isEqualTo(existing.get().uuid());
         assertThat(response.email()).isEqualTo(existing.get().email());
     }
 
@@ -131,7 +131,7 @@ class ConnectorRetrieveMeIT extends AbstractIntegrationTest {
         assertThat(response.username()).isEqualTo(username);
         assertThat(response.enabled()).isEqualTo(existing.get().enabled());
         assertThat(response.roles().size()).isEqualTo(existing.get().roles().size());
-        assertThat(response.identifier()).isEqualTo(existing.get().uuid());
+        assertThat(response.uuid()).isEqualTo(existing.get().uuid());
         assertThat(response.email()).isEqualTo(existing.get().email());
     }
 

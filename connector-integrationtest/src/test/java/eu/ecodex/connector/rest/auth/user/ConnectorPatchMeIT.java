@@ -26,7 +26,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 class ConnectorPatchMeIT extends AbstractIntegrationTest {
-    public static final String PATH = "/api/v1/users/me";
+    public static final String PATH = "/api/v1/auth/me";
 
     @Autowired
     private RestTestClient apiClient;

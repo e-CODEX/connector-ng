@@ -204,4 +204,43 @@ class ConnectorRetrieveUserServiceTest {
         verify(repository).findByUsername(username);
         verifyNoMoreInteractions(repository);
     }
+
+    @Test
+    void getActiveUserByUsername_should_return_found_user() {
+        // Given
+        var identifier = "uuid";
+        var username = "user";
+        var email = "myEmail@test.com";
+        var expected = ConnectorUser.builder()
+            .uuid(identifier)
+            .username(username)
+            .email(email)
+            .enabled(true)
+            .build();
+        when(repository.findByUsernameAndActiveIsTrue(any())).thenReturn(Optional.of(expected));
+
+        // When
+        var found = service.getActiveUserByUsername(username);
+
+        // Then
+        assertThat(found).isNotNull();
+        assertThat(found).isEqualTo(expected);
+        verify(repository).findByUsernameAndActiveIsTrue(username);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void getActiveUserByUsername_should_return_not_found_when_user_not_active() {
+        //Given
+        var username = "user";
+        when(repository.findByUsernameAndActiveIsTrue(any())).thenReturn(Optional.empty());
+
+        // When
+        assertThrows(ConnectorUserNotFoundException.class,
+            () -> service.getActiveUserByUsername(username));
+
+        // Then
+        verify(repository).findByUsernameAndActiveIsTrue(username);
+        verifyNoMoreInteractions(repository);
+    }
 }

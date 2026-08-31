@@ -50,7 +50,7 @@ public class ConnectorUserTestFixtures {
     public static ConnectorUserDto createUserDto() {
         return ConnectorUserDto.builder()
             .username("test_user")
-            .identifier("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
+            .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .email("test_user@email.com")
             .enabled(true)
             .build();
@@ -59,7 +59,7 @@ public class ConnectorUserTestFixtures {
     public static ConnectorUserDto createUserDtoWithRoles() {
         return ConnectorUserDto.builder()
             .username("test_user")
-            .identifier("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
+            .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .email("test_user@email.com")
             .enabled(true)
             .roles(Set.of("ROLE_ADMIN"))

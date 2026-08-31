@@ -30,19 +30,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Provides operations for patching and retrieving a user.
  * This interface defines the contract for user management-related endpoints.
  */
-@RequestMapping(path = "/api/v1/users/me", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Account or User profile", description = "API for managing connector's current user")
+@RequestMapping(path = "/api/v1/auth/me", produces = MediaType.APPLICATION_JSON_VALUE)
+@Tag(name = "AuthenticateUserProfile", description = "API for managing connector's current user")
 public interface ConnectorUserApi {
 
     @Operation(summary = "Update partially the currently connected user profile.")
     @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(@ApiResponse(responseCode = "400", description = "Bad Request"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Updated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ConnectorUserDto patch(@AuthenticationPrincipal ConnectorUserDetails userDetails,
                            @Valid @RequestBody ConnectorUserRequest userRequest);
 
     @Operation(summary = "Get the currently authenticated user account.")
     @GetMapping
-    @ApiResponses(@ApiResponse(responseCode = "404", description = "Not Found"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Found"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
+    })
     ConnectorUserDto getByIdentifier(@AuthenticationPrincipal ConnectorUserDetails userDetails);
 
 }

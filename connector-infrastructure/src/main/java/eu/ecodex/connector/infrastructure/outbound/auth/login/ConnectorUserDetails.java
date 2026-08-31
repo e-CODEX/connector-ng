@@ -57,6 +57,11 @@ public record ConnectorUserDetails(ConnectorUser connectorUser) implements UserD
     }
 
     @Override
+    public boolean isEnabled() {
+        return connectorUser.enabled();
+    }
+
+    @Override
     public @Nullable String getPassword() {
         return connectorUser.password();
     }

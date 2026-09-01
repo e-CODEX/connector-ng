@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Provides operations for patching and retrieving a user.
  * This interface defines the contract for user management-related endpoints.
  */
-@RequestMapping(path = "/users/me", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/api/v1/users/me", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Account or User profile", description = "API for managing connector's current user")
 public interface ConnectorUserApi {
 

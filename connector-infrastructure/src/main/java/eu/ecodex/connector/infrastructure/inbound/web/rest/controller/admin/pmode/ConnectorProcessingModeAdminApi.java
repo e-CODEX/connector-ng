@@ -40,7 +40,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
     name = "ProcessingModeAdmin",
     description = "API for managing processing modes for administrative purposes"
 )
-@RequestMapping("/admin/processing-modes")
+@RequestMapping("/api/v1/admin/processing-modes")
 public interface ConnectorProcessingModeAdminApi {
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)

@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
     name = "MessageTransportStepAdmin",
     description = "API for managing message transport steps for administrative purposes."
 )
-@RequestMapping("/admin/transport-steps")
+@RequestMapping("/api/v1/admin/transport-steps")
 public interface ConnectorMessageTransportStepAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping

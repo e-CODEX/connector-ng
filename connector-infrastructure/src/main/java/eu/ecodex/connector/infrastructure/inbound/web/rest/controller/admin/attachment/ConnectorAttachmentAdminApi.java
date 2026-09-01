@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * <p>The base URI for the endpoints defined in this interface is:
  * {@code /api/v1/admin/attachments}.
  */
-@RequestMapping("/admin/attachments")
+@RequestMapping("/api/v1/admin/attachments")
 @Tag(
     name = "MessageAttachmentAdmin",
     description = "Defines the API for managing message attachments for administrative purposes"

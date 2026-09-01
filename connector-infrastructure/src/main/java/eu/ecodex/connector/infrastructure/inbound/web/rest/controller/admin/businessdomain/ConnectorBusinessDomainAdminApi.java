@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
     description = "API for managing business domains within the connector system for "
         + "administrative purposes."
 )
-@RequestMapping(value = "/admin/business-domains")
+@RequestMapping(value = "/api/v1/admin/business-domains")
 public interface ConnectorBusinessDomainAdminApi {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)

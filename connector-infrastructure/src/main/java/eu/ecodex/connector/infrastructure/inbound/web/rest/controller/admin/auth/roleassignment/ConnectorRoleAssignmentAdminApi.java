@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  *
  * <p>All endpoints consume and produce JSON data.
  */
-@RequestMapping(path = "/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(path = "/api/v1/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Assign Users roles", description = "API for managing connector's users")
 public interface ConnectorRoleAssignmentAdminApi {
 

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * Defines the REST API for managing connector messages.
  */
 @Tag(name = "Message", description = "API for managing message.")
-@RequestMapping("/messages")
+@RequestMapping("/api/v1/messages")
 public interface ConnectorMessageApi {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/outbound", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

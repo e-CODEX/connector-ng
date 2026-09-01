@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Defines the REST API for managing link partner within the connector system.
  */
-@RequestMapping("/link-partners")
+@RequestMapping("/api/v1/link-partners")
 @Tag(name = "LinkPartner", description = "Api for managing link partner")
 public interface ConnectorLinkPartnerApi {
     @GetMapping("")

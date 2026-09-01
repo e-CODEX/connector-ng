@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * Defines the API for managing message attachments.
  */
-@RequestMapping("/attachments")
+@RequestMapping("/api/v1/attachments")
 @Tag(name = "MessageAttachment", description = "API for managing message attachments")
 public interface ConnectorAttachmentApi {
     @ResponseStatus(HttpStatus.CREATED)

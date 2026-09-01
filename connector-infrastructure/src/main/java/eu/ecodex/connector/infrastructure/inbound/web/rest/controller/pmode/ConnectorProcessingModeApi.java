@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
     name = "ProcessingMode",
     description = "API for managing processing modes"
 )
-@RequestMapping("/processing-modes")
+@RequestMapping("/api/v1/processing-modes")
 public interface ConnectorProcessingModeApi {
 
     @GetMapping("{identifier}/services")

@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * - The @Tag annotation is used for grouping and describing the API in documentation generated
  * via OpenAPI.
  */
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Authenticate a user", description = "API for managing connector's users "
     + "authentication")
 public interface ConnectorAuthenticationApi {

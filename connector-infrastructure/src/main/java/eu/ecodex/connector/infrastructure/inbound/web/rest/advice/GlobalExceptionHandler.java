@@ -22,6 +22,7 @@ import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFound
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
@@ -51,8 +52,16 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(ConnectorUserAccountInactiveException.class)
+    public ErrorResponse handleDisabledUserAccount(
+        ConnectorUserAccountInactiveException exception) {
+        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(ConnectorUserBadCredentialsException.class)
-    public ErrorResponse handleInvalidRefreshToken(ConnectorUserBadCredentialsException exception) {
+    public ErrorResponse handleInvalidCredentials(ConnectorUserBadCredentialsException exception) {
         return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
     }
 

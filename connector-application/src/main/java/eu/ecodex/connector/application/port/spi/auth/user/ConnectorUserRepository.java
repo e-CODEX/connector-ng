@@ -80,6 +80,20 @@ public interface ConnectorUserRepository {
     Optional<ConnectorUser> findByUsername(String username);
 
     /**
+     * Retrieves an active ConnectorUser entity based on the provided username.
+     *
+     * <p>This method queries the persistence layer to find and return a ConnectorUser
+     * wrapped in an Optional. If no user with the given username is found, the method
+     * returns an empty Optional.
+     *
+     * @param username the username of the ConnectorUser to retrieve; must not be null
+     *
+     * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
+     *     exists with the given username
+     */
+    Optional<ConnectorUser> findByUsernameAndActiveIsTrue(String username);
+
+    /**
      * Retrieves a ConnectorUser entity based on the provided email.
      *
      * <p>This method queries the persistence layer to find and return a ConnectorUser

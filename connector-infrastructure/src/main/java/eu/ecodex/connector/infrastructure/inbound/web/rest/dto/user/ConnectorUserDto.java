@@ -30,7 +30,7 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorUserDto(
-        String identifier,
+        String uuid,
         String username,
         String email,
         Boolean enabled,
@@ -49,7 +49,7 @@ public record ConnectorUserDto(
     public static ConnectorUserDto from(ConnectorUser user) {
         return ConnectorUserDto
                 .builder()
-                .identifier(user.uuid())
+                .uuid(user.uuid())
                 .username(user.username())
                 .email(user.email())
                 .enabled(user.enabled())

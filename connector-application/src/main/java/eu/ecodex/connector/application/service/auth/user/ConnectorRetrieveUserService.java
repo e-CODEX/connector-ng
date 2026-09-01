@@ -50,6 +50,15 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
     }
 
     @Override
+    public ConnectorUser getActiveUserByUsername(String username)
+        throws ConnectorUserNotFoundException {
+        return repository.findByUsernameAndActiveIsTrue(username)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(
+                String.format("No active user found by username %s", username)
+            ));
+    }
+
+    @Override
     public ConnectorUser getByUsername(String username) throws ConnectorUserNotFoundException {
         return repository
             .findByUsername(username)

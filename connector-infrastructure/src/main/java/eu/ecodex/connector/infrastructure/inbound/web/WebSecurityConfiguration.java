@@ -65,7 +65,7 @@ public class WebSecurityConfiguration {
             .authorizeHttpRequests(request -> request
                 .requestMatchers("/api/v1/admin/**")
                 .hasRole(ConnectorRoleName.ADMIN.name())
-                .requestMatchers("/api/v1/users/me")
+                .requestMatchers("/api/v1/auth/me")
                 .authenticated()
                 .requestMatchers(
                     "/api/v1/attachments/upload",

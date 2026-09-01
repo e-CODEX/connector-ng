@@ -44,12 +44,12 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
         var username = "test-user-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
-        assertThat(before.get().enabled()).isFalse();
+        assertThat(before.get().enabled()).isTrue();
 
         var request = ConnectorUserRequest
             .builder()
             .username(username)
-            .enabled(true)
+            .enabled(false)
             .build();
 
         var registeredUser = apiClient.patch()
@@ -65,12 +65,12 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
 
         assertThat(registeredUser).isNotNull();
         assertThat(registeredUser.username()).isEqualTo(username);
-        assertThat(registeredUser.enabled()).isTrue();
+        assertThat(registeredUser.enabled()).isFalse();
 
         var after = userRepository.findByUsername(username);
         assertThat(before).isNotEqualTo(after);
         assertThat(after).isNotEmpty();
-        assertThat(after.get().enabled()).isTrue();
+        assertThat(after.get().enabled()).isFalse();
     }
 
 

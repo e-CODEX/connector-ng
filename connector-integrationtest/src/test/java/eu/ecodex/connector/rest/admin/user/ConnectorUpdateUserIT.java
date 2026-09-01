@@ -44,14 +44,14 @@ class ConnectorUpdateUserIT extends AbstractIntegrationTest {
         var username = "test-user-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
-        assertThat(before.get().enabled()).isFalse();
+        assertThat(before.get().enabled()).isTrue();
 
         var request = ConnectorUserRequest
             .builder()
             .username(username)
             .password("password")
             .email("test@email.com")
-            .enabled(true)
+            .enabled(false)
             .build();
 
         var registeredUser = apiClient
@@ -70,7 +70,7 @@ class ConnectorUpdateUserIT extends AbstractIntegrationTest {
 
         var after = userRepository.findByUsername(username);
         assertThat(before).isNotEqualTo(after);
-        assertThat(registeredUser.enabled()).isTrue();
+        assertThat(registeredUser.enabled()).isFalse();
         assertThat(registeredUser.username()).isEqualTo(username);
         assertThat(registeredUser.email()).isEqualTo("test@email.com");
         assertThat(registeredUser.roles()).containsExactlyInAnyOrder("ROLE_USER", "ROLE_TEST");

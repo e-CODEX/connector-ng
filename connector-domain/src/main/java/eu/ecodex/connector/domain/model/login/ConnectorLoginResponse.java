@@ -21,6 +21,7 @@ import lombok.Builder;
 public record ConnectorLoginResponse(
         String accessToken,
         String refreshToken,
-        long expiresIn
+        long expiresIn,
+        long refreshExpiresIn
 ) {
 }

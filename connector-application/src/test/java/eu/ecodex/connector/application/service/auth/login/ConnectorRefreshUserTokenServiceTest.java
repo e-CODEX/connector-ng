@@ -218,6 +218,7 @@ class ConnectorRefreshUserTokenServiceTest {
         verify(refreshTokenRepository).findByToken(token);
         verify(authenticationTokenProvider).generateToken(user);
         verify(authenticationTokenProvider).getAccessTokenExpiresInSeconds();
+        verify(authenticationTokenProvider).getRefreshTokenExpiresIn();
 
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
     }

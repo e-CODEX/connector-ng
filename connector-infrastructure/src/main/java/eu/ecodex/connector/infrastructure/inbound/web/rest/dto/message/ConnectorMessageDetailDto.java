@@ -14,12 +14,15 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.Builder;
 
 /**
@@ -76,6 +79,15 @@ public record ConnectorMessageDetailDto(
     List<ConnectorMessageEvidenceDto> evidences,
     List<ConnectorMessageError> errors
 ) {
+    private static final Set<ConnectorAttachmentType> INCLUDED_ATTACHMENT_TYPES = EnumSet.of(
+        ConnectorAttachmentType.BUSINESS_CONTENT,
+        ConnectorAttachmentType.BUSINESS_DOCUMENT,
+        ConnectorAttachmentType.ATTACHMENT,
+        ConnectorAttachmentType.DETACHED_SIGNATURE,
+        ConnectorAttachmentType.PDF_TOKEN,
+        ConnectorAttachmentType.XML_TOKEN
+    );
+
     /**
      * Converts a {@link ConnectorBusinessMessage} object into a {@link ConnectorMessageDetailDto}.
      *
@@ -105,7 +117,7 @@ public record ConnectorMessageDetailDto(
             .confirmedAt(message.confirmedAt())
             .deliveredToLinkPartnerAt(message.deliveredToLinkPartnerAt())
             .errors(message.errors())
-            .attachments(message.attachments())
+            .attachments(filterAttachments(message.attachments()))
             .evidences(toEvidences(message.evidences()))
             .build();
     }
@@ -117,16 +129,17 @@ public record ConnectorMessageDetailDto(
         }
 
         return evidences.stream()
-                        .map(evidence ->
-                                 ConnectorMessageEvidenceDto
-                                     .builder()
-                                     .uuid(evidence.uuid())
-                                     .type(evidence.type())
-                                     .createdAt(evidence.createdAt())
-                                     .updatedAt(evidence.updatedAt())
-                                     .deliveredToLinkPartnerAt(
-                                         evidence.deliveredToLinkPartnerAt())
-                                     .build()
-                        ).toList();
+                        .map(ConnectorMessageEvidenceDto::from)
+                        .toList();
+    }
+
+    private static List<ConnectorMessageAttachment> filterAttachments(
+        List<ConnectorMessageAttachment> attachments) {
+        if (attachments == null) {
+            return List.of();
+        }
+        return attachments.stream()
+                          .filter(att -> INCLUDED_ATTACHMENT_TYPES.contains(att.type()))
+                          .toList();
     }
 }

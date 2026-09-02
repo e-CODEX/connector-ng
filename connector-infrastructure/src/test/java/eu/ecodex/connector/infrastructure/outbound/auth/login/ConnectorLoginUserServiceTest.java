@@ -84,6 +84,8 @@ class ConnectorLoginUserServiceTest {
 
         verify(authenticationTokenProvider).generateToken(connectorUser);
         verify(refreshTokenService).create(connectorUser);
+        verify(authenticationTokenProvider).getAccessTokenExpiresInSeconds();
+        verify(authenticationTokenProvider).getRefreshTokenExpiresIn();
         verifyNoMoreInteractions(authenticationTokenProvider, refreshTokenService);
     }
 

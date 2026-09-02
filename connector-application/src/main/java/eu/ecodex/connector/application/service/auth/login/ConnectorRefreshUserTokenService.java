@@ -105,7 +105,8 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
         var accessToken = authenticationTokenProvider.generateToken(user);
 
         return new ConnectorLoginResponse(accessToken, token,
-            authenticationTokenProvider.getAccessTokenExpiresInSeconds()
+            authenticationTokenProvider.getAccessTokenExpiresInSeconds(),
+            authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds()
         );
     }
 

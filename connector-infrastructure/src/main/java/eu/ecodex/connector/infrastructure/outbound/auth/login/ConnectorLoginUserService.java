@@ -83,7 +83,9 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
             var refreshToken = refreshTokenService.create(authenticatedUser);
 
             return new ConnectorLoginResponse(accessToken, refreshToken.token(),
-                authenticationTokenProvider.getAccessTokenExpiresInSeconds());
+                authenticationTokenProvider.getAccessTokenExpiresInSeconds(),
+                authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds());
+
         } catch (DisabledException exception) {
             throw new ConnectorUserAccountInactiveException(
                 "Your account is inactive. Please contact support.");

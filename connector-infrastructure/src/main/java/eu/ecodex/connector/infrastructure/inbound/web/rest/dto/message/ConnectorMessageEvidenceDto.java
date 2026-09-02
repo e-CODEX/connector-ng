@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message;
 
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
@@ -42,4 +43,25 @@ public record ConnectorMessageEvidenceDto(
     @Nullable Instant updatedAt,
     @Nullable Instant deliveredToLinkPartnerAt
 ) implements Serializable {
+    /**
+     * Converts a {@link ConnectorMessageEvidence} instance into a
+     * {@link ConnectorMessageEvidenceDto} instance by mapping all relevant fields.
+     *
+     * @param evidence the source {@link ConnectorMessageEvidence} to be converted. This parameter
+     *                 must not be null and should contain the evidence details.
+     *
+     * @return a {@link ConnectorMessageEvidenceDto} instance containing the mapped fields from the
+     *     input evidence.
+     */
+    public static ConnectorMessageEvidenceDto from(ConnectorMessageEvidence evidence) {
+        return ConnectorMessageEvidenceDto.builder()
+                                          .uuid(evidence.uuid())
+                                          .type(evidence.type())
+                                          .createdAt(evidence.createdAt())
+                                          .updatedAt(evidence.updatedAt())
+                                          .deliveredToLinkPartnerAt(
+                                              evidence.deliveredToLinkPartnerAt()
+                                          )
+                                          .build();
+    }
 }

@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.port.spi.auth.login;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Duration;
+import java.time.Instant;
 
 /**
  * A provider interface for managing authentication tokens used in the
@@ -41,6 +42,7 @@ public interface ConnectorAuthenticationTokenProvider {
      * @param user the user details from which the token will be generated.
      *             It should provide the necessary information such as username
      *             and authorities required for token creation.
+     *
      * @return the generated authentication token as a {@code String}.
      */
     String generateToken(ConnectorUser user);
@@ -62,5 +64,32 @@ public interface ConnectorAuthenticationTokenProvider {
      * @return the expiration duration of the refresh token in seconds.
      */
     Duration getRefreshTokenExpiresIn();
+
+    /**
+     * Checks if the given JWT token has expired.
+     *
+     * @param token accessToken to check
+     *
+     * @return true if expired, false otherwise
+     */
+    boolean isAccessTokenExpired(String token);
+
+    /**
+     * Get the expiration date of the access token.
+     *
+     * @param token the token to check
+     *
+     * @return the expiration date of the access token
+     */
+    Instant getAccessTokenExpirationDate(String token);
+
+    /**
+     * Retrieve the username from the token.
+     *
+     * @param token the token to check
+     *
+     * @return the username
+     */
+    String getUsernameFromToken(String token);
 
 }

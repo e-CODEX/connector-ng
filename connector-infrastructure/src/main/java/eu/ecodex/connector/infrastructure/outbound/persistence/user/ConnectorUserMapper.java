@@ -24,7 +24,6 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ConnectorUserMapper {
 
-
     /**
      * Map an entity user into a domain user.
      *

@@ -14,13 +14,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorRefreshTokenRepository;
+import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
-import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,10 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
+    @Autowired
+    private ConnectorRefreshTokenRepository refreshTokenRepository;
+    @Autowired
+    private ConnectorUserRepository userRepository;
     @Autowired
     private RestTestClient apiClient;
 
@@ -44,49 +50,23 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
 
     @Test
     @Sql("classpath:sql/user.sql")
-    void request_should_failed_when_access_token_has_expired() {
+    void request_should_failed_when_invalid_refresh_token() {
         var loginTime = Instant.parse("2026-08-18T10:00:00Z");
-
         when(clock.instant()).thenReturn(loginTime);
         when(clock.getZone()).thenReturn(ZoneOffset.UTC);
 
-        // Login → token expires at 10:15
-        var loginRequest = ConnectorLoginRequest
+        var refreshToken = UUID.randomUUID().toString();
+        var refreshRequest = ConnectorRefreshTokenRequest
             .builder()
-            .username(ConnectorUser.DEFAULT_ADMIN_USER_NAME)
-            .password(ConnectorUser.DEFAULT_ADMIN_PASSWORD)
+            .refreshToken(refreshToken)
             .build();
 
-        var loginResponse = apiClient.post()
-            .uri("/api/v1/auth/login")
+        // Refresh using admin token
+        apiClient.post()
+            .uri("/api/v1/auth/refresh")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .contentType(MediaType.APPLICATION_JSON)
-            .body(loginRequest)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorLoginResponse.class)
-            .getResponseBody();
-
-        assertThat(loginResponse).isNotNull();
-        var accessToken = loginResponse.accessToken();
-
-        // Token is still valid at 10:10
-        when(clock.instant()).thenReturn(Instant.parse("2026-08-18T10:10:00Z"));
-
-        // Verify that the token works before it expires
-        apiClient.get()
-            .uri("/api/v1/admin/attachments")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-            .exchange()
-            .expectStatus()
-            .isOk();
-
-        // Move clock past the 15-minute expiration
-        when(clock.instant()).thenReturn(Instant.parse("2026-08-18T10:16:00Z"));
-
-        apiClient.get()
-            .uri("/api/v1/admin/attachments")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+            .body(refreshRequest)
             .exchange()
             .expectStatus()
             .isUnauthorized();
@@ -94,18 +74,103 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
 
     @Test
     @Sql("classpath:sql/user.sql")
-    void should_refresh_access_token_when_access_token_has_expired() {
+    void request_should_failed_when_refresh_token_user_does_not_match_access_token_user() {
         var loginTime = Instant.parse("2026-08-18T10:00:00Z");
+        when(clock.instant()).thenReturn(loginTime);
+        when(clock.getZone()).thenReturn(ZoneOffset.UTC);
 
+        var refreshToken = "291b571a-1511-45a0-b990-368b5139011d"; // test-user-it refresh token
+        var refreshRequest = ConnectorRefreshTokenRequest
+            .builder()
+            .refreshToken(refreshToken)
+            .build();
+
+        // Refresh using admin token
+        apiClient.post()
+            .uri("/api/v1/auth/refresh")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(refreshRequest)
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
+    }
+
+    @Test
+    @Sql("classpath:sql/user.sql")
+    void request_should_create_new_access_token_and_rotate_refresh_token_when_access_token_has_expired() {
+        // Before login
+        var userUuid = "d43bfa931-3c25-47e4-b377-bf4ce7b0d04c_default_admin";
+        var revoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, true);
+        var notRevoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, false);
+        assertThat(revoked).hasSize(3);
+        assertThat(notRevoked).hasSize(1);
+
+        // Move clock past the 15-minute expiration
+        when(clock.instant()).thenReturn(Instant.parse("2026-08-18T10:16:00Z"));
+
+        var existing = notRevoked.getFirst().token();
+        var refreshRequest = ConnectorRefreshTokenRequest
+            .builder()
+            .refreshToken(existing)
+            .build();
+
+        var refreshResponse = apiClient.post()
+            .uri("/api/v1/auth/refresh")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(refreshRequest)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .returnResult(ConnectorLoginResponse.class)
+            .getResponseBody();
+
+        revoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, true);
+        notRevoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, false);
+        assertThat(revoked).hasSize(4);
+        assertThat(notRevoked).hasSize(1);
+
+        assertThat(refreshResponse).isNotNull();
+        var newAccessToken = refreshResponse.accessToken();
+
+        assertThat(newAccessToken).isNotBlank();
+        assertThat(refreshResponse.refreshToken()).isNotEqualTo(existing);
+
+        // New access token must work
+        apiClient.get()
+            .uri("/api/v1/auth/me")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken)
+            .exchange()
+            .expectStatus()
+            .isOk();
+    }
+
+    @Test
+    @Sql("classpath:sql/user.sql")
+    void should_refresh_access_token_when_access_token_has_expired() {
+        // Before login
+        var userUuid = "d43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_test";
+        assertThat(userRepository.existsByUuid(userUuid)).isTrue();
+        var user = userRepository.findByUsername("test-user-it");
+        assertThat(user).isPresent();
+
+        var revoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, true);
+        var notRevoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, false);
+        assertThat(revoked).hasSize(1);
+        assertThat(notRevoked).hasSize(1);
+
+        var loginTime = Instant.parse("2026-08-18T10:00:00Z");
         when(clock.instant()).thenReturn(loginTime);
         when(clock.getZone()).thenReturn(ZoneOffset.UTC);
 
         var loginRequest = ConnectorLoginRequest
             .builder()
-            .username(ConnectorUser.DEFAULT_ADMIN_USER_NAME)
-            .password(ConnectorUser.DEFAULT_ADMIN_PASSWORD)
+            .username("test-user-it")
+            .password("password")
             .build();
 
+        // login user first to get a valid access token
         var loginResponse = apiClient.post()
             .uri("/api/v1/auth/login")
             .contentType(MediaType.APPLICATION_JSON)
@@ -116,21 +181,19 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
             .returnResult(ConnectorLoginResponse.class)
             .getResponseBody();
 
+        revoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, true);
+        notRevoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, false);
+        assertThat(revoked).isEmpty();
+        assertThat(notRevoked).hasSize(1);
+
         assertThat(loginResponse).isNotNull();
         var expiredAccessToken = loginResponse.accessToken();
         var refreshToken = loginResponse.refreshToken();
 
+        // Login → token expires at 10:15
         var refreshTime = Instant.parse("2026-08-18T10:16:00Z");
         when(clock.instant()).thenReturn(refreshTime);
         when(clock.getZone()).thenReturn(ZoneOffset.UTC);
-
-        // Old access token must no longer work
-        apiClient.get()
-            .uri("/api/v1/admin/attachments")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + expiredAccessToken)
-            .exchange()
-            .expectStatus()
-            .isUnauthorized();
 
         // Refresh using the valid refresh token
         var refreshRequest = ConnectorRefreshTokenRequest
@@ -140,6 +203,7 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
 
         var refreshResponse = apiClient.post()
             .uri("/api/v1/auth/refresh")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + expiredAccessToken)
             .contentType(MediaType.APPLICATION_JSON)
             .body(refreshRequest)
             .exchange()
@@ -153,10 +217,11 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
 
         assertThat(newAccessToken).isNotBlank();
         assertThat(newAccessToken).isNotEqualTo(expiredAccessToken);
+        assertThat(refreshResponse.refreshToken()).isEqualTo(refreshToken);
 
         // New access token must work
         apiClient.get()
-            .uri("/api/v1/admin/attachments")
+            .uri("/api/v1/auth/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + newAccessToken)
             .exchange()
             .expectStatus()

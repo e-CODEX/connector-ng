@@ -18,7 +18,8 @@ import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
-import java.util.List;
+import java.time.Duration;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -55,32 +56,19 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
     public ConnectorRefreshToken create(ConnectorUser user) {
         log.debug("Creating refresh token for user {}", user.uuid());
 
-        List<ConnectorRefreshToken> revoked =
-            repository.findByUserUuidAndRevoked(user.uuid(), false);
+        // Delete all existing refresh tokens for the user
+        repository.deleteByUserUuid(user.uuid());
 
-        if (!revoked.isEmpty()) {
-            repository.revokeAllByUserUuid(user.uuid());
-        }
-
-        var refreshToken = ConnectorRefreshToken.builder()
-            .revoked(false)
-            .user(user)
-            .expiresAt(clock
-                .instant()
-                .plus(authenticationTokenProvider.getRefreshTokenExpiresIn()))
-            .build();
-
-        return repository.save(refreshToken);
+        return createRefreshToken(user);
     }
 
     @Override
-    public ConnectorRefreshToken verify(String token) {
+    public ConnectorRefreshToken verifyExpiration(String token) {
         if (token == null || token.isBlank()) {
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
         }
         var refreshToken = repository.findByToken(token)
-            .orElseThrow(() ->
-                new ConnectorUserBadCredentialsException("Invalid refresh token"));
+            .orElseThrow(() -> new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
         if (refreshToken.user() == null || refreshToken.user().uuid() == null) {
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
@@ -97,17 +85,74 @@ public class ConnectorRefreshUserTokenService implements ConnectorRefreshUserTok
         return refreshToken;
     }
 
-
     @Override
-    public ConnectorLoginResponse refresh(String token) {
-        var refreshToken = this.verify(token);
-        var user = refreshToken.user();
-        var accessToken = authenticationTokenProvider.generateToken(user);
+    public ConnectorLoginResponse refresh(String accessToken, String refreshToken) {
+        var verifiedRefreshToken = this.verifyExpiration(refreshToken);
 
-        return new ConnectorLoginResponse(accessToken, token,
-            authenticationTokenProvider.getAccessTokenExpiresInSeconds(),
-            authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds()
+        if (!authenticationTokenProvider.getUsernameFromToken(accessToken).equals(
+            verifiedRefreshToken.user().username())) {
+            throw new ConnectorUserBadCredentialsException(
+                "Access token and refresh token do not belong to the same user.");
+        }
+
+        log.debug("Refreshing access token for user {}", verifiedRefreshToken.user().uuid());
+        var newAccessToken = authenticationTokenProvider.isAccessTokenExpired(accessToken)
+            ? authenticationTokenProvider.generateToken(verifiedRefreshToken.user())
+            : accessToken;
+
+        var accessTokenExpiresAt =
+            authenticationTokenProvider.getAccessTokenExpirationDate(newAccessToken);
+
+        var newRefreshToken = shouldRotateRefreshToken(verifiedRefreshToken, accessTokenExpiresAt)
+            ? rotateRefreshToken(verifiedRefreshToken.user())
+            : verifiedRefreshToken;
+
+
+        return new ConnectorLoginResponse(newAccessToken, newRefreshToken.token(),
+            Duration.between(clock.instant(), accessTokenExpiresAt).getSeconds(),
+            Duration.between(clock.instant(), newRefreshToken.expiresAt()).getSeconds()
         );
     }
 
+    /**
+     * Rotates the refresh token when it would expire before the access token.
+     */
+    private boolean shouldRotateRefreshToken(ConnectorRefreshToken refreshToken,
+                                             Instant accessTokenExpiresAt) {
+        return refreshToken.expiresAt().isBefore(accessTokenExpiresAt);
+    }
+
+    /**
+     * Creates a new refresh token for the given user.
+     *
+     * @param user user to create the refresh token for
+     *
+     * @return newly created refresh token
+     */
+    private ConnectorRefreshToken createRefreshToken(ConnectorUser user) {
+        var refreshToken = ConnectorRefreshToken.builder()
+            .revoked(false)
+            .user(user)
+            .expiresAt(clock
+                .instant()
+                .plus(authenticationTokenProvider.getRefreshTokenExpiresIn()))
+            .build();
+
+        return repository.save(refreshToken);
+    }
+
+    /**
+     * Revokes all existing refresh tokens for the given user and creates a new one.
+     *
+     * @param user user to revoke refresh tokens for
+     *
+     * @return newly created refresh token
+     */
+    private ConnectorRefreshToken rotateRefreshToken(ConnectorUser user) {
+        var revoked = repository.findByUserUuidAndRevoked(user.uuid(), Boolean.FALSE);
+        if (!revoked.isEmpty()) {
+            repository.revokeByUserUuid(user.uuid());
+        }
+        return createRefreshToken(user);
+    }
 }

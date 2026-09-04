@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import java.time.Duration;
+import java.time.Instant;
 import javax.crypto.SecretKey;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +73,23 @@ public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenPr
     @Override
     public Duration getRefreshTokenExpiresIn() {
         return jwtProperties.getRefreshToken().expiration();
+    }
+
+    @Override
+    public boolean isAccessTokenExpired(String token) {
+        return jwtTokenService.isExpired(token);
+    }
+
+    @Override
+    public Instant getAccessTokenExpirationDate(String token) {
+        var claims = jwtTokenService.parseAllowingExpired(token);
+        return claims.getExpiration().toInstant();
+    }
+
+    @Override
+    public String getUsernameFromToken(String token) {
+        var claims = jwtTokenService.parseAllowingExpired(token);
+        return claims.getSubject();
     }
 
 }

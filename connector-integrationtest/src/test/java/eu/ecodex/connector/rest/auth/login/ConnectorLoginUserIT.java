@@ -153,7 +153,6 @@ class ConnectorLoginUserIT extends AbstractIntegrationTest {
             .password("wrong-password")
             .build();
 
-
         apiClient.post()
             .uri(PATH)
             .contentType(MediaType.APPLICATION_JSON)

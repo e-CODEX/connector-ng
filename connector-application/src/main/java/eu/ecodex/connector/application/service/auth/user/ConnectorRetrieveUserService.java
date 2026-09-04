@@ -60,16 +60,14 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
 
     @Override
     public ConnectorUser getByUsername(String username) throws ConnectorUserNotFoundException {
-        return repository
-            .findByUsername(username)
+        return repository.findByUsername(username)
             .orElseThrow(() -> new ConnectorUserNotFoundException(
                 String.format("User not found by username %s", username)));
     }
 
     @Override
     public ConnectorUser getByEmail(String email) throws ConnectorUserNotFoundException {
-        return repository
-            .findByEmail(email)
+        return repository.findByEmail(email)
             .orElseThrow(() -> new ConnectorUserNotFoundException(
                 String.format("User not found by email %s", email)));
     }
@@ -77,8 +75,7 @@ public class ConnectorRetrieveUserService implements ConnectorRetrieveUser {
     @Override
     public ConnectorUser getByUsernameAndEmail(String username, String email)
         throws ConnectorUserNotFoundException {
-        return repository
-            .findByUsernameAndEmail(username, email)
+        return repository.findByUsernameAndEmail(username, email)
             .orElseThrow(() -> new ConnectorUserNotFoundException(
                 String.format("User not found by username %s and email %s", username,
                     email)));

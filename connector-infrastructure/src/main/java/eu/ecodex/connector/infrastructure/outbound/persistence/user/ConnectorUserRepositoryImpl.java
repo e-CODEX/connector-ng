@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRoleJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import java.util.List;
@@ -55,6 +56,7 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
 
     ConnectorUserJpaRepository jpaRepository;
     ConnectorRoleJpaRepository roleRepository;
+    ConnectorRefreshTokenJpaRepository refreshTokenRepository;
 
     @Override
     public ConnectorUser save(ConnectorUser domainUser) {
@@ -122,11 +124,10 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     @Override
     @Transactional
     public void deleteByUuid(String identifier) {
-        var entity = jpaRepository
-            .findByUuid(identifier)
-            .orElseThrow(() ->
-                new ConnectorUserNotFoundException(
-                    "No user found by identifier " + identifier));
+        var entity = jpaRepository.findByUuid(identifier)
+            .orElseThrow(() -> new ConnectorUserNotFoundException(
+                "No user found by identifier " + identifier));
+        refreshTokenRepository.deleteByUser_Uuid(entity.getUuid());
         jpaRepository.delete(entity);
     }
 

@@ -16,6 +16,7 @@ import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticati
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -109,7 +110,6 @@ public class JwtService {
 
     }
 
-
     /**
      * Extracts the username from the payload of the provided JWT token.
      *
@@ -120,7 +120,6 @@ public class JwtService {
     public String extractUsername(String token) {
         return parse(token).getPayload().getSubject();
     }
-
 
     /**
      * Extracts the authorities (roles) from the payload of a given JWT token.
@@ -138,7 +137,6 @@ public class JwtService {
         if (!(claim instanceof List<?> roles)) {
             return List.of();
         }
-
         return roles
             .stream()
             .map(String::valueOf)
@@ -163,12 +161,29 @@ public class JwtService {
         try {
             var claims = parse(token).getPayload();
             return claims.getSubject().equals(user.getUsername());
-
         } catch (JwtException e) {
             return false;
         }
     }
 
+
+    /**
+     * Checks if the given JWT token has expired.
+     *
+     * @param token accessToken to check
+     *
+     * @return true if expired, false otherwise
+     */
+    public boolean isExpired(String token) {
+        try {
+            parse(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            return true; // signature verified successfully; only expiration failed
+        } catch (JwtException | IllegalArgumentException e) {
+            return false; // tampered, malformed, wrong key, or garbage input
+        }
+    }
 
     /**
      * Parses the given JWT and verifies its cryptographic signature against {@link #secretKey}.
@@ -200,5 +215,22 @@ public class JwtService {
             .clock(() -> Date.from(clock.instant()))
             .build()
             .parseSignedClaims(token);
+    }
+
+    /**
+     * Extracts claims even from an expired token, as long as its signature is correct.
+     * Used specifically by the refresh flow, where an expired access token is expected
+     * and its username still needs to be read to confirm it matches the refresh token's owner.
+     *
+     * @param token access token to parse
+     *
+     * @return the parsed claims
+     */
+    public Claims parseAllowingExpired(String token) {
+        try {
+            return parse(token).getPayload();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims(); // signature was already verified before expiration was checked
+        }
     }
 }

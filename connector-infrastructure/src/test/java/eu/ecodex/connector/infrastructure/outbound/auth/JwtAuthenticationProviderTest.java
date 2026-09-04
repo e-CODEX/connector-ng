@@ -74,7 +74,7 @@ class JwtAuthenticationProviderTest {
     @Test
     void refreshTokenExpires_should_return_refresh_token_duration() {
         // Given
-        Duration expiration = Duration.ofDays(2);
+        var expiration = Duration.ofDays(2);
         var props = new RefreshTokenProperties(expiration);
 
         when(jwtProperties.getRefreshToken()).thenReturn(props);
@@ -87,5 +87,17 @@ class JwtAuthenticationProviderTest {
 
         verify(jwtProperties).getRefreshToken();
         verifyNoMoreInteractions(jwtService, jwtProperties);
+    }
+
+    @Test
+    void isAccessTokenExpired() {
+    }
+
+    @Test
+    void getAccessTokenExpirationDate() {
+    }
+
+    @Test
+    void getUsernameFromToken() {
     }
 }

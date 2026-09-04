@@ -12,16 +12,12 @@ package eu.ecodex.connector;
 
 import eu.ecodex.connector.infrastructure.config.DssConfig;
 import eu.ecodex.connector.infrastructure.config.EvidenceConfig;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 /**
  * Loads DSS + REM evidence beans (aligned with infra property + dss scans used at runtime).
  */
-@SpringBootConfiguration
-@EnableAutoConfiguration
 @Import({DssConfig.class, EvidenceConfig.class})
 @ComponentScan(
         basePackages = {
@@ -30,5 +26,5 @@ import org.springframework.context.annotation.Import;
                 "eu.ecodex.connector.infrastructure.outbound.evidence",
         }
 )
-public class EvidenceContextConfiguration {
+public class EvidenceContextConfiguration extends SecurityDisabledTestConfiguration {
 }

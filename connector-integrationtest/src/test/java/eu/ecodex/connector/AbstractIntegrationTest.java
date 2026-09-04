@@ -10,12 +10,15 @@
 
 package eu.ecodex.connector;
 
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageAcknowledgementListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsInboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
+import eu.ecodex.connector.infrastructure.outbound.auth.JwtService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -23,6 +26,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.time.Duration;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -52,22 +56,22 @@ public abstract class AbstractIntegrationTest {
 
     static {
         minio = new MinIOContainer("minio/minio:RELEASE.2025-09-07T16-13-09Z")
-                .withUserName("testuser")
-                .withPassword("testpassword")
-                .withStartupTimeout(Duration.ofMinutes(2));
+            .withUserName("testuser")
+            .withPassword("testpassword")
+            .withStartupTimeout(Duration.ofMinutes(2));
 
         mysql = new MySQLContainer("mysql:8.0.33")
-                .withDatabaseName("connector")
-                .withUsername("connector")
-                .withPassword("connector");
+            .withDatabaseName("connector")
+            .withUsername("connector")
+            .withPassword("connector");
 
         Startables.deepStart(minio, mysql).join();
 
         try {
             minioClient = MinioClient.builder()
-                                     .endpoint(minio.getS3URL())
-                                     .credentials(minio.getUserName(), minio.getPassword())
-                                     .build();
+                .endpoint(minio.getS3URL())
+                .credentials(minio.getUserName(), minio.getPassword())
+                .build();
             createBucketIfNotExists();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MinIO client", e);
@@ -88,11 +92,13 @@ public abstract class AbstractIntegrationTest {
     ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private JwtService jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
         registry.add(
-                "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
+            "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
         );
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
@@ -110,11 +116,11 @@ public abstract class AbstractIntegrationTest {
 
     private static void createBucketIfNotExists() throws Exception {
         boolean exists = minioClient.bucketExists(
-                BucketExistsArgs.builder().bucket("attachments").build()
+            BucketExistsArgs.builder().bucket("attachments").build()
         );
         if (!exists) {
             minioClient.makeBucket(
-                    MakeBucketArgs.builder().bucket("attachments").build()
+                MakeBucketArgs.builder().bucket("attachments").build()
             );
         }
     }
@@ -123,12 +129,12 @@ public abstract class AbstractIntegrationTest {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
-                "attachments",
-                FilePartTestFixtures.filePart(
-                        "fake_file.pdf",
-                        FileTestFixtures.generateFakeFile(fileSize),
-                        MediaType.APPLICATION_PDF
-                )
+            "attachments",
+            FilePartTestFixtures.filePart(
+                "fake_file.pdf",
+                FileTestFixtures.generateFakeFile(fileSize),
+                MediaType.APPLICATION_PDF
+            )
         );
 
         return parts;
@@ -153,13 +159,29 @@ public abstract class AbstractIntegrationTest {
                     "connector_services",
                     "connector_actions",
                     "connector_processing_modes",
-                    "connector_processing_mode_truststores", // typo removed
-                    "connector_business_domains")) {
+                    "connector_processing_mode_truststores",
+                    "connector_business_domains",
+                    "connector_refresh_tokens",
+                    "connector_users",
+                    "connector_roles",
+                    "connector_users_roles"
+                    )) {
                     st.execute("TRUNCATE TABLE " + table);
                 }
                 st.execute("SET FOREIGN_KEY_CHECKS = 1");
             }
             return null;
         });
+    }
+
+    protected String generateDefaultAdminToken() {
+        var user = new ConnectorUserDetails(ConnectorUser
+            .defaultAdminUser()
+            .toBuilder()
+            .uuid(UUID
+                .randomUUID()
+                .toString())
+            .build());
+        return jwtTokenService.generateAccessToken(user);
     }
 }

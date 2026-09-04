@@ -19,6 +19,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @DisplayName("RetrieveQueuesStatsIT REST")
@@ -27,18 +29,20 @@ public class RetrieveQueuesStatsIT extends AbstractIntegrationTest {
     private RestTestClient apiClient;
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_retrieve_jms_queue_statistics() {
         apiClient.get()
-                 .uri("/api/v1/admin/jms/queues/stats")
-                 .exchange()
-                 .expectStatus()
-                 .isOk()
-                 .expectBody(new ParameterizedTypeReference<List<ConnectorQueueStats>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.size()).isEqualTo(8);
-                 });
+            .uri("/api/v1/admin/jms/queues/stats")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody(new ParameterizedTypeReference<List<ConnectorQueueStats>>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.size()).isEqualTo(8);
+            });
     }
 }

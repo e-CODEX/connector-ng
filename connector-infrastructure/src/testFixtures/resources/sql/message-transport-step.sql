@@ -1,4 +1,4 @@
-insert into connector_message_transport_steps (
+insert ignore into connector_message_transport_steps (
     id,
     identifier,
     number_of_attempts,

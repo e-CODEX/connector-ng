@@ -8,12 +8,11 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.auth.jwt;
-
-import java.time.Duration;
+package eu.ecodex.connector.application.port.api.auth.login;
 
 /**
- * Refresh token configuration properties.
+ * Interface for cleaning up connector refresh tokens.
  */
-public record RefreshTokenProperties(Duration expiration, String cleanupCron) {
+public interface ConnectorRefreshTokenCleanUp {
+    void purgeStaleTokens();
 }

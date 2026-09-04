@@ -25,6 +25,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -49,16 +50,17 @@ public class ConnectorDownloadAttachmentsIT extends AbstractIntegrationTest {
     @Test
     @WithAttachmentData
     void should_download_attachments() {
-        when(fileStorageProvider.findByIdentifier(any())).thenReturn(new byte[]{1, 2, 3});
+        when(fileStorageProvider.findByIdentifier(any())).thenReturn(new byte[] {1, 2, 3});
 
         var body = apiClient.get()
-                            .uri(
-                                "/api/v1/admin/attachments/d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file/download")
-                            .exchange()
-                            .expectStatus().isOk()
-                            .expectBody(byte[].class)
-                            .returnResult()
-                            .getResponseBody();
+            .uri(
+                "/api/v1/admin/attachments/d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file/download")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(byte[].class)
+            .returnResult()
+            .getResponseBody();
 
         assertThat(body).isNotNull().isNotEmpty();
     }
@@ -67,15 +69,15 @@ public class ConnectorDownloadAttachmentsIT extends AbstractIntegrationTest {
     @WithAttachmentData
     void should_failed_when_attachment_is_not_found() {
         apiClient.get()
-                 .uri(
-                     "/api/v1/admin/attachments/unknown-ide/download")
-                 .exchange()
-                 .expectStatus().is4xxClientError()
-                 .expectBody(ErrorResponse.class)
-                 .value(response -> {
-                     assert response != null;
-                     assertThat(response.status()).isEqualTo(404);
-                 });
+            .uri("/api/v1/admin/attachments/unknown-ide/download")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().is4xxClientError()
+            .expectBody(ErrorResponse.class)
+            .value(response -> {
+                assert response != null;
+                assertThat(response.status()).isEqualTo(404);
+            });
     }
 
     @Test
@@ -84,15 +86,16 @@ public class ConnectorDownloadAttachmentsIT extends AbstractIntegrationTest {
         when(fileStorageProvider.findByIdentifier(any())).thenReturn(null);
 
         apiClient.get()
-                 .uri(
-                     "/api/v1/admin/attachments/d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file/download")
-                 .exchange()
-                 .expectStatus().is4xxClientError()
-                 .expectBody(ErrorResponse.class)
-                 .value(response -> {
-                     assert response != null;
-                     assertThat(response.status()).isEqualTo(409);
-                 });
+            .uri(
+                "/api/v1/admin/attachments/d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file/download")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().is4xxClientError()
+            .expectBody(ErrorResponse.class)
+            .value(response -> {
+                assert response != null;
+                assertThat(response.status()).isEqualTo(409);
+            });
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -106,6 +109,7 @@ public class ConnectorDownloadAttachmentsIT extends AbstractIntegrationTest {
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
         "classpath:sql/attachment.sql",
+        "classpath:sql/user.sql"
     })
     private @interface WithAttachmentData {
     }

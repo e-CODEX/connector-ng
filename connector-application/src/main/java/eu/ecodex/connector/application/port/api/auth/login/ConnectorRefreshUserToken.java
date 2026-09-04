@@ -49,22 +49,20 @@ public interface ConnectorRefreshUserToken {
      *
      * @param token the refresh token to be verified
      *
-     * @return a {@code ConnectorRefreshToken} instance representing the details of the verified
-     *     token,
-     *     including user information, expiration, and revocation status
      */
-    ConnectorRefreshToken verify(String token);
+    ConnectorRefreshToken verifyExpiration(String token);
 
     /**
      * Refreshes the authentication session by generating a new access token using
      * the provided refresh token. This method validates the given refresh token
      * and, if valid, issues a new access token while preserving the user's session.
      *
-     * @param token the refresh token used to obtain a new access token
+     * @param token       the refresh token used to obtain a new access token
+     * @param accessToken the current access token associated with the user's session
      *
      * @return a {@code LoginResponse} containing the new access token,
      *     refresh token, and expiration details of the session
      */
-    ConnectorLoginResponse refresh(String token);
+    ConnectorLoginResponse refresh(String accessToken, String token);
 
 }

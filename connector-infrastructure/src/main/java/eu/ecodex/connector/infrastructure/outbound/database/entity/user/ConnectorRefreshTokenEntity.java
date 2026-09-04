@@ -35,10 +35,10 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @Entity
 @Table(name = "CONNECTOR_REFRESH_TOKENS",
-        indexes = {
-                @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_TOKEN", columnList = "TOKEN"),
-                @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_USER_ID", columnList = "USER_ID")
-        })
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_TOKEN", columnList = "TOKEN"),
+        @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_USER_ID", columnList = "USER_ID")
+    })
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -64,4 +64,3 @@ public class ConnectorRefreshTokenEntity extends BaseEntity {
     @Column(name = "REVOKED", nullable = false)
     private boolean revoked;
 }
-

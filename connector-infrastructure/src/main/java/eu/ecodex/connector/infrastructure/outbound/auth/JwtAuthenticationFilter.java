@@ -46,56 +46,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
 
         var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        var bearerPrefix = "Bearer ";
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith(bearerPrefix)) {
             filterChain.doFilter(request, response);
             return;
         }
-        var token = authHeader.substring(7);
+        var token = authHeader.substring(bearerPrefix.length());
 
         try {
             var username = jwtTokenService.extractUsername(token);
 
-            if (username == null) {
-                SecurityContextHolder.clearContext();
-                log.warn("JWT authentication failed: token does not contain a username");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
-                return;
+            if (username != null
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                var userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtTokenService.isValidToken(token, userDetails)) {
+                    var authentication = new UsernamePasswordAuthenticationToken(userDetails,
+                        null, userDetails.getAuthorities());
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource()
+                        .buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    log.debug(
+                        "JWT authentication set: principal={}, authenticated={}, authorities={}",
+                        authentication.getName(), authentication.isAuthenticated(),
+                        authentication.getAuthorities()
+                    );
+                }
             }
 
-            var userDetails = userDetailsService.loadUserByUsername(username);
-
-            if (!jwtTokenService.isValidToken(token, userDetails)) {
-                SecurityContextHolder.clearContext();
-                log.warn("JWT authentication failed: token is not valid for user {}", username);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Invalid or expired JWT token");
-                return;
-            }
-
-            var authentication = new UsernamePasswordAuthenticationToken(userDetails, null,
-                userDetails.getAuthorities());
-
-            authentication.setDetails(new WebAuthenticationDetailsSource()
-                .buildDetails(request));
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            log.info("JWT authentication set: principal={}, authenticated={}, "
-                    + "authorities={}",
-                authentication.getName(),
-                authentication.isAuthenticated(),
-                authentication.getAuthorities()
-            );
-
-            filterChain.doFilter(request, response);
-
-        } catch (JwtException ex) {
+        } catch (JwtException | IllegalArgumentException ex) {
             SecurityContextHolder.clearContext();
             log.error("Could not authenticate JWT token, {}", ex.getMessage());
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                "Invalid or expired JWT token");
         }
-    }
 
+        filterChain.doFilter(request, response);
+    }
 }

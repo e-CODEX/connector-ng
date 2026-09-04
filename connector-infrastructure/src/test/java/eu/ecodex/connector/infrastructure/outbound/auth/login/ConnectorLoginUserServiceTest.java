@@ -22,6 +22,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsExce
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -56,24 +57,27 @@ class ConnectorLoginUserServiceTest {
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var authenticatedToken = new UsernamePasswordAuthenticationToken(
             principal, password, principal.getAuthorities());
+        var token = "refresh-token-abc";
         var refreshToken = ConnectorRefreshToken.builder()
-            .token("refresh-token-abc")
+            .token(token)
             .user(connectorUser)
             .revoked(false)
             .build();
+        var accessToken = "access-token";
 
         when(authenticationManager.authenticate(any())).thenReturn(authenticatedToken);
-        when(authenticationTokenProvider.generateToken(any())).thenReturn("access-token");
+        when(authenticationTokenProvider.generateAccessToken(any())).thenReturn(accessToken);
         when(refreshTokenService.create(any())).thenReturn(refreshToken);
-        when(authenticationTokenProvider.getAccessTokenExpiresInSeconds()).thenReturn(60L);
+        when(authenticationTokenProvider.getAccessTokenExpiresIn()).thenReturn(
+            Duration.ofMinutes(1));
 
         // When
         var loginResponse = service.login(username, password);
 
         // Then
         assertThat(loginResponse).isNotNull();
-        assertThat(loginResponse.accessToken()).isEqualTo("access-token");
-        assertThat(loginResponse.refreshToken()).isEqualTo("refresh-token-abc");
+        assertThat(loginResponse.accessToken()).isEqualTo(accessToken);
+        assertThat(loginResponse.refreshToken()).isEqualTo(token);
         assertThat(loginResponse.expiresIn()).isEqualTo(60L);
 
         var authCaptor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
@@ -82,9 +86,9 @@ class ConnectorLoginUserServiceTest {
         assertThat(authCaptorValue.getPrincipal()).isEqualTo(username);
         assertThat(authCaptorValue.getCredentials()).isEqualTo(password);
 
-        verify(authenticationTokenProvider).generateToken(connectorUser);
+        verify(authenticationTokenProvider).generateAccessToken(connectorUser);
         verify(refreshTokenService).create(connectorUser);
-        verify(authenticationTokenProvider).getAccessTokenExpiresInSeconds();
+        verify(authenticationTokenProvider).getAccessTokenExpiresIn();
         verify(authenticationTokenProvider).getRefreshTokenExpiresIn();
         verifyNoMoreInteractions(authenticationTokenProvider, refreshTokenService);
     }

@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.port.spi.auth.login;
 
 import eu.ecodex.connector.application.port.api.auth.login.ConnectorRefreshUserToken;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ public interface ConnectorRefreshTokenRepository {
      *              token entity from the persistence layer.
      *
      * @return an {@link Optional} containing the {@link ConnectorRefreshToken} if it exists;
-     *         an empty {@link Optional} if no matching token is found.
+     *     an empty {@link Optional} if no matching token is found.
      */
     Optional<ConnectorRefreshToken> findByToken(String token);
 
@@ -80,7 +81,7 @@ public interface ConnectorRefreshTokenRepository {
      *                will be returned.
      *
      * @return a list of {@link ConnectorRefreshToken} entities matching the provided user UUID and
-     *         revocation status. The list may be empty if no matching tokens are found.
+     *     revocation status. The list may be empty if no matching tokens are found.
      */
     List<ConnectorRefreshToken> findByUserUuidAndRevoked(String uuid, boolean revoked);
 
@@ -94,5 +95,33 @@ public interface ConnectorRefreshTokenRepository {
      *
      * @return the number of refresh tokens that were successfully revoked.
      */
-    int revokeAllByUserUuid(String uuid);
+    int revokeByUserUuid(String uuid);
+
+    /**
+     * Deletes all refresh tokens associated with the specified user UUID.
+     *
+     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked.
+     *             It acts as a key to find and mark all associated tokens as revoked.
+     *
+     * @return the number of refresh tokens that were successfully revoked.
+     */
+    int deleteByUserUuid(String uuid);
+
+    /**
+     * Delete all expired refresh tokens before the specified date.
+     *
+     * @param expiryDate shall be before this date
+     *
+     * @return the number of refresh tokens that were successfully deleted
+     */
+    int deleteByExpiryDateBefore(Instant expiryDate);
+
+    /**
+     * Delete all revoked refresh tokens before the specified date.
+     *
+     * @param expiryDate shall be before this date
+     *
+     * @return the number of refresh tokens that were successfully deleted
+     */
+    int deleteByRevokedAndExpiryDateBefore(Instant expiryDate);
 }

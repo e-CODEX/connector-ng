@@ -18,6 +18,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.user.Connecto
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.user.ConnectorUserMapper;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -47,7 +48,7 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
     @Override
     public ConnectorRefreshToken save(ConnectorRefreshToken refreshToken) {
         var user = userRepository.findByUuid(refreshToken.user().uuid())
-                .orElseThrow();
+            .orElseThrow();
 
         var saved = jpaRepository.save(toEntity(refreshToken, user));
         return toDomain(saved);
@@ -56,41 +57,55 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
     @Override
     public void delete(ConnectorRefreshToken refreshToken) {
         var user = userRepository.findByUuid(refreshToken.user().uuid())
-                .orElseThrow();
+            .orElseThrow();
         jpaRepository.delete(toEntity(refreshToken, user));
     }
 
     @Override
     public List<ConnectorRefreshToken> findByUserUuidAndRevoked(String uuid, boolean revoked) {
         return jpaRepository.findByUser_UuidAndRevoked(uuid, revoked).stream()
-                .map(this::toDomain)
-                .toList();
+            .map(this::toDomain)
+            .toList();
     }
 
     @Override
-    public int revokeAllByUserUuid(String uuid) {
+    public int revokeByUserUuid(String uuid) {
         return jpaRepository.revokeAllByUserUuid(uuid);
+    }
+
+    @Override
+    public int deleteByUserUuid(String uuid) {
+        return jpaRepository.deleteByUser_Uuid(uuid);
+    }
+
+    @Override
+    public int deleteByExpiryDateBefore(Instant expiryDate) {
+        return jpaRepository.deleteByExpiresAtBefore(expiryDate);
+    }
+
+    @Override
+    public int deleteByRevokedAndExpiryDateBefore(Instant expiryDate) {
+        return jpaRepository.deleteByRevokedTrueAndExpiresAtBefore(expiryDate);
     }
 
     private ConnectorRefreshTokenEntity toEntity(ConnectorRefreshToken domain,
                                                  ConnectorUserEntity user) {
-
         return ConnectorRefreshTokenEntity.builder()
-                .token(domain.token())
-                .revoked(domain.revoked())
-                .user(user)
-                .expiresAt(domain.expiresAt())
-                .build();
+            .token(domain.token())
+            .revoked(domain.revoked())
+            .user(user)
+            .expiresAt(domain.expiresAt())
+            .build();
     }
 
 
     private ConnectorRefreshToken toDomain(ConnectorRefreshTokenEntity entity) {
         return ConnectorRefreshToken.builder()
-                .token(entity.getToken())
-                .user(ConnectorUserMapper.toDomain(entity.getUser()))
-                .revoked(entity.isRevoked())
-                .createdAt(entity.getCreatedAt())
-                .expiresAt(entity.getExpiresAt())
-                .build();
+            .token(entity.getToken())
+            .user(ConnectorUserMapper.toDomain(entity.getUser()))
+            .revoked(entity.isRevoked())
+            .createdAt(entity.getCreatedAt())
+            .expiresAt(entity.getExpiresAt())
+            .build();
     }
 }

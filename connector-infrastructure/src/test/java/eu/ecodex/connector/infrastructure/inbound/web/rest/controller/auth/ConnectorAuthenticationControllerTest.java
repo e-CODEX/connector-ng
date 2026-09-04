@@ -26,6 +26,7 @@ import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUse
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -81,18 +82,22 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
     @Test
     void refresh_should_refresh_the_token() {
         // Given
+        var accessToken = "access-token";
         var refreshToken = "refresh-token";
-        var request = ConnectorRefreshTokenRequest.builder().refreshToken(refreshToken).build();
+        var request = ConnectorRefreshTokenRequest.builder()
+            .refreshToken(refreshToken)
+            .build();
         var expected = ConnectorLoginResponse.builder()
-            .accessToken("access-token")
+            .accessToken(accessToken)
             .refreshToken(refreshToken)
             .build();
 
-        when(userTokenService.refresh(any())).thenReturn(expected);
+        when(userTokenService.refresh(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
             .uri("/api/v1/auth/refresh")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)
             .exchange()
@@ -105,8 +110,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(userTokenService).refresh(refreshToken);
+        verify(userTokenService).refresh(accessToken, refreshToken);
         verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
     }
-
 }

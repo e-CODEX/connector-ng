@@ -79,11 +79,11 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
                 throw new RuntimeException("Error reading user principal");
             }
             var authenticatedUser = user.connectorUser();
-            var accessToken = authenticationTokenProvider.generateToken(authenticatedUser);
+            var accessToken = authenticationTokenProvider.generateAccessToken(authenticatedUser);
             var refreshToken = refreshTokenService.create(authenticatedUser);
 
             return new ConnectorLoginResponse(accessToken, refreshToken.token(),
-                authenticationTokenProvider.getAccessTokenExpiresInSeconds(),
+                authenticationTokenProvider.getAccessTokenExpiresIn().toSeconds(),
                 authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds());
 
         } catch (DisabledException exception) {

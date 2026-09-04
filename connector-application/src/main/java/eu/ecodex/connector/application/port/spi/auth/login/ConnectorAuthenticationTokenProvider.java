@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.port.spi.auth.login;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Duration;
+import java.time.Instant;
 
 /**
  * A provider interface for managing authentication tokens used in the
@@ -41,18 +42,19 @@ public interface ConnectorAuthenticationTokenProvider {
      * @param user the user details from which the token will be generated.
      *             It should provide the necessary information such as username
      *             and authorities required for token creation.
+     *
      * @return the generated authentication token as a {@code String}.
      */
-    String generateToken(ConnectorUser user);
+    String generateAccessToken(ConnectorUser user);
 
     /**
-     * Retrieves the duration in seconds for which an access token remains valid.
+     * Retrieves the duration for which an access token remains valid.
      * This duration determines the token's expiration time, after which it will
      * no longer be accepted for authentication purposes.
      *
      * @return the expiration duration of the access token in seconds.
      */
-    long getAccessTokenExpiresInSeconds();
+    Duration getAccessTokenExpiresIn();
 
     /**
      * Retrieves the duration in seconds for which a refresh token remains valid.
@@ -63,4 +65,37 @@ public interface ConnectorAuthenticationTokenProvider {
      */
     Duration getRefreshTokenExpiresIn();
 
+    /**
+     * Checks if the given JWT token has expired.
+     *
+     * @param token accessToken to check
+     *
+     * @return true if expired, false otherwise
+     */
+    boolean isAccessTokenExpired(String token);
+
+    /**
+     * Get the expiration date of the access token.
+     *
+     * @param token the token to check
+     *
+     * @return the expiration date of the access token
+     */
+    Instant getAccessTokenExpirationDate(String token);
+
+    /**
+     * Retrieve the username from the token.
+     *
+     * @param token the token to check
+     *
+     * @return the username
+     */
+    String getUsernameFromToken(String token);
+
+    /**
+     * Get refresh tokens clean up cron expression.
+     *
+     * @return cron expression
+     */
+    String getRefreshTokenCleanupCron();
 }

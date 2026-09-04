@@ -108,7 +108,7 @@ class JwtAuthenticationFilterTest {
 
         // Then
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        assertThat(filterChain.getRequest()).isNull();
+        assertThat(filterChain.getRequest()).isEqualTo(request);
 
         verifyNoMoreInteractions(jwtService, userDetailsService);
     }
@@ -126,7 +126,7 @@ class JwtAuthenticationFilterTest {
 
         // Then
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
-        assertThat(filterChain.getRequest()).isNull();
+        assertThat(filterChain.getRequest()).isEqualTo(request);
 
         verifyNoMoreInteractions(jwtService, userDetailsService);
     }

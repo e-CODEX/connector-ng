@@ -23,15 +23,19 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests for {@link JwtService}.
+ * This class contains tests for the JwtService class.
+ */
 class JwtServiceTest {
 
-    private static final Instant FIXED_NOW = Instant.parse("2026-08-27T00:00:00Z");
+    private static final Instant FIXED_NOW = Instant.now();
     private static final long ACCESS_TOKEN_EXPIRATION_MS = 15 * 60 * 1000L; // 15 min
     private static final String SECRET_STRING =
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd";
 
     private final RefreshTokenProperties refreshTokenProps =
-        new RefreshTokenProperties(Duration.ofDays(3));
+        new RefreshTokenProperties(Duration.ofDays(3), "0 0 3 * * *");
     private final ConnectorUserDetails userDetails = ConnectorUserTestFixtures.createUserDetails();
 
     private final JwtProperties jwtProperties =
@@ -41,14 +45,14 @@ class JwtServiceTest {
 
     private JwtService jwtService;
 
-    private JwtService jwtServiceAt(Instant instant, JwtProperties jwtProperties) {
+    private JwtService jwtServiceAt(JwtProperties jwtProperties, Instant instant) {
         return new JwtService(jwtProperties, Clock.fixed(instant, ZoneOffset.UTC));
     }
 
     @Test
     void generateToken_should_generate_valid_token() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
 
         // When
         var accessToken = jwtService.generateAccessToken(userDetails);
@@ -61,7 +65,7 @@ class JwtServiceTest {
     @Test
     void extractUsername_should_extract_username_from_token() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var accessToken = jwtService.generateAccessToken(userDetails);
 
         // When
@@ -74,7 +78,7 @@ class JwtServiceTest {
     @Test
     void extractAuthorities() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var accessToken = jwtService.generateAccessToken(userDetails);
 
         // When
@@ -85,22 +89,22 @@ class JwtServiceTest {
     }
 
     @Test
-    void isValidToken_should_return_false_afterExpiration() {
+    void isValidToken_should_return_FALSE_afterExpiration() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var token = jwtService.generateAccessToken(userDetails);
 
         var afterExpiry = FIXED_NOW.plusMillis(ACCESS_TOKEN_EXPIRATION_MS).plusSeconds(1);
-        var jwtServiceLater = jwtServiceAt(afterExpiry, jwtProperties);
+        var jwtServiceLater = jwtServiceAt(jwtProperties, afterExpiry);
 
         assertThat(jwtServiceLater.isValidToken(token, userDetails)).isFalse();
     }
 
 
     @Test
-    void isValidToken_should_return_true_when_token_is_valid() {
+    void isValidToken_should_return_TRUE_when_token_is_valid() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var token = jwtService.generateAccessToken(userDetails);
 
         // When
@@ -111,7 +115,7 @@ class JwtServiceTest {
     @Test
     void isValidToken_should_return_false_when_token_is_invalid() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var token = jwtService.generateAccessToken(userDetails);
         var otherUser = ConnectorUserDetails.builder().connectorUser(
             ConnectorUser.builder().build()
@@ -125,7 +129,7 @@ class JwtServiceTest {
     @Test
     void isValidToken_should_return_false_when_token_is_tampered() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var token = jwtService.generateAccessToken(userDetails);
         var tampered = token.substring(0, token.length() - 2) + "xx";
 
@@ -137,7 +141,7 @@ class JwtServiceTest {
     @Test
     void isValidToken_should_return_false_when_token_signed_ByDifferentKey() {
         // Given
-        jwtService = jwtServiceAt(FIXED_NOW, jwtProperties);
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
         var otherKey = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432";
         var props = new JwtProperties(otherKey, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION_MS),
             refreshTokenProps);
@@ -148,5 +152,55 @@ class JwtServiceTest {
         // When
         // Then
         assertThat(jwtService.isValidToken(tokenFromOtherIssuer, userDetails)).isFalse();
+    }
+
+
+    @Test
+    void isExpired_should_return_TRUE_when_token_has_expired() {
+        // Given
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
+        var token = jwtService.generateAccessToken(userDetails);
+
+        var afterExpiry = FIXED_NOW.plusMillis(ACCESS_TOKEN_EXPIRATION_MS).plusSeconds(1);
+        var expiredJwtService = jwtServiceAt(jwtProperties, afterExpiry);
+
+        // When
+        var isExpired = expiredJwtService.isExpired(token);
+
+        // Then
+        assertThat(isExpired).isTrue();
+    }
+
+    @Test
+    void isExpired_should_return_FALSE_when_token_has_not_expired() {
+        // Given
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
+        var token = jwtService.generateAccessToken(userDetails);
+
+        var afterExpiry = FIXED_NOW.plusMillis(ACCESS_TOKEN_EXPIRATION_MS).minusSeconds(1);
+        var expiredJwtService = jwtServiceAt(jwtProperties, afterExpiry);
+
+        // When
+        var isExpired = expiredJwtService.isExpired(token);
+
+        // Then
+        assertThat(isExpired).isFalse();
+    }
+
+    @Test
+    void parseAllowingExpired_should_parse_expired_token() {
+        // Given
+        jwtService = jwtServiceAt(jwtProperties, FIXED_NOW);
+        var token = jwtService.generateAccessToken(userDetails);
+
+        var afterExpiry = FIXED_NOW.plusMillis(ACCESS_TOKEN_EXPIRATION_MS).plusSeconds(1);
+        var expiredJwtService = jwtServiceAt(jwtProperties, afterExpiry);
+
+        // When
+        var claims = expiredJwtService.parseAllowingExpired(token);
+
+        // Then
+        assertThat(claims).isNotEmpty();
+        assertThat(claims.getSubject()).isEqualTo(userDetails.getUsername());
     }
 }

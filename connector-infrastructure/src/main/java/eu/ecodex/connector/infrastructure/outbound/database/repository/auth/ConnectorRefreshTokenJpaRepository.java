@@ -11,8 +11,10 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -41,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
  * - Works within the persistence context provided by Spring Data JPA.
  */
 public interface ConnectorRefreshTokenJpaRepository
-        extends JpaRepository<ConnectorRefreshTokenEntity, Long> {
+    extends JpaRepository<ConnectorRefreshTokenEntity, Long> {
 
     /**
      * Retrieves a {@link ConnectorRefreshTokenEntity} instance matching the specified token.
@@ -51,8 +53,9 @@ public interface ConnectorRefreshTokenJpaRepository
      * @param token the unique token string used to identify the {@link ConnectorRefreshTokenEntity}
      *
      * @return an {@link Optional} containing the {@link ConnectorRefreshTokenEntity} if found, or
-     *         an empty {@link Optional} if no entity matches the provided token
+     *     an empty {@link Optional} if no entity matches the provided token
      */
+    @EntityGraph(attributePaths = {"user", "user.roles"})
     Optional<ConnectorRefreshTokenEntity> findByToken(String token);
 
     /**
@@ -65,18 +68,35 @@ public interface ConnectorRefreshTokenJpaRepository
      * @param revoked  the revocation status used to filter the returned refresh token entities
      *
      * @return a list of {@link ConnectorRefreshTokenEntity} instances matching the provided user
-     *         UUID and revocation status;
-     *         if no entities match, an empty list is returned
+     *     UUID and revocation status;
+     *     if no entities match, an empty list is returned
      */
+    @EntityGraph(attributePaths = {"user", "user.roles"})
     List<ConnectorRefreshTokenEntity> findByUser_UuidAndRevoked(String userUuid, boolean revoked);
 
     @Modifying
     @Transactional
     @Query("""
-            update ConnectorRefreshTokenEntity rt
-               set rt.revoked = true
-             where rt.user.uuid = :userUuid
-               and rt.revoked = false
-            """)
+        update ConnectorRefreshTokenEntity rt
+           set rt.revoked = true
+         where rt.user.uuid = :userUuid
+           and rt.revoked = false
+        """)
+    @EntityGraph(attributePaths = {"user", "user.roles"})
     int revokeAllByUserUuid(@Param("userUuid") String userUuid);
+
+    @Modifying
+    @Transactional
+    @EntityGraph(attributePaths = {"user", "user.roles"})
+    int deleteByUser_Uuid(String userUuid);
+
+    @Modifying
+    @Transactional
+    @EntityGraph(attributePaths = {"user", "user.roles"})
+    int deleteByExpiresAtBefore(Instant instant);
+
+    @Modifying
+    @Transactional
+    @EntityGraph(attributePaths = {"user", "user.roles"})
+    int deleteByRevokedTrueAndExpiresAtBefore(Instant instant);
 }

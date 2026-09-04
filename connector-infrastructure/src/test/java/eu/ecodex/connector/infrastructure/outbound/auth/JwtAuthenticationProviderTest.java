@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -19,7 +20,11 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.RefreshTokenProperties;
+import io.jsonwebtoken.Claims;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +41,7 @@ class JwtAuthenticationProviderTest {
     JwtProperties jwtProperties;
 
     @InjectMocks
-    JwtAuthenticationProvider provider;
+    JwtAuthenticationProvider jwtProvider;
 
     @Test
     void generateToken_should_return_token() {
@@ -47,7 +52,7 @@ class JwtAuthenticationProviderTest {
         when(jwtService.generateAccessToken(any())).thenReturn("token");
 
         // When
-        var token = provider.generateToken(user);
+        var token = jwtProvider.generateAccessToken(user);
 
         // Then
         assertThat(token).isEqualTo("token");
@@ -57,35 +62,117 @@ class JwtAuthenticationProviderTest {
     }
 
     @Test
-    void accessTokenExpiresInSeconds_should_return_access_token_duration_in_seconds() {
+    void accessTokenExpiresIn_should_return_access_token_duration() {
         // Given
-        when(jwtProperties.getExpiration()).thenReturn(Duration.ofMinutes(10));
+        var ofMinutes = Duration.ofMinutes(10);
+        when(jwtProperties.getExpiration()).thenReturn(ofMinutes);
 
         // When
-        var actual = provider.getAccessTokenExpiresInSeconds();
+        var actual = jwtProvider.getAccessTokenExpiresIn();
 
         // Then
-        assertThat(actual).isEqualTo(600L);
+        assertThat(actual).isEqualTo(ofMinutes);
 
         verify(jwtProperties).getExpiration();
-        verifyNoMoreInteractions(jwtService, jwtProperties);
+        assertNoMoreInteractions();
     }
 
     @Test
     void refreshTokenExpires_should_return_refresh_token_duration() {
         // Given
-        Duration expiration = Duration.ofDays(2);
-        var props = new RefreshTokenProperties(expiration);
+        var expiration = Duration.ofDays(2);
+        var props = new RefreshTokenProperties(expiration, StringUtils.EMPTY);
 
         when(jwtProperties.getRefreshToken()).thenReturn(props);
 
         // When
-        var actual = provider.getRefreshTokenExpiresIn();
+        var actual = jwtProvider.getRefreshTokenExpiresIn();
 
         // Then
         assertThat(actual).isEqualTo(expiration);
 
         verify(jwtProperties).getRefreshToken();
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void isAccessTokenExpired_should_return_FALSE() {
+        // Given
+        when(jwtService.isExpired(any())).thenReturn(Boolean.FALSE);
+
+        // When
+        boolean expired = jwtProvider.isAccessTokenExpired("token");
+
+        // Then
+        assertThat(expired).isFalse();
+        verify(jwtService).isExpired("token");
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void isAccessTokenExpired_should_return_TRUE() {
+        // Given
+        when(jwtService.isExpired(any())).thenReturn(Boolean.TRUE);
+
+        // When
+        boolean expired = jwtProvider.isAccessTokenExpired("token");
+
+        // Then
+        assertThat(expired).isTrue();
+        verify(jwtService).isExpired("token");
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void getAccessTokenExpirationDate_should_return_access_token_expiration_date() {
+        // Given
+        var claims = mock(Claims.class);
+        var dateString = "2026-09-01T00:00:00Z";
+        when(claims.getExpiration()).thenReturn(Date.from(Instant.parse(dateString)));
+        when(jwtService.parseAllowingExpired(any())).thenReturn(claims);
+
+        // When
+        var actual = jwtProvider.getAccessTokenExpirationDate("token");
+
+        // Then
+        assertThat(actual).isNotNull().isEqualTo(Instant.parse(dateString));
+        verify(jwtService).parseAllowingExpired("token");
+        assertNoMoreInteractions();
+    }
+
+    private void assertNoMoreInteractions() {
         verifyNoMoreInteractions(jwtService, jwtProperties);
+    }
+
+    @Test
+    void getUsernameFromToken_should_extract_username_when_token_is_expired() {
+        // Given
+        var claims = mock(Claims.class);
+        when(claims.getSubject()).thenReturn("username");
+        when(jwtService.parseAllowingExpired(any())).thenReturn(claims);
+
+        // When
+        var actual = jwtProvider.getUsernameFromToken("token");
+
+        // Then
+        assertThat(actual).isNotNull().isEqualTo("username");
+        verify(jwtService).parseAllowingExpired("token");
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void getRefreshTokenCleanupCron_should_return_cron_expression() {
+        // Given
+        var cron = "0 0 3 * * *";
+        var expiration = Duration.ofDays(2);
+        var props = new RefreshTokenProperties(expiration, cron);
+
+        when(jwtProperties.getRefreshToken()).thenReturn(props);
+
+        // When
+        // Then
+        assertThat(jwtProvider.getRefreshTokenCleanupCron()).isEqualTo(cron);
+        verify(jwtProperties).getRefreshToken();
+        assertNoMoreInteractions();
     }
 }

@@ -165,7 +165,7 @@ public abstract class AbstractIntegrationTest {
                     "connector_users",
                     "connector_roles",
                     "connector_users_roles"
-                    )) {
+                )) {
                     st.execute("TRUNCATE TABLE " + table);
                 }
                 st.execute("SET FOREIGN_KEY_CHECKS = 1");

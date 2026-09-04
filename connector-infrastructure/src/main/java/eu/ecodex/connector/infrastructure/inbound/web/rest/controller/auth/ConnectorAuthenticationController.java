@@ -22,9 +22,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -63,8 +65,13 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     }
 
     @Override
-    public ConnectorLoginResponse refresh(ConnectorRefreshTokenRequest request) {
-        var refreshed = userTokenService.refresh(request.refreshToken());
+    public ConnectorLoginResponse refresh(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
+        ConnectorRefreshTokenRequest request) {
+
+        var accessToken = authorizationHeader.replaceFirst("^Bearer ", "");
+        var refreshed = userTokenService.refresh(accessToken, request.refreshToken());
+
         log.info("Successfully refreshed token");
         return refreshed;
     }

@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import java.time.Duration;
+import java.time.Instant;
 import javax.crypto.SecretKey;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -54,19 +55,18 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
-
     JwtService jwtTokenService;
     JwtProperties jwtProperties;
 
     @Override
-    public String generateToken(ConnectorUser connectorUser) {
+    public String generateAccessToken(ConnectorUser connectorUser) {
         var user = new ConnectorUserDetails(connectorUser);
         return jwtTokenService.generateAccessToken(user);
     }
 
     @Override
-    public long getAccessTokenExpiresInSeconds() {
-        return jwtProperties.getExpiration().toSeconds();
+    public Duration getAccessTokenExpiresIn() {
+        return jwtProperties.getExpiration();
     }
 
     @Override
@@ -74,4 +74,25 @@ public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenPr
         return jwtProperties.getRefreshToken().expiration();
     }
 
+    @Override
+    public boolean isAccessTokenExpired(String token) {
+        return jwtTokenService.isExpired(token);
+    }
+
+    @Override
+    public Instant getAccessTokenExpirationDate(String token) {
+        var claims = jwtTokenService.parseAllowingExpired(token);
+        return claims.getExpiration().toInstant();
+    }
+
+    @Override
+    public String getUsernameFromToken(String token) {
+        var claims = jwtTokenService.parseAllowingExpired(token);
+        return claims.getSubject();
+    }
+
+    @Override
+    public String getRefreshTokenCleanupCron() {
+        return jwtProperties.getRefreshToken().cleanupCron();
+    }
 }

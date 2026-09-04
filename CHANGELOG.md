@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - **Search** — Filter messages by `business domain`.
 - **Message** — Missing security validation for incoming business message containers.
 - **Administration** — REST API endpoints to support the administration portal.
+- **Authentication enabled** — REST API admin endpoints will have to authenticate. An admin account is created by default. Check credentials in properties.
+
 
 #### Fixes
 - **Ebms** — Set the correct message description for `ebms:description` for outbound messages.

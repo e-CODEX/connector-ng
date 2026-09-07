@@ -17,9 +17,11 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeParser;
 import eu.ecodex.connector.infrastructure.outbound.adapter.exception.ConnectorProcessingModeParsingException;
 import eu.ecodex.connector.infrastructure.util.SecureXmlParserUtil;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -50,14 +52,13 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
     private static final String ELEMENT_SERVICE = "service";
     private static final String ELEMENT_ACTION = "action";
 
-    /**
-     * Role assigned to every party declared in a PMode. The connector only ever acts as a gateway,
-     * so the value is fixed rather than read from the definition.
-     */
-    private static final String GATEWAY_ROLE = "GW";
+    private static final String ELEMENT_ROLE = "role";
+    private static final String ELEMENT_PROCESS = "process";
+    private static final String ATTRIBUTE_INITIATOR_ROLE = "initiatorRole";
+    private static final String ATTRIBUTE_RESPONDER_ROLE = "responderRole";
 
     private static Iterable<Element> elementsOf(NodeList nodes) {
-        var elements = new java.util.ArrayList<Element>(nodes.getLength());
+        var elements = new ArrayList<Element>(nodes.getLength());
 
         for (int i = 0; i < nodes.getLength(); i++) {
             if (nodes.item(i) instanceof Element element) {
@@ -68,17 +69,17 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
         return elements;
     }
 
-    private static java.util.Optional<Element> firstChildElement(Element parent) {
+    private static Optional<Element> firstChildElement(Element parent) {
         var children = parent.getElementsByTagName(ELEMENT_IDENTIFIER);
 
         for (int i = 0; i < children.getLength(); i++) {
             var child = children.item(i);
             if (child instanceof Element element && element.getParentNode() == parent) {
-                return java.util.Optional.of(element);
+                return Optional.of(element);
             }
         }
 
-        return java.util.Optional.empty();
+        return Optional.empty();
     }
 
     private static String requiredAttribute(Element element, String attribute, String context) {
@@ -110,9 +111,16 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
             "processing mode root element"
         );
 
+        var roles = retrieveRoles(root.getElementsByTagName(ELEMENT_ROLE));
+        var roleValues = resolveRoleValues(root.getElementsByTagName(ELEMENT_PROCESS), roles);
+
         var partyIdTypes = retrievePartyIdTypes(root.getElementsByTagName(ELEMENT_PARTY_ID_TYPE));
         var parties = retrieveParties(
-            root.getElementsByTagName(ELEMENT_PARTY), partyIdTypes, homePartyName);
+            root.getElementsByTagName(ELEMENT_PARTY),
+            partyIdTypes,
+            homePartyName,
+            roleValues
+        );
         var services = retrieveServices(root.getElementsByTagName(ELEMENT_SERVICE));
         var actions = retrieveActions(root.getElementsByTagName(ELEMENT_ACTION));
 
@@ -160,7 +168,13 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
     }
 
     private Set<ConnectorParty> retrieveParties(
-        NodeList partyNodes, Map<String, String> partyIdTypes, String homePartyName) {
+        NodeList partyNodes,
+        Map<String, String> partyIdTypes,
+        String homePartyName, RoleValues roleValues) {
+        var roleByType = Map.of(
+            ConnectorPartyRoleType.INITIATOR, roleValues.initiator(),
+            ConnectorPartyRoleType.RESPONDER, roleValues.responder()
+        );
 
         var parties = new HashSet<ConnectorParty>();
 
@@ -190,7 +204,7 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
                                   .name(name)
                                   .identifier(partyId)
                                   .identifierType(partyIdTypeValue)
-                                  .role(GATEWAY_ROLE)
+                                  .role(roleByType.get(roleType))
                                   .roleType(roleType)
                                   .isHome(homePartyName.equals(name))
                                   .build());
@@ -240,5 +254,66 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
         }
 
         return actions;
+    }
+
+    private Map<String, String> retrieveRoles(NodeList roleNodes) {
+        var roles = new HashMap<String, String>();
+
+        for (var role : elementsOf(roleNodes)) {
+            var name = requiredAttribute(role, ATTRIBUTE_NAME, "role element");
+            var value = requiredAttribute(role, ATTRIBUTE_VALUE, "role [%s]".formatted(name));
+
+            var previous = roles.put(name, value);
+            if (previous != null && !previous.equals(value)) {
+                throw new ConnectorProcessingModeParsingException(
+                    "Duplicate role [%s] with conflicting values".formatted(name));
+            }
+        }
+
+        return roles;
+    }
+
+    private String resolveRole(Element process, String attribute, Map<String, String> roles) {
+        var processName = process.getAttribute(ATTRIBUTE_NAME);
+        var roleName = requiredAttribute(process, attribute, "process [%s]".formatted(processName));
+
+        var roleValue = roles.get(roleName);
+
+        if (roleValue == null) {
+            throw new ConnectorProcessingModeParsingException(
+                "Process [%s] references the undeclared role [%s]".formatted(processName, roleName)
+            );
+        }
+
+        return roleValue;
+    }
+
+    private RoleValues resolveRoleValues(NodeList processNodes, Map<String, String> roles) {
+        var initiatorValues = new HashSet<String>();
+        var responderValues = new HashSet<String>();
+
+        for (var process : elementsOf(processNodes)) {
+            initiatorValues.add(resolveRole(process, ATTRIBUTE_INITIATOR_ROLE, roles));
+            responderValues.add(resolveRole(process, ATTRIBUTE_RESPONDER_ROLE, roles));
+        }
+
+        if (initiatorValues.isEmpty() || responderValues.isEmpty()) {
+            throw new ConnectorProcessingModeParsingException(
+                "The processing mode declares no process with an initiator and responder role");
+        }
+
+        if (initiatorValues.size() > 1 || responderValues.size() > 1) {
+            throw new ConnectorProcessingModeParsingException(
+                "The processing mode declares processes with differing initiator or responder roles"
+            );
+        }
+
+        return new RoleValues(
+            initiatorValues.iterator().next(),
+            responderValues.iterator().next()
+        );
+    }
+
+    private record RoleValues(String initiator, String responder) {
     }
 }

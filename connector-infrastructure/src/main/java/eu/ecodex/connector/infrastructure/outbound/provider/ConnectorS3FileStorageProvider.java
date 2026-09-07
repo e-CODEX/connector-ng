@@ -68,7 +68,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
     }
 
     @Override
-    public byte[] findByIdentifier(String identifier) {
+    public byte[] findByIdentifier(@NonNull String identifier) {
         log.debug("Downloading attachment [{}] from s3", identifier);
 
         var getObjectRequest = GetObjectRequest.builder()

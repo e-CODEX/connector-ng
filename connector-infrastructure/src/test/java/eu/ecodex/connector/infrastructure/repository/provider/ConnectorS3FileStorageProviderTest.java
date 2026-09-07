@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.repository.provider;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
@@ -115,7 +116,18 @@ public class ConnectorS3FileStorageProviderTest {
         }
 
         @Test
-        void should_throw_when_the_identifier_is_null() {
+        void should_return_null_when_the_identifier_is_unknown() {
+            var attachment = MessageAttachmentTestFixtures.createAttachment();
+            when(s3ProviderProperties.getBucket()).thenReturn("attachments");
+            doThrow(RuntimeException.class).when(s3Client)
+                                           .getObjectAsBytes(any(GetObjectRequest.class));
+            var foundAttachment = fileStorageProvider.findByIdentifier(attachment.identifier());
+
+            assertThat(foundAttachment).isNull();
+        }
+
+        @Test
+        void should_failed_when_the_identifier_is_null() {
             assertThrows(
                 NullPointerException.class,
                 () -> fileStorageProvider.findByIdentifier(null)

@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.service.attachement;
 
 import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
@@ -39,7 +40,7 @@ public class ConnectorDownloadAttachmentService implements ConnectorDownloadAtta
         var attachment = this.attachmentRepository.findByIdentifier(identifier);
 
         if (attachment == null) {
-            throw new NotFoundException("Attachment not found");
+            throw new ConnectorMessageAttachmentNotFoundException("Attachment not found");
         }
 
         var document = this.storageProvider.findByIdentifier(attachment.identifier());

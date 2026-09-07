@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFound
 import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
@@ -102,6 +103,16 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ConnectorMessageAttachmentNotFoundException.class)
+    public ErrorResponse handleMessageAttachmentNotFoundException(
+        ConnectorMessageAttachmentNotFoundException exception) {
+        return new ErrorResponse(
+            HttpStatus.NOT_FOUND.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(ConnectorProcessingModeException.class)
     public ErrorResponse handleProcessingModeException(ConnectorProcessingModeException exception) {
@@ -120,21 +131,21 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorMessageAttachmentException.class)
+    public ErrorResponse handleMessageAttachmentException(
+        ConnectorMessageAttachmentException exception) {
+        return new ErrorResponse(
+            HttpStatus.CONFLICT.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConnectorBadRequestException.class)
     public ErrorResponse handleBadRequestException(ConnectorBadRequestException exception) {
         return new ErrorResponse(
             HttpStatus.BAD_REQUEST.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(ConnectorMessageAttachmentException.class)
-    public ErrorResponse handleMessageAttachmentException(
-        ConnectorMessageAttachmentException exception) {
-        return new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );
     }
 

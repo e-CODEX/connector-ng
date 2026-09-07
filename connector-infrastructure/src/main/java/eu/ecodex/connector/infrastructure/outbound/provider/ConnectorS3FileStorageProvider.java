@@ -76,8 +76,13 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
                                                .key(identifier)
                                                .build();
 
-        var responseBytes = this.s3Client.getObjectAsBytes(getObjectRequest);
-        return responseBytes.asByteArray();
+        try {
+            var responseBytes = this.s3Client.getObjectAsBytes(getObjectRequest);
+            return responseBytes.asByteArray();
+        } catch (Exception e) {
+            log.error("Could not download attachment [{}]", identifier, e);
+            return null;
+        }
     }
 
     @Override

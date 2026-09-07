@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.0.1-SNAPSHOT] - 0000-00-00
+## [7.1.0-SNAPSHOT] - 0000-00-00
 
 ### Release Notes
 
@@ -11,9 +11,15 @@ All notable changes to this project will be documented in this file.
 - **Delivery Evidence** — Support automatic `delivery evidence` submission.
 - **Statistics** — Added statistics for the connector messages. Supported formats: `csv`, `json`, `xlsx`.
 - **Search** — Filter messages by `business domain`.
+- **Message** — Missing security validation for incoming business message containers.
+- **Administration** — REST API endpoints to support the administration portal.
 
 #### Fixes
-- **Ebms** Set the correct message description for `ebms:description` for outbound messages.
+- **Ebms** — Set the correct message description for `ebms:description` for outbound messages.
+- **Pmode** — Party roles in a processing mode are now resolved from the definition's `<roles>` and
+  `<process>` declarations instead of a fixed value.
+- **Stream Management** — Fixed improper stream closure that could lead to resource leaks.
+- **Message** — Inbound message payload parsing.
 
 ### Technical
 
@@ -21,6 +27,8 @@ All notable changes to this project will be documented in this file.
 - **Transaction Management** — Replaced **Narayana** with **Atomikos** for JTA transaction management.
 - **Spring Boot** — Bump to Spring Boot 4.1.0
 - **Open Telemetry** — Support for Open Telemetry.
+- **Spring Boot** — Enable Spring Boot Actuator.
+- **Web** — Support Cross-Origin Resource Sharing (CORS).
 
 ## [7.0.0] - 2026-06-30
 

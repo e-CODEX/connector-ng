@@ -21,12 +21,15 @@ import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.mapper.ConnectorTruststoreEntryMapper;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -84,6 +87,22 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     public ConnectorProcessingModeDetailDto retrievePmode(String uuid) {
         var processingMode = retrieveProcessingModeService.execute(uuid);
         return ConnectorProcessingModeDetailDto.from(processingMode);
+    }
+
+    @Override
+    public ResponseEntity<byte[]> downloadPmode(String uuid) throws IOException {
+        var processingMode = retrieveProcessingModeService.execute(uuid);
+        var content = processingMode.content().getBytes(StandardCharsets.UTF_8);
+        var filename = Paths.get(processingMode.filename()).getFileName().toString();
+
+        return ResponseEntity.ok()
+                             .contentType(MediaType.APPLICATION_XML)
+                             .contentLength(content.length)
+                             .header(
+                                 HttpHeaders.CONTENT_DISPOSITION,
+                                 "attachment; filename=%s".formatted(filename)
+                             )
+                             .body(content);
     }
 
     private ConnectorProcessingMode processCreationRequest(

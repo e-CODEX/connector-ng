@@ -70,6 +70,25 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     @MockitoBean
     private ConnectorRetrieveProcessingMode retrieveProcessingModeService;
 
+    private static MockMultipartFile processingModeFile(String contentType) {
+        return new MockMultipartFile(
+            "processingModeFile", "processing-mode.xml", contentType, PMODE_CONTENT);
+    }
+
+    private static MockMultipartFile truststoreFile() {
+        return new MockMultipartFile(
+            "truststore.truststoreFile", "truststore.p12",
+            MediaType.APPLICATION_OCTET_STREAM_VALUE, TRUSTSTORE_CONTENT
+        );
+    }
+
+    private static MockMultipartHttpServletRequestBuilder creationRequest() {
+        return multipart(HttpMethod.POST, URL)
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .param("businessDomainIdentifier", BUSINESS_DOMAIN)
+            .param("description", DESCRIPTION);
+    }
+
     @Nested
     @DisplayName("POST (create a processing mode)")
     class Creation {
@@ -197,22 +216,33 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         }
     }
 
-    private static MockMultipartFile processingModeFile(String contentType) {
-        return new MockMultipartFile(
-            "processingModeFile", "processing-mode.xml", contentType, PMODE_CONTENT);
-    }
+    @Nested
+    @DisplayName("GET (download processing mode")
+    class Download {
+        @Test
+        void should_return_200_with_the_processing_mode_file() {
+            when(retrieveProcessingModeService.execute(any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
-    private static MockMultipartFile truststoreFile() {
-        return new MockMultipartFile(
-            "truststore.truststoreFile", "truststore.p12",
-            MediaType.APPLICATION_OCTET_STREAM_VALUE, TRUSTSTORE_CONTENT
-        );
-    }
+            var response = apiClient.get()
+                                    .uri(URL + "/{identifier}/download", "test-identifier")
+                                    .exchange()
+                                    .expectStatus().isOk()
+                                    .returnResult();
 
-    private static MockMultipartHttpServletRequestBuilder creationRequest() {
-        return multipart(HttpMethod.POST, URL)
-            .contentType(MediaType.MULTIPART_FORM_DATA)
-            .param("businessDomainIdentifier", BUSINESS_DOMAIN)
-            .param("description", DESCRIPTION);
+            assertThat(response).isNotNull();
+        }
+
+        @Test
+        void should_return_404_when_the_processing_mode_is_not_found() {
+            doThrow(ConnectorProcessingModeNotFoundException.class)
+                .when(retrieveProcessingModeService).execute(any());
+
+            apiClient.get()
+                     .uri(URL + "/{identifier}/download", "unknown-identifier")
+                     .exchange()
+                     .expectStatus().isNotFound()
+                     .returnResult();
+        }
     }
 }

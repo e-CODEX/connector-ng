@@ -47,6 +47,7 @@ public class WebSecurityConfiguration {
                            "/api/v1/admin/business-domains",
                            "/api/v1/admin/processing-modes",
                            "/api/v1/admin/processing-modes/{uuid}",
+                           "/api/v1/admin/processing-modes/{uuid}/download",
                            "/api/v1/admin/attachments",
                            "/api/v1/admin/attachments/{identifier}/download",
                            "/api/v1/attachments/upload",

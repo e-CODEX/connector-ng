@@ -30,9 +30,11 @@ public class ConnectorEvidenceController implements ConnectorEvidenceApi {
     @Override
     public ResponseEntity<byte[]> download(String uuid) {
         var evidence = retrieveEvidenceService.execute(uuid);
+        var contentLength = evidence.content() != null ? evidence.content().length : 0;
 
         return ResponseEntity.ok()
                              .contentType(MediaType.APPLICATION_XML)
+                             .contentLength(contentLength)
                              .header(
                                  HttpHeaders.CONTENT_DISPOSITION,
                                  "attachment; filename=%s.xml".formatted(evidence.type())

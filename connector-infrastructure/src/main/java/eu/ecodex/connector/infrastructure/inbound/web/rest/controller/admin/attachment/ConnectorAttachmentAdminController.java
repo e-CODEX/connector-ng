@@ -10,11 +10,16 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.attachment;
 
+import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorListAttachments;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorRetrieveAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -23,10 +28,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConnectorAttachmentAdminController implements ConnectorAttachmentAdminApi {
     private final ConnectorListAttachments listAttachmentsService;
+    private final ConnectorDownloadAttachment downloadAttachmentService;
+    private final ConnectorRetrieveAttachment retrieveAttachmentService;
 
+    /**
+     * Constructs a new instance of the {@code ConnectorAttachmentAdminController}.
+     *
+     * @param listAttachmentsService    the service responsible for listing message attachments
+     * @param downloadAttachmentService the service used for downloading message attachments
+     * @param retrieveAttachmentService the service used for retrieving metadata of a specific
+     *                                  attachment
+     */
     public ConnectorAttachmentAdminController(
-        ConnectorListAttachments listAttachmentsService) {
+        ConnectorListAttachments listAttachmentsService,
+        ConnectorDownloadAttachment downloadAttachmentService,
+        ConnectorRetrieveAttachment retrieveAttachmentService) {
         this.listAttachmentsService = listAttachmentsService;
+        this.downloadAttachmentService = downloadAttachmentService;
+        this.retrieveAttachmentService = retrieveAttachmentService;
     }
 
     @Override
@@ -41,5 +60,21 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
             attachments.totalElements(),
             attachments.totalPages()
         );
+    }
+
+    @Override
+    public ResponseEntity<byte[]> download(String identifier) {
+        var attachment = retrieveAttachmentService.execute(identifier);
+        var document = downloadAttachmentService.execute(identifier);
+        return ResponseEntity.ok()
+                             .contentType(MediaType.parseMediaType(
+                                 attachment.contentType()
+                             ))
+                             .contentLength(document.length)
+                             .header(
+                                 HttpHeaders.CONTENT_DISPOSITION,
+                                 "attachment; filename=%s".formatted(attachment.name())
+                             )
+                             .body(document);
     }
 }

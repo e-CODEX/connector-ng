@@ -127,16 +127,18 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         ConnectorMessageReportExportFormat format) {
         var reportsSummary = retrieveMessageReportService.execute(from, to, businessDomain);
         var exporter = reportExporterFactory.create(format);
+        var export = exporter.export(reportsSummary);
 
         return ResponseEntity.ok()
                              .contentType(MediaType.parseMediaType(
                                  exporter.getFormat().getContentType()
                              ))
+                             .contentLength(export.length)
                              .header(
                                  HttpHeaders.CONTENT_DISPOSITION,
                                  "attachment; filename=connector-message-report."
                                      + exporter.getFormat().getExtension()
                              )
-                             .body(exporter.export(reportsSummary));
+                             .body(export);
     }
 }

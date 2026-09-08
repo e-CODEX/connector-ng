@@ -43,7 +43,7 @@ public interface ConnectorFileStorageProvider {
 
     String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull byte[] content);
 
-    byte[] findByIdentifier(String identifier);
+    byte[] findByIdentifier(@Nonnull String identifier);
 
     ConnectorAttachmentStorage getStorage();
 }

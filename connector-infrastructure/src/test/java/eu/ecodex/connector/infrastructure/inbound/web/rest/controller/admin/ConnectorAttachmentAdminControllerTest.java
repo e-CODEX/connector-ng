@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -18,45 +19,100 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
+import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorListAttachments;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorRetrieveAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.attachment.ConnectorAttachmentAdminController;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+@ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorAttachmentAdminController")
 @WebMvcTest(ConnectorAttachmentAdminController.class)
 public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorListAttachments listAttachmentsService;
+    @MockitoBean
+    private ConnectorDownloadAttachment downloadAttachmentService;
+    @MockitoBean
+    private ConnectorRetrieveAttachment retrieveAttachmentService;
+
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    void should_return_200_when_retrieving_attachments() throws Exception {
-        var pageResult = new ConnectorPageResult<>(
-            List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
-        );
+    @Nested
+    @DisplayName("GET (list attachments)")
+    class ListAttachments {
+        @Test
+        void should_return_200_when_retrieving_attachments() throws Exception {
+            var pageResult = new ConnectorPageResult<>(
+                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
+            );
 
-        when(listAttachmentsService.execute(any())).thenReturn(pageResult);
+            when(listAttachmentsService.execute(any())).thenReturn(pageResult);
 
-        mockMvc.perform(get("/api/v1/admin/attachments")
-                            .param("page", "0")
-                            .param("size", "20")
-                            .contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isOk())
-               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$.totalElements").value(1))
-               .andExpect(jsonPath("$.totalPages").value(1))
-               .andExpect(jsonPath("$.size").value(1))
-               .andExpect(jsonPath("$.content").isArray())
-               .andExpect(jsonPath("$.content.length()").value(1));
+            mockMvc.perform(get("/api/v1/admin/attachments")
+                                .param("page", "0")
+                                .param("size", "20")
+                                .contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isOk())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(jsonPath("$.totalElements").value(1))
+                   .andExpect(jsonPath("$.totalPages").value(1))
+                   .andExpect(jsonPath("$.size").value(1))
+                   .andExpect(jsonPath("$.content").isArray())
+                   .andExpect(jsonPath("$.content.length()").value(1));
+        }
+    }
+
+    @Nested
+    @DisplayName("GET (download attachment)")
+    class DownloadAttachment {
+        @Test
+        void should_return_200_when_downloading_the_attachment() throws Exception {
+            when(retrieveAttachmentService.execute(any()))
+                .thenReturn(MessageAttachmentTestFixtures.createAttachment());
+            when(downloadAttachmentService.execute(any()))
+                .thenReturn(new byte[1]);
+
+            mockMvc.perform(get("/api/v1/admin/attachments/1234567890abcdef/download")
+                                .contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isOk());
+        }
+
+        @Test
+        void should_return_404_when_attachment_not_found() throws Exception {
+            doThrow(ConnectorMessageAttachmentNotFoundException.class).when(retrieveAttachmentService).execute(any());
+
+            mockMvc.perform(get("/api/v1/admin/attachments/unknown-id/download")
+                   .contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        }
+
+        @Test
+        void should_return_409_when_attachment_is_no_longer_available_in_the_storage() throws Exception {
+            when(retrieveAttachmentService.execute(any()))
+                .thenReturn(MessageAttachmentTestFixtures.createAttachment());
+            doThrow(ConnectorMessageAttachmentException.class).when(retrieveAttachmentService).execute(any());
+
+            mockMvc.perform(get("/api/v1/admin/attachments/unknown-id/download")
+                                .contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(status().is4xxClientError())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        }
     }
 }

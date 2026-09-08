@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,8 +62,16 @@ public interface ConnectorProcessingModeAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get a processing mode by identifier.")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Pmode found"),
+        @ApiResponse(responseCode = "200", description = "Success"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorProcessingModeDetailDto retrievePmode(@PathVariable String uuid);
+
+    @GetMapping("/{uuid}/download")
+    @Operation(summary = "Download a processing mode")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    ResponseEntity<byte[]> downloadPmode(@PathVariable String uuid) throws IOException;
 }

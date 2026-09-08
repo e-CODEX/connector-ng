@@ -70,6 +70,7 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
                              .contentType(MediaType.parseMediaType(
                                  attachment.contentType()
                              ))
+                             .contentLength(document.length)
                              .header(
                                  HttpHeaders.CONTENT_DISPOSITION,
                                  "attachment; filename=%s".formatted(attachment.name())

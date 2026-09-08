@@ -217,7 +217,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     }
 
     @Nested
-    @DisplayName("GET (download processing mode")
+    @DisplayName("GET (download processing mode)")
     class Download {
         @Test
         void should_return_200_with_the_processing_mode_file() {

@@ -10,30 +10,18 @@
 
 package eu.ecodex.connector.application.service.message;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Generates unique identifiers for connector messages.
- *
- * <p>This component is responsible for creating message identifiers used within the connector
- * system. The generated identifier follows a message-id style format consisting of a randomly
- * generated UUID and a fixed domain suffix.
- *
- * <p>Current format:</p>
- * <pre>
- *     &lt;uuid&gt;@eu.ecodex.connector
- * </pre>
- *
- * <p><strong>Note:</strong> The domain suffix is currently hardcoded.
- * Future implementations may derive it from message processing configuration or
- * environment-specific properties.
+ * Default implementation of {@link ConnectorMessageIdGenerator}.
  */
 @Slf4j
 @Service
-public class ConnectorMessageIdGeneratorService {
+public class ConnectorMessageIdGeneratorService implements ConnectorMessageIdGenerator {
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
     public ConnectorMessageIdGeneratorService(
@@ -41,12 +29,8 @@ public class ConnectorMessageIdGeneratorService {
         this.processingConfigurationProvider = processingConfigurationProvider;
     }
 
-    /**
-     * Generates a unique message identifier for use within the connector system.
-     *
-     * @return a unique message identifier in the format {@code <uuid>@<suffix>}
-     */
-    public String generateIdentifier() {
+    @Override
+    public String execute() {
         log.debug("Generating new message identifier");
         var configuration = this.processingConfigurationProvider.getConfiguration();
         return String.format("%s@%s", UUID.randomUUID(), configuration.identifierSuffix());

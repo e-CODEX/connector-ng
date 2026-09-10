@@ -10,12 +10,12 @@
 
 package eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
@@ -74,7 +74,7 @@ public class ConnectorJmsGatewayMessageListener {
     private final ConnectorFileStorageProvider fileStorageProvider;
     private final ConnectorMessageEventPublisher<ConnectorBusinessMessage>
         inboundMessagePipelinePublisher;
-    private final ConnectorMessageIdGeneratorService messageIdGenerator;
+    private final ConnectorMessageIdGenerator messageIdGeneratorService;
     private final ConnectorMessageEventPublisher<ConnectorEvidenceMessage>
         inboundEvidenceTriggerPublisher;
 
@@ -90,7 +90,7 @@ public class ConnectorJmsGatewayMessageListener {
         ConnectorFileStorageProvider fileStorageProvider,
         @Qualifier("connectorJmsInboundMessagePipelinePublisher")
         ConnectorMessageEventPublisher<ConnectorBusinessMessage> inboundMessagePipelinePublisher,
-        ConnectorMessageIdGeneratorService messageIdGenerator,
+        ConnectorMessageIdGenerator messageIdGeneratorService,
         @Qualifier("connectorJmsInboundEvidenceTriggerPublisher")
         ConnectorMessageEventPublisher<ConnectorEvidenceMessage> inboundEvidenceTriggerPublisher) {
         this.messageRepository = messageRepository;
@@ -98,7 +98,7 @@ public class ConnectorJmsGatewayMessageListener {
         this.evidenceRepository = evidenceRepository;
         this.fileStorageProvider = fileStorageProvider;
         this.inboundMessagePipelinePublisher = inboundMessagePipelinePublisher;
-        this.messageIdGenerator = messageIdGenerator;
+        this.messageIdGeneratorService = messageIdGeneratorService;
         this.inboundEvidenceTriggerPublisher = inboundEvidenceTriggerPublisher;
     }
 
@@ -124,7 +124,7 @@ public class ConnectorJmsGatewayMessageListener {
         var as4Properties = parseAS4Properties(message);
         var payloads = parsePayloads(message);
 
-        var messageIdentifier = messageIdGenerator.generateIdentifier();
+        var messageIdentifier = messageIdGeneratorService.execute();
 
         var inboundMessage = toInboundMessage(messageIdentifier, as4Properties, payloads);
 
@@ -273,8 +273,8 @@ public class ConnectorJmsGatewayMessageListener {
 
 
             var resolvedName = StringUtils.hasText(name)
-                               ? name
-                               : description.toLowerCase(Locale.ROOT);
+                ? name
+                : description.toLowerCase(Locale.ROOT);
 
             if (!StringUtils.hasText(description)) {
                 throw new IllegalArgumentException(

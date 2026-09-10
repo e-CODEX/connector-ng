@@ -13,8 +13,8 @@ package eu.ecodex.connector.infrastructure.outbound.jms.publisher.outbound;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 

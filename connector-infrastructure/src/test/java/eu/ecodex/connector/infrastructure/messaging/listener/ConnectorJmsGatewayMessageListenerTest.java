@@ -19,12 +19,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
@@ -53,7 +53,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
     @Mock
     private ConnectorMessageEventPublisher<ConnectorBusinessMessage> inboundMessagePipelinePublisher;
     @Mock
-    private ConnectorMessageIdGeneratorService messageIdGenerator;
+    private ConnectorMessageIdGenerator messageIdGeneratorService;
     @Mock
     private ConnectorMessageEventPublisher<ConnectorEvidenceMessage> inboundEvidenceTriggerPublisher;
     @Mock
@@ -69,7 +69,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             evidenceRepository,
             fileStorageProvider,
             inboundMessagePipelinePublisher,
-            messageIdGenerator,
+            messageIdGeneratorService,
             inboundEvidenceTriggerPublisher
         );
     }
@@ -287,7 +287,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
                                                                              + ".xml");
             when(message.getBytes("payload_4")).thenReturn("<evidence/>".getBytes());
 
-            when(messageIdGenerator.generateIdentifier()).thenReturn(
+            when(messageIdGeneratorService.execute()).thenReturn(
                 "184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu");
 
             when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -350,7 +350,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             when(message.getBytes("payload_5"))
                 .thenReturn(new byte[]{9});
 
-            when(messageIdGenerator.generateIdentifier())
+            when(messageIdGeneratorService.execute())
                 .thenReturn(
                     "c46d418b-3dd2-4d3c-933f-ea50db1156ba@connector.ecodex.eu"
                 );
@@ -382,7 +382,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             when(message.getBytes("payload_1"))
                 .thenReturn("<evidence/>".getBytes());
 
-            when(messageIdGenerator.generateIdentifier())
+            when(messageIdGeneratorService.execute())
                 .thenReturn(
                     "184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu"
                 );

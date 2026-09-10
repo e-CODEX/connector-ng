@@ -26,12 +26,12 @@ import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabl
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -54,7 +54,7 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
     @Mock
     private ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher;
     @Mock
-    private ConnectorMessageIdGeneratorService messageIdGenerator;
+    private ConnectorMessageIdGenerator messageIdGeneratorService;
     @Mock
     private ConnectorMessageProcessingConfigurationProvider messageProcessingConfigurationProvider;
     @Mock
@@ -70,7 +70,7 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
             messageProcessingConfigurationProvider,
             messageVerifier,
             stagingEventPublisher,
-            messageIdGenerator,
+            messageIdGeneratorService,
             businessDomainVerifier
         );
     }
@@ -184,7 +184,7 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
         @Test
         void should_submit_the_message_to_the_staging_queue() {
             doNothing().when(businessDomainVerifier).execute(any());
-            when(messageIdGenerator.generateIdentifier()).thenReturn(MESSAGE_ID);
+            when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
             when(messageProcessingConfigurationProvider.getConfiguration())
                 .thenReturn(
                     ConnectorMessageProcessingConfiguration

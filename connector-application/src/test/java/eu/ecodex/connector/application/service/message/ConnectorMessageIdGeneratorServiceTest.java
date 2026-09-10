@@ -40,7 +40,7 @@ public class ConnectorMessageIdGeneratorServiceTest {
                     .build()
             );
 
-        var generatedIdentifier = messageIdGeneratorService.generateIdentifier();
+        var generatedIdentifier = messageIdGeneratorService.execute();
 
         assertThat(generatedIdentifier).isNotNull();
         assertThat(generatedIdentifier).isNotBlank();

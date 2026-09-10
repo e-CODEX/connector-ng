@@ -12,12 +12,12 @@ package eu.ecodex.connector.application.service.message.outbound;
 
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
@@ -37,7 +37,7 @@ public class ConnectorOutboundBusinessMessageReceiverService
     private final ConnectorMessageProcessingConfigurationProvider configurationProvider;
     private final ConnectorBusinessMessageVerifier messageVerifierService;
     private final ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher;
-    private final ConnectorMessageIdGeneratorService messageIdGeneratorService;
+    private final ConnectorMessageIdGenerator messageIdGeneratorService;
     private final ConnectorBusinessDomainVerifier businessDomainVerifierService;
 
     /**
@@ -60,7 +60,7 @@ public class ConnectorOutboundBusinessMessageReceiverService
         ConnectorBusinessMessageVerifier messageVerifierService,
         @Qualifier("connectorJmsOutboundMessageStagingPublisher")
         ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher,
-        ConnectorMessageIdGeneratorService messageIdGeneratorService,
+        ConnectorMessageIdGenerator messageIdGeneratorService,
         ConnectorBusinessDomainVerifier businessDomainVerifierService) {
         this.configurationProvider = configurationProvider;
         this.messageVerifierService = messageVerifierService;
@@ -75,7 +75,7 @@ public class ConnectorOutboundBusinessMessageReceiverService
 
         var message = ConnectorBusinessMessage
             .builder()
-            .identifier(this.messageIdGeneratorService.generateIdentifier())
+            .identifier(this.messageIdGeneratorService.execute())
             .businessDomainIdentifier(command.businessDomainIdentifier())
             .backendMessageIdentifier(command.backendMessageIdentifier())
             .referenceToBackendMessageIdentifier(command.referenceToBackendMessageIdentifier())

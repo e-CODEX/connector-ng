@@ -15,7 +15,7 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageReposito
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import org.jspecify.annotations.NonNull;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.message;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConnectorMessageEbmsIdGeneratorService {
+public class ConnectorMessageEbmsIdGeneratorService implements ConnectorMessageEbmsIdGenerator {
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
     /**
@@ -52,7 +53,8 @@ public class ConnectorMessageEbmsIdGeneratorService {
      *
      * @return a unique message identifier in the format {@code <uuid>@<suffix>}
      */
-    public String generateIdentifier() {
+    @Override
+    public String execute() {
         log.debug("Generating new EBMS message identifier");
         var configuration = this.processingConfigurationProvider.getConfiguration();
         return String.format("%s@%s", UUID.randomUUID(), configuration.ebmsIdSuffix());

@@ -12,11 +12,10 @@ package eu.ecodex.connector.application.service.attachement;
 
 import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
-import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import org.jspecify.annotations.NonNull;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**

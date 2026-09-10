@@ -12,10 +12,8 @@ package eu.ecodex.connector.infrastructure.outbound.auth;
 
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -28,11 +26,12 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
+    private final PasswordEncoder passwordEncoder;
 
-    PasswordEncoder passwordEncoder;
+    public PasswordEncoderService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * Encodes the password of a {@link ConnectorUser} entity.
@@ -42,7 +41,7 @@ public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
      * @return user with encoded password
      */
     @Override
-    public ConnectorUser encodePassword(ConnectorUser user) {
+    public ConnectorUser encodePassword(@NonNull ConnectorUser user) {
         if (user.password() == null) {
             return user;
         }
@@ -53,7 +52,7 @@ public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
     }
 
     @Override
-    public String encodePassword(String password) {
+    public String encodePassword(@NonNull String password) {
         if (!StringUtils.hasText(password)) {
             return password;
         }
@@ -71,7 +70,7 @@ public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
      * @return {@code true} if the raw password matches the user's encoded password, otherwise
      */
     @Override
-    public boolean matches(String rawPassword, String encodedPassword) {
+    public boolean matches(@NonNull String rawPassword, @NonNull String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

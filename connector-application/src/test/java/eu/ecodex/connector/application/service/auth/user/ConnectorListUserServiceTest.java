@@ -28,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorListUserServiceTest {
-
     @Mock
     ConnectorUserRepository repository;
 
@@ -43,15 +42,15 @@ class ConnectorListUserServiceTest {
             .uuid("identifier")
             .roles(Set.of(ConnectorRole.builder().name("ROLE_USER").build()))
             .build());
-        when(repository.findAllWithRoles()).thenReturn(expected);
+        when(repository.findAllUsers()).thenReturn(expected);
 
         // When
-        var found = service.findAllWithRoles();
+        var found = service.execute();
 
         // Then
         assertThat(found).isNotEmpty();
         assertThat(found).usingRecursiveComparison().isEqualTo(expected);
-        verify(repository).findAllWithRoles();
+        verify(repository).findAllUsers();
         verifyNoMoreInteractions(repository);
     }
 }

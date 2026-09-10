@@ -11,23 +11,23 @@
 package eu.ecodex.connector.infrastructure.initializer;
 
 import static eu.ecodex.connector.domain.model.user.ConnectorRole.DEFAULT_ADMIN_ROLE;
-import static eu.ecodex.connector.domain.model.user.ConnectorRole.builder;
 import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultAdminRole;
+import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultLoadTesterRole;
+import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultUserRole;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.ConnectorAdminUserProperties;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jspecify.annotations.NonNull;
@@ -54,7 +54,7 @@ import org.springframework.stereotype.Component;
  * <p>Dependencies:
  * - {@link ConnectorRegisterUser}: Service for registering and updating user information.
  * - {@link ConnectorRegisterRole}: Service for registering user roles.
- * - {@link ConnectorRetrieveUser}: Service for retrieving existing user details.
+ * - {@link ConnectorRetrieveUserByUsername}: Service for retrieving existing user details.
  * - {@link ConnectorAdminUserProperties}: Configuration properties for the admin user.
  *
  * <p>Implements:
@@ -66,18 +66,50 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorAdminUserInitializer implements ApplicationRunner {
-    ConnectorRegisterUser registerUserService;
-    ConnectorRegisterRole registerUserRoleService;
-    ConnectorRetrieveUser retrieveUserService;
-    ConnectorRetrieveRole retrieveUserRoleService;
-    ConnectorAdminUserProperties adminUserProperties;
+    private final ConnectorPatchUser patchUser;
+    private final ConnectorRegisterUser registerUser;
+    private final ConnectorRegisterRole registerRole;
+    private final ConnectorRetrieveUserByUsername retrieveUserByUsername;
+    private final ConnectorRetrieveRoleByName retrieveUserRoleByName;
+    private final ConnectorAdminUserProperties adminUserProperties;
+
+    /**
+     * Initializes and configures the admin user for the Connector system.
+     * This constructor sets up the required dependencies for managing user and role initialization.
+     *
+     * @param patchUser              the {@link ConnectorPatchUser} instance used to partially
+     *                               update user information.
+     * @param registerUser           the {@link ConnectorRegisterUser} instance responsible for
+     *                               registering new users.
+     * @param registerRole           the {@link ConnectorRegisterRole} instance responsible for
+     *                               registering user roles.
+     * @param retrieveUserByUsername the {@link ConnectorRetrieveUserByUsername} instance used to
+     *                               retrieve users by their username.
+     * @param retrieveUserRoleByName the {@link ConnectorRetrieveRoleByName} instance used to
+     *                               retrieve user roles by their name.
+     * @param adminUserProperties    the {@link ConnectorAdminUserProperties} object containing
+     *                               configuration properties for the admin user.
+     */
+    public ConnectorAdminUserInitializer(ConnectorPatchUser patchUser,
+                                         ConnectorRegisterUser registerUser,
+                                         ConnectorRegisterRole registerRole,
+                                         ConnectorRetrieveUserByUsername retrieveUserByUsername,
+                                         ConnectorRetrieveRoleByName retrieveUserRoleByName,
+                                         ConnectorAdminUserProperties adminUserProperties) {
+        this.patchUser = patchUser;
+        this.registerUser = registerUser;
+        this.registerRole = registerRole;
+        this.retrieveUserByUsername = retrieveUserByUsername;
+        this.retrieveUserRoleByName = retrieveUserRoleByName;
+        this.adminUserProperties = adminUserProperties;
+    }
 
 
     @Override
     public void run(@NonNull ApplicationArguments args) {
+        initializeDefaultUserRoles();
+
         if (adminUserProperties == null || adminUserProperties.isEmpty()) {
             log.info("No Administrator user configured in properties");
             registerFallbackAdminUser();
@@ -86,33 +118,29 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
         initializeAdminUser(adminUserProperties);
     }
 
+    private void initializeDefaultUserRoles() {
+        registerDefaultRole(defaultUserRole());
+        registerDefaultRole(defaultAdminRole());
+        registerDefaultRole(defaultLoadTesterRole());
+    }
+
     private void registerFallbackAdminUser() {
         log.info("No Administrator user found in configuration; creating default admin user");
-        var existingAdmin =
-            retrieveUserService.findByUsername(ConnectorUser.DEFAULT_ADMIN_USER_NAME);
-
-        if (existingAdmin.isEmpty()) {
+        ConnectorUser existingAdmin;
+        try {
+            existingAdmin = retrieveUserByUsername.execute(ConnectorUser.DEFAULT_ADMIN_USER_NAME);
+            if (existingAdmin.isDefaultAdmin()) {
+                log.info("Default Administrator user already exists.");
+                return;
+            }
+            updateWithAdminRole(existingAdmin);
+        } catch (ConnectorUserNotFoundException e) {
             registerNewAdminUser();
-            return;
         }
-
-        var administrator = existingAdmin.get();
-        if (administrator.isDefaultAdmin()) {
-            log.info("Default Administrator user already exists.");
-            return;
-        }
-        updateWithAdminRole(administrator);
     }
 
     private void updateWithAdminRole(ConnectorUser administrator) {
         log.info("Administrator user exists but has not admin role; adding {}", DEFAULT_ADMIN_ROLE);
-        try {
-            registerUserRoleService.register(defaultAdminRole());
-            log.info("{} successfully created.", DEFAULT_ADMIN_ROLE);
-
-        } catch (ConnectorRoleAlreadyExistsException e) {
-            log.info("{} already exists.", DEFAULT_ADMIN_ROLE);
-        }
 
         var userRoles = new HashSet<>(
             CollectionUtils.union(
@@ -121,7 +149,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
             )
         );
 
-        registerUserService.patch(administrator.uuid(), administrator.toBuilder()
+        patchUser.execute(administrator.uuid(), administrator.toBuilder()
             .roles(userRoles).build());
 
         log.info("{} added to Administrator user, admin user updated", DEFAULT_ADMIN_ROLE);
@@ -131,39 +159,33 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
         log.info(
             "No default Administrator user found and none registered yet; creating "
                 + "default");
-        try {
-            registerUserRoleService.register(defaultAdminRole());
-            log.info("Default Administrator user successfully created.");
-        } catch (ConnectorUserAlreadyExistsException e) {
-            log.info("Default Administrator role already exists.");
-        }
+
         var defaultAdminUser = ConnectorUser.defaultAdminUser();
-        registerUserService.register(defaultAdminUser);
+        registerUser.execute(defaultAdminUser);
+    }
+
+    private void registerDefaultRole(ConnectorRole defaultRole) {
+        try {
+            registerRole.execute(defaultRole);
+            log.info("Default {} successfully created.", defaultRole.name());
+        } catch (ConnectorRoleAlreadyExistsException e) {
+            log.info("Default {} already exists.", defaultRole.name());
+        }
     }
 
     private void initializeAdminUser(ConnectorAdminUserProperties properties) {
-        if (properties.getRole() == null || properties.getRole().isBlank()
-            || properties.getUsername() == null || properties.getUsername().isBlank()) {
+        if (properties.getUsername() == null || properties.getUsername().isBlank()) {
             registerFallbackAdminUser();
             return;
         }
 
-        log.info("Initializing connector Administrator user with username: {}",
-            properties.getUsername());
-        var adminRole = builder().name(properties.getRole()).build();
         try {
-            adminRole = registerUserRoleService.register(adminRole);
-            log.info("Default Administrator {} successfully registered.", properties.getRole());
-        } catch (ConnectorRoleAlreadyExistsException e) {
-            log.info("Default Administrator {} already registered.", properties.getRole());
-            adminRole = retrieveUserRoleService.getByName(properties.getRole());
-        }
-
-        try {
-            registerUserService.register(createAdminUser(properties, adminRole));
-            log.info("Administrator user successfully registered.");
+            log.info("Registering Administrator user - username [{}]", properties.getUsername());
+            var adminRole = retrieveUserRoleByName.execute(DEFAULT_ADMIN_ROLE);
+            registerUser.execute(createAdminUser(properties, adminRole));
+            log.info("Administrator user [{}] successfully registered.", properties.getUsername());
         } catch (ConnectorUserAlreadyExistsException e) {
-            log.info("Administrator user already registered");
+            log.info("Administrator user [{}] already registered.", properties.getUsername());
         }
     }
 
@@ -178,5 +200,4 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
             .roles(Set.of(adminRole))
             .build();
     }
-
 }

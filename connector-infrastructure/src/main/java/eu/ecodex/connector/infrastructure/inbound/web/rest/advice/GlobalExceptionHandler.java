@@ -26,7 +26,7 @@ import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.exception.ConnectorUserBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorUserIdMismatchException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
@@ -83,8 +83,8 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConnectorUserBadRequestException.class)
-    public ErrorResponse handleUserException(ConnectorUserBadRequestException e) {
+    @ExceptionHandler(ConnectorUserIdMismatchException.class)
+    public ErrorResponse handleUserException(ConnectorUserIdMismatchException e) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 

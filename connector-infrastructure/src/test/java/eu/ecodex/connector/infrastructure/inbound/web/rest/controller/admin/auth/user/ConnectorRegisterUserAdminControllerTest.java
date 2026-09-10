@@ -19,9 +19,11 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
@@ -36,24 +38,21 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorUserAdminController.class)
 class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
-
     private static final String URL = "/api/v1/admin/users";
-
-    @MockitoBean
-    ConnectorRegisterUser registerUser;
-
-    @MockitoBean
-    ConnectorRetrieveUser retrieveUser;
-
-    @MockitoBean
-    ConnectorRemoveUser removeUser;
-
-    @MockitoBean
-    ConnectorListUser listUser;
-
     @MockitoBean
     ConnectorUserPasswordEncoder passwordEncoder;
-
+    @MockitoBean
+    private ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier;
+    @MockitoBean
+    private ConnectorRegisterUser connectorRegisterUser;
+    @MockitoBean
+    private ConnectorUpdateUser connectorUpdateUser;
+    @MockitoBean
+    private ConnectorPatchUser connectorPatchUser;
+    @MockitoBean
+    private ConnectorRemoveUser connectorRemoveUser;
+    @MockitoBean
+    private ConnectorListUser connectorListUser;
     @Autowired
     private RestTestClient apiClient;
 
@@ -62,7 +61,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
-        when(registerUser.register(any())).thenReturn(connectorUser);
+        when(connectorRegisterUser.execute(any())).thenReturn(connectorUser);
 
         // When
         var response = apiClient.post()
@@ -81,7 +80,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
-        verify(registerUser).register(connectorUser
+        verify(connectorRegisterUser).execute(connectorUser
             .toBuilder()
             .uuid(null)
             .password("test_password")
@@ -95,7 +94,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequestWithRoles();
-        when(registerUser.register(any())).thenReturn(connectorUser);
+        when(connectorRegisterUser.execute(any())).thenReturn(connectorUser);
 
         // When
         var response = apiClient.post()
@@ -115,7 +114,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDtoWithRoles());
 
-        verify(registerUser).register(connectorUser
+        verify(connectorRegisterUser).execute(connectorUser
             .toBuilder()
             .uuid(null)
             .password("test_password")
@@ -141,7 +140,6 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
             .is4xxClientError();
 
         // Then
-
         assertNoMoreInteractions();
     }
 
@@ -159,15 +157,9 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
             .body(connectorUserRequest)
             .exchange()
             .expectStatus()
-            .is5xxServerError(); // because of filter is deactivated
+            .isBadRequest(); // because of filter is deactivated
 
         // Then
-        verify(registerUser).register(ConnectorUser
-            .builder()
-            .username("username")
-            .enabled(true)
-            .build());
-
         assertNoMoreInteractions();
     }
 
@@ -176,7 +168,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
-        when(registerUser.register(any())).thenThrow(
+        when(connectorRegisterUser.execute(any())).thenThrow(
             new ConnectorUserAlreadyExistsException("msg"));
         when(passwordEncoder.encodePassword(any(ConnectorUser.class))).thenReturn(connectorUser);
 
@@ -191,9 +183,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
 
         // Then
         assertThat(response).isNotNull();
-
-        verify(registerUser).register(connectorUser
-            .toBuilder()
+        verify(connectorRegisterUser).execute(connectorUser.toBuilder()
             .uuid(null)
             .password("test_password")
             .build());
@@ -201,8 +191,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser, passwordEncoder);
+        verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
+            connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
     }
-
-
 }

@@ -16,8 +16,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
@@ -29,15 +27,39 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Adds JWT authentication to the Spring Security filter chain.
+ * A filter that intercepts each HTTP request to perform JWT-based authentication.
+ * This filter ensures that any incoming request is checked for a valid JSON Web Token (JWT)
+ * in the `Authorization` header. If a valid token is found, the user's authentication details
+ * are set into the Spring Security context.
+ *
+ * <p>The authentication token's validity is verified using {@link JwtService}. The user's
+ * details are fetched using {@link UserDetailsService}, and properly authenticated users are
+ * granted access to resources based on their authorities.
+ *
+ * <p>This filter should be executed once per request, extending the
+ * {@link OncePerRequestFilter}.</p>
+ *
+ * <p>Detailed steps executed by this filter:
+ * - Extracts the `Authorization` header from the incoming request.
+ * - Verifies the format and presence of the Bearer token.
+ * - Extracts the username from the token using {@link JwtService}.
+ * - Loads user details using {@link UserDetailsService}.
+ * - Validates the token for the fetched user.
+ * - Sets the authentication details in the Spring Security context if the token is valid.
+ * - If any exception occurs during token validation, the security context is cleared,
+ * and an error is logged.</p>
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    JwtService jwtTokenService;
-    UserDetailsService userDetailsService;
+    private final JwtService jwtTokenService;
+    private final UserDetailsService userDetailsService;
+
+    public JwtAuthenticationFilter(JwtService jwtTokenService,
+                                   UserDetailsService userDetailsService) {
+        this.jwtTokenService = jwtTokenService;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -77,12 +99,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                 }
             }
-
         } catch (JwtException | IllegalArgumentException ex) {
             SecurityContextHolder.clearContext();
             log.error("Could not authenticate JWT token, {}", ex.getMessage());
         }
-
         filterChain.doFilter(request, response);
     }
 }

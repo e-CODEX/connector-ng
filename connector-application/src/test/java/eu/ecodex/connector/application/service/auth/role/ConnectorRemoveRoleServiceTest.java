@@ -14,11 +14,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
-import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,12 +24,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorRemoveRoleServiceTest {
-
     @Mock
-    ConnectorRoleRepository repository;
+    private ConnectorRoleRepository repository;
 
     @InjectMocks
-    ConnectorRemoveRoleService service;
+    private ConnectorRemoveRoleService service;
 
     @Test
     void deleteByIdentifier_should_delete_role() {
@@ -41,7 +37,7 @@ class ConnectorRemoveRoleServiceTest {
         doNothing().when(repository).deleteByUuid(any());
 
         // When
-        service.deleteByIdentifier(uuid);
+        service.execute(uuid);
 
         // Then
         verify(repository).deleteByUuid(uuid);

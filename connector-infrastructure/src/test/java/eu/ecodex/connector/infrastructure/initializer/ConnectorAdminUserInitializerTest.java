@@ -10,19 +10,22 @@
 
 package eu.ecodex.connector.infrastructure.initializer;
 
+import static eu.ecodex.connector.domain.model.user.ConnectorRole.DEFAULT_ADMIN_ROLE;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.ConnectorAdminUserProperties;
-import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,32 +37,27 @@ import org.springframework.boot.ApplicationArguments;
 @ExtendWith(MockitoExtension.class)
 class ConnectorAdminUserInitializerTest {
     @Mock
-    ConnectorRegisterUser registerUserService;
-
+    private ConnectorRegisterUser registerUser;
     @Mock
-    ConnectorRegisterRole registerUserRoleService;
-
+    private ConnectorPatchUser patchUser;
     @Mock
-    ConnectorRetrieveUser retrieveUserService;
-
+    private ConnectorRegisterRole registerRole;
     @Mock
-    ConnectorRetrieveRole retrieveUserRoleService;
-
-    ConnectorAdminUserProperties adminUserProperties;
-
+    private ConnectorRetrieveUserByUsername retrieveUserByUsername;
     @Mock
-    ApplicationArguments applicationArguments;
+    private ConnectorRetrieveRoleByName retrieveRoleByName;
+    private ConnectorAdminUserProperties adminUserProperties;
+    @Mock
+    private ApplicationArguments applicationArguments;
 
-
-    ConnectorAdminUserInitializer initializer;
+    private ConnectorAdminUserInitializer initializer;
 
     private static ConnectorAdminUserProperties properties(
-        String username, String role, String pwd, String email
+        String username, String pwd, String email
     ) {
         var props = new ConnectorAdminUserProperties();
         props.setEmail(email);
         props.setUsername(username);
-        props.setRole(role);
         props.setPassword(pwd);
         return props;
     }
@@ -67,8 +65,8 @@ class ConnectorAdminUserInitializerTest {
     @BeforeEach
     void setUp() {
         initializer = new ConnectorAdminUserInitializer(
-            registerUserService, registerUserRoleService, retrieveUserService,
-            retrieveUserRoleService, adminUserProperties
+            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            retrieveRoleByName, adminUserProperties
         );
     }
 
@@ -80,7 +78,7 @@ class ConnectorAdminUserInitializerTest {
         var adminRole = "ROLE_ADMIN";
         var pwd = "password";
         var email = "testadmin@email.com";
-        adminUserProperties = properties(username, adminRole, pwd, email);
+        adminUserProperties = properties(username, pwd, email);
 
         var role = ConnectorRole.builder().name(adminRole).build();
         var user = ConnectorUser.builder()
@@ -91,23 +89,24 @@ class ConnectorAdminUserInitializerTest {
             .enabled(Boolean.TRUE)
             .build();
 
-        when(registerUserRoleService.register(any())).thenReturn(role);
-        when(registerUserService.register(any())).thenReturn(user);
+        when(registerRole.execute(any())).thenReturn(role);
+        when(registerUser.execute(any())).thenReturn(user);
+        when(retrieveRoleByName.execute(any())).thenReturn(role);
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            registerUserService, registerUserRoleService, retrieveUserService,
-            retrieveUserRoleService, adminUserProperties
+            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            retrieveRoleByName, adminUserProperties
         );
 
         initializer.run(applicationArguments);
 
         // Then
-        verify(registerUserRoleService).register(role);
-        verify(registerUserService).register(user);
-
-        verifyNoMoreInteractions(registerUserRoleService, registerUserService, retrieveUserService,
-            retrieveUserRoleService, applicationArguments);
+        verify(registerRole).execute(role);
+        verify(registerUser).execute(user);
+        verify(retrieveRoleByName).execute(DEFAULT_ADMIN_ROLE);
+        verifyNoMoreInteractions(registerRole, registerUser, retrieveUserByUsername,
+            retrieveRoleByName, applicationArguments);
     }
 
     @Test
@@ -127,25 +126,25 @@ class ConnectorAdminUserInitializerTest {
             .enabled(Boolean.TRUE)
             .build();
 
-        when(registerUserRoleService.register(any())).thenReturn(role);
-        when(registerUserService.register(any())).thenReturn(user);
-        when(retrieveUserService.findByUsername(any())).thenReturn(Optional.empty());
+        when(registerRole.execute(any())).thenReturn(role);
+        when(registerUser.execute(any())).thenReturn(user);
+        when(retrieveUserByUsername.execute(any())).thenThrow(ConnectorUserNotFoundException.class);
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            registerUserService, registerUserRoleService, retrieveUserService,
-            retrieveUserRoleService, adminUserProperties
+            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            retrieveRoleByName, adminUserProperties
         );
 
         initializer.run(applicationArguments);
 
         // Then
-        verify(registerUserRoleService).register(role);
-        verify(registerUserService).register(user);
-        verify(retrieveUserService).findByUsername(defaultAdmin);
+        verify(registerRole).execute(role);
+        verify(registerUser).execute(user);
+        verify(retrieveUserByUsername).execute(defaultAdmin);
 
-        verifyNoMoreInteractions(registerUserRoleService, registerUserService, retrieveUserService,
-            retrieveUserRoleService, applicationArguments);
+        verifyNoMoreInteractions(registerRole, registerUser, retrieveUserByUsername,
+            retrieveRoleByName, applicationArguments);
     }
 
     @Test
@@ -154,32 +153,37 @@ class ConnectorAdminUserInitializerTest {
         var defaultAdmin = "admin";
         var roleAdmin = "ROLE_ADMIN";
         var defaultPwd = "123456";
-
         adminUserProperties = new ConnectorAdminUserProperties();
-
-        var role = ConnectorRole.builder().name(roleAdmin).build();
+        var adminRole = ConnectorRole.builder().name(roleAdmin).build();
         var user = ConnectorUser.builder()
             .username(defaultAdmin)
             .password(defaultPwd)
-            .roles(Set.of(role))
+            .roles(Set.of(adminRole))
             .enabled(Boolean.TRUE)
             .build();
 
-        when(retrieveUserService.findByUsername(any())).thenReturn(Optional.of(user));
+        when(retrieveUserByUsername.execute(any())).thenReturn(user);
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            registerUserService, registerUserRoleService, retrieveUserService,
-            retrieveUserRoleService, adminUserProperties
+            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            retrieveRoleByName, adminUserProperties
         );
 
         initializer.run(applicationArguments);
 
         // Then
-        verify(retrieveUserService).findByUsername(defaultAdmin);
+        verify(retrieveUserByUsername).execute(defaultAdmin);
 
-        verifyNoMoreInteractions(registerUserRoleService, registerUserService, retrieveUserService,
-            retrieveUserRoleService, applicationArguments);
+        // verify init of default roles
+        verify(registerRole).execute(adminRole); // init of default role
+        var userRole = ConnectorRole.builder().name("ROLE_USER").build();
+        var testRole = ConnectorRole.builder().name("ROLE_LOAD_TESTER").build();
+        verify(registerRole).execute(userRole); // init of default role
+        verify(registerRole).execute(testRole); // init of default role
+
+        verifyNoMoreInteractions(registerRole, registerUser, retrieveUserByUsername,
+            retrieveRoleByName, applicationArguments);
     }
 
     @Test
@@ -200,23 +204,23 @@ class ConnectorAdminUserInitializerTest {
             .enabled(Boolean.TRUE)
             .build();
 
-        when(retrieveUserService.findByUsername(any())).thenReturn(Optional.of(user));
-        when(registerUserRoleService.register(any())).thenReturn(role);
+        when(retrieveUserByUsername.execute(any())).thenReturn(user);
+        when(registerRole.execute(any())).thenReturn(role);
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            registerUserService, registerUserRoleService, retrieveUserService,
-            retrieveUserRoleService, adminUserProperties
+            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            retrieveRoleByName, adminUserProperties
         );
 
         initializer.run(applicationArguments);
 
         // Then
-        verify(retrieveUserService).findByUsername(defaultAdmin);
-        verify(registerUserRoleService).register(role);
-        verify(registerUserService).patch(identifier, user.toBuilder().roles(Set.of(role)).build());
+        verify(retrieveUserByUsername).execute(defaultAdmin);
+        verify(registerRole).execute(role);
+        verify(patchUser).execute(identifier, user.toBuilder().roles(Set.of(role)).build());
 
-        verifyNoMoreInteractions(registerUserRoleService, registerUserService, retrieveUserService,
-            retrieveUserRoleService, applicationArguments);
+        verifyNoMoreInteractions(registerRole, registerUser, retrieveUserByUsername,
+            retrieveRoleByName, applicationArguments);
     }
 }

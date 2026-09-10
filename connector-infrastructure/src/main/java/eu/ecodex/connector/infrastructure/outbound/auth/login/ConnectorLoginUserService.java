@@ -12,13 +12,12 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.port.api.auth.login.ConnectorLoginUser;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
-import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
+import eu.ecodex.connector.application.port.api.auth.token.ConnectorRegisterUserRefreshToken;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginUser;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -42,29 +41,40 @@ import org.springframework.stereotype.Service;
  * - Retrieves the user details upon successful authentication.
  * - Generates an authentication token using the {@link ConnectorAuthenticationTokenProvider}.
  * - Returns a {@link ConnectorLoginResponse} containing the token details.
- *
- * <p>Exceptions:
- * - Throws {@link RuntimeException} if the principal (user details) cannot be retrieved after
- * authentication.
- *
- * <p>Annotations:
- * - {@code @Slf4j}: Enables logging for debugging and monitoring purposes.
- * - {@code @Service}: Marks this class as a Spring service component.
- * - {@code @RequiredArgsConstructor}: Generates a constructor for final fields.
- * - {@code @FieldDefaults}: Ensures fields are private and final by default.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorLoginUserService implements ConnectorLoginUser {
-    AuthenticationManager authenticationManager;
-    ConnectorAuthenticationTokenProvider authenticationTokenProvider;
-    ConnectorRefreshUserTokenService refreshTokenService;
+    private final AuthenticationManager authenticationManager;
+    private final ConnectorAuthenticationTokenProvider tokenProvider;
+    private final ConnectorRegisterUserRefreshToken registerRefreshToken;
 
+    /**
+     * Constructor for the {@code ConnectorLoginUserService}.
+     * Initializes the service with dependencies required for user login operations.
+     *
+     * @param authenticationManager The {@link AuthenticationManager} used to manage
+     *                              authentication processes such as validating user
+     *                              credentials.
+     * @param tokenProvider         The {@link ConnectorAuthenticationTokenProvider}
+     *                              responsible
+     *                              for generating and validating authentication tokens.
+     * @param registerRefreshToken  The {@link ConnectorRegisterUserRefreshTokenService} used
+     *                              to
+     *                              create user
+     *                              refresh tokens and handle related operations.
+     */
+    public ConnectorLoginUserService(AuthenticationManager authenticationManager,
+                                     ConnectorAuthenticationTokenProvider tokenProvider,
+                                     ConnectorRegisterUserRefreshTokenService
+                                         registerRefreshToken) {
+        this.authenticationManager = authenticationManager;
+        this.tokenProvider = tokenProvider;
+        this.registerRefreshToken = registerRefreshToken;
+    }
 
     @Override
-    public ConnectorLoginResponse login(String username, String password) {
+    public ConnectorLoginResponse execute(@Nonnull String username, @Nonnull String password) {
         try {
             var authentication =
                 authenticationManager.authenticate(
@@ -79,12 +89,12 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
                 throw new RuntimeException("Error reading user principal");
             }
             var authenticatedUser = user.connectorUser();
-            var accessToken = authenticationTokenProvider.generateAccessToken(authenticatedUser);
-            var refreshToken = refreshTokenService.create(authenticatedUser);
+            var accessToken = tokenProvider.generateAccessToken(authenticatedUser);
+            var refreshToken = registerRefreshToken.execute(authenticatedUser);
 
             return new ConnectorLoginResponse(accessToken, refreshToken.token(),
-                authenticationTokenProvider.getAccessTokenExpiresIn().toSeconds(),
-                authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds());
+                tokenProvider.getAccessTokenExpiresIn().toSeconds(),
+                tokenProvider.getRefreshTokenExpiresIn().toSeconds());
 
         } catch (DisabledException exception) {
             throw new ConnectorUserAccountInactiveException(

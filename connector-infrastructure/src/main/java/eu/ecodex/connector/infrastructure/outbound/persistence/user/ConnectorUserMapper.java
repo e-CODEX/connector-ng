@@ -23,7 +23,6 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class ConnectorUserMapper {
-
     /**
      * Map an entity user into a domain user.
      *
@@ -69,5 +68,4 @@ public class ConnectorUserMapper {
             .updatedAt(role.getUpdatedAt())
             .build();
     }
-
 }

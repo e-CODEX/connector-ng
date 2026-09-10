@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
-import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Optional;
@@ -32,13 +31,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorRegisterRoleServiceTest {
-
     @Mock
-    ConnectorRoleRepository roleRepository;
+    private ConnectorRoleRepository roleRepository;
 
     @InjectMocks
-    ConnectorRegisterRoleService service;
-
+    private ConnectorRegisterRoleService service;
 
     @Test
     void register_should_create_role() {
@@ -50,7 +47,7 @@ class ConnectorRegisterRoleServiceTest {
         when(roleRepository.findByName(anyString())).thenReturn(Optional.empty());
 
         // When
-        var registered = service.register(role);
+        var registered = service.execute(role);
 
         // Then
         assertNotNull(registered);
@@ -68,7 +65,7 @@ class ConnectorRegisterRoleServiceTest {
 
         // When
         // Then
-        assertThrows(ConnectorRoleBadRequestException.class, () -> service.register(role));
+        assertThrows(ConnectorRoleBadRequestException.class, () -> service.execute(role));
         verifyNoMoreInteractions(roleRepository);
     }
 
@@ -84,75 +81,10 @@ class ConnectorRegisterRoleServiceTest {
         when(roleRepository.findByName(anyString())).thenReturn(Optional.of(existingRole));
 
         // When
-        assertThrows(ConnectorRoleAlreadyExistsException.class, () -> service.register(role));
+        assertThrows(ConnectorRoleAlreadyExistsException.class, () -> service.execute(role));
 
         // Then
         verify(roleRepository).findByName(newRole);
-        verifyNoMoreInteractions(roleRepository);
-    }
-
-    @Test
-    void update_should_update_role_successfully() {
-        // Given
-        var newRole = "ROLE_ADMIN";
-        var roleUuid = "uuid";
-        var existingRole = ConnectorRole.builder().uuid(roleUuid).name("ROLE_USER").build();
-        var role = ConnectorRole.builder().uuid(roleUuid).name(newRole).build();
-
-        when(roleRepository.save(any())).thenReturn(role);
-        when(roleRepository.findByUuid(anyString())).thenReturn(Optional.of(existingRole));
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(existingRole));
-
-        // When
-        var registered = service.update(roleUuid, role);
-
-        // Then
-        assertNotNull(registered);
-        verify(roleRepository).save(role);
-        verify(roleRepository).findByUuid(roleUuid);
-        verify(roleRepository).findByName(newRole);
-
-        verifyNoMoreInteractions(roleRepository);
-    }
-
-    @Test
-    void update_should_not_update_role_when_nothing_to_update() {
-        // Given
-        var newRole = "ROLE_ADMIN";
-        var roleUuid = "uuid";
-        var existingRole = ConnectorRole.builder().uuid(roleUuid).name(newRole).build();
-        var role = ConnectorRole.builder().uuid(roleUuid).name(newRole).build();
-
-        when(roleRepository.findByUuid(any())).thenReturn(Optional.of(existingRole));
-        when(roleRepository.findByName(anyString())).thenReturn(Optional.of(existingRole));
-
-        // When
-        var registered = service.update(roleUuid, role);
-
-        // Then
-        assertNotNull(registered);
-        verify(roleRepository).findByUuid(roleUuid);
-        verify(roleRepository).findByName(newRole);
-
-        verifyNoMoreInteractions(roleRepository);
-    }
-
-    @Test
-    void update_should_throw_exception_when_role_not_found() {
-        // Given
-        var newRole = "ROLE_ADMIN";
-        var roleUuid = "uuid";
-
-        var role = ConnectorRole.builder().uuid(roleUuid).name(newRole).build();
-
-        when(roleRepository.findByUuid(any())).thenReturn(Optional.empty());
-
-        // When
-        // Then
-        assertThrows(ConnectorRoleNotFoundException.class,
-            () -> service.update(roleUuid, role));
-        verify(roleRepository).findByUuid(roleUuid);
-
         verifyNoMoreInteractions(roleRepository);
     }
 }

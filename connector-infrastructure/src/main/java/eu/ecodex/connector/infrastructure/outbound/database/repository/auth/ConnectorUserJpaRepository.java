@@ -11,53 +11,31 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import lombok.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for performing CRUD operations and query methods on
- * {@link ConnectorUserEntity} using JPA. This interface is responsible for
- * managing the persistence and retrieval of ConnectorUserEntity instances
+ * {@link ConnectorUserEntity} using JPA. This interface is responsible for managing the
+ * persistence
+ * and retrieval of ConnectorUserEntity instances
  * from the database.
  *
- * <p>The interface includes queries to retrieve user data by various unique
- * identifiers (UUID, username, email) and to check for their existence
- * within the database. Additionally, it uses EntityGraph annotations to
- * optimize fetching associated user roles.
- *
- * <p>Methods:
- * - `findByUuid(String uuid)`: Retrieves a user by their UUID,
- * loading their associated roles.
- * - `findByUsername(String username)`: Retrieves a user by their username,
- * loading their associated roles.
- * - `findByEmail(String email)`: Retrieves a user by their email,
- * loading their associated roles.
- * - `findByUsernameAndEmail(String username, String email)`: Retrieves a user
- * using both username and email, loading their associated roles.
- * - `existsByUuid(String uuid)`: Checks whether a user with the given UUID exists.
- * - `existsByUsername(String username)`: Checks whether a user with the given
- * username exists.
- * - `existsByEmail(String email)`: Checks whether a user with the given
- * email exists.
- * - `existsByUsernameAndUuidNot(String username, String uuid)`: Validates
- * the uniqueness of a username while excluding a specific UUID.
- * - `existsByEmailAndUuidNot(String email, String uuid)`: Validates the
- * uniqueness of an email while excluding a specific UUID.
- *
- * <p>EntityGraph Annotations:
- * - These annotations are used to load the "roles" relationship of the
- * {@link ConnectorUserEntity} eagerly by specifying paths for associated
- * entities that need to be included in the query result set.
+ * <p>The interface includes queries to retrieve user data by various unique identifiers (UUID,
+ * username, email) and to check for their existence within the database. Additionally, it uses
+ * EntityGraph annotations to optimize fetching associated user roles.
  *
  * <p>Inheritance:
  * - Extends {@link JpaRepository}, which provides basic CRUD functionality
  * and query method support.
  */
+@Repository
 public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserEntity, Long> {
-
     /**
      * Retrieves all instances of the ConnectorUserEntity from the database,
      * including their associated roles as specified by the defined entity graph.
@@ -79,7 +57,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *     {@link Optional} if no user is found with the given UUID.
      */
     @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUuid(String uuid);
+    Optional<ConnectorUserEntity> findByUuid(@Nonnull String uuid);
 
     /**
      * Retrieves a {@link ConnectorUserEntity} by its username along with the associated roles.
@@ -92,8 +70,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *     if no user is found with the given username.
      */
     @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUsername(String username);
-
+    Optional<ConnectorUserEntity> findByUsername(@Nonnull String username);
 
     /**
      * Retrieves an active {@link ConnectorUserEntity} by its username along with the associated
@@ -105,34 +82,8 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
      */
     @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUsernameAndEnabledIsTrue(String username);
-
-    /**
-     * Retrieves a {@link ConnectorUserEntity} by its email along with the associated roles.
-     * This method uses an {@link EntityGraph} to fetch the "roles" relationship eagerly.
-     *
-     * @param email the email of the user to be retrieved; must not be null.
-     *
-     * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
-     *     {@link Optional}
-     *     if no user is found with the given email.
-     */
-    @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByEmail(String email);
-
-    /**
-     * Retrieves a {@link ConnectorUserEntity} by its username and email along with the associated
-     * roles.
-     * This method uses an {@link EntityGraph} to fetch the "roles" relationship eagerly.
-     *
-     * @param username the username of the user to be retrieved; must not be null.
-     * @param email    the email of the user to be retrieved; must not be null.
-     *
-     * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found,
-     *     or an empty {@link Optional} if no user is found with the given username and email.
-     */
-    @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUsernameAndEmail(String username, String email);
+    Optional<ConnectorUserEntity> findByUsernameAndEnabled(@Nonnull String username,
+                                                           boolean enabled);
 
     /**
      * Checks whether an entity with the specified UUID exists in the database.
@@ -141,7 +92,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if an entity with the given UUID exists, false otherwise.
      */
-    boolean existsByUuid(String uuid);
+    boolean existsByUuid(@Nonnull String uuid);
 
     /**
      * Checks whether a user with the specified username exists in the database.
@@ -150,7 +101,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if a user with the given username exists, false otherwise.
      */
-    boolean existsByUsername(String username);
+    boolean existsByUsername(@Nonnull String username);
 
     /**
      * Checks whether a user with the specified email exists in the database.
@@ -159,7 +110,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if a user with the given email exists, false otherwise.
      */
-    boolean existsByEmail(String email);
+    boolean existsByEmail(@Nonnull String email);
 
     /**
      * Checks whether a user with the specified username exists in the database,
@@ -171,7 +122,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @return true if a user with the given username exists but has a different UUID, false
      *     otherwise.
      */
-    boolean existsByUsernameAndUuidNot(String username, String uuid);
+    boolean existsByUsernameAndUuidNot(@Nonnull String username, @Nonnull String uuid);
 
     /**
      * Checks whether a user with the specified email exists in the database,
@@ -182,5 +133,5 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if a user with the given email exists but has a different UUID, false otherwise.
      */
-    boolean existsByEmailAndUuidNot(String email, String uuid);
+    boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
 }

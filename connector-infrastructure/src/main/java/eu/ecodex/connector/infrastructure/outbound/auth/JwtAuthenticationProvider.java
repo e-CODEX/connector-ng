@@ -10,18 +10,15 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth;
 
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
+import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
-import javax.crypto.SecretKey;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,16 +31,6 @@ import org.springframework.stereotype.Service;
  *
  * <p>It conforms to the {@link ConnectorAuthenticationTokenProvider} interface.
  *
- * <p>Dependencies:
- * - {@link JwtProperties}: Specifies configuration values such as the secret key and expiration
- * period.
- * - {@link UserDetails}: Represents authenticated user information, including roles and username.
- * - {@link SecretKey}: Used for cryptographic operations.
- *
- * <p>Thread-safety:
- * This class is thread-safe assuming the provided {@link JwtProperties}
- * have been correctly initialized and remain immutable during runtime.
- *
  * <p>Responsibilities:
  * - Generate JWT tokens with user-specific claims and expiration times.
  * - Extract the username from an existing token payload.
@@ -52,14 +39,17 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
-    JwtService jwtTokenService;
-    JwtProperties jwtProperties;
+   private final JwtService jwtTokenService;
+   private final JwtProperties jwtProperties;
+
+    public JwtAuthenticationProvider(JwtService jwtTokenService, JwtProperties jwtProperties) {
+        this.jwtTokenService = jwtTokenService;
+        this.jwtProperties = jwtProperties;
+    }
 
     @Override
-    public String generateAccessToken(ConnectorUser connectorUser) {
+    public String generateAccessToken(@Nonnull ConnectorUser connectorUser) {
         var user = new ConnectorUserDetails(connectorUser);
         return jwtTokenService.generateAccessToken(user);
     }
@@ -75,18 +65,18 @@ public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenPr
     }
 
     @Override
-    public boolean isAccessTokenExpired(String token) {
+    public boolean isAccessTokenExpired(@NonNull String token) {
         return jwtTokenService.isExpired(token);
     }
 
     @Override
-    public Instant getAccessTokenExpirationDate(String token) {
+    public Instant getAccessTokenExpirationDate(@NonNull String token) {
         var claims = jwtTokenService.parseAllowingExpired(token);
         return claims.getExpiration().toInstant();
     }
 
     @Override
-    public String getUsernameFromToken(String token) {
+    public String getUsernameFromToken(@NonNull String token) {
         var claims = jwtTokenService.parseAllowingExpired(token);
         return claims.getSubject();
     }

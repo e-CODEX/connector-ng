@@ -18,9 +18,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,20 +32,19 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorUserAdminController.class)
 class ConnectorRemoveUserAdminControllerTest extends AbstractWebMvcTest {
-
     private static final String URL = "/api/v1/admin/users";
-
     @MockitoBean
-    ConnectorRegisterUser registerUser;
-
+    private ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier;
     @MockitoBean
-    ConnectorRetrieveUser retrieveUser;
-
+    private ConnectorRegisterUser connectorRegisterUser;
     @MockitoBean
-    ConnectorRemoveUser removeUser;
-
+    private ConnectorUpdateUser connectorUpdateUser;
     @MockitoBean
-    ConnectorListUser listUser;
+    private ConnectorPatchUser connectorPatchUser;
+    @MockitoBean
+    private ConnectorRemoveUser connectorRemoveUser;
+    @MockitoBean
+    private ConnectorListUser connectorListUser;
 
     @Autowired
     private RestTestClient apiClient;
@@ -53,7 +54,7 @@ class ConnectorRemoveUserAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var identifier = "uuid";
 
-        doNothing().when(removeUser).deleteById(any());
+        doNothing().when(connectorRemoveUser).execute(any());
 
         // When
         apiClient.delete()
@@ -63,9 +64,8 @@ class ConnectorRemoveUserAdminControllerTest extends AbstractWebMvcTest {
             .isNoContent();
 
         // Then
-
-        verify(removeUser).deleteById(identifier);
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser);
+        verify(connectorRemoveUser).execute(identifier);
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -73,7 +73,7 @@ class ConnectorRemoveUserAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var identifier = "uuid";
 
-        doThrow(ConnectorUserNotFoundException.class).when(removeUser).deleteById(any());
+        doThrow(ConnectorUserNotFoundException.class).when(connectorRemoveUser).execute(any());
 
         // When
         apiClient.delete()
@@ -84,7 +84,12 @@ class ConnectorRemoveUserAdminControllerTest extends AbstractWebMvcTest {
 
         // Then
 
-        verify(removeUser).deleteById(identifier);
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser);
+        verify(connectorRemoveUser).execute(identifier);
+        assertNoMoreInteractions();
+    }
+
+    private void assertNoMoreInteractions() {
+        verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
+            connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
     }
 }

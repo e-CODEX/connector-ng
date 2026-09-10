@@ -114,6 +114,7 @@ class ConnectorLoginUserIT extends AbstractIntegrationTest {
         var request = ConnectorUserRequest
             .builder()
             .username(username)
+            .password("password")
             .enabled(false)
             .build();
 

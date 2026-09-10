@@ -1,5 +1,6 @@
 package eu.ecodex.connector.domain.model.login;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 /**
@@ -19,8 +20,8 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorLoginResponse(
-        String accessToken,
-        String refreshToken,
+        @NotBlank String accessToken,
+        @NotBlank String refreshToken,
         long expiresIn,
         long refreshExpiresIn
 ) {

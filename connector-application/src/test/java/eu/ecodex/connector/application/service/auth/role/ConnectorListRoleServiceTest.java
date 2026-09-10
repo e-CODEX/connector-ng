@@ -26,32 +26,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorListRoleServiceTest {
-
     @Mock
-    ConnectorRoleRepository roleRepository;
+    private ConnectorRoleRepository roleRepository;
 
     @InjectMocks
-    ConnectorListRoleService service;
+    private ConnectorListRoleService service;
 
     @Test
     void findAll_should_return_all_roles() {
         // Given
-        ConnectorRole roleAdmin =
-            ConnectorRole.builder().name(ConnectorRoleName.ADMIN.name()).build();
-        ConnectorRole roleUser =
-            ConnectorRole.builder().name(ConnectorRoleName.USER.name()).build();
+        var roleAdmin = ConnectorRole.builder().name(ConnectorRoleName.ADMIN.name()).build();
+        var roleUser =  ConnectorRole.builder().name(ConnectorRoleName.USER.name()).build();
 
         when(roleRepository.findAll()).thenReturn(List.of(roleAdmin, roleUser));
 
         // When
-        var allRoles = service.findAll();
+        var allRoles = service.execute();
 
         // Then
         assertThat(allRoles).hasSize(2);
         assertThat(allRoles).containsExactlyInAnyOrder(roleAdmin, roleUser);
 
         verifyNoMoreInteractions(roleRepository);
-
     }
-
 }

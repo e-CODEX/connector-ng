@@ -14,7 +14,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.List;
 
 /**
- * Represents a contract for listing all user roles associated with the Connector system.
+ * Represents a contract for listing all user roles within the Connector system.
  * Implementations of this interface are responsible for retrieving all instances of
  * {@link ConnectorRole}.
  *
@@ -24,10 +24,10 @@ import java.util.List;
  */
 public interface ConnectorListRole {
     /**
-     * Retrieves a list of all user roles associated with the Connector system.
+     * Retrieves a list of all user roles.
      *
-     * @return a list of {@link ConnectorRole} representing all user roles stored
-     *         in the underlying data source.
+     * @return a list of {@link ConnectorRole} representing all user roles stored in the underlying
+     *     data source.
      */
-    List<ConnectorRole> findAll();
+    List<ConnectorRole> execute();
 }

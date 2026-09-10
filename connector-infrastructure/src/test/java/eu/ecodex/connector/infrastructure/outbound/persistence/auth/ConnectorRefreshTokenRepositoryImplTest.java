@@ -22,8 +22,8 @@ import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRefreshTokenJpaRepository;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -37,9 +37,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorRefreshTokenRepositoryImplTest {
-
     @Mock
-    private ConnectorRefreshTokenJpaRepository jpaRepository;
+    private ConnectorUserRefreshTokenJpaRepository jpaRepository;
 
     @Mock
     private ConnectorUserJpaRepository userJpaRepository;
@@ -203,5 +202,4 @@ class ConnectorRefreshTokenRepositoryImplTest {
         verify(jpaRepository).revokeAllByUserUuid(userId);
         verifyNoMoreInteractions(jpaRepository, userJpaRepository);
     }
-
 }

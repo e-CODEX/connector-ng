@@ -24,21 +24,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorRemoveUserServiceTest {
-
     @Mock
-    ConnectorUserRepository repository;
+    private ConnectorUserRepository repository;
 
     @InjectMocks
-    ConnectorRemoveUserService service;
+    private ConnectorRemoveUserService service;
 
     @Test
-    void deleteById_should_delete_user() {
+    void execute_should_delete_user() {
         // Given
         var identifier = "uuid";
         doNothing().when(repository).deleteByUuid(any());
 
         // When
-        service.deleteById(identifier);
+        service.execute(identifier);
 
         // Then
         verify(repository).deleteByUuid(identifier);

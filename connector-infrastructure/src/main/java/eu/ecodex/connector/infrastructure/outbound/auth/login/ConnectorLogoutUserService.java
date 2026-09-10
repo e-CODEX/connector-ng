@@ -10,14 +10,13 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
-import eu.ecodex.connector.application.port.api.auth.login.ConnectorLogoutUser;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
-import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
-import eu.ecodex.connector.application.service.auth.login.ConnectorRevokeUserTokenService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import eu.ecodex.connector.application.port.api.auth.token.ConnectorRevokeUserRefreshToken;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLogoutUser;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRevokeUserRefreshTokenService;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +39,8 @@ import org.springframework.stereotype.Service;
  * <p>Dependencies:
  * - {@link AuthenticationManager} for authenticating user credentials.
  * - {@link ConnectorAuthenticationTokenProvider} for generating and managing access tokens.
- * - {@link ConnectorRefreshUserTokenService} for creating and handling refresh token functionality.
+ * - {@link ConnectorRefreshUserRefreshTokenService} for creating and handling refresh token
+ * functionality.
  *
  * <p>Exceptions:
  * Throws a {@link RuntimeException} if the principal cannot be retrieved after authentication.
@@ -53,14 +53,15 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorLogoutUserService implements ConnectorLogoutUser {
+    private final ConnectorRevokeUserRefreshToken revokeTokenService;
 
-    ConnectorRevokeUserTokenService revokeTokenService;
+    public ConnectorLogoutUserService(ConnectorRevokeUserRefreshTokenService revokeTokenService) {
+        this.revokeTokenService = revokeTokenService;
+    }
 
     @Override
-    public void logout(String userId, String refreshToken) {
-        revokeTokenService.revoke(userId, refreshToken);
+    public void execute(@NonNull String userId, @NonNull String refreshToken) {
+        revokeTokenService.execute(userId, refreshToken);
     }
 }

@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRoleJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConnectorRoleRepositoryImplTest {
 
     @Mock
-    ConnectorRoleJpaRepository jpaRepository;
+    ConnectorUserRoleJpaRepository jpaRepository;
 
     @InjectMocks
     private ConnectorRoleRepositoryImpl repository;

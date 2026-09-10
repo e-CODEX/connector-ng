@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.service.auth.login.ConnectorRefreshUserTokenService;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
@@ -38,7 +38,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
     ConnectorLoginUserService loginUserService;
 
     @MockitoBean
-    ConnectorRefreshUserTokenService userTokenService;
+    ConnectorRefreshUserRefreshTokenService userTokenService;
 
     @MockitoBean
     ConnectorLogoutUserService logoutUserService;
@@ -58,7 +58,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
             .refreshToken("refresh-token")
             .build();
 
-        when(loginUserService.login(any(), any())).thenReturn(expected);
+        when(loginUserService.execute(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -75,7 +75,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(loginUserService).login(username, password);
+        verify(loginUserService).execute(username, password);
         verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
     }
 
@@ -92,7 +92,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
             .refreshToken(refreshToken)
             .build();
 
-        when(userTokenService.refresh(any(), any())).thenReturn(expected);
+        when(userTokenService.execute(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -110,7 +110,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(userTokenService).refresh(accessToken, refreshToken);
+        verify(userTokenService).execute(accessToken, refreshToken);
         verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
     }
 }

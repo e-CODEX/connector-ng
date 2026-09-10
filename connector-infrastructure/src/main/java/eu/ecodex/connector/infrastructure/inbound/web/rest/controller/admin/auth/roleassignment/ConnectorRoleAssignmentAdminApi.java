@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.NonNull;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(path = "/api/v1/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "AssignUsersRoles", description = "API for managing connector's users")
 public interface ConnectorRoleAssignmentAdminApi {
-
     @Operation(summary = "Assign an existing role to user.")
     @PostMapping(path = "/{uuid}/roles")
     @ApiResponses({
@@ -42,7 +42,8 @@ public interface ConnectorRoleAssignmentAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto register(@PathVariable("uuid") String identifier, @RequestBody String role);
+    ConnectorUserDto register(@PathVariable("uuid") @NonNull String identifier,
+                              @RequestBody String role);
 
     @Operation(summary = "Unassign a user role.")
     @DeleteMapping(path = "/{uuid}/roles")
@@ -51,6 +52,6 @@ public interface ConnectorRoleAssignmentAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto delete(@PathVariable("uuid") String identifier, @RequestBody String role);
-
+    ConnectorUserDto delete(@PathVariable("uuid") @NonNull String identifier,
+                            @RequestBody @NonNull String role);
 }

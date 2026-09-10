@@ -12,46 +12,48 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.user;
 
 import static eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest.toDomain;
 
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller for managing connector users. Provides APIs for operations such as registration,
- * updating, partial updates, retrieval, listing, and deletion of users.
+ * REST controller for managing the current user's profile within the connector system.
+ * Provides endpoints for partially updating user information and retrieving user details.
  *
- * <p>This controller relies on service classes for handling user-related operations and
- * ensures additional processing like password encoding before delegation.
+ * <p>This controller implements the {@link ConnectorUserApi} interface, which defines the contract
+ * for user management operations such as patching existing user data and retrieving user
+ * information based on authentication details.</p>
+ *
  */
 @Slf4j
 @RestController
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorUserController implements ConnectorUserApi {
-    ConnectorRegisterUser connectorRegisterUser;
-    ConnectorRetrieveUser connectorRetrieveUser;
+    private final ConnectorPatchUser patchUser;
+    private final ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
+
+    public ConnectorUserController(ConnectorPatchUser patchUser,
+                                   ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier) {
+        this.patchUser = patchUser;
+        this.retrieveUserByIdentifier = retrieveUserByIdentifier;
+    }
 
     @Override
     public ConnectorUserDto patch(ConnectorUserDetails userDetails,
                                   ConnectorUserRequest userRequest) {
         log.info("Patching existing user");
         var registered =
-            connectorRegisterUser.patch(userDetails.getUserId(), toDomain(userRequest));
+            patchUser.execute(userDetails.getUserId(), toDomain(userRequest));
         log.info("User patched");
         return ConnectorUserDto.from(registered);
     }
 
     @Override
     public ConnectorUserDto getByIdentifier(ConnectorUserDetails userDetails) {
-        var found = connectorRetrieveUser.getByIdentifier(userDetails.getUserId());
+        var found = retrieveUserByIdentifier.execute(userDetails.getUserId());
         return ConnectorUserDto.from(found);
     }
-
 }

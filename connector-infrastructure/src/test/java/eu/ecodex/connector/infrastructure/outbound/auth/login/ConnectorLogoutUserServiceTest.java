@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-import eu.ecodex.connector.application.service.auth.login.ConnectorRevokeUserTokenService;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRevokeUserRefreshTokenService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConnectorLogoutUserServiceTest {
 
     @Mock
-    ConnectorRevokeUserTokenService revokeUserTokenService;
+    ConnectorRevokeUserRefreshTokenService revokeUserTokenService;
 
     @InjectMocks
     ConnectorLogoutUserService service;
@@ -35,12 +35,12 @@ class ConnectorLogoutUserServiceTest {
         // Given
         var userId = "test";
         var refreshToken = "refresh-token-abc";
-        doNothing().when(revokeUserTokenService).revoke(any(), any());
+        doNothing().when(revokeUserTokenService).execute(any(), any());
 
         // When
-        service.logout(userId, refreshToken);
+        service.execute(userId, refreshToken);
 
         // Then
-        verify(revokeUserTokenService).revoke(userId, refreshToken);
+        verify(revokeUserTokenService).execute(userId, refreshToken);
     }
 }

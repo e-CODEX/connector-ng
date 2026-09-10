@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.service.auth.user.ConnectorRetrieveUserService;
+import eu.ecodex.connector.application.service.auth.user.ConnectorRetrieveUserByUsernameService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConnectorUserDetailsServiceTest {
 
     @Mock
-    ConnectorRetrieveUserService retrieveUserService;
+    ConnectorRetrieveUserByUsernameService retrieveUserService;
 
     @InjectMocks
     ConnectorUserDetailsService service;
@@ -42,14 +42,14 @@ class ConnectorUserDetailsServiceTest {
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
         var user = ConnectorUserTestFixtures.createDefaultUserWithRoles();
 
-        when(retrieveUserService.getByUsername(any())).thenReturn(user);
+        when(retrieveUserService.execute(any())).thenReturn(user);
 
         // When
         var userDetailsFound = service.loadUserByUsername(username);
 
         // Then
         assertThat(userDetailsFound).isEqualTo(userDetails);
-        verify(retrieveUserService).getByUsername(username);
+        verify(retrieveUserService).execute(username);
         verifyNoMoreInteractions(retrieveUserService);
     }
 
@@ -58,7 +58,7 @@ class ConnectorUserDetailsServiceTest {
         // Given
         var username = "test";
 
-        when(retrieveUserService.getByUsername(any())).thenThrow(
+        when(retrieveUserService.execute(any())).thenThrow(
             ConnectorUserNotFoundException.class);
 
         // When
@@ -66,7 +66,7 @@ class ConnectorUserDetailsServiceTest {
             () -> service.loadUserByUsername(username));
 
         // Then
-        verify(retrieveUserService).getByUsername(username);
+        verify(retrieveUserService).execute(username);
         verifyNoMoreInteractions(retrieveUserService);
     }
 }

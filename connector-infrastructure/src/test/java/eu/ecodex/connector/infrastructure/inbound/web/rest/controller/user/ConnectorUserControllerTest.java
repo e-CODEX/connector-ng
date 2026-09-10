@@ -21,8 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import org.junit.jupiter.api.AfterEach;
@@ -43,17 +43,13 @@ import tools.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @Import(ConnectorUserControllerTest.WebSecurityTestConfig.class)
 class ConnectorUserControllerTest extends AbstractWebMvcTest {
-
     private static final String URL = "/api/v1/auth/me";
-
     @MockitoBean
-    ConnectorRegisterUser registerUser;
-
+    private ConnectorPatchUser patchUser;
     @MockitoBean
-    ConnectorRetrieveUser retrieveUser;
-
+    private ConnectorRetrieveUserByIdentifier retrieveUser;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
     private MockMvc mockMvc;
@@ -70,7 +66,7 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         var userPrincipal = ConnectorUserTestFixtures.createUserDetails();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserPatchRequest();
 
-        when(registerUser.patch(any(), any())).thenReturn(connectorUser);
+        when(patchUser.execute(any(), any())).thenReturn(connectorUser);
 
         // When
         var mvcResult = mockMvc.perform(patch(URL)
@@ -87,9 +83,9 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         var actual = objectMapper.readValue(json, ConnectorUserDto.class);
         assertThat(actual).isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
-        verify(registerUser).patch(connectorUser.uuid(),
+        verify(patchUser).execute(connectorUser.uuid(),
             ConnectorUserTestFixtures.createDefaultUserPatched());
-        verifyNoMoreInteractions(registerUser, retrieveUser);
+        verifyNoMoreInteractions(patchUser, retrieveUser);
     }
 
     @Test
@@ -99,7 +95,7 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         var connectorUserDto = ConnectorUserTestFixtures.createUserDto();
         var userPrincipal = ConnectorUserTestFixtures.createUserDetails();
 
-        when(retrieveUser.getByIdentifier(any())).thenReturn(connectorUser);
+        when(retrieveUser.execute(any())).thenReturn(connectorUser);
 
         // When
         var mvcResult = mockMvc.perform(get(URL)
@@ -115,15 +111,15 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         var actual = objectMapper.readValue(json, ConnectorUserDto.class);
         assertThat(actual).isEqualTo(connectorUserDto);
 
-        verify(retrieveUser).getByIdentifier(connectorUser.uuid());
-        verifyNoMoreInteractions(registerUser, retrieveUser);
+        verify(retrieveUser).execute(connectorUser.uuid());
+        verifyNoMoreInteractions(patchUser, retrieveUser);
     }
 
     @Test
     void getByIdentifier_should_returns_404_when_user_not_found() throws Exception {
         var userPrincipal = ConnectorUserTestFixtures.createUserDetails();
 
-        when(retrieveUser.getByIdentifier(any())).thenThrow(ConnectorUserNotFoundException.class);
+        when(retrieveUser.execute(any())).thenThrow(ConnectorUserNotFoundException.class);
 
         // When
         // Then

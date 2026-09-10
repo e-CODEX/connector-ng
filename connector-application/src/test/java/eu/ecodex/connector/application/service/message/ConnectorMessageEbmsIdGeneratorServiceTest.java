@@ -40,7 +40,7 @@ public class ConnectorMessageEbmsIdGeneratorServiceTest {
                     .ebmsIdSuffix("connector.ecodex.eu")
                     .build()
             );
-        var ebmsIdentifier = ebmsIdGenerator.generateIdentifier();
+        var ebmsIdentifier = ebmsIdGenerator.execute();
 
         assertThat(ebmsIdentifier).isNotNull();
         assertThat(ebmsIdentifier).isNotBlank();

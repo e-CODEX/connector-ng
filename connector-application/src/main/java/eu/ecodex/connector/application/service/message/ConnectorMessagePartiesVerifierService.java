@@ -14,8 +14,8 @@ import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 /**

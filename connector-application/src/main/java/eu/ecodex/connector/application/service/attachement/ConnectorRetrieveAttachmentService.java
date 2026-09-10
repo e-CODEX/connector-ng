@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFo
 import eu.ecodex.connector.application.port.api.attachment.ConnectorRetrieveAttachment;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import org.jspecify.annotations.NonNull;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**

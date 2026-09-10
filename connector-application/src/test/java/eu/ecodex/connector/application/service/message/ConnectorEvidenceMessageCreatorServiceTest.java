@@ -20,6 +20,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.TriggeredEvidenceMessageTestFixtures;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEbmsIdGenerator;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
@@ -43,9 +45,9 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
         + ".ecodex.eu";
 
     @Mock
-    private ConnectorMessageIdGeneratorService messageIdGenerator;
+    private ConnectorMessageIdGenerator messageIdGeneratorService;
     @Mock
-    private ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator;
+    private ConnectorMessageEbmsIdGenerator messageEbmsIdGeneratorService;
 
     @InjectMocks
     private ConnectorEvidenceMessageCreatorService evidenceMessageCreator;
@@ -80,8 +82,8 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
         @ParameterizedTest
         @MethodSource("provideEvidence")
         void should_create_evidence_message_successfully(ConnectorMessageEvidence evidence) {
-            when(messageIdGenerator.generateIdentifier()).thenReturn(IDENTIFIER);
-            lenient().when(messageEbmsIdGenerator.generateIdentifier())
+            when(messageIdGeneratorService.execute()).thenReturn(IDENTIFIER);
+            lenient().when(messageEbmsIdGeneratorService.execute())
                      .thenReturn("62705399-0793-485e-bc48-9f0a49bd9ba3@connector.ecodex.eu");
 
             var message = BusinessMessageTestFixtures.createOutboundMessage();
@@ -166,7 +168,7 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
             var triggeredMessage =
                 TriggeredEvidenceMessageTestFixtures.createDeliveryTriggeredEvidenceMessage();
             var businessMessage = BusinessMessageTestFixtures.createInboundMessage();
-            when(messageIdGenerator.generateIdentifier()).thenReturn(IDENTIFIER);
+            when(messageIdGeneratorService.execute()).thenReturn(IDENTIFIER);
 
 
             var evidenceMessage = evidenceMessageCreator.createForTrigger(

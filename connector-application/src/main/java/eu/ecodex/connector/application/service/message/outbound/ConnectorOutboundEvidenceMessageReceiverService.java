@@ -1,10 +1,10 @@
 package eu.ecodex.connector.application.service.message.outbound;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.ConnectorTriggeredEvidenceMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import lombok.NonNull;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConnectorOutboundEvidenceMessageReceiverService
     implements ConnectorOutboundEvidenceMessageReceiver {
-    private final ConnectorMessageIdGeneratorService messageIdGeneratorService;
+    private final ConnectorMessageIdGenerator messageIdGeneratorService;
     private final ConnectorTriggeredEvidenceMessageVerifier triggeredEvidenceMessageVerifier;
     private final ConnectorMessageEventPublisher<ConnectorTriggeredEvidenceMessage>
         evidenceTriggerPublisher;
@@ -31,7 +31,7 @@ public class ConnectorOutboundEvidenceMessageReceiverService
      * @param evidenceTriggerPublisher         the publisher for evidence trigger messages
      */
     public ConnectorOutboundEvidenceMessageReceiverService(
-        ConnectorMessageIdGeneratorService messageIdGeneratorService,
+        ConnectorMessageIdGenerator messageIdGeneratorService,
         ConnectorTriggeredEvidenceMessageVerifier triggeredEvidenceMessageVerifier,
         @Qualifier("connectorJmsOutboundEvidenceTriggerPublisher")
         ConnectorMessageEventPublisher<ConnectorTriggeredEvidenceMessage> evidenceTriggerPublisher
@@ -46,7 +46,7 @@ public class ConnectorOutboundEvidenceMessageReceiverService
         @NonNull ConnectorOutboundEvidenceMessageCommand command) {
         var triggeredEvidenceMessage = ConnectorTriggeredEvidenceMessage
             .builder()
-            .identifier(messageIdGeneratorService.generateIdentifier())
+            .identifier(messageIdGeneratorService.execute())
             .backendMessageIdentifier(command.backendMessageIdentifier())
             .referenceToBackendMessageIdentifier(command.backendMessageIdentifier())
             .backendName(command.backendName())

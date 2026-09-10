@@ -20,10 +20,10 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.ConnectorTriggeredEvidenceMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.service.message.ConnectorMessageIdGeneratorService;
 import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,7 @@ public class ConnectorOutboundEvidenceMessageReceiverServiceTest {
     @Mock
     private ConnectorMessageEventPublisher<ConnectorTriggeredEvidenceMessage> evidenceTriggerPublisher;
     @Mock
-    private ConnectorMessageIdGeneratorService messageIdGenerator;
+    private ConnectorMessageIdGenerator messageIdGeneratorService;
     @Mock
     private ConnectorTriggeredEvidenceMessageVerifier verifyTriggeredEvidenceService;
 
@@ -55,7 +55,7 @@ public class ConnectorOutboundEvidenceMessageReceiverServiceTest {
     @BeforeEach
     void setUp() {
         evidenceMessageReceiverService = new ConnectorOutboundEvidenceMessageReceiverService(
-            messageIdGenerator,
+            messageIdGeneratorService,
             verifyTriggeredEvidenceService,
             evidenceTriggerPublisher
         );
@@ -97,7 +97,7 @@ public class ConnectorOutboundEvidenceMessageReceiverServiceTest {
             Class<? extends Exception> exceptionClass) {
             doThrow(exceptionClass).when(verifyTriggeredEvidenceService)
                                    .verify(any());
-            when(messageIdGenerator.generateIdentifier()).thenReturn(MESSAGE_ID);
+            when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
 
             var evidenceMessageCommand = createEvidenceMessageCommand();
 
@@ -112,7 +112,7 @@ public class ConnectorOutboundEvidenceMessageReceiverServiceTest {
         @Test
         void should_submit_the_message_to_the_evidence_queue() {
             doNothing().when(verifyTriggeredEvidenceService).verify(any());
-            when(messageIdGenerator.generateIdentifier()).thenReturn(MESSAGE_ID);
+            when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
 
             var evidenceMessageCommand = createEvidenceMessageCommand();
 

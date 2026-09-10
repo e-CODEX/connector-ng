@@ -10,49 +10,28 @@
 
 package eu.ecodex.connector.application.service.message;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Generates unique ebMS message identifiers for connector messages.
- *
- * <p>The identifier is composed of two parts:
- * <ul>
- *   <li>A randomly generated {@link java.util.UUID}</li>
- *   <li>A configured ebMS identifier suffix</li>
- * </ul>
- *
- * <p>The suffix is retrieved from the {@link ConnectorMessageProcessingConfigurationProvider}
- * configuration and typically represents the domain or system identifier required by
- * the ebMS specification.
+ * Default implementation of {@link ConnectorMessageEbmsIdGenerator} that generates unique ebMS
+ * message identifiers.
  */
 @Slf4j
 @Service
-public class ConnectorMessageEbmsIdGeneratorService {
+public class ConnectorMessageEbmsIdGeneratorService implements ConnectorMessageEbmsIdGenerator {
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
-    /**
-     * Creates a new identifier generator.
-     *
-     * @param processingConfigurationProvider provider used to retrieve the message processing
-     *                                        configuration, including the ebMS identifier suffix
-     */
     public ConnectorMessageEbmsIdGeneratorService(
         ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
         this.processingConfigurationProvider = processingConfigurationProvider;
     }
 
-    /**
-     * Generates a new ebMS-compliant message identifier.
-     *
-     * <p>A random {@link java.util.UUID} is generated and combined with the configured ebMS
-     * identifier suffix using the {@code '@'} separator.
-     *
-     * @return a unique message identifier in the format {@code <uuid>@<suffix>}
-     */
-    public String generateIdentifier() {
+    @Override
+    public String execute() {
         log.debug("Generating new EBMS message identifier");
         var configuration = this.processingConfigurationProvider.getConfiguration();
         return String.format("%s@%s", UUID.randomUUID(), configuration.ebmsIdSuffix());

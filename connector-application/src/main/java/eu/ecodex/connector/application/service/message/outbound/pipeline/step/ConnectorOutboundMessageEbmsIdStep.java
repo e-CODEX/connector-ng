@@ -10,10 +10,10 @@
 
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGeneratorService;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorOutboundMessageEbmsIdStep
     implements ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> {
-    private final ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator;
+    private final ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
 
@@ -43,7 +43,7 @@ public class ConnectorOutboundMessageEbmsIdStep
      *                                        whether ebMS ID generation is enabled
      */
     public ConnectorOutboundMessageEbmsIdStep(
-        ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator,
+        ConnectorMessageEbmsIdGenerator messageEbmsIdGenerator,
         ConnectorMessageRepository messageRepository,
         ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
         this.messageEbmsIdGenerator = messageEbmsIdGenerator;
@@ -66,7 +66,7 @@ public class ConnectorOutboundMessageEbmsIdStep
             );
 
             return this.messageRepository.updateEbmsIdentifier(
-                identifier, messageEbmsIdGenerator.generateIdentifier()
+                identifier, messageEbmsIdGenerator.execute()
             );
         }
 

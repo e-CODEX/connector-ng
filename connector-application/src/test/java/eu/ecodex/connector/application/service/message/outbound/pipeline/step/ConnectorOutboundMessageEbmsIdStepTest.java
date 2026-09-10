@@ -16,10 +16,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
-import eu.ecodex.connector.application.service.message.ConnectorMessageEbmsIdGeneratorService;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ConnectorOutboundMessageEbmsIdStep")
 public class ConnectorOutboundMessageEbmsIdStepTest {
     @Mock
-    private ConnectorMessageEbmsIdGeneratorService messageEbmsIdGenerator;
+    private ConnectorMessageEbmsIdGenerator messageEbmsIdGeneratorService;
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
@@ -64,7 +64,7 @@ public class ConnectorOutboundMessageEbmsIdStepTest {
                                                .ebmsMessageIdentifier(ebmsIdentifier)
                                                .build();
 
-            when(messageEbmsIdGenerator.generateIdentifier()).thenReturn(ebmsIdentifier);
+            when(messageEbmsIdGeneratorService.execute()).thenReturn(ebmsIdentifier);
             when(messageRepository.updateEbmsIdentifier(any(), any()))
                 .thenReturn(outboundMessage.toBuilder().as4Properties(as4Properties).build());
             when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration);

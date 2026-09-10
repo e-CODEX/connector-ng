@@ -17,7 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link ConnectorMessageIdGenerator}.
+ * Default implementation of {@link ConnectorMessageIdGenerator} that generates unique message
+ * identifiers.
  */
 @Slf4j
 @Service

@@ -17,7 +17,7 @@ public interface ConnectorMessageIdGenerator {
     /**
      * Executes the operation to generate a unique message identifier.
      *
-     * @return a string in the format <uuid>@<suffix>, representing the uniquely generated message
+     * @return a string in the format {@code <uuid>@<suffix>}, representing the uniquely generated message
      *     identifier
      */
     String execute();

@@ -16,10 +16,7 @@ import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import java.util.Objects;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -47,54 +44,28 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
+    private final ConnectorRoleRepository repository;
 
-    ConnectorRoleRepository repository;
+    public ConnectorRegisterRoleService(ConnectorRoleRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
-    public ConnectorRole register(ConnectorRole userRole) {
+    public ConnectorRole execute(@Nonnull ConnectorRole userRole) {
         if (userRole.uuid() != null) {
-            throw new ConnectorRoleBadRequestException(
-                "Connector user role id should be blank");
+            throw new ConnectorRoleBadRequestException("Connector user role id should be blank");
         }
-        checkRoleName(null, userRole);
+        validateRoleName(userRole);
         return repository.save(userRole);
     }
 
-    @Override
-    public ConnectorRole update(String identifier, ConnectorRole userRole) {
-        if (identifier == null && userRole.uuid() == null) {
-            throw new ConnectorRoleBadRequestException(
-                "Connector user role id should not be blank");
-        }
-
-        var existingUserRole = repository.findByUuid(identifier)
-            .orElseThrow(() -> new ConnectorRoleNotFoundException(
-                "No existing user role found with id " + identifier));
-
-        checkRoleName(identifier, userRole);
-
-        if (existingUserRole.name().equalsIgnoreCase(userRole.name())) {
-            log.info("Nothing to update");
-            return existingUserRole;
-        }
-        var userBuilder = existingUserRole.toBuilder();
-        userBuilder.name(userRole.name());
-
-        return repository.save(userBuilder.build());
-    }
-
-    private void checkRoleName(String identifier, ConnectorRole userRole) {
+    private void validateRoleName(@Nonnull ConnectorRole userRole) {
         var existingUser = repository.findByName(userRole.name());
-
-        if (existingUser.isPresent() && !Objects.equals(existingUser.get().uuid(), identifier)) {
+        if (existingUser.isPresent()) {
             throw new ConnectorRoleAlreadyExistsException(
                 "Role name '%s' already exists".formatted(userRole.name())
             );
         }
-
     }
-
 }

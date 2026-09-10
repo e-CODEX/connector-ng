@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.port.spi.auth.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import jakarta.annotation.Nonnull;
 
 /**
  * Interface for encoding passwords of {@link ConnectorUser} entities.
@@ -25,7 +26,7 @@ public interface ConnectorUserPasswordEncoder {
      *
      * @return a new {@code ConnectorUser} instance with the encoded password
      */
-    ConnectorUser encodePassword(ConnectorUser user);
+    ConnectorUser encodePassword(@Nonnull ConnectorUser user);
 
     /**
      * Encodes the provided raw password and returns the encoded version.
@@ -34,7 +35,7 @@ public interface ConnectorUserPasswordEncoder {
      *
      * @return the encoded password
      */
-    String encodePassword(String password);
+    String encodePassword(@Nonnull String password);
 
     /**
      * Verifies if the provided password matches the password of the specified user.
@@ -45,5 +46,5 @@ public interface ConnectorUserPasswordEncoder {
      * @return {@code true} if the raw password matches the user's encoded password, otherwise
      *     {@code false}.
      */
-    boolean matches(String rawPassword, String encodedPassword);
+    boolean matches(@Nonnull String rawPassword, @Nonnull String encodedPassword);
 }

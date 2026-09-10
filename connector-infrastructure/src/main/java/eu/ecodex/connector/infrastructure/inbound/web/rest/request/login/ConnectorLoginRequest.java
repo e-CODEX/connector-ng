@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
@@ -22,5 +23,8 @@ import lombok.Builder;
  * - password: The credential associated with the provided username.
  */
 @Builder
-public record ConnectorLoginRequest(String username, String password) {
+public record ConnectorLoginRequest(@NotNull(message = "Username is mandatory")
+                                    String username,
+                                    @NotNull(message = "Password is mandatory")
+                                    String password) {
 }

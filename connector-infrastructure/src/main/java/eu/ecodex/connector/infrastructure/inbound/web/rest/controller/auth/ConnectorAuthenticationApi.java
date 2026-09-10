@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Tag(name = "AuthenticateUser", description = "API for managing connector's users "
     + "authentication")
 public interface ConnectorAuthenticationApi {
-
     @Operation(summary = "Login a connector user.")
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses(value = {
@@ -53,8 +53,7 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
         @ApiResponse(responseCode = "204", description = "Successfully logged in"),
     })
-    ConnectorLoginResponse login(@RequestBody ConnectorLoginRequest connectorLoginRequest);
-
+    ConnectorLoginResponse login(@RequestBody @Valid ConnectorLoginRequest connectorLoginRequest);
 
     @Operation(summary = "Refresh a user token.")
     @PostMapping(path = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -64,7 +63,7 @@ public interface ConnectorAuthenticationApi {
     })
     ConnectorLoginResponse refresh(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-        @RequestBody ConnectorRefreshTokenRequest request);
+        @RequestBody @Valid ConnectorRefreshTokenRequest request);
 
 
     @Operation(summary = "Logout a user token.")
@@ -76,6 +75,5 @@ public interface ConnectorAuthenticationApi {
 
     })
     void logout(@AuthenticationPrincipal ConnectorUserDetails userDetails,
-                @RequestBody ConnectorLogoutRequest request);
-
+                @RequestBody @Valid ConnectorLogoutRequest request);
 }

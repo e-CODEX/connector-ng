@@ -16,17 +16,16 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRefreshTokenJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRoleJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRefreshTokenJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,28 +38,32 @@ import org.springframework.transaction.annotation.Transactional;
  * entities to domain objects and vice versa. It ensures consistency
  * between the domain and persistence layers and includes functionality
  * for saving, retrieving, updating, and deleting ConnectorUser entities.
- *
- * <p>Annotations Used:
- * - {@code @Slf4j}: Enables logging.
- * - {@code @Service}: Indicates that this class is a Spring service component.
- * - {@code @RequiredArgsConstructor}: Generates a constructor with required
- * arguments for dependencies marked as {@code final}.
- * - {@code @FieldDefaults(makeFinal=true, level=AccessLevel.PRIVATE)}: Sets
- * all fields to private final.
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
+    private final ConnectorUserJpaRepository jpaRepository;
+    private final ConnectorUserRoleJpaRepository roleRepository;
+    private final ConnectorUserRefreshTokenJpaRepository refreshTokenRepository;
 
-    ConnectorUserJpaRepository jpaRepository;
-    ConnectorRoleJpaRepository roleRepository;
-    ConnectorRefreshTokenJpaRepository refreshTokenRepository;
+    /**
+     * Constructs an instance of ConnectorUserRepositoryImpl.
+     *
+     * @param jpaRepository          the repository for managing ConnectorUser entities
+     * @param roleRepository         the repository for managing ConnectorRole entities
+     * @param refreshTokenRepository the repository for managing ConnectorRefreshToken entities
+     */
+    public ConnectorUserRepositoryImpl(ConnectorUserJpaRepository jpaRepository,
+                                       ConnectorUserRoleJpaRepository roleRepository,
+                                       ConnectorUserRefreshTokenJpaRepository
+                                           refreshTokenRepository) {
+        this.jpaRepository = jpaRepository;
+        this.roleRepository = roleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+    }
 
     @Override
-    public ConnectorUser save(ConnectorUser domainUser) {
-
+    public ConnectorUser save(@NonNull ConnectorUser domainUser) {
         var existing = jpaRepository.findByUuid(
             domainUser.uuid()); // TODO check if this call could be optimized
 
@@ -75,45 +78,26 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
         return ConnectorUserMapper.toDomain(saved);
     }
 
-
     @Override
-    public Optional<ConnectorUser> findById(Long id) {
-        var found = jpaRepository.findById(id);
-        return found.map(ConnectorUserMapper::toDomain);
+    public Optional<ConnectorUser> findByUuid(@NonNull String identifier) {
+        return jpaRepository.findByUuid(identifier).map(ConnectorUserMapper::toDomain);
     }
 
     @Override
-    public Optional<ConnectorUser> findByUuid(String identifier) {
-        return jpaRepository.findByUuid(identifier)
-            .map(ConnectorUserMapper::toDomain);
-    }
-
-    @Override
-    public Optional<ConnectorUser> findByUsername(String username) {
+    public Optional<ConnectorUser> findByUsername(@NonNull String username) {
         var found = jpaRepository.findByUsername(username);
         return found.map(ConnectorUserMapper::toDomain);
     }
 
     @Override
-    public Optional<ConnectorUser> findByUsernameAndActiveIsTrue(String username) {
-        var found = jpaRepository.findByUsernameAndEnabledIsTrue(username);
+    public Optional<ConnectorUser> findByUsernameAndActive(@NonNull String username,
+                                                           boolean active) {
+        var found = jpaRepository.findByUsernameAndEnabled(username, active);
         return found.map(ConnectorUserMapper::toDomain);
     }
 
     @Override
-    public Optional<ConnectorUser> findByEmail(String email) {
-        var found = jpaRepository.findByEmail(email);
-        return found.map(ConnectorUserMapper::toDomain);
-    }
-
-    @Override
-    public Optional<ConnectorUser> findByUsernameAndEmail(String username, String email) {
-        var found = jpaRepository.findByUsernameAndEmail(username, email);
-        return found.map(ConnectorUserMapper::toDomain);
-    }
-
-    @Override
-    public List<ConnectorUser> findAllWithRoles() {
+    public List<ConnectorUser> findAllUsers() {
         return jpaRepository
             .findAll()
             .stream()
@@ -123,46 +107,46 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
 
     @Override
     @Transactional
-    public void deleteByUuid(String identifier) {
-        var entity = jpaRepository.findByUuid(identifier)
-            .orElseThrow(() -> new ConnectorUserNotFoundException(
-                "No user found by identifier " + identifier));
+    public void deleteByUuid(@Nonnull String identifier) {
+        var entity = jpaRepository.findByUuid(identifier).orElseThrow(
+            () -> new ConnectorUserNotFoundException("No user found by identifier " + identifier));
         refreshTokenRepository.deleteByUser_Uuid(entity.getUuid());
         jpaRepository.delete(entity);
     }
 
     @Override
-    public boolean existsByUuid(String uuid) {
+    public boolean existsByUuid(@Nonnull String uuid) {
         return jpaRepository.existsByUuid(uuid);
     }
 
     @Override
-    public boolean existsByUsername(String username) {
+    public boolean existsByUsername(@Nonnull String username) {
         return jpaRepository.existsByUsername(username);
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public boolean existsByEmail(@Nonnull String email) {
         return jpaRepository.existsByEmail(email);
     }
 
     @Override
-    public boolean existsByEmailAndUuidNot(String email, String identifier) {
+    public boolean existsByEmailAndUuidNot(@NonNull String email, @NonNull String identifier) {
         return jpaRepository.existsByEmailAndUuidNot(email, identifier);
     }
 
     @Override
-    public boolean existsByUsernameAndUuidNot(String username, String identifier) {
+    public boolean existsByUsernameAndUuidNot(@Nonnull String username,
+                                              @Nonnull String identifier) {
         return jpaRepository.existsByUsernameAndUuidNot(username, identifier);
     }
 
 
     /**
-     * Map a domain user into an entity user.
+     * Converts a domain user model into a JPA entity representation.
      *
-     * @param domainUser domain user
+     * @param domainUser the domain-level user object to be converted
      *
-     * @return entity user
+     * @return a {@code ConnectorUserEntity} object representing the JPA entity
      */
     public ConnectorUserEntity toEntity(ConnectorUser domainUser) {
         return ConnectorUserEntity
@@ -172,29 +156,45 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
             .password(domainUser.password())
             .email(domainUser.email())
             .enabled(domainUser.enabled())
-            .roles(toUserRoles(domainUser))
+            .roles(toUserRoles(domainUser.roles()))
             .build();
     }
 
 
+    /**
+     * Converts a domain user model into a JPA entity representation.
+     *
+     * @param entity     the JPA entity to be updated
+     * @param domainUser the domain-level user object to be converted
+     */
     private void toEntity(ConnectorUserEntity entity, ConnectorUser domainUser) {
         entity.setUuid(domainUser.uuid());
         entity.setPassword(domainUser.password());
         entity.setEnabled(domainUser.enabled());
         entity.setUsername(domainUser.username());
         entity.setEmail(domainUser.email());
-        entity.setRoles(toUserRoles(domainUser));
+        entity.setRoles(toUserRoles(domainUser.roles()));
     }
 
-    private Set<ConnectorRoleEntity> toUserRoles(ConnectorUser domainUser) {
-        if (domainUser.roles() == null) {
+    /**
+     * Converts a set of domain-level user roles into a set of JPA role entities.
+     *
+     * @param domainUserRoles the set of {@code ConnectorRole} objects representing the domain user
+     *                        roles to be converted;
+     *                        can be {@code null}.
+     *
+     * @return a {@code Set} of {@code ConnectorRoleEntity} representing the JPA role entities, or
+     *     {@code null}
+     *     if the input is {@code null}.
+     */
+    private Set<ConnectorRoleEntity> toUserRoles(Set<ConnectorRole> domainUserRoles) {
+        if (domainUserRoles == null) {
             return null;
         }
-        var rolesNames = domainUser.roles().stream()
+        var rolesNames = domainUserRoles.stream()
             .map(ConnectorRole::name)
             .collect(Collectors.toUnmodifiableSet());
 
         return roleRepository.findByNameIn(rolesNames);
     }
-
 }

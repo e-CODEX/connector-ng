@@ -14,22 +14,22 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
-import lombok.NonNull;
 import org.springframework.util.CollectionUtils;
-import org.springframework.validation.annotation.Validated;
 
 
 /**
  * Represents a request for creating or updating a user in the connector system.
  */
-@Validated
 @Builder(toBuilder = true)
-public record ConnectorUserRequest(@NonNull
-                                   @NotBlank
+public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
+                                   @NotBlank(message = "Username must not be blank")
                                    String username,
+                                   @NotNull(message = "Password is mandatory")
+                                   @NotBlank(message = "Password must not be blank")
                                    String password,
                                    @Email
                                    String email,

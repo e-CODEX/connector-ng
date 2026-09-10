@@ -12,9 +12,6 @@ package eu.ecodex.connector.application.service.auth.user;
 
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -29,14 +26,15 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRemoveUserService implements ConnectorRemoveUser {
+    private final ConnectorUserRepository repository;
 
-    ConnectorUserRepository repository;
+    public ConnectorRemoveUserService(ConnectorUserRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
-    public void deleteById(String identifier) {
+    public void execute(String identifier) {
         repository.deleteByUuid(identifier);
     }
 }

@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 public class ConnectorAdminUserProperties {
     String username;
     String password;
-    String role;
     String email;
     Boolean enabled;
 
@@ -38,7 +37,6 @@ public class ConnectorAdminUserProperties {
         return this.username == null
                 && this.password == null
                 && this.email == null
-                && this.role == null
                 && this.enabled == null;
     }
 }

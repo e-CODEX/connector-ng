@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.model.user;
 
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 
 /**
@@ -30,11 +31,13 @@ import java.time.Instant;
  * to represent the roles associated with a user.
  */
 public record ConnectorRole(String uuid,
-                            String name,
+                            @NotBlank String name,
                             Instant createdAt,
                             Instant updatedAt) {
 
     public static final String DEFAULT_ADMIN_ROLE = "ROLE_ADMIN";
+    public static final String DEFAULT_USER_ROLE = "ROLE_USER";
+    public static final String DEFAULT_LOAD_TESTER_ROLE = "ROLE_LOAD_TESTER";
 
     public static Builder builder() {
         return new Builder();
@@ -46,10 +49,15 @@ public record ConnectorRole(String uuid,
      * @return Default admin role.
      */
     public static ConnectorRole defaultAdminRole() {
-        return ConnectorRole
-                .builder()
-                .name(DEFAULT_ADMIN_ROLE)
-                .build();
+        return ConnectorRole.builder().name(DEFAULT_ADMIN_ROLE).build();
+    }
+
+    public static ConnectorRole defaultUserRole() {
+        return ConnectorRole.builder().name(DEFAULT_USER_ROLE).build();
+    }
+
+    public static ConnectorRole defaultLoadTesterRole() {
+        return ConnectorRole.builder().name(DEFAULT_LOAD_TESTER_ROLE).build();
     }
 
     public boolean isDefaultAdminRole() {
@@ -61,14 +69,14 @@ public record ConnectorRole(String uuid,
      * of this {@code ConnectorUserRole} instance.
      *
      * @return a {@code Builder} instance containing the fields of the current
-     *         {@code ConnectorUserRole} object.
+     *     {@code ConnectorUserRole} object.
      */
     public Builder toBuilder() {
         return new Builder()
-                .uuid(this.uuid)
-                .name(this.name)
-                .createdAt(this.createdAt)
-                .updatedAt(this.updatedAt);
+            .uuid(this.uuid)
+            .name(this.name)
+            .createdAt(this.createdAt)
+            .updatedAt(this.updatedAt);
 
     }
 

@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorRefreshTokenRepository;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.RefreshTokenCleanupScheduler;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorCleanupRefreshTokenScheduler;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -30,7 +30,7 @@ public class ConnectorRefreshTokenCleanupSchedulerIT extends AbstractIntegration
     private ConnectorRefreshTokenRepository refreshTokenRepository;
 
     @Autowired
-    private RefreshTokenCleanupScheduler refreshTokenCleanupJob;
+    private ConnectorCleanupRefreshTokenScheduler refreshTokenCleanupJob;
 
     @MockitoBean
     private Clock clock;

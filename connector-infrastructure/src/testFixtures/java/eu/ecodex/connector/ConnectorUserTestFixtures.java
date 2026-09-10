@@ -79,6 +79,7 @@ public class ConnectorUserTestFixtures {
         return ConnectorUserRequest.builder()
             .username("test_user")
             .email("test_user@email.com")
+            .password("test_password")
             .build();
     }
 
@@ -86,6 +87,7 @@ public class ConnectorUserTestFixtures {
         return ConnectorUser.builder()
             .username("test_user")
             .email("test_user@email.com")
+            .password("test_password")
             .build();
     }
 

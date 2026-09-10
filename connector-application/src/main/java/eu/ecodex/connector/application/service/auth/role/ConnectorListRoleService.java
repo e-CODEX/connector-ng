@@ -14,9 +14,6 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,14 +29,15 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorListRoleService implements ConnectorListRole {
+    private final ConnectorRoleRepository repository;
 
-    ConnectorRoleRepository repository;
+    public ConnectorListRoleService(ConnectorRoleRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
-    public List<ConnectorRole> findAll() {
+    public List<ConnectorRole> execute() {
         return repository.findAll();
     }
 }

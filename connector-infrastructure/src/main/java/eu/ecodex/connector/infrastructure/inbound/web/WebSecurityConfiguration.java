@@ -14,9 +14,6 @@ import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.infrastructure.outbound.auth.JwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.property.ConnectorCorsProperties;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,17 +33,25 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 /**
- * Configures the security settings for the application. The security settings are configured using
- * Spring Security's {@code SecurityFilterChain}.
+ * Configures the web security for the application, defining security filters, CORs settings,
+ * password encoding, and authentication management.
+ *
+ * <p>This configuration sets up:</p>
+ * - A custom security filter chain integrating JWT authentication.
+ * - Cross-Origin Resource Sharing (CORS) settings based on application properties.
+ * - Stateless session management.
+ * - Role-based access control and endpoint-specific permissions.
+ * - Exception handling for unauthorized and access-denied responses.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class WebSecurityConfiguration {
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    JwtAuthenticationFilter jwtAuthenticationFilter;
+    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     /**
      * Configures the security filter chain for the application by defining HTTP security rules.
@@ -62,9 +67,11 @@ public class WebSecurityConfiguration {
             .httpBasic(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(request -> request
-                .requestMatchers("/api/v1/admin/**")
+                // Specific admin-only
+                .requestMatchers("/api/v1/admin/users/**")
                 .hasRole(ConnectorRoleName.ADMIN.name())
-                .requestMatchers("/api/v1/auth/me")
+                // All authenticated users
+                .requestMatchers("/api/v1/admin/**", "/api/v1/auth/me")
                 .authenticated()
                 .requestMatchers(
                     "/api/v1/attachments/upload",
@@ -91,8 +98,7 @@ public class WebSecurityConfiguration {
                 .anyRequest()
                 .authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter,
-                UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exceptionHandling -> exceptionHandling
@@ -107,7 +113,6 @@ public class WebSecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource(ConnectorCorsProperties corsProperties) {
         var configuration = new CorsConfiguration();
-
         configuration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         configuration.setAllowedMethods(corsProperties.getAllowedMethods());
         configuration.setAllowedHeaders(corsProperties.getAllowedHeaders());

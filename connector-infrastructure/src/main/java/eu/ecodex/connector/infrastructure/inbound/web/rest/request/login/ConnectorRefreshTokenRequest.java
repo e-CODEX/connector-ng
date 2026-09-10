@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
@@ -20,5 +22,8 @@ import lombok.Builder;
  * <p>The {@code refreshToken} field is the token used to refresh the authentication state.
  */
 @Builder
-public record ConnectorRefreshTokenRequest(String refreshToken) {
+public record ConnectorRefreshTokenRequest(
+    @NotNull(message = "Refresh token is mandatory")
+    @NotBlank(message = "Refresh token must not be blank")
+    String refreshToken) {
 }

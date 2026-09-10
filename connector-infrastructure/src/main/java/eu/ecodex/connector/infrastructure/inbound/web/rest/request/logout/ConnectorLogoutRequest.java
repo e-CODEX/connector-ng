@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
@@ -18,5 +19,6 @@ import lombok.Builder;
  * <p>The request carries a token used to log out the user, typically obtained from authentication.
  */
 @Builder
-public record ConnectorLogoutRequest(String refreshToken) {
+public record ConnectorLogoutRequest(@NotNull(message = "Refresh token must not be null")
+                                     String refreshToken) {
 }

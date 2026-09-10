@@ -41,7 +41,7 @@ class ConnectorRetrieveUserIT extends AbstractIntegrationTest {
     @Test
     @Sql({"classpath:sql/user.sql"})
     void getAll_should_succeeded_when_valid_token_is_provided() {
-        var existing = userRepository.findAllWithRoles();
+        var existing = userRepository.findAllUsers();
         assertThat(existing).isNotEmpty();
 
         var response = apiClient.get()

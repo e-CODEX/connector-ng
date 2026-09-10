@@ -19,35 +19,34 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorUserAdminController.class)
 class ConnectorRetrieveUserAdminControllerTest extends AbstractWebMvcTest {
-
     private static final String URL = "/api/v1/admin/users";
-
     @MockitoBean
-    ConnectorRegisterUser registerUser;
-
+    private ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier;
     @MockitoBean
-    ConnectorRetrieveUser retrieveUser;
-
+    private ConnectorRegisterUser connectorRegisterUser;
     @MockitoBean
-    ConnectorRemoveUser removeUser;
-
+    private ConnectorUpdateUser connectorUpdateUser;
     @MockitoBean
-    ConnectorListUser listUser;
+    private ConnectorPatchUser connectorPatchUser;
+    @MockitoBean
+    private ConnectorRemoveUser connectorRemoveUser;
+    @MockitoBean
+    private ConnectorListUser connectorListUser;
 
     @Autowired
     private RestTestClient apiClient;
@@ -58,7 +57,7 @@ class ConnectorRetrieveUserAdminControllerTest extends AbstractWebMvcTest {
         var identifier = "uuid";
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
 
-        when(retrieveUser.getByIdentifier(any())).thenReturn(connectorUser);
+        when(connectorRetrieveUserByIdentifier.execute(any())).thenReturn(connectorUser);
 
         // When
         var response = apiClient.get()
@@ -75,16 +74,16 @@ class ConnectorRetrieveUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
-        verify(retrieveUser).getByIdentifier(identifier);
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser);
+        verify(connectorRetrieveUserByIdentifier).execute(identifier);
+        assertNoMoreInteractions();
     }
 
     @Test
     void getByIdentifier_should_return_404_when_user_not_found() {
         // Given
         var identifier = "uuid";
-
-        when(retrieveUser.getByIdentifier(any())).thenThrow(ConnectorUserNotFoundException.class);
+        when(connectorRetrieveUserByIdentifier.execute(any())).thenThrow(
+            ConnectorUserNotFoundException.class);
 
         // When
         apiClient.get()
@@ -94,34 +93,12 @@ class ConnectorRetrieveUserAdminControllerTest extends AbstractWebMvcTest {
             .isNotFound();
 
         // Then
-        verify(retrieveUser).getByIdentifier(identifier);
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser);
+        verify(connectorRetrieveUserByIdentifier).execute(identifier);
+        assertNoMoreInteractions();
     }
 
-    @Test
-    void getAll_should_return_all_users() {
-        // Given
-        var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
-
-        when(listUser.findAllWithRoles()).thenReturn(List.of(connectorUser));
-
-        // When
-        var response = apiClient.get()
-            .uri(URL)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(new ParameterizedTypeReference<List<ConnectorUserDto>>() {
-            });
-
-        // Then
-        var responseBody = response.getResponseBody();
-        assertThat(responseBody).isNotNull();
-        assertThat(responseBody)
-            .usingRecursiveComparison()
-            .isEqualTo(List.of(ConnectorUserTestFixtures.createUserDto()));
-
-        verify(listUser).findAllWithRoles();
-        verifyNoMoreInteractions(registerUser, retrieveUser, removeUser, listUser);
+    private void assertNoMoreInteractions() {
+        verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
+            connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
     }
 }

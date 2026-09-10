@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.auth;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;

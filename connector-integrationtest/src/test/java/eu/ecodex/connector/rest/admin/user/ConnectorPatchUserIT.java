@@ -49,6 +49,7 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
         var request = ConnectorUserRequest
             .builder()
             .username(username)
+            .password("test-password")
             .enabled(false)
             .build();
 
@@ -101,5 +102,4 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
         var after = userRepository.findByUsername(username);
         assertThat(before).isEqualTo(after);
     }
-
 }

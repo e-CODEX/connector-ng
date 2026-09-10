@@ -11,6 +11,8 @@
 package eu.ecodex.connector.domain.model.auth;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import jakarta.annotation.Nonnull;
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 
 /**
@@ -26,11 +28,11 @@ import java.time.Instant;
  * consistently handle refresh token details within the system.
  */
 public record ConnectorRefreshToken(
-        String token,
-        ConnectorUser user,
-        Instant expiresAt,
-        Instant createdAt,
-        boolean revoked
+    @NotBlank String token,
+    @Nonnull ConnectorUser user,
+    Instant expiresAt,
+    Instant createdAt,
+    boolean revoked
 ) {
 
     public static Builder builder() {
@@ -42,15 +44,15 @@ public record ConnectorRefreshToken(
      * of this {@link ConnectorRefreshToken} instance.
      *
      * @return a {@link Builder} instance initialized with the field values of this
-     *         {@link ConnectorRefreshToken}.
+     *     {@link ConnectorRefreshToken}.
      */
     public Builder toBuilder() {
         return new Builder()
-                .token(token)
-                .user(user)
-                .expiresAt(expiresAt)
-                .createdAt(createdAt)
-                .revoked(revoked);
+            .token(token)
+            .user(user)
+            .expiresAt(expiresAt)
+            .createdAt(createdAt)
+            .revoked(revoked);
     }
 
     /**

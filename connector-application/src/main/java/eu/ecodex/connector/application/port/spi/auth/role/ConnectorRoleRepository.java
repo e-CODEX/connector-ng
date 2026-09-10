@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.port.spi.auth.role;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,9 +29,9 @@ public interface ConnectorRoleRepository {
      * @param user the ConnectorUserRole entity to be saved or updated
      *
      * @return the saved ConnectorUserRole entity, including any modifications or generated
-     *         identifiers
+     *     identifiers
      */
-    ConnectorRole save(ConnectorRole user);
+    ConnectorRole save(@Nonnull ConnectorRole user);
 
     /**
      * Retrieves a ConnectorUserRole entity by its unique UUID.
@@ -38,9 +39,9 @@ public interface ConnectorRoleRepository {
      * @param id the unique identifier (UUID) of the ConnectorUserRole entity to retrieve
      *
      * @return an Optional containing the ConnectorUserRole entity if found, or an empty Optional if
-     *         not found
+     *     not found
      */
-    Optional<ConnectorRole> findByUuid(String id);
+    Optional<ConnectorRole> findByUuid(@Nonnull String id);
 
     /**
      * Searches for a ConnectorUserRole entity by its name.
@@ -48,9 +49,9 @@ public interface ConnectorRoleRepository {
      * @param name the name of the ConnectorUserRole to search for
      *
      * @return an Optional containing the found ConnectorUserRole if it exists, or an empty Optional
-     *         if no entity is found
+     *     if no entity is found
      */
-    Optional<ConnectorRole> findByName(String name);
+    Optional<ConnectorRole> findByName(@Nonnull String name);
 
     /**
      * Retrieves all ConnectorUserRole entities from the repository.
@@ -64,7 +65,7 @@ public interface ConnectorRoleRepository {
      *
      * @param identifier the unique identifier (UUID) of the user role to be deleted
      */
-    void deleteByUuid(String identifier);
+    void deleteByUuid(@Nonnull String identifier);
 
     /**
      * Retrieves a set of {@code ConnectorUserRole} entities whose names match any
@@ -74,5 +75,5 @@ public interface ConnectorRoleRepository {
      *
      * @return a set of {@code ConnectorUserRole} entities matching the provided names
      */
-    Set<ConnectorRole> findByNameIn(Set<String> names);
+    Set<ConnectorRole> findByNameIn(@Nonnull Set<String> names);
 }

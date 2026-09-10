@@ -21,7 +21,8 @@ import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRole;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByIdentifier;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorUpdateRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorRoleDto;
@@ -36,14 +37,16 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorRoleAdminController.class)
 class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
-
     private static final String URL = "/api/v1/admin/users/roles";
 
     @MockitoBean
     ConnectorRegisterRole registerRole;
 
     @MockitoBean
-    ConnectorRetrieveRole retrieveRole;
+    ConnectorUpdateRole updateRole;
+
+    @MockitoBean
+    ConnectorRetrieveRoleByIdentifier retrieveRole;
 
     @MockitoBean
     ConnectorRemoveRole removeRole;
@@ -60,7 +63,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         var roleDto = ConnectorRoleDto.builder().name("new_role").build();
         var role = ConnectorRole.builder().name("new_role").build();
 
-        when(registerRole.register(any())).thenReturn(role);
+        when(registerRole.execute(any())).thenReturn(role);
 
         // When
         var response = apiClient.post()
@@ -77,7 +80,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         assertThat(responseBody).isNotNull();
         assertThat(responseBody).isEqualTo(roleDto);
 
-        verify(registerRole).register(role);
+        verify(registerRole).execute(role);
         assertNoMoreInteractions();
     }
 
@@ -88,7 +91,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         var roleDto = ConnectorRoleDto.builder().name("new_role").build();
         var role = ConnectorRole.builder().name("new_role").build();
 
-        when(registerRole.update(any(), any())).thenReturn(role);
+        when(updateRole.execute(any(), any())).thenReturn(role);
 
         // When
         var response = apiClient.put()
@@ -105,7 +108,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         assertThat(responseBody).isNotNull();
         assertThat(responseBody).isEqualTo(roleDto);
 
-        verify(registerRole).update(identifier, role);
+        verify(updateRole).execute(identifier, role);
         assertNoMoreInteractions();
     }
 
@@ -116,7 +119,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         var roleDto = ConnectorRoleDto.builder().name("new_role").build();
         var role = ConnectorRole.builder().name("new_role").build();
 
-        when(retrieveRole.getById(any())).thenReturn(role);
+        when(retrieveRole.execute(any())).thenReturn(role);
 
         // When
         var response = apiClient.get()
@@ -131,7 +134,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         assertThat(responseBody).isNotNull();
         assertThat(responseBody).isEqualTo(roleDto);
 
-        verify(retrieveRole).getById(identifier);
+        verify(retrieveRole).execute(identifier);
         assertNoMoreInteractions();
     }
 
@@ -140,7 +143,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var identifier = "uuid";
 
-        when(retrieveRole.getById(any())).thenThrow(ConnectorRoleNotFoundException.class);
+        when(retrieveRole.execute(any())).thenThrow(ConnectorRoleNotFoundException.class);
 
         // When
         apiClient.get()
@@ -150,7 +153,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
             .isNotFound();
 
         // Then
-        verify(retrieveRole).getById(identifier);
+        verify(retrieveRole).execute(identifier);
         assertNoMoreInteractions();
     }
 
@@ -161,7 +164,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         var roleDto = ConnectorRoleDto.builder().name("new_role").build();
         var role = ConnectorRole.builder().name("new_role").build();
 
-        when(listRole.findAll()).thenReturn(List.of(role));
+        when(listRole.execute()).thenReturn(List.of(role));
 
         // When
         var response = apiClient.get()
@@ -177,7 +180,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         assertThat(responseBody).isNotNull();
         assertThat(responseBody).usingRecursiveComparison().isEqualTo(List.of(roleDto));
 
-        verify(listRole).findAll();
+        verify(listRole).execute();
         assertNoMoreInteractions();
     }
 
@@ -186,7 +189,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
         // Given
         var identifier = "uuid";
 
-        doNothing().when(removeRole).deleteByIdentifier(any());
+        doNothing().when(removeRole).execute(any());
 
         // When
         apiClient.delete()
@@ -196,7 +199,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
             .isNoContent();
 
         // Then
-        verify(removeRole).deleteByIdentifier(identifier);
+        verify(removeRole).execute(identifier);
         assertNoMoreInteractions();
     }
 

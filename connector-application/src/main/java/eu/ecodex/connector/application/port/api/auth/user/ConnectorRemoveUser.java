@@ -29,5 +29,5 @@ public interface ConnectorRemoveUser {
      * @param identifier the unique identifier of the {@link ConnectorUser} to be deleted; must not
      *                   be null
      */
-    void deleteById(String identifier) throws ConnectorUserNotFoundException;
+    void execute(String identifier) throws ConnectorUserNotFoundException;
 }

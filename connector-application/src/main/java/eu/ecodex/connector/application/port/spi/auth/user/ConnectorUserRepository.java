@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.port.spi.auth.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +25,6 @@ import java.util.Optional;
  * in the Connector system.
  */
 public interface ConnectorUserRepository {
-
     /**
      * Persists a ConnectorUser entity in the persistence layer.
      * The method saves the provided ConnectorUser object and returns the
@@ -35,21 +35,7 @@ public interface ConnectorUserRepository {
      *
      * @return the saved ConnectorUser entity
      */
-    ConnectorUser save(ConnectorUser user);
-
-    /**
-     * Retrieves a ConnectorUser entity by its unique identifier.
-     *
-     * <p>This method queries the persistence layer to find and return a ConnectorUser
-     * wrapped in an Optional. If no user with the given identifier is found, the method
-     * returns an empty Optional.
-     *
-     * @param id the unique identifier of the ConnectorUser to retrieve; must not be null
-     *
-     * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
-     *     exists with the given identifier
-     */
-    Optional<ConnectorUser> findById(Long id);
+    ConnectorUser save(@Nonnull ConnectorUser user);
 
     /**
      * Retrieves a {@code ConnectorUser} entity by its UUID.
@@ -63,7 +49,7 @@ public interface ConnectorUserRepository {
      * @return an {@code Optional} containing the {@code ConnectorUser} if found, or an empty
      *     {@code Optional} if no user exists with the given UUID
      */
-    Optional<ConnectorUser> findByUuid(String identifier);
+    Optional<ConnectorUser> findByUuid(@Nonnull String identifier);
 
     /**
      * Retrieves a ConnectorUser entity based on the provided username.
@@ -77,7 +63,7 @@ public interface ConnectorUserRepository {
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
      *     exists with the given username
      */
-    Optional<ConnectorUser> findByUsername(String username);
+    Optional<ConnectorUser> findByUsername(@Nonnull String username);
 
     /**
      * Retrieves an active ConnectorUser entity based on the provided username.
@@ -87,40 +73,12 @@ public interface ConnectorUserRepository {
      * returns an empty Optional.
      *
      * @param username the username of the ConnectorUser to retrieve; must not be null
+     * @param active   whether the user must be active
      *
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
      *     exists with the given username
      */
-    Optional<ConnectorUser> findByUsernameAndActiveIsTrue(String username);
-
-    /**
-     * Retrieves a ConnectorUser entity based on the provided email.
-     *
-     * <p>This method queries the persistence layer to find and return a ConnectorUser
-     * wrapped in an Optional. If no user with the given email is found, the method
-     * returns an empty Optional.
-     *
-     * @param email the email address of the ConnectorUser to retrieve; must not be null
-     *
-     * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
-     *     exists with the given email
-     */
-    Optional<ConnectorUser> findByEmail(String email);
-
-    /**
-     * Retrieves a {@code ConnectorUser} entity based on the provided username and email.
-     *
-     * <p>This method queries the persistence layer to find and return a {@code ConnectorUser}
-     * wrapped in an {@code Optional}. If no user exists with the given username and email,
-     * the method returns an empty {@code Optional}.
-     *
-     * @param username the username of the {@code ConnectorUser} to retrieve; must not be null
-     * @param email    the email address of the {@code ConnectorUser} to retrieve; must not be null
-     *
-     * @return an {@code Optional} containing the {@code ConnectorUser} if found, or an empty
-     *     {@code Optional} if no user exists with the given username and email
-     */
-    Optional<ConnectorUser> findByUsernameAndEmail(String username, String email);
+    Optional<ConnectorUser> findByUsernameAndActive(@Nonnull String username, boolean active);
 
     /**
      * Retrieves a list of all {@code ConnectorUser} entities.
@@ -132,7 +90,7 @@ public interface ConnectorUserRepository {
      * @return a {@code List} of all {@code ConnectorUser} entities, or an empty {@code List} if no
      *     users exist
      */
-    List<ConnectorUser> findAllWithRoles();
+    List<ConnectorUser> findAllUsers();
 
     /**
      * Deletes the ConnectorUser entity with the specified unique identifier.
@@ -143,7 +101,7 @@ public interface ConnectorUserRepository {
      *
      * @param identifier the unique identifier of the ConnectorUser to delete; must not be null
      */
-    void deleteByUuid(String identifier);
+    void deleteByUuid(@Nonnull String identifier);
 
 
     /**
@@ -154,7 +112,7 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified UUID exists, {@code false}
      *     otherwise
      */
-    boolean existsByUuid(String uuid);
+    boolean existsByUuid(@Nonnull String uuid);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the specified username.
@@ -165,7 +123,7 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified username exists,
      *     {@code false} otherwise
      */
-    boolean existsByUsername(String username);
+    boolean existsByUsername(@Nonnull String username);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the specified email.
@@ -176,7 +134,7 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified email exists,
      *     {@code false} otherwise
      */
-    boolean existsByEmail(String email);
+    boolean existsByEmail(@Nonnull String email);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the given email
@@ -191,7 +149,7 @@ public interface ConnectorUserRepository {
      *     different UUID
      *     than the provided UUID, {@code false} otherwise
      */
-    boolean existsByEmailAndUuidNot(String email, String uuid);
+    boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the specified username
@@ -206,6 +164,5 @@ public interface ConnectorUserRepository {
      *     different UUID
      *     than the provided UUID, {@code false} otherwise
      */
-    boolean existsByUsernameAndUuidNot(String username, String uuid);
-
+    boolean existsByUsernameAndUuidNot(@Nonnull String username, @Nonnull String uuid);
 }

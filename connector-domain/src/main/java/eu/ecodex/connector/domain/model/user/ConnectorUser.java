@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.domain.model.user;
 
+import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +27,9 @@ import java.util.Set;
  */
 public record ConnectorUser(
     String uuid,
+    @NotBlank
     String username,
+    @NotBlank
     String password,
     String email,
     Boolean enabled,
@@ -44,8 +47,7 @@ public record ConnectorUser(
      * @return Default administrator
      */
     public static ConnectorUser defaultAdminUser() {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .username(DEFAULT_ADMIN_USER_NAME)
             .password(DEFAULT_ADMIN_PASSWORD)
             .enabled(true)

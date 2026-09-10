@@ -17,7 +17,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRoleAssignment;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorAssignRole;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorUnassignRole;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,10 @@ class ConnectorRoleAssignmentControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/users/%s/roles";
 
     @MockitoBean
-    ConnectorRegisterRoleAssignment registerRoleAssignment;
+    ConnectorAssignRole connectorAssignRole;
+
+    @MockitoBean
+    ConnectorUnassignRole connectorUnassignRole;
 
     @Autowired
     private RestTestClient apiClient;
@@ -47,7 +51,7 @@ class ConnectorRoleAssignmentControllerTest extends AbstractWebMvcTest {
         var roleUser = "ROLE_USER";
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
 
-        when(registerRoleAssignment.register(any(), any())).thenReturn(connectorUser);
+        when(connectorAssignRole.execute(any(), any())).thenReturn(connectorUser);
 
         // When
         var registeredUser = apiClient.post()
@@ -64,8 +68,8 @@ class ConnectorRoleAssignmentControllerTest extends AbstractWebMvcTest {
         assertThat(registeredUser).isNotNull();
         assertThat(registeredUser.roles()).hasSize(1);
 
-        verify(registerRoleAssignment).register(userIdentifier, roleUser);
-        verifyNoMoreInteractions(registerRoleAssignment);
+        verify(connectorAssignRole).execute(userIdentifier, roleUser);
+        verifyNoMoreInteractions(connectorAssignRole);
     }
 
     @Test
@@ -75,7 +79,7 @@ class ConnectorRoleAssignmentControllerTest extends AbstractWebMvcTest {
         var roleUser = "ROLE_USER";
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
 
-        when(registerRoleAssignment.remove(any(), any())).thenReturn(connectorUser);
+        when(connectorUnassignRole.execute(any(), any())).thenReturn(connectorUser);
 
         // When
         var registeredUser = apiClient.method(HttpMethod.DELETE)
@@ -91,7 +95,7 @@ class ConnectorRoleAssignmentControllerTest extends AbstractWebMvcTest {
         assertThat(registeredUser).isNotNull();
         assertThat(registeredUser.roles()).isNull();
 
-        verify(registerRoleAssignment).remove(userIdentifier, roleUser);
-        verifyNoMoreInteractions(registerRoleAssignment);
+        verify(connectorUnassignRole).execute(userIdentifier, roleUser);
+        verifyNoMoreInteractions(connectorAssignRole);
     }
 }

@@ -48,22 +48,23 @@ class ConnectorPatchMeIT extends AbstractIntegrationTest {
         assertThat(before.get().enabled()).isTrue();
 
         var request = ConnectorUserRequest
-                .builder()
-                .username(username)
-                .enabled(false)
-                .build();
+            .builder()
+            .username(username)
+            .password("password")
+            .enabled(false)
+            .build();
 
         var registeredUser = apiClient
-                .patch()
-                .uri(PATH)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(request)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .returnResult(ConnectorUserDto.class)
-                .getResponseBody();
+            .patch()
+            .uri(PATH)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(request)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .returnResult(ConnectorUserDto.class)
+            .getResponseBody();
 
         assertThat(registeredUser).isNotNull();
         assertThat(registeredUser.username()).isEqualTo(username);
@@ -74,5 +75,4 @@ class ConnectorPatchMeIT extends AbstractIntegrationTest {
         assertThat(after).isNotEmpty();
         assertThat(after.get().enabled()).isFalse();
     }
-
 }

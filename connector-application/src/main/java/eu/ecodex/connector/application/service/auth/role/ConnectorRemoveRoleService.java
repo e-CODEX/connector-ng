@@ -13,10 +13,8 @@ package eu.ecodex.connector.application.service.auth.role;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 
@@ -35,14 +33,15 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRemoveRoleService implements ConnectorRemoveRole {
+    private final ConnectorRoleRepository repository;
 
-    ConnectorRoleRepository repository;
+    public ConnectorRemoveRoleService(ConnectorRoleRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
-    public void deleteByIdentifier(String uuid) {
+    public void execute(@NonNull String uuid) {
         repository.deleteByUuid(uuid);
     }
 }

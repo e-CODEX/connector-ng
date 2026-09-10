@@ -11,19 +11,17 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.auth;
 
 
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorRefreshTokenRepository;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.user.ConnectorUserMapper;
+import jakarta.annotation.Nonnull;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,32 +30,31 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshTokenRepository {
+    private final ConnectorUserRefreshTokenJpaRepository jpaRepository;
+    private final ConnectorUserJpaRepository userRepository;
 
-    ConnectorRefreshTokenJpaRepository jpaRepository;
-    ConnectorUserJpaRepository userRepository;
-
+    public ConnectorRefreshTokenRepositoryImpl(ConnectorUserRefreshTokenJpaRepository jpaRepository,
+                                               ConnectorUserJpaRepository userRepository) {
+        this.jpaRepository = jpaRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
-    public Optional<ConnectorRefreshToken> findByToken(String token) {
+    public Optional<ConnectorRefreshToken> findByToken(@Nonnull String token) {
         return jpaRepository.findByToken(token).map(this::toDomain);
     }
 
     @Override
-    public ConnectorRefreshToken save(ConnectorRefreshToken refreshToken) {
-        var user = userRepository.findByUuid(refreshToken.user().uuid())
-            .orElseThrow();
-
+    public ConnectorRefreshToken save(@Nonnull ConnectorRefreshToken refreshToken) {
+        var user = userRepository.findByUuid(refreshToken.user().uuid()).orElseThrow();
         var saved = jpaRepository.save(toEntity(refreshToken, user));
         return toDomain(saved);
     }
 
     @Override
-    public void delete(ConnectorRefreshToken refreshToken) {
-        var user = userRepository.findByUuid(refreshToken.user().uuid())
-            .orElseThrow();
+    public void delete(@Nonnull ConnectorRefreshToken refreshToken) {
+        var user = userRepository.findByUuid(refreshToken.user().uuid()).orElseThrow();
         jpaRepository.delete(toEntity(refreshToken, user));
     }
 
@@ -69,25 +66,37 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
     }
 
     @Override
-    public int revokeByUserUuid(String uuid) {
+    public int revokeByUserUuid(@Nonnull String uuid) {
         return jpaRepository.revokeAllByUserUuid(uuid);
     }
 
     @Override
-    public int deleteByUserUuid(String uuid) {
+    public int deleteByUserUuid(@Nonnull String uuid) {
         return jpaRepository.deleteByUser_Uuid(uuid);
     }
 
     @Override
-    public int deleteByExpiryDateBefore(Instant expiryDate) {
+    public int deleteByExpiryDateBefore(@Nonnull Instant expiryDate) {
         return jpaRepository.deleteByExpiresAtBefore(expiryDate);
     }
 
     @Override
-    public int deleteByRevokedAndExpiryDateBefore(Instant expiryDate) {
+    public int deleteByRevokedAndExpiryDateBefore(@Nonnull Instant expiryDate) {
         return jpaRepository.deleteByRevokedTrueAndExpiresAtBefore(expiryDate);
     }
 
+    /**
+     * Converts a {@link ConnectorRefreshToken} domain object into a
+     * {@link ConnectorRefreshTokenEntity}.
+     *
+     * @param domain The {@link ConnectorRefreshToken} instance to be converted.
+     *               This represents the domain-level refresh token.
+     * @param user   The {@link ConnectorUserEntity} instance associated with the
+     *               provided refresh token. This represents the entity-level user.
+     *
+     * @return A new {@link ConnectorRefreshTokenEntity} built from the provided
+     *     {@link ConnectorRefreshToken} and {@link ConnectorUserEntity}.
+     */
     private ConnectorRefreshTokenEntity toEntity(ConnectorRefreshToken domain,
                                                  ConnectorUserEntity user) {
         return ConnectorRefreshTokenEntity.builder()
@@ -98,7 +107,15 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
             .build();
     }
 
-
+    /**
+     * Converts a {@link ConnectorRefreshTokenEntity} entity instance to its corresponding
+     * domain model {@link ConnectorRefreshToken}.
+     *
+     * @param entity The {@link ConnectorRefreshTokenEntity} instance to be converted.
+     *               This represents the persistence-level representation of a refresh token.
+     *
+     * @return A {@link ConnectorRefreshToken} instance constructed from the provided entity.
+     */
     private ConnectorRefreshToken toDomain(ConnectorRefreshTokenEntity entity) {
         return ConnectorRefreshToken.builder()
             .token(entity.getToken())

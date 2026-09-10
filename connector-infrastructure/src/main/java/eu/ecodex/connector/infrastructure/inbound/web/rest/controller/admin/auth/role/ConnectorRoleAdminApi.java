@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,7 +41,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RequestMapping(path = "/api/v1/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "AdministrateRoles", description = "API for managing connector's users roles")
 public interface ConnectorRoleAdminApi {
-
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user role.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -59,7 +59,7 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorRoleDto update(@PathVariable("uuid") String identifier,
+    ConnectorRoleDto update(@PathVariable("uuid") @NonNull String identifier,
                             @Valid @RequestBody ConnectorRoleDto userRoleDto);
 
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
@@ -69,7 +69,7 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
     })
-    ConnectorRoleDto getByIdentifier(@PathVariable("uuid") String identifier);
+    ConnectorRoleDto getByIdentifier(@PathVariable("uuid") @NonNull String identifier);
 
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
@@ -87,6 +87,5 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    void deleteByIdentifier(@PathVariable("uuid") String identifier);
-
+    void deleteByIdentifier(@PathVariable("uuid") @NonNull String identifier);
 }

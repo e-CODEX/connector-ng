@@ -39,6 +39,10 @@ public class ConnectorJmsGatewayLinkPublisher
     implements ConnectorMessageEventPublisher<ConnectorMessage> {
     private static final String CONTENT_TYPE_XML = "application/xml";
     private static final String GATEWAY_MESSAGE_TYPE = "submitMessage";
+    private static final String MESSAGE_CONTENT_DESCRIPTION = "messageContent";
+    private static final String ASICS_DESCRIPTION = "ASIC-S";
+    private static final String XML_TOKEN_DESCRIPTION = "tokenXML";
+    private static final String UNKNOWN_DESCRIPTION = "Unknown";
 
     // TODO add unit tests
     private final JmsTemplate jmsTemplate;
@@ -101,8 +105,8 @@ public class ConnectorJmsGatewayLinkPublisher
         mapMessage.setStringProperty(
             "messageId",
             message.as4Properties().ebmsMessageIdentifier() == null
-            ? message.identifier()
-            : message.as4Properties().ebmsMessageIdentifier()
+                ? message.identifier()
+                : message.as4Properties().ebmsMessageIdentifier()
         );
         mapMessage.setStringProperty("originalSender", as4Properties.originalSender());
         mapMessage.setStringProperty("finalRecipient", as4Properties.finalRecipient());
@@ -143,17 +147,6 @@ public class ConnectorJmsGatewayLinkPublisher
     private int buildContent(MapMessage mapMessage, ConnectorBusinessMessage message, int counter)
         throws JMSException {
         var content = message.businessContent();
-        var evidences = message.transportedEvidences();
-
-        if (content == null) {
-            if (evidences != null && !evidences.isEmpty()) {
-                log.debug(
-                    "Message [{}] has no content but has evidences — "
-                        + "treating as confirmation message", message.identifier()
-                );
-            }
-            return counter; // no content payload to write
-        }
 
         counter++;
 
@@ -163,7 +156,7 @@ public class ConnectorJmsGatewayLinkPublisher
             mapMessage,
             counter,
             CONTENT_TYPE_XML,
-            "messageContent",
+            MESSAGE_CONTENT_DESCRIPTION,
             content.xmlContent().name(),
             payload
         );
@@ -233,9 +226,9 @@ public class ConnectorJmsGatewayLinkPublisher
 
     private String describeAttachment(ConnectorAttachmentType type) {
         return switch (type) {
-            case ASICS -> "ASIC-S";
-            case XML_TOKEN -> "tokenXML";
-            default -> "Unknown";
+            case ASICS -> ASICS_DESCRIPTION;
+            case XML_TOKEN -> XML_TOKEN_DESCRIPTION;
+            default -> UNKNOWN_DESCRIPTION;
         };
     }
 

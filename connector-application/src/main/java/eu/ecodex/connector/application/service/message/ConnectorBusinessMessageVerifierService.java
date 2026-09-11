@@ -147,14 +147,6 @@ public class ConnectorBusinessMessageVerifierService implements ConnectorBusines
 
         var as4Properties = message.as4Properties();
 
-        if (as4Properties.service() == null) {
-            throw new IllegalStateException("Service is null");
-        }
-
-        if (as4Properties.action() == null) {
-            throw new IllegalStateException("Action is null");
-        }
-
         try {
 
             var serviceName = as4Properties.service().name();

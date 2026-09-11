@@ -12,20 +12,23 @@ package eu.ecodex.connector.application.service.message.outbound;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessageException;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageAttachmentLinker;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,17 +39,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ConnectorOutboundMessageStagerService")
-public class ConnectorOutboundMessageStagerServiceTest {
+@DisplayName("ConnectorOutboundBusinessMessageStagerService")
+public class ConnectorOutboundBusinessMessageStagerServiceTest {
     @Mock
     private ConnectorMessageEventPublisher<ConnectorBusinessMessage> outboundMessagePipelinePublisher;
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
-    private ConnectorMessageAttachmentRepository attachmentRepository;
+    private ConnectorMessageAttachmentLinker attachmentLinkerService;
 
     @InjectMocks
-    private ConnectorOutboundMessageStagerService outboundMessageStagerService;
+    private ConnectorOutboundBusinessMessageStagerService outboundMessageStagerService;
 
     private ConnectorBusinessMessage createMessage() {
         var message = BusinessMessageTestFixtures.createOutboundMessage();
@@ -63,35 +66,59 @@ public class ConnectorOutboundMessageStagerServiceTest {
     class WhenStagingSucceeds {
         @Test
         void should_stage_the_message_with_its_attachments() {
-            when(messageRepository.save(any())).thenReturn(createMessage());
-            when(attachmentRepository.findByIdentifier(any()))
-                .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-            doNothing().when(attachmentRepository).attachToMessage(any(), any());
+            var message = createMessage();
+            when(messageRepository.save(message)).thenReturn(message);
+            doNothing().when(attachmentLinkerService).execute(any(), any(), any());
 
-            outboundMessageStagerService.execute(createMessage());
+            outboundMessageStagerService.execute(message);
 
-            verify(messageRepository).save(any());
-            verify(attachmentRepository, times(3)).findByIdentifier(any());
-            verify(attachmentRepository, times(3)).attachToMessage(any(), any());
-            verify(attachmentRepository, times(3)).updateType(any(), any());
-            verify(outboundMessagePipelinePublisher).publish(any());
+            verify(messageRepository).save(message);
+            verify(attachmentLinkerService).execute(
+                message.attachments().getFirst().identifier(),
+                message.identifier(),
+                ConnectorAttachmentType.ATTACHMENT
+            );
+            verify(attachmentLinkerService).execute(
+                message.businessContent().xmlContent().identifier(),
+                message.identifier(),
+                ConnectorAttachmentType.BUSINESS_CONTENT
+            );
+            verify(attachmentLinkerService).execute(
+                message.businessContent().businessDocument().attachment().identifier(),
+                message.identifier(),
+                ConnectorAttachmentType.BUSINESS_DOCUMENT
+            );
+            verify(outboundMessagePipelinePublisher).publish(message);
         }
 
         @Test
         void should_stage_the_message_without_attachments() {
-            when(messageRepository.save(any())).thenReturn(
-                createMessage()
-                    .toBuilder()
-                    .attachments(null)
-                    .build()
+            var message = createMessage()
+                .toBuilder()
+                .attachments(null)
+                .build();
+            when(messageRepository.save(message)).thenReturn(message);
+            doNothing().when(attachmentLinkerService).execute(any(), any(), any());
+
+            outboundMessageStagerService.execute(message);
+
+            verify(messageRepository).save(message);
+            verify(attachmentLinkerService).execute(
+                message.businessContent().xmlContent().identifier(),
+                message.identifier(),
+                ConnectorAttachmentType.BUSINESS_CONTENT
             );
-            when(attachmentRepository.findByIdentifier(any()))
-                .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-            doNothing().when(attachmentRepository).attachToMessage(any(), any());
-
-            outboundMessageStagerService.execute(createMessage());
-
-            verify(outboundMessagePipelinePublisher).publish(any());
+            verify(attachmentLinkerService).execute(
+                message.businessContent().businessDocument().attachment().identifier(),
+                message.identifier(),
+                ConnectorAttachmentType.BUSINESS_DOCUMENT
+            );
+            verify(attachmentLinkerService, never()).execute(
+                any(),
+                any(),
+                eq(ConnectorAttachmentType.ATTACHMENT)
+            );
+            verify(outboundMessagePipelinePublisher).publish(message);
         }
     }
 
@@ -105,28 +132,33 @@ public class ConnectorOutboundMessageStagerServiceTest {
                 NullPointerException.class,
                 () -> outboundMessageStagerService.execute(null)
             );
+
+            verifyNoInteractions(
+                outboundMessagePipelinePublisher,
+                messageRepository,
+                attachmentLinkerService
+            );
         }
 
         @Test
         void should_fail_when_an_attachment_is_unknown() {
-            when(messageRepository.save(any())).thenReturn(createMessage());
-            when(attachmentRepository.findByIdentifier(any())).thenReturn(null);
+            var message = createMessage();
+            when(messageRepository.save(message)).thenReturn(message);
+            doThrow(IllegalStateException.class)
+                .when(attachmentLinkerService).execute(any(), any(), any());
 
             assertThrows(
                 IllegalStateException.class,
-                () -> outboundMessageStagerService.execute(createMessage())
+                () -> outboundMessageStagerService.execute(message)
             );
 
-            verify(messageRepository).save(any());
-            verify(attachmentRepository).findByIdentifier(any());
-            verify(attachmentRepository, never()).attachToMessage(any(), any());
-            verify(attachmentRepository, never()).updateType(any(), any());
+            verify(messageRepository).save(message);
+            verify(attachmentLinkerService).execute(any(), any(), any());
+            verifyNoInteractions(outboundMessagePipelinePublisher);
         }
 
         @Test
         void should_fail_when_the_business_document_is_null() {
-            when(messageRepository.save(any())).thenReturn(createMessage());
-
             var message = createMessage()
                 .toBuilder()
                 .businessContent(
@@ -137,13 +169,15 @@ public class ConnectorOutboundMessageStagerServiceTest {
                 )
                 .attachments(null)
                 .build();
+            when(messageRepository.save(message)).thenReturn(message);
 
             assertThrows(
                 ConnectorMessageException.class,
                 () -> outboundMessageStagerService.execute(message)
             );
 
-            verify(messageRepository).save(any());
+            verify(messageRepository).save(message);
+            verifyNoInteractions(attachmentLinkerService, outboundMessagePipelinePublisher);
         }
     }
 }

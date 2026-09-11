@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.jms.publisher.outbound;
+package eu.ecodex.connector.infrastructure.outbound.jms.publisher.inbound;
 
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
@@ -19,20 +19,19 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Event publisher responsible for emitting an outbound message staging events.
+ * Event publisher responsible for emitting an inbound message staging events.
  *
  * <p>This class implements {@link ConnectorMessageEventPublisher} and is used to publish events
- * when a
- * {@link ConnectorBusinessMessage} enters the outbound staging phase.
+ * when a {@link ConnectorBusinessMessage} enters the inbound staging phase.
  */
 @Slf4j
 @Component
-public class ConnectorJmsOutboundMessageStagingPublisher
+public class ConnectorJmsInboundMessageStagingPublisher
     implements ConnectorMessageEventPublisher<ConnectorBusinessMessage> {
     private final JmsTemplate jmsTemplate;
     private final ConnectorQueueProperties queueProperties;
 
-    public ConnectorJmsOutboundMessageStagingPublisher(
+    public ConnectorJmsInboundMessageStagingPublisher(
         JmsTemplate jmsTemplate,
         ConnectorQueueProperties queueProperties) {
         this.jmsTemplate = jmsTemplate;
@@ -41,10 +40,11 @@ public class ConnectorJmsOutboundMessageStagingPublisher
 
     @Override
     public void publish(@NonNull ConnectorBusinessMessage message) {
-        log.info("Submitting message [{}] to outbound message staging queue", message.identifier());
+        log.info("Submitting message [{}] to inbound message staging queue", message.identifier());
 
         this.jmsTemplate.convertAndSend(
-            this.queueProperties.getOutboundMessageStagingQueue(), message
+            this.queueProperties.getInboundMessageStagingQueue(),
+            message
         );
     }
 }

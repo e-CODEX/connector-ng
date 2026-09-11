@@ -8,9 +8,9 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
+package eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound;
 
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageStager;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageStager;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import lombok.extern.slf4j.Slf4j;
@@ -20,28 +20,28 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * JMS listener responsible for handling outbound message staging events.
+ * JMS listener responsible for handling inbound message staging events.
  *
  * <p>This class implements {@link ConnectorEventHandler} and is triggered
- * asynchronously via a JMS queue when an outbound {@link ConnectorBusinessMessage} enters the
+ * asynchronously via a JMS queue when an inbound {@link ConnectorBusinessMessage} enters the
  * staging phase.
  */
 @Slf4j
 @Component
-public class ConnectorJmsOutboundMessageStagingListener
+public class ConnectorJmsInboundMessageStagingListener
     implements ConnectorEventHandler<ConnectorBusinessMessage> {
-    private final ConnectorOutboundBusinessMessageStager messageStager;
+    private final ConnectorInboundBusinessMessageStager messageStager;
 
-    public ConnectorJmsOutboundMessageStagingListener(
-        ConnectorOutboundBusinessMessageStager messageStager) {
+    public ConnectorJmsInboundMessageStagingListener(
+        ConnectorInboundBusinessMessageStager messageStager) {
         this.messageStager = messageStager;
     }
 
     @Override
     @Transactional
-    @JmsListener(destination = "${connector.queues.outbound-message-staging-queue}")
+    @JmsListener(destination = "${connector.queues.inbound-message-staging-queue}")
     public void handle(@NonNull ConnectorBusinessMessage message) {
-        log.info("Entering outbound message [{}] staging process", message.identifier());
+        log.info("Entering inbound message [{}] staging process", message.identifier());
         messageStager.execute(message);
     }
 }

@@ -13,6 +13,7 @@ endif::header[]
 * *Search* -- Filter messages by `business domain`.
 * *Message* -- Missing security validation for incoming business message containers.
 * *Administration* -- REST API endpoints to support the administration portal.
+* *Authentication enabled*  -- REST API endpoints will have to authenticate. An admin account is created by default. Check credentials in properties.
 
 ==== Fixes
 * *Ebms* -- Set the correct message description for `ebms:description` for outbound messages.

@@ -1,0 +1,118 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.outbound.auth.login;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import eu.ecodex.connector.ConnectorUserTestFixtures;
+import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
+import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
+import java.time.Duration;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+
+@ExtendWith(MockitoExtension.class)
+class ConnectorLoginUserServiceTest {
+
+    @Mock
+    AuthenticationManager authenticationManager;
+
+    @Mock
+    ConnectorAuthenticationTokenProvider authenticationTokenProvider;
+
+    @Mock
+    ConnectorRegisterUserRefreshTokenService refreshTokenService;
+
+    @InjectMocks
+    ConnectorLoginUserService service;
+
+    @Test
+    void login_should_succeed() {
+        // Given
+        var username = "test";
+        var password = "password";
+        var principal = ConnectorUserTestFixtures.createUserDetails();
+        var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
+        var authenticatedToken = new UsernamePasswordAuthenticationToken(
+            principal, password, principal.getAuthorities());
+        var token = "refresh-token-abc";
+        var refreshToken = ConnectorRefreshToken.builder()
+            .token(token)
+            .user(connectorUser)
+            .revoked(false)
+            .build();
+        var accessToken = "access-token";
+
+        when(authenticationManager.authenticate(any())).thenReturn(authenticatedToken);
+        when(authenticationTokenProvider.generateAccessToken(any())).thenReturn(accessToken);
+        when(refreshTokenService.execute(any())).thenReturn(refreshToken);
+        when(authenticationTokenProvider.getAccessTokenExpiresIn()).thenReturn(
+            Duration.ofMinutes(1));
+
+        // When
+        var loginResponse = service.execute(username, password);
+
+        // Then
+        assertThat(loginResponse).isNotNull();
+        assertThat(loginResponse.accessToken()).isEqualTo(accessToken);
+        assertThat(loginResponse.refreshToken()).isEqualTo(token);
+        assertThat(loginResponse.expiresIn()).isEqualTo(60L);
+
+        var authCaptor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+        verify(authenticationManager).authenticate(authCaptor.capture());
+        var authCaptorValue = authCaptor.getValue();
+        assertThat(authCaptorValue.getPrincipal()).isEqualTo(username);
+        assertThat(authCaptorValue.getCredentials()).isEqualTo(password);
+
+        verify(authenticationTokenProvider).generateAccessToken(connectorUser);
+        verify(refreshTokenService).execute(connectorUser);
+        verify(authenticationTokenProvider).getAccessTokenExpiresIn();
+        verify(authenticationTokenProvider).getRefreshTokenExpiresIn();
+        verifyNoMoreInteractions(authenticationTokenProvider, refreshTokenService);
+    }
+
+    @Test
+    void login_should_throw_exception_when_authentication_fails() {
+        // Given
+        var username = "test";
+        var password = "password";
+
+        when(authenticationManager.authenticate(any())).thenThrow(
+            InsufficientAuthenticationException.class);
+
+        // When
+        assertThrows(
+            ConnectorUserBadCredentialsException.class, () -> service.execute(username, password));
+
+        // Then
+        var authCaptor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);
+        verify(authenticationManager).authenticate(authCaptor.capture());
+        var authCaptorValue = authCaptor.getValue();
+        assertThat(authCaptorValue.getPrincipal()).isEqualTo(username);
+        assertThat(authCaptorValue.getCredentials()).isEqualTo(password);
+
+        verifyNoMoreInteractions(authenticationTokenProvider, refreshTokenService);
+    }
+}

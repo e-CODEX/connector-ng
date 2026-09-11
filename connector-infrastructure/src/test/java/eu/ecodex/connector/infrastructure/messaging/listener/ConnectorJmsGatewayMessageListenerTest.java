@@ -10,69 +10,56 @@
 
 package eu.ecodex.connector.infrastructure.messaging.listener;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.BusinessMessageTestFixtures;
-import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageCommand;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageCommand;
+import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
-import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
+import eu.ecodex.connector.domain.ConnectorDefaults;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageListener;
 import eu.ecodex.connector.infrastructure.messaging.BaseJmsMessageTest;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+@SuppressWarnings("DataFlowIssue")
 @DisplayName("ConnectorJmsGatewayMessageListener")
 public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
     @Mock
-    private ConnectorMessageRepository messageRepository;
-    @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
-    @Mock
-    private ConnectorMessageEvidenceRepository evidenceRepository;
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
     @Mock
-    private ConnectorMessageEventPublisher<ConnectorBusinessMessage> inboundMessagePipelinePublisher;
+    private ConnectorInboundBusinessMessageReceiver inboundMessageReceiverService;
     @Mock
-    private ConnectorMessageIdGenerator messageIdGeneratorService;
-    @Mock
-    private ConnectorMessageEventPublisher<ConnectorEvidenceMessage> inboundEvidenceTriggerPublisher;
+    private ConnectorInboundEvidenceMessageReceiver inboundEvidenceReceiverService;
     @Mock
     private MapMessage message;
 
+    @InjectMocks
     private ConnectorJmsGatewayMessageListener listener;
-
-    @BeforeEach
-    void setUp() {
-        listener = new ConnectorJmsGatewayMessageListener(
-            messageRepository,
-            attachmentRepository,
-            evidenceRepository,
-            fileStorageProvider,
-            inboundMessagePipelinePublisher,
-            messageIdGeneratorService,
-            inboundEvidenceTriggerPublisher
-        );
-    }
 
     private void stubValidHeader(MapMessage msg, int payloadCount) throws JMSException {
         when(msg.getStringProperty("messageType"))
@@ -122,14 +109,10 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             .thenReturn("bob");
     }
 
-    private void stubMessagePersistence() {
-        when(messageRepository.save(any()))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-        when(messageRepository.findByIdentifier(any()))
-            .thenReturn(BusinessMessageTestFixtures.createInboundMessage());
+    private void stubAttachmentPersistence() {
         when(attachmentRepository.save(any()))
             .thenAnswer(invocation -> invocation.getArgument(0));
-        when(fileStorageProvider.save(any(), (byte[]) any()))
+        when(fileStorageProvider.save(any(), any(byte[].class)))
             .thenReturn(anyString());
     }
 
@@ -137,12 +120,32 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
     @DisplayName("message validation")
     class MessageValidation {
         @Test
+        void should_reject_null_jms_message() {
+            assertThatThrownBy(() -> listener.handle(null))
+                .isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
+        }
+
+        @Test
         void should_reject_message_with_invalid_message_type() throws JMSException {
             when(message.getStringProperty("messageType"))
                 .thenReturn("outgoingMessage");
 
             assertThatThrownBy(() -> listener.handle(message))
                 .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
         }
 
         @Test
@@ -154,6 +157,13 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
 
             assertThatThrownBy(() -> listener.handle(message))
                 .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
         }
 
         @Test
@@ -169,10 +179,37 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
 
             assertThatThrownBy(() -> listener.handle(message))
                 .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
         }
 
         @Test
-        void should_reject_message_without_business_content_or_evidence() throws JMSException {
+        void should_reject_message_with_missing_payload_description() throws JMSException {
+            stubValidHeader(message, 1);
+            stubAS4Properties(message);
+
+            when(message.getStringProperty("payload_1_description"))
+                .thenReturn("");
+
+            assertThatThrownBy(() -> listener.handle(message))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Missing description for payload at index 1");
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
+        }
+
+        @Test
+        void should_reject_message_without_transported_evidence() throws JMSException {
             stubValidHeader(message, 1);
             stubAS4Properties(message);
 
@@ -181,13 +218,16 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             when(message.getBytes("payload_1"))
                 .thenReturn(new byte[]{1, 2, 3});
 
-            when(attachmentRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-            when(fileStorageProvider.save(any(), (byte[]) any()))
-                .thenReturn(anyString());
+            stubAttachmentPersistence();
 
             assertThatThrownBy(() -> listener.handle(message))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Incoming message requires at least one transported evidence");
+
+            verifyNoInteractions(
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
         }
 
         @ParameterizedTest
@@ -218,6 +258,13 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
 
             assertThatThrownBy(() -> listener.handle(message))
                 .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
         }
 
         @ParameterizedTest
@@ -258,6 +305,13 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
 
             assertThatThrownBy(() -> listener.handle(message))
                 .isInstanceOf(IllegalArgumentException.class);
+
+            verifyNoInteractions(
+                attachmentRepository,
+                fileStorageProvider,
+                inboundMessageReceiverService,
+                inboundEvidenceReceiverService
+            );
         }
     }
 
@@ -287,19 +341,61 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
                                                                              + ".xml");
             when(message.getBytes("payload_4")).thenReturn("<evidence/>".getBytes());
 
-            when(messageIdGeneratorService.execute()).thenReturn(
-                "184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu");
+            stubAttachmentPersistence();
 
-            when(messageRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-            when(messageRepository.findByIdentifier(any())).thenReturn(BusinessMessageTestFixtures.createInboundMessage());
-            when(attachmentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-            when(fileStorageProvider.save(any(), (byte[]) any())).thenReturn(anyString());
-
-            // Should complete without throwing; the unknown payload is silently skipped
             assertThatNoException().isThrownBy(() -> listener.handle(message));
 
-            verify(inboundEvidenceTriggerPublisher, never()).publish(any());
-            verify(inboundMessagePipelinePublisher).publish(any());
+            var captor = ArgumentCaptor.forClass(ConnectorInboundBusinessMessageCommand.class);
+            verify(inboundMessageReceiverService).execute(captor.capture());
+
+            var command = captor.getValue();
+            assertThat(command).isNotNull();
+            assertThat(command.businessDomainIdentifier())
+                .isEqualTo(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID);
+            assertThat(command.gatewayName())
+                .isEqualTo(ConnectorDefaults.DEFAULT_GATEWAY_NAME);
+            assertThat(command.as4Properties()).isNotNull();
+            assertThat(command.as4Properties().ebmsMessageIdentifier())
+                .isEqualTo("9a855348-4ed7-11f1-815b-c6ceea70fe39@domibus.eu");
+            assertThat(command.businessContent()).isNotNull();
+            assertThat(command.businessContent().xmlContent().name()).isEqualTo("Form_A.xml");
+            assertThat(command.businessContent().xmlContent().type())
+                .isEqualTo(ConnectorAttachmentType.BUSINESS_CONTENT);
+            assertThat(command.attachments()).hasSize(2);
+            assertThat(command.transportedEvidences()).hasSize(1);
+            assertThat(command.transportedEvidences().getFirst().type())
+                .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
+
+            verify(inboundEvidenceReceiverService, never()).execute(any());
+            verify(attachmentRepository, times(3)).save(any());
+            verify(fileStorageProvider, times(3)).save(any(), any(byte[].class));
+        }
+
+        @Test
+        void should_use_fallback_name_when_payload_name_is_blank() throws JMSException {
+            stubValidHeader(message, 2);
+            stubAS4Properties(message);
+
+            when(message.getStringProperty("payload_1_description")).thenReturn("messageContent");
+            when(message.getStringProperty("payload_1_name")).thenReturn(null);
+            when(message.getBytes("payload_1")).thenReturn("<xml/>".getBytes());
+
+            when(message.getStringProperty("payload_2_description")).thenReturn(
+                ConnectorEvidenceType.SUBMISSION_ACCEPTANCE.name());
+            when(message.getStringProperty("payload_2_name")).thenReturn(null);
+            when(message.getBytes("payload_2")).thenReturn("<evidence/>".getBytes());
+
+            stubAttachmentPersistence();
+
+            assertThatNoException().isThrownBy(() -> listener.handle(message));
+
+            var captor = ArgumentCaptor.forClass(ConnectorInboundBusinessMessageCommand.class);
+            verify(inboundMessageReceiverService).execute(captor.capture());
+
+            var command = captor.getValue();
+            assertThat(command.businessContent().xmlContent().name()).isEqualTo("messagecontent");
+
+            verify(inboundEvidenceReceiverService, never()).execute(any());
         }
 
         @Test
@@ -350,20 +446,15 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             when(message.getBytes("payload_5"))
                 .thenReturn(new byte[]{9});
 
-            when(messageIdGeneratorService.execute())
-                .thenReturn(
-                    "c46d418b-3dd2-4d3c-933f-ea50db1156ba@connector.ecodex.eu"
-                );
-
-            stubMessagePersistence();
+            stubAttachmentPersistence();
 
             assertThatNoException()
                 .isThrownBy(() -> listener.handle(message));
 
-            verify(inboundMessagePipelinePublisher)
-                .publish(any());
-            verify(inboundEvidenceTriggerPublisher, never())
-                .publish(any());
+            verify(inboundMessageReceiverService).execute(any());
+            verify(inboundEvidenceReceiverService, never()).execute(any());
+            verify(attachmentRepository, times(3)).save(any());
+            verify(fileStorageProvider, times(3)).save(any(), any(byte[].class));
         }
     }
 
@@ -382,20 +473,27 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             when(message.getBytes("payload_1"))
                 .thenReturn("<evidence/>".getBytes());
 
-            when(messageIdGeneratorService.execute())
-                .thenReturn(
-                    "184b4564-72b2-4fe3-b5ce-6eaf93a1b7a7@connector.ecodex.eu"
-                );
-
             assertThatNoException()
                 .isThrownBy(() -> listener.handle(message));
 
-            verify(inboundEvidenceTriggerPublisher)
-                .publish(any());
-            verify(inboundMessagePipelinePublisher, never())
-                .publish(any());
-            verify(messageRepository, never())
-                .save(any());
+            var captor = ArgumentCaptor.forClass(ConnectorInboundEvidenceMessageCommand.class);
+            verify(inboundEvidenceReceiverService).execute(captor.capture());
+
+            var command = captor.getValue();
+            assertThat(command).isNotNull();
+            assertThat(command.businessDomainIdentifier())
+                .isEqualTo(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID);
+            assertThat(command.gatewayName())
+                .isEqualTo(ConnectorDefaults.DEFAULT_GATEWAY_NAME);
+            assertThat(command.as4Properties()).isNotNull();
+            assertThat(command.as4Properties().ebmsMessageIdentifier())
+                .isEqualTo("9a855348-4ed7-11f1-815b-c6ceea70fe39@domibus.eu");
+            assertThat(command.transportedEvidences()).hasSize(1);
+            assertThat(command.transportedEvidences().getFirst().type())
+                .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
+
+            verify(inboundMessageReceiverService, never()).execute(any());
+            verifyNoInteractions(attachmentRepository, fileStorageProvider);
         }
     }
 }

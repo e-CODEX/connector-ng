@@ -11,9 +11,9 @@
 package eu.ecodex.connector.application.service.message.outbound;
 
 import eu.ecodex.connector.application.exception.ConnectorMessageException;
-import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundMessageStager;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageAttachmentLinker;
+import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageStager;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
@@ -27,18 +27,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorOutboundMessageStager} service.
- *
- * <p>This service stages an outbound {@link ConnectorBusinessMessage} by:
- * <ol>
- *     <li>Persisting the message entity</li>
- *     <li>Associating existing attachments with the persisted message</li>
- *     <li>Persisting the business content and linking its business document</li>
- * </ol>
+ * Implementation of the {@link ConnectorOutboundBusinessMessageStager} service.
  *
  * <p>The staging operation is executed within a transactional boundary to ensure
- * atomicity. If any step fails (e.g. a referenced attachment does not exist),
- * the entire operation is rolled back.
+ * atomicity. If any step fails (e.g., a referenced attachment does not exist), the entire operation
+ * is rolled back.
  *
  * <p>After successful staging, the message is expected to be forwarded to the
  * outbound processing pipeline.
@@ -46,11 +39,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional
-public class ConnectorOutboundMessageStagerService implements ConnectorOutboundMessageStager {
+public class ConnectorOutboundBusinessMessageStagerService
+    implements ConnectorOutboundBusinessMessageStager {
     private final ConnectorMessageEventPublisher<ConnectorBusinessMessage>
         outboundMessagePipelinePublisher;
     private final ConnectorMessageRepository messageRepository;
-    private final ConnectorMessageAttachmentRepository attachmentRepository;
+    private final ConnectorMessageAttachmentLinker attachmentLinkerService;
 
     /**
      * Creates a new {@code ConnectorOutboundMessageStagerService}.
@@ -60,17 +54,18 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
      *                                         outbound processing pipeline
      * @param messageRepository                repository used to persist
      *                                         {@link ConnectorBusinessMessage} entities
-     * @param attachmentRepository             repository used to resolve and associate
-     *                                         {@link ConnectorMessageAttachment} entities
+     * @param attachmentLinkerService          linker service used to associate
+     *                                         {@link ConnectorMessageAttachment} entities to
+     *                                         {@link ConnectorBusinessMessage} entities
      */
-    public ConnectorOutboundMessageStagerService(
+    public ConnectorOutboundBusinessMessageStagerService(
         @Qualifier("connectorJmsOutboundMessagePipelinePublisher")
         ConnectorMessageEventPublisher<ConnectorBusinessMessage> outboundMessagePipelinePublisher,
         ConnectorMessageRepository messageRepository,
-        ConnectorMessageAttachmentRepository attachmentRepository) {
+        ConnectorMessageAttachmentLinker attachmentLinkerService) {
         this.outboundMessagePipelinePublisher = outboundMessagePipelinePublisher;
         this.messageRepository = messageRepository;
-        this.attachmentRepository = attachmentRepository;
+        this.attachmentLinkerService = attachmentLinkerService;
     }
 
     @Override
@@ -88,29 +83,12 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
         List<ConnectorMessageAttachment> attachments, String messageIdentifier) {
         if (attachments != null) {
             attachments.forEach(
-                attachment -> attachAttachment(
-                    attachment, messageIdentifier, ConnectorAttachmentType.ATTACHMENT));
+                attachment -> attachmentLinkerService.execute(
+                    attachment.identifier(),
+                    messageIdentifier,
+                    ConnectorAttachmentType.ATTACHMENT
+                ));
         }
-    }
-
-    private void attachAttachment(
-        ConnectorMessageAttachment attachment, String messageIdentifier,
-        ConnectorAttachmentType attachmentType) {
-        var attachmentIdentifier = attachment.identifier();
-        var existingAttachment = this.attachmentRepository.findByIdentifier(attachmentIdentifier);
-
-        if (existingAttachment == null) {
-            // TODO send back failed evidence message
-            throw new IllegalStateException(
-                "Attachment [%s] not found for the message [%s]".formatted(
-                    attachmentIdentifier,
-                    messageIdentifier
-                )
-            );
-        }
-
-        this.attachmentRepository.attachToMessage(attachmentIdentifier, messageIdentifier);
-        this.attachmentRepository.updateType(attachmentIdentifier, attachmentType);
     }
 
     private void persistBusinessDocument(
@@ -125,14 +103,14 @@ public class ConnectorOutboundMessageStagerService implements ConnectorOutboundM
             throw new ConnectorMessageException("Business document is required");
         }
 
-        attachAttachment(
-            businessContent.xmlContent(),
+        attachmentLinkerService.execute(
+            businessContent.xmlContent().identifier(),
             messageIdentifier,
             ConnectorAttachmentType.BUSINESS_CONTENT
         );
 
-        attachAttachment(
-            businessDocument.attachment(),
+        attachmentLinkerService.execute(
+            businessDocument.attachment().identifier(),
             messageIdentifier,
             ConnectorAttachmentType.BUSINESS_DOCUMENT
         );

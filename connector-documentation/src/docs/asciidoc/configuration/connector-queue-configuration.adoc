@@ -43,6 +43,11 @@ Configuration is provided via `application.properties` under the `connector.queu
 | Yes
 | By default, set to `connector.queues.outbound-evidence-trigger-queue`
 
+| `connector.queues.inbound-message-staging-queue`
+| JMS queue name where inbound messages are first staged/buffered before being picked up for further processing (e.g., signing verification ...) on their way out to the backend.
+| Yes
+| By default, set to `connector.queues.inbound-message-staging-queue`
+
 | `connector.queues.inbound-message-processing-queue`
 | JMS queue name used to process incoming messages received from the gateway before delivery to the backend.
 | Yes
@@ -66,6 +71,7 @@ Configuration is provided via `application.properties` under the `connector.queu
 connector.queues.outbound-message-staging-queue=connector.queues.outbound-message-staging-queue
 connector.queues.outbound-message-processing-queue=connector.queues.outbound-message-processing-queue
 connector.queues.outbound-evidence-trigger-queue=connector.queues.outbound-evidence-trigger-queue
+connector.queues.inbound-message-staging-queue=connector.queues.inbound-message-staging-queue
 connector.queues.inbound-message-processing-queue=connector.queues.inbound-message-processing-queue
 connector.queues.inbound-evidence-trigger-queue=connector.queues.inbound-evidence-trigger-queue
 connector.queues.backend-delivery-queue=connector.queues.backend-delivery-queue

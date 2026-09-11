@@ -23,7 +23,7 @@ import jakarta.annotation.Nonnull;
  * <p>Implementations may store the message temporarily, update its processing state, or perform
  * additional preparation logic required by the connector pipeline.
  */
-public interface ConnectorOutboundMessageStager {
+public interface ConnectorOutboundBusinessMessageStager {
     /**
      * Stages the given {@link ConnectorBusinessMessage}.
      *

@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Optional;
@@ -65,7 +65,7 @@ class ConnectorRegisterRoleServiceTest {
 
         // When
         // Then
-        assertThrows(ConnectorRoleBadRequestException.class, () -> service.execute(role));
+        assertThrows(ConnectorRoleIdentifierException.class, () -> service.execute(role));
         verifyNoMoreInteractions(roleRepository);
     }
 

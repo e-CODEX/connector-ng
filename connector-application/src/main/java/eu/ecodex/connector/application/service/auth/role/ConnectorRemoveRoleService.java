@@ -41,7 +41,7 @@ public class ConnectorRemoveRoleService implements ConnectorRemoveRole {
     }
 
     @Override
-    public void execute(@NonNull String uuid) {
-        repository.deleteByUuid(uuid);
+    public void execute(@NonNull String roleIdentifier) {
+        repository.deleteByUuid(roleIdentifier);
     }
 }

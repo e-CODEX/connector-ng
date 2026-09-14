@@ -21,8 +21,8 @@ import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserService;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserImpl;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +43,10 @@ import tools.jackson.databind.ObjectMapper;
 class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
 
     @MockitoBean
-    ConnectorLogoutUserService logoutUserService;
+    ConnectorLogoutUserImpl logoutUserService;
 
     @MockitoBean
-    ConnectorLoginUserService loginUserService;
+    ConnectorLoginUserImpl loginUserService;
 
     @MockitoBean
     ConnectorRefreshUserRefreshTokenService userTokenService;

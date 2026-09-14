@@ -8,13 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
-import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
@@ -39,17 +38,18 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class JwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
-   private final JwtService jwtTokenService;
-   private final JwtProperties jwtProperties;
+public class ConnectorJwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
+    private final ConnectorJwtTokenHelper jwtTokenService;
+    private final JwtProperties jwtProperties;
 
-    public JwtAuthenticationProvider(JwtService jwtTokenService, JwtProperties jwtProperties) {
+    public ConnectorJwtAuthenticationProvider(ConnectorJwtTokenHelper jwtTokenService,
+                                              JwtProperties jwtProperties) {
         this.jwtTokenService = jwtTokenService;
         this.jwtProperties = jwtProperties;
     }
 
     @Override
-    public String generateAccessToken(@Nonnull ConnectorUser connectorUser) {
+    public String generateAccessToken(@NonNull ConnectorUser connectorUser) {
         var user = new ConnectorUserDetails(connectorUser);
         return jwtTokenService.generateAccessToken(user);
     }

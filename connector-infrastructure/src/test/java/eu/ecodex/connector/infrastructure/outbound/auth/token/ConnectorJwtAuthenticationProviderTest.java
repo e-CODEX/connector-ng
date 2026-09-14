@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,16 +32,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class JwtAuthenticationProviderTest {
+class ConnectorJwtAuthenticationProviderTest {
 
     @Mock
-    JwtService jwtService;
+    ConnectorJwtTokenHelper jwtService;
 
     @Mock
     JwtProperties jwtProperties;
 
     @InjectMocks
-    JwtAuthenticationProvider jwtProvider;
+    ConnectorJwtAuthenticationProvider jwtProvider;
 
     @Test
     void generateToken_should_return_token() {

@@ -53,10 +53,10 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConnectorLogoutUserService implements ConnectorLogoutUser {
+public class ConnectorLogoutUserImpl implements ConnectorLogoutUser {
     private final ConnectorRevokeUserRefreshToken revokeTokenService;
 
-    public ConnectorLogoutUserService(ConnectorRevokeUserRefreshTokenService revokeTokenService) {
+    public ConnectorLogoutUserImpl(ConnectorRevokeUserRefreshTokenService revokeTokenService) {
         this.revokeTokenService = revokeTokenService;
     }
 

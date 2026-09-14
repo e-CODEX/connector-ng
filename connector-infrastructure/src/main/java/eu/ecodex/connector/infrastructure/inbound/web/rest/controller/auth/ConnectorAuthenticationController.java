@@ -18,8 +18,8 @@ import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserService;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserImpl;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserImpl;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -50,7 +50,7 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
      * Constructs a {@code ConnectorAuthenticationController} with the necessary services for
      * handling user authentication, refreshing tokens, and logging out.
      *
-     * @param loginUserService        The {@link ConnectorLoginUserService} responsible for
+     * @param loginUserService        The {@link ConnectorLoginUserImpl} responsible for
      *                                managing
      *                                user login operations, including credential validation
      *                                and token
@@ -60,14 +60,14 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
      *                                user
      *                                token refresh operations, ensuring the access token
      *                                remains valid.
-     * @param logoutUserService       The {@link ConnectorLogoutUserService} handling logout
+     * @param logoutUserService       The {@link ConnectorLogoutUserImpl} handling logout
      *                                functionality,
      *                                including revoking user refresh tokens.
      */
     public ConnectorAuthenticationController(
         ConnectorLoginUser loginUserService,
         ConnectorRefreshUserRefreshToken refreshUserTokenService,
-        ConnectorLogoutUserService logoutUserService) {
+        ConnectorLogoutUserImpl logoutUserService) {
         this.loginUserService = loginUserService;
         this.refreshUserTokenService = refreshUserTokenService;
         this.logoutUserService = logoutUserService;

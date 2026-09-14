@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
@@ -26,10 +26,10 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Service
-public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
+public class ConnectorUserPasswordEncoderImpl implements ConnectorUserPasswordEncoder {
     private final PasswordEncoder passwordEncoder;
 
-    public PasswordEncoderService(PasswordEncoder passwordEncoder) {
+    public ConnectorUserPasswordEncoderImpl(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 

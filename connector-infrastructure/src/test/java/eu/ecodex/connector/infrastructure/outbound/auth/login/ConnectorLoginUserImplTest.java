@@ -34,7 +34,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorLoginUserServiceTest {
+class ConnectorLoginUserImplTest {
 
     @Mock
     AuthenticationManager authenticationManager;
@@ -46,7 +46,7 @@ class ConnectorLoginUserServiceTest {
     ConnectorRegisterUserRefreshTokenService refreshTokenService;
 
     @InjectMocks
-    ConnectorLoginUserService service;
+    ConnectorLoginUserImpl service;
 
     @Test
     void login_should_succeed() {

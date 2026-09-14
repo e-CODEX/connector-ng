@@ -39,9 +39,9 @@ public class ConnectorRegisterUserRefreshTokenService implements ConnectorRegist
     /**
      * Constructs a new instance of {@link ConnectorRegisterUserRefreshTokenService}.
      *
-     * @param repository The repository for managing refresh tokens.
+     * @param repository                  The repository for managing refresh tokens.
      * @param authenticationTokenProvider The provider for generating access tokens.
-     * @param clock The clock used for time-related operations.
+     * @param clock                       The clock used for time-related operations.
      */
     public ConnectorRegisterUserRefreshTokenService(
         ConnectorRefreshTokenRepository repository,

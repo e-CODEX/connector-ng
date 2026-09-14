@@ -10,7 +10,8 @@
 
 package eu.ecodex.connector.application.port.spi.auth.login;
 
-import jakarta.annotation.Nonnull;
+
+import org.jspecify.annotations.NonNull;
 
 /**
  * Interface for handling user logout functionality in the connector system.
@@ -24,5 +25,5 @@ public interface ConnectorLogoutUser {
      * @param userId       the identifier of the user initiating the logout
      * @param refreshToken the refresh token to be invalidated
      */
-    void execute(@Nonnull String userId, @Nonnull String refreshToken);
+    void execute(@NonNull String userId, @NonNull String refreshToken);
 }

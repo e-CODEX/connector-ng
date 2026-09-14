@@ -15,8 +15,8 @@ import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -41,7 +41,7 @@ public class ConnectorRetrieveUserByIdentifierService implements ConnectorRetrie
     }
 
     @Override
-    public ConnectorUser execute(@NonNull String identifier) throws ConnectorUserNotFoundException {
+    public ConnectorUser execute(@NonNull String identifier) {
         return repository.findByUuid(identifier).orElseThrow(
             () -> new ConnectorUserNotFoundException(
                 String.format("No user found by identifier %s", identifier)));

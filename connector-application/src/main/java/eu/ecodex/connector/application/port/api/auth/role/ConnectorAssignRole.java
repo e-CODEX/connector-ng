@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.port.api.auth.role;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Defines a contract for assigning user roles within the Connector system.
@@ -22,15 +22,13 @@ public interface ConnectorAssignRole {
     /**
      * Executes the role assignment process for a given user identifier and role.
      *
-     * @param identifier The unique identifier of the user.
-     * @param role       The role to be assigned to the user.
+     * @param userIdentifier The unique identifier of the user.
+     * @param roleName       The role to be assigned to the user.
      *
      * @return The updated {@link ConnectorUser} instance after role assignment.
      *
      * @throws ConnectorRoleNotFoundException If the specified role is not found.
      * @throws ConnectorUserNotFoundException If the specified user is not found.
      */
-    ConnectorUser execute(@Nonnull String identifier, @Nonnull String role)
-        throws ConnectorRoleNotFoundException,
-        ConnectorUserNotFoundException;
+    ConnectorUser execute(@NonNull String userIdentifier, @NonNull String roleName);
 }

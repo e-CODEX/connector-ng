@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import lombok.NonNull;
@@ -33,17 +32,15 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConnectorUserDetailsService implements UserDetailsService {
+public class ConnectorUserDetailsServiceImpl implements UserDetailsService {
     private final ConnectorRetrieveUserByUsername retrieveUserByUsername;
 
-    public ConnectorUserDetailsService(ConnectorRetrieveUserByUsername retrieveUserByUsername) {
+    public ConnectorUserDetailsServiceImpl(ConnectorRetrieveUserByUsername retrieveUserByUsername) {
         this.retrieveUserByUsername = retrieveUserByUsername;
     }
 
     @Override
-    public @NonNull UserDetails loadUserByUsername(@NonNull String username)
-        throws ConnectorUserNotFoundException {
-
+    public @NonNull UserDetails loadUserByUsername(@NonNull String username) {
         var connectorUser = retrieveUserByUsername.execute(username);
         return new ConnectorUserDetails(connectorUser);
     }

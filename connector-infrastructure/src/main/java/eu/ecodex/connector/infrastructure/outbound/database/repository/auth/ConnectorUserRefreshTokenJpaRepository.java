@@ -11,7 +11,6 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
-import jakarta.annotation.Nonnull;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +52,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
      *     an empty {@link Optional} if no entity matches the provided token
      */
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    Optional<ConnectorRefreshTokenEntity> findByToken(@Nonnull String token);
+    Optional<ConnectorRefreshTokenEntity> findByToken(@NonNull String token);
 
     /**
      * Retrieves a list of {@link ConnectorRefreshTokenEntity} instances based on the specified
@@ -81,7 +80,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
            and rt.revoked = false
         """)
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int revokeAllByUserUuid(@Param("userUuid") @Nonnull String userUuid);
+    int revokeAllByUserUuid(@Param("userUuid") @NonNull String userUuid);
 
     @Modifying
     @Transactional
@@ -91,7 +90,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
     @Modifying
     @Transactional
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int deleteByExpiresAtBefore(@Nonnull Instant instant);
+    int deleteByExpiresAtBefore(@NonNull Instant instant);
 
     @Modifying
     @Transactional

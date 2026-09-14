@@ -17,7 +17,7 @@ import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginUser;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
-import jakarta.annotation.Nonnull;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConnectorLoginUserService implements ConnectorLoginUser {
+public class ConnectorLoginUserImpl implements ConnectorLoginUser {
     private final AuthenticationManager authenticationManager;
     private final ConnectorAuthenticationTokenProvider tokenProvider;
     private final ConnectorRegisterUserRefreshToken registerRefreshToken;
@@ -64,9 +64,9 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
      *                              create user
      *                              refresh tokens and handle related operations.
      */
-    public ConnectorLoginUserService(AuthenticationManager authenticationManager,
-                                     ConnectorAuthenticationTokenProvider tokenProvider,
-                                     ConnectorRegisterUserRefreshTokenService
+    public ConnectorLoginUserImpl(AuthenticationManager authenticationManager,
+                                  ConnectorAuthenticationTokenProvider tokenProvider,
+                                  ConnectorRegisterUserRefreshTokenService
                                          registerRefreshToken) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
@@ -74,7 +74,7 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
     }
 
     @Override
-    public ConnectorLoginResponse execute(@Nonnull String username, @Nonnull String password) {
+    public ConnectorLoginResponse execute(@NonNull String username, @NonNull String password) {
         try {
             var authentication =
                 authenticationManager.authenticate(

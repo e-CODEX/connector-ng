@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Interface for removing {@link ConnectorUser} entities from the system.
@@ -26,8 +27,9 @@ public interface ConnectorRemoveUser {
     /**
      * Deletes a {@link ConnectorUser} entity identified by its unique identifier.
      *
-     * @param identifier the unique identifier of the {@link ConnectorUser} to be deleted; must not
-     *                   be null
+     * @param userIdentifier the unique identifier of the {@link ConnectorUser} to be deleted;
+     *
+     * @throws ConnectorUserNotFoundException exception
      */
-    void execute(String identifier) throws ConnectorUserNotFoundException;
+    void execute(@NonNull String userIdentifier);
 }

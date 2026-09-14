@@ -14,8 +14,8 @@ package eu.ecodex.connector.application.exception;
  * Exception thrown when the identifier provided in the path does not match the identifier provided
  * in the request body.
  */
-public class ConnectorUserIdMismatchException extends RuntimeException {
-    public ConnectorUserIdMismatchException(String message) {
+public class ConnectorUserIdentifierMismatchException extends RuntimeException {
+    public ConnectorUserIdentifierMismatchException(String message) {
         super(message);
     }
 }

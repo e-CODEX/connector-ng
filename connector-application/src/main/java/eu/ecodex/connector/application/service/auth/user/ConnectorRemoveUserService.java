@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.auth.user;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -34,7 +35,7 @@ public class ConnectorRemoveUserService implements ConnectorRemoveUser {
     }
 
     @Override
-    public void execute(String identifier) {
-        repository.deleteByUuid(identifier);
+    public void execute(@NonNull String userIdentifier) {
+        repository.deleteByUuid(userIdentifier);
     }
 }

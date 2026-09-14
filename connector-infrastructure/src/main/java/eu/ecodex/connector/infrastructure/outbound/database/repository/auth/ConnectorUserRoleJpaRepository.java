@@ -11,9 +11,9 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
-import jakarta.annotation.Nonnull;
 import java.util.Optional;
 import java.util.Set;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -34,7 +34,7 @@ public interface ConnectorUserRoleJpaRepository extends JpaRepository<ConnectorR
      * @return an {@code Optional} containing the {@code ConnectorRoleEntity} if found,
      *     or empty if not found
      */
-    Optional<ConnectorRoleEntity> findByName(@Nonnull String username);
+    Optional<ConnectorRoleEntity> findByName(@NonNull String username);
 
     /**
      * Finds a role entity by its unique UUID.
@@ -44,7 +44,7 @@ public interface ConnectorUserRoleJpaRepository extends JpaRepository<ConnectorR
      * @return an {@code Optional} containing the {@code ConnectorRoleEntity} if found,
      *     or an empty {@code Optional} if no role with the given UUID exists
      */
-    Optional<ConnectorRoleEntity> findByUuid(@Nonnull String uuid);
+    Optional<ConnectorRoleEntity> findByUuid(@NonNull String uuid);
 
     /**
      * Retrieves a set of {@link ConnectorRoleEntity} objects that have names matching the provided
@@ -55,5 +55,5 @@ public interface ConnectorUserRoleJpaRepository extends JpaRepository<ConnectorR
      * @return a set of {@link ConnectorRoleEntity} objects whose names are present in the provided
      *     set, or an empty set if no matching roles are found
      */
-    Set<ConnectorRoleEntity> findByNameIn(@Nonnull Set<String> names);
+    Set<ConnectorRoleEntity> findByNameIn(@NonNull Set<String> names);
 }

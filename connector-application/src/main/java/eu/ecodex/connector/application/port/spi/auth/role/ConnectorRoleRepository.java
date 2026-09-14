@@ -11,10 +11,10 @@
 package eu.ecodex.connector.application.port.spi.auth.role;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Repository interface for managing ConnectorUserRole entities.
@@ -31,7 +31,7 @@ public interface ConnectorRoleRepository {
      * @return the saved ConnectorUserRole entity, including any modifications or generated
      *     identifiers
      */
-    ConnectorRole save(@Nonnull ConnectorRole user);
+    ConnectorRole save(@NonNull ConnectorRole user);
 
     /**
      * Retrieves a ConnectorUserRole entity by its unique UUID.
@@ -41,7 +41,7 @@ public interface ConnectorRoleRepository {
      * @return an Optional containing the ConnectorUserRole entity if found, or an empty Optional if
      *     not found
      */
-    Optional<ConnectorRole> findByUuid(@Nonnull String id);
+    Optional<ConnectorRole> findByUuid(@NonNull String id);
 
     /**
      * Searches for a ConnectorUserRole entity by its name.
@@ -51,7 +51,7 @@ public interface ConnectorRoleRepository {
      * @return an Optional containing the found ConnectorUserRole if it exists, or an empty Optional
      *     if no entity is found
      */
-    Optional<ConnectorRole> findByName(@Nonnull String name);
+    Optional<ConnectorRole> findByName(@NonNull String name);
 
     /**
      * Retrieves all ConnectorUserRole entities from the repository.
@@ -65,7 +65,7 @@ public interface ConnectorRoleRepository {
      *
      * @param identifier the unique identifier (UUID) of the user role to be deleted
      */
-    void deleteByUuid(@Nonnull String identifier);
+    void deleteByUuid(@NonNull String identifier);
 
     /**
      * Retrieves a set of {@code ConnectorUserRole} entities whose names match any
@@ -75,5 +75,5 @@ public interface ConnectorRoleRepository {
      *
      * @return a set of {@code ConnectorUserRole} entities matching the provided names
      */
-    Set<ConnectorRole> findByNameIn(@Nonnull Set<String> names);
+    Set<ConnectorRole> findByNameIn(@NonNull Set<String> names);
 }

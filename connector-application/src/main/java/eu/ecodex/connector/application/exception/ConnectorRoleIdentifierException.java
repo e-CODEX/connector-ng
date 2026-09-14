@@ -13,8 +13,8 @@ package eu.ecodex.connector.application.exception;
 /**
  * Representation of a bad request for a user role.
  */
-public class ConnectorRoleBadRequestException extends RuntimeException {
-    public ConnectorRoleBadRequestException(String message) {
+public class ConnectorRoleIdentifierException extends RuntimeException {
+    public ConnectorRoleIdentifierException(String message) {
         super(message);
     }
 }

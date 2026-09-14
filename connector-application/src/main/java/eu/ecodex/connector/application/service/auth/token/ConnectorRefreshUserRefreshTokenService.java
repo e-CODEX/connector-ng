@@ -21,8 +21,8 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -109,8 +109,8 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
     /**
      * Rotates the refresh token when it would expire before the access token.
      */
-    private boolean shouldRotateRefreshToken(ConnectorRefreshToken refreshToken,
-                                             Instant accessTokenExpiresAt) {
+    private boolean shouldRotateRefreshToken(@NonNull ConnectorRefreshToken refreshToken,
+                                             @NonNull Instant accessTokenExpiresAt) {
         return refreshToken.expiresAt().isBefore(accessTokenExpiresAt);
     }
 
@@ -121,7 +121,7 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
      *
      * @return newly created refresh token
      */
-    private ConnectorRefreshToken saveRefreshToken(ConnectorUser user) {
+    private ConnectorRefreshToken saveRefreshToken(@NonNull ConnectorUser user) {
         var refreshToken = ConnectorRefreshToken.builder()
             .revoked(false)
             .user(user)
@@ -140,7 +140,7 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
      *
      * @return newly created refresh token
      */
-    private ConnectorRefreshToken rotateRefreshToken(ConnectorUser user) {
+    private ConnectorRefreshToken rotateRefreshToken(@NonNull ConnectorUser user) {
         var revoked = repository.findByUserUuidAndRevoked(user.uuid(), Boolean.FALSE);
         if (!revoked.isEmpty()) {
             repository.revokeByUserUuid(user.uuid());

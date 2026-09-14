@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Builder;
 
 /**
  * Represents a data structure for a user in the Connector system.
@@ -25,6 +26,7 @@ import java.util.Set;
  * and builder for creating immutable instances of the class.
  *
  */
+@Builder(toBuilder = true)
 public record ConnectorUser(
     String uuid,
     @NotBlank
@@ -53,10 +55,6 @@ public record ConnectorUser(
             .enabled(true)
             .roles(Set.of(ConnectorRole.defaultAdminRole()))
             .build();
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     /**
@@ -101,92 +99,5 @@ public record ConnectorUser(
         boolean removed = updatedRoles.remove(role);
 
         return removed ? toBuilder().roles(updatedRoles).build() : this;
-    }
-
-    /**
-     * Creates a new {@code Builder} instance pre-populated with the current state of the
-     * {@code ConnectorUser} object.
-     *
-     * @return a {@code Builder} instance containing the fields of the current {@code ConnectorUser}
-     *     object.
-     */
-    public Builder toBuilder() {
-        return new Builder()
-            .uuid(this.uuid)
-            .username(this.username)
-            .password(this.password)
-            .email(this.email)
-            .enabled(this.enabled)
-            .roles(this.roles)
-            .createdAt(this.createdAt)
-            .updatedAt(this.updatedAt);
-
-    }
-
-    /**
-     * Builder class for constructing instances of {@code ConnectorUser}.
-     *
-     * <p>This builder pattern enables the creation of immutable {@code ConnectorUser}
-     * objects by providing methods to set various fields incrementally and
-     * eventually constructing a fully populated instance.
-     */
-    public static class Builder {
-        String uuid;
-        String username;
-        String password;
-        String email;
-        Boolean enabled;
-        Set<ConnectorRole> roles;
-        Instant createdAt;
-        Instant updatedAt;
-
-        private Builder() {
-
-        }
-
-        public Builder uuid(String uuid) {
-            this.uuid = uuid;
-            return this;
-        }
-
-        public Builder username(String username) {
-            this.username = username;
-            return this;
-        }
-
-        public Builder password(String password) {
-            this.password = password;
-            return this;
-        }
-
-        public Builder email(String email) {
-            this.email = email;
-            return this;
-        }
-
-        public Builder enabled(Boolean enabled) {
-            this.enabled = enabled;
-            return this;
-        }
-
-        public Builder createdAt(Instant createdAt) {
-            this.createdAt = createdAt;
-            return this;
-        }
-
-        public Builder updatedAt(Instant updatedAt) {
-            this.updatedAt = updatedAt;
-            return this;
-        }
-
-        public Builder roles(Set<ConnectorRole> roles) {
-            this.roles = roles;
-            return this;
-        }
-
-        public ConnectorUser build() {
-            return new ConnectorUser(uuid, username, password, email, enabled, roles, createdAt,
-                updatedAt);
-        }
     }
 }

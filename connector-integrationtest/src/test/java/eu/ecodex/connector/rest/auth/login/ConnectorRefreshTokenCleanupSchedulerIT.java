@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorCleanupRefreshTokenScheduler;
+import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorCleanupRefreshTokenScheduler;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;

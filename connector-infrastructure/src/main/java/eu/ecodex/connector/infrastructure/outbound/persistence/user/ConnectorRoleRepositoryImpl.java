@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,9 +101,8 @@ public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
      *
      * @return a new {@link ConnectorRoleEntity} object based on the provided domain object
      */
-    private ConnectorRoleEntity toEntity(ConnectorRole domainUserRole) {
-        return ConnectorRoleEntity
-            .builder()
+    private ConnectorRoleEntity toEntity(@NonNull ConnectorRole domainUserRole) {
+        return ConnectorRoleEntity.builder()
             .uuid(domainUserRole.uuid())
             .name(domainUserRole.name())
             .build();
@@ -117,8 +116,12 @@ public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
      *
      * @return a new {@link ConnectorRole} object based on the provided persistence entity
      */
-    private ConnectorRole toDomain(ConnectorRoleEntity entity) {
-        return new ConnectorRole(entity.getUuid(), entity.getName(), entity.getCreatedAt(),
-            entity.getUpdatedAt());
+    private ConnectorRole toDomain(@NonNull ConnectorRoleEntity entity) {
+        return ConnectorRole.builder()
+            .uuid(entity.getUuid())
+            .name(entity.getName())
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
     }
 }

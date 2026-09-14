@@ -11,9 +11,9 @@
 package eu.ecodex.connector.application.port.spi.auth.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Interface for managing ConnectorUser entities in the persistence layer.
@@ -35,7 +35,7 @@ public interface ConnectorUserRepository {
      *
      * @return the saved ConnectorUser entity
      */
-    ConnectorUser save(@Nonnull ConnectorUser user);
+    ConnectorUser save(@NonNull ConnectorUser user);
 
     /**
      * Retrieves a {@code ConnectorUser} entity by its UUID.
@@ -49,7 +49,7 @@ public interface ConnectorUserRepository {
      * @return an {@code Optional} containing the {@code ConnectorUser} if found, or an empty
      *     {@code Optional} if no user exists with the given UUID
      */
-    Optional<ConnectorUser> findByUuid(@Nonnull String identifier);
+    Optional<ConnectorUser> findByUuid(@NonNull String identifier);
 
     /**
      * Retrieves a ConnectorUser entity based on the provided username.
@@ -63,7 +63,7 @@ public interface ConnectorUserRepository {
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
      *     exists with the given username
      */
-    Optional<ConnectorUser> findByUsername(@Nonnull String username);
+    Optional<ConnectorUser> findByUsername(@NonNull String username);
 
     /**
      * Retrieves an active ConnectorUser entity based on the provided username.
@@ -78,7 +78,7 @@ public interface ConnectorUserRepository {
      * @return an Optional containing the ConnectorUser if found, or an empty Optional if no user
      *     exists with the given username
      */
-    Optional<ConnectorUser> findByUsernameAndActive(@Nonnull String username, boolean active);
+    Optional<ConnectorUser> findByUsernameAndActive(@NonNull String username, boolean active);
 
     /**
      * Retrieves a list of all {@code ConnectorUser} entities.
@@ -101,7 +101,7 @@ public interface ConnectorUserRepository {
      *
      * @param identifier the unique identifier of the ConnectorUser to delete; must not be null
      */
-    void deleteByUuid(@Nonnull String identifier);
+    void deleteByUuid(@NonNull String identifier);
 
 
     /**
@@ -112,7 +112,7 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified UUID exists, {@code false}
      *     otherwise
      */
-    boolean existsByUuid(@Nonnull String uuid);
+    boolean existsByUuid(@NonNull String uuid);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the specified username.
@@ -123,7 +123,7 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified username exists,
      *     {@code false} otherwise
      */
-    boolean existsByUsername(@Nonnull String username);
+    boolean existsByUsername(@NonNull String username);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the specified email.
@@ -134,7 +134,7 @@ public interface ConnectorUserRepository {
      * @return {@code true} if a {@code ConnectorUser} with the specified email exists,
      *     {@code false} otherwise
      */
-    boolean existsByEmail(@Nonnull String email);
+    boolean existsByEmail(@NonNull String email);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the given email
@@ -149,7 +149,7 @@ public interface ConnectorUserRepository {
      *     different UUID
      *     than the provided UUID, {@code false} otherwise
      */
-    boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
+    boolean existsByEmailAndUuidNot(@NonNull String email, @NonNull String uuid);
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the specified username
@@ -164,5 +164,5 @@ public interface ConnectorUserRepository {
      *     different UUID
      *     than the provided UUID, {@code false} otherwise
      */
-    boolean existsByUsernameAndUuidNot(@Nonnull String username, @Nonnull String uuid);
+    boolean existsByUsernameAndUuidNot(@NonNull String username, @NonNull String uuid);
 }

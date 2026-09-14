@@ -11,9 +11,9 @@
 package eu.ecodex.connector.application.port.spi.auth.token;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A provider interface for managing authentication tokens used in the
@@ -46,7 +46,7 @@ public interface ConnectorAuthenticationTokenProvider {
      *
      * @return the generated authentication token as a {@code String}.
      */
-    String generateAccessToken(@Nonnull ConnectorUser user);
+    String generateAccessToken(@NonNull ConnectorUser user);
 
     /**
      * Retrieves the duration for which an access token remains valid.
@@ -73,7 +73,7 @@ public interface ConnectorAuthenticationTokenProvider {
      *
      * @return true if expired, false otherwise
      */
-    boolean isAccessTokenExpired(@Nonnull String token);
+    boolean isAccessTokenExpired(@NonNull String token);
 
     /**
      * Get the expiration date of the access token.
@@ -82,7 +82,7 @@ public interface ConnectorAuthenticationTokenProvider {
      *
      * @return the expiration date of the access token
      */
-    Instant getAccessTokenExpirationDate(@Nonnull String token);
+    Instant getAccessTokenExpirationDate(@NonNull String token);
 
     /**
      * Retrieve the username from the token.
@@ -91,7 +91,7 @@ public interface ConnectorAuthenticationTokenProvider {
      *
      * @return the username
      */
-    String getUsernameFromToken(@Nonnull String token);
+    String getUsernameFromToken(@NonNull String token);
 
     /**
      * Get refresh tokens cleanup cron expression.

@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.spi.auth.login;
 
 import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Interface for handling user login functionality in the connector system.

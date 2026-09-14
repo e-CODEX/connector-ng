@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -32,9 +32,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * in the `Authorization` header. If a valid token is found, the user's authentication details
  * are set into the Spring Security context.
  *
- * <p>The authentication token's validity is verified using {@link JwtService}. The user's
- * details are fetched using {@link UserDetailsService}, and properly authenticated users are
- * granted access to resources based on their authorities.
+ * <p>The authentication token's validity is verified using {@link ConnectorJwtTokenHelper}.
+ * The user's details are fetched using {@link UserDetailsService}, and properly authenticated users
+ * are granted access to resources based on their authorities.</p>
  *
  * <p>This filter should be executed once per request, extending the
  * {@link OncePerRequestFilter}.</p>
@@ -42,7 +42,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>Detailed steps executed by this filter:
  * - Extracts the `Authorization` header from the incoming request.
  * - Verifies the format and presence of the Bearer token.
- * - Extracts the username from the token using {@link JwtService}.
+ * - Extracts the username from the token using {@link ConnectorJwtTokenHelper}.
  * - Loads user details using {@link UserDetailsService}.
  * - Validates the token for the fetched user.
  * - Sets the authentication details in the Spring Security context if the token is valid.
@@ -51,12 +51,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
  */
 @Slf4j
 @Component
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtService jwtTokenService;
+public class ConnectorJwtAuthenticationFilter extends OncePerRequestFilter {
+    private final ConnectorJwtTokenHelper jwtTokenService;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtService jwtTokenService,
-                                   UserDetailsService userDetailsService) {
+    public ConnectorJwtAuthenticationFilter(ConnectorJwtTokenHelper jwtTokenService,
+                                            UserDetailsService userDetailsService) {
         this.jwtTokenService = jwtTokenService;
         this.userDetailsService = userDetailsService;
     }

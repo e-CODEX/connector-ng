@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,11 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-class PasswordEncoderServiceTest {
+class ConnectorUserPasswordEncoderImplTest {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    PasswordEncoderService service = new PasswordEncoderService(passwordEncoder);
+    ConnectorUserPasswordEncoderImpl service = new ConnectorUserPasswordEncoderImpl(passwordEncoder);
 
 
     @Test

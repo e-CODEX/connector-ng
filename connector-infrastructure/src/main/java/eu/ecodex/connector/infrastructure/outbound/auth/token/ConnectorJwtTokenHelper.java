@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -26,8 +26,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.crypto.SecretKey;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -50,24 +49,13 @@ import org.springframework.stereotype.Service;
  * - {@link UserDetails}: Represents authenticated user information, including roles and username.
  * - {@link SecretKey}: Used for cryptographic operations.
  *
- * <p>Thread-safety:
- * This class is thread-safe assuming the provided {@link JwtProperties}
- * have been correctly initialized and remain immutable during runtime.
- *
- * <p>Responsibilities:
- * - Generate JWT tokens with user-specific claims and expiration times.
- * - Extract the username from an existing token payload.
- * - Validate if a token matches the user details and is not expired.
- * - Parse the token to extract and verify its claims.
- */
+ **/
 @Slf4j
 @Service
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class JwtService {
-
-    SecretKey secretKey;
-    JwtProperties jwtProperties;
-    Clock clock;
+public class ConnectorJwtTokenHelper {
+    private final SecretKey secretKey;
+    private final JwtProperties jwtProperties;
+    private final Clock clock;
 
     /**
      * Constructor for JwtTokenService.
@@ -75,7 +63,7 @@ public class JwtService {
      *
      * @param jwtProperties the JwtProperties object containing the secret key and other JWT-related
      */
-    public JwtService(JwtProperties jwtProperties, Clock clock) {
+    public ConnectorJwtTokenHelper(@NonNull JwtProperties jwtProperties, @NonNull Clock clock) {
         this.secretKey = Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(UTF_8));
         this.jwtProperties = jwtProperties;
         this.clock = clock;
@@ -93,7 +81,7 @@ public class JwtService {
      * @return a {@code String} representing the generated JWT token encoded with the user's details
      *     and cryptographically signed using the configured secret key.
      */
-    public String generateAccessToken(ConnectorUserDetails user) {
+    public String generateAccessToken(@NonNull ConnectorUserDetails user) {
         var now = clock.instant();
         var userRoles = user.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
@@ -117,7 +105,7 @@ public class JwtService {
      *
      * @return the username contained in the token payload.
      */
-    public String extractUsername(String token) {
+    public String extractUsername(@NonNull String token) {
         return parse(token).getPayload().getSubject();
     }
 
@@ -130,7 +118,7 @@ public class JwtService {
      * @return a list of {@code GrantedAuthority} objects representing the roles
      *     contained in the token, or an empty list if no valid roles are found.
      */
-    public List<? extends GrantedAuthority> extractAuthorities(String token) {
+    public List<? extends GrantedAuthority> extractAuthorities(@NonNull String token) {
         Claims claims = parse(token).getPayload();
         Object claim = claims.get("roles");
 
@@ -157,7 +145,7 @@ public class JwtService {
      * @return {@code true} if the token is valid, matches the user's username and is not expired;
      *     {@code false} otherwise.
      */
-    public boolean isValidToken(String token, UserDetails user) {
+    public boolean isValidToken(@NonNull String token, @NonNull UserDetails user) {
         try {
             var claims = parse(token).getPayload();
             return claims.getSubject().equals(user.getUsername());
@@ -174,7 +162,7 @@ public class JwtService {
      *
      * @return true if expired, false otherwise
      */
-    public boolean isExpired(String token) {
+    public boolean isExpired(@NonNull String token) {
         try {
             parse(token);
             return false;
@@ -194,7 +182,7 @@ public class JwtService {
      *
      * @return the parsed claims
      */
-    public Claims parseAllowingExpired(String token) {
+    public Claims parseAllowingExpired(@NonNull String token) {
         try {
             return parse(token).getPayload();
         } catch (ExpiredJwtException e) {
@@ -226,7 +214,7 @@ public class JwtService {
      *                                                     invalid/unsupported
      * @throws IllegalArgumentException                    if {@code token} is null, empty, or blank
      */
-    private Jws<Claims> parse(String token) {
+    private Jws<Claims> parse(@NonNull String token) {
         return Jwts.parser()
             .verifyWith(secretKey)
             .clock(() -> Date.from(clock.instant()))

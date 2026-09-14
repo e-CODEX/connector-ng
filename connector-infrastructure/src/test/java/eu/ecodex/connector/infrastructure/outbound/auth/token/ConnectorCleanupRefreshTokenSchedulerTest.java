@@ -8,13 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth.login;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
-import eu.ecodex.connector.application.service.auth.token.ConnectorRevokeUserRefreshTokenService;
+import eu.ecodex.connector.application.port.api.auth.token.ConnectorCleanupUserRefreshToken;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,25 +21,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorLogoutUserServiceTest {
+class ConnectorCleanupRefreshTokenSchedulerTest {
 
     @Mock
-    ConnectorRevokeUserRefreshTokenService revokeUserTokenService;
+    ConnectorCleanupUserRefreshToken refreshTokenCleanUp;
 
     @InjectMocks
-    ConnectorLogoutUserService service;
+    ConnectorCleanupRefreshTokenScheduler scheduler;
 
     @Test
-    void logout_should_succeed() {
+    void purgeStaleTokens_should_remove_stale_refresh_tokens() {
         // Given
-        var userId = "test";
-        var refreshToken = "refresh-token-abc";
-        doNothing().when(revokeUserTokenService).execute(any(), any());
-
+        doNothing().when(refreshTokenCleanUp).execute();
         // When
-        service.execute(userId, refreshToken);
+        scheduler.purgeStaleTokens();
 
         // Then
-        verify(revokeUserTokenService).execute(userId, refreshToken);
+        verify(refreshTokenCleanUp).execute();
     }
 }

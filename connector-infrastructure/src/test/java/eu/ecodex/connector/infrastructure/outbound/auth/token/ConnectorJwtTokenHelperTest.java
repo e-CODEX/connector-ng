@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,10 +24,10 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link JwtService}.
+ * Tests for {@link ConnectorJwtTokenHelper}.
  * This class contains tests for the JwtService class.
  */
-class JwtServiceTest {
+class ConnectorJwtTokenHelperTest {
 
     private static final Instant FIXED_NOW = Instant.now();
     private static final long ACCESS_TOKEN_EXPIRATION_MS = 15 * 60 * 1000L; // 15 min
@@ -43,10 +43,10 @@ class JwtServiceTest {
             refreshTokenProps);
 
 
-    private JwtService jwtService;
+    private ConnectorJwtTokenHelper jwtService;
 
-    private JwtService jwtServiceAt(JwtProperties jwtProperties, Instant instant) {
-        return new JwtService(jwtProperties, Clock.fixed(instant, ZoneOffset.UTC));
+    private ConnectorJwtTokenHelper jwtServiceAt(JwtProperties jwtProperties, Instant instant) {
+        return new ConnectorJwtTokenHelper(jwtProperties, Clock.fixed(instant, ZoneOffset.UTC));
     }
 
     @Test
@@ -146,7 +146,7 @@ class JwtServiceTest {
         var props = new JwtProperties(otherKey, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION_MS),
             refreshTokenProps);
 
-        var jwtServiceOtherKey = new JwtService(props, Clock.fixed(FIXED_NOW, ZoneOffset.UTC));
+        var jwtServiceOtherKey = new ConnectorJwtTokenHelper(props, Clock.fixed(FIXED_NOW, ZoneOffset.UTC));
         var tokenFromOtherIssuer = jwtServiceOtherKey.generateAccessToken(userDetails);
 
         // When

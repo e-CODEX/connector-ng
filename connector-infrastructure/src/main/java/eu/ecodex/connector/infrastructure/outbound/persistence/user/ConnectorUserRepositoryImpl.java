@@ -19,13 +19,12 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.user.Connecto
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
-import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -107,7 +106,7 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
 
     @Override
     @Transactional
-    public void deleteByUuid(@Nonnull String identifier) {
+    public void deleteByUuid(@NonNull String identifier) {
         var entity = jpaRepository.findByUuid(identifier).orElseThrow(
             () -> new ConnectorUserNotFoundException("No user found by identifier " + identifier));
         refreshTokenRepository.deleteByUser_Uuid(entity.getUuid());
@@ -115,17 +114,17 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     }
 
     @Override
-    public boolean existsByUuid(@Nonnull String uuid) {
+    public boolean existsByUuid(@NonNull String uuid) {
         return jpaRepository.existsByUuid(uuid);
     }
 
     @Override
-    public boolean existsByUsername(@Nonnull String username) {
+    public boolean existsByUsername(@NonNull  String username) {
         return jpaRepository.existsByUsername(username);
     }
 
     @Override
-    public boolean existsByEmail(@Nonnull String email) {
+    public boolean existsByEmail(@NonNull  String email) {
         return jpaRepository.existsByEmail(email);
     }
 
@@ -135,8 +134,8 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     }
 
     @Override
-    public boolean existsByUsernameAndUuidNot(@Nonnull String username,
-                                              @Nonnull String identifier) {
+    public boolean existsByUsernameAndUuidNot(@NonNull String username,
+                                              @NonNull String identifier) {
         return jpaRepository.existsByUsernameAndUuidNot(username, identifier);
     }
 
@@ -148,7 +147,7 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
      *
      * @return a {@code ConnectorUserEntity} object representing the JPA entity
      */
-    public ConnectorUserEntity toEntity(ConnectorUser domainUser) {
+    public ConnectorUserEntity toEntity(@NonNull ConnectorUser domainUser) {
         return ConnectorUserEntity
             .builder()
             .uuid(domainUser.uuid())
@@ -167,7 +166,7 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
      * @param entity     the JPA entity to be updated
      * @param domainUser the domain-level user object to be converted
      */
-    private void toEntity(ConnectorUserEntity entity, ConnectorUser domainUser) {
+    private void toEntity(@NonNull ConnectorUserEntity entity, @NonNull ConnectorUser domainUser) {
         entity.setUuid(domainUser.uuid());
         entity.setPassword(domainUser.password());
         entity.setEnabled(domainUser.enabled());

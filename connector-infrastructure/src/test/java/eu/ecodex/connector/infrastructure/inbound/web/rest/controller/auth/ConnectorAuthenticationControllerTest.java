@@ -21,8 +21,8 @@ import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserService;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserImpl;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -35,13 +35,13 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
 
     @MockitoBean
-    ConnectorLoginUserService loginUserService;
+    ConnectorLoginUserImpl loginUserService;
 
     @MockitoBean
     ConnectorRefreshUserRefreshTokenService userTokenService;
 
     @MockitoBean
-    ConnectorLogoutUserService logoutUserService;
+    ConnectorLogoutUserImpl logoutUserService;
 
     @Autowired
     RestTestClient apiClient;

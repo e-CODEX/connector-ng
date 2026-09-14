@@ -12,8 +12,8 @@ package eu.ecodex.connector.application.port.spi.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
-import jakarta.annotation.Nonnull;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Defines the contract for managing connector services within a specified business domain in the
@@ -21,8 +21,8 @@ import java.util.List;
  */
 public interface ConnectorServiceRepository {
     List<ConnectorService> saveAll(
-        @Nonnull List<ConnectorService> services,
-        @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+        @NonNull List<ConnectorService> services,
+        @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 
     /**
      * Retrieves a {@link ConnectorService} based on its name and the associated business domain
@@ -36,8 +36,8 @@ public interface ConnectorServiceRepository {
      *     identifier, or null if no such service exists.
      */
     ConnectorService findByNameAndBusinessDomain(
-        @Nonnull String name,
-        @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
+        @NonNull String name,
+        @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 
     /**
      * Retrieves a list of {@link ConnectorService} objects associated with the specified business
@@ -50,5 +50,5 @@ public interface ConnectorServiceRepository {
      *     business domain identifier.
      */
     List<ConnectorService> findAllByBusinessDomainIdentifier(
-        @Nonnull ConnectorBusinessDomainIdentifier identifier);
+        @NonNull ConnectorBusinessDomainIdentifier identifier);
 }

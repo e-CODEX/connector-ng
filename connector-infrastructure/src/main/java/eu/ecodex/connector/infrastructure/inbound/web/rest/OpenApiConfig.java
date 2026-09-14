@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -55,6 +56,23 @@ public class OpenApiConfig {
         return new OpenAPI()
             .components(components)
             .info(info);
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+                             .group("public")
+                             .pathsToMatch("/api/**")
+                             .pathsToExclude("/api/v?/admin/**")
+                             .build();
+    }
+
+    @Bean
+    public GroupedOpenApi adminApi() {
+        return GroupedOpenApi.builder()
+                             .group("admin")
+                             .pathsToMatch("/api/v?/admin/**")
+                             .build();
     }
 
     @Bean

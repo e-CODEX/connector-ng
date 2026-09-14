@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.auth.login;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
@@ -26,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-class ConnectorLoginUserIT extends AbstractIntegrationTest {
+class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
     private static final String PATH = "/api/v1/auth/login";
 
     @Autowired
@@ -53,7 +53,7 @@ class ConnectorLoginUserIT extends AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isOk()
-            .returnResult(ConnectorLoginResponse.class);
+            .returnResult(ConnectorUserAuthenticationResult.class);
 
         assertThat(loginResponse).isNotNull();
         assertThat(loginResponse.getResponseBody()).isNotNull();
@@ -77,7 +77,7 @@ class ConnectorLoginUserIT extends AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isOk()
-            .returnResult(ConnectorLoginResponse.class);
+            .returnResult(ConnectorUserAuthenticationResult.class);
 
         assertThat(loginResponse).isNotNull();
         assertThat(loginResponse.getResponseBody()).isNotNull();
@@ -103,7 +103,7 @@ class ConnectorLoginUserIT extends AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isOk()
-            .returnResult(ConnectorLoginResponse.class);
+            .returnResult(ConnectorUserAuthenticationResult.class);
 
         assertThat(loginResponse).isNotNull();
         assertThat(loginResponse.getResponseBody()).isNotNull();

@@ -15,7 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines a contract for retrieving user roles by Id within the Connector system.
+ * Defines a contract for retrieving user roles by Identifier within the Connector system.
  * Implementations of this interface are responsible for fetching user role details
  * based on either a unique identifier or a username.
  *
@@ -29,13 +29,13 @@ public interface ConnectorRetrieveRoleByIdentifier {
      * This method fetches the {@link ConnectorRole} entity from the
      * underlying data source using the provided identifier.
      *
-     * @param identifier the unique identifier of the user role to be retrieved.
-     *                   It must correspond to an existing user role in the system.
+     * @param roleIdentifier the unique identifier of the user role to be retrieved.
+     *                       It must correspond to an existing user role in the system.
      *
      * @return the {@link ConnectorRole} instance matching the given identifier.
      *
      * @throws ConnectorRoleNotFoundException if no user role is found for the specified
      *                                        identifier.
      */
-    ConnectorRole execute(@Nonnull String identifier) throws ConnectorRoleNotFoundException;
+    ConnectorRole execute(@Nonnull String roleIdentifier);
 }

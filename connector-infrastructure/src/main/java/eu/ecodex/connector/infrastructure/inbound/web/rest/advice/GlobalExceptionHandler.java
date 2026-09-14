@@ -21,12 +21,12 @@ import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNo
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.exception.ConnectorUserIdMismatchException;
+import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
@@ -82,10 +82,10 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConnectorUserIdMismatchException.class)
-    public ErrorResponse handleUserException(ConnectorUserIdMismatchException e) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorUserIdentifierMismatchException.class)
+    public ErrorResponse handleUserException(ConnectorUserIdentifierMismatchException e) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
     }
 
     @ResponseBody
@@ -105,10 +105,10 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConnectorRoleBadRequestException.class)
-    public ErrorResponse handleUserRoleException(ConnectorRoleBadRequestException e) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorRoleIdentifierException.class)
+    public ErrorResponse handleUserRoleException(ConnectorRoleIdentifierException e) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
     }
 
     @ResponseBody

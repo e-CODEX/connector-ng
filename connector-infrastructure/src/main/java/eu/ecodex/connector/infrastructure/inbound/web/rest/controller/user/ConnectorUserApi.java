@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,8 +43,8 @@ public interface ConnectorUserApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorUserDto patch(@AuthenticationPrincipal ConnectorUserDetails userDetails,
-                           @Valid @RequestBody ConnectorUserRequest userRequest);
+    ConnectorUserDto patch(@AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
+                           @Valid @RequestBody @Nonnull ConnectorUserRequest userRequest);
 
     @Operation(summary = "Get the currently authenticated user account.")
     @GetMapping
@@ -52,6 +53,7 @@ public interface ConnectorUserApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto getByIdentifier(@AuthenticationPrincipal ConnectorUserDetails userDetails);
+    ConnectorUserDto getByIdentifier(
+        @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails);
 
 }

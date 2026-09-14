@@ -133,5 +133,4 @@ class ConnectorUpdateUserIT extends AbstractIntegrationTest {
         var after = userRepository.findByUsername(username);
         assertThat(before).isEqualTo(after);
     }
-
 }

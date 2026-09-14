@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.port.api.auth.role;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import jakarta.annotation.Nonnull;
 
+
 /**
  * Defines updating user roles within the Connector system.
  * Implementations of this interface handle the creation of new {@link ConnectorRole}
@@ -30,13 +31,13 @@ public interface ConnectorUpdateRole {
      * is persisted in the underlying data store, and the resulting modified instance
      * is returned.
      *
-     * @param id       the unique identifier of the {@link ConnectorRole} to be updated.
-     *                 It must correspond to an existing user role in the system.
-     * @param userRole the {@link ConnectorRole} object containing the updated role
-     *                 information. It must include valid details for the update process.
+     * @param roleIdentifier the unique identifier of the {@link ConnectorRole} to be updated.
+     *                       It must correspond to an existing user role in the system.
+     * @param userRole       the {@link ConnectorRole} object containing the updated role
+     *                       information. It must include valid details for the update process.
      *
      * @return the updated {@link ConnectorRole} instance, reflecting all modifications
      *     made during the update process.
      */
-    ConnectorRole execute(@Nonnull String id, @Nonnull ConnectorRole userRole);
+    ConnectorRole execute(@Nonnull String roleIdentifier, @Nonnull ConnectorRole userRole);
 }

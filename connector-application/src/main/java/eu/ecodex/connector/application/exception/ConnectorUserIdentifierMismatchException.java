@@ -11,10 +11,11 @@
 package eu.ecodex.connector.application.exception;
 
 /**
- * Representation of a bad request for a user role.
+ * Exception thrown when the identifier provided in the path does not match the identifier provided
+ * in the request body.
  */
-public class ConnectorRoleBadRequestException extends RuntimeException {
-    public ConnectorRoleBadRequestException(String message) {
+public class ConnectorUserIdentifierMismatchException extends RuntimeException {
+    public ConnectorUserIdentifierMismatchException(String message) {
         super(message);
     }
 }

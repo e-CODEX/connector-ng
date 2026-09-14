@@ -22,17 +22,16 @@ import jakarta.annotation.Nonnull;
  */
 public interface ConnectorRegisterRole {
     /**
-     * Registers a new user role in the Connector system.
-     * This method persists the provided {@link ConnectorRole} instance
-     * in the underlying data store and returns the registered instance.
+     * Executes the registration of a new user role in the Connector system.
      *
-     * @param userRole the {@link ConnectorRole} object to be registered.
-     *                 It must contain valid role information to be persisted.
+     * @param userRole The {@link ConnectorRole} instance representing the role to be registered.
+     *                 It must not be null.
      *
-     * @return the registered {@link ConnectorRole} instance, including any
-     *     additional fields populated during the registration process (e.g., identifier,
-     *     timestamps).
+     * @return The registered {@link ConnectorRole} instance, including any system-assigned
+     *     metadata, such as timestamps or unique identifiers.
+     *
+     * @throws ConnectorRoleAlreadyExistsException If a role with the same attributes already exists
+     *                                             in the Connector system.
      */
-    ConnectorRole execute(@Nonnull ConnectorRole userRole) throws
-        ConnectorRoleAlreadyExistsException;
+    ConnectorRole execute(@Nonnull ConnectorRole userRole);
 }

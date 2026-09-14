@@ -11,16 +11,15 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorRefreshUserRefreshToken;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginUser;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLogoutUser;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserService;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserService;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserAuthenticationProviderImpl;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,61 +41,50 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 public class ConnectorAuthenticationController implements ConnectorAuthenticationApi {
-    private final ConnectorLoginUser loginUserService;
+    private final ConnectorUserAuthenticationProvider userAuthenticationProvider;
     private final ConnectorRefreshUserRefreshToken refreshUserTokenService;
-    private final ConnectorLogoutUser logoutUserService;
 
     /**
      * Constructs a {@code ConnectorAuthenticationController} with the necessary services for
      * handling user authentication, refreshing tokens, and logging out.
      *
-     * @param loginUserService        The {@link ConnectorLoginUserService} responsible for
-     *                                managing
-     *                                user login operations, including credential validation
-     *                                and token
-     *                                generation.
-     * @param refreshUserTokenService The {@link ConnectorRefreshUserRefreshTokenService}
-     *                                used to handle
-     *                                user
-     *                                token refresh operations, ensuring the access token
-     *                                remains valid.
-     * @param logoutUserService       The {@link ConnectorLogoutUserService} handling logout
-     *                                functionality,
-     *                                including revoking user refresh tokens.
+     * @param userAuthenticationProvider The {@link ConnectorUserAuthenticationProviderImpl}
+     *                                   responsible for managing user login operations, including
+     *                                   credential validation and token generation.
+     * @param refreshUserTokenService    The {@link ConnectorRefreshUserRefreshTokenService}
+     *                                   used to handle user token refresh operations, ensuring the
+     *                                   access token remains valid.
      */
     public ConnectorAuthenticationController(
-        ConnectorLoginUser loginUserService,
-        ConnectorRefreshUserRefreshToken refreshUserTokenService,
-        ConnectorLogoutUserService logoutUserService) {
-        this.loginUserService = loginUserService;
+        ConnectorUserAuthenticationProvider userAuthenticationProvider,
+        ConnectorRefreshUserRefreshToken refreshUserTokenService) {
+        this.userAuthenticationProvider = userAuthenticationProvider;
         this.refreshUserTokenService = refreshUserTokenService;
-        this.logoutUserService = logoutUserService;
     }
 
     @Override
-    public ConnectorLoginResponse login(ConnectorLoginRequest request) {
-        var loginResponse = loginUserService.execute(request.username(), request.password());
+    public ConnectorUserAuthenticationResult login(@NonNull ConnectorLoginRequest request) {
+        var loginResponse =
+            userAuthenticationProvider.login(request.username(), request.password());
         log.info("User {} successfully logged", request.username());
         return loginResponse;
     }
 
     @Override
-    public ConnectorLoginResponse refresh(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-        ConnectorRefreshTokenRequest request) {
-
+    public ConnectorUserAuthenticationResult refresh(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @NonNull String authorizationHeader,
+        @NonNull ConnectorRefreshTokenRequest request) {
         var accessToken = authorizationHeader.replaceFirst("^Bearer ", "");
         var refreshed = refreshUserTokenService.execute(accessToken, request.refreshToken());
-
         log.info("Successfully refreshed token");
         return refreshed;
     }
 
     @Override
     @PreAuthorize("isAuthenticated()")
-    public void logout(@AuthenticationPrincipal ConnectorUserDetails userDetails,
-                       @RequestBody ConnectorLogoutRequest request) {
-        logoutUserService.execute(userDetails.getUserId(), request.refreshToken());
+    public void logout(@AuthenticationPrincipal @NonNull ConnectorUserDetails userDetails,
+                       @RequestBody @NonNull ConnectorLogoutRequest request) {
+        userAuthenticationProvider.logout(userDetails.getUserId(), request.refreshToken());
         log.info("Successfully logged out");
     }
 }

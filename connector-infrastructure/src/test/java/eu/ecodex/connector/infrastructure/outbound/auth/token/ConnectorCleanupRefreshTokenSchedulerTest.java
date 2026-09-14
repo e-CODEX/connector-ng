@@ -8,13 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorCleanupUserRefreshToken;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorCleanupRefreshTokenScheduler;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

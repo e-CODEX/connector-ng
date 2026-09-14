@@ -14,8 +14,8 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorAssignRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorUnassignRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.web.bind.annotation.RestController;
 
 /**

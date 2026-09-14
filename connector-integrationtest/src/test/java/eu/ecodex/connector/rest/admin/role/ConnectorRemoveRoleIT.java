@@ -97,7 +97,6 @@ class ConnectorRemoveRoleIT extends AbstractIntegrationTest {
     @Test
     @Sql({"classpath:sql/user.sql"})
     void remove_should_failed_when_invalid_token_is_provided() {
-
         var existing = roleRepository.findByName("ROLE_ADMIN");
         assertThat(existing).isNotEmpty();
 
@@ -108,7 +107,5 @@ class ConnectorRemoveRoleIT extends AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isUnauthorized();
-
     }
-
 }

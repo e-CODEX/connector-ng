@@ -27,7 +27,7 @@ public interface ConnectorRetrieveUserByUsername {
      *
      * @throws ConnectorUserNotFoundException if no user is found with the given username
      */
-    ConnectorUser execute(String username) throws ConnectorUserNotFoundException;
+    ConnectorUser execute(String username);
 
     /**
      * Retrieves a {@link ConnectorUser} instance by its unique username and active status.
@@ -40,6 +40,5 @@ public interface ConnectorRetrieveUserByUsername {
      * @throws ConnectorUserNotFoundException if no user is found with the given username and active
      *                                        status
      */
-    ConnectorUser execute(String username, boolean active)
-        throws ConnectorUserNotFoundException;
+    ConnectorUser execute(String username, boolean active);
 }

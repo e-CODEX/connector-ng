@@ -8,12 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.auth.jwt;
-
-import java.time.Duration;
+package eu.ecodex.connector.application.exception;
 
 /**
- * Refresh token configuration properties.
+ * Representation of a bad request for a user role.
  */
-public record RefreshTokenProperties(Duration expiration, String cleanupCron) {
+public class ConnectorRoleIdentifierException extends RuntimeException {
+    public ConnectorRoleIdentifierException(String message) {
+        super(message);
+    }
 }

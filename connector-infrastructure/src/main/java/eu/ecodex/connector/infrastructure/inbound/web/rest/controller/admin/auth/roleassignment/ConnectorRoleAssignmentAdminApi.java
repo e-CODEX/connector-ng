@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.NonNull;
+import jakarta.annotation.Nonnull;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +42,7 @@ public interface ConnectorRoleAssignmentAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto register(@PathVariable("uuid") @NonNull String identifier,
+    ConnectorUserDto register(@PathVariable("uuid") @Nonnull String identifier,
                               @RequestBody String role);
 
     @Operation(summary = "Unassign a user role.")
@@ -52,6 +52,6 @@ public interface ConnectorRoleAssignmentAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto delete(@PathVariable("uuid") @NonNull String identifier,
-                            @RequestBody @NonNull String role);
+    ConnectorUserDto delete(@PathVariable("uuid") @Nonnull String identifier,
+                            @RequestBody @Nonnull String role);
 }

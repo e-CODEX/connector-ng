@@ -15,7 +15,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorCleanupRefreshTokenScheduler;
+import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorCleanupRefreshTokenScheduler;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -40,11 +40,9 @@ public class ConnectorRefreshTokenCleanupSchedulerIT extends AbstractIntegration
         cleanDb();
     }
 
-
     @Test
     @Sql("classpath:sql/user.sql")
     void should_clean_revoked_refresh_tokens() {
-
         var userUuid = "d43bfa931-3c25-47e4-b377-bf4ce7b0d04c_default_admin";
         var revoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, true);
         var notRevoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, false);

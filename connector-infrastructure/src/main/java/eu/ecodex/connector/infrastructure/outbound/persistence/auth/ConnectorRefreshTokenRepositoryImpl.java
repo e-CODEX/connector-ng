@@ -18,10 +18,10 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.user.Connecto
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRefreshTokenJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.user.ConnectorUserMapper;
-import jakarta.annotation.Nonnull;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -41,47 +41,48 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
     }
 
     @Override
-    public Optional<ConnectorRefreshToken> findByToken(@Nonnull String token) {
+    public Optional<ConnectorRefreshToken> findByToken(@NonNull String token) {
         return jpaRepository.findByToken(token).map(this::toDomain);
     }
 
     @Override
-    public ConnectorRefreshToken save(@Nonnull ConnectorRefreshToken refreshToken) {
+    public ConnectorRefreshToken save(@NonNull ConnectorRefreshToken refreshToken) {
         var user = userRepository.findByUuid(refreshToken.user().uuid()).orElseThrow();
         var saved = jpaRepository.save(toEntity(refreshToken, user));
         return toDomain(saved);
     }
 
     @Override
-    public void delete(@Nonnull ConnectorRefreshToken refreshToken) {
+    public void delete(@NonNull ConnectorRefreshToken refreshToken) {
         var user = userRepository.findByUuid(refreshToken.user().uuid()).orElseThrow();
         jpaRepository.delete(toEntity(refreshToken, user));
     }
 
     @Override
-    public List<ConnectorRefreshToken> findByUserUuidAndRevoked(String uuid, boolean revoked) {
+    public List<ConnectorRefreshToken> findByUserUuidAndRevoked(@NonNull String uuid,
+                                                                boolean revoked) {
         return jpaRepository.findByUser_UuidAndRevoked(uuid, revoked).stream()
             .map(this::toDomain)
             .toList();
     }
 
     @Override
-    public int revokeByUserUuid(@Nonnull String uuid) {
+    public int revokeByUserUuid(@NonNull String uuid) {
         return jpaRepository.revokeAllByUserUuid(uuid);
     }
 
     @Override
-    public int deleteByUserUuid(@Nonnull String uuid) {
+    public int deleteByUserUuid(@NonNull String uuid) {
         return jpaRepository.deleteByUser_Uuid(uuid);
     }
 
     @Override
-    public int deleteByExpiryDateBefore(@Nonnull Instant expiryDate) {
+    public int deleteByExpiryDateBefore(@NonNull Instant expiryDate) {
         return jpaRepository.deleteByExpiresAtBefore(expiryDate);
     }
 
     @Override
-    public int deleteByRevokedAndExpiryDateBefore(@Nonnull Instant expiryDate) {
+    public int deleteByRevokedAndExpiryDateBefore(@NonNull Instant expiryDate) {
         return jpaRepository.deleteByRevokedTrueAndExpiresAtBefore(expiryDate);
     }
 
@@ -97,7 +98,7 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
      * @return A new {@link ConnectorRefreshTokenEntity} built from the provided
      *     {@link ConnectorRefreshToken} and {@link ConnectorUserEntity}.
      */
-    private ConnectorRefreshTokenEntity toEntity(ConnectorRefreshToken domain,
+    private ConnectorRefreshTokenEntity toEntity(@NonNull ConnectorRefreshToken domain,
                                                  ConnectorUserEntity user) {
         return ConnectorRefreshTokenEntity.builder()
             .token(domain.token())
@@ -116,7 +117,7 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
      *
      * @return A {@link ConnectorRefreshToken} instance constructed from the provided entity.
      */
-    private ConnectorRefreshToken toDomain(ConnectorRefreshTokenEntity entity) {
+    private ConnectorRefreshToken toDomain(@NonNull ConnectorRefreshTokenEntity entity) {
         return ConnectorRefreshToken.builder()
             .token(entity.getToken())
             .user(ConnectorUserMapper.toDomain(entity.getUser()))

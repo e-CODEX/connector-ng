@@ -89,5 +89,4 @@ class ConnectorRemoveUserIT extends AbstractIntegrationTest {
         existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();
     }
-
 }

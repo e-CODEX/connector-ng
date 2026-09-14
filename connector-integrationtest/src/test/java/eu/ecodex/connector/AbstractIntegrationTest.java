@@ -17,8 +17,8 @@ import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.Connector
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
-import eu.ecodex.connector.infrastructure.outbound.auth.JwtService;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtGenerator;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -93,7 +93,7 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
-    private JwtService jwtTokenService;
+    private ConnectorJwtGenerator jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
@@ -175,12 +175,8 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected String generateDefaultAdminToken() {
-        var user = new ConnectorUserDetails(ConnectorUser
-            .defaultAdminUser()
-            .toBuilder()
-            .uuid(UUID
-                .randomUUID()
-                .toString())
+        var user = new ConnectorUserDetails(ConnectorUser.defaultAdminUser().toBuilder()
+            .uuid(UUID.randomUUID().toString())
             .build());
         return jwtTokenService.generateAccessToken(user);
     }

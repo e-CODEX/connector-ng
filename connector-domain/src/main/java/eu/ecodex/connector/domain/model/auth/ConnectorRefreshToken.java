@@ -11,9 +11,10 @@
 package eu.ecodex.connector.domain.model.auth;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
+import lombok.Builder;
 
 /**
  * Represents a refresh token used for managing user authentication sessions.
@@ -27,79 +28,13 @@ import java.time.Instant;
  * <p>The `RefreshToken` class serves as an immutable data structure to securely and
  * consistently handle refresh token details within the system.
  */
+@Builder(toBuilder = true)
 public record ConnectorRefreshToken(
     @NotBlank String token,
-    @Nonnull ConnectorUser user,
+    @NotNull ConnectorUser user,
     Instant expiresAt,
     Instant createdAt,
     boolean revoked
 ) {
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * Creates a new {@link Builder} instance pre-populated with the current state
-     * of this {@link ConnectorRefreshToken} instance.
-     *
-     * @return a {@link Builder} instance initialized with the field values of this
-     *     {@link ConnectorRefreshToken}.
-     */
-    public Builder toBuilder() {
-        return new Builder()
-            .token(token)
-            .user(user)
-            .expiresAt(expiresAt)
-            .createdAt(createdAt)
-            .revoked(revoked);
-    }
-
-    /**
-     * A builder class for constructing instances of {@link ConnectorRefreshToken}.
-     *
-     * <p>This builder provides a fluent interface for configuring and creating instances
-     * of the {@link ConnectorRefreshToken} class. It allows setting up various
-     * properties such as the unique identifier, associated user, expiration timestamp,
-     * creation timestamp, and revocation status.
-     *
-     * <p>The builder ensures that a properly configured {@link ConnectorRefreshToken}
-     * instance can be created with the desired state.
-     */
-    public static class Builder {
-        private String token;
-        private ConnectorUser user;
-        private boolean revoked;
-        private Instant expiresAt;
-        private Instant createdAt;
-
-        public Builder token(String token) {
-            this.token = token;
-            return this;
-        }
-
-        public Builder user(ConnectorUser user) {
-            this.user = user;
-            return this;
-        }
-
-        public Builder expiresAt(Instant expiresAt) {
-            this.expiresAt = expiresAt;
-            return this;
-        }
-
-        public Builder createdAt(Instant createdAt) {
-            this.createdAt = createdAt;
-            return this;
-        }
-
-        public Builder revoked(boolean revoked) {
-            this.revoked = revoked;
-            return this;
-        }
-
-        public ConnectorRefreshToken build() {
-            return new ConnectorRefreshToken(token, user, expiresAt, createdAt, revoked);
-        }
-    }
 }

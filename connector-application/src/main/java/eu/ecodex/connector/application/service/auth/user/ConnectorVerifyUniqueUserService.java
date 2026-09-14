@@ -10,13 +10,13 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserIdMismatchException;
+import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUserEmail;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,13 +36,13 @@ public class ConnectorVerifyUniqueUserService implements ConnectorVerifyUniqueUs
     }
 
     @Override
-    public void execute(@NonNull String identifier, @NonNull ConnectorUser user) {
-        if (user.uuid() != null && !user.uuid().equals(identifier)) {
-            throw new ConnectorUserIdMismatchException(
+    public void execute(@NonNull String userIdentifier, @NonNull ConnectorUser user) {
+        if (user.uuid() != null && !user.uuid().equals(userIdentifier)) {
+            throw new ConnectorUserIdentifierMismatchException(
                 "identifier '%s' does not match the user identifier '%s'"
-                    .formatted(identifier, user.uuid()));
+                    .formatted(userIdentifier, user.uuid()));
         }
-        var newUser = user.toBuilder().uuid(identifier).build();
+        var newUser = user.toBuilder().uuid(userIdentifier).build();
         execute(newUser);
     }
 

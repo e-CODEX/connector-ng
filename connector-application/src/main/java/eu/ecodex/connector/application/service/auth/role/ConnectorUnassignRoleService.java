@@ -17,8 +17,8 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorUnassignRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,9 +54,8 @@ public class ConnectorUnassignRoleService implements ConnectorUnassignRole {
     }
 
     @Override
-    public ConnectorUser execute(@NonNull String identifier, @NonNull String roleName)
-        throws ConnectorRoleNotFoundException, ConnectorUserNotFoundException {
-        var user = getUserByIdentifier(identifier);
+    public ConnectorUser execute(@NonNull String roleIdentifier, @NonNull String roleName) {
+        var user = getUserByIdentifier(roleIdentifier);
         if (user.roles() == null) {
             return user;
         }
@@ -65,8 +64,7 @@ public class ConnectorUnassignRoleService implements ConnectorUnassignRole {
         return (user.equals(updated)) ? user : userRepository.save(updated);
     }
 
-    private ConnectorUser getUserByIdentifier(String identifier)
-        throws ConnectorUserNotFoundException {
+    private ConnectorUser getUserByIdentifier(String identifier) {
         return userRepository.findByUuid(identifier)
             .orElseThrow(() -> new ConnectorUserNotFoundException(identifier));
     }

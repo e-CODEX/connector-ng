@@ -53,7 +53,8 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
             .expiresAt(loginTime.plus(duration))
             .build();
 
-        when(refreshTokenRepository.findByToken(any())).thenReturn(Optional.of(expectedRefreshToken));
+        when(refreshTokenRepository.findByToken(any())).thenReturn(
+            Optional.of(expectedRefreshToken));
 
         // When
         service.execute(userId, refreshToken);

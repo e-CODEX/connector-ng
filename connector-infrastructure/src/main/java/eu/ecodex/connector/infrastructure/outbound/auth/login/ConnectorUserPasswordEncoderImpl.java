@@ -8,12 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -26,10 +26,10 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Service
-public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
+public class ConnectorUserPasswordEncoderImpl implements ConnectorUserPasswordEncoder {
     private final PasswordEncoder passwordEncoder;
 
-    public PasswordEncoderService(PasswordEncoder passwordEncoder) {
+    public ConnectorUserPasswordEncoderImpl(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -41,7 +41,7 @@ public class PasswordEncoderService implements ConnectorUserPasswordEncoder {
      * @return user with encoded password
      */
     @Override
-    public ConnectorUser encodePassword(@NonNull ConnectorUser user) {
+    public ConnectorUser encodePassword(@lombok.NonNull ConnectorUser user) {
         if (user.password() == null) {
             return user;
         }

@@ -11,10 +11,10 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginUser;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLogoutUser;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;

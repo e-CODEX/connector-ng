@@ -117,5 +117,4 @@ class ConnectorUpdateRoleIT extends AbstractIntegrationTest {
             .expectStatus()
             .is4xxClientError();
     }
-
 }

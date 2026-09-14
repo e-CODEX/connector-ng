@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.application.port.spi.auth.login;
 
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import org.jspecify.annotations.NonNull;
 
 /**

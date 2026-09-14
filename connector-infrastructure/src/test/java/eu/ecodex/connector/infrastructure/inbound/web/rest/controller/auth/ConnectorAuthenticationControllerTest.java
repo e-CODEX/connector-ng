@@ -16,8 +16,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
@@ -33,7 +33,6 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorAuthenticationController.class)
 class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
-
     @MockitoBean
     ConnectorLoginUserImpl loginUserService;
 
@@ -45,7 +44,6 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
 
     @Autowired
     RestTestClient apiClient;
-
 
     @Test
     void login_should_return_200() {

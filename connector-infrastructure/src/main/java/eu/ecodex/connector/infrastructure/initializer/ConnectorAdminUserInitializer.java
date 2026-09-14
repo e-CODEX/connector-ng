@@ -34,6 +34,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Initializes an admin user in the connector system during the application startup phase.
@@ -110,7 +111,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     public void run(@NonNull ApplicationArguments args) {
         initializeDefaultUserRoles();
 
-        if (adminUserProperties == null || adminUserProperties.isEmpty()) {
+        if (adminUserProperties == null) {
             log.info("No Administrator user configured in properties");
             registerFallbackAdminUser();
             return;
@@ -174,7 +175,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     }
 
     private void initializeAdminUser(ConnectorAdminUserProperties properties) {
-        if (properties.getUsername() == null || properties.getUsername().isBlank()) {
+        if (!StringUtils.hasText(properties.getUsername())) {
             registerFallbackAdminUser();
             return;
         }

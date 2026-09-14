@@ -13,7 +13,10 @@ All notable changes to this project will be documented in this file.
 - **Search** — Filter messages by `business domain`.
 - **Message** — Missing security validation for incoming business message containers.
 - **Administration** — REST API endpoints to support the administration portal.
-- **Authentication enabled** — REST API admin endpoints will have to authenticate. An admin account is created by default. Check credentials in properties.
+- **Authentication enabled** — REST API endpoints require a valid JWT bearer token unless explicitly listed public endpoints.
+- ***An admin account is created by default*** — Check the deployment properties for its credentials.
+- ***Admin-only endpoints*** — `/api/v1/admin/users/**` requires the caller to hold the `ADMIN` role, in addition to being authenticated.
+- ***Public endpoints*** — require no authentication.
 
 
 #### Fixes

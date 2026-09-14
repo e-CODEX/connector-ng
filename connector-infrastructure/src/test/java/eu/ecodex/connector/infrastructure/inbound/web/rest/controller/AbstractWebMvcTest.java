@@ -14,9 +14,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 import eu.ecodex.connector.TestConfiguration;
+import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtTokenHelper;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -53,6 +53,17 @@ public abstract class AbstractWebMvcTest {
     @MockitoBean
     protected ConnectorJwtAuthenticationFilter jwtAuthenticationFilter;
 
+    protected static RequestPostProcessor authenticatedAs(ConnectorUserDetails principal) {
+        return (MockHttpServletRequest request) -> {
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities())
+            );
+            SecurityContextHolder.setContext(context);
+            return request;
+        };
+    }
+
     /**
      * Configures the mocked JWT authentication filter as a transparent pass-through filter.
      *
@@ -61,7 +72,8 @@ public abstract class AbstractWebMvcTest {
      * depend on the real security filter chain. For that reason, servlet filters are disabled with
      * {@code @AutoConfigureMockMvc(addFilters = false)}.
      *
-     * <p>The {@link ConnectorJwtAuthenticationFilter} bean is still mocked because some MVC test contexts
+     * <p>The {@link ConnectorJwtAuthenticationFilter} bean is still mocked because some MVC test
+     * contexts
      * may need it during Spring context creation, especially when security configuration is
      * discovered.
      *
@@ -79,17 +91,6 @@ public abstract class AbstractWebMvcTest {
         })
             .when(jwtAuthenticationFilter)
             .doFilter(any(), any(), any());
-    }
-
-    protected static RequestPostProcessor authenticatedAs(ConnectorUserDetails principal) {
-        return (MockHttpServletRequest request) -> {
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities())
-            );
-            SecurityContextHolder.setContext(context);
-            return request;
-        };
     }
 
 }

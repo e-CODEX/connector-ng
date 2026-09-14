@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.property.auth.jwt;
 
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -23,20 +24,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "connector.admin")
 public class ConnectorAdminUserProperties {
-    String username;
-    String password;
-    String email;
-    Boolean enabled;
-
-    /**
-     * Check if the user is empty.
-     *
-     * @return True if the user is empty, false otherwise.
-     */
-    public boolean isEmpty() {
-        return this.username == null
-                && this.password == null
-                && this.email == null
-                && this.enabled == null;
-    }
+    @NonNull
+    private String username;
+    @NonNull
+    private String password;
+    @NonNull
+    private String email;
+    @NonNull
+    private Boolean enabled;
 }

@@ -112,8 +112,6 @@ public class ConnectorUserEntity extends BaseEntity {
         joinColumns = @JoinColumn(name = "USER_ID"),
         inverseJoinColumns = @JoinColumn(name = "ROLE_ID")
     )
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     private Set<ConnectorRoleEntity> roles = new HashSet<>();
 
     /**
@@ -150,5 +148,4 @@ public class ConnectorUserEntity extends BaseEntity {
         }
         roles.remove(role);
     }
-
 }

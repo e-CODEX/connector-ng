@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.auth.token;
 
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import jakarta.annotation.Nonnull;
 
 /**
@@ -22,11 +22,12 @@ public interface ConnectorRefreshUserRefreshToken {
      * the provided refresh token. This method validates the given refresh token
      * and, if valid, issues a new access token while preserving the user's session.
      *
-     * @param token       the refresh token used to obtain a new access token
-     * @param accessToken the current access token associated with the user's session
+     * @param refreshToken the refresh token used to obtain a new access token
+     * @param accessToken  the current access token associated with the user's session
      *
      * @return a {@code LoginResponse} containing the new access token,
      *     refresh token, and expiration details of the session
      */
-    ConnectorLoginResponse execute(@Nonnull String accessToken, @Nonnull String token);
+    ConnectorUserAuthenticationResult execute(@Nonnull String accessToken,
+                                              @Nonnull String refreshToken);
 }

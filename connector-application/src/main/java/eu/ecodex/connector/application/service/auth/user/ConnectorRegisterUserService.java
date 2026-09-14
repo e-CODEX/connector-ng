@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserIdMismatchException;
+import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUser;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
@@ -67,7 +67,7 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
     @Override
     public ConnectorUser execute(@Nonnull ConnectorUser user) {
         if (user.uuid() != null) {
-            throw new ConnectorUserIdMismatchException("Connector user id should be blank");
+            throw new ConnectorUserIdentifierMismatchException("Connector user id should be blank");
         }
         verifyUniqueUser.execute(user);
         user = passwordEncoder.encodePassword(user);

@@ -8,14 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.exception;
+package eu.ecodex.connector.infrastructure.property.auth;
+
+import java.time.Duration;
+import lombok.NonNull;
 
 /**
- * Exception thrown when the identifier provided in the path does not match the identifier provided
- * in the request body.
+ * Refresh token configuration properties.
  */
-public class ConnectorUserIdMismatchException extends RuntimeException {
-    public ConnectorUserIdMismatchException(String message) {
-        super(message);
-    }
+public record ConnectorRefreshTokenProperties(@NonNull Duration expiration,
+                                              @NonNull String cleanupCron) {
 }

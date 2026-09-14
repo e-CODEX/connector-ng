@@ -15,9 +15,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import java.util.List;
-import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -49,7 +49,7 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorRoleDto register(@Valid @RequestBody ConnectorRoleDto usrRoleDto);
+    ConnectorRoleDto register(@Valid @RequestBody @Nonnull ConnectorRoleDto usrRoleDto);
 
     @Operation(summary = "Update a connector user role.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -59,7 +59,7 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorRoleDto update(@PathVariable("uuid") @NonNull String identifier,
+    ConnectorRoleDto update(@PathVariable("uuid") @Nonnull String identifier,
                             @Valid @RequestBody ConnectorRoleDto userRoleDto);
 
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
@@ -69,7 +69,7 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
     })
-    ConnectorRoleDto getByIdentifier(@PathVariable("uuid") @NonNull String identifier);
+    ConnectorRoleDto getByIdentifier(@PathVariable("uuid") @Nonnull String identifier);
 
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
@@ -87,5 +87,5 @@ public interface ConnectorRoleAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    void deleteByIdentifier(@PathVariable("uuid") @NonNull String identifier);
+    void deleteByIdentifier(@PathVariable("uuid") @Nonnull String identifier);
 }

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Component
+@Transactional
 public class ConnectorCleanupUserRefreshTokenService implements ConnectorCleanupUserRefreshToken {
     private final ConnectorRefreshTokenRepository refreshTokenRepository;
     private final Clock clock;
@@ -38,7 +39,6 @@ public class ConnectorCleanupUserRefreshTokenService implements ConnectorCleanup
      * How long to retain revoked tokens and then purge them.
      */
     @Override
-    @Transactional
     public void execute() {
         var now = clock.instant();
         var expiredDeleted = refreshTokenRepository.deleteByExpiryDateBefore(now);

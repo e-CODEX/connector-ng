@@ -152,5 +152,4 @@ class ConnectorAssignUserRoleIT extends AbstractIntegrationTest {
         assertThat(existing).isNotEmpty();
         assertThat(existing.get().roles()).hasSize(2);
     }
-
 }

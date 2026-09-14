@@ -22,8 +22,8 @@ public interface ConnectorVerifyUserRefreshToken {
      * This method checks whether the provided token is valid, not expired, and has not been
      * revoked.
      *
-     * @param token the refresh token to be verified
+     * @param refreshToken the refresh token to be verified
      *
      */
-    ConnectorRefreshToken execute(@Nonnull String token);
+    ConnectorRefreshToken execute(@Nonnull String refreshToken);
 }

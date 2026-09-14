@@ -16,8 +16,8 @@ import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshToken
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,9 +39,9 @@ public class ConnectorRegisterUserRefreshTokenService implements ConnectorRegist
     /**
      * Constructs a new instance of {@link ConnectorRegisterUserRefreshTokenService}.
      *
-     * @param repository The repository for managing refresh tokens.
+     * @param repository                  The repository for managing refresh tokens.
      * @param authenticationTokenProvider The provider for generating access tokens.
-     * @param clock The clock used for time-related operations.
+     * @param clock                       The clock used for time-related operations.
      */
     public ConnectorRegisterUserRefreshTokenService(
         ConnectorRefreshTokenRepository repository,

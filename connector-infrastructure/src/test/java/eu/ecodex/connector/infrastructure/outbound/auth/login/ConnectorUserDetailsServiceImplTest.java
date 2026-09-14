@@ -27,13 +27,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorUserDetailsServiceTest {
+class ConnectorUserDetailsServiceImplTest {
 
     @Mock
     ConnectorRetrieveUserByUsernameService retrieveUserService;
 
     @InjectMocks
-    ConnectorUserDetailsService service;
+    ConnectorUserDetailsServiceImpl service;
 
     @Test
     void loadUserByUsername_should_return_user_details() {

@@ -11,14 +11,14 @@
 package eu.ecodex.connector.application.service.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorUpdateRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Objects;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,7 +38,7 @@ import org.springframework.stereotype.Component;
  * during updates.
  *
  * <p>Exception Handling:
- * - Throws {@link ConnectorRoleBadRequestException} for invalid input, such as a non-blank
+ * - Throws {@link ConnectorRoleIdentifierException} for invalid input, such as a non-blank
  * identifier during registration.
  * - Throws {@link ConnectorRoleNotFoundException} if a user role to update is not found.
  * - Throws {@link ConnectorRoleAlreadyExistsException} when a duplicate role name is detected.
@@ -53,12 +53,12 @@ public class ConnectorUpdateRoleService implements ConnectorUpdateRole {
     }
 
     @Override
-    public ConnectorRole execute(@NonNull String identifier, @NonNull ConnectorRole userRole) {
-        var existingUserRole = repository.findByUuid(identifier)
+    public ConnectorRole execute(@NonNull String roleIdentifier, @NonNull ConnectorRole userRole) {
+        var existingUserRole = repository.findByUuid(roleIdentifier)
             .orElseThrow(() -> new ConnectorRoleNotFoundException(
-                "No existing user role found with id " + identifier));
+                "No existing user role found with id " + roleIdentifier));
 
-        validateRoleName(identifier, userRole);
+        validateRoleName(roleIdentifier, userRole);
 
         if (existingUserRole.name().equalsIgnoreCase(userRole.name())) {
             log.info("Nothing to update");
@@ -66,14 +66,14 @@ public class ConnectorUpdateRoleService implements ConnectorUpdateRole {
         }
         var userBuilder = existingUserRole.toBuilder();
         userBuilder.name(userRole.name());
-
         return repository.save(userBuilder.build());
     }
 
-    private void validateRoleName(@NonNull String identifier, @NonNull ConnectorRole userRole) {
+    private void validateRoleName(@NonNull String roleIdentifier, @NonNull ConnectorRole userRole) {
         var existingUser = repository.findByName(userRole.name());
 
-        if (existingUser.isPresent() && !Objects.equals(existingUser.get().uuid(), identifier)) {
+        if (existingUser.isPresent()
+            && !Objects.equals(existingUser.get().uuid(), roleIdentifier)) {
             throw new ConnectorRoleAlreadyExistsException(
                 "Role name '%s' already exists".formatted(userRole.name())
             );

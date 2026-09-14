@@ -15,8 +15,8 @@ import eu.ecodex.connector.application.port.api.auth.token.ConnectorVerifyUserRe
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import jakarta.annotation.Nonnull;
 import java.time.Clock;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -50,24 +50,24 @@ public class ConnectorVerifyUserRefreshTokenService implements ConnectorVerifyUs
     }
 
     @Override
-    public ConnectorRefreshToken execute(@Nonnull String token) {
-        if (!StringUtils.hasText(token)) {
+    public ConnectorRefreshToken execute(@NonNull String refreshToken) {
+        if (!StringUtils.hasText(refreshToken)) {
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
         }
-        var refreshToken = repository.findByToken(token)
+        var foundToken = repository.findByToken(refreshToken)
             .orElseThrow(() -> new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
-        if (refreshToken.user().uuid() == null) {
+        if (foundToken.user().uuid() == null) {
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
         }
 
-        if (refreshToken.revoked()) {
+        if (foundToken.revoked()) {
             throw new ConnectorUserBadCredentialsException("Refresh token revoked");
         }
 
-        if (!refreshToken.expiresAt().isAfter(clock.instant())) {
+        if (!foundToken.expiresAt().isAfter(clock.instant())) {
             throw new ConnectorUserBadCredentialsException("Refresh token expired");
         }
-        return refreshToken;
+        return foundToken;
     }
 }

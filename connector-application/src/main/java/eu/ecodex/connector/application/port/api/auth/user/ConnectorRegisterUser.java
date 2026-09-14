@@ -14,6 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsExcep
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
+
 /**
  * Interface for managing the registration and updates of {@link ConnectorUser} entities in the
  * system.
@@ -28,6 +29,8 @@ public interface ConnectorRegisterUser {
      *
      * @return the registered {@link ConnectorUser} with updated metadata (e.g., generated UUID,
      *     creation timestamp)
+     *
+     * @throws ConnectorUserAlreadyExistsException exception
      */
-    ConnectorUser execute(@Nonnull ConnectorUser user) throws ConnectorUserAlreadyExistsException;
+    ConnectorUser execute(@Nonnull ConnectorUser user);
 }

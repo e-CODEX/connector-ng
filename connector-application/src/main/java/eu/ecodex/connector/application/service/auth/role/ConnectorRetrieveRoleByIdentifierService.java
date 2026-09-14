@@ -15,8 +15,8 @@ import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByIdentifier;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -38,9 +38,9 @@ public class ConnectorRetrieveRoleByIdentifierService implements ConnectorRetrie
     }
 
     @Override
-    public ConnectorRole execute(@NonNull String identifier) throws ConnectorRoleNotFoundException {
-        return repository.findByUuid(identifier).orElseThrow(
+    public ConnectorRole execute(@NonNull String roleIdentifier) {
+        return repository.findByUuid(roleIdentifier).orElseThrow(
             () -> new ConnectorRoleNotFoundException(
-                String.format("User not found by identifier %s", identifier)));
+                String.format("User not found by identifier %s", roleIdentifier)));
     }
 }

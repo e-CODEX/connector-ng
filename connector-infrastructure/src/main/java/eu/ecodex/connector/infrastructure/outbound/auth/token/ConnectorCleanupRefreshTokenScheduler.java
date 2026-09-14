@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth.login;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorCleanupUserRefreshToken;
 import lombok.extern.slf4j.Slf4j;

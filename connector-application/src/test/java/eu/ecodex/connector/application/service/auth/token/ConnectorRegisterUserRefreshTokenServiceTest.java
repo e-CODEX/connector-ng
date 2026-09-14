@@ -23,7 +23,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsExce
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
 import java.time.Duration;
@@ -39,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConnectorRegisterUserRefreshTokenServiceTest {
     @Mock
-    Clock clock;
+    private Clock clock;
     @Mock
     private ConnectorRefreshTokenRepository refreshTokenRepository;
     @Mock
@@ -134,7 +134,7 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
 
         // Then
         assertThat(newToken).isNotNull();
-        assertThat(newToken).isEqualTo(ConnectorLoginResponse.builder()
+        assertThat(newToken).isEqualTo(ConnectorUserAuthenticationResult.builder()
             .accessToken(newAccessToken)
             .refreshToken(refreshToken)
             .expiresIn(accessTokenDuration.getSeconds())
@@ -182,7 +182,7 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
 
         // Then
         assertThat(newToken).isNotNull();
-        assertThat(newToken).isEqualTo(ConnectorLoginResponse.builder()
+        assertThat(newToken).isEqualTo(ConnectorUserAuthenticationResult.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .expiresIn(accessTokenDuration.getSeconds())
@@ -243,7 +243,7 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
 
         // Then
         assertThat(newToken).isNotNull();
-        assertThat(newToken).isEqualTo(ConnectorLoginResponse.builder()
+        assertThat(newToken).isEqualTo(ConnectorUserAuthenticationResult.builder()
             .accessToken(newAccessToken)
             .refreshToken(newRefreshToken)
             .expiresIn(accessTokenDuration.getSeconds())
@@ -307,7 +307,7 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
 
         // Then
         assertThat(newToken).isNotNull();
-        assertThat(newToken).isEqualTo(ConnectorLoginResponse.builder()
+        assertThat(newToken).isEqualTo(ConnectorUserAuthenticationResult.builder()
             .accessToken(newAccessToken)
             .refreshToken(newRefreshToken)
             .expiresIn(accessTokenDuration.getSeconds())

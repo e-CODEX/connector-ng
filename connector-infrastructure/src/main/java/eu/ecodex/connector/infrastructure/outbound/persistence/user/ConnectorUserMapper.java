@@ -16,6 +16,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.user.Connecto
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 
 /**
@@ -30,9 +31,8 @@ public class ConnectorUserMapper {
      *
      * @return domain user
      */
-    public ConnectorUser toDomain(ConnectorUserEntity entity) {
-        return ConnectorUser
-            .builder()
+    public ConnectorUser toDomain(@NonNull ConnectorUserEntity entity) {
+        return ConnectorUser.builder()
             .uuid(entity.getUuid())
             .username(entity.getUsername())
             .password(entity.getPassword())
@@ -52,16 +52,15 @@ public class ConnectorUserMapper {
      *
      * @return Set of domain roles
      */
-    public Set<ConnectorRole> toDomainRoles(ConnectorUserEntity entity) {
+    public Set<ConnectorRole> toDomainRoles(@NonNull ConnectorUserEntity entity) {
         return entity.getRoles() == null ? null :
             entity.getRoles().stream()
                 .map(ConnectorUserMapper::toDomainRole)
                 .collect(Collectors.toUnmodifiableSet());
     }
 
-    private ConnectorRole toDomainRole(ConnectorRoleEntity role) {
-        return ConnectorRole
-            .builder()
+    private ConnectorRole toDomainRole(@NonNull ConnectorRoleEntity role) {
+        return ConnectorRole.builder()
             .uuid(role.getUuid())
             .name(role.getName())
             .createdAt(role.getCreatedAt())

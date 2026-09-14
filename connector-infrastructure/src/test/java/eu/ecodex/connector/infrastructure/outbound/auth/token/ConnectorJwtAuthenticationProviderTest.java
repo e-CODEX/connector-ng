@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
-import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
-import eu.ecodex.connector.infrastructure.property.auth.jwt.RefreshTokenProperties;
+import eu.ecodex.connector.infrastructure.property.auth.ConnectorJwtProperties;
+import eu.ecodex.connector.infrastructure.property.auth.ConnectorRefreshTokenProperties;
 import io.jsonwebtoken.Claims;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,16 +32,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class JwtAuthenticationProviderTest {
+class ConnectorJwtAuthenticationProviderTest {
+    @Mock
+    ConnectorJwtParser tokenParser;
+    @Mock
+    ConnectorJwtGenerator tokenGenerator;
 
     @Mock
-    JwtService jwtService;
-
-    @Mock
-    JwtProperties jwtProperties;
+    ConnectorJwtProperties jwtProperties;
 
     @InjectMocks
-    JwtAuthenticationProvider jwtProvider;
+    ConnectorJwtAuthenticationProvider jwtProvider;
 
     @Test
     void generateToken_should_return_token() {
@@ -49,7 +50,7 @@ class JwtAuthenticationProviderTest {
         var user = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
 
-        when(jwtService.generateAccessToken(any())).thenReturn("token");
+        when(tokenGenerator.generateAccessToken(any())).thenReturn("token");
 
         // When
         var token = jwtProvider.generateAccessToken(user);
@@ -57,8 +58,8 @@ class JwtAuthenticationProviderTest {
         // Then
         assertThat(token).isEqualTo("token");
 
-        verify(jwtService).generateAccessToken(userDetails);
-        verifyNoMoreInteractions(jwtService);
+        verify(tokenGenerator).generateAccessToken(userDetails);
+        verifyNoMoreInteractions(tokenParser);
     }
 
     @Test
@@ -81,7 +82,7 @@ class JwtAuthenticationProviderTest {
     void refreshTokenExpires_should_return_refresh_token_duration() {
         // Given
         var expiration = Duration.ofDays(2);
-        var props = new RefreshTokenProperties(expiration, StringUtils.EMPTY);
+        var props = new ConnectorRefreshTokenProperties(expiration, StringUtils.EMPTY);
 
         when(jwtProperties.getRefreshToken()).thenReturn(props);
 
@@ -98,28 +99,28 @@ class JwtAuthenticationProviderTest {
     @Test
     void isAccessTokenExpired_should_return_FALSE() {
         // Given
-        when(jwtService.isExpired(any())).thenReturn(Boolean.FALSE);
+        when(tokenParser.isExpired(any())).thenReturn(Boolean.FALSE);
 
         // When
         boolean expired = jwtProvider.isAccessTokenExpired("token");
 
         // Then
         assertThat(expired).isFalse();
-        verify(jwtService).isExpired("token");
+        verify(tokenParser).isExpired("token");
         assertNoMoreInteractions();
     }
 
     @Test
     void isAccessTokenExpired_should_return_TRUE() {
         // Given
-        when(jwtService.isExpired(any())).thenReturn(Boolean.TRUE);
+        when(tokenParser.isExpired(any())).thenReturn(Boolean.TRUE);
 
         // When
         boolean expired = jwtProvider.isAccessTokenExpired("token");
 
         // Then
         assertThat(expired).isTrue();
-        verify(jwtService).isExpired("token");
+        verify(tokenParser).isExpired("token");
         assertNoMoreInteractions();
     }
 
@@ -129,19 +130,19 @@ class JwtAuthenticationProviderTest {
         var claims = mock(Claims.class);
         var dateString = "2026-09-01T00:00:00Z";
         when(claims.getExpiration()).thenReturn(Date.from(Instant.parse(dateString)));
-        when(jwtService.parseAllowingExpired(any())).thenReturn(claims);
+        when(tokenParser.parseAllowingExpired(any())).thenReturn(claims);
 
         // When
         var actual = jwtProvider.getAccessTokenExpirationDate("token");
 
         // Then
         assertThat(actual).isNotNull().isEqualTo(Instant.parse(dateString));
-        verify(jwtService).parseAllowingExpired("token");
+        verify(tokenParser).parseAllowingExpired("token");
         assertNoMoreInteractions();
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(jwtService, jwtProperties);
+        verifyNoMoreInteractions(tokenParser, jwtProperties);
     }
 
     @Test
@@ -149,14 +150,14 @@ class JwtAuthenticationProviderTest {
         // Given
         var claims = mock(Claims.class);
         when(claims.getSubject()).thenReturn("username");
-        when(jwtService.parseAllowingExpired(any())).thenReturn(claims);
+        when(tokenParser.parseAllowingExpired(any())).thenReturn(claims);
 
         // When
         var actual = jwtProvider.getUsernameFromToken("token");
 
         // Then
         assertThat(actual).isNotNull().isEqualTo("username");
-        verify(jwtService).parseAllowingExpired("token");
+        verify(tokenParser).parseAllowingExpired("token");
         assertNoMoreInteractions();
     }
 
@@ -165,7 +166,7 @@ class JwtAuthenticationProviderTest {
         // Given
         var cron = "0 0 3 * * *";
         var expiration = Duration.ofDays(2);
-        var props = new RefreshTokenProperties(expiration, cron);
+        var props = new ConnectorRefreshTokenProperties(expiration, cron);
 
         when(jwtProperties.getRefreshToken()).thenReturn(props);
 

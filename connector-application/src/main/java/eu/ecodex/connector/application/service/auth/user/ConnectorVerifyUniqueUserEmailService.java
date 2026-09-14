@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsExcep
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUserEmail;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,10 @@ public class ConnectorVerifyUniqueUserEmailService implements ConnectorVerifyUni
     }
 
     @Override
-    public void execute(@Nonnull ConnectorUser user) {
+    public void execute(@NonNull ConnectorUser user) {
+        if (user.email() == null) {
+            return;
+        }
         var emailTakenByAnotherUser = user.uuid() != null
             ? repository.existsByEmailAndUuidNot(user.email(), user.uuid())
             : repository.existsByEmail(user.email());

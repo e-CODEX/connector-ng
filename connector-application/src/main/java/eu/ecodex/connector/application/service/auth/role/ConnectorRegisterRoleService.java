@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleBadRequestException;
+import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
  * during updates.
  *
  * <p>Exception Handling:
- * - Throws {@link ConnectorRoleBadRequestException} for invalid input, such as a non-blank
+ * - Throws {@link ConnectorRoleIdentifierException} for invalid input, such as a non-blank
  * identifier during registration.
  * - Throws {@link ConnectorRoleNotFoundException} if a user role to update is not found.
  * - Throws {@link ConnectorRoleAlreadyExistsException} when a duplicate role name is detected.
@@ -54,7 +54,7 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     @Override
     public ConnectorRole execute(@Nonnull ConnectorRole userRole) {
         if (userRole.uuid() != null) {
-            throw new ConnectorRoleBadRequestException("Connector user role id should be blank");
+            throw new ConnectorRoleIdentifierException("Connector user role id should be blank");
         }
         validateRoleName(userRole);
         return repository.save(userRole);

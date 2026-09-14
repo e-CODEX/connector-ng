@@ -38,7 +38,6 @@ class ConnectorUnassignUserRoleIT extends AbstractIntegrationTest {
         cleanDb();
     }
 
-
     @Test
     @Sql({"classpath:sql/user.sql"})
     void delete_should_update_existing_user_roles() {
@@ -107,5 +106,4 @@ class ConnectorUnassignUserRoleIT extends AbstractIntegrationTest {
         assertThat(existing).isNotEmpty();
         assertThat(existing.get().roles()).hasSize(2);
     }
-
 }

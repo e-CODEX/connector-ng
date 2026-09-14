@@ -15,7 +15,6 @@ import jakarta.annotation.Nonnull;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -69,7 +68,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
      *     if no entities match, an empty list is returned
      */
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    List<ConnectorRefreshTokenEntity> findByUser_UuidAndRevoked(@NonNull String userUuid,
+    List<ConnectorRefreshTokenEntity> findByUser_UuidAndRevoked(@Nonnull String userUuid,
                                                                 boolean revoked);
 
     @Modifying
@@ -86,7 +85,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
     @Modifying
     @Transactional
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int deleteByUser_Uuid(@NonNull String userUuid);
+    int deleteByUser_Uuid(@Nonnull String userUuid);
 
     @Modifying
     @Transactional
@@ -96,5 +95,5 @@ public interface ConnectorUserRefreshTokenJpaRepository
     @Modifying
     @Transactional
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int deleteByRevokedTrueAndExpiresAtBefore(@NonNull Instant instant);
+    int deleteByRevokedTrueAndExpiresAtBefore(@Nonnull Instant instant);
 }

@@ -28,8 +28,11 @@ public interface ConnectorRemoveRole {
      * based on the provided UUID. If no entry corresponds to the given identifier,
      * the delete operation has no effect.
      *
-     * @param uuid the unique identifier of the user role to be deleted.
-     *             It must correspond to an existing user role in the system.
+     * @param roleIdentifier the unique identifier of the user role to be deleted.
+     *                       It must correspond to an existing user role in the Connector system.
+     *
+     * @throws ConnectorRoleNotFoundException If no user role with the specified identifier exists
+     *                                        in the Connector system.
      */
-    void execute(@Nonnull String uuid) throws ConnectorRoleNotFoundException;
+    void execute(@Nonnull String roleIdentifier);
 }

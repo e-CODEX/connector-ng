@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsExcep
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUsername;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ public class ConnectorVerifyUniqueUsernameService implements ConnectorVerifyUniq
     }
 
     @Override
-    public void execute(@Nonnull ConnectorUser user) {
+    public void execute(@NonNull ConnectorUser user) {
         var usernameTakenByAnotherUser = user.uuid() != null
             ? repository.existsByUsernameAndUuidNot(user.username(), user.uuid())
             : repository.existsByUsername(user.username());

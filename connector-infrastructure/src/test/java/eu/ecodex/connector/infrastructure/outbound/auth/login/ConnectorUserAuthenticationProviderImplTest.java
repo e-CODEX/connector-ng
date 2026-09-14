@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
+import eu.ecodex.connector.application.service.auth.token.ConnectorRevokeUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
@@ -34,8 +36,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorLoginUserServiceTest {
-
+class ConnectorUserAuthenticationProviderImplTest {
     @Mock
     AuthenticationManager authenticationManager;
 
@@ -46,7 +47,24 @@ class ConnectorLoginUserServiceTest {
     ConnectorRegisterUserRefreshTokenService refreshTokenService;
 
     @InjectMocks
-    ConnectorLoginUserService service;
+    ConnectorUserAuthenticationProviderImpl service;
+
+    @Mock
+    ConnectorRevokeUserRefreshTokenService revokeUserTokenService;
+
+    @Test
+    void logout_should_succeed() {
+        // Given
+        var userId = "test";
+        var refreshToken = "refresh-token-abc";
+        doNothing().when(revokeUserTokenService).execute(any(), any());
+
+        // When
+        service.logout(userId, refreshToken);
+
+        // Then
+        verify(revokeUserTokenService).execute(userId, refreshToken);
+    }
 
     @Test
     void login_should_succeed() {
@@ -72,7 +90,7 @@ class ConnectorLoginUserServiceTest {
             Duration.ofMinutes(1));
 
         // When
-        var loginResponse = service.execute(username, password);
+        var loginResponse = service.login(username, password);
 
         // Then
         assertThat(loginResponse).isNotNull();
@@ -104,7 +122,7 @@ class ConnectorLoginUserServiceTest {
 
         // When
         assertThrows(
-            ConnectorUserBadCredentialsException.class, () -> service.execute(username, password));
+            ConnectorUserBadCredentialsException.class, () -> service.login(username, password));
 
         // Then
         var authCaptor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken.class);

@@ -16,7 +16,7 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueU
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import jakarta.annotation.Nonnull;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -79,7 +79,7 @@ public class ConnectorPatchUserService implements ConnectorPatchUser {
      * @return patched {@link ConnectorUser} object
      */
     @Override
-    public ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user) {
+    public ConnectorUser execute(@NonNull String identifier, @NonNull ConnectorUser user) {
         var existingUser = retrieveUserByIdentifier.execute(identifier);
         verifyUniqueUser.execute(identifier, user);
 

@@ -13,8 +13,8 @@ package eu.ecodex.connector.application.service.auth.token;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorRevokeUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,20 +30,20 @@ public class ConnectorRevokeUserRefreshTokenService implements ConnectorRevokeUs
     }
 
     @Override
-    public void execute(@NonNull String userId, @NonNull String token) {
-        var refreshToken = repository.findByToken(token)
+    public void execute(@NonNull String userIdentifier, @NonNull String refreshToken) {
+        var found = repository.findByToken(refreshToken)
             .orElseThrow(() ->
                 new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
-        if (!refreshToken.user().uuid().equals(userId)) {
+        if (!found.user().uuid().equals(userIdentifier)) {
             throw new ConnectorUserBadCredentialsException(
-                "Invalid refresh token for user " + userId);
+                "Invalid refresh token for user " + userIdentifier);
         }
 
-        log.info("Revoking refresh token {}", token);
-        if (refreshToken.revoked()) {
+        log.info("Revoking refresh token {}", refreshToken);
+        if (found.revoked()) {
             return;
         }
-        repository.save(refreshToken.toBuilder().revoked(true).build());
+        repository.save(found.toBuilder().revoked(true).build());
     }
 }

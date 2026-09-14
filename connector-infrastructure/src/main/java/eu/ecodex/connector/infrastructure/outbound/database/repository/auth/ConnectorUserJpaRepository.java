@@ -14,7 +14,6 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.user.Connecto
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
-import lombok.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -44,7 +43,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      */
     @Override
     @EntityGraph(attributePaths = "roles")
-    @NonNull
+    @Nonnull
     List<ConnectorUserEntity> findAll();
 
     /**

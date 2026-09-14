@@ -74,7 +74,6 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
         assertThat(after.get().enabled()).isFalse();
     }
 
-
     @Test
     @Sql({"classpath:sql/user.sql"})
     void register_should_failed_when_username_already_exists() {

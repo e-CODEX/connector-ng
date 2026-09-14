@@ -8,35 +8,29 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.auth.jwt;
+package eu.ecodex.connector.infrastructure.property.auth;
 
+import java.time.Duration;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+
 /**
- * Configuration properties for the admin user.
+ * Configuration properties for the JWT authentication.
  */
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "connector.admin")
-public class ConnectorAdminUserProperties {
-    String username;
-    String password;
-    String email;
-    Boolean enabled;
-
-    /**
-     * Check if the user is empty.
-     *
-     * @return True if the user is empty, false otherwise.
-     */
-    public boolean isEmpty() {
-        return this.username == null
-                && this.password == null
-                && this.email == null
-                && this.enabled == null;
-    }
+@AllArgsConstructor
+@NoArgsConstructor
+@ConfigurationProperties(prefix = "connector.auth.security.jwt")
+public class ConnectorJwtProperties {
+    private @NonNull String secret;
+    private @NonNull Duration expiration;
+    private @NonNull ConnectorRefreshTokenProperties refreshToken;
 }

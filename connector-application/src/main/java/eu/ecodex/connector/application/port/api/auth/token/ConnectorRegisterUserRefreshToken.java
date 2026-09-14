@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
+
 /**
  * Defines methods for creating refresh tokens in the Connector system.
  */
@@ -23,12 +24,12 @@ public interface ConnectorRegisterUserRefreshToken {
      * This method generates a secure, unique refresh token associated with the
      * provided user, which can be used to manage authentication sessions.
      *
-     * @param token the {@code ConnectorUser} instance representing the user
-     *              for whom the refresh token will be created.
+     * @param user the {@code ConnectorUser} instance representing the user
+     *             for whom the refresh token will be created.
      *
      * @return a {@code ConnectorRefreshToken} representing the newly created
      *     refresh token, which includes details such as the user, token
      *     identifier, expiration time, and creation time.
      */
-    ConnectorRefreshToken execute(@Nonnull ConnectorUser token);
+    ConnectorRefreshToken execute(@Nonnull ConnectorUser user);
 }

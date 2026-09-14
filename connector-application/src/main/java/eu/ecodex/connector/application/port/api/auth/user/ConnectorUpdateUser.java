@@ -11,10 +11,11 @@
 package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserIdMismatchException;
+import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
+
 
 /**
  * Interface for managing the registration and updates of {@link ConnectorUser} entities in the
@@ -31,8 +32,10 @@ public interface ConnectorUpdateUser {
      *                   not be null
      *
      * @return the updated {@link ConnectorUser} object after applying the changes
+     *
+     * @throws ConnectorUserAlreadyExistsException      when user already exists
+     * @throws ConnectorUserNotFoundException           when user identifier not found
+     * @throws ConnectorUserIdentifierMismatchException when user identifier mismatched
      */
-    ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user)
-        throws ConnectorUserAlreadyExistsException, ConnectorUserNotFoundException,
-        ConnectorUserIdMismatchException;
+    ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
 }

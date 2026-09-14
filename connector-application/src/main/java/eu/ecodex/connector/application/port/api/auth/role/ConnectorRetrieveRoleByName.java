@@ -36,5 +36,5 @@ public interface ConnectorRetrieveRoleByName {
      *
      * @throws ConnectorRoleNotFoundException if no user role is found for the specified name.
      */
-    ConnectorRole execute(@Nonnull String roleName) throws ConnectorRoleNotFoundException;
+    ConnectorRole execute(@Nonnull String roleName);
 }

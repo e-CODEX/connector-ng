@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFound
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import jakarta.annotation.Nonnull;
 
+
 /**
  * Service interface for checking whether a business domain is active and can accept messages.
  */

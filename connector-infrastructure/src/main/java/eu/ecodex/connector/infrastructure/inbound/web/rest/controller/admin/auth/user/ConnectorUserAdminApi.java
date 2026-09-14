@@ -16,9 +16,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import java.util.List;
-import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,7 +48,7 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorUserDto register(@Valid @RequestBody ConnectorUserRequest userRequest);
+    ConnectorUserDto register(@Valid @RequestBody @Nonnull ConnectorUserRequest userRequest);
 
     @Operation(summary = "Update a connector user.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -58,8 +58,8 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorUserDto update(@PathVariable("uuid") @NonNull String identifier,
-                            @Valid @RequestBody ConnectorUserRequest userRequest);
+    ConnectorUserDto update(@PathVariable("uuid") @Nonnull String identifier,
+                            @Valid @RequestBody @Nonnull ConnectorUserRequest userRequest);
 
     @Operation(summary = "Update partially a connector user.")
     @PatchMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -69,8 +69,8 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorUserDto patch(@PathVariable("uuid") @NonNull String identifier,
-                           @Valid @RequestBody ConnectorUserRequest userRequest);
+    ConnectorUserDto patch(@PathVariable("uuid") @Nonnull String identifier,
+                           @Valid @RequestBody @Nonnull ConnectorUserRequest userRequest);
 
     @Operation(summary = "Retrieve a connector user.")
     @GetMapping(path = "/{uuid}")
@@ -79,7 +79,7 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto getByIdentifier(@PathVariable("uuid") @NonNull String identifier);
+    ConnectorUserDto getByIdentifier(@PathVariable("uuid") @Nonnull String identifier);
 
     @Operation(summary = "Retrieve all connector's users.")
     @GetMapping
@@ -97,5 +97,5 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
     })
-    void deleteByIdentifier(@PathVariable("uuid") @NonNull String userIdentifier);
+    void deleteByIdentifier(@PathVariable("uuid") @Nonnull String userIdentifier);
 }

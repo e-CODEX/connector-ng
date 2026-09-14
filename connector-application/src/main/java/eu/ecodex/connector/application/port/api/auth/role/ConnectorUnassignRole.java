@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
+
 /**
  * Defines a contract for unassigning user roles within the Connector system.
  */
@@ -22,14 +23,13 @@ public interface ConnectorUnassignRole {
     /**
      * Removes a role from a user in the Connector system.
      *
-     * @param identifier The unique identifier of the user.
-     * @param role       The role to be removed from the user.
+     * @param roleIdentifier The unique identifier of the user.
+     * @param roleName       The role to be removed from the user.
      *
      * @return The updated {@link ConnectorUser} instance after the role removal.
      *
      * @throws ConnectorRoleNotFoundException If the specified role is not found.
      * @throws ConnectorUserNotFoundException If the specified user is not found.
      */
-    ConnectorUser execute(@Nonnull String identifier, @Nonnull String role)
-        throws ConnectorRoleNotFoundException, ConnectorUserNotFoundException;
+    ConnectorUser execute(@Nonnull String roleIdentifier, @Nonnull String roleName);
 }

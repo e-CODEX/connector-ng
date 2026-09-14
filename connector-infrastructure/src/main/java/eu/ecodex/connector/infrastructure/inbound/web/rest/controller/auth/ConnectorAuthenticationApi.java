@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
-import eu.ecodex.connector.domain.model.login.ConnectorLoginResponse;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -53,7 +54,8 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
         @ApiResponse(responseCode = "204", description = "Successfully logged in"),
     })
-    ConnectorLoginResponse login(@RequestBody @Valid ConnectorLoginRequest connectorLoginRequest);
+    ConnectorUserAuthenticationResult login(
+        @RequestBody @Valid @Nonnull ConnectorLoginRequest connectorLoginRequest);
 
     @Operation(summary = "Refresh a user token.")
     @PostMapping(path = "/refresh", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -61,9 +63,9 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "204", description = "Successfully refreshed"),
     })
-    ConnectorLoginResponse refresh(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader,
-        @RequestBody @Valid ConnectorRefreshTokenRequest request);
+    ConnectorUserAuthenticationResult refresh(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Nonnull String authorizationHeader,
+        @RequestBody @Valid @Nonnull ConnectorRefreshTokenRequest request);
 
 
     @Operation(summary = "Logout a user token.")
@@ -74,6 +76,6 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
 
     })
-    void logout(@AuthenticationPrincipal ConnectorUserDetails userDetails,
-                @RequestBody @Valid ConnectorLogoutRequest request);
+    void logout(@AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
+                @RequestBody @Valid @Nonnull ConnectorLogoutRequest request);
 }

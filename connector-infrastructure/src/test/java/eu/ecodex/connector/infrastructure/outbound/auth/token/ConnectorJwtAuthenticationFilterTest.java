@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.outbound.auth;
+package eu.ecodex.connector.infrastructure.outbound.auth.token;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,16 +33,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 @ExtendWith(MockitoExtension.class)
-class JwtAuthenticationFilterTest {
-
+class ConnectorJwtAuthenticationFilterTest {
     @Mock
-    JwtService jwtService;
+    ConnectorJwtParser jwtTokenParser;
 
     @Mock
     UserDetailsService userDetailsService;
 
     @InjectMocks
-    JwtAuthenticationFilter filter;
+    ConnectorJwtAuthenticationFilter filter;
 
     private MockHttpServletRequest request;
     private MockHttpServletResponse response;
@@ -72,7 +71,7 @@ class JwtAuthenticationFilterTest {
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertThat(filterChain.getRequest()).isEqualTo(request);
 
-        verifyNoInteractions(jwtService, userDetailsService);
+        verifyNoInteractions(jwtTokenParser, userDetailsService);
     }
 
     @Test
@@ -89,7 +88,7 @@ class JwtAuthenticationFilterTest {
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertThat(filterChain.getRequest()).isEqualTo(request);
 
-        verifyNoInteractions(jwtService, userDetailsService);
+        verifyNoInteractions(jwtTokenParser, userDetailsService);
     }
 
     @Test
@@ -99,9 +98,9 @@ class JwtAuthenticationFilterTest {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
 
-        when(jwtService.extractUsername(any())).thenReturn(userDetails.getUsername());
+        when(jwtTokenParser.extractUsername(any())).thenReturn(userDetails.getUsername());
         when(userDetailsService.loadUserByUsername(any())).thenReturn(userDetails);
-        when(jwtService.isValidToken(token, userDetails)).thenReturn(false);
+        when(jwtTokenParser.isValidToken(token, userDetails)).thenReturn(false);
 
         // When
         filter.doFilterInternal(request, response, filterChain);
@@ -110,7 +109,7 @@ class JwtAuthenticationFilterTest {
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertThat(filterChain.getRequest()).isEqualTo(request);
 
-        verifyNoMoreInteractions(jwtService, userDetailsService);
+        verifyNoMoreInteractions(jwtTokenParser, userDetailsService);
     }
 
     @Test
@@ -119,7 +118,7 @@ class JwtAuthenticationFilterTest {
         var token = "not-a-real-jwt";
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
 
-        when(jwtService.extractUsername(any())).thenThrow(new MalformedJwtException("bad token"));
+        when(jwtTokenParser.extractUsername(any())).thenThrow(new MalformedJwtException("bad token"));
 
         // When
         filter.doFilterInternal(request, response, filterChain);
@@ -128,7 +127,7 @@ class JwtAuthenticationFilterTest {
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertThat(filterChain.getRequest()).isEqualTo(request);
 
-        verifyNoMoreInteractions(jwtService, userDetailsService);
+        verifyNoMoreInteractions(jwtTokenParser, userDetailsService);
     }
 
 
@@ -139,9 +138,9 @@ class JwtAuthenticationFilterTest {
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
 
-        when(jwtService.extractUsername(token)).thenReturn("john.doe");
+        when(jwtTokenParser.extractUsername(token)).thenReturn("john.doe");
         when(userDetailsService.loadUserByUsername("john.doe")).thenReturn(userDetails);
-        when(jwtService.isValidToken(token, userDetails)).thenReturn(true);
+        when(jwtTokenParser.isValidToken(token, userDetails)).thenReturn(true);
 
         // When
         filter.doFilterInternal(request, response, filterChain);
@@ -155,6 +154,6 @@ class JwtAuthenticationFilterTest {
             .containsExactly("ROLE_ADMIN");
         assertThat(filterChain.getRequest()).isEqualTo(request);
 
-        verifyNoMoreInteractions(jwtService, userDetailsService);
+        verifyNoMoreInteractions(jwtTokenParser, userDetailsService);
     }
 }

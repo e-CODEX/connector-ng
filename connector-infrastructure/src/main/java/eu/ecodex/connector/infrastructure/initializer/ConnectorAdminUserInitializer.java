@@ -25,15 +25,16 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.infrastructure.property.auth.jwt.ConnectorAdminUserProperties;
+import eu.ecodex.connector.infrastructure.property.auth.ConnectorAdminUserProperties;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jspecify.annotations.NonNull;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Initializes an admin user in the connector system during the application startup phase.
@@ -110,7 +111,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     public void run(@NonNull ApplicationArguments args) {
         initializeDefaultUserRoles();
 
-        if (adminUserProperties == null || adminUserProperties.isEmpty()) {
+        if (adminUserProperties == null) {
             log.info("No Administrator user configured in properties");
             registerFallbackAdminUser();
             return;
@@ -174,7 +175,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     }
 
     private void initializeAdminUser(ConnectorAdminUserProperties properties) {
-        if (properties.getUsername() == null || properties.getUsername().isBlank()) {
+        if (!StringUtils.hasText(properties.getUsername())) {
             registerFallbackAdminUser();
             return;
         }

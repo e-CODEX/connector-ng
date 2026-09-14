@@ -59,7 +59,7 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     }
 
     @Override
-    public ConnectorRoleDto register(@Valid ConnectorRoleDto usrRoleDto) {
+    public ConnectorRoleDto register(@NonNull ConnectorRoleDto usrRoleDto) {
         log.info("Registering new user role");
         var registered =
             connectorRegisterRole.execute(ConnectorRoleDto.toDomain(usrRoleDto));

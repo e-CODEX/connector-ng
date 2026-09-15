@@ -40,6 +40,8 @@ micrometer = "1.6.2"
 okhttp = "5.3.2"
 opencsv = "5.12.0"
 slf4j-api = "2.0.17"
+jjwt="0.12.7"
+
 # tests
 assertj = "3.27.7"
 junit = "5.10.0"
@@ -90,6 +92,10 @@ micrometer = { module = "io.micrometer:micrometer-tracing-bridge-brave", version
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 opencsv = { module = "com.opencsv:opencsv", version.ref = "opencsv" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j-api" }
+jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwt" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
+
 # test
 minio = { module = "io.minio:minio", version.ref = "minio" }
 minio-container = { module = "org.testcontainers:testcontainers-minio", version.ref = "minio-container" }

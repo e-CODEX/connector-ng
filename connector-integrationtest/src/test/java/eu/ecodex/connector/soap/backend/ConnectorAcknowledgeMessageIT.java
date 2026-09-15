@@ -117,6 +117,7 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
         "classpath:sql/evidence.sql",
         "classpath:sql/message-transport-step.sql",
         "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/user.sql"
     })
     private @interface WithMessageData {
     }

@@ -12,6 +12,7 @@ package eu.ecodex.connector;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The ConnectorApplication class serves as the entry point for the Spring Boot application. It is
@@ -19,6 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  *
  * <p>This class initializes and starts the application using the SpringApplication.run method.
  */
+@EnableScheduling
 @SpringBootApplication(scanBasePackages = "eu.ecodex.connector")
 public class ConnectorApplication {
     public static void main(String[] args) {

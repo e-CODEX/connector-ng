@@ -8,12 +8,14 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.auth.jwt;
+package eu.ecodex.connector.infrastructure.property.auth;
 
 import java.time.Duration;
+import lombok.NonNull;
 
 /**
  * Refresh token configuration properties.
  */
-public record RefreshTokenProperties(Duration expiration, String cleanupCron) {
+public record ConnectorRefreshTokenProperties(@NonNull Duration expiration,
+                                              @NonNull String cleanupCron) {
 }

@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.auth.token;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
-import eu.ecodex.connector.infrastructure.property.auth.jwt.JwtProperties;
+import eu.ecodex.connector.infrastructure.property.auth.ConnectorJwtProperties;
 import java.time.Duration;
 import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 /**
  * A service implementation for generating, validating, and parsing JWT tokens.
  * This class uses a symmetric key for signing and verifying tokens, as well as customizable
- * properties provided via {@link JwtProperties}.
+ * properties provided via {@link ConnectorJwtProperties}.
  *
  * <p>This implementation provides methods to create tokens, extract information
  * from tokens, and validate tokens against specific user details.
@@ -39,19 +39,31 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConnectorJwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
-    private final ConnectorJwtTokenHelper jwtTokenService;
-    private final JwtProperties jwtProperties;
+    private final ConnectorJwtParser jwtParser;
+    private final ConnectorJwtGenerator jwtGenerator;
+    private final ConnectorJwtProperties jwtProperties;
 
-    public ConnectorJwtAuthenticationProvider(ConnectorJwtTokenHelper jwtTokenService,
-                                              JwtProperties jwtProperties) {
-        this.jwtTokenService = jwtTokenService;
+    /**
+     * Constructs a new instance of {@code ConnectorJwtAuthenticationProvider}.
+     *
+     * @param jwtParser     The parser responsible for decoding and validating JWT tokens.
+     * @param jwtGenerator  The generator responsible for creating new JWT tokens based on user
+     *                      details.
+     * @param jwtProperties Configuration properties related to JWT tokens, including expiration and
+     *                      refresh settings.
+     */
+    public ConnectorJwtAuthenticationProvider(ConnectorJwtParser jwtParser,
+                                              ConnectorJwtGenerator jwtGenerator,
+                                              ConnectorJwtProperties jwtProperties) {
+        this.jwtParser = jwtParser;
+        this.jwtGenerator = jwtGenerator;
         this.jwtProperties = jwtProperties;
     }
 
     @Override
     public String generateAccessToken(@NonNull ConnectorUser connectorUser) {
         var user = new ConnectorUserDetails(connectorUser);
-        return jwtTokenService.generateAccessToken(user);
+        return jwtGenerator.generateAccessToken(user);
     }
 
     @Override
@@ -66,18 +78,18 @@ public class ConnectorJwtAuthenticationProvider implements ConnectorAuthenticati
 
     @Override
     public boolean isAccessTokenExpired(@NonNull String token) {
-        return jwtTokenService.isExpired(token);
+        return jwtParser.isExpired(token);
     }
 
     @Override
     public Instant getAccessTokenExpirationDate(@NonNull String token) {
-        var claims = jwtTokenService.parseAllowingExpired(token);
+        var claims = jwtParser.parseAllowingExpired(token);
         return claims.getExpiration().toInstant();
     }
 
     @Override
     public String getUsernameFromToken(@NonNull String token) {
-        var claims = jwtTokenService.parseAllowingExpired(token);
+        var claims = jwtParser.parseAllowingExpired(token);
         return claims.getSubject();
     }
 

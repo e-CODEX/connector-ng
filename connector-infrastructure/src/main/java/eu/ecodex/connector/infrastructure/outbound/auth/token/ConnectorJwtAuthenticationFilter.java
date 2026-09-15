@@ -32,7 +32,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * in the `Authorization` header. If a valid token is found, the user's authentication details
  * are set into the Spring Security context.
  *
- * <p>The authentication token's validity is verified using {@link ConnectorJwtTokenHelper}.
+ * <p>The authentication token's validity is verified using {@link ConnectorJwtGenerator}.
  * The user's details are fetched using {@link UserDetailsService}, and properly authenticated users
  * are granted access to resources based on their authorities.</p>
  *
@@ -42,7 +42,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * <p>Detailed steps executed by this filter:
  * - Extracts the `Authorization` header from the incoming request.
  * - Verifies the format and presence of the Bearer token.
- * - Extracts the username from the token using {@link ConnectorJwtTokenHelper}.
+ * - Extracts the username from the token using {@link ConnectorJwtGenerator}.
  * - Loads user details using {@link UserDetailsService}.
  * - Validates the token for the fetched user.
  * - Sets the authentication details in the Spring Security context if the token is valid.
@@ -52,12 +52,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Slf4j
 @Component
 public class ConnectorJwtAuthenticationFilter extends OncePerRequestFilter {
-    private final ConnectorJwtTokenHelper jwtTokenService;
+    private final ConnectorJwtParser jwtParser;
     private final UserDetailsService userDetailsService;
 
-    public ConnectorJwtAuthenticationFilter(ConnectorJwtTokenHelper jwtTokenService,
+    public ConnectorJwtAuthenticationFilter(ConnectorJwtParser jwtParser,
                                             UserDetailsService userDetailsService) {
-        this.jwtTokenService = jwtTokenService;
+        this.jwtParser = jwtParser;
         this.userDetailsService = userDetailsService;
     }
 
@@ -77,13 +77,13 @@ public class ConnectorJwtAuthenticationFilter extends OncePerRequestFilter {
         var token = authHeader.substring(bearerPrefix.length());
 
         try {
-            var username = jwtTokenService.extractUsername(token);
+            var username = jwtParser.extractUsername(token);
 
             if (username != null
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 var userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtTokenService.isValidToken(token, userDetails)) {
+                if (jwtParser.isValidToken(token, userDetails)) {
                     var authentication = new UsernamePasswordAuthenticationToken(userDetails,
                         null, userDetails.getAuthorities());
 

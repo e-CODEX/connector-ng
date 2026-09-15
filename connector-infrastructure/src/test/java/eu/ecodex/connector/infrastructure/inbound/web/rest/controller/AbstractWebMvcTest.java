@@ -16,7 +16,7 @@ import static org.mockito.Mockito.doAnswer;
 import eu.ecodex.connector.TestConfiguration;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtAuthenticationFilter;
-import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtTokenHelper;
+import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtGenerator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
@@ -48,7 +48,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 @AutoConfigureMockMvc(addFilters = false)
 public abstract class AbstractWebMvcTest {
     @MockitoBean
-    protected ConnectorJwtTokenHelper jwtTokenService;
+    protected ConnectorJwtGenerator jwtTokenService;
 
     @MockitoBean
     protected ConnectorJwtAuthenticationFilter jwtAuthenticationFilter;

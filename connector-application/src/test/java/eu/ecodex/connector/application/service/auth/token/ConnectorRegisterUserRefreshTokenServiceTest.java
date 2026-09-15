@@ -20,10 +20,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
 import java.time.Duration;
@@ -39,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConnectorRegisterUserRefreshTokenServiceTest {
     @Mock
-    Clock clock;
+    private Clock clock;
     @Mock
     private ConnectorRefreshTokenRepository refreshTokenRepository;
     @Mock

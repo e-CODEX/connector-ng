@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Interface for removing {@link ConnectorUser} entities from the system.
@@ -31,5 +31,5 @@ public interface ConnectorRemoveUser {
      *
      * @throws ConnectorUserNotFoundException exception
      */
-    void execute(@NonNull String userIdentifier);
+    void execute(@Nonnull String userIdentifier);
 }

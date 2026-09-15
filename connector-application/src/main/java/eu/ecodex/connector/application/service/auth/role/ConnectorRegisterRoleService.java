@@ -16,7 +16,7 @@ import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import lombok.NonNull;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -52,7 +52,7 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
     }
 
     @Override
-    public ConnectorRole execute(@NonNull ConnectorRole userRole) {
+    public ConnectorRole execute(@Nonnull ConnectorRole userRole) {
         if (userRole.uuid() != null) {
             throw new ConnectorRoleIdentifierException("Connector user role id should be blank");
         }
@@ -60,7 +60,7 @@ public class ConnectorRegisterRoleService implements ConnectorRegisterRole {
         return repository.save(userRole);
     }
 
-    private void validateRoleName(@NonNull ConnectorRole userRole) {
+    private void validateRoleName(@Nonnull ConnectorRole userRole) {
         var existingUser = repository.findByName(userRole.name());
         if (existingUser.isPresent()) {
             throw new ConnectorRoleAlreadyExistsException(

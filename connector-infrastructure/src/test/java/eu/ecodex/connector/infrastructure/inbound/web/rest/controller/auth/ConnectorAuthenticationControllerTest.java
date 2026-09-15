@@ -16,13 +16,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserImpl;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -34,13 +33,10 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @WebMvcTest(ConnectorAuthenticationController.class)
 class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
     @MockitoBean
-    ConnectorLoginUserImpl loginUserService;
+    ConnectorUserAuthenticationProvider loginUserService;
 
     @MockitoBean
     ConnectorRefreshUserRefreshTokenService userTokenService;
-
-    @MockitoBean
-    ConnectorLogoutUserImpl logoutUserService;
 
     @Autowired
     RestTestClient apiClient;
@@ -51,12 +47,12 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         var username = "username";
         var password = "pwd";
         var request = ConnectorLoginRequest.builder().username(username).password(password).build();
-        var expected = ConnectorLoginResponse.builder()
+        var expected = ConnectorUserAuthenticationResult.builder()
             .accessToken("access-token")
             .refreshToken("refresh-token")
             .build();
 
-        when(loginUserService.execute(any(), any())).thenReturn(expected);
+        when(loginUserService.login(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -66,15 +62,15 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
             .exchange()
             .expectStatus()
             .isOk()
-            .returnResult(ConnectorLoginResponse.class);
+            .returnResult(ConnectorUserAuthenticationResult.class);
 
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(loginUserService).execute(username, password);
-        verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
+        verify(loginUserService).login(username, password);
+        verifyNoMoreInteractions(loginUserService, userTokenService);
     }
 
     @Test
@@ -85,7 +81,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         var request = ConnectorRefreshTokenRequest.builder()
             .refreshToken(refreshToken)
             .build();
-        var expected = ConnectorLoginResponse.builder()
+        var expected = ConnectorUserAuthenticationResult.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .build();
@@ -101,7 +97,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
             .exchange()
             .expectStatus()
             .isOk()
-            .returnResult(ConnectorLoginResponse.class);
+            .returnResult(ConnectorUserAuthenticationResult.class);
 
         // Then
         assertThat(result).isNotNull();
@@ -109,6 +105,6 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
         verify(userTokenService).execute(accessToken, refreshToken);
-        verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
+        verifyNoMoreInteractions(loginUserService, userTokenService);
     }
 }

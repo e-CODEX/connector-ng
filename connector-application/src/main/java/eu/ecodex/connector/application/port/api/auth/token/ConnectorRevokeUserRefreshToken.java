@@ -10,7 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.auth.token;
 
-import org.jspecify.annotations.NonNull;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines methods for managing and verifying refresh tokens in the Connector system.
@@ -33,5 +34,5 @@ public interface ConnectorRevokeUserRefreshToken {
      * @param userIdentifier authenticated user
      * @param refreshToken   the refresh token to be revoked
      */
-    void execute(@NonNull String userIdentifier, @NonNull String refreshToken);
+    void execute(@Nonnull String userIdentifier, @Nonnull String refreshToken);
 }

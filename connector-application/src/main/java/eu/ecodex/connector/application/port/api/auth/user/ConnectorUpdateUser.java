@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsExcep
 import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 
 /**
@@ -33,9 +33,9 @@ public interface ConnectorUpdateUser {
      *
      * @return the updated {@link ConnectorUser} object after applying the changes
      *
-     * @throws ConnectorUserAlreadyExistsException when user already exists
-     * @throws ConnectorUserNotFoundException      when user identifier not found
-     * @throws ConnectorUserIdentifierMismatchException    when user identifier mistmatched
+     * @throws ConnectorUserAlreadyExistsException      when user already exists
+     * @throws ConnectorUserNotFoundException           when user identifier not found
+     * @throws ConnectorUserIdentifierMismatchException when user identifier mismatched
      */
-    ConnectorUser execute(@NonNull String identifier, @NonNull ConnectorUser user);
+    ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
 }

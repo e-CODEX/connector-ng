@@ -16,8 +16,8 @@ import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshToken
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 /**

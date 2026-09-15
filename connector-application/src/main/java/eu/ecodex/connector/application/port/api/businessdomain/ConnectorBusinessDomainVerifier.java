@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.port.api.businessdomain;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabledException;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 
 /**
@@ -29,5 +29,5 @@ public interface ConnectorBusinessDomainVerifier {
      *                                                    identifier
      * @throws ConnectorBusinessDomainNotEnabledException if the business domain is disabled
      */
-    void execute(@NonNull ConnectorBusinessDomainIdentifier identifier);
+    void execute(@Nonnull ConnectorBusinessDomainIdentifier identifier);
 }

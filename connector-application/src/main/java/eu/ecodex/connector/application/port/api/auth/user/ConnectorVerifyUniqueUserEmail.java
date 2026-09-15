@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Interface for verifying a user's email.
@@ -23,5 +23,5 @@ public interface ConnectorVerifyUniqueUserEmail {
      * @param user the {@link ConnectorUser} on which the operation will be performed; must not be
      *             null.
      */
-    void execute(@NonNull ConnectorUser user);
+    void execute(@Nonnull ConnectorUser user);
 }

@@ -77,7 +77,8 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
 
     @Override
-    public ConnectorUserDto register(ConnectorUserRequest userRequest) {
+    public ConnectorUserDto register(
+        @org.jspecify.annotations.NonNull ConnectorUserRequest userRequest) {
         log.info("Registering new user");
         var registered = connectorRegisterUser.execute(toDomain(userRequest));
 
@@ -87,7 +88,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
     @Override
     public ConnectorUserDto update(@NonNull String identifier,
-                                   @Valid ConnectorUserRequest userRequest) {
+                                   @NonNull @Valid ConnectorUserRequest userRequest) {
         log.info("Updating existing user");
         var updated = connectorUpdateUser.execute(identifier, toDomain(userRequest));
 
@@ -97,7 +98,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
     @Override
     public ConnectorUserDto patch(@NonNull String identifier,
-                                  @Valid ConnectorUserRequest userRequest) {
+                                  @NonNull ConnectorUserRequest userRequest) {
         log.info("Patching existing user");
         var registered = connectorPatchUser.execute(identifier, toDomain(userRequest));
 

@@ -13,10 +13,10 @@ package eu.ecodex.connector.application.service.auth.token;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorRefreshUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorVerifyUserRefreshToken;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
 import java.time.Duration;
@@ -78,8 +78,8 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
     }
 
     @Override
-    public ConnectorLoginResponse execute(@NonNull String accessToken,
-                                          @NonNull String refreshToken) {
+    public ConnectorUserAuthenticationResult execute(@NonNull String accessToken,
+                                                     @NonNull String refreshToken) {
         var verifiedRefreshToken = verifyUserToken.execute(refreshToken);
 
         if (!authenticationTokenProvider.getUsernameFromToken(accessToken).equals(
@@ -100,7 +100,7 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
             ? rotateRefreshToken(verifiedRefreshToken.user())
             : verifiedRefreshToken;
 
-        return new ConnectorLoginResponse(newAccessToken, newRefreshToken.token(),
+        return new ConnectorUserAuthenticationResult(newAccessToken, newRefreshToken.token(),
             Duration.between(clock.instant(), accessTokenExpiresAt).getSeconds(),
             Duration.between(clock.instant(), newRefreshToken.expiresAt()).getSeconds()
         );

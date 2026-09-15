@@ -16,7 +16,7 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueU
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import lombok.NonNull;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -65,7 +65,7 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
     }
 
     @Override
-    public ConnectorUser execute(@NonNull ConnectorUser user) {
+    public ConnectorUser execute(@Nonnull ConnectorUser user) {
         if (user.uuid() != null) {
             throw new ConnectorUserIdentifierMismatchException("Connector user id should be blank");
         }

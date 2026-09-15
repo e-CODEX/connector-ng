@@ -17,6 +17,7 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserB
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,8 +43,8 @@ public class ConnectorUserController implements ConnectorUserApi {
     }
 
     @Override
-    public ConnectorUserDto patch(ConnectorUserDetails userDetails,
-                                  ConnectorUserRequest userRequest) {
+    public ConnectorUserDto patch(@NonNull ConnectorUserDetails userDetails,
+                                  @NonNull ConnectorUserRequest userRequest) {
         log.info("Patching existing user");
         var registered =
             patchUser.execute(userDetails.getUserId(), toDomain(userRequest));
@@ -52,7 +53,7 @@ public class ConnectorUserController implements ConnectorUserApi {
     }
 
     @Override
-    public ConnectorUserDto getByIdentifier(ConnectorUserDetails userDetails) {
+    public ConnectorUserDto getByIdentifier(@NonNull ConnectorUserDetails userDetails) {
         var found = retrieveUserByIdentifier.execute(userDetails.getUserId());
         return ConnectorUserDto.from(found);
     }

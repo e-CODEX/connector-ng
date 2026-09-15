@@ -11,10 +11,10 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRefreshTokenEntity;
+import jakarta.annotation.Nonnull;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -52,7 +52,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
      *     an empty {@link Optional} if no entity matches the provided token
      */
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    Optional<ConnectorRefreshTokenEntity> findByToken(@NonNull String token);
+    Optional<ConnectorRefreshTokenEntity> findByToken(@Nonnull String token);
 
     /**
      * Retrieves a list of {@link ConnectorRefreshTokenEntity} instances based on the specified
@@ -68,7 +68,7 @@ public interface ConnectorUserRefreshTokenJpaRepository
      *     if no entities match, an empty list is returned
      */
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    List<ConnectorRefreshTokenEntity> findByUser_UuidAndRevoked(@NonNull String userUuid,
+    List<ConnectorRefreshTokenEntity> findByUser_UuidAndRevoked(@Nonnull String userUuid,
                                                                 boolean revoked);
 
     @Modifying
@@ -80,20 +80,20 @@ public interface ConnectorUserRefreshTokenJpaRepository
            and rt.revoked = false
         """)
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int revokeAllByUserUuid(@Param("userUuid") @NonNull String userUuid);
+    int revokeAllByUserUuid(@Param("userUuid") @Nonnull String userUuid);
 
     @Modifying
     @Transactional
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int deleteByUser_Uuid(@NonNull String userUuid);
+    int deleteByUser_Uuid(@Nonnull String userUuid);
 
     @Modifying
     @Transactional
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int deleteByExpiresAtBefore(@NonNull Instant instant);
+    int deleteByExpiresAtBefore(@Nonnull Instant instant);
 
     @Modifying
     @Transactional
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int deleteByRevokedTrueAndExpiresAtBefore(@NonNull Instant instant);
+    int deleteByRevokedTrueAndExpiresAtBefore(@Nonnull Instant instant);
 }

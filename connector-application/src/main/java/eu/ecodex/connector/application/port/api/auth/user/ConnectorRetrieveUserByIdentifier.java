@@ -12,7 +12,8 @@ package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
+
 
 /**
  * Service interface for retrieving {@link ConnectorUser} entities by identifier.
@@ -28,5 +29,5 @@ public interface ConnectorRetrieveUserByIdentifier {
      *
      * @throws ConnectorUserNotFoundException if no user is found with the specified identifier
      */
-    ConnectorUser execute(@NonNull String identifier);
+    ConnectorUser execute(@Nonnull String identifier);
 }

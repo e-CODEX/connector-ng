@@ -18,11 +18,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLoginUserImpl;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorLogoutUserImpl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,12 +40,8 @@ import tools.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc(addFilters = false)
 @Import(ConnectorLogoutControllerTest.WebSecurityTestConfig.class)
 class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
-
     @MockitoBean
-    ConnectorLogoutUserImpl logoutUserService;
-
-    @MockitoBean
-    ConnectorLoginUserImpl loginUserService;
+    ConnectorUserAuthenticationProvider userAuthenticationProvider;
 
     @MockitoBean
     ConnectorRefreshUserRefreshTokenService userTokenService;
@@ -69,7 +64,7 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
         var refreshToken = "refresh-token-abc";
         var request = ConnectorLogoutRequest.builder().refreshToken(refreshToken).build();
 
-        doNothing().when(logoutUserService).execute(any(), any());
+        doNothing().when(userAuthenticationProvider).logout(any(), any());
 
         // When
         mockMvc.perform(post("/api/v1/auth/logout")
@@ -80,8 +75,8 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
             .andExpect(status().isOk());
 
         // Then
-        verify(logoutUserService).execute(userPrincipal.getUserId(), refreshToken);
-        verifyNoMoreInteractions(loginUserService, userTokenService, logoutUserService);
+        verify(userAuthenticationProvider).logout(userPrincipal.getUserId(), refreshToken);
+        verifyNoMoreInteractions(userTokenService, userAuthenticationProvider);
     }
 
     @TestConfiguration

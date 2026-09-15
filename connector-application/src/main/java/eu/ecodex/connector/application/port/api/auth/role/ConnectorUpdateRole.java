@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.auth.role;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 
 /**
@@ -39,5 +39,5 @@ public interface ConnectorUpdateRole {
      * @return the updated {@link ConnectorRole} instance, reflecting all modifications
      *     made during the update process.
      */
-    ConnectorRole execute(@NonNull String roleIdentifier, @NonNull ConnectorRole userRole);
+    ConnectorRole execute(@Nonnull String roleIdentifier, @Nonnull ConnectorRole userRole);
 }

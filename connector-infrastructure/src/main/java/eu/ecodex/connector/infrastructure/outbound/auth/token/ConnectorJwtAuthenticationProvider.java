@@ -16,9 +16,9 @@ import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetai
 import eu.ecodex.connector.infrastructure.property.auth.ConnectorJwtProperties;
 import java.time.Duration;
 import java.time.Instant;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * A service implementation for generating, validating, and parsing JWT tokens.
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Service;
  * - Parse the token to extract and verify its claims.
  */
 @Slf4j
-@Service
+@Component
 public class ConnectorJwtAuthenticationProvider implements ConnectorAuthenticationTokenProvider {
     private final ConnectorJwtParser jwtParser;
     private final ConnectorJwtGenerator jwtGenerator;

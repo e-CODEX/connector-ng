@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Interface for verifying a unique user to avoid duplicates.
@@ -23,7 +23,7 @@ public interface ConnectorVerifyUniqueUser {
      * @param user the {@link ConnectorUser} on which the operation will be performed; must not be
      *             null.
      */
-    void execute(@NonNull ConnectorUser user);
+    void execute(@Nonnull ConnectorUser user);
 
     /**
      * Executes an operation using the given identifier and user.
@@ -32,5 +32,5 @@ public interface ConnectorVerifyUniqueUser {
      * @param user       the {@link ConnectorUser} on which the operation will be performed; must
      *                   not be null
      */
-    void execute(@NonNull String identifier, @NonNull ConnectorUser user);
+    void execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
 }

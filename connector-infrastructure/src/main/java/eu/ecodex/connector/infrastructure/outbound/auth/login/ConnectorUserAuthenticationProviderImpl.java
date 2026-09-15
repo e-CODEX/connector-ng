@@ -13,17 +13,18 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.token.ConnectorRegisterUserRefreshToken;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginUser;
+import eu.ecodex.connector.application.port.api.auth.token.ConnectorRevokeUserRefreshToken;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 /**
  * Service implementation responsible for handling user login operations within the connector
@@ -40,41 +41,47 @@ import org.springframework.stereotype.Service;
  * - Verifies user credentials by authenticating through the {@link AuthenticationManager}.
  * - Retrieves the user details upon successful authentication.
  * - Generates an authentication token using the {@link ConnectorAuthenticationTokenProvider}.
- * - Returns a {@link ConnectorLoginResponse} containing the token details.
+ * - Returns a {@link ConnectorUserAuthenticationResult} containing the token details.
  */
 @Slf4j
-@Service
-public class ConnectorLoginUserImpl implements ConnectorLoginUser {
+@Component
+public class ConnectorUserAuthenticationProviderImpl
+    implements ConnectorUserAuthenticationProvider {
     private final AuthenticationManager authenticationManager;
-    private final ConnectorAuthenticationTokenProvider tokenProvider;
-    private final ConnectorRegisterUserRefreshToken registerRefreshToken;
+    private final ConnectorAuthenticationTokenProvider authenticationTokenProvider;
+    private final ConnectorRegisterUserRefreshToken registerUserRefreshToken;
+    private final ConnectorRevokeUserRefreshToken revokeUserRefreshToken;
 
     /**
      * Constructor for the {@code ConnectorLoginUserService}.
      * Initializes the service with dependencies required for user login operations.
      *
-     * @param authenticationManager The {@link AuthenticationManager} used to manage
-     *                              authentication processes such as validating user
-     *                              credentials.
-     * @param tokenProvider         The {@link ConnectorAuthenticationTokenProvider}
-     *                              responsible
-     *                              for generating and validating authentication tokens.
-     * @param registerRefreshToken  The {@link ConnectorRegisterUserRefreshTokenService} used
-     *                              to
-     *                              create user
-     *                              refresh tokens and handle related operations.
+     * @param authenticationManager       The {@link AuthenticationManager} used to manage
+     *                                    authentication processes such as validating user
+     *                                    credentials.
+     * @param authenticationTokenProvider The {@link ConnectorAuthenticationTokenProvider}
+     *                                    responsible for generating and validating authentication
+     *                                    tokens.
+     * @param registerUserRefreshToken    The {@link ConnectorRegisterUserRefreshTokenService} used
+     *                                    to create user refresh tokens and handle related
+     *                                    operations.
      */
-    public ConnectorLoginUserImpl(AuthenticationManager authenticationManager,
-                                  ConnectorAuthenticationTokenProvider tokenProvider,
-                                  ConnectorRegisterUserRefreshTokenService
-                                      registerRefreshToken) {
+    public ConnectorUserAuthenticationProviderImpl(AuthenticationManager authenticationManager,
+                                                   ConnectorAuthenticationTokenProvider
+                                                       authenticationTokenProvider,
+                                                   ConnectorRegisterUserRefreshTokenService
+                                                       registerUserRefreshToken,
+                                                   ConnectorRevokeUserRefreshToken
+                                                       revokeUserRefreshToken) {
         this.authenticationManager = authenticationManager;
-        this.tokenProvider = tokenProvider;
-        this.registerRefreshToken = registerRefreshToken;
+        this.authenticationTokenProvider = authenticationTokenProvider;
+        this.registerUserRefreshToken = registerUserRefreshToken;
+        this.revokeUserRefreshToken = revokeUserRefreshToken;
     }
 
     @Override
-    public ConnectorLoginResponse execute(@NonNull String username, @NonNull String password) {
+    public ConnectorUserAuthenticationResult login(@NonNull String username,
+                                                   @NonNull String password) {
         try {
             var authentication =
                 authenticationManager.authenticate(
@@ -89,12 +96,12 @@ public class ConnectorLoginUserImpl implements ConnectorLoginUser {
                 throw new RuntimeException("Error reading user principal");
             }
             var authenticatedUser = user.connectorUser();
-            var accessToken = tokenProvider.generateAccessToken(authenticatedUser);
-            var refreshToken = registerRefreshToken.execute(authenticatedUser);
+            var accessToken = authenticationTokenProvider.generateAccessToken(authenticatedUser);
+            var refreshToken = registerUserRefreshToken.execute(authenticatedUser);
 
-            return new ConnectorLoginResponse(accessToken, refreshToken.token(),
-                tokenProvider.getAccessTokenExpiresIn().toSeconds(),
-                tokenProvider.getRefreshTokenExpiresIn().toSeconds());
+            return new ConnectorUserAuthenticationResult(accessToken, refreshToken.token(),
+                authenticationTokenProvider.getAccessTokenExpiresIn().toSeconds(),
+                authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds());
 
         } catch (DisabledException exception) {
             throw new ConnectorUserAccountInactiveException(
@@ -104,5 +111,10 @@ public class ConnectorLoginUserImpl implements ConnectorLoginUser {
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void logout(@NonNull String userIdentifier, @NonNull String refreshToken) {
+        revokeUserRefreshToken.execute(userIdentifier, refreshToken);
     }
 }

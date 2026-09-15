@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsExcep
 import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Interface for managing the patch of {@link ConnectorUser} entities in the
@@ -42,5 +42,5 @@ public interface ConnectorPatchUser {
      * @throws ConnectorUserIdentifierMismatchException if the identifier does not match the user's
      *                                                  identifier.
      */
-    ConnectorUser execute(@NonNull String identifier, @NonNull ConnectorUser user);
+    ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
 }

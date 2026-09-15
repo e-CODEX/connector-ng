@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.port.api.auth.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 
 /**
@@ -32,5 +32,5 @@ public interface ConnectorRegisterUser {
      *
      * @throws ConnectorUserAlreadyExistsException exception
      */
-    ConnectorUser execute(@NonNull ConnectorUser user);
+    ConnectorUser execute(@Nonnull ConnectorUser user);
 }

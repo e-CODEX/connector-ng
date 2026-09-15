@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.port.api.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines a contract for registering user roles within the Connector system.
@@ -33,5 +33,5 @@ public interface ConnectorRegisterRole {
      * @throws ConnectorRoleAlreadyExistsException If a role with the same attributes already exists
      *                                             in the Connector system.
      */
-    ConnectorRole execute(@NonNull ConnectorRole userRole);
+    ConnectorRole execute(@Nonnull ConnectorRole userRole);
 }

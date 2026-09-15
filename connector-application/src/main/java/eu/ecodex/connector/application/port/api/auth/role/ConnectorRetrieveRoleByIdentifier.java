@@ -12,10 +12,10 @@ package eu.ecodex.connector.application.port.api.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
- * Defines a contract for retrieving user roles by Id within the Connector system.
+ * Defines a contract for retrieving user roles by Identifier within the Connector system.
  * Implementations of this interface are responsible for fetching user role details
  * based on either a unique identifier or a username.
  *
@@ -37,5 +37,5 @@ public interface ConnectorRetrieveRoleByIdentifier {
      * @throws ConnectorRoleNotFoundException if no user role is found for the specified
      *                                        identifier.
      */
-    ConnectorRole execute(@NonNull String roleIdentifier);
+    ConnectorRole execute(@Nonnull String roleIdentifier);
 }

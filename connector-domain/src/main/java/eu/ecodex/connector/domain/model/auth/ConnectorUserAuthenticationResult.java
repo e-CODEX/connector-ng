@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.port.spi.auth.login;
+package eu.ecodex.connector.domain.model.auth;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -29,7 +29,7 @@ import lombok.Builder;
  * system.
  */
 @Builder
-public record ConnectorLoginResponse(
+public record ConnectorUserAuthenticationResult(
         @NotBlank String accessToken,
         @NotBlank String refreshToken,
         long expiresIn,

@@ -11,9 +11,9 @@
 package eu.ecodex.connector.infrastructure.outbound.database.repository.auth;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -43,7 +43,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      */
     @Override
     @EntityGraph(attributePaths = "roles")
-    @NonNull
+    @Nonnull
     List<ConnectorUserEntity> findAll();
 
     /**
@@ -56,7 +56,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *     {@link Optional} if no user is found with the given UUID.
      */
     @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUuid(@NonNull String uuid);
+    Optional<ConnectorUserEntity> findByUuid(@Nonnull String uuid);
 
     /**
      * Retrieves a {@link ConnectorUserEntity} by its username along with the associated roles.
@@ -69,7 +69,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *     if no user is found with the given username.
      */
     @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUsername(@NonNull String username);
+    Optional<ConnectorUserEntity> findByUsername(@Nonnull String username);
 
     /**
      * Retrieves an active {@link ConnectorUserEntity} by its username along with the associated
@@ -81,7 +81,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @return an {@link Optional} containing the {@link ConnectorUserEntity} if found, or an empty
      */
     @EntityGraph(attributePaths = {"roles"})
-    Optional<ConnectorUserEntity> findByUsernameAndEnabled(@NonNull String username,
+    Optional<ConnectorUserEntity> findByUsernameAndEnabled(@Nonnull String username,
                                                            boolean enabled);
 
     /**
@@ -91,7 +91,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if an entity with the given UUID exists, false otherwise.
      */
-    boolean existsByUuid(@NonNull String uuid);
+    boolean existsByUuid(@Nonnull String uuid);
 
     /**
      * Checks whether a user with the specified username exists in the database.
@@ -100,7 +100,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if a user with the given username exists, false otherwise.
      */
-    boolean existsByUsername(@NonNull String username);
+    boolean existsByUsername(@Nonnull String username);
 
     /**
      * Checks whether a user with the specified email exists in the database.
@@ -109,7 +109,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if a user with the given email exists, false otherwise.
      */
-    boolean existsByEmail(@NonNull String email);
+    boolean existsByEmail(@Nonnull String email);
 
     /**
      * Checks whether a user with the specified username exists in the database,
@@ -121,7 +121,7 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @return true if a user with the given username exists but has a different UUID, false
      *     otherwise.
      */
-    boolean existsByUsernameAndUuidNot(@NonNull String username, @NonNull String uuid);
+    boolean existsByUsernameAndUuidNot(@Nonnull String username, @Nonnull String uuid);
 
     /**
      * Checks whether a user with the specified email exists in the database,
@@ -132,5 +132,5 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      *
      * @return true if a user with the given email exists but has a different UUID, false otherwise.
      */
-    boolean existsByEmailAndUuidNot(@NonNull String email, @NonNull String uuid);
+    boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
 }

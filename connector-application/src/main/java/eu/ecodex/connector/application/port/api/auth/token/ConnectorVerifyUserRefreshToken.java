@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.auth.token;
 
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines methods verifying refresh tokens in the Connector system.
@@ -25,5 +25,5 @@ public interface ConnectorVerifyUserRefreshToken {
      * @param refreshToken the refresh token to be verified
      *
      */
-    ConnectorRefreshToken execute(@NonNull String refreshToken);
+    ConnectorRefreshToken execute(@Nonnull String refreshToken);
 }

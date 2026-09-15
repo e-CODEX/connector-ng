@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.port.api.auth.token;
 
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 
 /**
@@ -31,5 +31,5 @@ public interface ConnectorRegisterUserRefreshToken {
      *     refresh token, which includes details such as the user, token
      *     identifier, expiration time, and creation time.
      */
-    ConnectorRefreshToken execute(@NonNull ConnectorUser user);
+    ConnectorRefreshToken execute(@Nonnull ConnectorUser user);
 }

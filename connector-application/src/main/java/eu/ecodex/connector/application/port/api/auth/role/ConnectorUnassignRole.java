@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.port.api.auth.role;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 
 /**
@@ -31,5 +31,5 @@ public interface ConnectorUnassignRole {
      * @throws ConnectorRoleNotFoundException If the specified role is not found.
      * @throws ConnectorUserNotFoundException If the specified user is not found.
      */
-    ConnectorUser execute(@NonNull String roleIdentifier, @NonNull String roleName);
+    ConnectorUser execute(@Nonnull String roleIdentifier, @Nonnull String roleName);
 }

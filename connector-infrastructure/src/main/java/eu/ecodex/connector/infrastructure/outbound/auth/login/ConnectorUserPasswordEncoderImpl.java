@@ -12,8 +12,8 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -41,7 +41,7 @@ public class ConnectorUserPasswordEncoderImpl implements ConnectorUserPasswordEn
      * @return user with encoded password
      */
     @Override
-    public ConnectorUser encodePassword(@NonNull ConnectorUser user) {
+    public ConnectorUser encodePassword(@lombok.NonNull ConnectorUser user) {
         if (user.password() == null) {
             return user;
         }

@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.auth.role;
 
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
-import org.jspecify.annotations.NonNull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Provides a contract for removing user roles in the Connector system.
@@ -34,5 +34,5 @@ public interface ConnectorRemoveRole {
      * @throws ConnectorRoleNotFoundException If no user role with the specified identifier exists
      *                                        in the Connector system.
      */
-    void execute(@NonNull String roleIdentifier);
+    void execute(@Nonnull String roleIdentifier);
 }

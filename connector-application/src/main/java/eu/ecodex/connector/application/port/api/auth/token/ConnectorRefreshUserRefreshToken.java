@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.auth.token;
 
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
-import org.jspecify.annotations.NonNull;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
+import jakarta.annotation.Nonnull;
 
 /**
  * Defines methods for refreshing user tokens in the Connector system.
@@ -28,5 +28,6 @@ public interface ConnectorRefreshUserRefreshToken {
      * @return a {@code LoginResponse} containing the new access token,
      *     refresh token, and expiration details of the session
      */
-    ConnectorLoginResponse execute(@NonNull String accessToken, @NonNull String refreshToken);
+    ConnectorUserAuthenticationResult execute(@Nonnull String accessToken,
+                                              @Nonnull String refreshToken);
 }

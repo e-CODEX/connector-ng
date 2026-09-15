@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorLoginResponse;
+import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
 import java.time.Clock;
@@ -64,7 +64,7 @@ class ConnectorLogoutUserIT extends AbstractIntegrationTest {
             .exchange()
             .expectStatus()
             .isOk()
-            .returnResult(ConnectorLoginResponse.class)
+            .returnResult(ConnectorUserAuthenticationResult.class)
             .getResponseBody();
 
         assertThat(loginResponse).isNotNull();

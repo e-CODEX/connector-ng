@@ -11,20 +11,16 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.infrastructure.config.DssConfig;
-import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-@SpringBootConfiguration
-@EnableAutoConfiguration
+
 @Import(DssConfig.class)
-@SuppressWarnings("checkstyle:MissingJavadocType")
 @ComponentScan(
         basePackages = {
                 "eu.ecodex.connector.infrastructure.property",
                 "eu.ecodex.connector.infrastructure.dss",
         }
 )
-public class DSSContextConfiguration {
+public class DSSContextConfiguration extends SecurityDisabledTestConfiguration {
 }

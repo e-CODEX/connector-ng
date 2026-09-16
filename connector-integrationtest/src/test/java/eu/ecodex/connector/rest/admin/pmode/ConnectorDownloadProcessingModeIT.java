@@ -18,6 +18,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -41,27 +42,29 @@ public class ConnectorDownloadProcessingModeIT extends AbstractIntegrationTest {
         "classpath:sql/processing-mode.sql",
         "classpath:sql/party.sql",
         "classpath:sql/service.sql",
-        "classpath:sql/action.sql"
+        "classpath:sql/action.sql",
+        "classpath:sql/user.sql"
     })
     void should_download_connector_pmode() {
         var uuid = "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf";
         apiClient.get()
-                 .uri("/api/v1/admin/processing-modes/%s/download".formatted(uuid))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<byte[]>() {
-                 })
-                 .value(content -> {
-                     assertThat(content).isNotNull();
-                 });
+            .uri("/api/v1/admin/processing-modes/%s/download".formatted(uuid))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<byte[]>() {
+            })
+            .value(content -> assertThat(content).isNotNull());
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_fail_when_downloading_non_existing_pmode() {
         var uuid = "ccafa470-c32b-4d69-be24-dbbf1b9fcad1";
         apiClient.get()
-                 .uri("/api/v1/admin/processing-modes/%s/download".formatted(uuid))
-                 .exchange()
-                 .expectStatus().isNotFound();
+            .uri("/api/v1/admin/processing-modes/%s/download".formatted(uuid))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isNotFound();
     }
 }

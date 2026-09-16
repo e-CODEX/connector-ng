@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.port.api.businessdomain;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
-import jakarta.annotation.Nonnull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Service interface for registering a new {@link ConnectorBusinessDomain} entity into the system.
@@ -28,5 +28,5 @@ public interface ConnectorRegisterBusinessDomain {
      * @return the registered {@link ConnectorBusinessDomain} entity, potentially enriched with
      *     system-generated or updated metadata after registration.
      */
-    ConnectorBusinessDomain execute(@Nonnull ConnectorBusinessDomain businessDomain);
+    ConnectorBusinessDomain execute(@NonNull ConnectorBusinessDomain businessDomain);
 }

@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -49,19 +50,20 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     @WithMessageData
     void should_list_connector_messages() {
         apiClient.get()
-                 .uri(URL)
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(4);
-                     assertThat(result.size()).isEqualTo(4);
-                     assertThat(result.totalElements()).isEqualTo(4);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri(URL)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(4);
+                assertThat(result.size()).isEqualTo(4);
+                assertThat(result.totalElements()).isEqualTo(4);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 
     @ParameterizedTest
@@ -73,19 +75,20 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     @WithMessageData
     void should_list_connector_messages_filtered_by_identifiers(String identifier) {
         apiClient.get()
-                 .uri(String.format("%s?identifier=%s", URL, identifier))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(1);
-                     assertThat(result.size()).isEqualTo(1);
-                     assertThat(result.totalElements()).isEqualTo(1);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri(String.format("%s?identifier=%s", URL, identifier))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(1);
+                assertThat(result.size()).isEqualTo(1);
+                assertThat(result.totalElements()).isEqualTo(1);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 
     @ParameterizedTest
@@ -108,27 +111,28 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
         String service,
         String action) {
         apiClient.get()
-                 .uri(String.format(
-                     "%s?identifier=%s&backendName=%s&businessDomain=%s&service=%s&action=%s",
-                     URL,
-                     identifier,
-                     backendName,
-                     businessDomain,
-                     service,
-                     action
-                 ))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(1);
-                     assertThat(result.size()).isEqualTo(1);
-                     assertThat(result.totalElements()).isEqualTo(1);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
+            .uri(String.format(
+                "%s?identifier=%s&backendName=%s&businessDomain=%s&service=%s&action=%s",
+                URL,
+                identifier,
+                backendName,
+                businessDomain,
+                service,
+                action
+            ))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assert result != null;
+                assertThat(result.content().size()).isEqualTo(1);
+                assertThat(result.size()).isEqualTo(1);
+                assertThat(result.totalElements()).isEqualTo(1);
+                assertThat(result.totalPages()).isEqualTo(1);
+            });
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -144,7 +148,8 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
         "classpath:sql/attachment.sql",
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
-        "classpath:sql/evidence.sql"
+        "classpath:sql/evidence.sql",
+        "classpath:sql/user.sql",
     })
     private @interface WithMessageData {
     }

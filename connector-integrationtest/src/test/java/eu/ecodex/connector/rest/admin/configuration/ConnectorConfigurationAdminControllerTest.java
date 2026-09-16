@@ -26,6 +26,8 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.Con
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 public class ConnectorConfigurationAdminControllerTest extends AbstractIntegrationTest {
@@ -35,126 +37,143 @@ public class ConnectorConfigurationAdminControllerTest extends AbstractIntegrati
     private RestTestClient apiClient;
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_business_domains_configurations_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/business-domains")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorBusinessDomainPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     var defaults = result.defaults();
-                     assertThat(defaults).isNotEmpty();
-                 });
+            .uri(BASE_URL + "/business-domains")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorBusinessDomainPropertiesDto>() {
+            })
+            .value(result -> {
+                var defaults = result.defaults();
+                assertThat(defaults).isNotEmpty();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_container_configurations_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/container")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorContainerPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     var signature = result.signature();
-                     assertThat(signature).isNotNull();
-                     assertThat(signature.getPrivateKey()).isNotNull();
-                     assertThat(signature.getKeystore()).isNotNull();
-                 });
+            .uri(BASE_URL + "/container")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorContainerPropertiesDto>() {
+            })
+            .value(result -> {
+                var signature = result.signature();
+                assertThat(signature).isNotNull();
+                assertThat(signature.getPrivateKey()).isNotNull();
+                assertThat(signature.getKeystore()).isNotNull();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_queues_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/queues")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorQueuePropertiesDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assertThat(result.outboundEvidenceTriggerQueue()).isNotNull();
-                 });
+            .uri(BASE_URL + "/queues")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorQueuePropertiesDto>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assertThat(result.outboundEvidenceTriggerQueue()).isNotNull();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_message_processing_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/message-processing")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageProcessingPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assertThat(result.identifierSuffix()).isNotNull();
-                     assertThat(result.ebmsIdGeneratorEnabled()).isTrue();
-                 });
+            .uri(BASE_URL + "/message-processing")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(
+                new ParameterizedTypeReference<ConnectorMessageProcessingPropertiesDto>() {
+                })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assertThat(result.identifierSuffix()).isNotNull();
+                assertThat(result.ebmsIdGeneratorEnabled()).isTrue();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_evidence_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/evidence")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorEvidencesPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assertThat(result.signature()).isNotNull();
-                     assertThat(result.issuer()).isNotNull();
-                 });
+            .uri(BASE_URL + "/evidence")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorEvidencesPropertiesDto>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assertThat(result.signature()).isNotNull();
+                assertThat(result.issuer()).isNotNull();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_business_document_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/business-document")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorBusinessDocumentPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result.country()).isEqualTo("BL");
-                     assertThat(result.serviceProvider()).isEqualTo("TestProvider");
-                     assertThat(result.signature()).isNotNull();
-                     assertThat(result.defaultAdvancedSystemType()).isEqualTo(
-                             ConnectorBusinessDocumentAESType.SIGNATURE_BASED);
-                     assertThat(result.authenticationValidation()).isNotNull();
-                     assertThat(result.signature()).isNotNull();
-                 });
+            .uri(BASE_URL + "/business-document")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorBusinessDocumentPropertiesDto>() {
+            })
+            .value(result -> {
+                assertThat(result.country()).isEqualTo("BL");
+                assertThat(result.serviceProvider()).isEqualTo("TestProvider");
+                assertThat(result.signature()).isNotNull();
+                assertThat(result.defaultAdvancedSystemType()).isEqualTo(
+                    ConnectorBusinessDocumentAESType.SIGNATURE_BASED);
+                assertThat(result.authenticationValidation()).isNotNull();
+                assertThat(result.signature()).isNotNull();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_message_routing_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/routing")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageRoutingPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assertThat(result.enabled()).isTrue();
-                     assertThat(result.defaultBackendName()).isEqualTo("backend_alice");
-                     assertThat(result.backendRules()).isNotEmpty();
-                 });
+            .uri(BASE_URL + "/routing")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorMessageRoutingPropertiesDto>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assertThat(result.enabled()).isTrue();
+                assertThat(result.defaultBackendName()).isEqualTo("backend_alice");
+                assertThat(result.backendRules()).isNotEmpty();
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_list_backend_link_partners_configuration_successfully() {
         apiClient.get()
-                 .uri(BASE_URL + "/backend-link-partners")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorLinkPropertiesDto>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assertThat(result.backend()).isNotEmpty();
-                     assertThat(result.backend().getFirst().getLinkConfig()).isNotNull();
-                 });
+            .uri(BASE_URL + "/backend-link-partners")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorLinkPropertiesDto>() {
+            })
+            .value(result -> {
+                assertThat(result).isNotNull();
+                assertThat(result.backend()).isNotEmpty();
+                assertThat(result.backend().getFirst().getLinkConfig()).isNotNull();
+            });
     }
 }

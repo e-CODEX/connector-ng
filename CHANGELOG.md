@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - **Search** — Filter messages by `business domain`.
 - **Message** — Missing security validation for incoming business message containers.
 - **Administration** — REST API endpoints to support the administration portal.
+- **Replace Minio S3 storage by SeaweedFS** — Support for free MiniIO Docker image distribution was stopped.
 
 #### Fixes
 - **Ebms** — Set the correct message description for `ebms:description` for outbound messages.

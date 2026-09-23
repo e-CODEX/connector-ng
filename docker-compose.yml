@@ -1,17 +1,20 @@
 # version: "3.8"
 services:
-    minio-s3:
-        image: minio/minio:latest
-        container_name: minio
-        ports:
-            - "9000:9000"      # S3 API
-            - "9001:9001"      # Web Console
+    seaweed-s3:
+        image: chrislusf/seaweedfs:latest
+        container_name: seaweedfs
+        command: mini -dir=/data
         environment:
-            MINIO_ROOT_USER: admin
-            MINIO_ROOT_PASSWORD: admin123
-        command: server /data --console-address ":9001"
+            - AWS_ACCESS_KEY_ID=admin
+            - AWS_SECRET_ACCESS_KEY=admin123
+            - WEED_ADMIN_USER=admin
+            - WEED_ADMIN_PASSWORD=admin123
+            - S3_BUCKET=attachments
+        ports:
+            - "8333:8333"    # S3 API
+            - "23646:23646"  # Admin UI
         healthcheck:
-            test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/ready" ]
+            test: [ "CMD", "wget", "-q", "--spider", "http://localhost:9333" ]
             interval: 10s
             timeout: 5s
             retries: 5
@@ -19,7 +22,7 @@ services:
         networks:
             ecodex:
         volumes:
-            - minio_data:/data
+            - seaweed-data:/data
     activemq:
         image: apache/activemq-classic:6.2.0
         container_name: activemq
@@ -191,7 +194,7 @@ services:
         depends_on:
             connector-ng-db:
                 condition: service_healthy
-            minio-s3:
+            seaweed-s3:
                 condition: service_started
             activemq:
                 condition: service_started
@@ -217,6 +220,6 @@ volumes:
     ng-postgres-data:
     gateway-mysql-data:
     gateway-attachments:
-    minio_data:
     activemq-data:
     oracle-data:
+    seaweed-data:

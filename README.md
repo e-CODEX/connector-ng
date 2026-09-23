@@ -62,7 +62,7 @@ In this section, we assume that you have already built the connector image. If y
 Again, we assume that Docker Compose is installed on your local machine. If it is not already installed, please install it before proceeding.
 ```
 
-You can also run the connector container and its database as a service (avoiding DBMS and MiniIO (S3 bucket) installation and configuration).
+You can also run the connector container and its database as a service (avoiding DBMS and SeaweeFS (S3 bucket) installation and configuration).
 To achieve this goal, we have provided a `docker-compose` configuration file. In our example, we are using MySQL as the DBMS service, so feel free to customize the `docker-compose.yml` file with your preferred DBMS (Oracle will be supported in the future).
 
 ```
@@ -96,6 +96,6 @@ Once containers are up and running, you can access:
 * the application swagger doc at: `http://localhost:30000/swagger-ui/index.html`.
 * the application APIs at `http://localhost:30000`.
 * the application database at `http://localhost:40000`.
-* the MiniIO admin console at `http://localhost:9001` (```username```: admin, ```password```: admin123).
+* the SeaweeFS (in replacement of MiniIO) admin console at `http://localhost:23646` (```username```: admin, ```password```: admin123).
 * the Artemis broker admin console at `http://localhost:8161` (```username```: admin, ```password```: admin).
 * the Domibus Gateway admin console at `http://localhost:30010` (```username```: admin, ```password```: 123456).

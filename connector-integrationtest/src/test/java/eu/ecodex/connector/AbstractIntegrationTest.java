@@ -35,7 +35,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.mysql.MySQLContainer;
@@ -46,28 +45,29 @@ import org.testcontainers.mysql.MySQLContainer;
 @AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest {
-    public static final MinIOContainer minio;
-    public static final MySQLContainer mysql;
+    private static final MySQLContainer mysql;
     private static final MinioClient minioClient;
+    private static final SeaweedFSContainer seaweedFs;
 
     static {
-        minio = new MinIOContainer("minio/minio:RELEASE.2025-09-07T16-13-09Z")
-                .withUserName("testuser")
-                .withPassword("testpassword")
-                .withStartupTimeout(Duration.ofMinutes(2));
+        seaweedFs = new SeaweedFSContainer("chrislusf/seaweedfs:latest")
+            .withUserName("testuser")
+            .withPassword("testpassword")
+            .withBucket("attachments")
+            .withStartupTimeout(Duration.ofMinutes(2));
 
         mysql = new MySQLContainer("mysql:8.0.33")
-                .withDatabaseName("connector")
-                .withUsername("connector")
-                .withPassword("connector");
+            .withDatabaseName("connector")
+            .withUsername("connector")
+            .withPassword("connector");
 
-        Startables.deepStart(minio, mysql).join();
+        Startables.deepStart(seaweedFs, mysql).join();
 
         try {
             minioClient = MinioClient.builder()
-                                     .endpoint(minio.getS3URL())
-                                     .credentials(minio.getUserName(), minio.getPassword())
-                                     .build();
+                .endpoint(seaweedFs.getS3URL())
+                .credentials(seaweedFs.getUserName(), seaweedFs.getPassword())
+                .build();
             createBucketIfNotExists();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MinIO client", e);
@@ -92,7 +92,7 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
         registry.add(
-                "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
+            "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
         );
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
@@ -101,20 +101,20 @@ public abstract class AbstractIntegrationTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
         registry.add("spring.jpa.defer-datasource-initialization", () -> "true");
 
-        registry.add("connector.file.storage.s3.access-key", minio::getUserName);
-        registry.add("connector.file.storage.s3.secret-key", minio::getPassword);
+        registry.add("connector.file.storage.s3.access-key", seaweedFs::getUserName);
+        registry.add("connector.file.storage.s3.secret-key", seaweedFs::getPassword);
         registry.add("connector.file.storage.s3.bucket", () -> "attachments");
         registry.add("connector.file.storage.s3.region", () -> "us-east-1");
-        registry.add("connector.file.storage.s3.endpoint", minio::getS3URL);
+        registry.add("connector.file.storage.s3.endpoint", seaweedFs::getS3URL);
     }
 
     private static void createBucketIfNotExists() throws Exception {
         boolean exists = minioClient.bucketExists(
-                BucketExistsArgs.builder().bucket("attachments").build()
+            BucketExistsArgs.builder().bucket("attachments").build()
         );
         if (!exists) {
             minioClient.makeBucket(
-                    MakeBucketArgs.builder().bucket("attachments").build()
+                MakeBucketArgs.builder().bucket("attachments").build()
             );
         }
     }
@@ -123,12 +123,12 @@ public abstract class AbstractIntegrationTest {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
-                "attachments",
-                FilePartTestFixtures.filePart(
-                        "fake_file.pdf",
-                        FileTestFixtures.generateFakeFile(fileSize),
-                        MediaType.APPLICATION_PDF
-                )
+            "attachments",
+            FilePartTestFixtures.filePart(
+                "fake_file.pdf",
+                FileTestFixtures.generateFakeFile(fileSize),
+                MediaType.APPLICATION_PDF
+            )
         );
 
         return parts;

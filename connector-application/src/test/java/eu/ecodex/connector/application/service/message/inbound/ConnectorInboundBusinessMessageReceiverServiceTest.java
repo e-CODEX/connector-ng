@@ -27,12 +27,15 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabledException;
 import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorProcessingModeInvalidTruststoreException;
+import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
@@ -59,6 +62,8 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
     @Mock
     private ConnectorBusinessDomainVerifier businessDomainVerifierService;
     @Mock
+    private ConnectorProcessingModeVerifier processingModeVerifierService;
+    @Mock
     private ConnectorMessageProcessingConfigurationProvider configurationProvider;
     @Mock
     private ConnectorBusinessMessageVerifier messageVerifierService;
@@ -73,6 +78,7 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
     void setUp() {
         inboundBusinessMessageReceiver = new ConnectorInboundBusinessMessageReceiverService(
             businessDomainVerifierService,
+            processingModeVerifierService,
             configurationProvider,
             messageVerifierService,
             messageIdGeneratorService,
@@ -107,6 +113,7 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
 
             verifyNoInteractions(
                 businessDomainVerifierService,
+                processingModeVerifierService,
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
@@ -133,6 +140,7 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
             verify(businessDomainVerifierService)
                 .execute(inboundMessageCommand.businessDomainIdentifier());
             verifyNoInteractions(
+                processingModeVerifierService,
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
@@ -155,6 +163,55 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
             verify(businessDomainVerifierService)
                 .execute(inboundMessageCommand.businessDomainIdentifier());
             verifyNoInteractions(
+                processingModeVerifierService,
+                configurationProvider,
+                messageVerifierService,
+                messageIdGeneratorService,
+                stagingEventPublisher
+            );
+        }
+
+        @Test
+        void should_fail_when_the_processing_mode_is_not_found() {
+            doThrow(ConnectorProcessingModeNotFoundException.class)
+                .when(processingModeVerifierService).execute(any());
+
+            var inboundMessageCommand = createInboundBusinessMessageCommand();
+
+            assertThrows(
+                ConnectorProcessingModeNotFoundException.class,
+                () -> inboundBusinessMessageReceiver.execute(inboundMessageCommand)
+            );
+
+            verify(businessDomainVerifierService)
+                .execute(inboundMessageCommand.businessDomainIdentifier());
+            verify(processingModeVerifierService)
+                .execute(inboundMessageCommand.businessDomainIdentifier());
+            verifyNoInteractions(
+                configurationProvider,
+                messageVerifierService,
+                messageIdGeneratorService,
+                stagingEventPublisher
+            );
+        }
+
+        @Test
+        void should_fail_when_the_processing_mode_truststore_is_invalid() {
+            doThrow(ConnectorProcessingModeInvalidTruststoreException.class)
+                .when(processingModeVerifierService).execute(any());
+
+            var inboundMessageCommand = createInboundBusinessMessageCommand();
+
+            assertThrows(
+                ConnectorProcessingModeInvalidTruststoreException.class,
+                () -> inboundBusinessMessageReceiver.execute(inboundMessageCommand)
+            );
+
+            verify(businessDomainVerifierService)
+                .execute(inboundMessageCommand.businessDomainIdentifier());
+            verify(processingModeVerifierService)
+                .execute(inboundMessageCommand.businessDomainIdentifier());
+            verifyNoInteractions(
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
@@ -165,6 +222,7 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
         @Test
         void should_fail_when_the_message_verification_fails() {
             doNothing().when(businessDomainVerifierService).execute(any());
+            doNothing().when(processingModeVerifierService).execute(any());
             when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
             when(configurationProvider.getConfiguration())
                 .thenReturn(
@@ -185,6 +243,8 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
 
             verify(businessDomainVerifierService)
                 .execute(inboundMessageCommand.businessDomainIdentifier());
+            verify(processingModeVerifierService)
+                .execute(inboundMessageCommand.businessDomainIdentifier());
             verify(messageIdGeneratorService).execute();
             verify(configurationProvider).getConfiguration();
             verify(messageVerifierService).verify(any(), eq(ProcessingModeVerificationMode.STRICT));
@@ -194,6 +254,7 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
         @Test
         void should_submit_the_message_to_the_staging_queue() {
             doNothing().when(businessDomainVerifierService).execute(any());
+            doNothing().when(processingModeVerifierService).execute(any());
             when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
             when(configurationProvider.getConfiguration())
                 .thenReturn(
@@ -227,6 +288,8 @@ public class ConnectorInboundBusinessMessageReceiverServiceTest {
                 .isEqualTo(inboundMessageCommand.transportedEvidences());
 
             verify(businessDomainVerifierService)
+                .execute(inboundMessageCommand.businessDomainIdentifier());
+            verify(processingModeVerifierService)
                 .execute(inboundMessageCommand.businessDomainIdentifier());
             verify(messageVerifierService)
                 .verify(message, ProcessingModeVerificationMode.STRICT);

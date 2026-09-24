@@ -15,6 +15,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.soap.BackendServiceTest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,13 +48,7 @@ public class ConnectorSubmitMessageIT extends BackendServiceTest {
     }
 
     @Test
-    @Sql({
-        "classpath:sql/business-domain.sql",
-        "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql"
-    })
+    @WithReferenceData
     void should_submit_outbound_message_via_soap() {
         var message = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
 
@@ -62,13 +60,7 @@ public class ConnectorSubmitMessageIT extends BackendServiceTest {
     }
 
     @Test
-    @Sql({
-        "classpath:sql/business-domain.sql",
-        "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql"
-    })
+    @WithReferenceData
     void should_submit_soap_outbound_message_without_attachment() {
         var message =
             SoapMessageSubmitTestFixtures.createBackendToConnectorMessageWithoutAttachment();
@@ -78,5 +70,18 @@ public class ConnectorSubmitMessageIT extends BackendServiceTest {
         assertThat(ack).isNotNull();
         assertThat(ack.isResult()).isTrue();
         assertThat(ack.getMessageId()).isNotBlank();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/processing-mode-truststores.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+    })
+    private @interface WithReferenceData {
     }
 }

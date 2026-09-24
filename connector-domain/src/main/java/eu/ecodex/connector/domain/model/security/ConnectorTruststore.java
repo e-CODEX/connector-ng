@@ -11,6 +11,8 @@
 package eu.ecodex.connector.domain.model.security;
 
 import lombok.Builder;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Represents the truststore configuration used for secure communication.
@@ -34,4 +36,7 @@ public record ConnectorTruststore(
     String password,
     KeystoreType type
 ) {
+    public boolean isValid() {
+        return type != null && StringUtils.isNotEmpty(password) && ArrayUtils.isNotEmpty(content);
+    }
 }

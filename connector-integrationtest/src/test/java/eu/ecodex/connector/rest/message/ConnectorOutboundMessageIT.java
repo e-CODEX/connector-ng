@@ -190,6 +190,7 @@ public class ConnectorOutboundMessageIT extends AbstractIntegrationTest {
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
+        "classpath:sql/processing-mode-truststores.sql",
         "classpath:sql/party.sql",
         "classpath:sql/service.sql",
         "classpath:sql/action.sql",

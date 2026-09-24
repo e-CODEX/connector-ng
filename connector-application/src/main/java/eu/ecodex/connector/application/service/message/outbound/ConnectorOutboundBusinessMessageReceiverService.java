@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessage
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
@@ -39,6 +40,7 @@ public class ConnectorOutboundBusinessMessageReceiverService
     private final ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher;
     private final ConnectorMessageIdGenerator messageIdGeneratorService;
     private final ConnectorBusinessDomainVerifier businessDomainVerifierService;
+    private final ConnectorProcessingModeVerifier processingModeVerifierService;
 
     /**
      * Constructs a new {@code ConnectorOutboundMessageReceiverService}.
@@ -54,6 +56,8 @@ public class ConnectorOutboundBusinessMessageReceiverService
      *                                      validate business domains of outbound messages
      * @param businessDomainVerifierService verifier used to validate business domains of outbound
      *                                      messages
+     * @param processingModeVerifierService verifier used to validate processing modes of outbound
+     *                                      messages
      */
     public ConnectorOutboundBusinessMessageReceiverService(
         ConnectorMessageProcessingConfigurationProvider configurationProvider,
@@ -61,17 +65,20 @@ public class ConnectorOutboundBusinessMessageReceiverService
         @Qualifier("connectorJmsOutboundMessageStagingPublisher")
         ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher,
         ConnectorMessageIdGenerator messageIdGeneratorService,
-        ConnectorBusinessDomainVerifier businessDomainVerifierService) {
+        ConnectorBusinessDomainVerifier businessDomainVerifierService,
+        ConnectorProcessingModeVerifier processingModeVerifierService) {
         this.configurationProvider = configurationProvider;
         this.messageVerifierService = messageVerifierService;
         this.stagingEventPublisher = stagingEventPublisher;
         this.messageIdGeneratorService = messageIdGeneratorService;
         this.businessDomainVerifierService = businessDomainVerifierService;
+        this.processingModeVerifierService = processingModeVerifierService;
     }
 
     @Override
     public ConnectorMessage execute(@NonNull ConnectorOutboundBusinessMessageCommand command) {
         businessDomainVerifierService.execute(command.businessDomainIdentifier());
+        processingModeVerifierService.execute(command.businessDomainIdentifier());
 
         var message = ConnectorBusinessMessage
             .builder()

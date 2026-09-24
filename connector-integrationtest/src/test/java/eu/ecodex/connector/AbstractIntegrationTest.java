@@ -39,6 +39,7 @@ import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.mysql.MySQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 @Tag("integration")
@@ -46,17 +47,22 @@ import org.testcontainers.mysql.MySQLContainer;
 @AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest {
+    private static final DockerImageName MINIO_IMAGE =
+        DockerImageName.parse("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
+                       .asCompatibleSubstituteFor("minio/minio");
+    private static final DockerImageName MYSQL_IMAGE = DockerImageName.parse("mysql:8.0.33");
+
     public static final MinIOContainer minio;
     public static final MySQLContainer mysql;
     private static final MinioClient minioClient;
 
     static {
-        minio = new MinIOContainer("minio/minio:RELEASE.2025-09-07T16-13-09Z")
+        minio = new MinIOContainer(MINIO_IMAGE)
                 .withUserName("testuser")
                 .withPassword("testpassword")
                 .withStartupTimeout(Duration.ofMinutes(2));
 
-        mysql = new MySQLContainer("mysql:8.0.33")
+        mysql = new MySQLContainer(MYSQL_IMAGE)
                 .withDatabaseName("connector")
                 .withUsername("connector")
                 .withPassword("connector");

@@ -10,15 +10,15 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
-import eu.ecodex.connector.application.port.api.auth.token.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.application.service.auth.token.ConnectorRefreshUserRefreshTokenService;
+import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserAuthenticationProviderImpl;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;

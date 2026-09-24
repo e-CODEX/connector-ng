@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.user;
 
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
-import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

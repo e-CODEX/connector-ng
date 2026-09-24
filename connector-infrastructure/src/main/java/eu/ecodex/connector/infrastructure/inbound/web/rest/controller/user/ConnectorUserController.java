@@ -16,7 +16,7 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;

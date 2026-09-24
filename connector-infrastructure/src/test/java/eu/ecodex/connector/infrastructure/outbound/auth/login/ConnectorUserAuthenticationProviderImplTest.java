@@ -20,9 +20,9 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
-import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
-import eu.ecodex.connector.application.service.auth.token.ConnectorRevokeUserRefreshTokenService;
+import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
+import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRegisterUserRefreshTokenService;
+import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRevokeUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;

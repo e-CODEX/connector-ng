@@ -12,12 +12,13 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.port.api.auth.token.ConnectorRegisterUserRefreshToken;
-import eu.ecodex.connector.application.port.api.auth.token.ConnectorRevokeUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRegisterUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRevokeUserRefreshToken;
+import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.application.port.spi.auth.token.ConnectorAuthenticationTokenProvider;
-import eu.ecodex.connector.application.service.auth.token.ConnectorRegisterUserRefreshTokenService;
+import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRegisterUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

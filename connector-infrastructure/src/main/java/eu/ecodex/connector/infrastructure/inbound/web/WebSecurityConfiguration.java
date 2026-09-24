@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
-import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtAuthenticationFilter;
+import eu.ecodex.connector.infrastructure.outbound.auth.accesstoken.ConnectorJwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.property.ConnectorCorsProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;

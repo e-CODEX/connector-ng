@@ -14,9 +14,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 import eu.ecodex.connector.TestConfiguration;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
-import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtAuthenticationFilter;
-import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtGenerator;
+import eu.ecodex.connector.infrastructure.outbound.auth.accesstoken.ConnectorJwtAuthenticationFilter;
+import eu.ecodex.connector.infrastructure.outbound.auth.accesstoken.ConnectorJwtGenerator;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;

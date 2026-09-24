@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.auth.user;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUser;
-import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserPasswordEncoder;
+import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.util.Objects;

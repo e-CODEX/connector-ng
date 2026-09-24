@@ -17,8 +17,8 @@ import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.Connector
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
 import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
-import eu.ecodex.connector.infrastructure.outbound.auth.token.ConnectorJwtGenerator;
+import eu.ecodex.connector.infrastructure.outbound.auth.accesstoken.ConnectorJwtGenerator;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -53,7 +53,7 @@ import org.testcontainers.utility.DockerImageName;
 public abstract class AbstractIntegrationTest {
     private static final DockerImageName MINIO_IMAGE =
         DockerImageName.parse("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
-                       .asCompatibleSubstituteFor("minio/minio");
+            .asCompatibleSubstituteFor("minio/minio");
     private static final DockerImageName MYSQL_IMAGE = DockerImageName.parse("mysql:8.0.33");
 
     public static final MinIOContainer minio;
@@ -62,22 +62,22 @@ public abstract class AbstractIntegrationTest {
 
     static {
         minio = new MinIOContainer(MINIO_IMAGE)
-                .withUserName("testuser")
-                .withPassword("testpassword")
-                .withStartupTimeout(Duration.ofMinutes(2));
+            .withUserName("testuser")
+            .withPassword("testpassword")
+            .withStartupTimeout(Duration.ofMinutes(2));
 
         mysql = new MySQLContainer(MYSQL_IMAGE)
-                .withDatabaseName("connector")
-                .withUsername("connector")
-                .withPassword("connector");
+            .withDatabaseName("connector")
+            .withUsername("connector")
+            .withPassword("connector");
 
         Startables.deepStart(minio, mysql).join();
 
         try {
             minioClient = MinioClient.builder()
-                                     .endpoint(minio.getS3URL())
-                                     .credentials(minio.getUserName(), minio.getPassword())
-                                     .build();
+                .endpoint(minio.getS3URL())
+                .credentials(minio.getUserName(), minio.getPassword())
+                .build();
             createBucketIfNotExists();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MinIO client", e);
@@ -104,7 +104,7 @@ public abstract class AbstractIntegrationTest {
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
         registry.add(
-                "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
+            "spring.datasource.driver-class-name", () -> "com.mysql.cj.jdbc.Driver"
         );
         registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.MySQLDialect");
         registry.add("spring.datasource.url", mysql::getJdbcUrl);
@@ -122,11 +122,11 @@ public abstract class AbstractIntegrationTest {
 
     private static void createBucketIfNotExists() throws Exception {
         boolean exists = minioClient.bucketExists(
-                BucketExistsArgs.builder().bucket("attachments").build()
+            BucketExistsArgs.builder().bucket("attachments").build()
         );
         if (!exists) {
             minioClient.makeBucket(
-                    MakeBucketArgs.builder().bucket("attachments").build()
+                MakeBucketArgs.builder().bucket("attachments").build()
             );
         }
     }
@@ -135,12 +135,12 @@ public abstract class AbstractIntegrationTest {
         var parts = new LinkedMultiValueMap<String, Object>();
 
         parts.add(
-                "attachments",
-                FilePartTestFixtures.filePart(
-                        "fake_file.pdf",
-                        FileTestFixtures.generateFakeFile(fileSize),
-                        MediaType.APPLICATION_PDF
-                )
+            "attachments",
+            FilePartTestFixtures.filePart(
+                "fake_file.pdf",
+                FileTestFixtures.generateFakeFile(fileSize),
+                MediaType.APPLICATION_PDF
+            )
         );
 
         return parts;

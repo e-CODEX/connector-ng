@@ -16,7 +16,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import java.util.Set;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})

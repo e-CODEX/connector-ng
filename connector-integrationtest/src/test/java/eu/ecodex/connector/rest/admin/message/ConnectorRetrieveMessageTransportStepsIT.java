@@ -19,6 +19,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -49,34 +50,38 @@ public class ConnectorRetrieveMessageTransportStepsIT extends AbstractIntegratio
         "classpath:sql/message-business-content.sql",
         "classpath:sql/message-business-document.sql",
         "classpath:sql/message-transport-step.sql",
-        "classpath:sql/message-transport-step-statuses.sql"
+        "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/user.sql",
     })
     void should_retrieve_transport_steps_for_connector_message() {
         var messageId = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
         apiClient.get()
-                 .uri(buildUrl(messageId))
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<ConnectorMessageTransportStepDto>() {
-                 })
-                 .value(step -> {
-                     assertThat(step).isNotNull();
-                     assert step != null;
-                     assertThat(step.identifier()).isNotNull();
-                     assertThat(step.transportedMessageIdentifier()).isEqualTo(messageId);
-                     assertThat(step.numberOfAttempts()).isEqualTo(1);
-                     assertThat(step.status()).isEqualTo("SUBMITTED");
-                     assertThat(step.messageType()).isEqualTo("BUSINESS");
-                 });
+            .uri(buildUrl(messageId))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<ConnectorMessageTransportStepDto>() {
+            })
+            .value(step -> {
+                assertThat(step).isNotNull();
+                assert step != null;
+                assertThat(step.identifier()).isNotNull();
+                assertThat(step.transportedMessageIdentifier()).isEqualTo(messageId);
+                assertThat(step.numberOfAttempts()).isEqualTo(1);
+                assertThat(step.status()).isEqualTo("SUBMITTED");
+                assertThat(step.messageType()).isEqualTo("BUSINESS");
+            });
     }
 
     @Test
+    @Sql({"classpath:sql/user.sql"})
     void should_return_404_when_retrieving_transport_steps_for_non_existing_connector_message() {
         var messageId = "5410e2a3-be9a-4598-99b3-21846233c67e@connector.ecodex.eu";
         apiClient.get()
-                 .uri(buildUrl(messageId))
-                 .exchange()
-                 .expectStatus().isNotFound();
+            .uri(buildUrl(messageId))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isNotFound();
     }
 
     private String buildUrl(String identifier) {

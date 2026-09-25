@@ -20,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -40,18 +41,20 @@ public class ConnectorListBusinessDomainsIT extends AbstractIntegrationTest {
     @Test
     @Sql({
         "classpath:sql/business-domain.sql",
+        "classpath:sql/user.sql"
     })
     void should_list_connector_business_domains() {
         apiClient.get()
-                 .uri("/api/v1/admin/business-domains")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<List<ConnectorBusinessDomainDto>>() {
-                 })
-                 .value(businessDomains -> {
-                     assertThat(businessDomains).isNotNull();
-                     assert businessDomains != null;
-                     assertThat(businessDomains.size()).isEqualTo(1);
-                 });
+            .uri("/api/v1/admin/business-domains")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody(new ParameterizedTypeReference<List<ConnectorBusinessDomainDto>>() {
+            })
+            .value(businessDomains -> {
+                assertThat(businessDomains).isNotNull();
+                assert businessDomains != null;
+                assertThat(businessDomains.size()).isEqualTo(1);
+            });
     }
 }

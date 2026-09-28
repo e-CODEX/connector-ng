@@ -99,6 +99,10 @@ public class ConnectorPatchUserService implements ConnectorPatchUser {
             } else {
                 var encodedPassword = passwordEncoder.encodePassword(user.password());
                 userBuilder.password(encodedPassword);
+
+                // After a password update, mustChangePassword flag must be cleared
+                // so the user isn't forced to change it again right after.
+                userBuilder.mustChangePassword(Boolean.FALSE);
             }
         }
 

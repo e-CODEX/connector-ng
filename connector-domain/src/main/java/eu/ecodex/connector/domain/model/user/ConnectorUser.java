@@ -35,6 +35,7 @@ public record ConnectorUser(
     String password,
     String email,
     Boolean enabled,
+    Boolean mustChangePassword,
     Set<ConnectorRole> roles,
     Instant createdAt,
     Instant updatedAt
@@ -52,7 +53,8 @@ public record ConnectorUser(
         return ConnectorUser.builder()
             .username(DEFAULT_ADMIN_USER_NAME)
             .password(DEFAULT_ADMIN_PASSWORD)
-            .enabled(true)
+            .enabled(Boolean.TRUE)
+            .mustChangePassword(Boolean.TRUE)
             .roles(Set.of(ConnectorRole.defaultAdminRole()))
             .build();
     }

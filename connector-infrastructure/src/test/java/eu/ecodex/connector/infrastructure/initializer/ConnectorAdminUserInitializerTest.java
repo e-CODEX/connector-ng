@@ -86,6 +86,7 @@ class ConnectorAdminUserInitializerTest {
             .email(email)
             .roles(Set.of(role))
             .enabled(Boolean.TRUE)
+            .mustChangePassword(Boolean.TRUE)
             .build();
 
         when(registerRole.execute(any())).thenReturn(role);
@@ -123,6 +124,7 @@ class ConnectorAdminUserInitializerTest {
             .password(defaultPwd)
             .roles(Set.of(role))
             .enabled(Boolean.TRUE)
+            .mustChangePassword(Boolean.TRUE)
             .build();
 
         when(registerRole.execute(any())).thenReturn(role);

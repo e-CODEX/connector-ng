@@ -8,24 +8,23 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.property.routing;
+package eu.ecodex.connector.infrastructure.property.c2ctest;
 
-import java.util.ArrayList;
-import java.util.List;
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration properties for the connector message routing.
+ * Configuration properties for connector-to-connector test messages.
  */
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "connector.routing")
-public class ConnectorMessageRoutingProperties {
-    private boolean enabled;
-    private String defaultBackendName;
-    private List<BackendRuleProperties> backendRules = new ArrayList<>();
+@ConfigurationProperties(prefix = "connector.c2ctests")
+public class Connector2ConnectorTestMessageProperties {
+    boolean enabled = true;
+    String action = ConnectorDefaults.DEFAULT_TEST_ACTION_NAME;
+    TestServiceProperties service = new TestServiceProperties();
 }

@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorLinkPartnerException;
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ConnectorFindLinkPartnerService")
 public class ConnectorFindLinkPartnerServiceTest {
     @Mock
-    private ConnectorLinkPartnerRepository linkPartnerRepository;
+    private ConnectorLinkPartnerProvider linkPartnerRepository;
 
     @InjectMocks
     private ConnectorFindLinkPartnerService findLinkPartnerService;

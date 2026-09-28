@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.port.api.routing;
 
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingRule;
 import java.util.Map;
 
 /**

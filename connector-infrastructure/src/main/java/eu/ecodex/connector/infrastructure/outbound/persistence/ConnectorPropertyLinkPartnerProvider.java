@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence;
 
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
@@ -30,11 +30,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorLinkPartnerRepository}.
+ * Implementation of the {@link ConnectorLinkPartnerProvider}.
  */
 @Slf4j
 @Component
-public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerRepository {
+public class ConnectorPropertyLinkPartnerProvider implements ConnectorLinkPartnerProvider {
     private final Map<ConnectorLinkPartnerName, ConnectorLinkPartner> partners;
 
     /**
@@ -48,7 +48,7 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
      * @param properties The {@link ConnectorLinkProperties} containing backend link partner
      *                   configurations required to populate the registry.
      */
-    public ConnectorLinkPartnerRepositoryImpl(ConnectorLinkProperties properties) {
+    public ConnectorPropertyLinkPartnerProvider(ConnectorLinkProperties properties) {
         log.info("Initializing link partner registry");
 
         var partnersMap = new HashMap<ConnectorLinkPartnerName, ConnectorLinkPartner>();
@@ -66,6 +66,9 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
                 }
             }
         }
+
+        var testMessageBackend = createDefaultTestMessageLinkPartner();
+        partnersMap.put(testMessageBackend.name(), testMessageBackend);
 
         var gatewayPartner = createDefaultGatewayLinkPartner();
         partnersMap.put(gatewayPartner.name(), gatewayPartner);
@@ -115,6 +118,24 @@ public class ConnectorLinkPartnerRepositoryImpl implements ConnectorLinkPartnerR
             .description("Default gateway")
             .enabled(true)
             .type(ConnectorLinkType.GATEWAY)
+            .source(ConnectorConfigurationSource.APPLICATION)
+            .senderMode(null)
+            .encryptionAlias(null)
+            .pushAddress(null)
+            .certificateDn(null)
+            .build();
+    }
+
+    private ConnectorLinkPartner createDefaultTestMessageLinkPartner() {
+        var partnerName = ConnectorLinkPartnerName.builder()
+                                                  .name(ConnectorDefaults.DEFAULT_TEST_BACKEND_NAME)
+                                                  .build();
+        return ConnectorLinkPartner
+            .builder()
+            .name(partnerName)
+            .description("Default test message backend")
+            .enabled(true)
+            .type(ConnectorLinkType.BACKEND)
             .source(ConnectorConfigurationSource.APPLICATION)
             .senderMode(null)
             .encryptionAlias(null)

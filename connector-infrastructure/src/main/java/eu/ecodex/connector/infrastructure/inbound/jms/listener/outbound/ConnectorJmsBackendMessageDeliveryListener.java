@@ -13,10 +13,12 @@ package eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
+import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
@@ -26,6 +28,8 @@ import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransp
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
 import eu.ecodex.connector.infrastructure.inbound.ConnectorEventHandler;
 import eu.ecodex.connector.infrastructure.outbound.soap.ConnectorBackendDeliveryServiceClient;
+import jakarta.annotation.Nullable;
+import java.util.UUID;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +49,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
-    private final ConnectorLinkPartnerRepository linkPartnerRepository;
+    private final ConnectorLinkPartnerProvider linkPartnerRepository;
     private final LegacyMessageHelper legacyMessageHelper;
     private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
 
@@ -70,7 +74,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
         ConnectorMessageRepository messageRepository,
         ConnectorMessageEvidenceRepository evidenceRepository,
         ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
-        ConnectorLinkPartnerRepository linkPartnerRepository,
+        ConnectorLinkPartnerProvider linkPartnerRepository,
         LegacyMessageHelper legacyMessageHelper,
         ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService) {
         this.messageTransportStep = messageTransportStep;
@@ -85,29 +89,42 @@ public class ConnectorJmsBackendMessageDeliveryListener
     @Override
     @JmsListener(destination = "${connector.queues.backend-delivery-queue}")
     public void handle(@NonNull ConnectorMessage message) {
-        if (message.identifier() == null) {
-            throw new IllegalArgumentException("Message identifier cannot be null");
-        }
+        validate(message);
 
-        if (!(message instanceof ConnectorBusinessMessage)
-            && !(message instanceof ConnectorEvidenceMessage)) {
-            throw new IllegalStateException(
-                "Received message is neither evidence nor a business message"
-            );
-        }
+        var linkPartner = findLinkPartner(message.backendName());
 
-        var partnerName = ConnectorLinkPartnerName.builder().name(message.backendName()).build();
-        var linkPartner = this.linkPartnerRepository.findByName(partnerName);
-
-        if (linkPartner == null) {
-            throw new IllegalStateException("Link partner " + partnerName + " not found");
-        }
-
-        if (linkPartner.senderMode() == ConnectorLinkMode.PUSH) {
+        if (linkPartner.name().name().equals(ConnectorDefaults.DEFAULT_TEST_BACKEND_NAME)) {
+            processTestMessage(message);
+        } else if (linkPartner.senderMode() == ConnectorLinkMode.PUSH) {
             submitToBackend(message);
         } else {
             makeReadyForPull(message);
         }
+    }
+
+    private void validate(ConnectorMessage message) {
+        if (!(message instanceof ConnectorBusinessMessage)
+            && !(message instanceof ConnectorEvidenceMessage)) {
+            throw unsupportedMessageType(message);
+        }
+    }
+
+    private IllegalStateException unsupportedMessageType(ConnectorMessage message) {
+        return new IllegalStateException(
+            "Received message [%s] is neither evidence nor a business message : [%s]"
+                .formatted(message.identifier(), message.getClass().getName())
+        );
+    }
+
+    private ConnectorLinkPartner findLinkPartner(String backendName) {
+        var partnerName = ConnectorLinkPartnerName.builder().name(backendName).build();
+        var linkPartner = linkPartnerRepository.findByName(partnerName);
+
+        if (linkPartner == null) {
+            throw new IllegalStateException("Link partner %s not found".formatted(partnerName));
+        }
+
+        return linkPartner;
     }
 
     private void makeReadyForPull(ConnectorMessage message) {
@@ -120,98 +137,124 @@ public class ConnectorJmsBackendMessageDeliveryListener
 
     private void submitToBackend(@NonNull ConnectorMessage message) {
         var identifier = message.identifier();
-
-        if (identifier == null) {
-            throw new IllegalStateException("Message identifier cannot be null");
-        }
-
         log.info("Submitting message [{}] to the backend system", identifier);
 
-        var deliveryWebService = backendDeliveryServiceClient.createClient(message.backendName());
-
+        DeliveryOutcome outcome;
         try {
-            var backendMessage = legacyMessageHelper.convertMessage(message);
-            var acknowledgment = deliveryWebService.deliverMessage(backendMessage);
-
-            if (acknowledgment.isResult()) {
-                if (message instanceof ConnectorBusinessMessage) {
-                    if (autoTriggerDeliveryEvidences) {
-                        triggerDeliveryConfirmation(
-                            message.backendMessageIdentifier(),
-                            message.as4Properties().ebmsMessageIdentifier(),
-                            message.backendName()
-                        );
-                    }
-
-                    messageRepository.setDeliveredToLinkPartnerAt(identifier);
-                    if (acknowledgment.getMessageId() != null) {
-                        messageRepository.updateBackendIdentifier(
-                            identifier,
-                            acknowledgment.getMessageId()
-                        );
-                    }
-
-                    // a business message has at least one transported evidence
-                    var transportedEvidences = message.transportedEvidences();
-
-                    if (transportedEvidences != null && !transportedEvidences.isEmpty()) {
-                        transportedEvidences.forEach(
-                            evidence -> {
-                                if (evidence.uuid() == null) {
-                                    throw new IllegalStateException(
-                                        "The evidence message contains no transported evidence");
-                                }
-                                evidenceRepository.setDeliveredToLinkPartnerAt(evidence.uuid());
-                            }
-                        );
-                    }
-                } else { // the message is an evidence message
-                    var transportedEvidences = message.transportedEvidences();
-
-                    if (transportedEvidences == null || transportedEvidences.isEmpty()) {
-                        throw new IllegalStateException(
-                            "The evidence message contains no transported evidence"
-                        );
-                    }
-
-                    var transportedEvidence = transportedEvidences.getFirst();
-
-                    if (transportedEvidence.uuid() == null) {
-                        throw new IllegalStateException(
-                            "The evidence message contains no transported evidence"
-                        );
-                    }
-
-                    evidenceRepository.setDeliveredToLinkPartnerAt(
-                        transportedEvidence.uuid()
-                    );
-                }
-                messageTransportStep.execute(
-                    message,
-                    ConnectorMessageTransportStatus.DELIVERED
-                );
-
-                log.info("Message [{}] delivered to the backend system", identifier);
-            } else {
-                log.error(
-                    "Failed to deliver message [{}] to the backend system: [{}] ",
-                    identifier,
-                    acknowledgment.getResultMessage()
-                );
-                if (message instanceof ConnectorBusinessMessage) {
-                    // TODO: if message is a business message and state is failed
-                    // trigger NON_DELIVERY
-                    messageRepository.setAsRejected(identifier);
-                }
-                messageTransportStep.execute(
-                    message,
-                    ConnectorMessageTransportStatus.FAILED
-                );
-            }
+            outcome = deliver(message);
         } catch (Exception e) {
             log.error("Failed to deliver message [{}] to the backend system", identifier, e);
             messageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
+            return;
         }
+
+        if (!outcome.accepted()) {
+            handleRejection(message, outcome.resultMessage());
+            return;
+        }
+
+        markAsDelivered(message, outcome.backendIdentifier());
+        log.info("Message [{}] delivered to the backend system", identifier);
+    }
+
+    private DeliveryOutcome deliver(ConnectorMessage message) {
+        var deliveryWebService = backendDeliveryServiceClient.createClient(message.backendName());
+        var backendMessage = legacyMessageHelper.convertMessage(message);
+        var acknowledgment = deliveryWebService.deliverMessage(backendMessage);
+
+        return new DeliveryOutcome(
+            acknowledgment.isResult(),
+            acknowledgment.getMessageId(),
+            acknowledgment.getResultMessage()
+        );
+    }
+
+    private void markAsDelivered(ConnectorMessage message, @Nullable String backendIdentifier) {
+        switch (message) {
+            case ConnectorBusinessMessage businessMessage ->
+                markBusinessMessageAsDelivered(businessMessage, backendIdentifier);
+            case ConnectorEvidenceMessage evidenceMessage ->
+                markEvidenceMessageAsDelivered(evidenceMessage);
+            default -> throw unsupportedMessageType(message);
+        }
+        messageTransportStep.execute(message, ConnectorMessageTransportStatus.DELIVERED);
+    }
+
+    private void markBusinessMessageAsDelivered(
+        ConnectorBusinessMessage message,
+        @Nullable String backendIdentifier) {
+        var identifier = message.identifier();
+
+        if (autoTriggerDeliveryEvidences) {
+            triggerDeliveryConfirmation(
+                message.backendMessageIdentifier(),
+                message.as4Properties().ebmsMessageIdentifier(),
+                message.backendName()
+            );
+        }
+
+        messageRepository.setDeliveredToLinkPartnerAt(identifier);
+
+        if (backendIdentifier != null) {
+            messageRepository.updateBackendIdentifier(identifier, backendIdentifier);
+        }
+
+        // a business message has at least one transported evidence
+        var transportedEvidences = message.transportedEvidences();
+
+        if (transportedEvidences != null && !transportedEvidences.isEmpty()) {
+            transportedEvidences.forEach(
+                evidence -> {
+                    if (evidence.uuid() == null) {
+                        throw new IllegalStateException(
+                            "The evidence message contains no transported evidence");
+                    }
+                    evidenceRepository.setDeliveredToLinkPartnerAt(evidence.uuid());
+                }
+            );
+        }
+    }
+
+    private void markEvidenceMessageAsDelivered(ConnectorEvidenceMessage message) {
+        var transportedEvidences = message.transportedEvidences();
+
+        if (transportedEvidences.isEmpty()) {
+            throw new IllegalStateException(
+                "The evidence message contains no transported evidence"
+            );
+        }
+
+        var evidenceUuid = transportedEvidences.getFirst().uuid();
+
+        if (evidenceUuid == null) {
+            throw new IllegalStateException(
+                "The evidence message contains no transported evidence"
+            );
+        }
+
+        evidenceRepository.setDeliveredToLinkPartnerAt(evidenceUuid);
+    }
+
+    private void handleRejection(ConnectorMessage message, String reason) {
+        var identifier = message.identifier();
+        log.error(
+            "Backend system rejected message [{}]: [{}]",
+            identifier,
+            reason
+        );
+        if (message instanceof ConnectorBusinessMessage) {
+            // TODO: if message is a business message and state is failed
+            // trigger NON_DELIVERY
+            messageRepository.setAsRejected(identifier);
+        }
+        messageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
+    }
+
+    private void processTestMessage(@NonNull ConnectorMessage message) {
+        var identifier = message.identifier();
+        log.info("Processing test message [{}]", identifier);
+        markAsDelivered(message, UUID.randomUUID().toString());
+        log.info("Test message [{}] marked as delivered", message);
     }
 
     private void triggerDeliveryConfirmation(
@@ -228,5 +271,13 @@ public class ConnectorJmsBackendMessageDeliveryListener
             .build();
 
         outboundEvidenceMessageReceiverService.execute(message);
+    }
+
+
+    private record DeliveryOutcome(
+        boolean accepted,
+        @Nullable String backendIdentifier,
+        @Nullable String resultMessage
+    ) {
     }
 }

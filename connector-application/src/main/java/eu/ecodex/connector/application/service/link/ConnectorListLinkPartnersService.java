@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.link;
 
 import eu.ecodex.connector.application.port.api.link.ConnectorListLinkPartners;
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import java.util.List;
@@ -22,10 +22,10 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ConnectorListLinkPartnersService implements ConnectorListLinkPartners {
-    private final ConnectorLinkPartnerRepository linkPartnerRepository;
+    private final ConnectorLinkPartnerProvider linkPartnerRepository;
 
     public ConnectorListLinkPartnersService(
-        ConnectorLinkPartnerRepository linkPartnerRepository) {
+        ConnectorLinkPartnerProvider linkPartnerRepository) {
         this.linkPartnerRepository = linkPartnerRepository;
     }
 

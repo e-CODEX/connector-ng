@@ -74,8 +74,8 @@ import lombok.NonNull;
 @Builder(toBuilder = true)
 public record ConnectorBusinessMessage(
     // TODO check if caused by should be set to connector message definition
-    @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
-    @NonNull String identifier,
+    @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
+    @Nonnull String identifier,
     @Nullable String backendMessageIdentifier,
     @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
     @Nullable String backendName,

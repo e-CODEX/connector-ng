@@ -22,7 +22,7 @@ import java.util.List;
  * {@link ConnectorLinkPartnerName}. Implementations might use different storage mechanisms such as
  * databases, in-memory collections.
  */
-public interface ConnectorLinkPartnerRepository {
+public interface ConnectorLinkPartnerProvider {
     ConnectorLinkPartner findByName(@Nonnull ConnectorLinkPartnerName name);
 
     ConnectorLinkPartner findByCertificateDn(@Nonnull String certificateDn);

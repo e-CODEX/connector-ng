@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.link;
 
 import eu.ecodex.connector.application.exception.ConnectorLinkPartnerException;
 import eu.ecodex.connector.application.port.api.link.ConnectorFindLinkPartner;
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +24,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConnectorFindLinkPartnerService implements ConnectorFindLinkPartner {
-    private final ConnectorLinkPartnerRepository linkPartnerRepository;
+    private final ConnectorLinkPartnerProvider linkPartnerRepository;
 
-    public ConnectorFindLinkPartnerService(ConnectorLinkPartnerRepository linkPartnerRepository) {
+    public ConnectorFindLinkPartnerService(ConnectorLinkPartnerProvider linkPartnerRepository) {
         this.linkPartnerRepository = linkPartnerRepository;
     }
 

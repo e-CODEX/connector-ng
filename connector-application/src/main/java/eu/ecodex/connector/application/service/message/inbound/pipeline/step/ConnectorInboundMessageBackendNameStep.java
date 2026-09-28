@@ -13,9 +13,9 @@ package eu.ecodex.connector.application.service.message.inbound.pipeline.step;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.port.api.routing.ConnectorMessageRouter;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingRule;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -117,7 +117,7 @@ public class ConnectorInboundMessageBackendNameStep
         }
 
         log.debug(
-            "Conversation uuid is set for the message [{}], setting the correct backend name",
+            "Conversation identifier is set for the message [{}], setting the correct backend name",
             inboundMessage.identifier()
         );
 
@@ -132,7 +132,7 @@ public class ConnectorInboundMessageBackendNameStep
 
         if (backendName != null) {
             log.debug(
-                "Found backend name [{}] for the conversation uuid [{}]",
+                "Found backend name [{}] for the conversation identifier [{}]",
                 backendName,
                 conversationId
             );

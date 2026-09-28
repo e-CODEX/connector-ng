@@ -1,6 +1,6 @@
 package eu.ecodex.connector.infrastructure.outbound.soap;
 
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendDeliveryWebService;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ConnectorBackendDeliveryServiceClient {
-    private final ConnectorLinkPartnerRepository linkPartnerRepository;
+    private final ConnectorLinkPartnerProvider linkPartnerRepository;
     private final ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory;
     private final ConnectorMerlinPropertiesFactory merlinPropertiesFactory;
 
@@ -38,7 +38,7 @@ public class ConnectorBackendDeliveryServiceClient {
      *                                 properties.
      */
     public ConnectorBackendDeliveryServiceClient(
-        ConnectorLinkPartnerRepository linkPartnerRepository,
+        ConnectorLinkPartnerProvider linkPartnerRepository,
         ConnectorLinkPartnerConfigFactory linkPartnerConfigFactory,
         ConnectorMerlinPropertiesFactory merlinPropertiesFactory) {
         this.linkPartnerRepository = linkPartnerRepository;

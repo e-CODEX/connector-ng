@@ -15,5 +15,6 @@ import lombok.Setter;
 @Setter
 public class BackendRuleProperties {
     private String linkName;
+    private String description;
     private String matchClause;
 }

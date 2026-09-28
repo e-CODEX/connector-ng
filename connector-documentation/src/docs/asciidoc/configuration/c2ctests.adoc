@@ -1,0 +1,47 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= Connector-to-Connector (C2C) Test
+
+The C2C test feature allows two connector instances to verify end-to-end AS4 connectivity without involving a real backend on either side.
+When enabled, any inbound message whose AS4 service/action pair matches the configured combination is intercepted and short-circuited: the connector generates synthetic REM evidence responses internally and never forwards the message to the backend.
+
+== Basic configuration
+Configuration is provided via `application.properties` under the `connector.c2ctests.*` prefix.
+
+.Connector-to-Connector (C2C) Test Configuration
+[cols="35,40,10,15", options="header"]
+|===
+| Property | Description | Optional | Example
+
+| `connector.c2ctests.enabled`
+| Activates connector-to-connector test mode. When enabled, messages matching the configured service/action combination are intercepted and handled entirely within the connector.
+| Yes
+| By default, set to `*true*`
+
+| `connector.c2ctests.action`
+| The AS4 action value that identifies a message as a C2C test message. Must match the action defined in the P-Mode used for test traffic.
+| Yes
+| By default, set to `*ConTest_Form*`
+
+| `connector.c2ctests.service.name`
+| The AS4 service name used to identify C2C test messages, paired with `connector.c2ctests.action` to form the matching combination. Must match the service name in the P-Mode.
+| Yes
+| By default, set to `*Connector-TEST*`
+
+| `connector.c2ctests.service.type`
+| The AS4 service type URI qualifying `connector.c2ctests.service.name`.
+| Yes
+| By default, set to `*urn:e-codex:services:*`
+
+|===
+
+.Configuration Example
+[source,properties]
+----
+connector.c2ctests.enabled=true
+connector.c2ctests.action=ConTest_Form
+connector.c2ctests.service.name=Connector-TEST
+connector.c2ctests.service.type=urn:e-codex:services:
+----

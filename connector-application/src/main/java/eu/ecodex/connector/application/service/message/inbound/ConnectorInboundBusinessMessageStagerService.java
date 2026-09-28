@@ -85,12 +85,15 @@ public class ConnectorInboundBusinessMessageStagerService implements
         }
 
         var createdMessage = this.messageRepository.save(message);
-        createdMessage = createdMessage.toBuilder()
-                                       .transportedEvidences(transportedEvidences)
-                                       .build();
         attachAttachments(message.attachments(), identifier);
         persistBusinessDocument(message.businessContent(), identifier);
-        persistEvidences(transportedEvidences, identifier);
+        var persistedTransportedEvidences = persistTransportedEvidences(
+            transportedEvidences,
+            identifier
+        );
+        createdMessage = createdMessage.toBuilder()
+                                       .transportedEvidences(persistedTransportedEvidences)
+                                       .build();
         inboundMessagePipelinePublisher.publish(createdMessage);
     }
 
@@ -119,16 +122,16 @@ public class ConnectorInboundBusinessMessageStagerService implements
         // will be extracted and persisted in the security validation step
     }
 
-    private void persistEvidences(
+    private List<ConnectorMessageEvidence> persistTransportedEvidences(
         List<ConnectorMessageEvidence> evidences,
         String messageIdentifier) {
-        evidences.forEach(evidence -> {
+        return evidences.stream().map(evidence -> {
             if (evidence.content() == null) {
                 throw new IllegalStateException(
                     "Evidence content is null for evidence %s".formatted(evidence.type())
                 );
             }
-            evidenceRepository.save(evidence, messageIdentifier);
-        });
+            return evidenceRepository.save(evidence, messageIdentifier);
+        }).toList();
     }
 }

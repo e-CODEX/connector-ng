@@ -28,4 +28,8 @@ package eu.ecodex.connector.domain;
 public class ConnectorDefaults {
     public static final String DEFAULT_BACKEND_NAME = "default_backend";
     public static final String DEFAULT_GATEWAY_NAME = "default_gateway";
+    public static final String DEFAULT_TEST_BACKEND_NAME = "default_test_backend";
+    public static final String DEFAULT_TEST_SERVICE_NAME = "Connector-TEST";
+    public static final String DEFAULT_TEST_SERVICE_TYPE = "urn:e-codex:services:";
+    public static final String DEFAULT_TEST_ACTION_NAME = "ConTest_Form";
 }

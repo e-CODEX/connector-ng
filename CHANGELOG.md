@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 - ***An admin account is created by default*** — Check the deployment properties for its credentials.
 - ***Admin-only endpoints*** — `/api/v1/admin/users/**` requires the caller to hold the `ADMIN` role, in addition to being authenticated.
 - ***Public endpoints*** — require no authentication.
-
+- **Message** — Support Connector-to-Connector test message.
 
 #### Fixes
 - **Ebms** — Set the correct message description for `ebms:description` for outbound messages.

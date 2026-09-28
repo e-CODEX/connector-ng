@@ -10,12 +10,12 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingBusinessDomainItem;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingBusinessDomainProperties;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingConfiguration;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingBusinessDomainItem;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingBusinessDomainProperties;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingConfiguration;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingRule;
 import eu.ecodex.connector.domain.routing.ConnectorRoutingRulePattern;
 import java.util.Map;
 

@@ -22,6 +22,8 @@ include::{basepath}/configuration/link-partner-configuration.adoc[leveloffset=+1
 
 include::{basepath}/configuration/backend-routing-configuration.adoc[leveloffset=+1]
 
+include::{basepath}/configuration/c2ctests.adoc[leveloffset=+1]
+
 include::{basepath}/configuration/connector-queue-configuration.adoc[leveloffset=+1]
 
 include::{basepath}/configuration/gateway-queue-configuration.adoc[leveloffset=+1]

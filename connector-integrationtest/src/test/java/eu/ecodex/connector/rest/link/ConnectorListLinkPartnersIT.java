@@ -49,7 +49,7 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
 
         var linkPartners = response.getResponseBody();
         assertThat(linkPartners).isNotNull();
-        assertThat(linkPartners).hasSize(2);
+        assertThat(linkPartners).hasSize(3);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
 
         var linkPartners = response.getResponseBody();
         assertThat(linkPartners).isNotNull();
-        assertThat(linkPartners).hasSize(1);
+        assertThat(linkPartners).hasSize(2);
 
         assert linkPartners != null;
         var first = Arrays.stream(linkPartners).findFirst();

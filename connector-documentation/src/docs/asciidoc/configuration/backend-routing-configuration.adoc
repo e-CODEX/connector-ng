@@ -21,14 +21,14 @@ Configuration is provided via `application.properties` under the `connector.rout
 | No
 | `true/false`
 
-| `connector.routing.default-backend-name`
-| Defines the default backend destination used when no routing rule matches.
+| `connector.routing.backend-rules[*index*].link-name`
+| Routing name (must match a declared backend link partner name).
 | No
 | `backend_alice`
 
-| `connector.routing.backend-rules[*index*].link-name`
-| Password protecting the keystore file itself.
-| No
+| `connector.routing.backend-rules[*index*].description`
+| Routing description.
+| Yes
 | `backend_alice`
 
 | `connector.routing.backend-rules[*index*].match-clause`

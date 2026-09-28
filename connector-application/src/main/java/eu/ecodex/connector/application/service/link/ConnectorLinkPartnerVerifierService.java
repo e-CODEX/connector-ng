@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.link;
 
 import eu.ecodex.connector.application.exception.ConnectorLinkPartnerSubmissionException;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkPartnerVerifier;
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartnerVerifier {
-    private final ConnectorLinkPartnerRepository linkPartnerRepository;
+    private final ConnectorLinkPartnerProvider linkPartnerRepository;
 
     /**
      * Constructs an instance of {@code ConnectorGatewayLinkEventHandler}.
@@ -37,7 +37,7 @@ public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartner
      *                              up the link partner associated with a given gateway name.
      */
     public ConnectorLinkPartnerVerifierService(
-        ConnectorLinkPartnerRepository linkPartnerRepository) {
+        ConnectorLinkPartnerProvider linkPartnerRepository) {
         this.linkPartnerRepository = linkPartnerRepository;
     }
 

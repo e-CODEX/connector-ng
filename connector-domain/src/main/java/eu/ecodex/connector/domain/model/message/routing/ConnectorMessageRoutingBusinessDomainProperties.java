@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.propertiesprovider.routing;
+package eu.ecodex.connector.domain.model.message.routing;
 
 import lombok.Builder;
 

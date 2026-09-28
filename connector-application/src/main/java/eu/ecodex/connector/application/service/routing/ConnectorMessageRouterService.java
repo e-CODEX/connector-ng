@@ -11,11 +11,11 @@
 package eu.ecodex.connector.application.service.routing;
 
 import eu.ecodex.connector.application.port.api.routing.ConnectorMessageRouter;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingConfigurationProvider;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingRule;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageRoutingConfigurationProvider;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
+import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingRule;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,7 +32,6 @@ public class ConnectorMessageRouterService implements ConnectorMessageRouter {
         ConnectorMessageRoutingConfigurationProvider routingConfigurationProvider) {
         this.routingConfigurationProvider = routingConfigurationProvider;
     }
-
 
     @Override
     public boolean isRoutingEnabled(ConnectorBusinessDomainIdentifier businessDomainIdentifier) {

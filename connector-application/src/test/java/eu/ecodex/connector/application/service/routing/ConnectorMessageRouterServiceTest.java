@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.MessageRoutingConfigurationTestFixtures;
-import eu.ecodex.connector.application.propertiesprovider.routing.ConnectorMessageRoutingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageRoutingConfigurationProvider;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorMessageRouterService")
-public class ConnectorMessageRouterTest {
+public class ConnectorMessageRouterServiceTest {
     private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
 

@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.link;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.util.List;
@@ -28,7 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ConnectorListLinkPartnersService")
 public class ConnectorListLinkPartnersServiceTest {
     @Mock
-    private ConnectorLinkPartnerRepository linkPartnerRepository;
+    private ConnectorLinkPartnerProvider linkPartnerRepository;
 
     @InjectMocks
     private ConnectorListLinkPartnersService listLinkPartnersService;

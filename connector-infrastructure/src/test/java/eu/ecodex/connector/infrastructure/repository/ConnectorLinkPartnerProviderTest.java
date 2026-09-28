@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
-import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerRepository;
+import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,9 +56,9 @@ import org.springframework.test.context.ActiveProfiles;
             """
     }
 )
-public class ConnectorLinkPartnerRepositoryTest {
+public class ConnectorLinkPartnerProviderTest {
     @Autowired
-    private ConnectorLinkPartnerRepository repository;
+    private ConnectorLinkPartnerProvider repository;
 
     @Nested
     @DisplayName("find all")
@@ -68,7 +68,7 @@ public class ConnectorLinkPartnerRepositoryTest {
             var partners = repository.findAll();
 
             assertThat(partners).isNotNull();
-            assertThat(partners).hasSize(2);
+            assertThat(partners).hasSize(3);
         }
     }
 

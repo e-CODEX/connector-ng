@@ -38,12 +38,12 @@ public class ConnectorUserMapper {
             .password(entity.getPassword())
             .email(entity.getEmail())
             .enabled(entity.isEnabled())
+            .mustChangePassword(entity.isMustChangePassword())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
             .roles(toDomainRoles(entity))
             .build();
     }
-
 
     /**
      * Map a user entity role.

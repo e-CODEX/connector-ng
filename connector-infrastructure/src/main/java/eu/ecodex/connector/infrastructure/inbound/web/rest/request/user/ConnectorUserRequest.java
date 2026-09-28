@@ -45,8 +45,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
      * @return request user
      */
     public static ConnectorUserRequest from(ConnectorUser user) {
-        return ConnectorUserRequest
-            .builder()
+        return ConnectorUserRequest.builder()
             .username(user.username())
             .password(user.password())
             .email(user.email())
@@ -63,8 +62,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
      * @return domain user
      */
     public static ConnectorUser toDomain(ConnectorUserRequest userRequest) {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .username(userRequest.username())
             .password(userRequest.password())
             .email(userRequest.email())
@@ -91,8 +89,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
             .roles()
             .stream()
             .map(role ->
-                ConnectorRole
-                    .builder()
+                ConnectorRole.builder()
                     .name(role)
                     .build())
             .collect(Collectors.toUnmodifiableSet());

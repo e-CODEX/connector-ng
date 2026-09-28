@@ -59,8 +59,11 @@ class ConnectorPatchUserServiceTest {
             .email(email)
             .build();
         var encodedPwd = "encoded";
-        var encoded = user.toBuilder().password(encodedPwd).build();
-        var expected = encoded.toBuilder().uuid(identifier).build();
+        var encodedPwdUser = user.toBuilder().password(encodedPwd).build();
+        var expected = encodedPwdUser.toBuilder()
+            .uuid(identifier)
+            .mustChangePassword(Boolean.FALSE)
+            .build();
 
         when(retrieveUserByIdentifier.execute(any())).thenReturn(expected);
         doNothing().when(verifyUniqueUser).execute(any(), any());

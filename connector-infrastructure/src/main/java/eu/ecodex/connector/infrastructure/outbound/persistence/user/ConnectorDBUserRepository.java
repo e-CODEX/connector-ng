@@ -151,13 +151,13 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
      * @return a {@code ConnectorUserEntity} object representing the JPA entity
      */
     public ConnectorUserEntity toEntity(@NonNull ConnectorUser domainUser) {
-        return ConnectorUserEntity
-            .builder()
+        return ConnectorUserEntity.builder()
             .uuid(domainUser.uuid())
             .username(domainUser.username())
             .password(domainUser.password())
             .email(domainUser.email())
             .enabled(domainUser.enabled())
+            .mustChangePassword(domainUser.mustChangePassword())
             .roles(toUserRoles(domainUser.roles()))
             .build();
     }
@@ -175,6 +175,7 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
         entity.setEnabled(domainUser.enabled());
         entity.setUsername(domainUser.username());
         entity.setEmail(domainUser.email());
+        entity.setMustChangePassword(domainUser.mustChangePassword());
         entity.setRoles(toUserRoles(domainUser.roles()));
     }
 

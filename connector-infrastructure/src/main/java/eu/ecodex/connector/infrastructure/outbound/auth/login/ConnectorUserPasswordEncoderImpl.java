@@ -41,13 +41,18 @@ public class ConnectorUserPasswordEncoderImpl implements ConnectorUserPasswordEn
      * @return user with encoded password
      */
     @Override
-    public ConnectorUser encodePassword(@lombok.NonNull ConnectorUser user) {
+    public ConnectorUser encodePassword(@NonNull ConnectorUser user) {
         if (user.password() == null) {
             return user;
         }
         var encodedPassword = encodePassword(user.password());
         return user.toBuilder()
             .password(encodedPassword)
+            .mustChangePassword(
+                // Regular users are not forced to change password at creation.
+                // TODO: Add a more secure mechanism based on the password creation date, so that
+                //  any account is forced to rotate its password once it expires.
+                user.mustChangePassword() == null ? Boolean.FALSE : user.mustChangePassword())
             .build();
     }
 

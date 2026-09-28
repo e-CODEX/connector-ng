@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 @Component("connectorJmsGatewayLinkPublisher")
 public class ConnectorJmsGatewayLinkPublisher
     implements ConnectorMessageEventPublisher<ConnectorMessage> {
-    private static final String CONTENT_TYPE_XML = "application/xml";
+    private static final String CONTENT_TYPE_XML = "text/xml";
     private static final String GATEWAY_MESSAGE_TYPE = "submitMessage";
     private static final String MESSAGE_CONTENT_DESCRIPTION = "messageContent";
     private static final String ASICS_DESCRIPTION = "ASIC-S";
@@ -157,7 +157,7 @@ public class ConnectorJmsGatewayLinkPublisher
             counter,
             CONTENT_TYPE_XML,
             MESSAGE_CONTENT_DESCRIPTION,
-            content.xmlContent().name(),
+            MESSAGE_CONTENT_DESCRIPTION,
             payload
         );
 
@@ -182,7 +182,7 @@ public class ConnectorJmsGatewayLinkPublisher
                 counter,
                 CONTENT_TYPE_XML,
                 evidenceName,
-                evidenceName.toLowerCase(),
+                evidenceName,
                 evidence.content()
             );
         }

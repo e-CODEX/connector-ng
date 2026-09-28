@@ -49,7 +49,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceRepository evidenceRepository;
     private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
-    private final ConnectorLinkPartnerProvider linkPartnerRepository;
+    private final ConnectorLinkPartnerProvider linkPartnerProvider;
     private final LegacyMessageHelper legacyMessageHelper;
     private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
 
@@ -59,29 +59,34 @@ public class ConnectorJmsBackendMessageDeliveryListener
     /**
      * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
      *
-     * @param messageTransportStep         Represents the transport step responsible for processing
-     *                                     and executing message delivery within the connector
-     *                                     registration process.
-     * @param messageRepository            Repository for handling the persistence and retrieval of
-     *                                     connector messages.
-     * @param backendDeliveryServiceClient Client for interacting with backend services required for
-     *                                     message delivery.
-     * @param linkPartnerRepository        Repository for managing link partners associated with
-     *                                     connector
+     * @param messageTransportStep                   Represents the transport step responsible for
+     *                                               processing and executing message delivery
+     *                                               within the connector registration process.
+     * @param messageRepository                      Repository for handling the persistence and
+     *                                               retrieval of connector messages.
+     * @param evidenceRepository                     Repository for handling the persistence and
+     *                                               retrieval of connector evidences.
+     * @param backendDeliveryServiceClient           Client for interacting with backend services
+     *                                               required for message delivery.
+     * @param linkPartnerProvider                    Repository for managing link partners
+     *                                               associated with connector
+     * @param legacyMessageHelper                    Helper for handling legacy messages.
+     * @param outboundEvidenceMessageReceiverService Service for processing outbound evidence
+     *                                               messages.
      */
     public ConnectorJmsBackendMessageDeliveryListener(
         ConnectorRegisterMessageTransportStep messageTransportStep,
         ConnectorMessageRepository messageRepository,
         ConnectorMessageEvidenceRepository evidenceRepository,
         ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
-        ConnectorLinkPartnerProvider linkPartnerRepository,
+        ConnectorLinkPartnerProvider linkPartnerProvider,
         LegacyMessageHelper legacyMessageHelper,
         ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService) {
         this.messageTransportStep = messageTransportStep;
         this.messageRepository = messageRepository;
         this.evidenceRepository = evidenceRepository;
         this.backendDeliveryServiceClient = backendDeliveryServiceClient;
-        this.linkPartnerRepository = linkPartnerRepository;
+        this.linkPartnerProvider = linkPartnerProvider;
         this.legacyMessageHelper = legacyMessageHelper;
         this.outboundEvidenceMessageReceiverService = outboundEvidenceMessageReceiverService;
     }
@@ -118,7 +123,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
 
     private ConnectorLinkPartner findLinkPartner(String backendName) {
         var partnerName = ConnectorLinkPartnerName.builder().name(backendName).build();
-        var linkPartner = linkPartnerRepository.findByName(partnerName);
+        var linkPartner = linkPartnerProvider.findByName(partnerName);
 
         if (linkPartner == null) {
             throw new IllegalStateException("Link partner %s not found".formatted(partnerName));

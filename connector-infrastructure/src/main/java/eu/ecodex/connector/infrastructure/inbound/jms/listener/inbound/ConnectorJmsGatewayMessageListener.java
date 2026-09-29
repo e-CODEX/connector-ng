@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Component
 public class ConnectorJmsGatewayMessageListener {
-    private static final String CONTENT_TYPE_XML = "text/xml";
+    private static final String CONTENT_TYPE_XML = "application/xml";
     private static final String CONTENT_TYPE_ASICS = "application/vnd.etsi.asic-s+zip";
     private static final String MESSAGE_CONTENT_DESCRIPTION = "messageContent";
     private static final String ASICS_DESCRIPTION = "ASIC-S";

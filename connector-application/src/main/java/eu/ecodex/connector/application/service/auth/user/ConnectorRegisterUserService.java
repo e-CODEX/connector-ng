@@ -70,7 +70,15 @@ public class ConnectorRegisterUserService implements ConnectorRegisterUser {
             throw new ConnectorUserIdentifierMismatchException("Connector user id should be blank");
         }
         verifyUniqueUser.execute(user);
-        user = passwordEncoder.encodePassword(user);
+        var encodedPassword = passwordEncoder.encodePassword(user.password());
+        user = user.toBuilder()
+            .password(encodedPassword)
+            .mustChangePassword(
+                // Users are not forced to change password at creation except default admin user.
+                // TODO: Add a mechanism based on the password creation date, so
+                // that any account is forced to rotate its password once it expires.
+                user.mustChangePassword() == null ? Boolean.FALSE : user.mustChangePassword())
+            .build();
         return repository.save(user);
     }
 }

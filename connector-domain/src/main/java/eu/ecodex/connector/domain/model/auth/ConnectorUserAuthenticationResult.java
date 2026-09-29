@@ -30,9 +30,10 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorUserAuthenticationResult(
-        @NotBlank String accessToken,
-        @NotBlank String refreshToken,
-        long expiresIn,
-        long refreshExpiresIn
+    @NotBlank String accessToken,
+    @NotBlank String refreshToken,
+    long expiresIn,
+    long refreshExpiresIn,
+    boolean mustChangePassword
 ) {
 }

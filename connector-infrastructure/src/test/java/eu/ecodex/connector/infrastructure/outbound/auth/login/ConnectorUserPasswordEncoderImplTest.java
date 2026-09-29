@@ -12,8 +12,6 @@ package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import eu.ecodex.connector.ConnectorUserTestFixtures;
-import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,35 +20,9 @@ class ConnectorUserPasswordEncoderImplTest {
 
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    ConnectorUserPasswordEncoderImpl service = new ConnectorUserPasswordEncoderImpl(passwordEncoder);
+    ConnectorUserPasswordEncoderImpl service =
+        new ConnectorUserPasswordEncoderImpl(passwordEncoder);
 
-
-    @Test
-    void encode_user_Password_should_return_user_with_encoded_password() {
-        // Given
-        var user = ConnectorUserTestFixtures.createDefaultUserWithRoles();
-
-        // When
-        var actual = service.encodePassword(user);
-
-        // Then
-        assertThat(actual).isNotNull();
-        assertThat(actual.password()).isNotEqualTo(user.password()).isNotBlank();
-        assertThat(passwordEncoder.matches(user.password(), actual.password())).isTrue();
-    }
-
-    @Test
-    void encode_user_Password_should_return_user_when_password_is_null() {
-        // Given
-        var user = ConnectorUser.builder().build();
-
-        // When
-        var actual = service.encodePassword(user);
-
-        // Then
-        assertThat(actual).isNotNull();
-        assertThat(actual.password()).isNull();
-    }
 
     @Test
     void encodePassword_should_encode_password_with_password_encoder() {

@@ -100,9 +100,14 @@ public class ConnectorUserAuthenticationProviderImpl
             var accessToken = authenticationTokenProvider.generateAccessToken(authenticatedUser);
             var refreshToken = registerUserRefreshToken.execute(authenticatedUser);
 
-            return new ConnectorUserAuthenticationResult(accessToken, refreshToken.token(),
-                authenticationTokenProvider.getAccessTokenExpiresIn().toSeconds(),
-                authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds());
+            return ConnectorUserAuthenticationResult.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.token())
+                .expiresIn(authenticationTokenProvider.getAccessTokenExpiresIn().toSeconds())
+                .refreshExpiresIn(
+                    authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds())
+                .mustChangePassword(authenticatedUser.mustChangePassword())
+                .build();
 
         } catch (DisabledException exception) {
             throw new ConnectorUserAccountInactiveException(

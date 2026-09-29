@@ -12,7 +12,9 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmo
 
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeTruststoreDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeTruststoreRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,5 +76,17 @@ public interface ConnectorProcessingModeAdminApi {
         @ApiResponse(responseCode = "200", description = "Success"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ResponseEntity<byte[]> downloadPmode(@PathVariable String uuid) throws IOException;
+    ResponseEntity<byte[]> downloadPmode(@PathVariable String uuid);
+
+    @PatchMapping(value = "/{uuid}/truststore", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Update the truststore of a processing mode")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    ConnectorProcessingModeTruststoreDto updateTruststore(
+        @PathVariable String uuid,
+        @Valid @ModelAttribute ConnectorProcessingModeTruststoreRequest request);
 }

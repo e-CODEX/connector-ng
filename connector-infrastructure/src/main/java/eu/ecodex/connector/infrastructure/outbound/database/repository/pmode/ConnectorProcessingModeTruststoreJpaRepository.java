@@ -21,4 +21,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConnectorProcessingModeTruststoreJpaRepository
     extends JpaRepository<ConnectorProcessingModeTruststoreEntity, Long> {
+    ConnectorProcessingModeTruststoreEntity findByProcessingModeUuid(String processingModeUuid);
+
+    void deleteByProcessingModeUuid(String processingModeUuid);
+
+    void deleteIfExistsByProcessingModeUuid(String processingModeUuid);
 }

@@ -15,14 +15,18 @@ import static eu.ecodex.connector.domain.model.security.KeystoreType.fromFileNam
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorUpdateProcessingModeTruststore;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeTruststoreDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode.ConnectorProcessingModeTruststoreRequest;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
@@ -32,6 +36,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Defines the REST controller for managing processing modes within the connector system.
@@ -41,22 +46,28 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     private final ConnectorRegisterProcessingMode registerProcessingModeService;
     private final ConnectorListProcessingMode listProcessingModeService;
     private final ConnectorRetrieveProcessingMode retrieveProcessingModeService;
+    private final ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststoreService;
 
     /**
      * Constructs an instance of {@code ConnectorProcessingModeAdminController}.
      *
-     * @param registerProcessingModeService the service responsible for registering processing
-     *                                      modes
-     * @param listProcessingModeService     the service used to list processing modes
-     * @param retrieveProcessingModeService the service for retrieving specific processing modes
+     * @param registerProcessingModeService         the service responsible for registering
+     *                                              processing modes
+     * @param listProcessingModeService             the service used to list processing modes
+     * @param retrieveProcessingModeService         the service for retrieving specific processing
+     *                                              modes
+     * @param updateProcessingModeTruststoreService the service for updating the truststore of
+     *                                              processing modes
      */
     public ConnectorProcessingModeAdminController(
         ConnectorRegisterProcessingMode registerProcessingModeService,
         ConnectorListProcessingMode listProcessingModeService,
-        ConnectorRetrieveProcessingMode retrieveProcessingModeService) {
+        ConnectorRetrieveProcessingMode retrieveProcessingModeService,
+        ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststoreService) {
         this.registerProcessingModeService = registerProcessingModeService;
         this.listProcessingModeService = listProcessingModeService;
         this.retrieveProcessingModeService = retrieveProcessingModeService;
+        this.updateProcessingModeTruststoreService = updateProcessingModeTruststoreService;
     }
 
     @Override
@@ -70,7 +81,8 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
         var processingMode = processCreationRequest(request);
 
         var created = this.registerProcessingModeService.execute(
-            businessDomainIdentifier, processingMode
+            businessDomainIdentifier,
+            processingMode
         );
 
         return ConnectorProcessingModeDto.from(created);
@@ -90,7 +102,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     @Override
-    public ResponseEntity<byte[]> downloadPmode(String uuid) throws IOException {
+    public ResponseEntity<byte[]> downloadPmode(String uuid) {
         var processingMode = retrieveProcessingModeService.execute(uuid);
         var content = processingMode.content().getBytes(StandardCharsets.UTF_8);
         var filename = Paths.get(processingMode.filename()).getFileName().toString();
@@ -105,6 +117,26 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                              .body(content);
     }
 
+    @Override
+    public ConnectorProcessingModeTruststoreDto updateTruststore(
+        String uuid,
+        ConnectorProcessingModeTruststoreRequest request) {
+        var file = request.truststoreFile();
+        var filename = StringUtils.getFilename(getFilename(file.getOriginalFilename()));
+        var truststore = ConnectorTruststore.builder()
+                                            .filename(filename)
+                                            .password(request.password())
+                                            .content(
+                                                readTruststoreContent(request.truststoreFile())
+                                            )
+                                            .type(fromFileName(filename).orElse(null))
+                                            .build();
+
+        var updated = updateProcessingModeTruststoreService.execute(uuid, truststore);
+
+        return ConnectorProcessingModeTruststoreDto.from(updated);
+    }
+
     private ConnectorProcessingMode processCreationRequest(
         ConnectorProcessingModeCreationRequest request) throws IOException {
         var processingModeXmlFile = request.processingModeFile();
@@ -113,29 +145,39 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
 
         if (!Objects.equals(xmlFileContentType, MediaType.APPLICATION_XML_VALUE)
             && !Objects.equals(xmlFileContentType, MediaType.TEXT_XML_VALUE)) {
-            throw new ConnectorBadRequestException("Pmode file must be XML");
+            throw new ConnectorBadRequestException("Pmode file must be an XML file");
         }
 
         var truststoreRequest = request.truststore();
-
-        var truststoreFilename = StringUtils.cleanPath(Objects.requireNonNull(
-            truststoreRequest.truststoreFile()
-                             .getOriginalFilename()));
+        var truststoreFile = truststoreRequest.truststoreFile();
+        var truststoreFilename = getFilename(truststoreFile.getOriginalFilename());
 
         var truststore = ConnectorTruststore.builder()
                                             .filename(truststoreFilename)
                                             .password(truststoreRequest.password())
-                                            .content(truststoreRequest.truststoreFile().getBytes())
+                                            .content(readTruststoreContent(truststoreFile))
                                             .type(fromFileName(truststoreFilename).orElse(null))
                                             .build();
 
         return ConnectorProcessingMode.builder()
                                       .description(request.description())
                                       .content(new String(processingModeXmlFile.getBytes()))
-                                      .filename(StringUtils.cleanPath(Objects.requireNonNull(
-                                          processingModeXmlFile.getOriginalFilename()))
-                                      )
+                                      .filename(getFilename(
+                                          processingModeXmlFile.getOriginalFilename()
+                                      ))
                                       .truststore(truststore)
                                       .build();
+    }
+
+    private byte[] readTruststoreContent(MultipartFile file) {
+        try {
+            return file.getBytes();
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not read the uploaded truststore", e);
+        }
+    }
+
+    private String getFilename(String filename) {
+        return StringUtils.getFilename(StringUtils.cleanPath(Objects.requireNonNull(filename, "")));
     }
 }

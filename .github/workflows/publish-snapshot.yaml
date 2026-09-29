@@ -1,17 +1,20 @@
+name: Publish Snapshot
+
 on:
-  push:
-    branches:
-      - develop
+    push:
+        branches:
+            - develop
 jobs:
-  publish:
-    uses: e-CODEX/workflows/.github/workflows/gradle-publish-snapshot.yaml@ae5d86c18f70e8a6971b80354219b330d67258a7
-    with:
-      java-version: 21
-      maven-repo-id: 'artifactory'
-      gradle-parameters: '-Partifactory.repo.id=artifactory'
-  docker:
-    name: Docker build and push
-    uses: e-CODEX/workflows/.github/workflows/docker-build-push.yaml@main
-    with:
-      image-name: connector-ng
-      registry: scm.ecodex.eu/ecodex-docker-snapshots
+    publish:
+        name: Publish the snapshot
+        uses: e-CODEX/workflows/.github/workflows/gradle-publish-snapshot.yaml@ae5d86c18f70e8a6971b80354219b330d67258a7
+        with:
+            java-version: 21
+            maven-repo-id: 'artifactory'
+            gradle-parameters: '-Partifactory.repo.id=artifactory'
+    docker:
+        name: Build and push the docker image
+        uses: e-CODEX/workflows/.github/workflows/docker-build-push.yaml@main
+        with:
+            image-name: connector-ng
+            registry: scm.ecodex.eu/ecodex-docker-snapshots

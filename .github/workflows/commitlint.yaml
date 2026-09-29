@@ -1,9 +1,12 @@
+name: Commit Lint
+
 on:
     push:
     pull_request:
         types: [ opened, synchronize ]
     merge_group:
-name: Commit Lint
+
 jobs:
     commitlint:
+        name: Lint commit messages
         uses: e-CODEX/workflows/.github/workflows/commitlint.yaml@main

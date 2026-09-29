@@ -1,8 +1,11 @@
+name: Java Code Checkstyle
+
 on:
     push:
     pull_request:
     merge_group:
-name: Java Code Checkstyle
+
 jobs:
     checkstyle:
+        name: Lint Java code
         uses: e-CODEX/workflows/.github/workflows/java-linting.yaml@f7157b007761f75f54b09e6b84d23ce37829b686

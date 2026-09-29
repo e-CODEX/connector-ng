@@ -85,9 +85,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
             return null;
         }
 
-        return request
-            .roles()
-            .stream()
+        return request.roles().stream()
             .map(role ->
                 ConnectorRole.builder()
                     .name(role)

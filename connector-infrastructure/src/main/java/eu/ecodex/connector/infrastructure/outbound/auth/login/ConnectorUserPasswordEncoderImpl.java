@@ -33,29 +33,6 @@ public class ConnectorUserPasswordEncoderImpl implements ConnectorUserPasswordEn
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Encodes the password of a {@link ConnectorUser} entity.
-     *
-     * @param user user's password to encode
-     *
-     * @return user with encoded password
-     */
-    @Override
-    public ConnectorUser encodePassword(@NonNull ConnectorUser user) {
-        if (user.password() == null) {
-            return user;
-        }
-        var encodedPassword = encodePassword(user.password());
-        return user.toBuilder()
-            .password(encodedPassword)
-            .mustChangePassword(
-                // Regular users are not forced to change password at creation.
-                // TODO: Add a more secure mechanism based on the password creation date, so that
-                //  any account is forced to rotate its password once it expires.
-                user.mustChangePassword() == null ? Boolean.FALSE : user.mustChangePassword())
-            .build();
-    }
-
     @Override
     public String encodePassword(@NonNull String password) {
         if (!StringUtils.hasText(password)) {

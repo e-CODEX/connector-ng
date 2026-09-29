@@ -22,24 +22,24 @@ import java.util.Set;
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ConnectorUserTestFixtures {
     public static ConnectorUser createDefaultUser() {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .username("test_user")
             .email("test_user@email.com")
             .password("encoded")
             .enabled(true)
+            .mustChangePassword(false)
             .build();
     }
 
     public static ConnectorUser createDefaultUserWithRoles() {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .username("test_user")
             .email("test_user@email.com")
             .password("encoded")
             .enabled(true)
+            .mustChangePassword(false)
             .roles(Set.of(ConnectorRole
                 .builder()
                 .name("ROLE_".concat(ConnectorRoleName.ADMIN.name()))
@@ -53,6 +53,7 @@ public class ConnectorUserTestFixtures {
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .email("test_user@email.com")
             .enabled(true)
+            .mustChangePassword(false)
             .build();
     }
 
@@ -62,6 +63,7 @@ public class ConnectorUserTestFixtures {
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .email("test_user@email.com")
             .enabled(true)
+            .mustChangePassword(false)
             .roles(Set.of("ROLE_ADMIN"))
             .build();
     }

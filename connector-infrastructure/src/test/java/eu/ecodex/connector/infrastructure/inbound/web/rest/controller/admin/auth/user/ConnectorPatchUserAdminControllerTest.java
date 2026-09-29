@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.aut
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -24,9 +25,12 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -78,11 +82,11 @@ class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
-        verify(connectorPatchUser).execute(connectorUser.uuid(), connectorUser
-            .toBuilder()
-            .uuid(null)
-            .password("test_password")
-            .build());
+        var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
+        verify(connectorPatchUser).execute(eq(connectorUser.uuid()), userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
+            ConnectorUserRequest.toDomain(connectorUserRequest)
+        );
 
         verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
             connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);

@@ -57,11 +57,14 @@ class ConnectorRegisterUserServiceTest {
             .roles(Set.of(ConnectorRole.builder().name("ROLE_USER").build()))
             .build();
 
-        var encoded = user.toBuilder().password("encoded").build();
-        var expected = encoded.toBuilder().uuid("identifier").build();
+        var encodedPwdUser = user.toBuilder()
+            .password("encoded")
+            .mustChangePassword(Boolean.FALSE)
+            .build();
+        var expected = encodedPwdUser.toBuilder().uuid("identifier").build();
 
         doNothing().when(verifyUniqueUser).execute(any());
-        when(passwordEncoder.encodePassword(any(ConnectorUser.class))).thenReturn(encoded);
+        when(passwordEncoder.encodePassword(any())).thenReturn("encoded");
         when(repository.save(any())).thenReturn(expected);
 
         // When
@@ -71,8 +74,8 @@ class ConnectorRegisterUserServiceTest {
         assertThat(registered).isNotNull();
         assertThat(registered).isEqualTo(expected);
         verify(verifyUniqueUser).execute(user);
-        verify(passwordEncoder).encodePassword(user);
-        verify(repository).save(encoded);
+        verify(passwordEncoder).encodePassword(pwd);
+        verify(repository).save(encodedPwdUser);
 
         assertNoMoreInteractions();
     }
@@ -91,11 +94,16 @@ class ConnectorRegisterUserServiceTest {
             .password(pwd)
             .roles(Set.of(ConnectorRole.builder().name("ROLE_USER").build()))
             .build();
-        var encoded = user.toBuilder().password("encoded").build();
-        var expected = encoded.toBuilder().uuid("identifier").build();
+        var encodedPwdUser = user.toBuilder()
+            .password("encoded")
+            .mustChangePassword(Boolean.FALSE)
+            .build();
+        var expected = encodedPwdUser.toBuilder()
+            .uuid("identifier")
+            .build();
 
         doNothing().when(verifyUniqueUser).execute(any());
-        when(passwordEncoder.encodePassword(any(ConnectorUser.class))).thenReturn(encoded);
+        when(passwordEncoder.encodePassword(any())).thenReturn("encoded");
         when(repository.save(any())).thenReturn(expected);
 
         // When
@@ -105,8 +113,8 @@ class ConnectorRegisterUserServiceTest {
         assertThat(registered).isNotNull();
         assertThat(registered).isEqualTo(expected);
         verify(verifyUniqueUser).execute(user);
-        verify(passwordEncoder).encodePassword(user);
-        verify(repository).save(encoded);
+        verify(passwordEncoder).encodePassword(pwd);
+        verify(repository).save(encodedPwdUser);
 
         assertNoMoreInteractions();
     }

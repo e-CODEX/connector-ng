@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
   `<process>` declarations instead of a fixed value.
 - **Stream Management** — Fixed improper stream closure that could lead to resource leaks.
 - **Message** — Inbound message payload parsing.
+- **Message** — Restore backward compatibility between the 7.x and 4.x/6.x series.
 
 ### Technical
 

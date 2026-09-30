@@ -63,7 +63,6 @@ public class ConnectorUpdateProcessingModeTruststoreIT extends AbstractIntegrati
                  })
                  .value(truststoreDto -> {
                      assertThat(truststoreDto).isNotNull();
-                     assert truststoreDto != null;
                      assertThat(truststoreDto.filename()).isNotEmpty();
                      assertThat(truststoreDto.password()).isNotEmpty();
                      assertThat(truststoreDto.type()).isNotNull();

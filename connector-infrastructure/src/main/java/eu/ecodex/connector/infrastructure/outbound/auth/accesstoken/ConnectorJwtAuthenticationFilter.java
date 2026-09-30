@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.accesstoken;
 
+import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import io.jsonwebtoken.JwtException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
@@ -78,13 +79,17 @@ public class ConnectorJwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             var username = jwtParser.extractUsername(token);
-
             if (username != null
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 var userDetails = userDetailsService.loadUserByUsername(username);
                 if (jwtParser.isValidToken(token, userDetails)) {
-                    var authentication = new UsernamePasswordAuthenticationToken(userDetails,
+
+                    var connectorUser = ((ConnectorUserDetails) userDetails).connectorUser();
+                    var principal =
+                        new ConnectorUserDetails(connectorUser, token); // attach token to principal
+
+                    var authentication = new UsernamePasswordAuthenticationToken(principal,
                         null, userDetails.getAuthorities());
 
                     authentication.setDetails(new WebAuthenticationDetailsSource()

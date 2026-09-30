@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
+import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUser;
@@ -95,7 +96,8 @@ public class ConnectorPatchUserService implements ConnectorPatchUser {
 
         if (StringUtils.hasText(user.password())) {
             if (passwordEncoder.matches(user.password(), existingUser.password())) {
-                log.warn("New password matches existing");
+                throw new ConnectorUserInvalidPasswordException(
+                    "New password should not match the existing");
             } else {
                 var encodedPassword = passwordEncoder.encodePassword(user.password());
                 userBuilder.password(encodedPassword);
@@ -109,6 +111,7 @@ public class ConnectorPatchUserService implements ConnectorPatchUser {
         if (user.enabled() != null) {
             userBuilder.enabled(user.enabled());
         }
+
         return repository.save(userBuilder.build());
     }
 }

@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import java.util.Set;
@@ -77,7 +78,23 @@ public class ConnectorUserTestFixtures {
             .build();
     }
 
-    public static ConnectorUserRequest createDefaultUserPatchRequest() {
+    public static ConnectorUpdateUserPasswordRequest createDefaultUpdateUserPasswordRequest() {
+        return ConnectorUpdateUserPasswordRequest.builder()
+            .refreshToken("refresh-token")
+            .newPassword("test_password")
+            .currentPassword("password")
+            .build();
+    }
+
+    public static ConnectorUpdateUserPasswordRequest createDefaultUpdateUserShortPasswordRequest() {
+        return ConnectorUpdateUserPasswordRequest.builder()
+            .refreshToken("refresh-token")
+            .newPassword("test")
+            .currentPassword("password")
+            .build();
+    }
+
+    public static ConnectorUserRequest createDefaultPatchUserRequest() {
         return ConnectorUserRequest.builder()
             .username("test_user")
             .email("test_user@email.com")
@@ -114,7 +131,11 @@ public class ConnectorUserTestFixtures {
     }
 
     public static ConnectorUserDetails createUserDetails() {
-        return new ConnectorUserDetails(createDefaultUserWithRoles());
+        return createUserDetails(null);
+    }
+
+    public static ConnectorUserDetails createUserDetails(String accessToken) {
+        return new ConnectorUserDetails(createDefaultUserWithRoles(), accessToken);
     }
 }
 

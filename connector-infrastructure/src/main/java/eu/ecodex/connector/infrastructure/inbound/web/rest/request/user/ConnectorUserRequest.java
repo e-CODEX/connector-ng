@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -28,8 +29,7 @@ import org.springframework.util.CollectionUtils;
 public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
                                    @NotBlank(message = "Username must not be blank")
                                    String username,
-                                   @NotNull(message = "Password is mandatory")
-                                   @NotBlank(message = "Password must not be blank")
+                                   @Size(min = 6, message = "Password must have at least 6 digits")
                                    String password,
                                    @Email
                                    String email,

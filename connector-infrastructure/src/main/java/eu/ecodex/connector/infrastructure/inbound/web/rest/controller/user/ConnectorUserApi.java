@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(path = "/api/v1/auth/me", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "AuthenticateUserProfile", description = "API for managing connector's current user")
 public interface ConnectorUserApi {
-
     @Operation(summary = "Update partially the currently connected user profile.")
     @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({

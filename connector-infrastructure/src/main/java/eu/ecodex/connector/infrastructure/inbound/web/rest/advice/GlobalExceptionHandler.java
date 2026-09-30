@@ -28,6 +28,7 @@ import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveExc
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
+import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
@@ -51,6 +52,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConnectorUserInvalidPasswordException.class)
+    public ErrorResponse handleUserPasswordException(ConnectorUserInvalidPasswordException e) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.UNAUTHORIZED)

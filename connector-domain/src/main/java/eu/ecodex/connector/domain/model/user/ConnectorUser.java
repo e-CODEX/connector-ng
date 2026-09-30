@@ -31,7 +31,6 @@ public record ConnectorUser(
     String uuid,
     @NotBlank
     String username,
-    @NotBlank
     String password,
     String email,
     Boolean enabled,

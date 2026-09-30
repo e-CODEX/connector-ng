@@ -77,8 +77,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
 
     @Override
-    public ConnectorUserDto register(
-        @org.jspecify.annotations.NonNull ConnectorUserRequest userRequest) {
+    public ConnectorUserDto register(@NonNull ConnectorUserRequest userRequest) {
         log.info("Registering new user");
         var registered = connectorRegisterUser.execute(toDomain(userRequest));
 

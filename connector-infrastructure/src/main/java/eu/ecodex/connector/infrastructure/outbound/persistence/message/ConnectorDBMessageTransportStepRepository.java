@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorMessageTransportStepRepositoryImpl
+public class ConnectorDBMessageTransportStepRepository
     implements ConnectorMessageTransportStepRepository {
     private final ConnectorMessageTransportStepJpaRepository transportStepJpaRepository;
     private final ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository;
@@ -56,8 +56,10 @@ public class ConnectorMessageTransportStepRepositoryImpl
      * @param stepStatusJpaRepository    the repository for managing
      *                                   {@code ConnectorMessageTransportStepStatusEntity}
      *                                   instances
+     * @param paginationMapper           the utility for mapping between page requests and results
+     * @param objectMapper               The object mapper
      */
-    public ConnectorMessageTransportStepRepositoryImpl(
+    public ConnectorDBMessageTransportStepRepository(
         ConnectorMessageTransportStepJpaRepository transportStepJpaRepository,
         ConnectorMessageTransportStepStatusJpaRepository stepStatusJpaRepository,
         PaginationMapper paginationMapper,

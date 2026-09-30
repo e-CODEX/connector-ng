@@ -30,17 +30,17 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Service
-public class ConnectorRoleRepositoryImpl implements ConnectorRoleRepository {
+public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
     private final ConnectorUserRoleJpaRepository jpaRepository;
 
-    public ConnectorRoleRepositoryImpl(ConnectorUserRoleJpaRepository jpaRepository) {
+    public ConnectorDBRoleRepository(ConnectorUserRoleJpaRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
     @Override
     public ConnectorRole save(@NonNull ConnectorRole userRole) {
-        var existing =
-            jpaRepository.findByUuid(userRole.uuid()); // TODO check if this call could be optimized
+        // TODO check if this call could be optimized
+        var existing = jpaRepository.findByUuid(userRole.uuid());
         ConnectorRoleEntity entity;
         if (existing.isPresent()) {
             entity = existing.get();

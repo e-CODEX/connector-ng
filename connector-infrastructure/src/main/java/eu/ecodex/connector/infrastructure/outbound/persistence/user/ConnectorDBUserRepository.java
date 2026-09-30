@@ -30,17 +30,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * Implementation of the ConnectorUserRepository interface that provides
- * operations for managing ConnectorUser entities in the database.
+ * Implementation of the ConnectorUserRepository interface that provides operations for managing
+ * ConnectorUser entities in the database.
  *
  * <p>This class uses JPA repositories for persistence and mapping
- * entities to domain objects and vice versa. It ensures consistency
- * between the domain and persistence layers and includes functionality
- * for saving, retrieving, updating, and deleting ConnectorUser entities.
+ * entities to domain objects and vice versa. It ensures consistency between the domain and
+ * persistence layers and includes functionality for saving, retrieving, updating, and deleting
+ * ConnectorUser entities.
  */
 @Slf4j
 @Service
-public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
+public class ConnectorDBUserRepository implements ConnectorUserRepository {
     private final ConnectorUserJpaRepository jpaRepository;
     private final ConnectorUserRoleJpaRepository roleRepository;
     private final ConnectorUserRefreshTokenJpaRepository refreshTokenRepository;
@@ -52,10 +52,11 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
      * @param roleRepository         the repository for managing ConnectorRole entities
      * @param refreshTokenRepository the repository for managing ConnectorRefreshToken entities
      */
-    public ConnectorUserRepositoryImpl(ConnectorUserJpaRepository jpaRepository,
-                                       ConnectorUserRoleJpaRepository roleRepository,
-                                       ConnectorUserRefreshTokenJpaRepository
-                                           refreshTokenRepository) {
+    public ConnectorDBUserRepository(
+        ConnectorUserJpaRepository jpaRepository,
+        ConnectorUserRoleJpaRepository roleRepository,
+        ConnectorUserRefreshTokenJpaRepository
+            refreshTokenRepository) {
         this.jpaRepository = jpaRepository;
         this.roleRepository = roleRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -63,8 +64,8 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
 
     @Override
     public ConnectorUser save(@NonNull ConnectorUser domainUser) {
-        var existing = jpaRepository.findByUuid(
-            domainUser.uuid()); // TODO check if this call could be optimized
+        // TODO check if this call could be optimized
+        var existing = jpaRepository.findByUuid(domainUser.uuid());
 
         ConnectorUserEntity entity;
         if (existing.isPresent()) {
@@ -89,8 +90,9 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     }
 
     @Override
-    public Optional<ConnectorUser> findByUsernameAndActive(@NonNull String username,
-                                                           boolean active) {
+    public Optional<ConnectorUser> findByUsernameAndActive(
+        @NonNull String username,
+        boolean active) {
         var found = jpaRepository.findByUsernameAndEnabled(username, active);
         return found.map(ConnectorUserMapper::toDomain);
     }
@@ -119,12 +121,12 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     }
 
     @Override
-    public boolean existsByUsername(@NonNull  String username) {
+    public boolean existsByUsername(@NonNull String username) {
         return jpaRepository.existsByUsername(username);
     }
 
     @Override
-    public boolean existsByEmail(@NonNull  String email) {
+    public boolean existsByEmail(@NonNull String email) {
         return jpaRepository.existsByEmail(email);
     }
 
@@ -134,8 +136,9 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
     }
 
     @Override
-    public boolean existsByUsernameAndUuidNot(@NonNull String username,
-                                              @NonNull String identifier) {
+    public boolean existsByUsernameAndUuidNot(
+        @NonNull String username,
+        @NonNull String identifier) {
         return jpaRepository.existsByUsernameAndUuidNot(username, identifier);
     }
 
@@ -179,20 +182,18 @@ public class ConnectorUserRepositoryImpl implements ConnectorUserRepository {
      * Converts a set of domain-level user roles into a set of JPA role entities.
      *
      * @param domainUserRoles the set of {@code ConnectorRole} objects representing the domain user
-     *                        roles to be converted;
-     *                        can be {@code null}.
+     *                        roles to be converted; can be {@code null}.
      *
      * @return a {@code Set} of {@code ConnectorRoleEntity} representing the JPA role entities, or
-     *     {@code null}
-     *     if the input is {@code null}.
+     *     {@code null} if the input is {@code null}.
      */
     private Set<ConnectorRoleEntity> toUserRoles(Set<ConnectorRole> domainUserRoles) {
         if (domainUserRoles == null) {
             return null;
         }
         var rolesNames = domainUserRoles.stream()
-            .map(ConnectorRole::name)
-            .collect(Collectors.toUnmodifiableSet());
+                                        .map(ConnectorRole::name)
+                                        .collect(Collectors.toUnmodifiableSet());
 
         return roleRepository.findByNameIn(rolesNames);
     }

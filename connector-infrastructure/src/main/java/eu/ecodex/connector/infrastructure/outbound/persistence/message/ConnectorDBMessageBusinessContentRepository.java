@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @SuppressWarnings("checkstyle:LineLength")
-public class ConnectorMessageBusinessContentRepositoryImpl implements
+public class ConnectorDBMessageBusinessContentRepository implements
     ConnectorMessageBusinessContentRepository {
     private final ConnectorMessageBusinessContentJpaRepository businessContentJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
@@ -57,7 +57,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
      *                                       ConnectorMessageBusinessDocumentDetachedSignatureEntity}
      *                                       entities
      */
-    public ConnectorMessageBusinessContentRepositoryImpl(
+    public ConnectorDBMessageBusinessContentRepository(
         ConnectorMessageBusinessContentJpaRepository businessContentJpaRepository,
         ConnectorMessageJpaRepository messageJpaRepository,
         ConnectorMessageBusinessDocumentJpaRepository businessDocumentJpaRepository,
@@ -79,7 +79,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
         return ConnectorMessageBusinessContent
             .builder()
             .uuid(entity.getUuid())
-            .xmlContent(ConnectorMessageAttachmentRepositoryImpl.toDomain(entity.getXmlContent()))
+            .xmlContent(ConnectorDBMessageAttachmentRepository.toDomain(entity.getXmlContent()))
             .businessDocument(toDomain(entity.getBusinessDocument()))
             .build();
     }
@@ -94,7 +94,7 @@ public class ConnectorMessageBusinessContentRepositoryImpl implements
             .builder()
             .uuid(entity.getUuid())
             .aesType(entity.getAesType())
-            .attachment(ConnectorMessageAttachmentRepositoryImpl.toDomain(entity.getAttachment()))
+            .attachment(ConnectorDBMessageAttachmentRepository.toDomain(entity.getAttachment()))
             .detachedSignature(toDomain(entity.getDetachedSignature()))
             .build();
     }

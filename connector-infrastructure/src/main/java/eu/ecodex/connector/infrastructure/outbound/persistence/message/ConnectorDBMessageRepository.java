@@ -34,9 +34,9 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.message.C
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.MessageSpecification;
 import eu.ecodex.connector.infrastructure.outbound.persistence.PaginationMapper;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorActionRepositoryImpl;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorPartyRepositoryImpl;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorServiceRepositoryImpl;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBActionRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBPartyRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBServiceRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorMessageRepository}.
  */
 @Component
-public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepository {
+public class ConnectorDBMessageRepository implements ConnectorMessageRepository {
     private final ConnectorMessageJpaRepository messageJpaRepository;
     private final ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository;
     private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
@@ -71,9 +71,10 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
      * @param as4PropertiesRepository          JPA repository responsible for managing
      *                                         {@code ConnectorMessageAS4Properties} entities.
      * @param messageBusinessContentRepository JPA repository responsible for managing
-     * @param paginationMapper                 Mapper for pagination.
+     * @param paginationMapper                 the utility for mapping between page requests and
+     *                                         results
      */
-    public ConnectorMessageRepositoryImpl(
+    public ConnectorDBMessageRepository(
         ConnectorMessageJpaRepository messageJpaRepository,
         ConnectorBusinessDomainJpaRepository businessDomainJpaRepository,
         ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository,
@@ -122,10 +123,10 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
             .ebmsMessageIdentifier(entity.getEbmsMessageIdentifier())
             .originalSender(entity.getOriginalSender())
             .finalRecipient(entity.getFinalRecipient())
-            .service(ConnectorServiceRepositoryImpl.toDomain(entity.getService()))
-            .action(ConnectorActionRepositoryImpl.toDomain(entity.getAction()))
-            .fromParty(ConnectorPartyRepositoryImpl.toDomain(entity.getFromParty()))
-            .toParty(ConnectorPartyRepositoryImpl.toDomain(entity.getToParty()))
+            .service(ConnectorDBServiceRepository.toDomain(entity.getService()))
+            .action(ConnectorDBActionRepository.toDomain(entity.getAction()))
+            .fromParty(ConnectorDBPartyRepository.toDomain(entity.getFromParty()))
+            .toParty(ConnectorDBPartyRepository.toDomain(entity.getToParty()))
             .build();
     }
 
@@ -346,32 +347,32 @@ public class ConnectorMessageRepositoryImpl implements ConnectorMessageRepositor
 
     private ConnectorMessageBusinessContent toBusinessContent(
         ConnectorMessageBusinessContentEntity businessContent) {
-        return ConnectorMessageBusinessContentRepositoryImpl.toDomain(businessContent);
+        return ConnectorDBMessageBusinessContentRepository.toDomain(businessContent);
     }
 
     private List<ConnectorMessageAttachment> toAttachment(
         List<ConnectorMessageAttachmentEntity> attachments) {
         return attachments == null
-               ? List.of()
-               : attachments.stream()
-                            .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
-                            .toList();
+            ? List.of()
+            : attachments.stream()
+                         .map(ConnectorDBMessageAttachmentRepository::toDomain)
+                         .toList();
     }
 
     private List<ConnectorMessageError> toError(List<ConnectorMessageErrorEntity> errors) {
         return errors == null
-               ? List.of()
-               : errors.stream()
-                       .map(ConnectorMessageErrorRepositoryImpl::toDomain)
-                       .toList();
+            ? List.of()
+            : errors.stream()
+                    .map(ConnectorDBMessageErrorRepository::toDomain)
+                    .toList();
     }
 
     private List<ConnectorMessageEvidence> toEvidence(
         Set<ConnectorMessageEvidenceEntity> evidences) {
         return evidences == null
-               ? List.of()
-               : evidences.stream()
-                          .map(ConnectorMessageEvidenceRepositoryImpl::toDomain)
-                          .toList();
+            ? List.of()
+            : evidences.stream()
+                       .map(ConnectorDBMessageEvidenceRepository::toDomain)
+                       .toList();
     }
 }

@@ -30,12 +30,13 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshTokenRepository {
+public class ConnectorDBRefreshTokenRepository implements ConnectorRefreshTokenRepository {
     private final ConnectorUserRefreshTokenJpaRepository jpaRepository;
     private final ConnectorUserJpaRepository userRepository;
 
-    public ConnectorRefreshTokenRepositoryImpl(ConnectorUserRefreshTokenJpaRepository jpaRepository,
-                                               ConnectorUserJpaRepository userRepository) {
+    public ConnectorDBRefreshTokenRepository(
+        ConnectorUserRefreshTokenJpaRepository jpaRepository,
+        ConnectorUserJpaRepository userRepository) {
         this.jpaRepository = jpaRepository;
         this.userRepository = userRepository;
     }
@@ -59,11 +60,12 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
     }
 
     @Override
-    public List<ConnectorRefreshToken> findByUserUuidAndRevoked(@NonNull String uuid,
-                                                                boolean revoked) {
+    public List<ConnectorRefreshToken> findByUserUuidAndRevoked(
+        @NonNull String uuid,
+        boolean revoked) {
         return jpaRepository.findByUser_UuidAndRevoked(uuid, revoked).stream()
-            .map(this::toDomain)
-            .toList();
+                            .map(this::toDomain)
+                            .toList();
     }
 
     @Override
@@ -90,40 +92,41 @@ public class ConnectorRefreshTokenRepositoryImpl implements ConnectorRefreshToke
      * Converts a {@link ConnectorRefreshToken} domain object into a
      * {@link ConnectorRefreshTokenEntity}.
      *
-     * @param domain The {@link ConnectorRefreshToken} instance to be converted.
-     *               This represents the domain-level refresh token.
-     * @param user   The {@link ConnectorUserEntity} instance associated with the
-     *               provided refresh token. This represents the entity-level user.
+     * @param domain The {@link ConnectorRefreshToken} instance to be converted. This represents the
+     *               domain-level refresh token.
+     * @param user   The {@link ConnectorUserEntity} instance associated with the provided refresh
+     *               token. This represents the entity-level user.
      *
      * @return A new {@link ConnectorRefreshTokenEntity} built from the provided
      *     {@link ConnectorRefreshToken} and {@link ConnectorUserEntity}.
      */
-    private ConnectorRefreshTokenEntity toEntity(@NonNull ConnectorRefreshToken domain,
-                                                 ConnectorUserEntity user) {
+    private ConnectorRefreshTokenEntity toEntity(
+        @NonNull ConnectorRefreshToken domain,
+        ConnectorUserEntity user) {
         return ConnectorRefreshTokenEntity.builder()
-            .token(domain.token())
-            .revoked(domain.revoked())
-            .user(user)
-            .expiresAt(domain.expiresAt())
-            .build();
+                                          .token(domain.token())
+                                          .revoked(domain.revoked())
+                                          .user(user)
+                                          .expiresAt(domain.expiresAt())
+                                          .build();
     }
 
     /**
-     * Converts a {@link ConnectorRefreshTokenEntity} entity instance to its corresponding
-     * domain model {@link ConnectorRefreshToken}.
+     * Converts a {@link ConnectorRefreshTokenEntity} entity instance to its corresponding domain
+     * model {@link ConnectorRefreshToken}.
      *
-     * @param entity The {@link ConnectorRefreshTokenEntity} instance to be converted.
-     *               This represents the persistence-level representation of a refresh token.
+     * @param entity The {@link ConnectorRefreshTokenEntity} instance to be converted. This
+     *               represents the persistence-level representation of a refresh token.
      *
      * @return A {@link ConnectorRefreshToken} instance constructed from the provided entity.
      */
     private ConnectorRefreshToken toDomain(@NonNull ConnectorRefreshTokenEntity entity) {
         return ConnectorRefreshToken.builder()
-            .token(entity.getToken())
-            .user(ConnectorUserMapper.toDomain(entity.getUser()))
-            .revoked(entity.isRevoked())
-            .createdAt(entity.getCreatedAt())
-            .expiresAt(entity.getExpiresAt())
-            .build();
+                                    .token(entity.getToken())
+                                    .user(ConnectorUserMapper.toDomain(entity.getUser()))
+                                    .revoked(entity.isRevoked())
+                                    .createdAt(entity.getCreatedAt())
+                                    .expiresAt(entity.getExpiresAt())
+                                    .build();
     }
 }

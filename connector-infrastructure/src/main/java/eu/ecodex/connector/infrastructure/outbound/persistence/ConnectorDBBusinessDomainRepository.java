@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
  * Implementation of the {@link ConnectorBusinessDomainRepository}.
  */
 @Component
-public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessDomainRepository {
+public class ConnectorDBBusinessDomainRepository implements ConnectorBusinessDomainRepository {
     private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
 
     /**
@@ -34,7 +34,7 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
      *                                    {@link ConnectorBusinessDomainEntity} entities in the
      *                                    database; must not be null.
      */
-    public ConnectorBusinessDomainRepositoryImpl(
+    public ConnectorDBBusinessDomainRepository(
         ConnectorBusinessDomainJpaRepository businessDomainJpaRepository) {
         this.businessDomainJpaRepository = businessDomainJpaRepository;
     }
@@ -113,7 +113,7 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
         );
 
         return businessDomains.stream()
-                              .map(ConnectorBusinessDomainRepositoryImpl::toDomain)
+                              .map(ConnectorDBBusinessDomainRepository::toDomain)
                               .toList();
     }
 }

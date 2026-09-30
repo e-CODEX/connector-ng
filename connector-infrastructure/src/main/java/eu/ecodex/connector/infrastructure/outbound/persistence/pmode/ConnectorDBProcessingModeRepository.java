@@ -19,7 +19,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.Connect
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorBusinessDomainJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeTruststoreJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.ConnectorBusinessDomainRepositoryImpl;
+import eu.ecodex.connector.infrastructure.outbound.persistence.ConnectorDBBusinessDomainRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorProcessingModeRepository}.
  */
 @Component
-public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessingModeRepository {
+public class ConnectorDBProcessingModeRepository implements ConnectorProcessingModeRepository {
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
     private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
     private final ConnectorProcessingModeTruststoreJpaRepository truststoreJpaRepository;
@@ -46,7 +46,7 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
      * @param truststoreJpaRepository     the repository for performing operations on
      *                                    {@code ConnectorProcessingModeTruststoreEntity}.
      */
-    public ConnectorProcessingModeRepositoryImpl(
+    public ConnectorDBProcessingModeRepository(
         ConnectorProcessingModeJpaRepository processingModeJpaRepository,
         ConnectorBusinessDomainJpaRepository businessDomainJpaRepository,
         ConnectorProcessingModeTruststoreJpaRepository truststoreJpaRepository) {
@@ -152,20 +152,20 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
         return ConnectorProcessingMode
             .builder()
             .businessDomain(
-                ConnectorBusinessDomainRepositoryImpl.toDomain(entity.getBusinessDomain()))
+                ConnectorDBBusinessDomainRepository.toDomain(entity.getBusinessDomain()))
             .uuid(entity.getUuid())
             .description(entity.getDescription())
             .content(entity.getContent())
             .filename(entity.getFilename())
             .truststore(toDomain(entity.getTruststore()))
             .parties(entity.getParties().stream().map(
-                ConnectorPartyRepositoryImpl::toDomain).collect(
+                ConnectorDBPartyRepository::toDomain).collect(
                 Collectors.toSet()))
             .actions(entity.getActions().stream().map(
-                ConnectorActionRepositoryImpl::toDomain).collect(
+                ConnectorDBActionRepository::toDomain).collect(
                 Collectors.toSet()))
             .services(entity.getServices().stream().map(
-                ConnectorServiceRepositoryImpl::toDomain).collect(
+                ConnectorDBServiceRepository::toDomain).collect(
                 Collectors.toSet()))
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())

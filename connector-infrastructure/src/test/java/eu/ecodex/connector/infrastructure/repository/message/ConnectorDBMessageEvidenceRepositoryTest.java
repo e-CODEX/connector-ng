@@ -24,7 +24,7 @@ import org.springframework.test.context.jdbc.Sql;
 @SuppressWarnings("DataFlowIssue")
 
 @DisplayName("ConnectorMessageEvidenceRepository")
-public class ConnectorMessageEvidenceRepositoryImplTest extends AbstractRepositoryTest {
+public class ConnectorDBMessageEvidenceRepositoryTest extends AbstractRepositoryTest {
     private static final String MESSAGE_ID =
         "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
 

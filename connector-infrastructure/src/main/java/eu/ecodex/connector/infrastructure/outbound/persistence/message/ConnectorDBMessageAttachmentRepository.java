@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorMessageAttachmentRepository}.
  */
 @Component
-public class ConnectorMessageAttachmentRepositoryImpl implements
+public class ConnectorDBMessageAttachmentRepository implements
     ConnectorMessageAttachmentRepository {
     private final ConnectorMessageAttachmentJpaRepository attachmentJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
@@ -44,7 +44,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
      *                                {@code ConnectorMessageEntity}
      * @param paginationMapper        the utility for mapping between page requests and results
      */
-    public ConnectorMessageAttachmentRepositoryImpl(
+    public ConnectorDBMessageAttachmentRepository(
         ConnectorMessageAttachmentJpaRepository attachmentJpaRepository,
         ConnectorMessageJpaRepository messageJpaRepository, PaginationMapper paginationMapper) {
         this.attachmentJpaRepository = attachmentJpaRepository;
@@ -97,7 +97,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
 
         return attachmentJpaRepository.findAll(specification)
                                       .stream()
-                                      .map(ConnectorMessageAttachmentRepositoryImpl::toDomain)
+                                      .map(ConnectorDBMessageAttachmentRepository::toDomain)
                                       .toList();
     }
 
@@ -106,7 +106,7 @@ public class ConnectorMessageAttachmentRepositoryImpl implements
         var pageable = paginationMapper.toPageable(request);
 
         var attachments = attachmentJpaRepository.findAll(pageable)
-                                                 .map(ConnectorMessageAttachmentRepositoryImpl
+                                                 .map(ConnectorDBMessageAttachmentRepository
                                                           ::toDomain);
 
         return paginationMapper.toPageResult(attachments);

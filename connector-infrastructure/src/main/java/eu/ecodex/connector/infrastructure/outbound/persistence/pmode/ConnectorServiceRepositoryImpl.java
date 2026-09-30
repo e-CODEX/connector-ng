@@ -19,6 +19,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.Con
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
 import java.util.List;
 import lombok.NonNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -118,7 +119,8 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
     public List<ConnectorService> findAllByBusinessDomainIdentifier(
         @NonNull ConnectorBusinessDomainIdentifier identifier) {
         var services = this.serviceJpaRepository.findByProcessingModeBusinessDomainIdentifier(
-            identifier.messageLaneIdentifier()
+            identifier.messageLaneIdentifier(),
+            Sort.by(Sort.Order.asc("name"))
         );
 
         return services.stream().map(ConnectorServiceRepositoryImpl::toDomain).toList();

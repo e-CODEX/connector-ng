@@ -101,7 +101,6 @@ public class ConnectorJwtParser {
             .toList();
     }
 
-
     /**
      * Validates the given JWT token by checking if it matches the username of the specified user
      * and ensures the token has not expired.
@@ -121,7 +120,6 @@ public class ConnectorJwtParser {
             return false;
         }
     }
-
 
     /**
      * Checks if the given JWT token has expired.

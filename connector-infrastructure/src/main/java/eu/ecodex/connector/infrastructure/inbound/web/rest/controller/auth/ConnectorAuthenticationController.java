@@ -11,14 +11,18 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.auth;
 
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshUserRefreshTokenService;
+import eu.ecodex.connector.domain.model.auth.ConnectorUpdateUserPasswordData;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.outbound.auth.login.ConnectorUserAuthenticationProviderImpl;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -42,7 +46,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConnectorAuthenticationController implements ConnectorAuthenticationApi {
     private final ConnectorUserAuthenticationProvider userAuthenticationProvider;
-    private final ConnectorRefreshUserRefreshToken refreshUserTokenService;
+    private final ConnectorUpdateUserPassword updateUserPassword;
+    private final ConnectorRefreshUserRefreshToken refreshUserToken;
 
     /**
      * Constructs a {@code ConnectorAuthenticationController} with the necessary services for
@@ -51,15 +56,18 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
      * @param userAuthenticationProvider The {@link ConnectorUserAuthenticationProviderImpl}
      *                                   responsible for managing user login operations, including
      *                                   credential validation and token generation.
-     * @param refreshUserTokenService    The {@link ConnectorRefreshUserRefreshTokenService}
+     * @param refreshUserToken           The {@link ConnectorRefreshUserRefreshTokenService}
      *                                   used to handle user token refresh operations, ensuring the
      *                                   access token remains valid.
+     * @param updateUserPassword         The service that will process update of user password
      */
     public ConnectorAuthenticationController(
         ConnectorUserAuthenticationProvider userAuthenticationProvider,
-        ConnectorRefreshUserRefreshToken refreshUserTokenService) {
+        ConnectorUpdateUserPassword updateUserPassword,
+        ConnectorRefreshUserRefreshToken refreshUserToken) {
         this.userAuthenticationProvider = userAuthenticationProvider;
-        this.refreshUserTokenService = refreshUserTokenService;
+        this.updateUserPassword = updateUserPassword;
+        this.refreshUserToken = refreshUserToken;
     }
 
     @Override
@@ -75,7 +83,7 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
         @RequestHeader(HttpHeaders.AUTHORIZATION) @NonNull String authorizationHeader,
         @NonNull ConnectorRefreshTokenRequest request) {
         var accessToken = authorizationHeader.replaceFirst("^Bearer ", "");
-        var refreshed = refreshUserTokenService.execute(accessToken, request.refreshToken());
+        var refreshed = refreshUserToken.execute(accessToken, request.refreshToken());
         log.info("Successfully refreshed token");
         return refreshed;
     }
@@ -86,5 +94,31 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
                        @RequestBody @NonNull ConnectorLogoutRequest request) {
         userAuthenticationProvider.logout(userDetails.getUserId(), request.refreshToken());
         log.info("Successfully logged out");
+    }
+
+    @Override
+    public void updatePasswordAfterLogin(@NonNull ConnectorUserDetails userDetails,
+                                         @NonNull
+                                         ConnectorUpdateUserPasswordRequest userPasswordRequest) {
+        try {
+            var passwordUpdateData = ConnectorUpdateUserPasswordRequest.toDomain(
+                userDetails.getUserId(), userDetails.accessToken(), userPasswordRequest);
+
+            updateUserPassword.execute(passwordUpdateData);
+        } catch (ExpiredJwtException e) {
+            var authenticationResult =
+                refreshUserToken.execute(userDetails.accessToken(),
+                    userPasswordRequest.refreshToken());
+
+            var passwordUpdateData = ConnectorUpdateUserPasswordData.builder()
+                .uuid(userDetails.getUserId())
+                .accessToken(authenticationResult.accessToken())
+                .refreshToken(authenticationResult.refreshToken())
+                .newPassword(userPasswordRequest.newPassword())
+                .currentPassword(userPasswordRequest.currentPassword())
+                .build();
+
+            updateUserPassword.execute(passwordUpdateData);
+        }
     }
 }

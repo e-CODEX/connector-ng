@@ -36,6 +36,12 @@ public class ConnectorUserController implements ConnectorUserApi {
     private final ConnectorPatchUser patchUser;
     private final ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
 
+    /**
+     * Constructs a {@code ConnectorUserController} with the necessary services.
+     *
+     * @param patchUser                service to patch user
+     * @param retrieveUserByIdentifier service to retrieve user
+     */
     public ConnectorUserController(ConnectorPatchUser patchUser,
                                    ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier) {
         this.patchUser = patchUser;

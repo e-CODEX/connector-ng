@@ -16,27 +16,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorAuthenticationController.class)
-class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
+class ConnectorLoginControllerTest extends AbstractWebMvcTest {
     @MockitoBean
-    ConnectorUserAuthenticationProvider loginUserService;
-
+    ConnectorUserAuthenticationProvider userAuthenticationProvider;
     @MockitoBean
-    ConnectorRefreshUserRefreshTokenService userTokenService;
+    ConnectorUpdateUserPassword updateUserPassword;
+    @MockitoBean
+    ConnectorRefreshUserRefreshToken userRefreshToken;
 
     @Autowired
     RestTestClient apiClient;
@@ -52,7 +52,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
             .refreshToken("refresh-token")
             .build();
 
-        when(loginUserService.login(any(), any())).thenReturn(expected);
+        when(userAuthenticationProvider.login(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -69,42 +69,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(loginUserService).login(username, password);
-        verifyNoMoreInteractions(loginUserService, userTokenService);
-    }
-
-    @Test
-    void refresh_should_refresh_the_token() {
-        // Given
-        var accessToken = "access-token";
-        var refreshToken = "refresh-token";
-        var request = ConnectorRefreshTokenRequest.builder()
-            .refreshToken(refreshToken)
-            .build();
-        var expected = ConnectorUserAuthenticationResult.builder()
-            .accessToken(accessToken)
-            .refreshToken(refreshToken)
-            .build();
-
-        when(userTokenService.execute(any(), any())).thenReturn(expected);
-
-        // When
-        var result = apiClient.post()
-            .uri("/api/v1/auth/refresh")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(request)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorUserAuthenticationResult.class);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getResponseBody()).isNotNull();
-        assertThat(result.getResponseBody()).isEqualTo(expected);
-
-        verify(userTokenService).execute(accessToken, refreshToken);
-        verifyNoMoreInteractions(loginUserService, userTokenService);
+        verify(userAuthenticationProvider).login(username, password);
+        verifyNoMoreInteractions(userAuthenticationProvider, userRefreshToken, updateUserPassword);
     }
 }

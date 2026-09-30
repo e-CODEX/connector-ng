@@ -10,6 +10,7 @@ INSERT INTO connector_users (id, uuid, username, password, email, enabled, mustC
 VALUES (2, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_admin', 'test-admin-it', '$2a$12$pwdAdminIt', 'admin-it@email.com', true, false, now(), now()),
        (3, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_test', 'test-user-it','$2a$12$Z4jT8Cvg/CcmNxJ3aNXeleQ/upt3LIla4e2mghCvUyvhj9P3BpSjS', 'user-it@email.com', true, false,now(), now()),
        (4, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_test2', 'test-user2-it','$2a$12$pwdUser2It', 'user2-it@email.com', true, false, now(), now()),
+       (5, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_test3', 'test-user3-it','$2b$12$pyjrPNksvg6iIZzDoouZF.hH5ZdFTRgl8wZT4d9iOc0sF5XVc2EPS', 'user3-it@email.com', true, true,now(), now()),
        (1, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_default_admin', 'admin', '$2a$12$5jl8Wz2LwcMLc7.yarZT8eOnWtu4tz1IvScxxSPZyGTtrKBTdTt3W', 'admin@example.org', true, false,now(), now())
 ON DUPLICATE KEY UPDATE uuid     = VALUES(uuid),
                         username = VALUES(username),

@@ -18,8 +18,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -42,10 +43,10 @@ import tools.jackson.databind.ObjectMapper;
 class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     ConnectorUserAuthenticationProvider userAuthenticationProvider;
-
     @MockitoBean
-    ConnectorRefreshUserRefreshTokenService userTokenService;
-
+    ConnectorRefreshUserRefreshToken userRefreshToken;
+    @MockitoBean
+    ConnectorUpdateUserPassword updateUserPassword;
     @Autowired
     ObjectMapper objectMapper;
 
@@ -76,7 +77,7 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
 
         // Then
         verify(userAuthenticationProvider).logout(userPrincipal.getUserId(), refreshToken);
-        verifyNoMoreInteractions(userTokenService, userAuthenticationProvider);
+        verifyNoMoreInteractions(userRefreshToken, userAuthenticationProvider, updateUserPassword);
     }
 
     @TestConfiguration

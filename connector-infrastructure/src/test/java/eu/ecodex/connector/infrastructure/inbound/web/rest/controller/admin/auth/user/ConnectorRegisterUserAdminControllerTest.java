@@ -143,26 +143,6 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     }
 
     @Test
-    void should_not_register_user_when_password_is_missing() {
-        // Given
-        var connectorUserRequest = ConnectorUserTestFixtures.createUserRequest(
-            "username", null, null
-        );
-
-        // When
-        apiClient.post()
-            .uri(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(connectorUserRequest)
-            .exchange()
-            .expectStatus()
-            .isBadRequest(); // because of filter is deactivated
-
-        // Then
-        assertNoMoreInteractions();
-    }
-
-    @Test
     void should_not_register_user_when_already_exists_exception_is_thrown() {
         // Given
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();

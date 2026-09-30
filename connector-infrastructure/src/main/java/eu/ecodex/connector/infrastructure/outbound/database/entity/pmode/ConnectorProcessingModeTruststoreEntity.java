@@ -37,7 +37,7 @@ import org.hibernate.type.SqlTypes;
  */
 @Entity
 @Getter
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "CONNECTOR_PROCESSING_MODE_TRUSTSTORES")

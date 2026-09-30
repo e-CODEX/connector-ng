@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.port.spi.pmode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
@@ -35,6 +36,11 @@ public interface ConnectorProcessingModeRepository {
     ConnectorProcessingMode save(
         @Nonnull ConnectorProcessingMode processingMode,
         @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier
+    );
+
+    ConnectorProcessingMode updateTruststore(
+        @Nonnull String pmodeUuid,
+        @Nonnull ConnectorTruststore truststore
     );
 
     /**

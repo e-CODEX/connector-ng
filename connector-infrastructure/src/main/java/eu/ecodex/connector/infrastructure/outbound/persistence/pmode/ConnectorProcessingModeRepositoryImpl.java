@@ -73,6 +73,33 @@ public class ConnectorProcessingModeRepositoryImpl implements ConnectorProcessin
     }
 
     @Override
+    public ConnectorProcessingMode updateTruststore(
+        @NonNull String pmodeUuid,
+        @NonNull ConnectorTruststore truststore) {
+        var processingModeEntity = processingModeJpaRepository.findByUuid(pmodeUuid);
+
+        var truststoreEntity = processingModeEntity.getTruststore();
+
+        if (truststoreEntity != null) {
+            truststoreEntity = truststoreEntity.toBuilder()
+                                               .filename(truststore.filename())
+                                               .content(truststore.content())
+                                               .type(truststore.type())
+                                               .password(truststore.password())
+                                               .build();
+            var savedTruststore = truststoreJpaRepository.save(truststoreEntity);
+            processingModeEntity.setTruststore(savedTruststore);
+        } else {
+            truststoreEntity = toEntity(truststore);
+            truststoreEntity.setProcessingMode(processingModeEntity);
+            var savedTruststore = truststoreJpaRepository.save(truststoreEntity);
+            processingModeEntity.setTruststore(savedTruststore);
+        }
+
+        return toDomain(processingModeEntity);
+    }
+
+    @Override
     public ConnectorProcessingMode findByUuid(@NonNull String uuid) {
         var processingMode = processingModeJpaRepository.findByUuid(uuid);
 

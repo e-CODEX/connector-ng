@@ -24,6 +24,7 @@ import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFound
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorUpdateProcessingModeTruststore;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.pmode.ConnectorProcessingModeAdminController;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDetailDto;
@@ -69,24 +70,26 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     private ConnectorListProcessingMode listProcessingModeService;
     @MockitoBean
     private ConnectorRetrieveProcessingMode retrieveProcessingModeService;
-
-    private static MockMultipartFile processingModeFile(String contentType) {
-        return new MockMultipartFile(
-            "processingModeFile", "processing-mode.xml", contentType, PMODE_CONTENT);
-    }
-
-    private static MockMultipartFile truststoreFile() {
-        return new MockMultipartFile(
-            "truststore.truststoreFile", "truststore.p12",
-            MediaType.APPLICATION_OCTET_STREAM_VALUE, TRUSTSTORE_CONTENT
-        );
-    }
+    @MockitoBean
+    private ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststore;
 
     private static MockMultipartHttpServletRequestBuilder creationRequest() {
         return multipart(HttpMethod.POST, URL)
             .contentType(MediaType.MULTIPART_FORM_DATA)
             .param("businessDomainIdentifier", BUSINESS_DOMAIN)
             .param("description", DESCRIPTION);
+    }
+
+    private MockMultipartFile processingModeFile(String contentType) {
+        return new MockMultipartFile(
+            "processingModeFile", "processing-mode.xml", contentType, PMODE_CONTENT);
+    }
+
+    private MockMultipartFile truststoreFile(String name) {
+        return new MockMultipartFile(
+            name, "truststore.jks",
+            MediaType.APPLICATION_OCTET_STREAM_VALUE, TRUSTSTORE_CONTENT
+        );
     }
 
     @Nested
@@ -101,7 +104,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
 
             mockMvc.perform(creationRequest()
                                 .file(processingModeFile(contentType))
-                                .file(truststoreFile())
+                                .file(truststoreFile("truststore.truststoreFile"))
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isCreated());
 
@@ -112,7 +115,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         void should_return_400_when_the_processing_mode_file_is_not_xml() throws Exception {
             mockMvc.perform(creationRequest()
                                 .file(processingModeFile(MediaType.TEXT_PLAIN_VALUE))
-                                .file(truststoreFile())
+                                .file(truststoreFile("truststore.truststoreFile"))
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isBadRequest());
 
@@ -122,7 +125,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         @Test
         void should_return_400_when_the_processing_mode_file_is_missing() throws Exception {
             mockMvc.perform(creationRequest()
-                                .file(truststoreFile())
+                                .file(truststoreFile("truststore.truststoreFile"))
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isBadRequest());
 
@@ -146,7 +149,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
             throws Exception {
             mockMvc.perform(creationRequest()
                                 .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
-                                .file(truststoreFile())
+                                .file(truststoreFile("truststore.truststoreFile"))
                                 .param("truststore.password", password))
                    .andExpect(status().isBadRequest());
 
@@ -157,7 +160,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         void should_return_400_when_the_business_domain_identifier_is_missing() throws Exception {
             mockMvc.perform(multipart(HttpMethod.POST, URL)
                                 .file(processingModeFile(MediaType.APPLICATION_XML_VALUE))
-                                .file(truststoreFile())
+                                .file(truststoreFile("truststore.truststoreFile"))
                                 .param("description", DESCRIPTION)
                                 .param("truststore.password", TRUSTSTORE_PASSWORD)
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
@@ -243,6 +246,57 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                      .exchange()
                      .expectStatus().isNotFound()
                      .returnResult();
+        }
+    }
+
+    @Nested
+    @DisplayName("PATCH (update processing mode truststore)")
+    class UpdateTruststore {
+        @Test
+        void should_return_200_with_the_truststore() throws Exception {
+            when(updateProcessingModeTruststore.execute(any(), any()))
+                .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain().truststore());
+            mockMvc.perform(multipart(HttpMethod.PATCH, URL + "/unknown-id/truststore")
+                                .file(truststoreFile("truststoreFile"))
+                                .param("password", "12345")
+                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isOk());
+
+            verify(updateProcessingModeTruststore).execute(any(), any());
+        }
+
+        @Test
+        void should_return_404_when_the_processing_mode_is_not_found() throws Exception {
+            doThrow(ConnectorProcessingModeNotFoundException.class)
+                .when(updateProcessingModeTruststore).execute(any(), any());
+            mockMvc.perform(multipart(HttpMethod.PATCH, URL + "/unknown-id/truststore")
+                                .file(truststoreFile("truststoreFile"))
+                                .param("password", "12345")
+                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isNotFound());
+
+            verify(updateProcessingModeTruststore).execute(any(), any());
+        }
+
+        @Test
+        void should_return_400_when_password_is_empty() throws Exception {
+            mockMvc.perform(multipart(HttpMethod.PATCH, URL + "/fake-id/truststore")
+                                .file(truststoreFile("truststoreFile"))
+                                .param("password", "")
+                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(updateProcessingModeTruststore);
+        }
+
+        @Test
+        void should_return_400_when_truststore_file_is_null() throws Exception {
+            mockMvc.perform(multipart(HttpMethod.PATCH, URL + "/fake-id/truststore")
+                                .param("password", "")
+                                .contentType(MediaType.MULTIPART_FORM_DATA))
+                   .andExpect(status().isBadRequest());
+
+            verifyNoInteractions(updateProcessingModeTruststore);
         }
     }
 }

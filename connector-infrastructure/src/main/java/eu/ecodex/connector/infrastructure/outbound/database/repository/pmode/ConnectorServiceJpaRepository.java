@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.outbound.database.repository.pmode;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
 import java.util.List;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -24,5 +25,7 @@ public interface ConnectorServiceJpaRepository extends JpaRepository<ConnectorSe
         String name, String businessDomainIdentifier);
 
     List<ConnectorServiceEntity> findByProcessingModeBusinessDomainIdentifier(
-        String businessDomainIdentifier);
+        String businessDomainIdentifier,
+        Sort sort
+    );
 }

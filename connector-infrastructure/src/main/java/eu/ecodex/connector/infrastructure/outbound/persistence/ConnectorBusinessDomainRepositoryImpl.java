@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.infrastructure.outbound.database.entity.ConnectorBusinessDomainEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.ConnectorBusinessDomainJpaRepository;
 import java.util.List;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -107,7 +108,9 @@ public class ConnectorBusinessDomainRepositoryImpl implements ConnectorBusinessD
 
     @Override
     public List<ConnectorBusinessDomain> findAll() {
-        var businessDomains = businessDomainJpaRepository.findAll();
+        var businessDomains = businessDomainJpaRepository.findAll(
+            Sort.by(Sort.Order.asc("identifier"))
+        );
 
         return businessDomains.stream()
                               .map(ConnectorBusinessDomainRepositoryImpl::toDomain)

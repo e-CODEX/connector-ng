@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorMessageEvidenceRepository}.
  */
 @Component
-public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageEvidenceRepository {
+public class ConnectorDBMessageEvidenceRepository implements ConnectorMessageEvidenceRepository {
     private final ConnectorEvidenceJpaRepository evidenceJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
 
@@ -39,7 +39,7 @@ public class ConnectorMessageEvidenceRepositoryImpl implements ConnectorMessageE
      *                              ConnectorMessageEntity instances and finding messages by their
      *                              identifier.
      */
-    public ConnectorMessageEvidenceRepositoryImpl(
+    public ConnectorDBMessageEvidenceRepository(
         ConnectorEvidenceJpaRepository evidenceJpaRepository,
         ConnectorMessageJpaRepository messageJpaRepository) {
         this.evidenceJpaRepository = evidenceJpaRepository;

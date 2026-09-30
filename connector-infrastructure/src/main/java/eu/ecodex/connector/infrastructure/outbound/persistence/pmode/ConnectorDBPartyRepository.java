@@ -26,11 +26,11 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorPartyRepository}.
  */
 @Component
-public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
+public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
     private final ConnectorPartyJpaRepository partyJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
-    public ConnectorPartyRepositoryImpl(
+    public ConnectorDBPartyRepository(
         ConnectorPartyJpaRepository partyJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.partyJpaRepository = partyJpaRepository;
@@ -102,7 +102,7 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
             parties.stream().map(party -> toEntity(party, processingMode)).toList()
         );
 
-        return savedParties.stream().map(ConnectorPartyRepositoryImpl::toDomain).toList();
+        return savedParties.stream().map(ConnectorDBPartyRepository::toDomain).toList();
     }
 
     @Override
@@ -126,6 +126,6 @@ public class ConnectorPartyRepositoryImpl implements ConnectorPartyRepository {
         var parties = partyJpaRepository.findByProcessingModeBusinessDomainIdentifier(
             identifier.messageLaneIdentifier());
 
-        return parties.stream().map(ConnectorPartyRepositoryImpl::toDomain).toList();
+        return parties.stream().map(ConnectorDBPartyRepository::toDomain).toList();
     }
 }

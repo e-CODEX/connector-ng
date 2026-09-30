@@ -31,13 +31,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorRoleRepositoryImplTest {
+class ConnectorDBRoleRepositoryTest {
 
     @Mock
     ConnectorUserRoleJpaRepository jpaRepository;
 
     @InjectMocks
-    private ConnectorRoleRepositoryImpl repository;
+    private ConnectorDBRoleRepository repository;
 
     @Test
     void save_should_save_role_to_database() {

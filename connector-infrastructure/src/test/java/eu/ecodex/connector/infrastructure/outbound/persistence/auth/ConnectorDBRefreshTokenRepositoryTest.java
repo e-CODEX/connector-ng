@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorRefreshTokenRepositoryImplTest {
+class ConnectorDBRefreshTokenRepositoryTest {
     @Mock
     private ConnectorUserRefreshTokenJpaRepository jpaRepository;
 
@@ -44,7 +44,7 @@ class ConnectorRefreshTokenRepositoryImplTest {
     private ConnectorUserJpaRepository userJpaRepository;
 
     @InjectMocks
-    private ConnectorRefreshTokenRepositoryImpl repository;
+    private ConnectorDBRefreshTokenRepository repository;
 
     private static ConnectorRefreshToken getExpectedRefreshToken() {
         var user = ConnectorUser.builder()

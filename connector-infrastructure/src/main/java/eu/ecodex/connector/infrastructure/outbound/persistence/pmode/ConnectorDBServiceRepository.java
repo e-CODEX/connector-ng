@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorServiceRepository}.
  */
 @Component
-public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepository {
+public class ConnectorDBServiceRepository implements ConnectorServiceRepository {
     private final ConnectorServiceJpaRepository serviceJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
@@ -39,7 +39,7 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
      *                                    perform CRUD operations on ConnectorProcessingMode
      *                                    entities and retrieve processing mode configurations.
      */
-    public ConnectorServiceRepositoryImpl(
+    public ConnectorDBServiceRepository(
         ConnectorServiceJpaRepository serviceJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.serviceJpaRepository = serviceJpaRepository;
@@ -101,7 +101,7 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
             services.stream().map(service -> toEntity(service, processingMode)).toList()
         );
 
-        return savedServices.stream().map(ConnectorServiceRepositoryImpl::toDomain).toList();
+        return savedServices.stream().map(ConnectorDBServiceRepository::toDomain).toList();
     }
 
     @Override
@@ -123,6 +123,6 @@ public class ConnectorServiceRepositoryImpl implements ConnectorServiceRepositor
             Sort.by(Sort.Order.asc("name"))
         );
 
-        return services.stream().map(ConnectorServiceRepositoryImpl::toDomain).toList();
+        return services.stream().map(ConnectorDBServiceRepository::toDomain).toList();
     }
 }

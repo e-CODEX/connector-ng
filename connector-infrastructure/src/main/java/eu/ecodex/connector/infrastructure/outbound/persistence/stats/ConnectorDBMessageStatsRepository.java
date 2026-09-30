@@ -23,10 +23,10 @@ import org.springframework.stereotype.Component;
  * Default implementation of the {@link ConnectorMessageStatsRepository} interface.
  */
 @Component
-public class ConnectorMessageStatsRepositoryImpl implements ConnectorMessageStatsRepository {
+public class ConnectorDBMessageStatsRepository implements ConnectorMessageStatsRepository {
     private final ConnectorMessageStatsJpaRepository messageStatsJpaRepository;
 
-    public ConnectorMessageStatsRepositoryImpl(
+    public ConnectorDBMessageStatsRepository(
         ConnectorMessageStatsJpaRepository messageStatsJpaRepository) {
         this.messageStatsJpaRepository = messageStatsJpaRepository;
     }
@@ -80,13 +80,14 @@ public class ConnectorMessageStatsRepositoryImpl implements ConnectorMessageStat
         Instant to,
         String businessDomain) {
         var reports = messageStatsJpaRepository.computeReports(from, to, businessDomain);
-        return reports.stream().map((report) -> new ConnectorMessageReport(
-            report.year(),
-            report.month(),
-            report.party(),
-            report.service(),
-            report.direction(),
-            report.total()
-        )).toList();
+        return reports.stream()
+                      .map((report) -> new ConnectorMessageReport(
+                          report.year(),
+                          report.month(),
+                          report.party(),
+                          report.service(),
+                          report.direction(),
+                          report.total()
+                      )).toList();
     }
 }

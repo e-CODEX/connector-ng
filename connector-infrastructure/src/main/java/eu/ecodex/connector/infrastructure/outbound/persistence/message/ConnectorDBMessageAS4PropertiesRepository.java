@@ -13,9 +13,9 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.message.C
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorActionRepositoryImpl;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorPartyRepositoryImpl;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorServiceRepositoryImpl;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBActionRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBPartyRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBServiceRepository;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
  * with connector messages.
  */
 @Component
-public class ConnectorMessageAS4PropertiesRepositoryImpl
+public class ConnectorDBMessageAS4PropertiesRepository
     implements ConnectorMessageAS4PropertiesRepository {
     private final ConnectorMessageJpaRepository messageJpaRepository;
     private final ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository;
@@ -34,7 +34,7 @@ public class ConnectorMessageAS4PropertiesRepositoryImpl
     private final ConnectorPartyJpaRepository partyJpaRepository;
 
     /**
-     * Constructs a new instance of the {@link ConnectorMessageAS4PropertiesRepositoryImpl} class.
+     * Constructs a new instance of the {@link ConnectorDBMessageAS4PropertiesRepository} class.
      *
      * @param messageJpaRepository       The repository for managing connector messages.
      * @param as4PropertiesJpaRepository The repository for managing AS4 properties associated with
@@ -43,7 +43,7 @@ public class ConnectorMessageAS4PropertiesRepositoryImpl
      * @param actionJpaRepository        The repository for managing connector actions.
      * @param partyJpaRepository         The repository for managing connector parties.
      */
-    public ConnectorMessageAS4PropertiesRepositoryImpl(
+    public ConnectorDBMessageAS4PropertiesRepository(
         ConnectorMessageJpaRepository messageJpaRepository,
         ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository,
         ConnectorServiceJpaRepository serviceJpaRepository,
@@ -126,10 +126,10 @@ public class ConnectorMessageAS4PropertiesRepositoryImpl
             .ebmsMessageIdentifier(entity.getEbmsMessageIdentifier())
             .originalSender(entity.getOriginalSender())
             .finalRecipient(entity.getFinalRecipient())
-            .service(ConnectorServiceRepositoryImpl.toDomain(entity.getService()))
-            .action(ConnectorActionRepositoryImpl.toDomain(entity.getAction()))
-            .fromParty(ConnectorPartyRepositoryImpl.toDomain(entity.getFromParty()))
-            .toParty(ConnectorPartyRepositoryImpl.toDomain(entity.getToParty()))
+            .service(ConnectorDBServiceRepository.toDomain(entity.getService()))
+            .action(ConnectorDBActionRepository.toDomain(entity.getAction()))
+            .fromParty(ConnectorDBPartyRepository.toDomain(entity.getFromParty()))
+            .toParty(ConnectorDBPartyRepository.toDomain(entity.getToParty()))
             .build();
     }
 }

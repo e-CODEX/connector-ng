@@ -24,11 +24,11 @@ import org.springframework.stereotype.Component;
  * Default implementation of {@link ConnectorMessageErrorRepository}.
  */
 @Component
-public class ConnectorMessageErrorRepositoryImpl implements ConnectorMessageErrorRepository {
+public class ConnectorDBMessageErrorRepository implements ConnectorMessageErrorRepository {
     private final ConnectorMessageErrorJpaRepository errorJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
 
-    public ConnectorMessageErrorRepositoryImpl(
+    public ConnectorDBMessageErrorRepository(
         ConnectorMessageErrorJpaRepository errorJpaRepository,
         ConnectorMessageJpaRepository messageJpaRepository) {
         this.errorJpaRepository = errorJpaRepository;
@@ -68,7 +68,7 @@ public class ConnectorMessageErrorRepositoryImpl implements ConnectorMessageErro
         var entities = toEntities(errors, message);
         var savedErrors = errorJpaRepository.saveAll(entities);
 
-        return savedErrors.stream().map(ConnectorMessageErrorRepositoryImpl::toDomain).toList();
+        return savedErrors.stream().map(ConnectorDBMessageErrorRepository::toDomain).toList();
     }
 
     private ConnectorMessageErrorEntity toEntity(ConnectorMessageError error) {

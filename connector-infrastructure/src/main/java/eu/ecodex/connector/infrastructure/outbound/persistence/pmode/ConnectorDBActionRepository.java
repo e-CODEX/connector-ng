@@ -26,11 +26,11 @@ import org.springframework.stereotype.Component;
  * Default Implementation of the {@link ConnectorActionRepository}.
  */
 @Component
-public class ConnectorActionRepositoryImpl implements ConnectorActionRepository {
+public class ConnectorDBActionRepository implements ConnectorActionRepository {
     private final ConnectorActionJpaRepository actionJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
-    public ConnectorActionRepositoryImpl(
+    public ConnectorDBActionRepository(
         ConnectorActionJpaRepository actionJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.actionJpaRepository = actionJpaRepository;
@@ -86,7 +86,7 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
             actions.stream().map(action -> toEntity(action, processingMode)).toList()
         );
 
-        return savedActions.stream().map(ConnectorActionRepositoryImpl::toDomain).toList();
+        return savedActions.stream().map(ConnectorDBActionRepository::toDomain).toList();
     }
 
     @Override
@@ -108,6 +108,6 @@ public class ConnectorActionRepositoryImpl implements ConnectorActionRepository 
             Sort.by(Sort.Order.asc("name"))
         );
 
-        return actions.stream().map(ConnectorActionRepositoryImpl::toDomain).toList();
+        return actions.stream().map(ConnectorDBActionRepository::toDomain).toList();
     }
 }

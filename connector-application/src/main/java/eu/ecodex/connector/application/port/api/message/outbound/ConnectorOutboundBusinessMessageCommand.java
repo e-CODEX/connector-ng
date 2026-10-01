@@ -9,7 +9,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.util.List;
 import lombok.Builder;
-import lombok.NonNull;
 
 /**
  * Represents a record for sending outbound business messages through the connector system.
@@ -38,13 +37,13 @@ import lombok.NonNull;
  */
 @Builder
 public record ConnectorOutboundBusinessMessageCommand(
-    @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
+    @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
     @Nullable String backendMessageIdentifier,
     @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
-    @NonNull String backendName,
+    @Nonnull String backendName,
     @Nonnull ConnectorMessageAS4Properties as4Properties,
     @Nonnull ConnectorMessageDirection direction,
-    @NonNull ConnectorMessageBusinessContent businessContent,
+    @Nonnull ConnectorMessageBusinessContent businessContent,
     @Nullable List<ConnectorMessageAttachment> attachments
 ) {
     public ConnectorOutboundBusinessMessageCommand {

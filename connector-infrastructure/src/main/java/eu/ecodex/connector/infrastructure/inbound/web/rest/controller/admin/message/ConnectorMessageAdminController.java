@@ -12,19 +12,27 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.port.api.message.test.ConnectorSendOutboundTestMessage;
+import eu.ecodex.connector.application.port.api.message.test.ConnectorTestBusinessMessageAS4PropertiesCommand;
+import eu.ecodex.connector.application.port.api.message.test.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
+import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.parser.ConnectorRestOutboundMessageParser;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.test.ConnectorTestMessageRequest;
 import eu.ecodex.connector.infrastructure.outbound.export.ConnectorMessageReportExporterFactory;
+import java.io.IOException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +49,8 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     private final ConnectorRetrieveMessageStats retrieveMessageStatsService;
     private final ConnectorRetrieveMessageReport retrieveMessageReportService;
     private final ConnectorMessageReportExporterFactory reportExporterFactory;
+    private final ConnectorSendOutboundTestMessage sendTestMessageService;
+    private final ConnectorRestOutboundMessageParser restOutboundMessageParser;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
@@ -51,6 +61,8 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
      * @param retrieveMessageStatsService  The service for retrieving message statistics.
      * @param retrieveMessageReportService The service for retrieving message reports.
      * @param reportExporterFactory        The factory for creating message report exporters.
+     * @param sendTestMessageService       The service for sending C2C test message.
+     * @param restOutboundMessageParser    The rest outbound message parsing util.
      */
     public ConnectorMessageAdminController(
         ConnectorListMessages listMessagesService,
@@ -58,13 +70,27 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         ConnectorRetrieveTransportStep retrieveTransportStepService,
         ConnectorRetrieveMessageStats retrieveMessageStatsService,
         ConnectorRetrieveMessageReport retrieveMessageReportService,
-        ConnectorMessageReportExporterFactory reportExporterFactory) {
+        ConnectorMessageReportExporterFactory reportExporterFactory,
+        ConnectorSendOutboundTestMessage sendTestMessageService,
+        ConnectorRestOutboundMessageParser restOutboundMessageParser) {
         this.listMessagesService = listMessagesService;
         this.retrieveMessageService = retrieveMessageService;
         this.retrieveTransportStepService = retrieveTransportStepService;
         this.retrieveMessageStatsService = retrieveMessageStatsService;
         this.retrieveMessageReportService = retrieveMessageReportService;
         this.reportExporterFactory = reportExporterFactory;
+        this.sendTestMessageService = sendTestMessageService;
+        this.restOutboundMessageParser = restOutboundMessageParser;
+    }
+
+    @Override
+    public ConnectorOutboundMessageDto submitOutboundTestMessage(
+        ConnectorTestMessageRequest request)
+        throws IOException {
+        var command = toTestBusinessMessageCommand(request);
+        var submittedMessage = sendTestMessageService.execute(command);
+
+        return ConnectorOutboundMessageDto.from(submittedMessage);
     }
 
     @Override
@@ -140,5 +166,39 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
                                      + exporter.getFormat().getExtension()
                              )
                              .body(export);
+    }
+
+    private ConnectorTestBusinessMessageCommand toTestBusinessMessageCommand(
+        ConnectorTestMessageRequest request) throws IOException {
+        var requestAs4Properties = request.as4Properties();
+
+        var testAs4PropertiesCommand = ConnectorTestBusinessMessageAS4PropertiesCommand
+            .builder()
+            .ebmsIdentifier(requestAs4Properties.ebmsIdentifier())
+            .conversationIdentifier(requestAs4Properties.conversationIdentifier())
+            .originalSender(requestAs4Properties.originalSender())
+            .finalRecipient(requestAs4Properties.finalRecipient())
+            .fromParty(restOutboundMessageParser.toParty(
+                requestAs4Properties.fromParty(),
+                ConnectorPartyRoleType.INITIATOR
+            ))
+            .toParty(restOutboundMessageParser.toParty(
+                requestAs4Properties.toParty(),
+                ConnectorPartyRoleType.RESPONDER
+            ))
+            .build();
+
+        return ConnectorTestBusinessMessageCommand
+            .builder()
+            .businessDomainIdentifier(
+                restOutboundMessageParser.resolveBusinessDomainIdentifier(
+                    request.businessDomainIdentifier()
+                )
+            )
+            .backendMessageIdentifier(request.backendMessageIdentifier())
+            .as4PropertiesCommand(testAs4PropertiesCommand)
+            .businessContent(restOutboundMessageParser.toBusinessContent(request.businessContent()))
+            .attachments(restOutboundMessageParser.toAttachments(request.attachments()))
+            .build();
     }
 }

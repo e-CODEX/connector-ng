@@ -16,6 +16,9 @@ import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMod
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeActionDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeServiceDto;
+import eu.ecodex.connector.infrastructure.property.c2ctest.Connector2ConnectorTestMessageProperties;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +30,7 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     private final ConnectorListProcessingModeServices listProcessingModeServicesService;
     private final ConnectorListProcessingModeActions listProcessingModeActionsService;
     private final ConnectorListProcessingModeParties listProcessingModePartiesService;
+    private final Connector2ConnectorTestMessageProperties testMessageProperties;
 
     /**
      * Constructs an instance of the {@code ConnectorProcessingModeController}, which is responsible
@@ -41,24 +45,41 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
      * @param listProcessingModePartiesService  the service handling operations related to listing
      *                                          {@link ConnectorParty} entities in the processing
      *                                          mode.
+     * @param testMessageProperties             the property for connector2Connector test message
      */
     public ConnectorProcessingModeController(
         ConnectorListProcessingModeServices listProcessingModeServicesService,
         ConnectorListProcessingModeActions listProcessingModeActionsService,
-        ConnectorListProcessingModeParties listProcessingModePartiesService) {
+        ConnectorListProcessingModeParties listProcessingModePartiesService,
+        Connector2ConnectorTestMessageProperties testMessageProperties) {
         this.listProcessingModeServicesService = listProcessingModeServicesService;
         this.listProcessingModeActionsService = listProcessingModeActionsService;
         this.listProcessingModePartiesService = listProcessingModePartiesService;
+        this.testMessageProperties = testMessageProperties;
     }
 
     @Override
-    public List<ConnectorService> listProcessingModeServices(String identifier) {
-        return listProcessingModeServicesService.execute(identifier);
+    public List<ConnectorProcessingModeServiceDto> listProcessingModeServices(String identifier) {
+        return listProcessingModeServicesService
+            .execute(identifier)
+            .stream()
+            .map(service -> ConnectorProcessingModeServiceDto.from(
+                service,
+                testMessageProperties.getService().getName(),
+                testMessageProperties.getService().getType()
+            ))
+            .toList();
     }
 
     @Override
-    public List<ConnectorAction> listProcessingModeActions(String identifier) {
-        return this.listProcessingModeActionsService.execute(identifier);
+    public List<ConnectorProcessingModeActionDto> listProcessingModeActions(String identifier) {
+        return this.listProcessingModeActionsService
+            .execute(identifier)
+            .stream()
+            .map(action -> ConnectorProcessingModeActionDto.from(
+                action, testMessageProperties.getAction()
+            ))
+            .toList();
     }
 
     @Override

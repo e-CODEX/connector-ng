@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.pmode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeServiceDto;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ public class ConnectorListProcessingModeServicesIT extends AbstractIntegrationTe
                  .uri("/api/v1/processing-modes/default_business_domain/services")
                  .exchange()
                  .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<List<ConnectorService>>() {
+                 .expectBody(new ParameterizedTypeReference<List<ConnectorProcessingModeServiceDto>>() {
                  })
                  .value(result -> {
                      assertThat(result).isNotNull();

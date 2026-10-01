@@ -20,7 +20,6 @@ import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -76,7 +75,8 @@ public class ConnectorOutboundBusinessMessageReceiverService
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull ConnectorOutboundBusinessMessageCommand command) {
+    public ConnectorBusinessMessage execute(
+        @NonNull ConnectorOutboundBusinessMessageCommand command) {
         businessDomainVerifierService.execute(command.businessDomainIdentifier());
         processingModeVerifierService.execute(command.businessDomainIdentifier());
 

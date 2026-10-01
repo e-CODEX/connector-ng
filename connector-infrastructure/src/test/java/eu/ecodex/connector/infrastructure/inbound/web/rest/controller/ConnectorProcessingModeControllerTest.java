@@ -23,7 +23,10 @@ import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeActions;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeParties;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode.ConnectorProcessingModeController;
+import eu.ecodex.connector.infrastructure.property.c2ctest.Connector2ConnectorTestMessageProperties;
+import eu.ecodex.connector.infrastructure.property.c2ctest.TestServiceProperties;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,11 +53,14 @@ public class ConnectorProcessingModeControllerTest extends AbstractWebMvcTest {
     private ConnectorListProcessingModeActions listProcessingModeActions;
     @MockitoBean
     private ConnectorListProcessingModeParties listProcessingModeParties;
+    @MockitoBean
+    Connector2ConnectorTestMessageProperties testMessageProperties;
 
     @Test
     void should_return_200_with_the_services() throws Exception {
         when(listProcessingModeServices.execute(any()))
             .thenReturn(List.of(ServiceTestFixtures.createService()));
+        when(testMessageProperties.getService()).thenReturn(new TestServiceProperties());
 
         mockMvc.perform(get(SERVICE_URL.formatted(BUSINESS_DOMAIN))
                             .contentType(MediaType.APPLICATION_JSON))
@@ -68,6 +74,7 @@ public class ConnectorProcessingModeControllerTest extends AbstractWebMvcTest {
     void should_return_200_with_the_actions() throws Exception {
         when(listProcessingModeActions.execute(any()))
             .thenReturn(List.of(ActionTestFixtures.createAction()));
+        when(testMessageProperties.getAction()).thenReturn(ConnectorDefaults.DEFAULT_TEST_ACTION_NAME);
 
         mockMvc.perform(get(ACTION_URL.formatted(BUSINESS_DOMAIN))
                             .contentType(MediaType.APPLICATION_JSON))

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
@@ -52,7 +53,8 @@ public record ConnectorLinkPartnerDto(
     ConnectorConfigurationSource source,
     String encryptionAlias,
     String certificateDn,
-    String pushAddress
+    String pushAddress,
+    boolean isTest
 ) {
     /**
      * Creates a new instance of {@code ConnectorLinkPartnerDto} from the provided
@@ -74,7 +76,8 @@ public record ConnectorLinkPartnerDto(
             linkPartner.source(),
             linkPartner.encryptionAlias(),
             linkPartner.certificateDn(),
-            linkPartner.pushAddress()
+            linkPartner.pushAddress(),
+            linkPartner.name().name().equals(ConnectorDefaults.DEFAULT_TEST_BACKEND_NAME)
         );
     }
 }

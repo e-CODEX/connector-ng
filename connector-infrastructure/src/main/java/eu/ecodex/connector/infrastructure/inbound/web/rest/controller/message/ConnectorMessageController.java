@@ -10,43 +10,24 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
-import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
-import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
-import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
-import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorEvidenceMessageDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.parser.ConnectorRestOutboundMessageParser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessContent;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Defines the REST controller for managing messages within the connector system.
@@ -56,7 +37,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     private final ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService;
     private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
     private final ConnectorBackendClientVerifier backendClientVerifierService;
-    private final ConnectorUploadAttachments uploadAttachmentsService;
+    private final ConnectorRestOutboundMessageParser restOutboundMessageParser;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
@@ -67,27 +48,26 @@ public class ConnectorMessageController implements ConnectorMessageApi {
      *                                               evidence messages.
      * @param backendClientVerifierService           The service used for verifying backend
      *                                               clients.
-     * @param uploadAttachmentsService               The service for handling file attachments
-     *                                               during message processing.
+     * @param restOutboundMessageParser              The rest outbound message parsing util.
      */
     public ConnectorMessageController(
         ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService,
         ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService,
         ConnectorBackendClientVerifier backendClientVerifierService,
-        ConnectorUploadAttachments uploadAttachmentsService) {
+        ConnectorRestOutboundMessageParser restOutboundMessageParser) {
         this.outboundBusinessMessageReceiverService = outboundBusinessMessageReceiverService;
         this.outboundEvidenceMessageReceiverService = outboundEvidenceMessageReceiverService;
         this.backendClientVerifierService = backendClientVerifierService;
-        this.uploadAttachmentsService = uploadAttachmentsService;
+        this.restOutboundMessageParser = restOutboundMessageParser;
     }
 
     @Override
     public ConnectorOutboundMessageDto submitOutboundMessage(
         ConnectorOutboundMessageRequest request) throws IOException {
-        var command = toCommand(request);
+        var command = toOutboundMessageCommand(request);
         var registeredMessage = outboundBusinessMessageReceiverService.execute(command);
 
-        return toDto((ConnectorBusinessMessage) registeredMessage);
+        return ConnectorOutboundMessageDto.from(registeredMessage);
     }
 
     @Override
@@ -109,17 +89,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         return ConnectorEvidenceMessageDto.of(registeredMessage.identifier());
     }
 
-    private ConnectorOutboundMessageDto toDto(ConnectorBusinessMessage message) {
-        return ConnectorOutboundMessageDto
-            .builder()
-            .identifier(message.identifier())
-            .backendMessageIdentifier(message.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
-            .direction(Objects.requireNonNull(message.direction()))
-            .build();
-    }
-
-    private ConnectorOutboundBusinessMessageCommand toCommand(
+    private ConnectorOutboundBusinessMessageCommand toOutboundMessageCommand(
         ConnectorOutboundMessageRequest request)
         throws IOException {
         // TODO current cn is fake, retrieve the certificate dn from user principal
@@ -127,15 +97,17 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         return ConnectorOutboundBusinessMessageCommand
             .builder()
             .businessDomainIdentifier(
-                resolveBusinessDomainIdentifier(request.businessDomainIdentifier())
+                restOutboundMessageParser.resolveBusinessDomainIdentifier(
+                    request.businessDomainIdentifier()
+                )
             )
             .backendMessageIdentifier(request.backendMessageIdentifier())
             .referenceToBackendMessageIdentifier(null)
             .backendName(backendClientName)
             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
             .as4Properties(toDomainAS4Properties(request.as4Properties()))
-            .businessContent(toBusinessContent(request.businessContent()))
-            .attachments(toAttachments(request.attachments()))
+            .businessContent(restOutboundMessageParser.toBusinessContent(request.businessContent()))
+            .attachments(restOutboundMessageParser.toAttachments(request.attachments()))
             .build();
     }
 
@@ -150,20 +122,14 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             .name(as4Properties.service().name())
             .type(as4Properties.service().type())
             .build();
-        var fromParty = ConnectorParty
-            .builder()
-            .identifier(as4Properties.fromParty().identifier())
-            .identifierType(as4Properties.fromParty().identifierType())
-            .role(as4Properties.fromParty().role())
-            .roleType(ConnectorPartyRoleType.INITIATOR)
-            .build();
-        var toParty = ConnectorParty
-            .builder()
-            .identifier(as4Properties.toParty().identifier())
-            .identifierType(as4Properties.toParty().identifierType())
-            .role(as4Properties.toParty().role())
-            .roleType(ConnectorPartyRoleType.RESPONDER)
-            .build();
+        var fromParty = restOutboundMessageParser.toParty(
+            as4Properties.fromParty(),
+            ConnectorPartyRoleType.INITIATOR
+        );
+        var toParty = restOutboundMessageParser.toParty(
+            as4Properties.toParty(),
+            ConnectorPartyRoleType.RESPONDER
+        );
 
         return ConnectorMessageAS4Properties
             .builder()
@@ -176,97 +142,5 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             .fromParty(fromParty)
             .toParty(toParty)
             .build();
-    }
-
-    private ConnectorBusinessDomainIdentifier resolveBusinessDomainIdentifier(String identifier) {
-        if (identifier == null) {
-            return ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID;
-        }
-
-        return ConnectorBusinessDomainIdentifier
-            .builder()
-            .messageLaneIdentifier(identifier)
-            .build();
-    }
-
-    private ConnectorMessageBusinessContent toBusinessContent(
-        ConnectorOutboundMessageBusinessContent businessContent) throws IOException {
-        var businessDocumentRequest = businessContent.businessDocument();
-        var businessDocument = ConnectorMessageBusinessDocument
-            .builder()
-            .attachment(toAttachment(businessContent.businessDocument().document()))
-            .detachedSignature(toDetachedSignature(businessDocumentRequest.detachedSignature()))
-            .aesType(businessDocumentRequest.aesType())
-            .build();
-
-        return ConnectorMessageBusinessContent
-            .builder()
-            .xmlContent(toAttachment(businessContent.contentFile()))
-            .businessDocument(businessDocument)
-            .build();
-    }
-
-    private DetachedSignature toDetachedSignature(
-        ConnectorOutboundMessageDetachedSignature detachedSignature) throws IOException {
-        if (detachedSignature == null || detachedSignature.signature() == null) {
-            return null;
-        }
-
-        return DetachedSignature
-            .builder()
-            .name(
-                StringUtils.cleanPath(
-                    Objects.requireNonNull(detachedSignature.signature()
-                                                            .getOriginalFilename()))
-            )
-            .signature(detachedSignature.signature().getBytes())
-            .mimeType(detachedSignature.mimeType())
-            .build();
-    }
-
-    private ConnectorMessageAttachment toAttachment(String identifier) {
-        return ConnectorMessageAttachment
-            .builder()
-            .identifier(identifier)
-            .build();
-    }
-
-    private ConnectorMessageAttachment toAttachment(MultipartFile file) throws IOException {
-        var filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-
-        var tempLocation = Files.createTempFile(
-            "upload-%s".formatted(UUID.randomUUID()),
-            filename
-        );
-
-        try {
-            file.transferTo(tempLocation);
-            var uploadCommand = FileUploadCommand
-                .builder()
-                .contentType(Objects.requireNonNull(file.getContentType()))
-                .filename(filename)
-                .tempFileLocation(tempLocation)
-                .size(file.getSize())
-                .description("Registered business content/document")
-                .build();
-
-            return uploadAttachmentsService.execute(List.of(uploadCommand)).getFirst();
-        } catch (Exception e) {
-            throw new ConnectorAttachmentUploadException(
-                "Failed to upload attachment: " + file.getName(), e);
-        } finally {
-            // Always runs — covers both success and failure paths
-            Files.deleteIfExists(tempLocation);
-        }
-    }
-
-    private List<ConnectorMessageAttachment> toAttachments(List<String> identifiers) {
-        if (identifiers == null) {
-            return new ArrayList<>();
-        }
-
-        return identifiers.stream()
-                          .map(this::toAttachment)
-                          .toList();
     }
 }

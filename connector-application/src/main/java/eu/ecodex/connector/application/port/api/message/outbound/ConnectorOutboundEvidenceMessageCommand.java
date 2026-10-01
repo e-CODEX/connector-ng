@@ -1,8 +1,8 @@
 package eu.ecodex.connector.application.port.api.message.outbound;
 
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import jakarta.annotation.Nonnull;
 import lombok.Builder;
-import lombok.NonNull;
 
 /**
  * This record represents a command for outbound evidence message processing. It encapsulates
@@ -16,9 +16,9 @@ import lombok.NonNull;
  */
 @Builder
 public record ConnectorOutboundEvidenceMessageCommand(
-    @NonNull ConnectorEvidenceType evidenceType,
+    @Nonnull ConnectorEvidenceType evidenceType,
     String backendMessageIdentifier,
     String referenceToIdentifier,
-    @NonNull String backendName
+    @Nonnull String backendName
 ) {
 }

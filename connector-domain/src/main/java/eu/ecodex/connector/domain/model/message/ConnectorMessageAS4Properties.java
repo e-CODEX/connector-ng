@@ -18,7 +18,6 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import lombok.Builder;
-import lombok.NonNull;
 
 
 /**
@@ -50,10 +49,10 @@ public record ConnectorMessageAS4Properties(
     @Nullable String conversationIdentifier,
     @NotBlank String originalSender,
     @NotBlank String finalRecipient,
-    @NonNull ConnectorService service,
-    @NonNull ConnectorAction action,
-    @NonNull ConnectorParty fromParty,
-    @NonNull ConnectorParty toParty
+    @Nonnull ConnectorService service,
+    @Nonnull ConnectorAction action,
+    @Nonnull ConnectorParty fromParty,
+    @Nonnull ConnectorParty toParty
 ) implements Serializable {
     @Override
     @Nonnull

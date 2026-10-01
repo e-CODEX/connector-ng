@@ -10,11 +10,11 @@
 
 package eu.ecodex.connector.application.port.api.message.outbound;
 
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for processing outbound {@link ConnectorMessage} instances.
+ * Defines the contract for processing outbound {@link ConnectorBusinessMessage} instances.
  *
  * <p>Implementations are responsible for preparing a message before it is
  * dispatched to an external party. Processing may include tasks such as:
@@ -26,22 +26,22 @@ import jakarta.annotation.Nonnull;
  * </p>
  *
  * <p>The processor may modify and return the same instance or return a new,
- * processed {@link ConnectorMessage} instance depending on the implementation.
+ * processed {@link ConnectorBusinessMessage} instance depending on the implementation.
  */
 public interface ConnectorOutboundBusinessMessageReceiver {
     /**
-     * Processes the given command to prepare and return a {@link ConnectorMessage}.
+     * Processes the given command to prepare and return a {@link ConnectorBusinessMessage}.
      *
      * <p>This method takes in a command, which encapsulates details about the outbound business
-     * message and processes it to generate a ready-to-dispatch {@link ConnectorMessage}. The
-     * processing may involve transformations, validations, and enrichment of message details.
+     * message and processes it to generate a ready-to-dispatch {@link ConnectorBusinessMessage}.
+     * The processing may involve transformations, validations, and enrichment of message details.
      *
      * @param command the outbound business message command to be processed; must not be
      *                {@code null}
      *
-     * @return the processed {@link ConnectorMessage} instance, ready for dispatch
+     * @return the processed {@link ConnectorBusinessMessage} instance, ready for dispatch
      *
      * @throws NullPointerException if the given command is {@code null}
      */
-    ConnectorMessage execute(@Nonnull ConnectorOutboundBusinessMessageCommand command);
+    ConnectorBusinessMessage execute(@Nonnull ConnectorOutboundBusinessMessageCommand command);
 }

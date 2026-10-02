@@ -20,7 +20,7 @@ import java.util.List;
 import lombok.Builder;
 
 /**
- * Represents a request to submit an outbound message to the connector.
+ * Represents a request to submit an outbound test message to the connector.
  *
  * <p>This record encapsulates the data required to stage and transmit
  * a business message, including the business content, optional attachments, backend identifiers,

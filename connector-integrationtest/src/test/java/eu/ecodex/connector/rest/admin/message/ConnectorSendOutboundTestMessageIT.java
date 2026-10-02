@@ -73,6 +73,18 @@ public class ConnectorSendOutboundTestMessageIT extends AbstractIntegrationTest 
         assertThat(response).isNotNull();
     }
 
+    @Test
+    @WithReferenceData
+    void should_return_400_when_the_request_is_invalid() {
+        apiClient.post()
+                 .uri("/api/v1/admin/messages/outbound/test")
+                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                 .contentType(MediaType.MULTIPART_FORM_DATA)
+                 .body(new LinkedMultiValueMap<>())
+                 .exchange()
+                 .expectStatus().isBadRequest();
+    }
+
     private LinkedMultiValueMap<String, Object> buildOutboundMessageParts(
         List<String> attachmentIds,
         boolean withDetachedSignature

@@ -32,6 +32,7 @@ import eu.ecodex.connector.MessageStatsTestFixtures;
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledException;
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.api.message.test.ConnectorSendOutboundTestMessage;
@@ -242,6 +243,27 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
             // fromParty must be resolved as INITIATOR, toParty as RESPONDER
             assertThat(as4Properties.fromParty()).isEqualTo(fromParty);
             assertThat(as4Properties.toParty()).isEqualTo(toParty);
+        }
+
+        @Test
+        void should_return_409_when_test_message_is_disabled() throws Exception {
+            when(restOutboundMessageParser.resolveBusinessDomainIdentifier(any()))
+                .thenReturn(businessDomainIdentifier);
+            when(restOutboundMessageParser.toBusinessContent(any())).thenReturn(businessContent);
+            when(restOutboundMessageParser.toAttachments(any())).thenReturn(attachments);
+            when(restOutboundMessageParser.toParty(any(), eq(ConnectorPartyRoleType.INITIATOR)))
+                .thenReturn(fromParty);
+            when(restOutboundMessageParser.toParty(any(), eq(ConnectorPartyRoleType.RESPONDER)))
+                .thenReturn(toParty);
+
+            doThrow(ConnectorTestMessageDisabledException.class)
+                .when(sendTestMessageService).execute(any());
+
+            mockMvc.perform(
+                       buildValidTestMessageRequest()
+                           .contentType(MediaType.MULTIPART_FORM_DATA)
+                   )
+                   .andExpect(status().isConflict());
         }
 
         @Test

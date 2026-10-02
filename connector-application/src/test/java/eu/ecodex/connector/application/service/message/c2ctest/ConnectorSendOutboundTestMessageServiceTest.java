@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.message.test;
+package eu.ecodex.connector.application.service.message.c2ctest;
 
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -27,8 +27,8 @@ import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledExc
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
-import eu.ecodex.connector.application.port.api.message.test.ConnectorTestBusinessMessageAS4PropertiesCommand;
-import eu.ecodex.connector.application.port.api.message.test.ConnectorTestBusinessMessageCommand;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageAS4PropertiesCommand;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.ConnectorTestMessageConfigurationProvider;

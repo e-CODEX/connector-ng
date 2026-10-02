@@ -11,8 +11,8 @@
 package eu.ecodex.connector.infrastructure.outbound.provider;
 
 import eu.ecodex.connector.application.port.spi.ConnectorTestMessageConfigurationProvider;
-import eu.ecodex.connector.domain.model.test.ConnectorTestMessageConfiguration;
-import eu.ecodex.connector.domain.model.test.ConnectorTestMessageService;
+import eu.ecodex.connector.domain.model.c2ctest.ConnectorTestMessageConfiguration;
+import eu.ecodex.connector.domain.model.c2ctest.ConnectorTestMessageService;
 import eu.ecodex.connector.infrastructure.property.c2ctest.Connector2ConnectorTestMessageProperties;
 import org.springframework.stereotype.Component;
 

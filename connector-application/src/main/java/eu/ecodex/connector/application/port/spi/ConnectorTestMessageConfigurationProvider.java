@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi;
 
-import eu.ecodex.connector.domain.model.test.ConnectorTestMessageConfiguration;
+import eu.ecodex.connector.domain.model.c2ctest.ConnectorTestMessageConfiguration;
 
 /**
  * Provides the configuration used for connector test messages.

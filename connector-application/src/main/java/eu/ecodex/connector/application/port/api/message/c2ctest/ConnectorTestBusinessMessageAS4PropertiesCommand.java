@@ -1,4 +1,4 @@
-package eu.ecodex.connector.application.port.api.message.test;
+package eu.ecodex.connector.application.port.api.message.c2ctest;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;

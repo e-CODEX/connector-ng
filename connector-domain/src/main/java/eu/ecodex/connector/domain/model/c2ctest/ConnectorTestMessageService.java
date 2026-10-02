@@ -8,14 +8,19 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.port.api.message.test;
+package eu.ecodex.connector.domain.model.c2ctest;
 
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import jakarta.annotation.Nonnull;
+import lombok.Builder;
 
 /**
- * Defines the contract for sending test business messages through the connector system.
+ * Represents a message service used by the connector system.
+ *
+ * @param name The name identifying the message service.
+ * @param type The type of the message service.
  */
-public interface ConnectorSendOutboundTestMessage {
-    ConnectorBusinessMessage execute(@Nonnull ConnectorTestBusinessMessageCommand command);
+@Builder
+public record ConnectorTestMessageService(
+    String name,
+    String type
+) {
 }

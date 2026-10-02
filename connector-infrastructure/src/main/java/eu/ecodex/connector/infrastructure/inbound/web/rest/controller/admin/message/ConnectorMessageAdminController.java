@@ -12,9 +12,9 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
-import eu.ecodex.connector.application.port.api.message.test.ConnectorSendOutboundTestMessage;
-import eu.ecodex.connector.application.port.api.message.test.ConnectorTestBusinessMessageAS4PropertiesCommand;
-import eu.ecodex.connector.application.port.api.message.test.ConnectorTestBusinessMessageCommand;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundTestMessage;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageAS4PropertiesCommand;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;

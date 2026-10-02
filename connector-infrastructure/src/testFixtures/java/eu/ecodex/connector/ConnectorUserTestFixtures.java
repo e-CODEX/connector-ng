@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import java.util.Set;
@@ -22,24 +23,24 @@ import java.util.Set;
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ConnectorUserTestFixtures {
     public static ConnectorUser createDefaultUser() {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .username("test_user")
             .email("test_user@email.com")
             .password("encoded")
             .enabled(true)
+            .mustChangePassword(false)
             .build();
     }
 
     public static ConnectorUser createDefaultUserWithRoles() {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .username("test_user")
             .email("test_user@email.com")
             .password("encoded")
             .enabled(true)
+            .mustChangePassword(false)
             .roles(Set.of(ConnectorRole
                 .builder()
                 .name("ROLE_".concat(ConnectorRoleName.ADMIN.name()))
@@ -53,6 +54,7 @@ public class ConnectorUserTestFixtures {
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .email("test_user@email.com")
             .enabled(true)
+            .mustChangePassword(false)
             .build();
     }
 
@@ -62,6 +64,7 @@ public class ConnectorUserTestFixtures {
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .email("test_user@email.com")
             .enabled(true)
+            .mustChangePassword(false)
             .roles(Set.of("ROLE_ADMIN"))
             .build();
     }
@@ -75,7 +78,23 @@ public class ConnectorUserTestFixtures {
             .build();
     }
 
-    public static ConnectorUserRequest createDefaultUserPatchRequest() {
+    public static ConnectorUpdateUserPasswordRequest createDefaultUpdateUserPasswordRequest() {
+        return ConnectorUpdateUserPasswordRequest.builder()
+            .refreshToken("refresh-token")
+            .newPassword("test_password")
+            .currentPassword("password")
+            .build();
+    }
+
+    public static ConnectorUpdateUserPasswordRequest createDefaultUpdateUserShortPasswordRequest() {
+        return ConnectorUpdateUserPasswordRequest.builder()
+            .refreshToken("refresh-token")
+            .newPassword("test")
+            .currentPassword("password")
+            .build();
+    }
+
+    public static ConnectorUserRequest createDefaultPatchUserRequest() {
         return ConnectorUserRequest.builder()
             .username("test_user")
             .email("test_user@email.com")
@@ -112,7 +131,11 @@ public class ConnectorUserTestFixtures {
     }
 
     public static ConnectorUserDetails createUserDetails() {
-        return new ConnectorUserDetails(createDefaultUserWithRoles());
+        return createUserDetails(null);
+    }
+
+    public static ConnectorUserDetails createUserDetails(String accessToken) {
+        return new ConnectorUserDetails(createDefaultUserWithRoles(), accessToken);
     }
 }
 

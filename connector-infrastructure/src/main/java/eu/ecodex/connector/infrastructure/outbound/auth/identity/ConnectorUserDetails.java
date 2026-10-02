@@ -40,15 +40,18 @@ import org.springframework.security.core.userdetails.UserDetails;
  */
 @Slf4j
 @Builder
-public record ConnectorUserDetails(ConnectorUser connectorUser) implements UserDetails {
+public record ConnectorUserDetails(ConnectorUser connectorUser, String accessToken)
+    implements UserDetails {
+    public ConnectorUserDetails(ConnectorUser connectorUser) {
+        this(connectorUser, null);
+    }
 
     @Override
     public @NonNull Collection<? extends GrantedAuthority> getAuthorities() {
         if (connectorUser.roles() == null) {
             return List.of();
         }
-        return connectorUser.roles()
-            .stream()
+        return connectorUser.roles().stream()
             .filter(Objects::nonNull)
             .map(ConnectorRole::name)
             .filter(name -> name != null && !name.isBlank())

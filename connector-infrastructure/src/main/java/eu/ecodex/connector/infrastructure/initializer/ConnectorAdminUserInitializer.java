@@ -192,12 +192,13 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
 
     private ConnectorUser createAdminUser(ConnectorAdminUserProperties properties,
                                           ConnectorRole adminRole) {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .username(properties.getUsername())
             .password(properties.getPassword())
             .email(properties.getEmail())
             .enabled(Boolean.TRUE)
+            // Only the default admin user is required to change their password at first login.
+            .mustChangePassword(Boolean.TRUE)
             .roles(Set.of(adminRole))
             .build();
     }

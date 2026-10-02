@@ -63,7 +63,7 @@ class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
 
     @Test
     @Sql("classpath:sql/user.sql")
-    void login_should_succeeded_for_user_when_user_is_active_valid_credentials_are_provided() {
+    void login_should_succeeded_when_user_is_active_valid_credentials_are_provided() {
         var loginRequest = ConnectorLoginRequest
             .builder()
             .username("test-user-it")
@@ -87,11 +87,10 @@ class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
 
     @Test
     @Sql("classpath:sql/user.sql")
-    void login_should_failed_for_user_when_user_is_not_active_valid_credentials_are_provided() {
+    void login_should_failed_when_user_is_not_active_valid_credentials_are_provided() {
         // login first to get the access token
         var username = "test-user-it";
-        var loginRequest = ConnectorLoginRequest
-            .builder()
+        var loginRequest = ConnectorLoginRequest.builder()
             .username(username)
             .password("password")
             .build();
@@ -111,15 +110,12 @@ class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
         assertThat(accessToken).isNotBlank();
 
         // update user to disable it
-        var request = ConnectorUserRequest
-            .builder()
+        var request = ConnectorUserRequest.builder()
             .username(username)
-            .password("password")
             .enabled(false)
             .build();
 
-        var updatedUser = apiClient
-            .patch()
+        var updatedUser = apiClient.patch()
             .uri("/api/v1/auth/me")
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
             .contentType(MediaType.APPLICATION_JSON)

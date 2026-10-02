@@ -46,8 +46,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isEmpty();
 
-        var request = ConnectorUserRequest
-            .builder()
+        var request = ConnectorUserRequest.builder()
             .username(username)
             .password("password")
             .email("test@email.com")
@@ -71,6 +70,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();
         assertThat(existing.get().roles()).hasSize(1);
+        assertThat(existing.get().mustChangePassword()).isFalse();
     }
 
     @Test

@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -28,8 +29,7 @@ import org.springframework.util.CollectionUtils;
 public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
                                    @NotBlank(message = "Username must not be blank")
                                    String username,
-                                   @NotNull(message = "Password is mandatory")
-                                   @NotBlank(message = "Password must not be blank")
+                                   @Size(min = 6, message = "Password must have at least 6 digits")
                                    String password,
                                    @Email
                                    String email,
@@ -45,8 +45,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
      * @return request user
      */
     public static ConnectorUserRequest from(ConnectorUser user) {
-        return ConnectorUserRequest
-            .builder()
+        return ConnectorUserRequest.builder()
             .username(user.username())
             .password(user.password())
             .email(user.email())
@@ -63,8 +62,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
      * @return domain user
      */
     public static ConnectorUser toDomain(ConnectorUserRequest userRequest) {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .username(userRequest.username())
             .password(userRequest.password())
             .email(userRequest.email())
@@ -87,12 +85,9 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
             return null;
         }
 
-        return request
-            .roles()
-            .stream()
+        return request.roles().stream()
             .map(role ->
-                ConnectorRole
-                    .builder()
+                ConnectorRole.builder()
                     .name(role)
                     .build())
             .collect(Collectors.toUnmodifiableSet());

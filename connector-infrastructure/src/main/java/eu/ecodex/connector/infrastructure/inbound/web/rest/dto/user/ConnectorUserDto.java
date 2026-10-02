@@ -30,13 +30,14 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorUserDto(
-        String uuid,
-        String username,
-        String email,
-        Boolean enabled,
-        Set<String> roles,
-        Instant createdAt,
-        Instant updatedAt
+    String uuid,
+    String username,
+    String email,
+    Boolean enabled,
+    Boolean mustChangePassword,
+    Set<String> roles,
+    Instant createdAt,
+    Instant updatedAt
 ) {
 
     /**
@@ -47,16 +48,16 @@ public record ConnectorUserDto(
      * @return a new {@link ConnectorUserDto} instance containing the mapped values
      */
     public static ConnectorUserDto from(ConnectorUser user) {
-        return ConnectorUserDto
-                .builder()
-                .uuid(user.uuid())
-                .username(user.username())
-                .email(user.email())
-                .enabled(user.enabled())
-                .roles(getRoles(user))
-                .createdAt(user.createdAt())
-                .updatedAt(user.updatedAt())
-                .build();
+        return ConnectorUserDto.builder()
+            .uuid(user.uuid())
+            .username(user.username())
+            .email(user.email())
+            .enabled(user.enabled())
+            .mustChangePassword(user.mustChangePassword())
+            .roles(getRoles(user))
+            .createdAt(user.createdAt())
+            .updatedAt(user.updatedAt())
+            .build();
     }
 
     private static Set<String> getRoles(ConnectorUser user) {
@@ -64,10 +65,10 @@ public record ConnectorUserDto(
             return null;
         }
         return user
-                .roles()
-                .stream()
-                .map(ConnectorRole::name)
-                .collect(Collectors.toUnmodifiableSet());
+            .roles()
+            .stream()
+            .map(ConnectorRole::name)
+            .collect(Collectors.toUnmodifiableSet());
     }
 
 }

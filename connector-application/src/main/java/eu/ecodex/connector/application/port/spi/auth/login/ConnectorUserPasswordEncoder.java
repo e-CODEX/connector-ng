@@ -17,17 +17,6 @@ import jakarta.annotation.Nonnull;
  * Interface for encoding passwords of {@link ConnectorUser} entities.
  */
 public interface ConnectorUserPasswordEncoder {
-
-    /**
-     * Encodes the password of the specified {@code ConnectorUser} and returns a new
-     * {@code ConnectorUser} instance with the encoded password.
-     *
-     * @param user the {@code ConnectorUser} whose password needs to be encoded
-     *
-     * @return a new {@code ConnectorUser} instance with the encoded password
-     */
-    ConnectorUser encodePassword(@Nonnull ConnectorUser user);
-
     /**
      * Encodes the provided raw password and returns the encoded version.
      *

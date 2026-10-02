@@ -64,7 +64,7 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var userPrincipal = ConnectorUserTestFixtures.createUserDetails();
-        var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserPatchRequest();
+        var connectorUserRequest = ConnectorUserTestFixtures.createDefaultPatchUserRequest();
 
         when(patchUser.execute(any(), any())).thenReturn(connectorUser);
 
@@ -85,7 +85,8 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
 
         verify(patchUser).execute(connectorUser.uuid(),
             ConnectorUserTestFixtures.createDefaultUserPatched());
-        verifyNoMoreInteractions(patchUser, retrieveUser);
+
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -112,7 +113,7 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         assertThat(actual).isEqualTo(connectorUserDto);
 
         verify(retrieveUser).execute(connectorUser.uuid());
-        verifyNoMoreInteractions(patchUser, retrieveUser);
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -127,6 +128,10 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
                 .with(authenticatedAs(userPrincipal))
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound());
+    }
+
+    private void assertNoMoreInteractions() {
+        verifyNoMoreInteractions(patchUser, retrieveUser);
     }
 
     @TestConfiguration

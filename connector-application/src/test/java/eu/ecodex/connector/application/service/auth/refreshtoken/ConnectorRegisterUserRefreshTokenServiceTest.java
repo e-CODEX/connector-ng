@@ -110,7 +110,11 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
         var accessToken = "access-token";
         var newAccessToken = "new-access-token";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
-        var user = ConnectorUser.builder().username(username).uuid(userId).build();
+        var user = ConnectorUser.builder()
+            .mustChangePassword(Boolean.FALSE)
+            .username(username)
+            .uuid(userId)
+            .build();
         var accessTokenDuration = Duration.ofMinutes(3);
         var accessTokenExpiresAt = loginTime.plus(accessTokenDuration);
         var refreshTokenDuration = Duration.ofDays(30);
@@ -159,7 +163,11 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
         var refreshToken = "refresh-token";
         var accessToken = "access-token";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
-        var user = ConnectorUser.builder().username(username).uuid(userId).build();
+        var user = ConnectorUser.builder()
+            .mustChangePassword(Boolean.FALSE)
+            .username(username)
+            .uuid(userId)
+            .build();
         var accessTokenDuration = Duration.ofMinutes(3);
         var accessTokenExpiresAt = loginTime.plus(accessTokenDuration);
         var refreshTokenDuration = Duration.ofDays(30);
@@ -210,7 +218,11 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
         var newAccessToken = "new-access-token";
         var newRefreshToken = "new-refresh-token";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
-        var user = ConnectorUser.builder().username(username).uuid(userId).build();
+        var user = ConnectorUser.builder()
+            .mustChangePassword(Boolean.FALSE)
+            .username(username)
+            .uuid(userId)
+            .build();
         var accessTokenDuration = Duration.ofMinutes(3);
         var accessTokenExpiresAt = loginTime.plus(accessTokenDuration);
         var refreshTokenDuration = Duration.ofDays(3);
@@ -274,7 +286,11 @@ class ConnectorRegisterUserRefreshTokenServiceTest {
         var newAccessToken = "new-access-token";
         var newRefreshToken = "new-refresh-token";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
-        var user = ConnectorUser.builder().username(username).uuid(userId).build();
+        var user = ConnectorUser.builder()
+            .mustChangePassword(Boolean.FALSE)
+            .username(username)
+            .uuid(userId)
+            .build();
         var accessTokenDuration = Duration.ofMinutes(3);
         var accessTokenExpiresAt = loginTime.plus(accessTokenDuration);
         var refreshTokenDuration = Duration.ofDays(3);

@@ -50,6 +50,7 @@ class ConnectorDBRefreshTokenRepositoryTest {
         var user = ConnectorUser.builder()
             .uuid("userId")
             .enabled(Boolean.FALSE)
+            .mustChangePassword(Boolean.FALSE)
             .roles(Set.of()).build();
         return ConnectorRefreshToken.builder().user(user).build();
     }

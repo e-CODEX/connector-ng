@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.pmode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeActionDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,10 +47,13 @@ public class ConnectorListProcessingModeActionsIT extends AbstractIntegrationTes
                                 .uri("/api/v1/processing-modes/default_business_domain/actions")
                                 .exchange()
                                 .expectStatus().isOk()
-                                .returnResult(ConnectorAction[].class);
+                                .returnResult(ConnectorProcessingModeActionDto[].class);
 
         var actions = response.getResponseBody();
         assertThat(actions).isNotNull();
         assertThat(actions).hasSize(31);
+        assertThat(actions)
+            .extracting(ConnectorProcessingModeActionDto::testOnly)
+            .contains(true);
     }
 }

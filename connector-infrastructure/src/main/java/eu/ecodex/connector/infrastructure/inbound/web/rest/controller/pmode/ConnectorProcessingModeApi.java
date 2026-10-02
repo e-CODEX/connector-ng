@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeActionDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeServiceDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -32,11 +32,15 @@ public interface ConnectorProcessingModeApi {
 
     @GetMapping("{identifier}/services")
     @Operation(summary = "List a processing mode services")
-    List<ConnectorService> listProcessingModeServices(@PathVariable String identifier);
+    List<ConnectorProcessingModeServiceDto> listProcessingModeServices(
+        @PathVariable String identifier
+    );
 
     @GetMapping("{identifier}/actions")
     @Operation(summary = "List a processing mode actions")
-    List<ConnectorAction> listProcessingModeActions(@PathVariable String identifier);
+    List<ConnectorProcessingModeActionDto> listProcessingModeActions(
+        @PathVariable String identifier
+    );
 
     @GetMapping("{identifier}/parties")
     @Operation(summary = "List a processing mode parties")

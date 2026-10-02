@@ -14,17 +14,24 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.test.ConnectorTestMessageRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.io.IOException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -42,6 +49,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 )
 @RequestMapping("/api/v1/admin/messages")
 public interface ConnectorMessageAdminApi {
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/outbound/test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Submit a test message from this connector to another connector")
+    @ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "403", description = "Forbidden")
+    })
+    ConnectorOutboundMessageDto submitOutboundTestMessage(
+        @Valid @ModelAttribute ConnectorTestMessageRequest request
+    ) throws IOException;
+
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     @Operation(summary = "Get paginated list of messages.")

@@ -61,11 +61,11 @@ public class ConnectorListLinkPartnersIT extends AbstractIntegrationTest {
                                 .returnResult(ConnectorLinkPartnerDto[].class);
 
         var linkPartners = response.getResponseBody();
-        assertThat(linkPartners).isNotNull();
-        assertThat(linkPartners).hasSize(2);
-
-        assert linkPartners != null;
-        var first = Arrays.stream(linkPartners).findFirst();
-        first.ifPresent(partner -> assertThat(partner.type()).isEqualTo(ConnectorLinkType.BACKEND));
+        assertThat(linkPartners)
+            .isNotNull()
+            .hasSize(2)
+            .allSatisfy(partner -> assertThat(partner.type()).isEqualTo(ConnectorLinkType.BACKEND))
+            .extracting(ConnectorLinkPartnerDto::testOnly)
+            .contains(true);
     }
 }

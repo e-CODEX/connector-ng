@@ -23,6 +23,7 @@ import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFound
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledException;
 import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
@@ -116,6 +117,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorBusinessDomainAlreadyExistsException.class)
     public ErrorResponse handleBusinessDomainException(
         ConnectorBusinessDomainAlreadyExistsException exception) {
+        return new ErrorResponse(
+            HttpStatus.CONFLICT.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorTestMessageDisabledException.class)
+    public ErrorResponse handleBTestMessageDisabledException(
+        ConnectorTestMessageDisabledException exception) {
         return new ErrorResponse(
             HttpStatus.CONFLICT.value(), exception.getMessage()
         );
@@ -241,10 +252,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-            .getAllErrors()
-            .stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
+                                  .getAllErrors()
+                                  .stream()
+                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                  .collect(Collectors.joining(", "));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

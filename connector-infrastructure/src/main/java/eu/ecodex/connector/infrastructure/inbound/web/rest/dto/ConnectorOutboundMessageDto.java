@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
+import java.util.Objects;
 import lombok.Builder;
 
 /**
@@ -36,4 +37,22 @@ public record ConnectorOutboundMessageDto(
     @Nullable String referenceToBackendMessageIdentifier,
     @Nonnull ConnectorMessageDirection direction
 ) {
+    /**
+     * Creates an outbound message DTO from a connector business message.
+     *
+     * @param message the connector business message to convert
+     *
+     * @return a DTO representing the outbound message
+     *
+     * @throws NullPointerException if the message direction is {@code null}
+     */
+    public static ConnectorOutboundMessageDto from(ConnectorBusinessMessage message) {
+        return ConnectorOutboundMessageDto
+            .builder()
+            .identifier(message.identifier())
+            .backendMessageIdentifier(message.backendMessageIdentifier())
+            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+            .direction(Objects.requireNonNull(message.direction()))
+            .build();
+    }
 }

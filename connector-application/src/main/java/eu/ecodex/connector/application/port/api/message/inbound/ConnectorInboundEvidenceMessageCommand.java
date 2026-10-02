@@ -6,7 +6,6 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import lombok.Builder;
-import lombok.NonNull;
 
 /**
  * Represents a record for sending outbound business messages through the connector system.
@@ -22,8 +21,8 @@ import lombok.NonNull;
  */
 @Builder
 public record ConnectorInboundEvidenceMessageCommand(
-    @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
-    @NonNull String gatewayName,
+    @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
+    @Nonnull String gatewayName,
     @Nonnull ConnectorMessageAS4Properties as4Properties,
     @Nonnull List<ConnectorMessageEvidence> transportedEvidences
 ) {

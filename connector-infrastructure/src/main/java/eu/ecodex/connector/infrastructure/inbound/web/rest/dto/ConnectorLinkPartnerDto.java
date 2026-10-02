@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto;
 
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkType;
@@ -41,6 +42,9 @@ import lombok.Builder;
  *                        typically referencing a keystore entry
  * @param certificateDn   distinguished name (DN) of the partner certificate used for authentication
  *                        or secure communication
+ * @param pushAddress     The backend system address used by the connector to submit messages.
+ * @param testOnly        If this action is reserved for test messages and must not be
+ *                        used for business messages
  */
 @Builder(toBuilder = true)
 public record ConnectorLinkPartnerDto(
@@ -52,7 +56,8 @@ public record ConnectorLinkPartnerDto(
     ConnectorConfigurationSource source,
     String encryptionAlias,
     String certificateDn,
-    String pushAddress
+    String pushAddress,
+    boolean testOnly
 ) {
     /**
      * Creates a new instance of {@code ConnectorLinkPartnerDto} from the provided
@@ -74,7 +79,8 @@ public record ConnectorLinkPartnerDto(
             linkPartner.source(),
             linkPartner.encryptionAlias(),
             linkPartner.certificateDn(),
-            linkPartner.pushAddress()
+            linkPartner.pushAddress(),
+            linkPartner.name().name().equals(ConnectorDefaults.DEFAULT_TEST_BACKEND_NAME)
         );
     }
 }

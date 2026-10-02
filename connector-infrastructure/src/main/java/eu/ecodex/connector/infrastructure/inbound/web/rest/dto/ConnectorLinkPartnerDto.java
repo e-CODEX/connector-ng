@@ -42,6 +42,9 @@ import lombok.Builder;
  *                        typically referencing a keystore entry
  * @param certificateDn   distinguished name (DN) of the partner certificate used for authentication
  *                        or secure communication
+ * @param pushAddress     The backend system address used by the connector to submit messages.
+ * @param testOnly        If this action is reserved for test messages and must not be
+ *                        used for business messages
  */
 @Builder(toBuilder = true)
 public record ConnectorLinkPartnerDto(
@@ -54,7 +57,7 @@ public record ConnectorLinkPartnerDto(
     String encryptionAlias,
     String certificateDn,
     String pushAddress,
-    boolean isTest
+    boolean testOnly
 ) {
     /**
      * Creates a new instance of {@code ConnectorLinkPartnerDto} from the provided

@@ -17,13 +17,13 @@ import lombok.Builder;
 /**
  * Represents a Data Transfer Object (DTO) for the processing mode action.
  *
- * @param name   The name of the action.
- * @param isTest whether the current service is for testing or not
+ * @param name     The name of the action.
+ * @param testOnly Whether the current service is for testing or not
  */
 @Builder
 public record ConnectorProcessingModeActionDto(
     String name,
-    boolean isTest
+    boolean testOnly
 ) implements Serializable {
     /**
      * Creates a DTO from a connector action and determines whether it matches the configured test
@@ -40,7 +40,7 @@ public record ConnectorProcessingModeActionDto(
         var name = action.name();
         return ConnectorProcessingModeActionDto.builder()
                                                .name(name)
-                                               .isTest(name.equals(testActionName))
+                                               .testOnly(name.equals(testActionName))
                                                .build();
     }
 }

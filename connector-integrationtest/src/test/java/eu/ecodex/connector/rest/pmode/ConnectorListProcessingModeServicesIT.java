@@ -14,12 +14,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeServiceDto;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
@@ -44,16 +42,17 @@ public class ConnectorListProcessingModeServicesIT extends AbstractIntegrationTe
         "classpath:sql/service.sql",
     })
     void should_list_connector_pmode_services() {
-        apiClient.get()
-                 .uri("/api/v1/processing-modes/default_business_domain/services")
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(new ParameterizedTypeReference<List<ConnectorProcessingModeServiceDto>>() {
-                 })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.size()).isEqualTo(7);
-                 });
+        var response = apiClient.get()
+                                .uri("/api/v1/processing-modes/default_business_domain/services")
+                                .exchange()
+                                .expectStatus().isOk()
+                                .returnResult(ConnectorProcessingModeServiceDto[].class);
+
+        var services = response.getResponseBody();
+        assertThat(services)
+            .isNotNull()
+            .hasSize(7)
+            .extracting(ConnectorProcessingModeServiceDto::testOnly)
+            .contains(true);
     }
 }

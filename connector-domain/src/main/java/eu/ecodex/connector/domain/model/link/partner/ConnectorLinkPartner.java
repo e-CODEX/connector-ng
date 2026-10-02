@@ -42,6 +42,7 @@ import lombok.Builder;
  *                        typically referencing a keystore entry
  * @param certificateDn   distinguished name (DN) of the partner certificate used for authentication
  *                        or secure communication
+ * @param pushAddress     The backend system address used by the connector to submit messages.
  */
 @Builder(toBuilder = true)
 public record ConnectorLinkPartner(

@@ -52,5 +52,8 @@ public class ConnectorListProcessingModeActionsIT extends AbstractIntegrationTes
         var actions = response.getResponseBody();
         assertThat(actions).isNotNull();
         assertThat(actions).hasSize(31);
+        assertThat(actions)
+            .extracting(ConnectorProcessingModeActionDto::testOnly)
+            .contains(true);
     }
 }

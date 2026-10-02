@@ -19,13 +19,13 @@ import lombok.Builder;
  *
  * @param name   The name of the service
  * @param type   The type of the service
- * @param isTest whether the current service is for testing or not
+ * @param testOnly whether the current service is for testing or not
  */
 @Builder
 public record ConnectorProcessingModeServiceDto(
     String name,
     String type,
-    boolean isTest
+    boolean testOnly
 ) implements Serializable {
     /**
      * Creates a DTO from a connector service and determines whether it matches the configured test
@@ -47,7 +47,7 @@ public record ConnectorProcessingModeServiceDto(
             .builder()
             .name(name)
             .type(type)
-            .isTest(name.equals(testServiceName) && type.equals(testServiceType))
+            .testOnly(name.equals(testServiceName) && type.equals(testServiceType))
             .build();
     }
 }

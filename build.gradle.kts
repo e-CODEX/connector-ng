@@ -4,6 +4,8 @@ plugins {
     id("checkstyle")
     id("maven-publish")
     id("org.cyclonedx.bom") version "3.1.1"
+    id("org.sonarqube") version "7.5.0.8588"
+
 }
 
 allprojects {
@@ -20,6 +22,13 @@ allprojects {
 
 jacoco {
     toolVersion = "0.8.14"
+}
+
+sonar {
+  properties {
+    property("sonar.projectKey", "e-CODEX_connector-ng")
+    property("sonar.organization", "e-codex")
+  }
 }
 
 subprojects {

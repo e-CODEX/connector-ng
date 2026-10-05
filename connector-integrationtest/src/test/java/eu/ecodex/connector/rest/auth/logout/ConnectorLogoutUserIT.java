@@ -85,7 +85,7 @@ class ConnectorLogoutUserIT extends AbstractIntegrationTest {
             .body(logoutRequest)
             .exchange()
             .expectStatus()
-            .isOk()
+            .isNoContent()
             .returnResult(String.class);
 
         apiClient.get()

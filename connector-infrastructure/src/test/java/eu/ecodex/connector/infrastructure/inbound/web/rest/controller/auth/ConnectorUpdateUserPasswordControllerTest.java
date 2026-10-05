@@ -22,9 +22,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.domain.model.auth.ConnectorUpdateUserPasswordData;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
@@ -51,7 +51,7 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorUserAuthenticationProvider userAuthenticationProvider;
     @MockitoBean
-    private ConnectorUpdateUserPassword updateUserPassword;
+    private ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
     private ConnectorRefreshUserRefreshToken refreshUserRefreshToken;
     @Autowired
@@ -74,7 +74,7 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var userPrincipal = new ConnectorUserDetails(connectorUser, accessToken);
 
-        doNothing().when(updateUserPassword).execute(any());
+        doNothing().when(updateUserPasswordAtFirstLogin).execute(any());
 
         // When
         mockMvc.perform(post(URL)
@@ -86,11 +86,11 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
             .andReturn();
 
         // Then
-        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordData.class);
-        verify(updateUserPassword).execute(captor.capture());
+        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordCommand.class);
+        verify(updateUserPasswordAtFirstLogin).execute(captor.capture());
 
         assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUpdateUserPasswordRequest.toDomain(connectorUser.uuid(), accessToken,
+            ConnectorUpdateUserPasswordRequest.from(connectorUser.uuid(), accessToken,
                 userPasswordRequest)
         );
 
@@ -106,7 +106,8 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var userPrincipal = new ConnectorUserDetails(connectorUser, accessToken);
 
-        doThrow(ConnectorUserInvalidPasswordException.class).when(updateUserPassword).execute(
+        doThrow(ConnectorUserInvalidPasswordException.class).when(
+            updateUserPasswordAtFirstLogin).execute(
             any());
 
         // When
@@ -119,11 +120,11 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
             .andReturn();
 
         // Then
-        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordData.class);
-        verify(updateUserPassword).execute(captor.capture());
+        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordCommand.class);
+        verify(updateUserPasswordAtFirstLogin).execute(captor.capture());
 
         assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUpdateUserPasswordRequest.toDomain(connectorUser.uuid(), accessToken,
+            ConnectorUpdateUserPasswordRequest.from(connectorUser.uuid(), accessToken,
                 userPasswordRequest)
         );
 
@@ -148,7 +149,7 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(userAuthenticationProvider, updateUserPassword,
+        verifyNoMoreInteractions(userAuthenticationProvider, updateUserPasswordAtFirstLogin,
             refreshUserRefreshToken);
     }
 

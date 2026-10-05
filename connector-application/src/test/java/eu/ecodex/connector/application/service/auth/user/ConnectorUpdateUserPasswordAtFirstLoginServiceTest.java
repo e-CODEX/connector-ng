@@ -13,6 +13,8 @@ package eu.ecodex.connector.application.service.auth.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -20,10 +22,8 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;
-import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
-import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,17 +33,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorUpdateUserPasswordServiceTest {
+class ConnectorUpdateUserPasswordAtFirstLoginServiceTest {
     @InjectMocks
-    ConnectorUpdateUserPasswordService updateUserPasswordService;
+    ConnectorUpdateUserPasswordAtFirstLoginService userPasswordAtFirstLoginService;
     @Mock
-    private ConnectorUserRepository repository;
-    @Mock
-    private ConnectorUserPasswordEncoder passwordEncoder;
+    private ConnectorUpdateUserPassword updateUserPassword;
     @Mock
     private ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
-    @Mock
-    private ConnectorAuthenticationTokenProvider authenticationTokenProvider;
 
     @Test
     void should_update_user_password_successfully() {
@@ -56,11 +52,7 @@ class ConnectorUpdateUserPasswordServiceTest {
             .build();
 
         when(retrieveUserByIdentifier.execute(any())).thenReturn(user);
-        when(authenticationTokenProvider.getUsernameFromToken(any())).thenReturn("username");
-        when(passwordEncoder.matches(any(), any())).thenReturn(Boolean.TRUE);
-        var encodedPassword = "encodePassword";
-        when(passwordEncoder.encodePassword(any())).thenReturn(encodedPassword);
-        when(repository.save(any())).thenReturn(user);
+        doNothing().when(updateUserPassword).execute(any());
 
         // When
         var updateData = ConnectorUpdateUserPasswordCommand.builder()
@@ -70,29 +62,34 @@ class ConnectorUpdateUserPasswordServiceTest {
             .currentPassword("current-password")
             .newPassword("new-password")
             .build();
-        updateUserPasswordService.execute(updateData);
+        userPasswordAtFirstLoginService.execute(updateData);
 
         // Then
         verify(retrieveUserByIdentifier).execute(user.uuid());
         assert updateData.accessToken() != null;
-        verify(authenticationTokenProvider).getUsernameFromToken(updateData.accessToken());
-        verify(passwordEncoder).matches(updateData.currentPassword(), user.password());
 
-        var captor = ArgumentCaptor.forClass(ConnectorUser.class);
-        verify(repository).save(captor.capture());
-        var expected = ConnectorUser.builder()
-            .uuid(user.uuid())
-            .username(user.username())
-            .password(encodedPassword)
-            .mustChangePassword(Boolean.FALSE)
-            .build();
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(expected);
+        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordCommand.class);
+        verify(updateUserPassword).execute(captor.capture());
+
+        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updateData);
         assertNoMoreAssertions();
     }
 
     @Test
     void should_not_update_user_password_when_new_password_and_current_password_are_same() {
         // Given
+        var user = ConnectorUser.builder()
+            .uuid("uuid")
+            .username("username")
+            .password("current-password")
+            .mustChangePassword(Boolean.TRUE)
+            .build();
+
+        when(retrieveUserByIdentifier.execute(any())).thenReturn(user);
+        doThrow(ConnectorUserInvalidPasswordException.class).when(updateUserPassword).execute(
+            any());
+
+        // When
         var updateData = ConnectorUpdateUserPasswordCommand.builder()
             .uuid("uuid")
             .accessToken("access-token")
@@ -101,11 +98,13 @@ class ConnectorUpdateUserPasswordServiceTest {
             .newPassword("current-password")
             .build();
 
-        // When
         assertThrows(ConnectorUserInvalidPasswordException.class,
-            () -> updateUserPasswordService.execute(updateData));
+            () -> userPasswordAtFirstLoginService.execute(updateData));
 
         // Then
+        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordCommand.class);
+        verify(updateUserPassword).execute(captor.capture());
+        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updateData);
         assertNoMoreAssertions();
     }
 
@@ -116,11 +115,12 @@ class ConnectorUpdateUserPasswordServiceTest {
             .uuid("uuid")
             .username("username")
             .password("current-password")
+            .mustChangePassword(Boolean.TRUE)
             .build();
 
         // When
         when(retrieveUserByIdentifier.execute(any())).thenReturn(user);
-        when(authenticationTokenProvider.getUsernameFromToken(any())).thenReturn("username2");
+        doThrow(ConnectorUserBadCredentialsException.class).when(updateUserPassword).execute(any());
 
         var updateData = ConnectorUpdateUserPasswordCommand.builder()
             .uuid("uuid")
@@ -129,14 +129,16 @@ class ConnectorUpdateUserPasswordServiceTest {
             .currentPassword("current-password")
             .newPassword("new-password")
             .build();
+
         assertThrows(ConnectorUserBadCredentialsException.class,
-            () -> updateUserPasswordService.execute(updateData));
+            () -> userPasswordAtFirstLoginService.execute(updateData));
 
         // Then
         verify(retrieveUserByIdentifier).execute(user.uuid());
         assert updateData.accessToken() != null;
-        verify(authenticationTokenProvider).getUsernameFromToken(updateData.accessToken());
-
+        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordCommand.class);
+        verify(updateUserPassword).execute(captor.capture());
+        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updateData);
         assertNoMoreAssertions();
     }
 
@@ -153,8 +155,8 @@ class ConnectorUpdateUserPasswordServiceTest {
 
         // When
         when(retrieveUserByIdentifier.execute(any())).thenReturn(user);
-        when(passwordEncoder.matches(any(), any())).thenReturn(Boolean.FALSE);
-        when(authenticationTokenProvider.getUsernameFromToken(any())).thenReturn("username");
+        doThrow(ConnectorUserInvalidPasswordException.class).when(updateUserPassword).execute(
+            any());
 
         var updateData = ConnectorUpdateUserPasswordCommand.builder()
             .uuid("uuid")
@@ -165,18 +167,17 @@ class ConnectorUpdateUserPasswordServiceTest {
             .build();
 
         assertThrows(ConnectorUserInvalidPasswordException.class,
-            () -> updateUserPasswordService.execute(updateData));
+            () -> userPasswordAtFirstLoginService.execute(updateData));
 
         // Then
         verify(retrieveUserByIdentifier).execute(user.uuid());
-        verify(passwordEncoder).matches(updateData.currentPassword(), user.password());
-        assert updateData.accessToken() != null;
-        verify(authenticationTokenProvider).getUsernameFromToken(updateData.accessToken());
+        var captor = ArgumentCaptor.forClass(ConnectorUpdateUserPasswordCommand.class);
+        verify(updateUserPassword).execute(captor.capture());
+        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updateData);
         assertNoMoreAssertions();
     }
 
     private void assertNoMoreAssertions() {
-        verifyNoMoreInteractions(retrieveUserByIdentifier, authenticationTokenProvider,
-            passwordEncoder, repository);
+        verifyNoMoreInteractions(retrieveUserByIdentifier, updateUserPassword);
     }
 }

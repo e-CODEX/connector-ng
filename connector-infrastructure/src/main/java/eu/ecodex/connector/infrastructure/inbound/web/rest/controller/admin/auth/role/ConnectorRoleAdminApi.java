@@ -45,7 +45,6 @@ public interface ConnectorRoleAdminApi {
     @Operation(summary = "Persist a connector user role.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Created"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
@@ -54,7 +53,6 @@ public interface ConnectorRoleAdminApi {
     @Operation(summary = "Update a connector user role.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Updated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
@@ -62,10 +60,10 @@ public interface ConnectorRoleAdminApi {
     ConnectorRoleDto update(@PathVariable("uuid") @Nonnull String identifier,
                             @Valid @RequestBody ConnectorRoleDto userRoleDto);
 
+
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
     @GetMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Found"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
     })
@@ -74,7 +72,6 @@ public interface ConnectorRoleAdminApi {
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Found"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
     })
     List<ConnectorRoleDto> getAll();
@@ -83,7 +80,6 @@ public interface ConnectorRoleAdminApi {
     @Operation(summary = "Delete a connector user role by uuid identifier.")
     @DeleteMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Deleted"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })

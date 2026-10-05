@@ -25,8 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
-    public static final String PATH = "/api/v1/auth/change-password";
+class ConnectorUpdateSelfPasswordIT extends AbstractIntegrationTest {
+    public static final String PATH = "/api/v1/auth/me/change-password";
 
     @Autowired
     private RestTestClient apiClient;
@@ -41,13 +41,13 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void update_password_should_not_update_when_must_change_password_is_False() {
-        var username = "test-user-it";
+    void update_my_password_should_not_update_when_wrong_access_token() {
+        var username = "test-user3-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
-        assertThat(before.get().mustChangePassword()).isFalse();
+        assertThat(before.get().mustChangePassword()).isTrue();
 
-        var password = "password";
+        var password = "Passw0rd123!";
         var loginRequest = ConnectorLoginRequest
             .builder()
             .username(username)
@@ -77,22 +77,22 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
             .build();
 
         apiClient.post().uri(PATH)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)
             .exchange()
             .expectStatus()
-            .is4xxClientError();
+            .isBadRequest();
 
         var after = userRepository.findByUsername(username);
         assertThat(before).isEqualTo(after);
         assertThat(after).isNotEmpty();
-        assertThat(after.get().mustChangePassword()).isFalse();
+        assertThat(after.get().mustChangePassword()).isTrue();
     }
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void update_password_should_not_update_when_passwords_does_not_match_existing_one() {
+    void update_my_password_should_not_update_when_passwords_does_not_match_existing_one() {
         var username = "test-user3-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
@@ -145,16 +145,17 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void update_password_should_not_update_when_passwords_does_not_change() {
+    void update_my_password_should_not_update_when_passwords_does_not_change() {
         var username = "test-user3-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
         assertThat(before.get().mustChangePassword()).isTrue();
 
+        var password = "Passw0rd123!";
         var loginRequest = ConnectorLoginRequest
             .builder()
             .username(username)
-            .password("Passw0rd123!")
+            .password(password)
             .build();
 
         var loginResponse = apiClient.post()
@@ -172,10 +173,11 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
         var refreshToken = loginResponse.getResponseBody().refreshToken();
         assertThat(accessToken).isNotBlank();
 
+        var newPassword = "Passw0rd123!";
         var request = ConnectorUpdateUserPasswordRequest.builder()
             .refreshToken(refreshToken)
-            .currentPassword("Passw0rd123!")
-            .newPassword("Passw0rd123!")
+            .currentPassword(password)
+            .newPassword(newPassword)
             .build();
 
         apiClient.post()
@@ -195,16 +197,17 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void update_password_should_not_update_when_new_password_is_too_short() {
+    void update_my_password_should_not_update_when_new_password_is_too_short() {
         var username = "test-user3-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
         assertThat(before.get().enabled()).isTrue();
 
+        var password = "Passw0rd123!";
         var loginRequest = ConnectorLoginRequest
             .builder()
             .username(username)
-            .password("Passw0rd123!")
+            .password(password)
             .build();
 
         var loginResponse = apiClient.post()
@@ -222,10 +225,11 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
         var refreshToken = loginResponse.getResponseBody().refreshToken();
         assertThat(accessToken).isNotBlank();
 
+        var newPassword = "test!";
         var request = ConnectorUpdateUserPasswordRequest.builder()
             .refreshToken(refreshToken)
-            .currentPassword("Passw0rd123!")
-            .newPassword("test!")
+            .currentPassword(password)
+            .newPassword(newPassword)
             .build();
 
         apiClient.post()
@@ -245,17 +249,18 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void update_password_should_succeeded_when_valid_credentials_are_provided() {
+    void update_my_password_should_succeeded_when_valid_credentials_are_provided() {
         var username = "test-user3-it";
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
         assertThat(before.get().enabled()).isTrue();
         assertThat(before.get().mustChangePassword()).isTrue();
 
+        var password = "Passw0rd123!";
         var loginRequest = ConnectorLoginRequest
             .builder()
             .username(username)
-            .password("Passw0rd123!")
+            .password(password)
             .build();
 
         var loginResponse = apiClient.post()
@@ -273,10 +278,11 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
         var refreshToken = loginResponse.getResponseBody().refreshToken();
         assertThat(accessToken).isNotBlank();
 
+        var newPassword = "new-password";
         var request = ConnectorUpdateUserPasswordRequest.builder()
             .refreshToken(refreshToken)
-            .currentPassword("Passw0rd123!")
-            .newPassword("new-password")
+            .currentPassword(password)
+            .newPassword(newPassword)
             .build();
 
         apiClient.post().uri(PATH)

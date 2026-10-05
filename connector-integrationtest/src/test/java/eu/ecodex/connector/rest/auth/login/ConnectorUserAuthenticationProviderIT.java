@@ -13,22 +13,21 @@ package eu.ecodex.connector.rest.auth.login;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
+import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
     private static final String PATH = "/api/v1/auth/login";
-
+    @Autowired
+    ConnectorUserRepository userRepository;
     @Autowired
     private RestTestClient apiClient;
 
@@ -110,29 +109,17 @@ class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
         assertThat(accessToken).isNotBlank();
 
         // update user to disable it
-        var request = ConnectorUserRequest.builder()
-            .username(username)
-            .enabled(false)
-            .build();
+        var user = userRepository.findByUsername(username);
+        assertThat(user).isPresent();
+        var disabled = user.get().toBuilder().enabled(false).build();
+        userRepository.save(disabled);
 
-        var updatedUser = apiClient.patch()
-            .uri("/api/v1/auth/me")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(request)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorUserDto.class)
-            .getResponseBody();
-
-        assertThat(updatedUser).isNotNull();
-        assertThat(updatedUser.username()).isEqualTo(username);
-        assertThat(updatedUser.enabled()).isFalse();
+        user = userRepository.findByUsername(username);
+        assertThat(user).isPresent();
+        assertThat(user.get().enabled()).isFalse();
 
         // login again with the disabled user
-        apiClient.post()
-            .uri(PATH)
+        apiClient.post().uri(PATH)
             .contentType(MediaType.APPLICATION_JSON)
             .body(loginRequest)
             .exchange()

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
-import eu.ecodex.connector.domain.model.auth.ConnectorUpdateUserPasswordData;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -37,11 +37,11 @@ public record ConnectorUpdateUserPasswordRequest(
      *
      * @return domain user
      */
-    public static ConnectorUpdateUserPasswordData toDomain(
+    public static ConnectorUpdateUserPasswordCommand from(
         String uuid,
         String accessToken,
         ConnectorUpdateUserPasswordRequest userRequest) {
-        return ConnectorUpdateUserPasswordData.builder()
+        return ConnectorUpdateUserPasswordCommand.builder()
             .uuid(uuid)
             .accessToken(accessToken)
             .refreshToken(userRequest.refreshToken())

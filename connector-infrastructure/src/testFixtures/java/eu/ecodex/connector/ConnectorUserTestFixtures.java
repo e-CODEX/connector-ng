@@ -16,6 +16,8 @@ import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditUserRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import java.util.Set;
@@ -94,19 +96,18 @@ public class ConnectorUserTestFixtures {
             .build();
     }
 
-    public static ConnectorUserRequest createDefaultPatchUserRequest() {
-        return ConnectorUserRequest.builder()
+    public static ConnectorEditUserRequest createDefaultPatchUserRequest() {
+        return ConnectorEditUserRequest.builder()
             .username("test_user")
             .email("test_user@email.com")
-            .password("test_password")
+            .enabled(Boolean.TRUE)
             .build();
     }
 
-    public static ConnectorUser createDefaultUserPatched() {
-        return ConnectorUser.builder()
+    public static ConnectorEditSelfRequest createDefaultPatchMeUserRequest() {
+        return ConnectorEditSelfRequest.builder()
             .username("test_user")
-            .email("test_user@email.com")
-            .password("test_password")
+            .email("test_user_new@email.com")
             .build();
     }
 

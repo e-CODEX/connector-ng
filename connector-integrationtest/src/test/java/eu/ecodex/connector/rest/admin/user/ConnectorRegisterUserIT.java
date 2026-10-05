@@ -70,7 +70,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();
         assertThat(existing.get().roles()).hasSize(1);
-        assertThat(existing.get().mustChangePassword()).isFalse();
+        assertThat(existing.get().mustChangePassword()).isTrue();
     }
 
     @Test

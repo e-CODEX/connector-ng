@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -23,9 +22,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
-import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,46 +31,39 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorPatchUserServiceTest {
+class ConnectorEditUserServiceTest {
     @Mock
     private ConnectorUserRepository repository;
     @Mock
     private ConnectorVerifyUniqueUserService verifyUniqueUser;
     @Mock
     private ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier;
-    @Mock
-    private ConnectorUserPasswordEncoder passwordEncoder;
 
     @InjectMocks
-    private ConnectorPatchUserService service;
+    private ConnectorEditUserService service;
 
     @Test
-    void patch_should_patch_user() {
+    void edit_user_should_update_user_successfully() {
         // Given
         var identifier = "uuid";
         var username = "user";
         var email = "email@test.com";
-        var pwd = "password";
-        var user = ConnectorUser.builder()
+        var editUserCommand = ConnectorEditUserCommand.builder()
             .username(username)
-            .password(pwd)
             .email(email)
             .build();
-        var encodedPwd = "encoded";
-        var encodedPwdUser = user.toBuilder().password(encodedPwd).build();
-        var expected = encodedPwdUser.toBuilder()
+        var user = ConnectorEditUserCommand.toDomain(editUserCommand);
+        var expected = user.toBuilder()
             .uuid(identifier)
             .mustChangePassword(Boolean.FALSE)
             .build();
 
         when(retrieveUserByIdentifier.execute(any())).thenReturn(expected);
         doNothing().when(verifyUniqueUser).execute(any(), any());
-        when(passwordEncoder.matches(any(), any())).thenReturn(Boolean.FALSE);
-        when(passwordEncoder.encodePassword(anyString())).thenReturn(encodedPwd);
         when(repository.save(any())).thenReturn(expected);
 
         // When
-        var registered = service.execute(identifier, user);
+        var registered = service.execute(identifier, editUserCommand);
 
         // Then
         assertThat(registered).isNotNull();
@@ -80,24 +71,20 @@ class ConnectorPatchUserServiceTest {
 
         verify(retrieveUserByIdentifier).execute(identifier);
         verify(verifyUniqueUser).execute(identifier, user);
-        verify(passwordEncoder).matches(pwd, encodedPwd);
-        verify(passwordEncoder).encodePassword(pwd);
         verify(repository).save(expected);
 
         assertNoMoreInteractions();
     }
 
     @Test
-    void patch_should_throw_user_not_found_exception() {
+    void edit_should_throw_user_not_found_exception() {
         // Given
         var identifier = "uuid";
         var username = "user";
         var email = "email@test.com";
-        var pwd = "password";
 
-        var user = ConnectorUser.builder()
+        var user = ConnectorEditUserCommand.builder()
             .username(username)
-            .password(pwd)
             .email(email)
             .build();
 
@@ -114,21 +101,18 @@ class ConnectorPatchUserServiceTest {
 
 
     @Test
-    void patch_should_throw_exception_when_mail_already_exists() {
+    void edit_user_should_throw_exception_when_email_address_already_exists() {
         // Given
         var identifier = "uuid";
         var username = "user";
         var email = "email@test.com";
-        var pwd = "password";
-        var user = ConnectorUser.builder()
+        var editUserCommand = ConnectorEditUserCommand.builder()
             .username(username)
-            .password(pwd)
             .email(email)
             .build();
 
-        var encodedPwd = "encoded";
-        var encoded = user.toBuilder().password(encodedPwd).build();
-        var expected = encoded.toBuilder().uuid(identifier).build();
+        var user = ConnectorEditUserCommand.toDomain(editUserCommand);
+        var expected = user.toBuilder().uuid(identifier).build();
         var message = "User email 'email@test.com' already exists";
 
         when(retrieveUserByIdentifier.execute(any())).thenReturn(expected);
@@ -138,29 +122,29 @@ class ConnectorPatchUserServiceTest {
 
         // When
         // Then
-        assertThatThrownBy(() -> service.execute(identifier, user))
+        assertThatThrownBy(() -> service.execute(identifier, editUserCommand))
             .isInstanceOf(ConnectorUserAlreadyExistsException.class)
             .hasMessage(message);
+
         verify(retrieveUserByIdentifier).execute(identifier);
+
         verify(verifyUniqueUser).execute(identifier, user);
         assertNoMoreInteractions();
     }
 
     @Test
-    void patch_should_throw_exception_when_mail_username_exists() {
+    void edit_should_throw_exception_when_username_exists() {
         // Given
         var identifier = "uuid";
         var username = "user";
         var email = "email@test.com";
-        var pwd = "password";
-        var user = ConnectorUser.builder()
+
+        var editUserCommand = ConnectorEditUserCommand.builder()
             .username(username)
-            .password(pwd)
             .email(email)
             .build();
-        var encodedPwd = "encoded";
-        var encoded = user.toBuilder().password(encodedPwd).build();
-        var expected = encoded.toBuilder().uuid(identifier).build();
+        var user = ConnectorEditUserCommand.toDomain(editUserCommand);
+        var expected = user.toBuilder().uuid(identifier).build();
         var message = "User name 'user' already exists";
 
         when(retrieveUserByIdentifier.execute(any())).thenReturn(expected);
@@ -169,7 +153,7 @@ class ConnectorPatchUserServiceTest {
             any());
 
         // When
-        assertThatThrownBy(() -> service.execute(identifier, user))
+        assertThatThrownBy(() -> service.execute(identifier, editUserCommand))
             .isInstanceOf(ConnectorUserAlreadyExistsException.class)
             .hasMessage(message);
 
@@ -180,7 +164,6 @@ class ConnectorPatchUserServiceTest {
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(repository, passwordEncoder, retrieveUserByIdentifier,
-            verifyUniqueUser);
+        verifyNoMoreInteractions(repository, retrieveUserByIdentifier, verifyUniqueUser);
     }
 }

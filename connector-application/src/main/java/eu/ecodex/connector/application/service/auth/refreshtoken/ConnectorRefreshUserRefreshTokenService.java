@@ -100,7 +100,7 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
             ? rotateRefreshToken(verifiedRefreshToken.user())
             : verifiedRefreshToken;
 
-        return ConnectorUserAuthenticationResult.builder()
+        ConnectorUserAuthenticationResult result = ConnectorUserAuthenticationResult.builder()
             .accessToken(newAccessToken)
             .refreshToken(newRefreshToken.token())
             .expiresIn(Duration.between(clock.instant(), accessTokenExpiresAt).getSeconds())
@@ -108,6 +108,9 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
                 Duration.between(clock.instant(), newRefreshToken.expiresAt()).getSeconds())
             .mustChangePassword(newRefreshToken.user().mustChangePassword())
             .build();
+
+        log.info("User {} access token successfully refreshed.", newRefreshToken.user().uuid());
+        return result;
     }
 
     /**

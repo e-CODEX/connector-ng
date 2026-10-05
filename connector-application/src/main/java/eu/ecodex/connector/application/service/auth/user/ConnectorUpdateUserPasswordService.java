@@ -12,13 +12,12 @@ package eu.ecodex.connector.application.service.auth.user;
 
 import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
-import eu.ecodex.connector.domain.model.auth.ConnectorUpdateUserPasswordData;
-import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,8 +28,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class ConnectorUpdateUserPasswordService implements ConnectorUpdateUserPassword {
-    private final ConnectorPatchUser patchUser;
     private final ConnectorUserPasswordEncoder passwordEncoder;
+    private final ConnectorUserRepository repository;
     private final ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
     private final ConnectorAuthenticationTokenProvider authenticationTokenProvider;
 
@@ -38,49 +37,50 @@ public class ConnectorUpdateUserPasswordService implements ConnectorUpdateUserPa
      * Constructs an instance of {@code ConnectorUpdateUserPassword}.
      */
     public ConnectorUpdateUserPasswordService(
-        ConnectorPatchUser patchUser, ConnectorUserPasswordEncoder passwordEncoder,
+        ConnectorUserPasswordEncoder passwordEncoder,
+        ConnectorUserRepository repository,
         ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier,
         ConnectorAuthenticationTokenProvider authenticationTokenProvider) {
-        this.patchUser = patchUser;
         this.passwordEncoder = passwordEncoder;
+        this.repository = repository;
         this.retrieveUserByIdentifier = retrieveUserByIdentifier;
         this.authenticationTokenProvider = authenticationTokenProvider;
     }
 
     @Override
-    public void execute(@NonNull ConnectorUpdateUserPasswordData passwordUpdateData) {
+    public void execute(@NonNull ConnectorUpdateUserPasswordCommand passwordUpdateData) {
+        log.info("Updating user {} password", passwordUpdateData.uuid());
         if (passwordUpdateData.currentPassword().equals(passwordUpdateData.newPassword())) {
+            log.error("Password update rejected for user {}: new password equals current password",
+                passwordUpdateData.uuid());
+
             throw new ConnectorUserInvalidPasswordException(
                 "The new password must be different from the current password.");
         }
-        var connectorUser = retrieveUserByIdentifier.execute(passwordUpdateData.uuid());
-        var usernameFromToken = authenticationTokenProvider.getUsernameFromToken(
-            passwordUpdateData.accessToken());
-        if (!usernameFromToken.equals(connectorUser.username())) {
-            throw new ConnectorUserBadCredentialsException(
-                "Access token does not match the target user.");
-        }
-        boolean mustChangePassword =
-            connectorUser.mustChangePassword() == null || connectorUser.mustChangePassword();
 
-        if (!mustChangePassword) {
-            log.warn("No need to change password for user '{}' — mustChangePassword is false.",
-                connectorUser.username());
-            return;
+        var user = retrieveUserByIdentifier.execute(passwordUpdateData.uuid());
+
+        if (passwordUpdateData.accessToken() != null) {
+            var usernameFromToken = authenticationTokenProvider.getUsernameFromToken(
+                passwordUpdateData.accessToken());
+            if (!usernameFromToken.equals(user.username())) {
+                log.error(
+                    "Password update rejected for user {}: access token does not match the user",
+                    passwordUpdateData.uuid());
+                throw new ConnectorUserBadCredentialsException(
+                    "Access token does not match the target user.");
+            }
         }
-        if (!passwordEncoder.matches(passwordUpdateData.currentPassword(),
-            connectorUser.password())) {
+
+        if (!passwordEncoder.matches(passwordUpdateData.currentPassword(), user.password())) {
+            log.warn("Password update rejected for user {}: current password is incorrect",
+                passwordUpdateData.uuid());
             throw new ConnectorUserInvalidPasswordException(
                 "The current password provided is incorrect.");
         }
 
-        var updatePasswordData = ConnectorUser.builder()
-            .uuid(connectorUser.uuid())
-            .username(connectorUser.username())
-            .password(passwordUpdateData.newPassword())
-            .build();
-
-        var patched = patchUser.execute(connectorUser.uuid(), updatePasswordData);
-        log.info("User '{}' password is successfully updated.", patched.username());
+        var encodedPassword = passwordEncoder.encodePassword(passwordUpdateData.newPassword());
+        var updatedUser = user.changePassword(encodedPassword);
+        repository.save(updatedUser);
     }
 }

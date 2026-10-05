@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-class ConnectorPatchMeIT extends AbstractIntegrationTest {
+class ConnectorPatchSelfIT extends AbstractIntegrationTest {
     public static final String PATH = "/api/v1/auth/me";
 
     @Autowired
@@ -47,11 +47,11 @@ class ConnectorPatchMeIT extends AbstractIntegrationTest {
         assertThat(before).isNotEmpty();
         assertThat(before.get().enabled()).isTrue();
 
-        var request = ConnectorUserRequest
+        var newEmail = "my_new_email@test.com";
+        var request = ConnectorEditSelfRequest
             .builder()
             .username(username)
-            .password("password")
-            .enabled(false)
+            .email(newEmail)
             .build();
 
         var registeredUser = apiClient
@@ -68,11 +68,11 @@ class ConnectorPatchMeIT extends AbstractIntegrationTest {
 
         assertThat(registeredUser).isNotNull();
         assertThat(registeredUser.username()).isEqualTo(username);
-        assertThat(registeredUser.enabled()).isFalse();
+        assertThat(registeredUser.email()).isEqualTo(newEmail);
 
         var after = userRepository.findByUsername(username);
         assertThat(before).isNotEqualTo(after);
         assertThat(after).isNotEmpty();
-        assertThat(after.get().enabled()).isFalse();
+        assertThat(after.get().email()).isEqualTo(newEmail);
     }
 }

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
@@ -33,9 +33,9 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @WebMvcTest(ConnectorAuthenticationController.class)
 class ConnectorRefreshTokenControllerTest extends AbstractWebMvcTest {
     @MockitoBean
-    ConnectorUserAuthenticationProvider userAuthenticationProvider;
+    ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
-    ConnectorUpdateUserPassword updateUserPassword;
+    ConnectorUserAuthenticationProvider userAuthenticationProvider;
     @MockitoBean
     ConnectorRefreshUserRefreshToken userRefreshToken;
 
@@ -74,6 +74,7 @@ class ConnectorRefreshTokenControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
         verify(userRefreshToken).execute(accessToken, refreshToken);
-        verifyNoMoreInteractions(userAuthenticationProvider, userRefreshToken, updateUserPassword);
+        verifyNoMoreInteractions(userAuthenticationProvider, userRefreshToken,
+            updateUserPasswordAtFirstLogin);
     }
 }

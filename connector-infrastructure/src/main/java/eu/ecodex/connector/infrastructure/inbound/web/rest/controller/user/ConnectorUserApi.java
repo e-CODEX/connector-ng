@@ -11,7 +11,8 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.user;
 
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,12 +20,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Interface for managing connector users via REST APIs.
@@ -37,22 +41,32 @@ public interface ConnectorUserApi {
     @Operation(summary = "Update partially the currently connected user profile.")
     @PatchMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Updated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
     ConnectorUserDto patch(@AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
-                           @Valid @RequestBody @Nonnull ConnectorUserRequest userRequest);
+                           @Valid @RequestBody @Nonnull ConnectorEditSelfRequest userRequest);
 
     @Operation(summary = "Get the currently authenticated user account.")
     @GetMapping
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Found"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorUserDto getByIdentifier(
         @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails);
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Update a connector user password after login, using access and refresh "
+        + "tokens.")
+    @PostMapping(path = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
+    })
+    void updatePassword(
+        @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
+        @Valid @RequestBody @Nonnull ConnectorUpdateUserPasswordRequest userPasswordRequest);
 }

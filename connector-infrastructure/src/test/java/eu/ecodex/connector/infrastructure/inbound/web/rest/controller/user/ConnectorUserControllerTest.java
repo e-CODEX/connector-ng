@@ -12,19 +12,24 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +50,9 @@ import tools.jackson.databind.ObjectMapper;
 class ConnectorUserControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/auth/me";
     @MockitoBean
-    private ConnectorPatchUser patchUser;
+    private ConnectorEditUser editUser;
+    @MockitoBean
+    private ConnectorUpdateUserPassword updateUserPassword;
     @MockitoBean
     private ConnectorRetrieveUserByIdentifier retrieveUser;
     @Autowired
@@ -60,19 +67,49 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
     }
 
     @Test
-    void patch_should_return_user_patched() throws Exception {
+    void update_password_should_edit_user_password() throws Exception {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var userPrincipal = ConnectorUserTestFixtures.createUserDetails();
-        var connectorUserRequest = ConnectorUserTestFixtures.createDefaultPatchUserRequest();
+        var userPasswordRequest =
+            ConnectorUserTestFixtures.createDefaultUpdateUserPasswordRequest();
+        var userPasswordCommand = ConnectorUpdateUserPasswordRequest.from(connectorUser.uuid(),
+            userPrincipal.accessToken(), userPasswordRequest);
 
-        when(patchUser.execute(any(), any())).thenReturn(connectorUser);
+        doNothing().when(updateUserPassword).execute(any());
+
+        // When
+        mockMvc.perform(post(URL.concat("/change-password"))
+                .with(authenticatedAs(userPrincipal))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userPasswordRequest))
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+
+        // Then
+        verify(updateUserPassword).execute(userPasswordCommand);
+
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void patch_should_edit_user_data() throws Exception {
+        // Given
+        var newEmail = "test_user_new@email.com";
+        var connectorUser = ConnectorUserTestFixtures.createDefaultUser()
+            .toBuilder().email(newEmail).build();
+        var userPrincipal = ConnectorUserTestFixtures.createUserDetails();
+        var editSelfRequest = ConnectorUserTestFixtures.createDefaultPatchMeUserRequest();
+        var expected =
+            ConnectorUserTestFixtures.createUserDto().toBuilder().email(newEmail).build();
+
+        when(editUser.execute(any(), any())).thenReturn(connectorUser);
 
         // When
         var mvcResult = mockMvc.perform(patch(URL)
                 .with(authenticatedAs(userPrincipal))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(connectorUserRequest))
+                .content(objectMapper.writeValueAsString(editSelfRequest))
                 .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
@@ -81,10 +118,11 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
         assertThat(mvcResult).isNotNull();
         var json = mvcResult.getResponse().getContentAsString();
         var actual = objectMapper.readValue(json, ConnectorUserDto.class);
-        assertThat(actual).isEqualTo(ConnectorUserTestFixtures.createUserDto());
+        assertThat(actual).isEqualTo(expected);
 
-        verify(patchUser).execute(connectorUser.uuid(),
-            ConnectorUserTestFixtures.createDefaultUserPatched());
+        var editUserCommand =
+            ConnectorEditSelfRequest.toCommand(connectorUser.uuid(), editSelfRequest);
+        verify(editUser).execute(connectorUser.uuid(), editUserCommand);
 
         assertNoMoreInteractions();
     }
@@ -131,7 +169,7 @@ class ConnectorUserControllerTest extends AbstractWebMvcTest {
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(patchUser, retrieveUser);
+        verifyNoMoreInteractions(editUser, retrieveUser);
     }
 
     @TestConfiguration

@@ -19,7 +19,6 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
-import org.springframework.util.CollectionUtils;
 
 
 /**
@@ -33,26 +32,10 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
                                    String password,
                                    @Email
                                    String email,
+                                   @NotNull(message = "Enable must not be null")
                                    Boolean enabled,
                                    Set<String> roles
 ) {
-
-    /**
-     * Map a domain ser to a request user.
-     *
-     * @param user user to map
-     *
-     * @return request user
-     */
-    public static ConnectorUserRequest from(ConnectorUser user) {
-        return ConnectorUserRequest.builder()
-            .username(user.username())
-            .password(user.password())
-            .email(user.email())
-            .enabled(user.enabled())
-            .roles(getRoles(user))
-            .build();
-    }
 
     /**
      * Map a request user into a domain user.
@@ -69,15 +52,6 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
             .enabled(userRequest.enabled())
             .roles(getRoles(userRequest))
             .build();
-    }
-
-    private static Set<String> getRoles(ConnectorUser user) {
-        return CollectionUtils.isEmpty(user.roles()) ? Set.of() :
-            user
-                .roles()
-                .stream()
-                .map(ConnectorRole::name)
-                .collect(Collectors.toUnmodifiableSet());
     }
 
     private static Set<ConnectorRole> getRoles(ConnectorUserRequest request) {

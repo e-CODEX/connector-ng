@@ -18,8 +18,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
@@ -42,7 +42,7 @@ class ConnectorRetrieveUserAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorUpdateUser connectorUpdateUser;
     @MockitoBean
-    private ConnectorPatchUser connectorPatchUser;
+    private ConnectorEditUser connectorEditUser;
     @MockitoBean
     private ConnectorRemoveUser connectorRemoveUser;
     @MockitoBean
@@ -98,7 +98,7 @@ class ConnectorRetrieveUserAdminControllerTest extends AbstractWebMvcTest {
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
+        verifyNoMoreInteractions(connectorEditUser, connectorListUser, connectorRemoveUser,
             connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
     }
 }

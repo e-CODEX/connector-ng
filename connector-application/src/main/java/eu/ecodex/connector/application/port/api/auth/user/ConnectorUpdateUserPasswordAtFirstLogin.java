@@ -19,7 +19,7 @@ import jakarta.annotation.Nonnull;
  * Interface for managing the {@link ConnectorUser} password update after login.
  * Provides methods for updating user password after login.
  */
-public interface ConnectorUpdateUserPassword {
+public interface ConnectorUpdateUserPasswordAtFirstLogin {
     /**
      * Updates an existing {@link ConnectorUser} user password in the system with the provided
      * information.

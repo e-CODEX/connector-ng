@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.auth.user;
 
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditUserRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -43,7 +44,6 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Persist a connector user.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Created"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
@@ -53,7 +53,6 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Update a connector user.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Updated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
@@ -64,18 +63,16 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Update partially a connector user.")
     @PatchMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Updated"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
     ConnectorUserDto patch(@PathVariable("uuid") @Nonnull String identifier,
-                           @Valid @RequestBody @Nonnull ConnectorUserRequest userRequest);
+                           @Valid @RequestBody @Nonnull ConnectorEditUserRequest userRequest);
 
     @Operation(summary = "Retrieve a connector user.")
     @GetMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "User found"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
@@ -84,7 +81,6 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Retrieve all connector's users.")
     @GetMapping
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Users found"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
     })
     List<ConnectorUserDto> getAll();
@@ -93,7 +89,6 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Delete a connector user by Identifier.")
     @DeleteMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Deleted"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
     })

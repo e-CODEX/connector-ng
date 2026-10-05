@@ -21,7 +21,7 @@ import jakarta.annotation.Nonnull;
  * system.
  * Provides methods for partially updating user information.
  */
-public interface ConnectorPatchUser {
+public interface ConnectorEditUser {
     /**
      * Partially updates an existing {@link ConnectorUser} in the system based on the provided
      * identifier.
@@ -42,5 +42,5 @@ public interface ConnectorPatchUser {
      * @throws ConnectorUserIdentifierMismatchException if the identifier does not match the user's
      *                                                  identifier.
      */
-    ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
+    ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorEditUserCommand user);
 }

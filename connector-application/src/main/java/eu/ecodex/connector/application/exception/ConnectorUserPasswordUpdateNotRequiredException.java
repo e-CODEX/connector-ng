@@ -8,20 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.model.auth;
-
-import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
+package eu.ecodex.connector.application.exception;
 
 /**
- * Represents data used to update user password.
+ * Exception thrown when the connector user password does not need change.
  */
-@Builder
-public record ConnectorUpdateUserPasswordData(
-    @NotBlank String uuid,
-    @NotBlank String accessToken,
-    @NotBlank String refreshToken,
-    @NotBlank String currentPassword,
-    @NotBlank String newPassword
-) {
+public class ConnectorUserPasswordUpdateNotRequiredException extends RuntimeException {
+    public ConnectorUserPasswordUpdateNotRequiredException(String message) {
+        super(message);
+    }
 }

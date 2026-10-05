@@ -17,9 +17,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorAssignRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
@@ -38,7 +38,7 @@ class ConnectorAdminUserInitializerTest {
     @Mock
     private ConnectorRegisterUser registerUser;
     @Mock
-    private ConnectorPatchUser patchUser;
+    private ConnectorAssignRole assignRole;
     @Mock
     private ConnectorRegisterRole registerRole;
     @Mock
@@ -64,7 +64,7 @@ class ConnectorAdminUserInitializerTest {
     @BeforeEach
     void setUp() {
         initializer = new ConnectorAdminUserInitializer(
-            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            registerUser, registerRole, assignRole, retrieveUserByUsername,
             retrieveRoleByName, adminUserProperties
         );
     }
@@ -95,7 +95,7 @@ class ConnectorAdminUserInitializerTest {
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            registerUser, registerRole, assignRole, retrieveUserByUsername,
             retrieveRoleByName, adminUserProperties
         );
 
@@ -133,7 +133,7 @@ class ConnectorAdminUserInitializerTest {
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            registerUser, registerRole, assignRole, retrieveUserByUsername,
             retrieveRoleByName, adminUserProperties
         );
 
@@ -167,7 +167,7 @@ class ConnectorAdminUserInitializerTest {
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            registerUser, registerRole, assignRole, retrieveUserByUsername,
             retrieveRoleByName, adminUserProperties
         );
 
@@ -210,7 +210,7 @@ class ConnectorAdminUserInitializerTest {
 
         // When
         initializer = new ConnectorAdminUserInitializer(
-            patchUser, registerUser, registerRole, retrieveUserByUsername,
+            registerUser, registerRole, assignRole, retrieveUserByUsername,
             retrieveRoleByName, adminUserProperties
         );
 
@@ -219,7 +219,7 @@ class ConnectorAdminUserInitializerTest {
         // Then
         verify(retrieveUserByUsername).execute(defaultAdmin);
         verify(registerRole).execute(role);
-        verify(patchUser).execute(identifier, user.toBuilder().roles(Set.of(role)).build());
+        verify(assignRole).execute(identifier, roleAdmin);
 
         verifyNoMoreInteractions(registerRole, registerUser, retrieveUserByUsername,
             retrieveRoleByName, applicationArguments);

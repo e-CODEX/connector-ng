@@ -110,11 +110,14 @@ public class ConnectorUserAuthenticationProviderImpl
                 .build();
 
         } catch (DisabledException exception) {
+            log.error("User {} account is disabled", username);
             throw new ConnectorUserAccountInactiveException(
                 "Your account is inactive. Please contact support.");
         } catch (AuthenticationException e) {
+            log.error("User {} invalid username or password", username);
             throw new ConnectorUserBadCredentialsException("Invalid username or password");
         } catch (RuntimeException e) {
+            log.error("Error occurs when login user {}, cause {}", username, e.getMessage());
             throw new RuntimeException(e);
         }
     }

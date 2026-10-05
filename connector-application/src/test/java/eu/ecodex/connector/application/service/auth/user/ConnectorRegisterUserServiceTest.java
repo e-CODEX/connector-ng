@@ -44,7 +44,7 @@ class ConnectorRegisterUserServiceTest {
     private ConnectorRegisterUserService service;
 
     @Test
-    void register_should_register_user() {
+    void register_should_register_new_user() {
         // Given
         var username = "user";
         var email = "email@test.com";
@@ -59,7 +59,7 @@ class ConnectorRegisterUserServiceTest {
 
         var encodedPwdUser = user.toBuilder()
             .password("encoded")
-            .mustChangePassword(Boolean.FALSE)
+            .mustChangePassword(Boolean.TRUE)
             .build();
         var expected = encodedPwdUser.toBuilder().uuid("identifier").build();
 
@@ -96,7 +96,7 @@ class ConnectorRegisterUserServiceTest {
             .build();
         var encodedPwdUser = user.toBuilder()
             .password("encoded")
-            .mustChangePassword(Boolean.FALSE)
+            .mustChangePassword(Boolean.TRUE)
             .build();
         var expected = encodedPwdUser.toBuilder()
             .uuid("identifier")

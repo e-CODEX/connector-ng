@@ -65,8 +65,7 @@ class ConnectorRetrieveRoleIT extends AbstractIntegrationTest {
         var existing = roleRepository.findByName(name);
         assertThat(existing).isNotEmpty();
 
-        var response = apiClient
-            .get()
+        var response = apiClient.get()
             .uri(StringUtils.joinWith("/", PATH, existing.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .exchange()
@@ -87,8 +86,7 @@ class ConnectorRetrieveRoleIT extends AbstractIntegrationTest {
         var existing = roleRepository.findByName(name);
         assertThat(existing).isNotEmpty();
 
-        apiClient
-            .get()
+        apiClient.get()
             .uri(StringUtils.joinWith("/", PATH, existing.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer ")
             .exchange()

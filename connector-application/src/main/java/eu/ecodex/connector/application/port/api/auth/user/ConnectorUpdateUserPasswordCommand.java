@@ -8,13 +8,20 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.exception;
+package eu.ecodex.connector.application.port.api.auth.user;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 
 /**
- * Exception thrown when the connector user password does not match.
+ * Represents data used to update user password.
  */
-public class ConnectorUserInvalidPasswordException extends RuntimeException {
-    public ConnectorUserInvalidPasswordException(String message) {
-        super(message);
-    }
+@Builder
+public record ConnectorUpdateUserPasswordCommand(
+    @NotBlank String uuid,
+    @NotBlank String accessToken,
+    @NotBlank String refreshToken,
+    @NotBlank String currentPassword,
+    @NotBlank String newPassword
+) {
 }

@@ -79,13 +79,20 @@ public record ConnectorMessageDetailDto(
     List<ConnectorMessageEvidenceDto> evidences,
     List<ConnectorMessageError> errors
 ) {
-    private static final Set<ConnectorAttachmentType> INCLUDED_ATTACHMENT_TYPES = EnumSet.of(
+    private static final Set<ConnectorAttachmentType> INBOUND_INCLUDED_ATTACHMENT_TYPES = EnumSet.of(
         ConnectorAttachmentType.BUSINESS_CONTENT,
         ConnectorAttachmentType.BUSINESS_DOCUMENT,
         ConnectorAttachmentType.ATTACHMENT,
         ConnectorAttachmentType.DETACHED_SIGNATURE,
         ConnectorAttachmentType.PDF_TOKEN,
         ConnectorAttachmentType.XML_TOKEN
+    );
+
+    private static final Set<ConnectorAttachmentType> OUTBOUND_INCLUDED_ATTACHMENT_TYPES = EnumSet.of(
+        ConnectorAttachmentType.BUSINESS_CONTENT,
+        ConnectorAttachmentType.BUSINESS_DOCUMENT,
+        ConnectorAttachmentType.ATTACHMENT,
+        ConnectorAttachmentType.DETACHED_SIGNATURE
     );
 
     /**
@@ -117,7 +124,7 @@ public record ConnectorMessageDetailDto(
             .confirmedAt(message.confirmedAt())
             .deliveredToLinkPartnerAt(message.deliveredToLinkPartnerAt())
             .errors(message.errors())
-            .attachments(filterAttachments(message.attachments()))
+            .attachments(filterAttachments(message))
             .evidences(toEvidences(message.evidences()))
             .build();
     }
@@ -134,12 +141,19 @@ public record ConnectorMessageDetailDto(
     }
 
     private static List<ConnectorMessageAttachment> filterAttachments(
-        List<ConnectorMessageAttachment> attachments) {
+        ConnectorBusinessMessage message) {
+        var attachments = message.attachments();
+
         if (attachments == null) {
             return List.of();
         }
+
+        var includedTypes = message.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND
+            ? INBOUND_INCLUDED_ATTACHMENT_TYPES
+            : OUTBOUND_INCLUDED_ATTACHMENT_TYPES;
+
         return attachments.stream()
-                          .filter(att -> INCLUDED_ATTACHMENT_TYPES.contains(att.type()))
+                          .filter(att -> includedTypes.contains(att.type()))
                           .toList();
     }
 }

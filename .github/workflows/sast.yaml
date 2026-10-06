@@ -1,0 +1,19 @@
+on:
+  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  merge_group:
+  workflow_dispatch: 
+name: Static Analysis for Java
+jobs:
+  sonar:
+    uses: e-CODEX/workflows/.github/workflows/sonar-java.yaml@main
+    with:
+        java-version: 21
+        build-tool: 'gradle'
+    secrets: inherit
+  codeql:
+    uses: e-CODEX/workflows/.github/workflows/codeql-java.yaml@main
+    with:
+      java-version: 21
+      build-tool: 'gradle'

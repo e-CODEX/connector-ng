@@ -86,6 +86,9 @@ DB_URL=jdbc:mysql://<db-host>:<db-port>/connector
 DB_DRIVER_CLASSNAME=com.mysql.cj.jdbc.MysqlXADataSource
 DB_DIALECT=org.hibernate.dialect.MySQLDialect
 
+# JWT authentication
+JWT_SECRET_KEY=<jwt_secret_key>
+
 # File storage (S3 / MinIO)
 S3_ACCESS_KEY=<access_key>
 S3_SECRET_KEY=<secret_key>

@@ -3,7 +3,7 @@ WORKDIR /app
 COPY . .
 RUN gradle clean build -x test -x :connector-integrationtest:integrationTest -x integrationTest
 
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 
 LABEL maintainer="e-codex@eulisa.europa.eu"
 LABEL description="e-CODEX connector"

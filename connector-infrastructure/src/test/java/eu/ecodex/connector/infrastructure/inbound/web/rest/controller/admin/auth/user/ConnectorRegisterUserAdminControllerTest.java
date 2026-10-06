@@ -28,7 +28,7 @@ import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPassword
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +85,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
         verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
         assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUserRequest.toDomain(connectorUserRequest)
+            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
         );
         assertNoMoreInteractions();
     }
@@ -117,7 +117,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
         verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
         assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUserRequest.toDomain(connectorUserRequest)
+            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
         );
         assertNoMoreInteractions();
     }
@@ -143,7 +143,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     }
 
     @Test
-    void should_not_register_user_when_already_exists_exception_is_thrown() {
+    void should_not_register_user_when_already_exists() {
         // Given
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
         when(connectorRegisterUser.execute(any())).thenThrow(
@@ -163,7 +163,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
         verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
         assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUserRequest.toDomain(connectorUserRequest)
+            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
         );
         assertNoMoreInteractions();
     }

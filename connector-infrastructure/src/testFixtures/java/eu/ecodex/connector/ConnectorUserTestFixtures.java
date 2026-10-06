@@ -18,7 +18,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUse
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditUserRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
 import java.util.Set;
 
@@ -71,8 +71,8 @@ public class ConnectorUserTestFixtures {
             .build();
     }
 
-    public static ConnectorUserRequest createDefaultUserRequest() {
-        return ConnectorUserRequest.builder()
+    public static ConnectorUserCreationOrUpdateRequest createDefaultUserRequest() {
+        return ConnectorUserCreationOrUpdateRequest.builder()
             .username("test_user")
             .email("test_user@email.com")
             .password("test_password")
@@ -111,8 +111,8 @@ public class ConnectorUserTestFixtures {
             .build();
     }
 
-    public static ConnectorUserRequest createDefaultUserRequestWithRoles() {
-        return ConnectorUserRequest.builder()
+    public static ConnectorUserCreationOrUpdateRequest createDefaultUserRequestWithRoles() {
+        return ConnectorUserCreationOrUpdateRequest.builder()
             .username("test_user")
             .email("test_user@email.com")
             .password("test_password")
@@ -121,9 +121,10 @@ public class ConnectorUserTestFixtures {
             .build();
     }
 
-    public static ConnectorUserRequest createUserRequest(String username, String email,
-                                                         String password) {
-        return ConnectorUserRequest.builder()
+    public static ConnectorUserCreationOrUpdateRequest createUserRequest(String username,
+                                                                         String email,
+                                                                         String password) {
+        return ConnectorUserCreationOrUpdateRequest.builder()
             .username(username)
             .email(email)
             .password(password)

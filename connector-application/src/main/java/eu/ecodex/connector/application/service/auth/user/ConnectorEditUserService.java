@@ -53,10 +53,10 @@ public class ConnectorEditUserService implements ConnectorEditUser {
      * @param retrieveUserByIdentifier the service to retrieve a user by its unique identifier; must
      *                                 not be null
      */
-    public ConnectorEditUserService(ConnectorUserRepository repository,
-                                    ConnectorVerifyUniqueUser verifyUniqueUser,
-                                    ConnectorRetrieveUserByIdentifierService
-                                        retrieveUserByIdentifier) {
+    public ConnectorEditUserService(
+        ConnectorUserRepository repository,
+        ConnectorVerifyUniqueUser verifyUniqueUser,
+        ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier) {
         this.repository = repository;
         this.verifyUniqueUser = verifyUniqueUser;
         this.retrieveUserByIdentifier = retrieveUserByIdentifier;

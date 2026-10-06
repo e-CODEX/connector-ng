@@ -54,26 +54,26 @@ public class ConnectorUserController implements ConnectorUserApi {
     @Override
     public ConnectorUserDto patch(@NonNull ConnectorUserDetails userDetails,
                                   @NonNull ConnectorEditSelfRequest userRequest) {
-        log.info("Editing existing user");
+        log.debug("Editing existing user");
         var registered = editUser.execute(userDetails.getUserId(),
             ConnectorEditSelfRequest.toCommand(userDetails.getUserId(), userRequest));
 
-        log.info("User patched");
+        log.debug("User patched");
         return ConnectorUserDto.from(registered);
     }
 
     @Override
     public ConnectorUserDto getByIdentifier(@NonNull ConnectorUserDetails userDetails) {
-        log.info("Retrieving user {} details", userDetails.getUserId());
+        log.debug("Retrieving user {} details", userDetails.getUserId());
         var found = retrieveUserByIdentifier.execute(userDetails.getUserId());
-        log.info("User {} found", userDetails.getUserId());
+        log.debug("User {} found", userDetails.getUserId());
         return ConnectorUserDto.from(found);
     }
 
     @Override
     public void updatePassword(@NonNull ConnectorUserDetails userDetails,
                                @NonNull ConnectorUpdateUserPasswordRequest userPasswordRequest) {
-        log.info("Updating user {} password", userDetails.getUserId());
+        log.debug("Updating user {} password", userDetails.getUserId());
         var passwordUpdateData = ConnectorUpdateUserPasswordRequest.from(
             userDetails.getUserId(), userDetails.accessToken(), userPasswordRequest);
 

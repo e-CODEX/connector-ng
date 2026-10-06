@@ -6,7 +6,7 @@ VALUES (2, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_role_test', 'ROLE_TEST', 
 ON DUPLICATE KEY UPDATE name = VALUES(name),
                         uuid = VALUES(uuid);
 
-INSERT INTO connector_users (id, uuid, username, password, email, enabled, mustChangePassword, created_at, updated_at)
+INSERT INTO connector_users (id, uuid, username, password, email, enabled, must_change_password, created_at, updated_at)
 VALUES (2, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_admin', 'test-admin-it', '$2a$12$pwdAdminIt', 'admin-it@email.com', true, false, now(), now()),
        (3, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_test', 'test-user-it','$2a$12$Z4jT8Cvg/CcmNxJ3aNXeleQ/upt3LIla4e2mghCvUyvhj9P3BpSjS', 'user-it@email.com', true, false,now(), now()),
        (4, 'd43bfa931-3c25-47e4-b377-bf4ce7b0d04c_fake_user_test2', 'test-user2-it','$2a$12$pwdUser2It', 'user2-it@email.com', true, false, now(), now()),

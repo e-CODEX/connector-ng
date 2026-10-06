@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.auth.user;
 
-import static eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest.toDomain;
+import static eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest.toDomain;
 
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
@@ -21,7 +21,7 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditUserRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.NonNull;
@@ -78,37 +78,40 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
 
     @Override
-    public ConnectorUserDto register(@NonNull ConnectorUserRequest userRequest) {
-        log.info("Registering new user");
+    public ConnectorUserDto registerUser(
+        @NonNull ConnectorUserCreationOrUpdateRequest userRequest) {
+        log.debug("Registering new user");
         var registered = connectorRegisterUser.execute(toDomain(userRequest));
 
-        log.info("New user registered successfully");
+        log.debug("New user registered successfully");
         return ConnectorUserDto.from(registered);
     }
 
     @Override
-    public ConnectorUserDto update(@NonNull String identifier,
-                                   @NonNull @Valid ConnectorUserRequest userRequest) {
-        log.info("Updating existing user");
+    public ConnectorUserDto update(
+        @NonNull String identifier,
+        @NonNull @Valid ConnectorUserCreationOrUpdateRequest userRequest) {
+        log.debug("Updating existing user");
         var updated = connectorUpdateUser.execute(identifier, toDomain(userRequest));
 
-        log.info("User updated successfully");
+        log.debug("User updated successfully");
         return ConnectorUserDto.from(updated);
     }
 
     @Override
-    public ConnectorUserDto patch(@NonNull String identifier,
-                                  @NonNull ConnectorEditUserRequest userRequest) {
-        log.info("Editing existing user");
+    public ConnectorUserDto editUser(
+        @NonNull String identifier,
+        @NonNull ConnectorEditUserRequest userRequest) {
+        log.debug("Editing existing user");
         var registered = connectorEditUser.execute(identifier,
             ConnectorEditUserRequest.fromCommand(identifier, userRequest));
 
-        log.info("User edited successfully");
+        log.debug("User edited successfully");
         return ConnectorUserDto.from(registered);
     }
 
     @Override
-    public ConnectorUserDto getByIdentifier(@NonNull String identifier) {
+    public ConnectorUserDto retrieveUser(@NonNull String identifier) {
         ConnectorUser userById = connectorRetrieveUserByIdentifier.execute(identifier);
         return ConnectorUserDto.from(userById);
     }
@@ -119,8 +122,8 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     }
 
     @Override
-    public void deleteByIdentifier(@NonNull String userIdentifier) {
+    public void deleteUser(@NonNull String userIdentifier) {
         connectorRemoveUser.execute(userIdentifier);
-        log.info("User deleted by identifier");
+        log.debug("User deleted by identifier");
     }
 }

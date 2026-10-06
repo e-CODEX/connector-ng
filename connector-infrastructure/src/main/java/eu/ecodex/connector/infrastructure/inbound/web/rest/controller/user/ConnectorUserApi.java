@@ -64,7 +64,7 @@ public interface ConnectorUserApi {
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
     void updatePassword(
         @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,

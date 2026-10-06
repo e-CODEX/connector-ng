@@ -25,7 +25,7 @@ public record ConnectorUpdateUserPasswordRequest(
     @NotBlank(message = "Current password is mandatory")
     String currentPassword,
     @NotBlank(message = "New password is mandatory")
-    @Size(min = 6, message = "New password must be at least 8 characters")
+    @Size(min = 6, message = "New password must be at least 6 characters")
     String newPassword) {
 
     /**

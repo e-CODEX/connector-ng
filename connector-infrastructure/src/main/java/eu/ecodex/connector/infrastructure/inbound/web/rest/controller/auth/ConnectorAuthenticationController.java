@@ -75,7 +75,7 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     public ConnectorUserAuthenticationResult login(@NonNull ConnectorLoginRequest request) {
         var loginResponse =
             userAuthenticationProvider.login(request.username(), request.password());
-        log.info("User {} successfully logged in.", request.username());
+        log.debug("User {} successfully logged in.", request.username());
         return loginResponse;
     }
 
@@ -92,7 +92,7 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     public void logout(@AuthenticationPrincipal @NonNull ConnectorUserDetails userDetails,
                        @RequestBody @NonNull ConnectorLogoutRequest request) {
         userAuthenticationProvider.logout(userDetails.getUserId(), request.refreshToken());
-        log.info("User {} successfully logged out.", userDetails.getUserId());
+        log.debug("User {} successfully logged out.", userDetails.getUserId());
     }
 
     @Override
@@ -118,6 +118,6 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
 
             updateUserPasswordAtFirstLogin.execute(passwordUpdateData);
         }
-        log.info("User {} password successfully updated.", userDetails.getUserId());
+        log.debug("User {} password successfully updated.", userDetails.getUserId());
     }
 }

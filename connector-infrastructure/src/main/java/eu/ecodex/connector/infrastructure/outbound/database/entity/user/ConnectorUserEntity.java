@@ -105,7 +105,7 @@ public class ConnectorUserEntity extends BaseEntity {
     private boolean enabled;
 
     @Setter
-    @Column(name = "MUSTCHANGEPASSWORD")
+    @Column(name = "MUST_CHANGE_PASSWORD")
     private boolean mustChangePassword;
 
     @Builder.Default

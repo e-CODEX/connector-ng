@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -46,7 +46,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isEmpty();
 
-        var request = ConnectorUserRequest.builder()
+        var request = ConnectorUserCreationOrUpdateRequest.builder()
             .username(username)
             .password("password")
             .email("test@email.com")
@@ -79,7 +79,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isEmpty();
 
-        var request = ConnectorUserRequest
+        var request = ConnectorUserCreationOrUpdateRequest
             .builder()
             .username(username)
             .password("password")
@@ -106,7 +106,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();
 
-        var request = ConnectorUserRequest
+        var request = ConnectorUserCreationOrUpdateRequest
             .builder()
             .username(username)
             .password("password")
@@ -134,7 +134,7 @@ class ConnectorRegisterUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isEmpty();
 
-        var request = ConnectorUserRequest
+        var request = ConnectorUserCreationOrUpdateRequest
             .builder()
             .username(username)
             .password(StringUtils.EMPTY)

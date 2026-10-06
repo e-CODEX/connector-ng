@@ -25,16 +25,17 @@ import lombok.Builder;
  * Represents a request for creating or updating a user in the connector system.
  */
 @Builder(toBuilder = true)
-public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
-                                   @NotBlank(message = "Username must not be blank")
-                                   String username,
-                                   @Size(min = 6, message = "Password must have at least 6 digits")
-                                   String password,
-                                   @Email
-                                   String email,
-                                   @NotNull(message = "Enable must not be null")
-                                   Boolean enabled,
-                                   Set<String> roles
+public record ConnectorUserCreationOrUpdateRequest(
+    @NotNull(message = "Username is mandatory")
+    @NotBlank(message = "Username must not be blank")
+    String username,
+    @Size(min = 6, message = "Password must have at least 6 digits")
+    String password,
+    @Email
+    String email,
+    @NotNull(message = "Enable must not be null")
+    Boolean enabled,
+    Set<String> roles
 ) {
 
     /**
@@ -44,7 +45,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
      *
      * @return domain user
      */
-    public static ConnectorUser toDomain(ConnectorUserRequest userRequest) {
+    public static ConnectorUser toDomain(ConnectorUserCreationOrUpdateRequest userRequest) {
         return ConnectorUser.builder()
             .username(userRequest.username())
             .password(userRequest.password())
@@ -54,7 +55,7 @@ public record ConnectorUserRequest(@NotNull(message = "Username is mandatory")
             .build();
     }
 
-    private static Set<ConnectorRole> getRoles(ConnectorUserRequest request) {
+    private static Set<ConnectorRole> getRoles(ConnectorUserCreationOrUpdateRequest request) {
         if (request.roles() == null) {
             return null;
         }

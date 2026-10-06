@@ -40,7 +40,7 @@ public class ConnectorUserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public @NonNull UserDetails loadUserByUsername(@NonNull String username) {
+    public @NonNull ConnectorUserDetails loadUserByUsername(@NonNull String username) {
         var connectorUser = retrieveUserByUsername.execute(username);
         return new ConnectorUserDetails(connectorUser);
     }

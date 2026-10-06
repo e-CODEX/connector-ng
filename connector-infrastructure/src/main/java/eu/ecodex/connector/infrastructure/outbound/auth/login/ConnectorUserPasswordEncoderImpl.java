@@ -33,24 +33,6 @@ public class ConnectorUserPasswordEncoderImpl implements ConnectorUserPasswordEn
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Encodes the password of a {@link ConnectorUser} entity.
-     *
-     * @param user user's password to encode
-     *
-     * @return user with encoded password
-     */
-    @Override
-    public ConnectorUser encodePassword(@lombok.NonNull ConnectorUser user) {
-        if (user.password() == null) {
-            return user;
-        }
-        var encodedPassword = encodePassword(user.password());
-        return user.toBuilder()
-            .password(encodedPassword)
-            .build();
-    }
-
     @Override
     public String encodePassword(@NonNull String password) {
         if (!StringUtils.hasText(password)) {

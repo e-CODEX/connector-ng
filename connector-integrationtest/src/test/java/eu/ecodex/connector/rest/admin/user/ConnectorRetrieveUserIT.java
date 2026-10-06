@@ -64,8 +64,7 @@ class ConnectorRetrieveUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();
 
-        var response = apiClient
-            .get()
+        var response = apiClient.get()
             .uri(StringUtils.joinWith("/", PATH, existing.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .exchange()
@@ -89,8 +88,7 @@ class ConnectorRetrieveUserIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();
 
-        apiClient
-            .get()
+        apiClient.get()
             .uri(StringUtils.joinWith("/", PATH, existing.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer ")
             .exchange()

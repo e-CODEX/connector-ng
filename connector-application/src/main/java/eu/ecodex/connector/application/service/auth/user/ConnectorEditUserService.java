@@ -10,10 +10,10 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUser;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import lombok.NonNull;
@@ -39,11 +39,10 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Component
-public class ConnectorPatchUserService implements ConnectorPatchUser {
+public class ConnectorEditUserService implements ConnectorEditUser {
     private final ConnectorUserRepository repository;
     private final ConnectorVerifyUniqueUser verifyUniqueUser;
     private final ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
-    private final ConnectorUserPasswordEncoder passwordEncoder;
 
     /**
      * Constructs an instance of {@code ConnectorPatchUserService} with the required dependencies.
@@ -53,18 +52,14 @@ public class ConnectorPatchUserService implements ConnectorPatchUser {
      * @param verifyUniqueUser         the service to verify user uniqueness; must not be null
      * @param retrieveUserByIdentifier the service to retrieve a user by its unique identifier; must
      *                                 not be null
-     * @param passwordEncoder          the password encoder used for encoding user passwords; must
-     *                                 not be null
      */
-    public ConnectorPatchUserService(ConnectorUserRepository repository,
-                                     ConnectorVerifyUniqueUser verifyUniqueUser,
-                                     ConnectorRetrieveUserByIdentifierService
-                                         retrieveUserByIdentifier,
-                                     ConnectorUserPasswordEncoder passwordEncoder) {
+    public ConnectorEditUserService(
+        ConnectorUserRepository repository,
+        ConnectorVerifyUniqueUser verifyUniqueUser,
+        ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier) {
         this.repository = repository;
         this.verifyUniqueUser = verifyUniqueUser;
         this.retrieveUserByIdentifier = retrieveUserByIdentifier;
-        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -79,31 +74,27 @@ public class ConnectorPatchUserService implements ConnectorPatchUser {
      * @return patched {@link ConnectorUser} object
      */
     @Override
-    public ConnectorUser execute(@NonNull String identifier, @NonNull ConnectorUser user) {
+    public ConnectorUser execute(@NonNull String identifier,
+                                 @NonNull ConnectorEditUserCommand user) {
         var existingUser = retrieveUserByIdentifier.execute(identifier);
-        verifyUniqueUser.execute(identifier, user);
+        verifyUniqueUser.execute(identifier, ConnectorEditUserCommand.toDomain(user));
 
         var userBuilder = existingUser.toBuilder();
-
-        if (StringUtils.hasText(user.email())) {
-            userBuilder.email(user.email());
-        }
 
         if (StringUtils.hasText(user.username())) {
             userBuilder.username(user.username());
         }
 
-        if (StringUtils.hasText(user.password())) {
-            if (passwordEncoder.matches(user.password(), existingUser.password())) {
-                log.warn("New password matches existing");
-            } else {
-                var encodedPassword = passwordEncoder.encodePassword(user.password());
-                userBuilder.password(encodedPassword);
-            }
+        if (StringUtils.hasText(user.email())) {
+            userBuilder.email(user.email());
         }
 
         if (user.enabled() != null) {
             userBuilder.enabled(user.enabled());
+        }
+
+        if (user.mustChangePassword() != null) {
+            userBuilder.mustChangePassword(user.mustChangePassword());
         }
         return repository.save(userBuilder.build());
     }

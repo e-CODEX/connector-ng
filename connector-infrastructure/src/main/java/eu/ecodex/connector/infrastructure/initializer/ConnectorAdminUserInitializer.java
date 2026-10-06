@@ -18,19 +18,17 @@ import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultUserRol
 import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorAssignRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.property.auth.ConnectorAdminUserProperties;
-import java.util.HashSet;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -68,9 +66,9 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Component
 public class ConnectorAdminUserInitializer implements ApplicationRunner {
-    private final ConnectorPatchUser patchUser;
     private final ConnectorRegisterUser registerUser;
     private final ConnectorRegisterRole registerRole;
+    private final ConnectorAssignRole assignRole;
     private final ConnectorRetrieveUserByUsername retrieveUserByUsername;
     private final ConnectorRetrieveRoleByName retrieveUserRoleByName;
     private final ConnectorAdminUserProperties adminUserProperties;
@@ -79,8 +77,6 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
      * Initializes and configures the admin user for the Connector system.
      * This constructor sets up the required dependencies for managing user and role initialization.
      *
-     * @param patchUser              the {@link ConnectorPatchUser} instance used to partially
-     *                               update user information.
      * @param registerUser           the {@link ConnectorRegisterUser} instance responsible for
      *                               registering new users.
      * @param registerRole           the {@link ConnectorRegisterRole} instance responsible for
@@ -92,15 +88,15 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
      * @param adminUserProperties    the {@link ConnectorAdminUserProperties} object containing
      *                               configuration properties for the admin user.
      */
-    public ConnectorAdminUserInitializer(ConnectorPatchUser patchUser,
-                                         ConnectorRegisterUser registerUser,
+    public ConnectorAdminUserInitializer(ConnectorRegisterUser registerUser,
                                          ConnectorRegisterRole registerRole,
+                                         ConnectorAssignRole assignRole,
                                          ConnectorRetrieveUserByUsername retrieveUserByUsername,
                                          ConnectorRetrieveRoleByName retrieveUserRoleByName,
                                          ConnectorAdminUserProperties adminUserProperties) {
-        this.patchUser = patchUser;
         this.registerUser = registerUser;
         this.registerRole = registerRole;
+        this.assignRole = assignRole;
         this.retrieveUserByUsername = retrieveUserByUsername;
         this.retrieveUserRoleByName = retrieveUserRoleByName;
         this.adminUserProperties = adminUserProperties;
@@ -143,16 +139,7 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
     private void updateWithAdminRole(ConnectorUser administrator) {
         log.info("Administrator user exists but has not admin role; adding {}", DEFAULT_ADMIN_ROLE);
 
-        var userRoles = new HashSet<>(
-            CollectionUtils.union(
-                CollectionUtils.emptyIfNull(administrator.roles()),
-                Set.of(defaultAdminRole())
-            )
-        );
-
-        patchUser.execute(administrator.uuid(), administrator.toBuilder()
-            .roles(userRoles).build());
-
+        assignRole.execute(administrator.uuid(), DEFAULT_ADMIN_ROLE);
         log.info("{} added to Administrator user, admin user updated", DEFAULT_ADMIN_ROLE);
     }
 
@@ -192,12 +179,13 @@ public class ConnectorAdminUserInitializer implements ApplicationRunner {
 
     private ConnectorUser createAdminUser(ConnectorAdminUserProperties properties,
                                           ConnectorRole adminRole) {
-        return ConnectorUser
-            .builder()
+        return ConnectorUser.builder()
             .username(properties.getUsername())
             .password(properties.getPassword())
             .email(properties.getEmail())
             .enabled(Boolean.TRUE)
+            // The default admin user will be required to change its password at first login.
+            .mustChangePassword(Boolean.TRUE)
             .roles(Set.of(adminRole))
             .build();
     }

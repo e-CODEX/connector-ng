@@ -13,13 +13,15 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.aut
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
@@ -27,6 +29,7 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -34,7 +37,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorUserAdminController.class)
-class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
+class ConnectorEditUserAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/users";
 
     @MockitoBean
@@ -44,7 +47,7 @@ class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorUpdateUser connectorUpdateUser;
     @MockitoBean
-    private ConnectorPatchUser connectorPatchUser;
+    private ConnectorEditUser connectorEditUser;
     @MockitoBean
     private ConnectorRemoveUser connectorRemoveUser;
     @MockitoBean
@@ -54,12 +57,18 @@ class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
     private RestTestClient apiClient;
 
     @Test
-    void should_patch_user_successfully() {
+    void should_edit_user_successfully() {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
-        var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
+        var connectorUserRequest = ConnectorUserTestFixtures.createDefaultPatchUserRequest();
+        var editUserCommand = ConnectorEditUserCommand.builder()
+            .uuid(connectorUser.uuid())
+            .username("test_user")
+            .email("test_user@email.com")
+            .enabled(Boolean.TRUE)
+            .build();
 
-        when(connectorPatchUser.execute(anyString(), any())).thenReturn(connectorUser);
+        when(connectorEditUser.execute(anyString(), any())).thenReturn(connectorUser);
 
         // When
         var response = apiClient.patch()
@@ -78,13 +87,13 @@ class ConnectorPatchUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
-        verify(connectorPatchUser).execute(connectorUser.uuid(), connectorUser
-            .toBuilder()
-            .uuid(null)
-            .password("test_password")
-            .build());
+        var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorEditUserCommand.class);
+        verify(connectorEditUser).execute(eq(connectorUser.uuid()), userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
+            editUserCommand
+        );
 
-        verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
+        verifyNoMoreInteractions(connectorEditUser, connectorListUser, connectorRemoveUser,
             connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
     }
 }

@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-class ConnectorPatchUserIT extends AbstractIntegrationTest {
+class ConnectorEditUserIT extends AbstractIntegrationTest {
     public static final String PATH = "/api/v1/admin/users";
     @Autowired
     private RestTestClient apiClient;
@@ -46,7 +46,7 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
         assertThat(before).isNotEmpty();
         assertThat(before.get().enabled()).isTrue();
 
-        var request = ConnectorUserRequest
+        var request = ConnectorUserCreationOrUpdateRequest
             .builder()
             .username(username)
             .password("test-password")
@@ -81,7 +81,7 @@ class ConnectorPatchUserIT extends AbstractIntegrationTest {
         var before = userRepository.findByUsername(username);
         assertThat(before).isNotEmpty();
 
-        var request = ConnectorUserRequest
+        var request = ConnectorUserCreationOrUpdateRequest
             .builder()
             .username("test-user-it")
             .password("password")

@@ -31,10 +31,10 @@ public record ConnectorUser(
     String uuid,
     @NotBlank
     String username,
-    @NotBlank
     String password,
     String email,
-    Boolean enabled,
+    boolean enabled,
+    boolean mustChangePassword,
     Set<ConnectorRole> roles,
     Instant createdAt,
     Instant updatedAt
@@ -52,7 +52,8 @@ public record ConnectorUser(
         return ConnectorUser.builder()
             .username(DEFAULT_ADMIN_USER_NAME)
             .password(DEFAULT_ADMIN_PASSWORD)
-            .enabled(true)
+            .enabled(Boolean.TRUE)
+            .mustChangePassword(Boolean.TRUE)
             .roles(Set.of(ConnectorRole.defaultAdminRole()))
             .build();
     }
@@ -99,5 +100,30 @@ public record ConnectorUser(
         boolean removed = updatedRoles.remove(role);
 
         return removed ? toBuilder().roles(updatedRoles).build() : this;
+    }
+
+    /**
+     * Update user with new password.
+     *
+     * @param newPasswordHash user new password
+     *
+     * @return user
+     */
+    public ConnectorUser changePassword(String newPasswordHash) {
+        return this.toBuilder()
+            .password(newPasswordHash)
+            .mustChangePassword(false)
+            .build();
+    }
+
+    /**
+     * Force password change after first login.
+     *
+     * @return current user
+     */
+    public ConnectorUser forcePasswordChangeOnNextLogin() {
+        return this.toBuilder()
+            .mustChangePassword(true)
+            .build();
     }
 }

@@ -92,11 +92,15 @@ public class ConnectorUpdateUserService implements ConnectorUpdateUser {
         }
 
         var userBuilder = existingUser.toBuilder();
-        var encodePassword = passwordEncoder.encodePassword(user.password());
-        userBuilder.password(encodePassword);
         userBuilder.username(user.username());
         userBuilder.email(user.email());
         userBuilder.enabled(user.enabled());
+
+        var encodePassword = passwordEncoder.encodePassword(user.password());
+        userBuilder.password(encodePassword);
+        // After a password update, mustChangePassword flag must be cleared
+        // so the user isn't forced to change it again right after.
+        userBuilder.mustChangePassword(Boolean.FALSE);
 
         return repository.save(userBuilder.build());
     }

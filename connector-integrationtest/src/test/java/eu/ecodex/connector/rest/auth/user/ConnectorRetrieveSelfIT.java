@@ -18,7 +18,7 @@ import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepositor
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-class ConnectorRetrieveMeIT extends AbstractIntegrationTest {
+class ConnectorRetrieveSelfIT extends AbstractIntegrationTest {
     public static final String PATH = "/api/v1/auth/me";
     @Autowired
     private RestTestClient apiClient;
@@ -73,7 +73,7 @@ class ConnectorRetrieveMeIT extends AbstractIntegrationTest {
         assertThat(existing).isEmpty();
 
         // register user
-        var request = ConnectorUserRequest
+        var request = ConnectorUserCreationOrUpdateRequest
             .builder()
             .username(username)
             .password("password")

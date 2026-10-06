@@ -60,20 +60,20 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
 
     @Override
     public ConnectorRoleDto register(@NonNull ConnectorRoleDto usrRoleDto) {
-        log.info("Registering new user role");
+        log.debug("Registering new user role");
         var registered =
             connectorRegisterRole.execute(ConnectorRoleDto.toDomain(usrRoleDto));
-        log.info("New user registered");
+        log.debug("New user registered");
         return ConnectorRoleDto.from(registered);
     }
 
     @Override
     public ConnectorRoleDto update(@NonNull String identifier,
                                    @Valid ConnectorRoleDto userRoleDto) {
-        log.info("Updating existing user");
+        log.debug("Updating existing user");
         var updated =
             connectorUpdateRole.execute(identifier, ConnectorRoleDto.toDomain(userRoleDto));
-        log.info("Existing user updated");
+        log.debug("Existing user updated");
         return ConnectorRoleDto.from(updated);
     }
 
@@ -93,6 +93,6 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     @Override
     public void deleteByIdentifier(@NonNull String identifier) {
         connectorRemoveRole.execute(identifier);
-        log.info("User deleted by id");
+        log.debug("User deleted by id");
     }
 }

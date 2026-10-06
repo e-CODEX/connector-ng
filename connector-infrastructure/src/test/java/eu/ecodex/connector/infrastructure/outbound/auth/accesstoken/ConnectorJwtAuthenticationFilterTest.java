@@ -133,14 +133,14 @@ class ConnectorJwtAuthenticationFilterTest {
 
 
     @Test
-    void doFilterInternal_withValidToken_setsAuthentication() throws Exception {
+    void doFilterInternal_with_validToken_setsAuthentication() throws Exception {
         // Given
         var token = "valid-token";
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
 
-        when(jwtTokenParser.extractUsername(token)).thenReturn("john.doe");
-        when(userDetailsService.loadUserByUsername("john.doe")).thenReturn(userDetails);
+        when(jwtTokenParser.extractUsername(token)).thenReturn("username");
+        when(userDetailsService.loadUserByUsername("username")).thenReturn(userDetails);
         when(jwtTokenParser.isValidToken(token, userDetails)).thenReturn(true);
 
         // When
@@ -149,7 +149,8 @@ class ConnectorJwtAuthenticationFilterTest {
         // Then
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         assertThat(authentication).isNotNull();
-        assertThat(authentication.getPrincipal()).isEqualTo(userDetails);
+        var userPrincipal = ConnectorUserTestFixtures.createUserDetails(token);
+        assertThat(authentication.getPrincipal()).isEqualTo(userPrincipal);
         assertThat(authentication.isAuthenticated()).isTrue();
         assertThat(authentication.getAuthorities()).extracting("authority")
             .containsExactly("ROLE_ADMIN");

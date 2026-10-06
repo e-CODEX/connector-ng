@@ -18,8 +18,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -41,11 +42,11 @@ import tools.jackson.databind.ObjectMapper;
 @Import(ConnectorLogoutControllerTest.WebSecurityTestConfig.class)
 class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
     @MockitoBean
-    ConnectorUserAuthenticationProvider userAuthenticationProvider;
-
+    ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
-    ConnectorRefreshUserRefreshTokenService userTokenService;
-
+    ConnectorUserAuthenticationProvider userAuthenticationProvider;
+    @MockitoBean
+    ConnectorRefreshUserRefreshToken userRefreshToken;
     @Autowired
     ObjectMapper objectMapper;
 
@@ -72,11 +73,12 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
                 .accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         // Then
         verify(userAuthenticationProvider).logout(userPrincipal.getUserId(), refreshToken);
-        verifyNoMoreInteractions(userTokenService, userAuthenticationProvider);
+        verifyNoMoreInteractions(userRefreshToken, userAuthenticationProvider,
+            updateUserPasswordAtFirstLogin);
     }
 
     @TestConfiguration

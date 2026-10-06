@@ -16,11 +16,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
-import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,47 +31,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorAuthenticationController.class)
-class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
+class ConnectorRefreshTokenControllerTest extends AbstractWebMvcTest {
     @MockitoBean
-    ConnectorUserAuthenticationProvider loginUserService;
-
+    ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
-    ConnectorRefreshUserRefreshTokenService userTokenService;
+    ConnectorUserAuthenticationProvider userAuthenticationProvider;
+    @MockitoBean
+    ConnectorRefreshUserRefreshToken userRefreshToken;
 
     @Autowired
     RestTestClient apiClient;
-
-    @Test
-    void login_should_return_200() {
-        // Given
-        var username = "username";
-        var password = "pwd";
-        var request = ConnectorLoginRequest.builder().username(username).password(password).build();
-        var expected = ConnectorUserAuthenticationResult.builder()
-            .accessToken("access-token")
-            .refreshToken("refresh-token")
-            .build();
-
-        when(loginUserService.login(any(), any())).thenReturn(expected);
-
-        // When
-        var result = apiClient.post()
-            .uri("/api/v1/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(request)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorUserAuthenticationResult.class);
-
-        // Then
-        assertThat(result).isNotNull();
-        assertThat(result.getResponseBody()).isNotNull();
-        assertThat(result.getResponseBody()).isEqualTo(expected);
-
-        verify(loginUserService).login(username, password);
-        verifyNoMoreInteractions(loginUserService, userTokenService);
-    }
 
     @Test
     void refresh_should_refresh_the_token() {
@@ -86,7 +55,7 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
             .refreshToken(refreshToken)
             .build();
 
-        when(userTokenService.execute(any(), any())).thenReturn(expected);
+        when(userRefreshToken.execute(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -104,7 +73,8 @@ class ConnectorAuthenticationControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(userTokenService).execute(accessToken, refreshToken);
-        verifyNoMoreInteractions(loginUserService, userTokenService);
+        verify(userRefreshToken).execute(accessToken, refreshToken);
+        verifyNoMoreInteractions(userAuthenticationProvider, userRefreshToken,
+            updateUserPasswordAtFirstLogin);
     }
 }

@@ -25,7 +25,6 @@ import jakarta.persistence.Table;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -104,6 +103,10 @@ public class ConnectorUserEntity extends BaseEntity {
     @Setter
     @Column(name = "ENABLED")
     private boolean enabled;
+
+    @Setter
+    @Column(name = "MUST_CHANGE_PASSWORD")
+    private boolean mustChangePassword;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.LAZY)

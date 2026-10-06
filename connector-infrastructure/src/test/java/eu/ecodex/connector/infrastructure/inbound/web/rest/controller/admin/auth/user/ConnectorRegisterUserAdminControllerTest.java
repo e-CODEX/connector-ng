@@ -18,8 +18,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorPatchUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
@@ -28,7 +28,9 @@ import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPassword
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
@@ -48,7 +50,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorUpdateUser connectorUpdateUser;
     @MockitoBean
-    private ConnectorPatchUser connectorPatchUser;
+    private ConnectorEditUser connectorEditUser;
     @MockitoBean
     private ConnectorRemoveUser connectorRemoveUser;
     @MockitoBean
@@ -80,17 +82,16 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDto());
 
-        verify(connectorRegisterUser).execute(connectorUser
-            .toBuilder()
-            .uuid(null)
-            .password("test_password")
-            .build());
-
+        var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
+        verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
+            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
+        );
         assertNoMoreInteractions();
     }
 
     @Test
-    void should_register_user_with_roles_successfully() {
+    void should_register_user_with_user_roles_successfully() {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUserWithRoles();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequestWithRoles();
@@ -109,17 +110,15 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         // Then
         var responseBody = response.getResponseBody();
         assertThat(responseBody).isNotNull();
-        assert responseBody != null;
         assertThat(responseBody)
             .usingRecursiveComparison()
             .isEqualTo(ConnectorUserTestFixtures.createUserDtoWithRoles());
 
-        verify(connectorRegisterUser).execute(connectorUser
-            .toBuilder()
-            .uuid(null)
-            .password("test_password")
-            .build());
-
+        var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
+        verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
+            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
+        );
         assertNoMoreInteractions();
     }
 
@@ -144,33 +143,11 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     }
 
     @Test
-    void should_not_register_user_when_password_is_missing() {
+    void should_not_register_user_when_already_exists() {
         // Given
-        var connectorUserRequest = ConnectorUserTestFixtures.createUserRequest(
-            "username", null, null
-        );
-
-        // When
-        apiClient.post()
-            .uri(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(connectorUserRequest)
-            .exchange()
-            .expectStatus()
-            .isBadRequest(); // because of filter is deactivated
-
-        // Then
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void should_not_register_user_when_field_already_exists() {
-        // Given
-        var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultUserRequest();
         when(connectorRegisterUser.execute(any())).thenThrow(
             new ConnectorUserAlreadyExistsException("msg"));
-        when(passwordEncoder.encodePassword(any(ConnectorUser.class))).thenReturn(connectorUser);
 
         // When
         var response = apiClient.post()
@@ -183,15 +160,16 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
 
         // Then
         assertThat(response).isNotNull();
-        verify(connectorRegisterUser).execute(connectorUser.toBuilder()
-            .uuid(null)
-            .password("test_password")
-            .build());
+        var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
+        verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
+        assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
+            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
+        );
         assertNoMoreInteractions();
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(connectorPatchUser, connectorListUser, connectorRemoveUser,
+        verifyNoMoreInteractions(connectorEditUser, connectorListUser, connectorRemoveUser,
             connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
     }
 }

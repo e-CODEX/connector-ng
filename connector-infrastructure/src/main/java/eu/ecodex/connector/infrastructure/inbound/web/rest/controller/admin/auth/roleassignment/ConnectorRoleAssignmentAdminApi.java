@@ -38,7 +38,6 @@ public interface ConnectorRoleAssignmentAdminApi {
     @Operation(summary = "Assign an existing role to user.")
     @PostMapping(path = "/{uuid}/roles")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Assign role successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
@@ -48,7 +47,6 @@ public interface ConnectorRoleAssignmentAdminApi {
     @Operation(summary = "Unassign a user role.")
     @DeleteMapping(path = "/{uuid}/roles")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Unassign role successfully"),
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })

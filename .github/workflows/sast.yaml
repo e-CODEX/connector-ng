@@ -4,7 +4,7 @@ on:
     types: [opened, synchronize, reopened]
   merge_group:
   workflow_dispatch: 
-name: Static Analysis Java    
+name: Static Analysis for Java
 jobs:
   sonar:
     uses: e-CODEX/workflows/.github/workflows/sonar-java.yaml@main

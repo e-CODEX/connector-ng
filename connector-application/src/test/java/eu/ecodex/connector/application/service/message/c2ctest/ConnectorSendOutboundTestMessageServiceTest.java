@@ -160,7 +160,7 @@ class ConnectorSendOutboundTestMessageServiceTest {
 
             assertThatThrownBy(() -> service.execute(createCommand()))
                 .isInstanceOf(ConnectorC2CTestMessageDisabledException.class)
-                .hasMessage("Test message is disabled");
+                .hasMessage("C2C Test message is disabled");
 
             verifyNoInteractions(
                 businessDomainVerifierService,

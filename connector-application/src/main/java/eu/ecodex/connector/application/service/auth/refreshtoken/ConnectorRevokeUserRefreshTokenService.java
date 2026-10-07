@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.refreshtoken;
 
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRevokeUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
 import lombok.NonNull;

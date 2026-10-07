@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.TransportStepFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import org.junit.jupiter.api.DisplayName;

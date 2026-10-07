@@ -17,8 +17,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeInvalidTruststoreException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeInvalidTruststoreException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.security.ConnectorTruststore;

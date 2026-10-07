@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.auth.login;
 
-import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAccountInactiveException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRegisterUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRevokeUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;

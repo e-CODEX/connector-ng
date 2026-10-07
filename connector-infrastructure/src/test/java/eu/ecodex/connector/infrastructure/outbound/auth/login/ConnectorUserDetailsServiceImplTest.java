@@ -18,7 +18,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.service.auth.user.ConnectorRetrieveUserByUsernameService;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;

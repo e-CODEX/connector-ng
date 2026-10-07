@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
-import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleIdentifierException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;

@@ -10,13 +10,12 @@
 
 package eu.ecodex.connector.application.service.message;
 
-import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.ConnectorErrorCode;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.util.Comparator;

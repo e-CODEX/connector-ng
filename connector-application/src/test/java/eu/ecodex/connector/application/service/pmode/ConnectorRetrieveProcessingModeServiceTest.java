@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -30,9 +30,9 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageReportTestFixtures;
 import eu.ecodex.connector.MessageStatsTestFixtures;
 import eu.ecodex.connector.TransportStepFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledException;
+import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundTestMessage;
@@ -256,7 +256,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
             when(restOutboundMessageParser.toParty(any(), eq(ConnectorPartyRoleType.RESPONDER)))
                 .thenReturn(toParty);
 
-            doThrow(ConnectorTestMessageDisabledException.class)
+            doThrow(ConnectorC2CTestMessageDisabledException.class)
                 .when(sendTestMessageService).execute(any());
 
             mockMvc.perform(

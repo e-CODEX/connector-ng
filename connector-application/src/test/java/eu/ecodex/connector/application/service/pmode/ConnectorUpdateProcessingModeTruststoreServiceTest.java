@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.security.ConnectorTruststore;

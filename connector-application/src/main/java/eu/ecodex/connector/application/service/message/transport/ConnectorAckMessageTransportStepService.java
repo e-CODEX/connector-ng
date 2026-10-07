@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageErrorRepository;

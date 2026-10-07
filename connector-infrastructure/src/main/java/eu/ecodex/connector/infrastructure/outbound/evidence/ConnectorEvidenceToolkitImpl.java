@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.evidence;
 
-import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
 import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;

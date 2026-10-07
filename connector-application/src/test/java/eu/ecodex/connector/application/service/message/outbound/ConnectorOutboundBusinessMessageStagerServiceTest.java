@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessageException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageAttachmentLinker;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;

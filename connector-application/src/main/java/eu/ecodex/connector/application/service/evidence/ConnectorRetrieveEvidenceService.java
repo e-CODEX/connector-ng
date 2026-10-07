@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.evidence;
 
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessagePartyException;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;

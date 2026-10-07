@@ -18,8 +18,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.application.port.api.message.ConnectorTriggeredEvidenceMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;

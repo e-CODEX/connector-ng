@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.port.api.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserIdentifierMismatchException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 

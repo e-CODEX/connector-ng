@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.AS4PropertiesTestFixtures;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;

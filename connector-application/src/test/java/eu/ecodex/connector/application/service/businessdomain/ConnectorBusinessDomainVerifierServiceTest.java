@@ -17,8 +17,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import org.junit.jupiter.api.DisplayName;

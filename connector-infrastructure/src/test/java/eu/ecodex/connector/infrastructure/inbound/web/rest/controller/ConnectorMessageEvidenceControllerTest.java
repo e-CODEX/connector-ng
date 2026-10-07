@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.evidence.ConnectorEvidenceController;
 import org.junit.jupiter.api.DisplayName;

@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessagePartyException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import org.junit.jupiter.api.DisplayName;

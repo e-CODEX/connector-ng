@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserIdentifierMismatchException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUserEmail;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUsername;

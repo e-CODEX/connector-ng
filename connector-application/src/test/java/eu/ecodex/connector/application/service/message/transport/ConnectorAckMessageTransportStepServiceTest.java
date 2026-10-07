@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageErrorRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;

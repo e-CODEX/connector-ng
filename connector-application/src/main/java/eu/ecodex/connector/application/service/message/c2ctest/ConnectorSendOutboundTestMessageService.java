@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message.c2ctest;
 
-import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledException;
+import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
@@ -88,7 +88,7 @@ public class ConnectorSendOutboundTestMessageService implements ConnectorSendOut
         var testMessageConfiguration = testMessageConfigProvider.getConfig();
 
         if (!testMessageConfiguration.enabled()) {
-            throw new ConnectorTestMessageDisabledException("Test message is disabled");
+            throw new ConnectorC2CTestMessageDisabledException("C2C Test message is disabled");
         }
 
         businessDomainVerifierService.execute(command.businessDomainIdentifier());

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.link;
 
-import eu.ecodex.connector.application.exception.ConnectorLinkPartnerException;
+import eu.ecodex.connector.application.exception.linkpartner.ConnectorLinkPartnerException;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;

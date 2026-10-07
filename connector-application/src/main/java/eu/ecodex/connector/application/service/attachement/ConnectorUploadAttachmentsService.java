@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.attachement;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;

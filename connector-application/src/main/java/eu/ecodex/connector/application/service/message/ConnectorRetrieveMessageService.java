@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;

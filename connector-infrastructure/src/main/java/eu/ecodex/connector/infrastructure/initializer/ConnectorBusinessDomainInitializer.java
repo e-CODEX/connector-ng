@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.initializer;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;

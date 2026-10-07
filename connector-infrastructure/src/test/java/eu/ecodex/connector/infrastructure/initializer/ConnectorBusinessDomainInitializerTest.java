@@ -24,8 +24,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorListBusinessDomain;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;

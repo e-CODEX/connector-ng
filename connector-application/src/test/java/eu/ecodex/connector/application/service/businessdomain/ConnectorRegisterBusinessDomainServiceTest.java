@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import org.junit.jupiter.api.DisplayName;

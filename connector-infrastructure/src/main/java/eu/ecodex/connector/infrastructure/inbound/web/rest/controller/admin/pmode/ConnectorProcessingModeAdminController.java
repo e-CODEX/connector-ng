@@ -71,7 +71,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
     }
 
     @Override
-    public ConnectorProcessingModeDto create(ConnectorProcessingModeCreationRequest request)
+    public ConnectorProcessingModeDto registerPmode(ConnectorProcessingModeCreationRequest request)
         throws IOException {
         var businessDomainIdentifier = ConnectorBusinessDomainIdentifier
             .builder()

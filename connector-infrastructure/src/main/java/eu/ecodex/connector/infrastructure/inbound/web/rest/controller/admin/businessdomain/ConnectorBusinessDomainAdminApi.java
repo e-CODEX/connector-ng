@@ -42,14 +42,20 @@ public interface ConnectorBusinessDomainAdminApi {
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Creates a new business domain.")
-    @ApiResponses(
-        @ApiResponse(responseCode = "400", description = "Bad Request")
-    )
-    ConnectorBusinessDomainDto create(
+    @ApiResponses({
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
+    ConnectorBusinessDomainDto registerBusinessDomain(
         @Valid @RequestBody ConnectorBusinessDomainCreationRequest request);
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all business domains.")
-    List<ConnectorBusinessDomainDto> getBusinessDomains();
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    List<ConnectorBusinessDomainDto> listBusinessDomains();
 }

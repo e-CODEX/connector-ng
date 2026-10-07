@@ -18,11 +18,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorEditRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByIdentifier;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorUpdateRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorRoleDto;
@@ -43,7 +43,7 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
     ConnectorRegisterRole registerRole;
 
     @MockitoBean
-    ConnectorUpdateRole updateRole;
+    ConnectorEditRole updateRole;
 
     @MockitoBean
     ConnectorRetrieveRoleByIdentifier retrieveRole;
@@ -67,13 +67,13 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
         // When
         var response = apiClient.post()
-            .uri(URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(roleDto)
-            .exchange()
-            .expectStatus()
-            .isCreated()
-            .returnResult(ConnectorRoleDto.class);
+                                .uri(URL)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(roleDto)
+                                .exchange()
+                                .expectStatus()
+                                .isCreated()
+                                .returnResult(ConnectorRoleDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
@@ -95,13 +95,13 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
         // When
         var response = apiClient.put()
-            .uri(URL + "/" + identifier)
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(roleDto)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorRoleDto.class);
+                                .uri(URL + "/" + identifier)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(roleDto)
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .returnResult(ConnectorRoleDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
@@ -123,11 +123,11 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
         // When
         var response = apiClient.get()
-            .uri(URL + "/" + identifier)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorRoleDto.class);
+                                .uri(URL + "/" + identifier)
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .returnResult(ConnectorRoleDto.class);
 
         // Then
         var responseBody = response.getResponseBody();
@@ -147,10 +147,10 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
         // When
         apiClient.get()
-            .uri(URL + "/" + identifier)
-            .exchange()
-            .expectStatus()
-            .isNotFound();
+                 .uri(URL + "/" + identifier)
+                 .exchange()
+                 .expectStatus()
+                 .isNotFound();
 
         // Then
         verify(retrieveRole).execute(identifier);
@@ -168,12 +168,12 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
         // When
         var response = apiClient.get()
-            .uri(URL)
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(new ParameterizedTypeReference<List<ConnectorRoleDto>>() {
-            });
+                                .uri(URL)
+                                .exchange()
+                                .expectStatus()
+                                .isOk()
+                                .returnResult(new ParameterizedTypeReference<List<ConnectorRoleDto>>() {
+                                });
 
         // Then
         var responseBody = response.getResponseBody();
@@ -193,10 +193,10 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
         // When
         apiClient.delete()
-            .uri(URL + "/" + identifier)
-            .exchange()
-            .expectStatus()
-            .isNoContent();
+                 .uri(URL + "/" + identifier)
+                 .exchange()
+                 .expectStatus()
+                 .isNoContent();
 
         // Then
         verify(removeRole).execute(identifier);

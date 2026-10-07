@@ -26,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-class ConnectorUpdateRoleIT extends AbstractIntegrationTest {
+class ConnectorEditRoleIT extends AbstractIntegrationTest {
     public static final String PATH = "/api/v1/admin/users/roles";
     @Autowired
     private RestTestClient apiClient;

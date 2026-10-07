@@ -51,14 +51,19 @@ public interface ConnectorProcessingModeAdminApi {
     @Operation(summary = "Creates a new processing mode.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Created"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "400", description = "Bad Request")
     })
-    ConnectorProcessingModeDto create(
+    ConnectorProcessingModeDto registerPmode(
         @Valid @ModelAttribute ConnectorProcessingModeCreationRequest request) throws IOException;
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all processing modes.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     List<ConnectorProcessingModeDto> listPmodes();
 
     @GetMapping("/{uuid}")
@@ -66,6 +71,7 @@ public interface ConnectorProcessingModeAdminApi {
     @Operation(summary = "Get a processing mode by identifier.")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorProcessingModeDetailDto retrievePmode(@PathVariable String uuid);
@@ -74,6 +80,7 @@ public interface ConnectorProcessingModeAdminApi {
     @Operation(summary = "Download a processing mode")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ResponseEntity<byte[]> downloadPmode(@PathVariable String uuid);
@@ -83,6 +90,7 @@ public interface ConnectorProcessingModeAdminApi {
     @Operation(summary = "Update the truststore of a processing mode")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Success"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })

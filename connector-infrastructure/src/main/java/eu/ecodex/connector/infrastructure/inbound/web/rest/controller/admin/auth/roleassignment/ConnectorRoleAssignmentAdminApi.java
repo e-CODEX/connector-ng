@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * API interface for managing connector user roles.
  *
  * <p>This interface exposes endpoints for creating, updating, retrieving, and deleting
- * roles assigned to connector users. It allows for management of the roles within
- * the connector's authorization and role-based access control system.
+ * roles assigned to connector users. It allows for management of the roles within the connector's
+ * authorization and role-based access control system.
  *
  * <p>All endpoints consume and produce JSON data.
  */
@@ -39,17 +39,23 @@ public interface ConnectorRoleAssignmentAdminApi {
     @PostMapping(path = "/{uuid}/roles")
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto register(@PathVariable("uuid") @Nonnull String identifier,
-                              @RequestBody String role);
+    ConnectorUserDto assignRole(
+        @PathVariable("uuid") @Nonnull String identifier,
+        @RequestBody String role);
 
     @Operation(summary = "Unassign a user role.")
     @DeleteMapping(path = "/{uuid}/roles")
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto delete(@PathVariable("uuid") @Nonnull String identifier,
-                            @RequestBody @Nonnull String role);
+    ConnectorUserDto unassignRole(
+        @PathVariable("uuid") @Nonnull String identifier,
+        @RequestBody @Nonnull String role);
 }

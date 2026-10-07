@@ -33,8 +33,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * API interface for managing connector user roles.
  *
  * <p>This interface exposes endpoints for creating, updating, retrieving, and deleting
- * roles assigned to connector users. It allows for management of the roles within
- * the connector's authorization and role-based access control system.
+ * roles assigned to connector users. It allows for management of the roles within the connector's
+ * authorization and role-based access control system.
  *
  * <p>All endpoints consume and produce JSON data.
  */
@@ -42,46 +42,55 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Tag(name = "AdministrateRoles", description = "API for managing connector's users roles")
 public interface ConnectorRoleAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Persist a connector user role.")
+    @Operation(summary = "Register a connector user role.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorRoleDto register(@Valid @RequestBody @Nonnull ConnectorRoleDto usrRoleDto);
+    ConnectorRoleDto registerRole(@Valid @RequestBody @Nonnull ConnectorRoleDto usrRoleDto);
 
     @Operation(summary = "Update a connector user role.")
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorRoleDto update(@PathVariable("uuid") @Nonnull String identifier,
-                            @Valid @RequestBody ConnectorRoleDto userRoleDto);
+    ConnectorRoleDto editRole(
+        @PathVariable("uuid") @Nonnull String identifier,
+        @Valid @RequestBody ConnectorRoleDto userRoleDto);
 
 
     @Operation(summary = "Retrieve a connector user role by uuid identifier.")
     @GetMapping(path = "/{uuid}")
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorRoleDto getByIdentifier(@PathVariable("uuid") @Nonnull String identifier);
+    ConnectorRoleDto retrieveRole(@PathVariable("uuid") @Nonnull String identifier);
 
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
     @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    List<ConnectorRoleDto> getAll();
+    List<ConnectorRoleDto> listRoles();
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user role by uuid identifier.")
     @DeleteMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    void deleteByIdentifier(@PathVariable("uuid") @Nonnull String identifier);
+    Void removeRole(@PathVariable("uuid") @Nonnull String identifier);
 }

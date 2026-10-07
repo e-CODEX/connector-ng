@@ -28,7 +28,7 @@ public class ConnectorEvidenceController implements ConnectorEvidenceApi {
     }
 
     @Override
-    public ResponseEntity<byte[]> download(String uuid) {
+    public ResponseEntity<byte[]> downloadEvidence(String uuid) {
         var evidence = retrieveEvidenceService.execute(uuid);
         var contentLength = evidence.content() != null ? evidence.content().length : 0;
 

@@ -19,6 +19,8 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.Con
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorMessageRoutingPropertiesDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.configuration.ConnectorQueuePropertiesDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,33 +38,57 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface ConnectorConfigurationAdminApi {
     @GetMapping("/business-domains")
     @Operation(summary = "List business domain configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorBusinessDomainPropertiesDto listBusinessDomains();
 
     @GetMapping("/container")
     @Operation(summary = "List container configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorContainerPropertiesDto listContainer();
 
     @GetMapping("/queues")
     @Operation(summary = "List queues configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorQueuePropertiesDto listQueues();
 
     @GetMapping("/message-processing")
     @Operation(summary = "List message processing configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorMessageProcessingPropertiesDto listMessageProcessing();
 
     @GetMapping("/evidence")
     @Operation(summary = "List evidences configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorEvidencesPropertiesDto listEvidences();
 
     @GetMapping("/business-document")
     @Operation(summary = "List business document configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorBusinessDocumentPropertiesDto listBusinessDocument();
 
     @GetMapping("/routing")
     @Operation(summary = "List routing configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorMessageRoutingPropertiesDto listRouting();
 
     @GetMapping("/backend-link-partners")
     @Operation(summary = "List backend link partners configurations")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorLinkPropertiesDto listBackendLinkPartners();
 }

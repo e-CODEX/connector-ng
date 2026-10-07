@@ -33,9 +33,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Interface for managing connector users via REST APIs.
- * Provides operations for creating, updating, patching, retrieving, listing, and deleting users.
- * This interface defines the contract for user management-related endpoints.
+ * Interface for managing connector users via REST APIs. Provides operations for creating, updating,
+ * patching, retrieving, listing, and deleting users. This interface defines the contract for user
+ * management-related endpoints.
  */
 @RequestMapping(path = "/api/v1/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "AdministrateUsers", description = "API for managing connector's users")
@@ -45,6 +45,8 @@ public interface ConnectorUserAdminApi {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
@@ -55,6 +57,8 @@ public interface ConnectorUserAdminApi {
     @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
@@ -66,6 +70,8 @@ public interface ConnectorUserAdminApi {
     @PatchMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
@@ -76,7 +82,8 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Retrieve a connector user.")
     @GetMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
     ConnectorUserDto retrieveUser(@PathVariable("uuid") @Nonnull String identifier);
@@ -84,16 +91,18 @@ public interface ConnectorUserAdminApi {
     @Operation(summary = "Retrieve all connector's users.")
     @GetMapping
     @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    List<ConnectorUserDto> getAll();
+    List<ConnectorUserDto> listUsers();
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user by Identifier.")
     @DeleteMapping(path = "/{uuid}")
     @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    void deleteUser(@PathVariable("uuid") @Nonnull String userIdentifier);
+    Void removeUser(@PathVariable("uuid") @Nonnull String userIdentifier);
 }

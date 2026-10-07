@@ -84,7 +84,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     }
 
     @Override
-    public ConnectorOutboundMessageDto submitOutboundTestMessage(
+    public ConnectorOutboundMessageDto submitOutboundC2CTestMessage(
         ConnectorTestMessageRequest request)
         throws IOException {
         var command = toTestBusinessMessageCommand(request);

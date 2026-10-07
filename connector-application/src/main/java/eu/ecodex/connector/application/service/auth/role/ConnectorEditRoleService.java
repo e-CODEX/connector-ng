@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.auth.role;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorUpdateRole;
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorEditRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Objects;
@@ -45,10 +45,10 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class ConnectorUpdateRoleService implements ConnectorUpdateRole {
+public class ConnectorEditRoleService implements ConnectorEditRole {
     private final ConnectorRoleRepository repository;
 
-    public ConnectorUpdateRoleService(ConnectorRoleRepository repository) {
+    public ConnectorEditRoleService(ConnectorRoleRepository repository) {
         this.repository = repository;
     }
 

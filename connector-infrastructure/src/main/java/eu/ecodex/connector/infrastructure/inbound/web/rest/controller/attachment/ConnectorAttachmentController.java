@@ -37,7 +37,7 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
     }
 
     @Override
-    public List<String> upload(List<MultipartFile> attachments) {
+    public List<String> uploadAttachment(List<MultipartFile> attachments) {
         var fileUploadCommands = attachments
             .stream()
             .map(attachment -> {

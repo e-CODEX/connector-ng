@@ -13,6 +13,8 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.tra
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +34,9 @@ public interface ConnectorMessageTransportStepAdminApi {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     @Operation(summary = "Get paginated list of messages transport steps.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
         @RequestParam(name = "messageOrRemoteSystemIdentifier", required = false)
         String messageOrRemoteSystemIdentifier,

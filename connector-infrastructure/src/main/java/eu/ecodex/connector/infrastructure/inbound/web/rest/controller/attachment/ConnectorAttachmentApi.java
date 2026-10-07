@@ -35,5 +35,5 @@ public interface ConnectorAttachmentApi {
     @ApiResponses(
         @ApiResponse(responseCode = "400", description = "Bad Request")
     )
-    List<String> upload(@RequestPart("attachments") List<MultipartFile> attachments);
+    List<String> uploadAttachment(@RequestPart("attachments") List<MultipartFile> attachments);
 }

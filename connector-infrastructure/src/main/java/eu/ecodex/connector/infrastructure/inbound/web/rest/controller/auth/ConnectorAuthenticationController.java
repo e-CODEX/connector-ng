@@ -32,10 +32,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Controller responsible for handling user login operations for the connector system.
- * This class implements the {@link ConnectorAuthenticationApi} interface, providing API
- * functionality
- * for authenticating users and returning an access token upon successful login.
+ * Controller responsible for handling user login operations for the connector system. This class
+ * implements the {@link ConnectorAuthenticationApi} interface, providing API functionality for
+ * authenticating users and returning an access token upon successful login.
  *
  * <p>The login process involves validating user credentials and generating a token
  * using the provided {@code ConnectorLoginUserService}.
@@ -54,12 +53,10 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
      *
      * @param userAuthenticationProvider     The {@link ConnectorUserAuthenticationProviderImpl}
      *                                       responsible for managing user login operations,
-     *                                       including
-     *                                       credential validation and token generation.
+     *                                       including credential validation and token generation.
      * @param refreshUserToken               The {@link ConnectorRefreshUserRefreshTokenService}
      *                                       used to handle user token refresh operations, ensuring
-     *                                       the
-     *                                       access token remains valid.
+     *                                       the access token remains valid.
      * @param updateUserPasswordAtFirstLogin The service that will process update of user password
      */
     public ConnectorAuthenticationController(
@@ -80,7 +77,7 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     }
 
     @Override
-    public ConnectorUserAuthenticationResult refresh(
+    public ConnectorUserAuthenticationResult refreshJwtToken(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @NonNull String authorizationHeader,
         @NonNull ConnectorRefreshTokenRequest request) {
         var accessToken = authorizationHeader.replaceFirst("^Bearer ", "");
@@ -89,8 +86,9 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
     }
 
     @Override
-    public void logout(@AuthenticationPrincipal @NonNull ConnectorUserDetails userDetails,
-                       @RequestBody @NonNull ConnectorLogoutRequest request) {
+    public void logout(
+        @AuthenticationPrincipal @NonNull ConnectorUserDetails userDetails,
+        @RequestBody @NonNull ConnectorLogoutRequest request) {
         userAuthenticationProvider.logout(userDetails.getUserId(), request.refreshToken());
         log.debug("User {} successfully logged out.", userDetails.getUserId());
     }
@@ -105,10 +103,13 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
 
             updateUserPasswordAtFirstLogin.execute(passwordUpdateData);
         } catch (ExpiredJwtException e) {
-            var authenticationResult = refreshUserToken.execute(userDetails.accessToken(),
-                userPasswordRequest.refreshToken());
+            var authenticationResult = refreshUserToken.execute(
+                userDetails.accessToken(),
+                userPasswordRequest.refreshToken()
+            );
 
-            var passwordUpdateData = ConnectorUpdateUserPasswordCommand.builder()
+            var passwordUpdateData = ConnectorUpdateUserPasswordCommand
+                .builder()
                 .uuid(userDetails.getUserId())
                 .accessToken(authenticationResult.accessToken())
                 .refreshToken(authenticationResult.refreshToken())

@@ -2,7 +2,7 @@ import io.mateo.cxf.codegen.wsdl2java.Wsdl2Java
 
 plugins {
     id("java")
-    id("io.mateo.cxf-codegen") version "2.5.0"
+    id("io.mateo.cxf-codegen") version "3.0.0"
 }
 
 val mockitoAgent: Configuration = configurations.create("mockitoAgent")

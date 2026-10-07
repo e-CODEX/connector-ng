@@ -24,7 +24,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 | Ubuntu 26.04 LTS
 | Adopt Open JDK 21.0.11
 | Tomcat 11.0.15
-| MariaDB Connector 3.5.9
+| MariaDB Connector 3.5.10
 | MariaDB 12.3.2
 | App init, DB Scripts
 
@@ -32,7 +32,7 @@ NOTE: The following matrix may always be a little behind the current testing and
 | Ubuntu 26.04 LTS
 | Adopt Open JDK 21.0.11
 | Tomcat 11.0.15
-| Postgres Connector 42.7.11
+| Postgres Connector 42.7.13
 | Postgresql 17.0
 | App init, DB Scripts
 

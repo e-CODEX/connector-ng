@@ -31,8 +31,9 @@ public class ConnectorLoginUserService implements ConnectorLoginUser {
     }
 
     @Override
-    public ConnectorUserAuthenticationResult execute(@NonNull String username,
-                                                     @NonNull String password) {
+    public ConnectorUserAuthenticationResult execute(
+        @NonNull String username,
+        @NonNull String password) {
         return userAuthenticationProvider.login(username, password);
     }
 }

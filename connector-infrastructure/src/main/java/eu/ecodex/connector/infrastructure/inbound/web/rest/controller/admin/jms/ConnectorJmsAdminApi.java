@@ -11,6 +11,9 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.jms;
 
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,5 +30,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(value = "/api/v1/admin/jms/queues")
 public interface ConnectorJmsAdminApi {
     @GetMapping("/stats")
+    @Operation(summary = "List JMS Queues statistics")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     List<ConnectorQueueStats> retrieveQueuesStats();
 }

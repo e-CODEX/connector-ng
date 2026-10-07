@@ -13,6 +13,8 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.att
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ConnectorAttachmentAdminApi {
     @GetMapping
     @Operation(summary = "Get paginated list of message attachments.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "20") int size
@@ -42,5 +47,10 @@ public interface ConnectorAttachmentAdminApi {
 
     @GetMapping("/{identifier}/download")
     @Operation(summary = "Get a message attachment by identifier.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+        @ApiResponse(responseCode = "409", description = "Conflict")
+    })
     ResponseEntity<byte[]> download(@PathVariable String identifier) throws IOException;
 }

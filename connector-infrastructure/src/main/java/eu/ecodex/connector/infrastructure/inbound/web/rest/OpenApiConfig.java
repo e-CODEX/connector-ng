@@ -33,95 +33,101 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class OpenApiConfig {
-    private static final String ERROR_RESPONSE_SCHEMA = "#/components/schemas/ErrorResponse";
+    private static final String ERROR_RESPONSE = "ErrorResponse";
+    private static final String ERROR_RESPONSE_SCHEMA =
+        "#/components/schemas/" + ERROR_RESPONSE;
 
     @Bean
     public OpenAPI customOpenAPI() {
-        var info = new Info()
-            .title("e-CODEX Connector")
-            .version("1.0.0")
-            .description("Open API documentation for e-CODEX Connector.");
-
-        var resolvedSchema = ModelConverters
-            .getInstance()
-            .resolveAsResolvedSchema(new AnnotatedType(ErrorResponse.class));
-
-        var components = new Components()
-            .addSchemas("ErrorResponse", resolvedSchema.schema);
-
-        if (resolvedSchema.referencedSchemas != null) {
-            resolvedSchema.referencedSchemas.forEach(components::addSchemas);
-        }
-
         return new OpenAPI()
-            .components(components)
-            .info(info);
+            .info(new Info()
+                      .title("e-CODEX Connector")
+                      .version("1.0.0")
+                      .description("Open API documentation for e-CODEX Connector."));
     }
 
     @Bean
-    public GroupedOpenApi publicApi() {
+    public GroupedOpenApi publicApi(OpenApiCustomizer injectErrorResponseSchema) {
         return GroupedOpenApi.builder()
                              .group("public")
                              .pathsToMatch("/api/**")
                              .pathsToExclude("/api/v?/admin/**")
+                             .addOpenApiCustomizer(injectErrorResponseSchema)
                              .build();
     }
 
     @Bean
-    public GroupedOpenApi adminApi() {
+    public GroupedOpenApi adminApi(OpenApiCustomizer injectErrorResponseSchema) {
         return GroupedOpenApi.builder()
                              .group("admin")
                              .pathsToMatch("/api/v?/admin/**")
+                             .addOpenApiCustomizer(injectErrorResponseSchema)
                              .build();
     }
 
     @Bean
     public OperationCustomizer globalResponseCustomizer() {
         return (operation, handlerMethod) -> {
-            // Only add 500 here — it has no @ApiResponse annotation to conflict with
-            addErrorResponse(operation.getResponses(), "500", "Internal Server Error");
+            // Only 500 here: it has no @ApiResponse annotation to conflict with
+            addErrorResponse(operation.getResponses());
             return operation;
         };
     }
 
-    // Runs AFTER all annotation processing — safe to patch 4xx content here
     @Bean
     public OpenApiCustomizer injectErrorResponseSchema() {
-        return openApi ->
-            openApi
-                .getPaths()
-                .values()
-                .forEach(pathItem ->
-                             pathItem.readOperations()
-                                     .forEach(
-                                         operation ->
-                                             operation.getResponses().forEach(
-                                                 (code, apiResponse) -> {
-                                                     if (code.startsWith("4")
-                                                         || code.startsWith("5")) {
-                                                         apiResponse.content(
-                                                             getContent()
-                                                         );
-                                                     }
-                                                 })
-                                     )
-                );
+        return openApi -> {
+            registerErrorSchemas(openApi);
+
+            if (openApi.getPaths() == null) {
+                return;
+            }
+            openApi.getPaths()
+                   .values()
+                   .forEach(pathItem ->
+                                pathItem.readOperations().forEach(operation -> {
+                                    if (operation.getResponses() == null) {
+                                        return;
+                                    }
+                                    operation.getResponses().forEach((code, apiResponse) -> {
+                                        if (code.startsWith("4") || code.startsWith("5")) {
+                                            apiResponse.content(getContent());
+                                        }
+                                    });
+                                }));
+        };
     }
 
-    private void addErrorResponse(ApiResponses responses, String code, String description) {
+    private void registerErrorSchemas(OpenAPI openApi) {
+        var resolved = ModelConverters.getInstance()
+                                      .resolveAsResolvedSchema(
+                                          new AnnotatedType(ErrorResponse.class)
+                                      );
+
+        if (openApi.getComponents() == null) {
+            openApi.setComponents(new Components());
+        }
+        var components = openApi.getComponents();
+
+        components.addSchemas(ERROR_RESPONSE, resolved.schema);
+        if (resolved.referencedSchemas != null) {
+            resolved.referencedSchemas.forEach(components::addSchemas);
+        }
+    }
+
+    private void addErrorResponse(ApiResponses responses) {
         responses.addApiResponse(
-            code,
+            "500",
             new ApiResponse()
-                .description(description)
+                .description("Internal Server Error")
                 .content(getContent())
         );
     }
 
     private Content getContent() {
-        return new Content()
-            .addMediaType(
-                "application/json",
-                new MediaType().schema(new Schema<>().$ref(ERROR_RESPONSE_SCHEMA))
-            );
+        return new Content().addMediaType(
+            "application/json",
+            new MediaType().schema(new Schema<>().$ref(ERROR_RESPONSE_SCHEMA))
+        );
     }
 }

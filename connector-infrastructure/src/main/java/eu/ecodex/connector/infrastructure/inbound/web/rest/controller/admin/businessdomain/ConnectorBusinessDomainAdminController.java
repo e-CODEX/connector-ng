@@ -37,7 +37,7 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
     }
 
     @Override
-    public ConnectorBusinessDomainDto create(
+    public ConnectorBusinessDomainDto registerBusinessDomain(
         @Valid @RequestBody ConnectorBusinessDomainCreationRequest request) {
         var created = this.registerBusinessDomain.execute(toDomain(request));
 
@@ -45,7 +45,7 @@ public class ConnectorBusinessDomainAdminController implements ConnectorBusiness
     }
 
     @Override
-    public List<ConnectorBusinessDomainDto> getBusinessDomains() {
+    public List<ConnectorBusinessDomainDto> listBusinessDomains() {
         var businessDomains = this.listBusinessDomain.execute();
 
         return businessDomains.stream().map(ConnectorBusinessDomainDto::from).toList();

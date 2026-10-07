@@ -30,19 +30,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/v1/processing-modes")
 public interface ConnectorProcessingModeApi {
 
-    @GetMapping("{identifier}/services")
+    @GetMapping("{businessDomainIdentifier}/services")
     @Operation(summary = "List a processing mode services")
     List<ConnectorProcessingModeServiceDto> listProcessingModeServices(
-        @PathVariable String identifier
+        @PathVariable String businessDomainIdentifier
     );
 
-    @GetMapping("{identifier}/actions")
+    @GetMapping("{businessDomainIdentifier}/actions")
     @Operation(summary = "List a processing mode actions")
     List<ConnectorProcessingModeActionDto> listProcessingModeActions(
-        @PathVariable String identifier
+        @PathVariable String businessDomainIdentifier
     );
 
-    @GetMapping("{identifier}/parties")
+    @GetMapping("{businessDomainIdentifier}/parties")
     @Operation(summary = "List a processing mode parties")
-    List<ConnectorParty> listProcessingModeParties(@PathVariable String identifier);
+    List<ConnectorParty> listProcessingModeParties(@PathVariable String businessDomainIdentifier);
 }

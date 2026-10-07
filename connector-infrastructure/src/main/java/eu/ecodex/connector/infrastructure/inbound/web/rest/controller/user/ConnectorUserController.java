@@ -22,13 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for managing the current user's profile within the connector system.
- * Provides endpoints for partially updating user information and retrieving user details.
- *
- * <p>This controller implements the {@link ConnectorUserApi} interface, which defines the contract
- * for user management operations such as patching existing user data and retrieving user
- * information based on authentication details.</p>
- *
+ * REST controller for managing the current authenticated user's profile within the connector
+ * system. Provides endpoints for partially updating user information and retrieving user details.
  */
 @Slf4j
 @RestController
@@ -43,27 +38,31 @@ public class ConnectorUserController implements ConnectorUserApi {
      * @param editUser                 service to patch user
      * @param retrieveUserByIdentifier service to retrieve user
      */
-    public ConnectorUserController(ConnectorEditUser editUser,
-                                   ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier,
-                                   ConnectorUpdateUserPassword updateUserPassword) {
+    public ConnectorUserController(
+        ConnectorEditUser editUser,
+        ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier,
+        ConnectorUpdateUserPassword updateUserPassword) {
         this.editUser = editUser;
         this.retrieveUserByIdentifier = retrieveUserByIdentifier;
         this.updateUserPassword = updateUserPassword;
     }
 
     @Override
-    public ConnectorUserDto patch(@NonNull ConnectorUserDetails userDetails,
-                                  @NonNull ConnectorEditSelfRequest userRequest) {
+    public ConnectorUserDto editAuthenticatedUser(
+        @NonNull ConnectorUserDetails userDetails,
+        @NonNull ConnectorEditSelfRequest userRequest) {
         log.debug("Editing existing user");
-        var registered = editUser.execute(userDetails.getUserId(),
-            ConnectorEditSelfRequest.toCommand(userDetails.getUserId(), userRequest));
+        var registered = editUser.execute(
+            userDetails.getUserId(),
+            ConnectorEditSelfRequest.toCommand(userDetails.getUserId(), userRequest)
+        );
 
         log.debug("User patched");
         return ConnectorUserDto.from(registered);
     }
 
     @Override
-    public ConnectorUserDto getByIdentifier(@NonNull ConnectorUserDetails userDetails) {
+    public ConnectorUserDto retrieveAuthenticatedUser(@NonNull ConnectorUserDetails userDetails) {
         log.debug("Retrieving user {} details", userDetails.getUserId());
         var found = retrieveUserByIdentifier.execute(userDetails.getUserId());
         log.debug("User {} found", userDetails.getUserId());
@@ -71,8 +70,9 @@ public class ConnectorUserController implements ConnectorUserApi {
     }
 
     @Override
-    public void updatePassword(@NonNull ConnectorUserDetails userDetails,
-                               @NonNull ConnectorUpdateUserPasswordRequest userPasswordRequest) {
+    public void updateAuthenticatedUserPassword(
+        @NonNull ConnectorUserDetails userDetails,
+        @NonNull ConnectorUpdateUserPasswordRequest userPasswordRequest) {
         log.debug("Updating user {} password", userDetails.getUserId());
         var passwordUpdateData = ConnectorUpdateUserPasswordRequest.from(
             userDetails.getUserId(), userDetails.accessToken(), userPasswordRequest);

@@ -33,18 +33,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Defines the API for managing user login functionality within the connector system.
- * Provides an operation for authenticating users and retrieving an access token upon successful
- * login. This interface serves as a contract for the implementation of user login services.
+ * Defines the API for managing user login functionality within the connector system. Provides an
+ * operation for authenticating users and retrieving an access token upon successful login. This
+ * interface serves as a contract for the implementation of user login services.
  *
  * <p>Endpoints:
- * - POST /api/v1/auth/login: Handles user login by accepting credentials in the request body
- * and responding with an authentication token.
- *
- * <p>Annotations:
- * - The class is annotated with @RequestMapping to define the base path for all endpoints.
- * - The @Tag annotation is used for grouping and describing the API in documentation generated
- * via OpenAPI.
+ * - POST /api/v1/auth/login: Handles user login by accepting credentials in the request body and
+ * responding with an authentication token.
  */
 @RequestMapping("/api/v1/auth")
 @Tag(name = "AuthenticateUser", description = "API for managing connector's users "
@@ -65,7 +60,7 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    ConnectorUserAuthenticationResult refresh(
+    ConnectorUserAuthenticationResult refreshJwtToken(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Nonnull String authorizationHeader,
         @RequestBody @Valid @Nonnull ConnectorRefreshTokenRequest request);
 
@@ -75,8 +70,8 @@ public interface ConnectorAuthenticationApi {
     @PostMapping(path = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized Request"),
     })
     void updatePasswordAfterLogin(
         @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
@@ -89,6 +84,7 @@ public interface ConnectorAuthenticationApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    void logout(@AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
-                @RequestBody @Valid @Nonnull ConnectorLogoutRequest request);
+    void logout(
+        @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
+        @RequestBody @Valid @Nonnull ConnectorLogoutRequest request);
 }

@@ -10,11 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.auth.role;
 
+import eu.ecodex.connector.application.port.api.auth.role.ConnectorEditRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByIdentifier;
-import eu.ecodex.connector.application.port.api.auth.role.ConnectorUpdateRole;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorRoleDto;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -23,17 +23,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller responsible for managing user roles within the connector system.
- * Provides functionality to create, update, retrieve, list, and delete user roles.
- * Implements the API defined in {@link ConnectorRoleAdminApi}.
- * Uses service-level components to execute business logic related to user roles.
+ * REST controller responsible for managing user roles within the connector system. Provides
+ * functionality to create, update, retrieve, list, and delete user roles. Implements the API
+ * defined in {@link ConnectorRoleAdminApi}. Uses service-level components to execute business logic
+ * related to user roles.
  */
 @Slf4j
 @RestController
 public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     private final ConnectorRegisterRole connectorRegisterRole;
     private final ConnectorRetrieveRoleByIdentifier connectorRetrieveRole;
-    private final ConnectorUpdateRole connectorUpdateRole;
+    private final ConnectorEditRole connectorEditRole;
     private final ConnectorRemoveRole connectorRemoveRole;
     private final ConnectorListRole connectorListRole;
 
@@ -42,24 +42,25 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
      *
      * @param connectorRegisterRole The role registration service.
      * @param connectorRetrieveRole The role retrieval service.
-     * @param connectorUpdateRole   The role update service.
+     * @param connectorEditRole     The role update service.
      * @param connectorRemoveRole   The role removal service.
      * @param connectorListRole     The role listing service.
      */
-    public ConnectorRoleAdminController(ConnectorRegisterRole connectorRegisterRole,
-                                        ConnectorRetrieveRoleByIdentifier connectorRetrieveRole,
-                                        ConnectorUpdateRole connectorUpdateRole,
-                                        ConnectorRemoveRole connectorRemoveRole,
-                                        ConnectorListRole connectorListRole) {
+    public ConnectorRoleAdminController(
+        ConnectorRegisterRole connectorRegisterRole,
+        ConnectorRetrieveRoleByIdentifier connectorRetrieveRole,
+        ConnectorEditRole connectorEditRole,
+        ConnectorRemoveRole connectorRemoveRole,
+        ConnectorListRole connectorListRole) {
         this.connectorRegisterRole = connectorRegisterRole;
         this.connectorRetrieveRole = connectorRetrieveRole;
-        this.connectorUpdateRole = connectorUpdateRole;
+        this.connectorEditRole = connectorEditRole;
         this.connectorRemoveRole = connectorRemoveRole;
         this.connectorListRole = connectorListRole;
     }
 
     @Override
-    public ConnectorRoleDto register(@NonNull ConnectorRoleDto usrRoleDto) {
+    public ConnectorRoleDto registerRole(@NonNull ConnectorRoleDto usrRoleDto) {
         log.debug("Registering new user role");
         var registered =
             connectorRegisterRole.execute(ConnectorRoleDto.toDomain(usrRoleDto));
@@ -68,31 +69,34 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     }
 
     @Override
-    public ConnectorRoleDto update(@NonNull String identifier,
-                                   @Valid ConnectorRoleDto userRoleDto) {
+    public ConnectorRoleDto editRole(
+        @NonNull String identifier,
+        @Valid ConnectorRoleDto userRoleDto) {
         log.debug("Updating existing user");
         var updated =
-            connectorUpdateRole.execute(identifier, ConnectorRoleDto.toDomain(userRoleDto));
+            connectorEditRole.execute(identifier, ConnectorRoleDto.toDomain(userRoleDto));
         log.debug("Existing user updated");
         return ConnectorRoleDto.from(updated);
     }
 
     @Override
-    public ConnectorRoleDto getByIdentifier(@NonNull String identifier) {
+    public ConnectorRoleDto retrieveRole(@NonNull String identifier) {
         var found = connectorRetrieveRole.execute(identifier);
         return ConnectorRoleDto.from(found);
     }
 
     @Override
-    public List<ConnectorRoleDto> getAll() {
+    public List<ConnectorRoleDto> listRoles() {
         return connectorListRole.execute().stream()
-            .map(ConnectorRoleDto::from)
-            .toList();
+                                .map(ConnectorRoleDto::from)
+                                .toList();
     }
 
     @Override
-    public void deleteByIdentifier(@NonNull String identifier) {
+    public Void removeRole(@NonNull String identifier) {
         connectorRemoveRole.execute(identifier);
         log.debug("User deleted by id");
+
+        return null;
     }
 }

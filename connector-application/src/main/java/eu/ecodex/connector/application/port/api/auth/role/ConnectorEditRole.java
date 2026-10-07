@@ -23,7 +23,7 @@ import jakarta.annotation.Nonnull;
  * persistence mechanism, ensuring that each role is correctly registered or updated
  * based on the provided data.
  */
-public interface ConnectorUpdateRole {
+public interface ConnectorEditRole {
     /**
      * Updates an existing user role in the Connector system.
      * This method modifies the details of a {@link ConnectorRole} object

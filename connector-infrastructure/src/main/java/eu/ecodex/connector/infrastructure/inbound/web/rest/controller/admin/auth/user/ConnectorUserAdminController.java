@@ -46,8 +46,8 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     private final ConnectorListUser connectorListUser;
 
     /**
-     * Constructs an instance of {@code ConnectorUserAdminController} with the required
-     * service interfaces for managing {@link ConnectorUser} entities.
+     * Constructs an instance of {@code ConnectorUserAdminController} with the required service
+     * interfaces for managing {@link ConnectorUser} entities.
      *
      * @param connectorRetrieveUserByIdentifier service for retrieving {@link ConnectorUser}
      *                                          entities by identifier
@@ -60,8 +60,8 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
      * @param connectorRemoveUser               service for deleting {@link ConnectorUser} entities
      *                                          from the system
      * @param connectorListUser                 service for retrieving a list of all
-     *                                          {@link ConnectorUser}
-     *                                          entities along with their roles
+     *                                          {@link ConnectorUser} entities along with their
+     *                                          roles
      */
     public ConnectorUserAdminController(
         ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier,
@@ -75,7 +75,6 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         this.connectorRemoveUser = connectorRemoveUser;
         this.connectorListUser = connectorListUser;
     }
-
 
     @Override
     public ConnectorUserDto registerUser(
@@ -103,8 +102,10 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         @NonNull String identifier,
         @NonNull ConnectorEditUserRequest userRequest) {
         log.debug("Editing existing user");
-        var registered = connectorEditUser.execute(identifier,
-            ConnectorEditUserRequest.fromCommand(identifier, userRequest));
+        var registered = connectorEditUser.execute(
+            identifier,
+            ConnectorEditUserRequest.fromCommand(identifier, userRequest)
+        );
 
         log.debug("User edited successfully");
         return ConnectorUserDto.from(registered);
@@ -117,13 +118,15 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     }
 
     @Override
-    public List<ConnectorUserDto> getAll() {
+    public List<ConnectorUserDto> listUsers() {
         return connectorListUser.execute().stream().map(ConnectorUserDto::from).toList();
     }
 
     @Override
-    public void deleteUser(@NonNull String userIdentifier) {
+    public Void removeUser(@NonNull String userIdentifier) {
         connectorRemoveUser.execute(userIdentifier);
         log.debug("User deleted by identifier");
+
+        return null;
     }
 }

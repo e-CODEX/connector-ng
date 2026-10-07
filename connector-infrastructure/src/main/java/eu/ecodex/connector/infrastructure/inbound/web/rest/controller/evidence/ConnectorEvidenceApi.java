@@ -34,5 +34,5 @@ public interface ConnectorEvidenceApi {
     @ApiResponses(
         @ApiResponse(responseCode = "404", description = "Not Found")
     )
-    ResponseEntity<byte[]> download(@PathVariable String uuid) throws IOException;
+    ResponseEntity<byte[]> downloadEvidence(@PathVariable String uuid) throws IOException;
 }

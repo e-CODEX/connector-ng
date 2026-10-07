@@ -29,12 +29,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorUpdateRoleServiceTest {
+class ConnectorEditRoleServiceTest {
     @Mock
     ConnectorRoleRepository roleRepository;
 
     @InjectMocks
-    ConnectorUpdateRoleService service;
+    ConnectorEditRoleService service;
 
     @Test
     void update_should_update_role_successfully() {

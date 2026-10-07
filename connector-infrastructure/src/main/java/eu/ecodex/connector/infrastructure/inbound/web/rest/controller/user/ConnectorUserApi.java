@@ -31,9 +31,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Interface for managing connector users via REST APIs.
- * Provides operations for patching and retrieving a user.
- * This interface defines the contract for user management-related endpoints.
+ * Interface for managing connector users via REST APIs. Provides operations for patching and
+ * retrieving a user. This interface defines the contract for user management-related endpoints.
  */
 @RequestMapping(path = "/api/v1/auth/me", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "AuthenticateUserProfile", description = "API for managing connector's current user")
@@ -45,8 +44,9 @@ public interface ConnectorUserApi {
         @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
-    ConnectorUserDto patch(@AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
-                           @Valid @RequestBody @Nonnull ConnectorEditSelfRequest userRequest);
+    ConnectorUserDto editAuthenticatedUser(
+        @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
+        @Valid @RequestBody @Nonnull ConnectorEditSelfRequest userRequest);
 
     @Operation(summary = "Get the currently authenticated user account.")
     @GetMapping
@@ -54,7 +54,7 @@ public interface ConnectorUserApi {
         @ApiResponse(responseCode = "400", description = "Bad Request"),
         @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    ConnectorUserDto getByIdentifier(
+    ConnectorUserDto retrieveAuthenticatedUser(
         @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails);
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -63,10 +63,10 @@ public interface ConnectorUserApi {
     @PostMapping(path = "/change-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ApiResponses({
         @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    void updatePassword(
+    void updateAuthenticatedUserPassword(
         @AuthenticationPrincipal @Nonnull ConnectorUserDetails userDetails,
         @Valid @RequestBody @Nonnull ConnectorUpdateUserPasswordRequest userPasswordRequest);
 }

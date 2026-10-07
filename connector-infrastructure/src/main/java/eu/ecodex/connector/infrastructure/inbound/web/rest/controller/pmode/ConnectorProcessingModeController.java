@@ -59,9 +59,10 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     }
 
     @Override
-    public List<ConnectorProcessingModeServiceDto> listProcessingModeServices(String identifier) {
+    public List<ConnectorProcessingModeServiceDto> listProcessingModeServices(
+        String businessDomainIdentifier) {
         return listProcessingModeServicesService
-            .execute(identifier)
+            .execute(businessDomainIdentifier)
             .stream()
             .map(service -> ConnectorProcessingModeServiceDto.from(
                 service,
@@ -72,9 +73,10 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     }
 
     @Override
-    public List<ConnectorProcessingModeActionDto> listProcessingModeActions(String identifier) {
+    public List<ConnectorProcessingModeActionDto> listProcessingModeActions(
+        String businessDomainIdentifier) {
         return this.listProcessingModeActionsService
-            .execute(identifier)
+            .execute(businessDomainIdentifier)
             .stream()
             .map(action -> ConnectorProcessingModeActionDto.from(
                 action, testMessageProperties.getAction()
@@ -83,7 +85,7 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     }
 
     @Override
-    public List<ConnectorParty> listProcessingModeParties(String identifier) {
-        return listProcessingModePartiesService.execute(identifier);
+    public List<ConnectorParty> listProcessingModeParties(String businessDomainIdentifier) {
+        return listProcessingModePartiesService.execute(businessDomainIdentifier);
     }
 }

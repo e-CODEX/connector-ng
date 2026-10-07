@@ -20,6 +20,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -38,7 +39,16 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_PARTIES")
+@Table(name = "CONNECTOR_PARTIES",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_PARTIES_UUID", columnList = "UUID"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_NAME", columnList = "NAME"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER", columnList = "IDENTIFIER"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_ROLE", columnList = "ROLE"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_ROLE_TYPE", columnList = "ROLE_TYPE"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_CREATED_AT", columnList = "CREATED_AT"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_UPDATED_AT", columnList = "UPDATED_AT"),
+    })
 public class ConnectorPartyEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

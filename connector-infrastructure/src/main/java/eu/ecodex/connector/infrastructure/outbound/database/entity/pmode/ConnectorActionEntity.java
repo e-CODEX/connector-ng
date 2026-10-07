@@ -17,6 +17,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -35,7 +36,13 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_ACTIONS")
+@Table(name = "CONNECTOR_ACTIONS",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_ACTIONS_UUID", columnList = "UUID"),
+        @Index(name = "IDX_CONNECTOR_ACTIONS_NAME", columnList = "NAME"),
+        @Index(name = "IDX_CONNECTOR_ACTIONS_CREATED_AT", columnList = "CREATED_AT"),
+        @Index(name = "IDX_CONNECTOR_ACTIONS_UPDATED_AT", columnList = "UPDATED_AT"),
+    })
 public class ConnectorActionEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

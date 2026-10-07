@@ -12,7 +12,6 @@ package eu.ecodex.connector.infrastructure.outbound.database.entity.pmode;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.ConnectorBusinessDomainEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.message.content.ConnectorMessageBusinessDocumentEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -21,6 +20,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -45,7 +45,13 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_PROCESSING_MODES")
+@Table(name = "CONNECTOR_PROCESSING_MODES",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODES_UUID", columnList = "UUID"),
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODES_FILENAME", columnList = "FILENAME"),
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODES_CREATED_AT", columnList = "CREATED_AT"),
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODES_UPDATED_AT", columnList = "UPDATED_AT"),
+    })
 public class ConnectorProcessingModeEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

@@ -73,9 +73,11 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_USERS",
     indexes = {
+        @Index(name = "IDX_CONNECTOR_USERS_UUID", columnList = "UUID"),
         @Index(name = "IDX_CONNECTOR_USERS_EMAIL", columnList = "EMAIL"),
         @Index(name = "IDX_CONNECTOR_USERS_USERNAME", columnList = "USERNAME"),
-        @Index(name = "IDX_CONNECTOR_USERS_UUID", columnList = "UUID"),
+        @Index(name = "IDX_CONNECTOR_USERS_CREATED_AT", columnList = "CREATED_AT"),
+        @Index(name = "IDX_CONNECTOR_USERS_UPDATED_AT", columnList = "UPDATED_AT"),
     })
 public class ConnectorUserEntity extends BaseEntity {
     @Id

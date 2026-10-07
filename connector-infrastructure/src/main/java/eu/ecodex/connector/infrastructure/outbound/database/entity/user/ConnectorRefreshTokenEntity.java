@@ -37,14 +37,12 @@ import org.hibernate.annotations.UuidGenerator;
 @Table(name = "CONNECTOR_REFRESH_TOKENS",
     indexes = {
         @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_TOKEN", columnList = "TOKEN"),
-        @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_USER_ID", columnList = "USER_ID")
     })
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "user")
 public class ConnectorRefreshTokenEntity extends BaseEntity {
-
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

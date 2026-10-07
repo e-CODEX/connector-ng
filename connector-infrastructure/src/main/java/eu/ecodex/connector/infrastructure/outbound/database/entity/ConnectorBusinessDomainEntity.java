@@ -37,11 +37,7 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_BUSINESS_DOMAINS",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_UUID", columnList = "UUID"),
         @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_IDENTIFIER", columnList = "IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_SOURCE", columnList = "SOURCE"),
-        @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_CREATED_AT", columnList = "CREATED_AT"),
-        @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_UPDATED_AT", columnList = "UPDATED_AT"),
     })
 public class ConnectorBusinessDomainEntity extends BaseEntity {
     @Id

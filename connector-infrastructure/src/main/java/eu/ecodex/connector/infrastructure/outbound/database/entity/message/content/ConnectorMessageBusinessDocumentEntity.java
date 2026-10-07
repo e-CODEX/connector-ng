@@ -22,6 +22,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -41,7 +42,11 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS")
+@Table(name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS_AES_TYPE", columnList = "AES_TYPE"),
+    }
+)
 public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

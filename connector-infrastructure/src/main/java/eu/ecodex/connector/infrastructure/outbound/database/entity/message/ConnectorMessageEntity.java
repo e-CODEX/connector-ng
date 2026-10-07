@@ -60,13 +60,9 @@ import lombok.Setter;
             columnList = "REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER"),
         @Index(name = "IDX_CONNECTOR_MESSAGES_GATEWAY_NAME", columnList = "GATEWAY_NAME"),
         @Index(name = "IDX_CONNECTOR_MESSAGES_DIRECTION", columnList = "DIRECTION"),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_DELETED_AT", columnList = "DELETED_AT"),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_REJECTED_AT", columnList = "REJECTED_AT"),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_CONFIRMED_AT", columnList = "CONFIRMED_AT"),
         @Index(name = "IDX_CONNECTOR_MESSAGES_DELIVERED_TO_LINK_PARTNER_AT", columnList =
             "DELIVERED_TO_LINK_PARTNER_AT"),
         @Index(name = "IDX_CONNECTOR_MESSAGES_CREATED_AT", columnList = "CREATED_AT"),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_UPDATED_AT", columnList = "UPDATED_AT"),
     })
 public class ConnectorMessageEntity extends BaseEntity {
     @Id

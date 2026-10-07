@@ -53,8 +53,6 @@ import lombok.Setter;
             = "ORIGINAL_SENDER"),
         @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_FINAL_RECIPIENT", columnList
             = "FINAL_RECIPIENT"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_CREATED_AT", columnList = "CREATED_AT"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_UPDATED_AT", columnList = "UPDATED_AT"),
     })
 public class ConnectorMessageAS4PropertiesEntity extends BaseEntity {
     @Id

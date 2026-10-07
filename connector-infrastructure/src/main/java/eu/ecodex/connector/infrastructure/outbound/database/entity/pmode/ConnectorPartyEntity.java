@@ -41,13 +41,10 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_PARTIES",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_PARTIES_UUID", columnList = "UUID"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_NAME", columnList = "NAME"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER", columnList = "IDENTIFIER"),
         @Index(name = "IDX_CONNECTOR_PARTIES_ROLE", columnList = "ROLE"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER", columnList = "IDENTIFIER"),
+        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER_TYPE", columnList = "IDENTIFIER_TYPE"),
         @Index(name = "IDX_CONNECTOR_PARTIES_ROLE_TYPE", columnList = "ROLE_TYPE"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_CREATED_AT", columnList = "CREATED_AT"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_UPDATED_AT", columnList = "UPDATED_AT"),
     })
 public class ConnectorPartyEntity extends BaseEntity {
     @Id

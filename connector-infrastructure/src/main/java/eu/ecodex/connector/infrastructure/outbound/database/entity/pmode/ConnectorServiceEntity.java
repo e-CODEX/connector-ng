@@ -38,11 +38,8 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_SERVICES",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_SERVICES_UUID", columnList = "UUID"),
         @Index(name = "IDX_CONNECTOR_SERVICES_NAME", columnList = "NAME"),
         @Index(name = "IDX_CONNECTOR_SERVICES_TYPE", columnList = "TYPE"),
-        @Index(name = "IDX_CONNECTOR_SERVICES_CREATED_AT", columnList = "CREATED_AT"),
-        @Index(name = "IDX_CONNECTOR_SERVICES_UPDATED_AT", columnList = "UPDATED_AT"),
     })
 public class ConnectorServiceEntity extends BaseEntity {
     @Id

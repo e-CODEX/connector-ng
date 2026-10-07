@@ -23,6 +23,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -43,7 +44,14 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_TRANSPORT_STEPS")
+@Table(name = "CONNECTOR_MESSAGE_TRANSPORT_STEPS",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_REMOTE_SYSTEM_IDENTIFIER",
+            columnList = "REMOTE_SYSTEM_IDENTIFIER"),
+        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_LINK_PARTNER_NAME", columnList =
+            "LINK_PARTNER_NAME"),
+        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_STATUS", columnList = "STATUS"),
+    })
 public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

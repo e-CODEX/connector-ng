@@ -28,7 +28,7 @@ h2 = "2.4.240"
 mysql = "8.0.33"
 mariadb = "3.5.9"
 postgresql = "42.7.11"
-oracle = "23.26.2.0.0"
+oracle = "23.26.3.0.0"
 # jta
 atomikos = "6.0.1"
 # other

@@ -10,10 +10,12 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
-import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
     private final ConnectorUserRoleJpaRepository jpaRepository;
+    private final ConnectorUserJpaRepository userJpaRepository;
 
-    public ConnectorDBRoleRepository(ConnectorUserRoleJpaRepository jpaRepository) {
+    public ConnectorDBRoleRepository(ConnectorUserRoleJpaRepository jpaRepository,
+                                     ConnectorUserJpaRepository userJpaRepository) {
         this.jpaRepository = jpaRepository;
+        this.userJpaRepository = userJpaRepository;
     }
 
     @Override
@@ -76,10 +80,10 @@ public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
     @Transactional
     public void deleteByUuid(@NonNull String identifier) {
         var entity = jpaRepository.findByUuid(identifier).orElseThrow(() ->
-            new ConnectorUserNotFoundException("No user role found with id " + identifier));
+            new ConnectorRoleNotFoundException("No user role found with id " + identifier));
 
-        if (!CollectionUtils.isEmpty(entity.getUsers())) {
-            entity.getUsers().forEach(user -> user.removeRole(entity));
+        if (userJpaRepository.existsByRolesId(entity.getId())) {
+            throw new ConnectorRoleInUseException("User role is currently in use");
         }
         jpaRepository.delete(entity);
     }

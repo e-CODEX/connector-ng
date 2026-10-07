@@ -11,15 +11,20 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -32,9 +37,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorDBRoleRepositoryTest {
-
     @Mock
     ConnectorUserRoleJpaRepository jpaRepository;
+    @Mock
+    ConnectorUserJpaRepository userJpaRepository;
 
     @InjectMocks
     private ConnectorDBRoleRepository repository;
@@ -58,7 +64,7 @@ class ConnectorDBRoleRepositoryTest {
         verify(jpaRepository).findByUuid(uuid);
         verify(jpaRepository).save(roleEntity);
 
-        verifyNoMoreInteractions(jpaRepository);
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -77,7 +83,7 @@ class ConnectorDBRoleRepositoryTest {
         assertThat(found.get()).isEqualTo(role);
         verify(jpaRepository).findByUuid(uuid);
 
-        verifyNoMoreInteractions(jpaRepository);
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -97,7 +103,7 @@ class ConnectorDBRoleRepositoryTest {
         assertThat(found.get()).isEqualTo(role);
         verify(jpaRepository).findByName(name);
 
-        verifyNoMoreInteractions(jpaRepository);
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -118,15 +124,20 @@ class ConnectorDBRoleRepositoryTest {
         assertThat(found.getFirst()).isEqualTo(role);
         verify(jpaRepository).findAll();
 
-        verifyNoMoreInteractions(jpaRepository);
+        assertNoMoreInteractions();
     }
 
     @Test
     void deleteByUuid_should_delete_role() {
         // Given
         var uuid = "uuid";
-        var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name("test").build();
+        var roleEntity = ConnectorRoleEntity.builder()
+            .id(1L)
+            .uuid(uuid).name("test")
+            .build();
+
         when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.of(roleEntity));
+        when(userJpaRepository.existsByRolesId(anyLong())).thenReturn(Boolean.FALSE);
 
         // When
         repository.deleteByUuid(uuid);
@@ -134,8 +145,46 @@ class ConnectorDBRoleRepositoryTest {
         // Then
         verify(jpaRepository).findByUuid(uuid);
         verify(jpaRepository).delete(roleEntity);
+        verify(userJpaRepository).existsByRolesId(1L);
 
-        verifyNoMoreInteractions(jpaRepository);
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void deleteByUuid_should_throw_exception_when_role_not_found() {
+        // Given
+        var uuid = "uuid";
+
+        when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.empty());
+
+        // When
+        assertThrows(ConnectorRoleNotFoundException.class, () -> repository.deleteByUuid(uuid));
+
+        // Then
+        verify(jpaRepository).findByUuid(uuid);
+        assertNoMoreInteractions();
+    }
+
+    @Test
+    void deleteByUuid_should_throw_exception_when_role_is_in_use() {
+        // Given
+        var uuid = "uuid";
+        var roleEntity = ConnectorRoleEntity.builder()
+            .id(1L)
+            .uuid(uuid).name("test")
+            .build();
+
+        when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.of(roleEntity));
+        when(userJpaRepository.existsByRolesId(anyLong())).thenReturn(Boolean.TRUE);
+
+        // When
+        assertThrows(ConnectorRoleInUseException.class, () -> repository.deleteByUuid(uuid));
+
+        // Then
+        verify(jpaRepository).findByUuid(uuid);
+        verify(userJpaRepository).existsByRolesId(1L);
+
+        assertNoMoreInteractions();
     }
 
     @Test
@@ -156,6 +205,10 @@ class ConnectorDBRoleRepositoryTest {
         assertThat(found.stream().toList().getFirst()).isEqualTo(role);
         verify(jpaRepository).findByNameIn(names);
 
-        verifyNoMoreInteractions(jpaRepository);
+        assertNoMoreInteractions();
+    }
+
+    private void assertNoMoreInteractions() {
+        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
     }
 }

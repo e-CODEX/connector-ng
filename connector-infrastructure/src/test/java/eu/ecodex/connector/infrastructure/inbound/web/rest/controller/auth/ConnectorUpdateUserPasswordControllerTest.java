@@ -21,10 +21,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.user.ConnectorUserInvalidPasswordException;
+import eu.ecodex.connector.application.port.api.auth.ConnectorLoginUser;
+import eu.ecodex.connector.application.port.api.auth.ConnectorLogoutUser;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
@@ -49,7 +50,9 @@ import tools.jackson.databind.ObjectMapper;
 class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/auth/change-password";
     @MockitoBean
-    private ConnectorUserAuthenticationProvider userAuthenticationProvider;
+    ConnectorLoginUser loginUser;
+    @MockitoBean
+    ConnectorLogoutUser logoutUser;
     @MockitoBean
     private ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
@@ -149,7 +152,7 @@ class ConnectorUpdateUserPasswordControllerTest extends AbstractWebMvcTest {
     }
 
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(userAuthenticationProvider, updateUserPasswordAtFirstLogin,
+        verifyNoMoreInteractions(loginUser, logoutUser, updateUserPasswordAtFirstLogin,
             refreshUserRefreshToken);
     }
 

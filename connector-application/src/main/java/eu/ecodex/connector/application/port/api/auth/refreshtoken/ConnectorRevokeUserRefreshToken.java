@@ -31,8 +31,8 @@ public interface ConnectorRevokeUserRefreshToken {
      * This method ensures that the provided refresh token is disabled and
      * cannot be used to refresh an authentication session.
      *
-     * @param userIdentifier authenticated user
-     * @param refreshToken   the refresh token to be revoked
+     * @param uuid         authenticated user identifier
+     * @param refreshToken the refresh token to be revoked
      */
-    void execute(@Nonnull String userIdentifier, @Nonnull String refreshToken);
+    void execute(@Nonnull String uuid, @Nonnull String refreshToken);
 }

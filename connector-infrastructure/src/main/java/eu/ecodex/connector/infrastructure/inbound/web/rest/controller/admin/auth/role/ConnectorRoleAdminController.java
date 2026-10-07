@@ -69,9 +69,8 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     }
 
     @Override
-    public ConnectorRoleDto editRole(
-        @NonNull String identifier,
-        @Valid ConnectorRoleDto userRoleDto) {
+    public ConnectorRoleDto editRole(@NonNull String identifier,
+                                     @Valid ConnectorRoleDto userRoleDto) {
         log.debug("Updating existing user");
         var updated =
             connectorEditRole.execute(identifier, ConnectorRoleDto.toDomain(userRoleDto));
@@ -88,8 +87,8 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     @Override
     public List<ConnectorRoleDto> listRoles() {
         return connectorListRole.execute().stream()
-                                .map(ConnectorRoleDto::from)
-                                .toList();
+            .map(ConnectorRoleDto::from)
+            .toList();
     }
 
     @Override

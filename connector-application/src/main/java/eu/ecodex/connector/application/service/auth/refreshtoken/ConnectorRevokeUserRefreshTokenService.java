@@ -30,14 +30,14 @@ public class ConnectorRevokeUserRefreshTokenService implements ConnectorRevokeUs
     }
 
     @Override
-    public void execute(@NonNull String userIdentifier, @NonNull String refreshToken) {
+    public void execute(@NonNull String uuid, @NonNull String refreshToken) {
         var found = repository.findByToken(refreshToken)
             .orElseThrow(() ->
                 new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
-        if (!found.user().uuid().equals(userIdentifier)) {
+        if (!found.user().uuid().equals(uuid)) {
             throw new ConnectorUserBadCredentialsException(
-                "Invalid refresh token for user " + userIdentifier);
+                "Invalid refresh token for user " + uuid);
         }
 
         log.info("Revoking refresh token {}", refreshToken);

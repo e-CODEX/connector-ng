@@ -10,27 +10,27 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.advice;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
-import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledException;
-import eu.ecodex.connector.application.exception.ConnectorUserAccountInactiveException;
-import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.exception.ConnectorUserIdentifierMismatchException;
-import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorUserPasswordUpdateNotRequiredException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleIdentifierException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAccountInactiveException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserIdentifierMismatchException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserInvalidPasswordException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserPasswordUpdateNotRequiredException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorInternalServerException;
@@ -141,9 +141,9 @@ public class GlobalExceptionHandler {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorTestMessageDisabledException.class)
+    @ExceptionHandler(ConnectorC2CTestMessageDisabledException.class)
     public ErrorResponse handleBTestMessageDisabledException(
-        ConnectorTestMessageDisabledException exception) {
+        ConnectorC2CTestMessageDisabledException exception) {
         return new ErrorResponse(
             HttpStatus.CONFLICT.value(), exception.getMessage()
         );
@@ -269,10 +269,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-            .getAllErrors()
-            .stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
+                                  .getAllErrors()
+                                  .stream()
+                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                  .collect(Collectors.joining(", "));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

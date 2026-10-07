@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import org.junit.jupiter.api.Test;

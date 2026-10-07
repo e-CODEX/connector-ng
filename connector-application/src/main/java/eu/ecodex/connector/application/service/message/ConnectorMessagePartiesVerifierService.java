@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message;
 
-import eu.ecodex.connector.application.exception.ConnectorMessagePartyException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessagePartyException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessagePartiesVerifier;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;

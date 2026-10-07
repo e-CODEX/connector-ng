@@ -23,7 +23,7 @@ import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.TriggeredEvidenceMessageTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;

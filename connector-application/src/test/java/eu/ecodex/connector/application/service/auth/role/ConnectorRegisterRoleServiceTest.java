@@ -18,8 +18,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorRoleIdentifierException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleIdentifierException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Optional;

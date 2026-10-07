@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorListRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;

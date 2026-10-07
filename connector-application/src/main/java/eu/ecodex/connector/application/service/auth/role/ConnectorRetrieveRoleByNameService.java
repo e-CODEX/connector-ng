@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
@@ -20,10 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation for retrieving user roles within the Connector system.
- * This class provides methods to fetch user role details based on a unique identifier or a
- * username.
- * It interacts with the {@link ConnectorRoleRepository} to query the underlying data source.
+ * Service implementation for retrieving user roles within the Connector system. This class provides
+ * methods to fetch user role details based on a unique identifier or a username. It interacts with
+ * the {@link ConnectorRoleRepository} to query the underlying data source.
  *
  * <p>The service is designed to throw a {@link NotFoundException} if a requested user role
  * cannot be located by the provided identifier or name.

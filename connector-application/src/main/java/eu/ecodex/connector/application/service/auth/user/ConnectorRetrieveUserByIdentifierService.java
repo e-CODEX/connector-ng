@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
@@ -21,9 +21,8 @@ import org.springframework.stereotype.Service;
 
 /**
  * Implementation of the {@link ConnectorRetrieveUserByIdentifier} interface, providing services for
- * retrieving
- * {@link ConnectorUser} entities from a repository based on various attributes such as identifier,
- * username, email, or a combination of username and email.
+ * retrieving {@link ConnectorUser} entities from a repository based on various attributes such as
+ * identifier, username, email, or a combination of username and email.
  *
  * <p>This service integrates with a {@link ConnectorUserRepository} to perform data operations and
  * throws a {@link NotFoundException} when a user cannot be found based on the provided parameters.

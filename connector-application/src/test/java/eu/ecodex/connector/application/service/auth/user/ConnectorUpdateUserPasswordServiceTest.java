@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserInvalidPasswordException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;

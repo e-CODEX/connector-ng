@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.businessdomain;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotEnabledException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import jakarta.annotation.Nonnull;
 

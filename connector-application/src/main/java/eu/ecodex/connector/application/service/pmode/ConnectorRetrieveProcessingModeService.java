@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.pmode;
 
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;

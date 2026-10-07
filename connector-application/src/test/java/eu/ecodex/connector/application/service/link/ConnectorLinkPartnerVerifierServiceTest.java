@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorLinkPartnerSubmissionException;
+import eu.ecodex.connector.application.exception.linkpartner.ConnectorLinkPartnerSubmissionException;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import org.junit.jupiter.api.DisplayName;

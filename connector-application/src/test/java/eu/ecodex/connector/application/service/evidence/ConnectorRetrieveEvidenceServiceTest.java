@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.EvidenceTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

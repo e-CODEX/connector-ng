@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.link;
 
-import eu.ecodex.connector.application.exception.ConnectorLinkPartnerException;
+import eu.ecodex.connector.application.exception.linkpartner.ConnectorLinkPartnerException;
 import eu.ecodex.connector.application.port.api.link.ConnectorFindLinkPartner;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;

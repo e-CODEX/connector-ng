@@ -16,8 +16,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;

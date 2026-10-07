@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message.outbound;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageException;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageAttachmentLinker;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageStager;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;

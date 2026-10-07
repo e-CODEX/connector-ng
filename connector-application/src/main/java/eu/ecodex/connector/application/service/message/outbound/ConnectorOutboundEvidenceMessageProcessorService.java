@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.service.message.outbound;
 
-import eu.ecodex.connector.application.exception.ConnectorEvidenceException;
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
-import eu.ecodex.connector.application.exception.ConnectorMessageNotFoundException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenceCreator;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;

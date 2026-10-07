@@ -17,8 +17,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorDownloadAttachmentService;

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message.inbound;
 
-import eu.ecodex.connector.application.exception.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotRelevantException;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageProcessor;

@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.exception.ConnectorUserInvalidPasswordException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserInvalidPasswordException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordCommand;

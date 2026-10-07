@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.attachement;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorRetrieveAttachment;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;

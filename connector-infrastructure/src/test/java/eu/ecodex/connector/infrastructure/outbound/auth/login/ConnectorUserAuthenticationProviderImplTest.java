@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRegisterUserRefreshTokenService;
 import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRevokeUserRefreshTokenService;

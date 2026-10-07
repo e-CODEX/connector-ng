@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;

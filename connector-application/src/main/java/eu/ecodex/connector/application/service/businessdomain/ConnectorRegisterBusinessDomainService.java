@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.businessdomain;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainAlreadyExistsException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorRegisterBusinessDomain;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;

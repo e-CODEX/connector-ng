@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.pmode;
 
-import eu.ecodex.connector.application.exception.ConnectorBusinessDomainNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeException;
+import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;

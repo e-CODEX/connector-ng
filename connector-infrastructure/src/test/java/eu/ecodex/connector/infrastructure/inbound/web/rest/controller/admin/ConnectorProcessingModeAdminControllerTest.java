@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ProcessingModeTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;

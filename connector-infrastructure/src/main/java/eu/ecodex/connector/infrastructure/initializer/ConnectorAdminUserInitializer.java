@@ -15,9 +15,9 @@ import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultAdminRo
 import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultLoadTesterRole;
 import static eu.ecodex.connector.domain.model.user.ConnectorRole.defaultUserRole;
 
-import eu.ecodex.connector.application.exception.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorAssignRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRegisterRole;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;

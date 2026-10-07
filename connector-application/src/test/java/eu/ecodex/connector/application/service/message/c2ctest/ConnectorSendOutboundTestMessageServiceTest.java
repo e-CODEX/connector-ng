@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorTestMessageDisabledException;
+import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
@@ -159,8 +159,8 @@ class ConnectorSendOutboundTestMessageServiceTest {
             stubTestMessagesEnabled(false);
 
             assertThatThrownBy(() -> service.execute(createCommand()))
-                .isInstanceOf(ConnectorTestMessageDisabledException.class)
-                .hasMessage("Test message is disabled");
+                .isInstanceOf(ConnectorC2CTestMessageDisabledException.class)
+                .hasMessage("C2C Test message is disabled");
 
             verifyNoInteractions(
                 businessDomainVerifierService,

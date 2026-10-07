@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
-import eu.ecodex.connector.application.exception.ConnectorRoleNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorUserNotFoundException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 

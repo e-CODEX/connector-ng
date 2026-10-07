@@ -17,7 +17,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorUserAlreadyExistsException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;

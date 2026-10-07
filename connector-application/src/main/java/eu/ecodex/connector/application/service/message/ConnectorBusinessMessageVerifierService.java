@@ -10,10 +10,10 @@
 
 package eu.ecodex.connector.application.service.message;
 
-import eu.ecodex.connector.application.exception.ConnectorActionNotFoundException;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
-import eu.ecodex.connector.application.exception.ConnectorServiceNotFoundException;
 import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeActionNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeServiceNotFoundException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
@@ -160,7 +160,7 @@ public class ConnectorBusinessMessageVerifierService implements ConnectorBusines
                     "Service with name [{}] and business domain [{}] not found",
                     serviceName, businessDomainIdentifier
                 );
-                throw new ConnectorServiceNotFoundException(
+                throw new ConnectorProcessingModeServiceNotFoundException(
                     "Service [{" + serviceName + "}] not found"
                 );
             }
@@ -177,7 +177,7 @@ public class ConnectorBusinessMessageVerifierService implements ConnectorBusines
                     actionName, businessDomainIdentifier
                 );
 
-                throw new ConnectorActionNotFoundException(
+                throw new ConnectorProcessingModeActionNotFoundException(
                     "action [{" + actionName + "}] not found"
                 );
             }

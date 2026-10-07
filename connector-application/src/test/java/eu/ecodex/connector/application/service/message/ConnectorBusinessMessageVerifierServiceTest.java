@@ -22,7 +22,7 @@ import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.application.exception.ConnectorProcessingModeVerificationException;
+import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;

@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
-import eu.ecodex.connector.application.exception.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;

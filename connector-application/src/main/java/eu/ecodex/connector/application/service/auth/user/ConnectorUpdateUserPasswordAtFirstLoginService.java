@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.exception.ConnectorUserPasswordUpdateNotRequiredException;
+import eu.ecodex.connector.application.exception.user.ConnectorUserPasswordUpdateNotRequiredException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPassword;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;

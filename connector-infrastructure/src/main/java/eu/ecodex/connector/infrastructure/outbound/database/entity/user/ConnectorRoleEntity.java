@@ -17,7 +17,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
@@ -53,11 +52,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_ROLES",
-        indexes = {
-                @Index(name = "IDX_CONNECTOR_ROLES_UUID", columnList = "UUID"),
-                @Index(name = "IDX_CONNECTOR_ROLES_NAME", columnList = "NAME"),
-        })
+@Table(name = "CONNECTOR_ROLES")
 public class ConnectorRoleEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

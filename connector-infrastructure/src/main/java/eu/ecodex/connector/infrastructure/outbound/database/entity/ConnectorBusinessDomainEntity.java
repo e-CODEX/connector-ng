@@ -18,6 +18,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +35,10 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_BUSINESS_DOMAINS")
+@Table(name = "CONNECTOR_BUSINESS_DOMAINS",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_IDENTIFIER", columnList = "IDENTIFIER"),
+    })
 public class ConnectorBusinessDomainEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

@@ -12,7 +12,6 @@ package eu.ecodex.connector.infrastructure.outbound.database.entity.pmode;
 
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.ConnectorBusinessDomainEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.message.content.ConnectorMessageBusinessDocumentEntity;
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

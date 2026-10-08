@@ -24,6 +24,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -49,7 +50,20 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGES")
+@Table(name = "CONNECTOR_MESSAGES",
+    indexes = {
+        @Index(name = "IDX_CONNECTOR_MESSAGES_IDENTIFIER", columnList = "IDENTIFIER"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_BACKEND_NAME", columnList = "BACKEND_NAME"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_BACKEND_MESSAGE_IDENTIFIER", columnList =
+            "BACKEND_MESSAGE_IDENTIFIER"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER",
+            columnList = "REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_GATEWAY_NAME", columnList = "GATEWAY_NAME"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_DIRECTION", columnList = "DIRECTION"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_DELIVERED_TO_LINK_PARTNER_AT", columnList =
+            "DELIVERED_TO_LINK_PARTNER_AT"),
+        @Index(name = "IDX_CONNECTOR_MESSAGES_CREATED_AT", columnList = "CREATED_AT"),
+    })
 public class ConnectorMessageEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

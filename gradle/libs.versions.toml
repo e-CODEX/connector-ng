@@ -21,7 +21,7 @@ jaxb-impl = "4.0.6"
 jaxb-xjc = "4.0.9"
 # spring boot
 spring-boot = "4.1.1"
-spring-doc = "3.0.1"
+spring-doc = "3.1.1"
 s3 = "2.41.30"
 # dbms
 h2 = "2.4.240"

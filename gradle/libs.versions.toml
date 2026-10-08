@@ -33,7 +33,7 @@ oracle = "23.26.3.0.0"
 atomikos = "6.0.1"
 # other
 dss-tool = "6.1"
-itextpdf = "9.5.0"
+itextpdf = "9.8.0"
 jackson-databind = "2.21.7"
 lombok = "1.18.42"
 micrometer = "1.7.1"

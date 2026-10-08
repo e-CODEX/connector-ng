@@ -285,7 +285,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 List.of(BusinessMessageTestFixtures.createConfirmedMessage()), 1, 1, 1
             );
 
-            when(listMessagesService.execute(any(), any(), any(), any(), any(), any()))
+            when(listMessagesService.execute(any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(pageResult);
 
             mockMvc.perform(get(URL)
@@ -303,6 +303,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
             // messages are always listed newest first; no filter was sent
             verify(listMessagesService).execute(
                 ConnectorPageRequest.of(0, 20, "createdAt", SortDirection.DESC),
+                null,
                 null,
                 null,
                 null,

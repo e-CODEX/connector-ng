@@ -11,6 +11,7 @@
 package eu.ecodex.connector.application.port.api.message;
 
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
@@ -30,6 +31,7 @@ public interface ConnectorListMessages {
      * @param identifier               the identifier of the message to be retrieved (id,
      *                                 ebmsMessageId, conversationId, etc.)
      * @param backendName              the name of the backend to which the message belongs to.
+     * @param direction                the message direction.
      * @param businessDomainIdentifier the identifier of the business domain to which the message
      *                                 belongs to.
      * @param service                  the service name of the message.
@@ -42,6 +44,7 @@ public interface ConnectorListMessages {
         @Nonnull ConnectorPageRequest pageRequest,
         String identifier,
         String backendName,
+        ConnectorMessageDirection direction,
         String businessDomainIdentifier,
         String service,
         String action

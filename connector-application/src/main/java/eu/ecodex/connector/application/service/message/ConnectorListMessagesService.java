@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import lombok.NonNull;
@@ -34,6 +35,7 @@ public class ConnectorListMessagesService implements ConnectorListMessages {
         @NonNull ConnectorPageRequest pageRequest,
         String identifier,
         String backendName,
+        ConnectorMessageDirection direction,
         String businessDomainIdentifier,
         String service,
         String action) {
@@ -41,6 +43,7 @@ public class ConnectorListMessagesService implements ConnectorListMessages {
             pageRequest,
             identifier,
             backendName,
+            direction,
             businessDomainIdentifier,
             service,
             action

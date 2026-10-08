@@ -135,11 +135,11 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
     boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
 
     /**
-     * checks if users has role id in parameter.
+     * checks if users has role identifier in parameter.
      *
-     * @param roleId roleId to delete
+     * @param uuid role uuid to check
      *
      * @return true if users exists and false else
      */
-    boolean existsByRolesId(long roleId);
+    boolean existsByRolesUuid(@Nonnull String uuid);
 }

@@ -165,4 +165,13 @@ public interface ConnectorUserRepository {
      *     than the provided UUID, {@code false} otherwise
      */
     boolean existsByUsernameAndUuidNot(@Nonnull String username, @Nonnull String uuid);
+
+    /**
+     * Checks if a role is in use by a connector user.
+     *
+     * @param uuid role identifier to check
+     *
+     * @return true if found else not
+     */
+    boolean existsByRolesUuid(@Nonnull String uuid);
 }

@@ -55,8 +55,7 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
     public ConnectorDBUserRepository(
         ConnectorUserJpaRepository jpaRepository,
         ConnectorUserRoleJpaRepository roleRepository,
-        ConnectorUserRefreshTokenJpaRepository
-            refreshTokenRepository) {
+        ConnectorUserRefreshTokenJpaRepository refreshTokenRepository) {
         this.jpaRepository = jpaRepository;
         this.roleRepository = roleRepository;
         this.refreshTokenRepository = refreshTokenRepository;
@@ -142,6 +141,10 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
         return jpaRepository.existsByUsernameAndUuidNot(username, identifier);
     }
 
+    @Override
+    public boolean existsByRolesUuid(@NonNull String identifier) {
+        return jpaRepository.existsByRolesUuid(identifier);
+    }
 
     /**
      * Converts a domain user model into a JPA entity representation.
@@ -150,7 +153,7 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
      *
      * @return a {@code ConnectorUserEntity} object representing the JPA entity
      */
-    public ConnectorUserEntity toEntity(@NonNull ConnectorUser domainUser) {
+    private ConnectorUserEntity toEntity(@NonNull ConnectorUser domainUser) {
         return ConnectorUserEntity.builder()
             .uuid(domainUser.uuid())
             .username(domainUser.username())
@@ -193,8 +196,8 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
             return null;
         }
         var rolesNames = domainUserRoles.stream()
-                                        .map(ConnectorRole::name)
-                                        .collect(Collectors.toUnmodifiableSet());
+            .map(ConnectorRole::name)
+            .collect(Collectors.toUnmodifiableSet());
 
         return roleRepository.findByNameIn(rolesNames);
     }

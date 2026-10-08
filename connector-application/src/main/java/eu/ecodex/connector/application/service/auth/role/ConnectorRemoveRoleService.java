@@ -10,9 +10,12 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
+import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
+import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,13 +38,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConnectorRemoveRoleService implements ConnectorRemoveRole {
     private final ConnectorRoleRepository repository;
+    private final ConnectorUserRepository userRepository;
 
-    public ConnectorRemoveRoleService(ConnectorRoleRepository repository) {
+    public ConnectorRemoveRoleService(ConnectorRoleRepository repository,
+                                      ConnectorUserRepository userRepository) {
         this.repository = repository;
+        this.userRepository = userRepository;
     }
 
     @Override
     public void execute(@Nonnull String roleIdentifier) {
+        repository.findByUuid(roleIdentifier).orElseThrow(() ->
+            new ConnectorRoleNotFoundException("No user role found with id " + roleIdentifier));
+
+        if (userRepository.existsByRolesUuid(roleIdentifier)) {
+            throw new ConnectorRoleInUseException("User role is currently in use");
+        }
         repository.deleteByUuid(roleIdentifier);
     }
 }

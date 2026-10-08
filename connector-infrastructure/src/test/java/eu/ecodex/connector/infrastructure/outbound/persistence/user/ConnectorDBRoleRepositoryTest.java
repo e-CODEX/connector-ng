@@ -13,202 +13,234 @@ package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
-import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorDBRoleRepositoryTest {
     @Mock
     ConnectorUserRoleJpaRepository jpaRepository;
-    @Mock
-    ConnectorUserJpaRepository userJpaRepository;
 
     @InjectMocks
     private ConnectorDBRoleRepository repository;
 
-    @Test
-    void save_should_save_role_to_database() {
-        // Given
-        var uuid = "uuid";
-        var name = "test";
-        var role = ConnectorRole.builder().uuid(uuid).name(name).build();
-        var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name(name).build();
-        when(jpaRepository.findByUuid(any())).thenReturn(Optional.of(roleEntity));
-        when(jpaRepository.save(any())).thenReturn(roleEntity);
-
-        // When
-        var saved = repository.save(role);
-
-        // Then
-        assertThat(saved).isNotNull();
-        assertThat(saved).isEqualTo(role);
-        verify(jpaRepository).findByUuid(uuid);
-        verify(jpaRepository).save(roleEntity);
-
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void findByUuid_should_find_role_by_uuid() {
-        // Given
-        var uuid = "uuid";
-        var role = ConnectorRole.builder().uuid(uuid).name("test").build();
-        var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name("test").build();
-        when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.of(roleEntity));
-
-        // When
-        var found = repository.findByUuid(uuid);
-
-        // Then
-        assertThat(found).isPresent();
-        assertThat(found.get()).isEqualTo(role);
-        verify(jpaRepository).findByUuid(uuid);
-
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void findByName_should_find_role_by_name() {
-        // Given
-        var uuid = "uuid";
-        var name = "test";
-        var role = ConnectorRole.builder().uuid(uuid).name(name).build();
-        var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name(name).build();
-        when(jpaRepository.findByName(anyString())).thenReturn(Optional.of(roleEntity));
-
-        // When
-        var found = repository.findByName(name);
-
-        // Then
-        assertThat(found).isPresent();
-        assertThat(found.get()).isEqualTo(role);
-        verify(jpaRepository).findByName(name);
-
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void findAll_should_find_all_roles() {
-        // Given
-        var uuid = "uuid";
-        var name = "test";
-        var role = ConnectorRole.builder().uuid(uuid).name(name).build();
-        var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name(name).build();
-        when(jpaRepository.findAll()).thenReturn(List.of(roleEntity));
-
-        // When
-        var found = repository.findAll();
-
-        // Then
-        assertThat(found).isNotEmpty();
-        assertThat(found).hasSize(1);
-        assertThat(found.getFirst()).isEqualTo(role);
-        verify(jpaRepository).findAll();
-
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void deleteByUuid_should_delete_role() {
-        // Given
-        var uuid = "uuid";
-        var roleEntity = ConnectorRoleEntity.builder()
-            .id(1L)
-            .uuid(uuid).name("test")
-            .build();
-
-        when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.of(roleEntity));
-        when(userJpaRepository.existsByRolesId(anyLong())).thenReturn(Boolean.FALSE);
-
-        // When
-        repository.deleteByUuid(uuid);
-
-        // Then
-        verify(jpaRepository).findByUuid(uuid);
-        verify(jpaRepository).delete(roleEntity);
-        verify(userJpaRepository).existsByRolesId(1L);
-
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void deleteByUuid_should_throw_exception_when_role_not_found() {
-        // Given
-        var uuid = "uuid";
-
-        when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.empty());
-
-        // When
-        assertThrows(ConnectorRoleNotFoundException.class, () -> repository.deleteByUuid(uuid));
-
-        // Then
-        verify(jpaRepository).findByUuid(uuid);
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void deleteByUuid_should_throw_exception_when_role_is_in_use() {
-        // Given
-        var uuid = "uuid";
-        var roleEntity = ConnectorRoleEntity.builder()
-            .id(1L)
-            .uuid(uuid).name("test")
-            .build();
-
-        when(jpaRepository.findByUuid(anyString())).thenReturn(Optional.of(roleEntity));
-        when(userJpaRepository.existsByRolesId(anyLong())).thenReturn(Boolean.TRUE);
-
-        // When
-        assertThrows(ConnectorRoleInUseException.class, () -> repository.deleteByUuid(uuid));
-
-        // Then
-        verify(jpaRepository).findByUuid(uuid);
-        verify(userJpaRepository).existsByRolesId(1L);
-
-        assertNoMoreInteractions();
-    }
-
-    @Test
-    void findByNameIn_should_find_roles_by_name_in() {
-        // Given
-        var uuid = "uuid";
-        var name = "test";
-        var names = Set.of(name);
-        var role = ConnectorRole.builder().uuid(uuid).name(name).build();
-        var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name(name).build();
-        when(jpaRepository.findByNameIn(anySet())).thenReturn(Set.of(roleEntity));
-
-        // When
-        var found = repository.findByNameIn(names);
-
-        // Then
-        assertThat(found).isNotEmpty();
-        assertThat(found.stream().toList().getFirst()).isEqualTo(role);
-        verify(jpaRepository).findByNameIn(names);
-
-        assertNoMoreInteractions();
-    }
-
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verifyNoMoreInteractions(jpaRepository);
+    }
+
+    @Nested
+    class Save {
+
+        @Test
+        void should_save_role_to_database() {
+            // Given
+            var uuid = "uuid";
+            var name = "test";
+            var role = ConnectorRole.builder().uuid(uuid).name(name).build();
+            var roleEntity = ConnectorRoleEntity.builder().uuid(uuid).name(name).build();
+
+            when(jpaRepository.findByUuid(any())).thenReturn(Optional.of(roleEntity));
+            when(jpaRepository.save(any())).thenReturn(roleEntity);
+
+            // When
+            var saved = repository.save(role);
+
+            // Then
+            assertThat(saved).isNotNull();
+            assertThat(saved).isEqualTo(role);
+            verify(jpaRepository).findByUuid(uuid);
+            verify(jpaRepository).save(roleEntity);
+
+            assertNoMoreInteractions();
+        }
+    }
+
+    @Nested
+    class FindByUuid {
+
+        @Test
+        void should_find_role_by_uuid() {
+            // Given
+            var uuid = "uuid";
+            var role = ConnectorRole.builder()
+                .uuid(uuid)
+                .name("test")
+                .build();
+            var roleEntity = ConnectorRoleEntity.builder()
+                .uuid(uuid)
+                .name("test")
+                .build();
+
+            when(jpaRepository.findByUuid(anyString()))
+                .thenReturn(Optional.of(roleEntity));
+
+            // When
+            var found = repository.findByUuid(uuid);
+
+            // Then
+            assertThat(found).isPresent();
+            assertThat(found.get()).isEqualTo(role);
+            verify(jpaRepository).findByUuid(uuid);
+
+            assertNoMoreInteractions();
+        }
+    }
+
+    @Nested
+    class FindByName {
+
+        @Test
+        void should_find_role_by_name() {
+            // Given
+            var uuid = "uuid";
+            var name = "test";
+            var role = ConnectorRole.builder()
+                .uuid(uuid)
+                .name(name)
+                .build();
+            var roleEntity = ConnectorRoleEntity.builder()
+                .uuid(uuid)
+                .name(name)
+                .build();
+
+            when(jpaRepository.findByName(anyString()))
+                .thenReturn(Optional.of(roleEntity));
+
+            // When
+            var found = repository.findByName(name);
+
+            // Then
+            assertThat(found).isPresent();
+            assertThat(found.get()).isEqualTo(role);
+            verify(jpaRepository).findByName(name);
+
+            assertNoMoreInteractions();
+        }
+    }
+
+    @Nested
+    class FindAll {
+
+        @Test
+        void should_find_all_roles() {
+            // Given
+            var uuid = "uuid";
+            var name = "test";
+            var role = ConnectorRole.builder()
+                .uuid(uuid)
+                .name(name)
+                .build();
+            var roleEntity = ConnectorRoleEntity.builder()
+                .uuid(uuid)
+                .name(name)
+                .build();
+
+            when(jpaRepository.findAll()).thenReturn(List.of(roleEntity));
+
+            // When
+            var found = repository.findAll();
+
+            // Then
+            assertThat(found).isNotEmpty();
+            assertThat(found).hasSize(1);
+            assertThat(found.getFirst()).isEqualTo(role);
+            verify(jpaRepository).findAll();
+
+            assertNoMoreInteractions();
+        }
+    }
+
+    @Nested
+    class DeleteByUuid {
+
+        @Test
+        void should_delete_role() {
+            // Given
+            var uuid = "uuid";
+
+            doNothing().when(jpaRepository).deleteByUuid(anyString());
+
+            // When
+            repository.deleteByUuid(uuid);
+
+            // Then
+            verify(jpaRepository).deleteByUuid(uuid);
+
+            assertNoMoreInteractions();
+        }
+
+        @Test
+        void should_throw_exception_when_error_occurs_during_delete() {
+            // Given
+            var uuid = "uuid";
+
+            doThrow(DataIntegrityViolationException.class)
+                .when(jpaRepository)
+                .deleteByUuid(any());
+
+            // When
+            assertThrows(
+                ConnectorRoleInUseException.class,
+                () -> repository.deleteByUuid(uuid)
+            );
+
+            // Then
+            verify(jpaRepository).deleteByUuid(uuid);
+
+            assertNoMoreInteractions();
+        }
+    }
+
+    @Nested
+    class FindByNameIn {
+
+        @Test
+        void should_find_roles_by_name_in() {
+            // Given
+            var uuid = "uuid";
+            var name = "test";
+            var names = Set.of(name);
+            var role = ConnectorRole.builder()
+                .uuid(uuid)
+                .name(name)
+                .build();
+            var roleEntity = ConnectorRoleEntity.builder()
+                .uuid(uuid)
+                .name(name)
+                .build();
+
+            when(jpaRepository.findByNameIn(anySet()))
+                .thenReturn(Set.of(roleEntity));
+
+            // When
+            var found = repository.findByNameIn(names);
+
+            // Then
+            assertThat(found).isNotEmpty();
+            assertThat(found.stream().toList().getFirst()).isEqualTo(role);
+            verify(jpaRepository).findByNameIn(names);
+
+            assertNoMoreInteractions();
+        }
     }
 }

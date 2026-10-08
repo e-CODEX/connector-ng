@@ -18,6 +18,7 @@ import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBus
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
@@ -99,6 +100,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         int size,
         String identifier,
         String backendName,
+        ConnectorMessageDirection direction,
         String businessDomain,
         String service,
         String action) {
@@ -108,6 +110,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
             pageRequest,
             identifier,
             backendName,
+            direction,
             businessDomain,
             service,
             action

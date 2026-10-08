@@ -212,6 +212,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
         ConnectorPageRequest request,
         String identifier,
         String backendName,
+        ConnectorMessageDirection direction,
         String businessDomainIdentifier,
         String service,
         String action) {
@@ -220,6 +221,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
         var specification = MessageSpecification.withFilters(
             identifier,
             backendName,
+            direction,
             businessDomainIdentifier,
             service,
             action

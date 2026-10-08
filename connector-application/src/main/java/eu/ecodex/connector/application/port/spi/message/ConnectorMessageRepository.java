@@ -77,6 +77,7 @@ public interface ConnectorMessageRepository {
      *                                 scoping the search results to messages associated with a
      *                                 specific backend name; may be null or empty if no backend
      *                                 filtering is required.
+     * @param direction                the direction of the message to filter.
      * @param businessDomainIdentifier the identifier of the business domain to filter
      * @param service                  the service name to filter messages
      * @param action                   the action name to filter messages
@@ -90,6 +91,7 @@ public interface ConnectorMessageRepository {
         ConnectorPageRequest request,
         String identifier,
         String backendName,
+        ConnectorMessageDirection direction,
         String businessDomainIdentifier,
         String service,
         String action

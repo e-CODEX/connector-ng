@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.message;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
@@ -72,6 +73,7 @@ public interface ConnectorMessageAdminApi {
         @RequestParam(name = "size", defaultValue = "20") int size,
         @RequestParam(name = "identifier", required = false) String identifier,
         @RequestParam(name = "backendName", required = false) String backendName,
+        @RequestParam(name = "direction", required = false) ConnectorMessageDirection direction,
         @RequestParam(name = "businessDomain", required = false) String businessDomain,
         @RequestParam(name = "service", required = false) String service,
         @RequestParam(name = "action", required = false) String action

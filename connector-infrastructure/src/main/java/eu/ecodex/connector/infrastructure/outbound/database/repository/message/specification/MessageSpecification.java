@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification;
 
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
@@ -29,6 +30,7 @@ public class MessageSpecification {
     private static final String CONVERSATION_IDENTIFIER_FIELD = "conversationIdentifier";
     private static final String EBMS_IDENTIFIER_FIELD = "ebmsMessageIdentifier";
     private static final String BACKEND_NAME_FIELD = "backendName";
+    private static final String DIRECTION_FIELD = "direction";
     private static final String BUSINESS_DOMAIN_FIELD = "businessDomain";
 
     /**
@@ -42,6 +44,7 @@ public class MessageSpecification {
      *                                 entity fields. If the identifier is {@code null}, the
      *                                 specification will not add any criteria.
      * @param backendName              the name of the backend to filter the results.
+     * @param direction                the direction of message to filter the results.
      * @param businessDomainIdentifier the identifier of the business domain to filter the results.
      * @param serviceName              the name of the service to filter the results.
      * @param actionName               the name of the action to filter the results.
@@ -52,6 +55,7 @@ public class MessageSpecification {
     public static Specification<ConnectorMessageEntity> withFilters(
         String identifier,
         String backendName,
+        ConnectorMessageDirection direction,
         String businessDomainIdentifier,
         String serviceName,
         String actionName) {
@@ -63,6 +67,7 @@ public class MessageSpecification {
                     .or(withConversationIdentifier(identifier))
                     .or(withEbmsIdentifier(identifier))
             )
+            .and(withDirection(direction))
             .and(withBackendName(backendName))
             .and(withBusinessDomain(businessDomainIdentifier))
             .and(withServiceName(serviceName))
@@ -149,6 +154,21 @@ public class MessageSpecification {
 
             return cb.like(
                 root.get(BACKEND_NAME_FIELD), pattern
+            );
+        });
+    }
+
+    private static Specification<ConnectorMessageEntity> withDirection(
+        ConnectorMessageDirection direction) {
+        return ((root, query, cb) -> {
+            if (direction == null) {
+                return null;
+            }
+
+            var pattern = "%" + direction.name() + "%";
+
+            return cb.like(
+                root.get(DIRECTION_FIELD), pattern
             );
         });
     }

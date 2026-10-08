@@ -94,28 +94,30 @@ public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     @ParameterizedTest
     @CsvSource({
         // identifier
-        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,"
+        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,BACKEND_TO_GATEWAY,"
             + "default_business_domain,Connector-TEST,Test_Form",
         // backendMessageIdentifier
-        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,"
+        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,BACKEND_TO_GATEWAY,"
             + "default_business_domain,Connector-TEST,Test_Form",
         // conversationIdentifier
-        "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice,default_business_domain,"
+        "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice,GATEWAY_TO_BACKEND,default_business_domain,"
             + "Connector-TEST,Test_Form",
     })
     @WithMessageData
-    void should_list_connector_messages_matching_identifier_backend_name_and_business_domain_filters(
+    void should_list_connector_messages_matching_identifier_backend_name_direction_and_business_domain_filters(
         String identifier,
         String backendName,
+        String direction,
         String businessDomain,
         String service,
         String action) {
         apiClient.get()
             .uri(String.format(
-                "%s?identifier=%s&backendName=%s&businessDomain=%s&service=%s&action=%s",
+                "%s?identifier=%s&backendName=%s&direction=%s&businessDomain=%s&service=%s&action=%s",
                 URL,
                 identifier,
                 backendName,
+                direction,
                 businessDomain,
                 service,
                 action

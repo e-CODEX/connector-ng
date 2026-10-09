@@ -11,10 +11,12 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
+import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,15 +34,17 @@ public class ConnectorMessageTransportStepAdminController
 
     @Override
     public ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
+        int page,
+        int size,
         String messageOrRemoteSystemIdentifier,
         String linkPartnerName,
-        int page,
-        int size) {
+        List<ConnectorMessageTransportStatus> statuses) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
         var transportSteps = listTransportStepsService.execute(
             pageRequest,
             messageOrRemoteSystemIdentifier,
-            linkPartnerName
+            linkPartnerName,
+            statuses
         );
 
         return ConnectorPageResult.of(

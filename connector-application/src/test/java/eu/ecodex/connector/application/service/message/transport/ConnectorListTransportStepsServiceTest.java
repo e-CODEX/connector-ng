@@ -39,7 +39,7 @@ public class ConnectorListTransportStepsServiceTest {
     void should_fail_when_the_page_request_is_null() {
         assertThrows(
             NullPointerException.class,
-            () -> listTransportStepsService.execute(null, null, null)
+            () -> listTransportStepsService.execute(null, null, null, null)
         );
     }
 
@@ -52,10 +52,10 @@ public class ConnectorListTransportStepsServiceTest {
             20
 
         );
-        when(transportStepRepository.findAll(any(), any(), any())).thenReturn(pageResult);
+        when(transportStepRepository.findAll(any(), any(), any(), any())).thenReturn(pageResult);
 
         var request = ConnectorPageRequest.builder().page(0).size(20).build();
-        var result = listTransportStepsService.execute(request, null, null);
+        var result = listTransportStepsService.execute(request, null, null, any());
 
         assertThat(result).isNotNull();
         assertThat(result.content().size()).isEqualTo(1);

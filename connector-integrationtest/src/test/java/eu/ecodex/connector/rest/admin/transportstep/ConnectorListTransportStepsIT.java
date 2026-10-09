@@ -57,11 +57,11 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
             arguments("remote system identifier", none.withIdentifier(REMOTE_SYSTEM_ID), 1, 1),
             arguments(
                 "message identifier + backend name",
-                none.withIdentifier(MESSAGE_ID).withLinkPartnerName(BACKEND_NAME), 1, 1
+                none.withIdentifier(MESSAGE_ID).withLinkPartnerName(), 1, 1
             ),
             arguments(
                 "remote system identifier + backend name",
-                none.withIdentifier(REMOTE_SYSTEM_ID).withLinkPartnerName(BACKEND_NAME), 1, 1
+                none.withIdentifier(REMOTE_SYSTEM_ID).withLinkPartnerName(), 1, 1
             ),
 
             arguments("status DELIVERED", none.withStatuses("DELIVERED"), 0, 0),
@@ -88,7 +88,8 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     void should_list_transport_steps_with_filters(
         String description,
         TransportStepFilter filter,
-        int expectedSize, int totalPages) {
+        int expectedSize,
+        int totalPages) {
 
         var uri = UriComponentsBuilder
             .fromPath(URL)
@@ -144,8 +145,12 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
             return new TransportStepFilter(v, linkPartnerName, statuses);
         }
 
-        TransportStepFilter withLinkPartnerName(String v) {
-            return new TransportStepFilter(identifier, v, statuses);
+        TransportStepFilter withLinkPartnerName() {
+            return new TransportStepFilter(
+                identifier,
+                ConnectorListTransportStepsIT.BACKEND_NAME,
+                statuses
+            );
         }
 
         TransportStepFilter withStatuses(String... v) {

@@ -55,7 +55,7 @@ public class ConnectorListTransportStepsServiceTest {
         when(transportStepRepository.findAll(any(), any(), any(), any())).thenReturn(pageResult);
 
         var request = ConnectorPageRequest.builder().page(0).size(20).build();
-        var result = listTransportStepsService.execute(request, null, null, any());
+        var result = listTransportStepsService.execute(request, null, null, null);
 
         assertThat(result).isNotNull();
         assertThat(result.content().size()).isEqualTo(1);

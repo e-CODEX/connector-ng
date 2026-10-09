@@ -62,7 +62,8 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
                 List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
             );
 
-            when(listAttachmentsService.execute(any())).thenReturn(pageResult);
+            when(listAttachmentsService.execute(any(), any(), any(), any(), any())).thenReturn(
+                pageResult);
 
             mockMvc.perform(get("/api/v1/admin/attachments")
                                 .param("page", "0")
@@ -95,19 +96,22 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
 
         @Test
         void should_return_404_when_attachment_not_found() throws Exception {
-            doThrow(ConnectorMessageAttachmentNotFoundException.class).when(retrieveAttachmentService).execute(any());
+            doThrow(ConnectorMessageAttachmentNotFoundException.class).when(
+                retrieveAttachmentService).execute(any());
 
             mockMvc.perform(get("/api/v1/admin/attachments/unknown-id/download")
-                   .contentType(MediaType.APPLICATION_JSON))
+                                .contentType(MediaType.APPLICATION_JSON))
                    .andExpect(status().isNotFound())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         }
 
         @Test
-        void should_return_409_when_attachment_is_no_longer_available_in_the_storage() throws Exception {
+        void should_return_409_when_attachment_is_no_longer_available_in_the_storage()
+            throws Exception {
             when(retrieveAttachmentService.execute(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-            doThrow(ConnectorMessageAttachmentException.class).when(retrieveAttachmentService).execute(any());
+            doThrow(ConnectorMessageAttachmentException.class).when(retrieveAttachmentService)
+                                                              .execute(any());
 
             mockMvc.perform(get("/api/v1/admin/attachments/unknown-id/download")
                                 .contentType(MediaType.APPLICATION_JSON))

@@ -111,7 +111,7 @@ public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepository
             repository.save(attachment);
 
             var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
-            var attachments = repository.findAll(pageRequest);
+            var attachments = repository.findAll(pageRequest, null, null, null, null);
 
             assertThat(attachments).isNotNull();
             assertThat(attachments.content()).hasSize(1);

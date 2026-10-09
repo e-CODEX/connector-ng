@@ -13,10 +13,13 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.att
 import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorListAttachments;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorRetrieveAttachment;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
+import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -49,10 +52,21 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
     }
 
     @Override
-    public ConnectorPageResult<ConnectorAttachmentDto> listAttachments(int page, int size) {
+    public ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
+        int page, int size,
+        String messageIdentifier,
+        String name,
+        List<ConnectorAttachmentType> types,
+        List<ConnectorAttachmentStorage> storages) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
-        var attachments = listAttachmentsService.execute(pageRequest);
+        var attachments = listAttachmentsService.execute(
+            pageRequest,
+            messageIdentifier,
+            name,
+            types,
+            storages
+        );
 
         return ConnectorPageResult.of(
             attachments.content().stream().map(ConnectorAttachmentDto::from).toList(),

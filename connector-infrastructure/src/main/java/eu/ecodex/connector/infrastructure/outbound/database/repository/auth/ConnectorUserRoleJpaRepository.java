@@ -63,4 +63,6 @@ public interface ConnectorUserRoleJpaRepository extends JpaRepository<ConnectorR
      * @param uuid identifier
      */
     void deleteByUuid(@Nonnull String uuid);
+
+    boolean existsByUuidAndUsersIsNotEmpty(String uuid);
 }

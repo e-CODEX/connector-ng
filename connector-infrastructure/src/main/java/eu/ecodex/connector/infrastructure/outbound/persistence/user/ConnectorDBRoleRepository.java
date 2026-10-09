@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
-import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
+import eu.ecodex.connector.application.port.spi.exception.ConnectorRoleReferencedException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
@@ -78,7 +78,7 @@ public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
         try {
             jpaRepository.deleteByUuid(identifier);
         } catch (DataIntegrityViolationException e) {
-            throw new ConnectorRoleInUseException(e.getMessage());
+            throw new ConnectorRoleReferencedException(e.getMessage());
         }
     }
 
@@ -91,6 +91,10 @@ public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
             .collect(Collectors.toUnmodifiableSet());
     }
 
+    @Override
+    public boolean hasUsers(@NonNull String identifier) {
+        return jpaRepository.existsByUuidAndUsersIsNotEmpty(identifier);
+    }
 
     /**
      * Converts a {@link ConnectorRole} domain object into a {@link ConnectorRoleEntity}.

@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.auth.role;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -20,7 +21,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
-import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.application.port.spi.exception.ConnectorRoleReferencedException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -33,8 +34,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConnectorRemoveRoleServiceTest {
     @Mock
     private ConnectorRoleRepository repository;
-    @Mock
-    private ConnectorUserRepository userRepository;
 
     @InjectMocks
     private ConnectorRemoveRoleService service;
@@ -48,7 +47,7 @@ class ConnectorRemoveRoleServiceTest {
             .build();
 
         when(repository.findByUuid(any())).thenReturn(Optional.of(connectorRole));
-        when(userRepository.existsByRolesUuid(any())).thenReturn(Boolean.FALSE);
+        when(repository.hasUsers(any())).thenReturn(Boolean.FALSE);
         doNothing().when(repository).deleteByUuid(any());
 
         // When
@@ -56,7 +55,7 @@ class ConnectorRemoveRoleServiceTest {
 
         // Then
         verify(repository).findByUuid(uuid);
-        verify(userRepository).existsByRolesUuid(uuid);
+        verify(repository).hasUsers(uuid);
         verify(repository).deleteByUuid(uuid);
         verifyNoMoreInteractions(repository);
     }
@@ -70,14 +69,36 @@ class ConnectorRemoveRoleServiceTest {
             .build();
 
         when(repository.findByUuid(any())).thenReturn(Optional.of(connectorRole));
-        when(userRepository.existsByRolesUuid(any())).thenReturn(Boolean.TRUE);
+        when(repository.hasUsers(any())).thenReturn(Boolean.TRUE);
 
         // When
         assertThrows(ConnectorRoleInUseException.class, () -> service.execute(uuid));
 
         // Then
         verify(repository).findByUuid(uuid);
-        verify(userRepository).existsByRolesUuid(uuid);
+        verify(repository).hasUsers(uuid);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void delete_by_identifier_should_not_delete_role_when_role_referenced_exception_is_thrown() {
+        // Given
+        var uuid = "uuid";
+        var connectorRole = ConnectorRole.builder()
+            .uuid(uuid)
+            .build();
+
+        when(repository.findByUuid(any())).thenReturn(Optional.of(connectorRole));
+        when(repository.hasUsers(any())).thenReturn(Boolean.FALSE);
+        doThrow(ConnectorRoleReferencedException.class).when(repository).deleteByUuid(any());
+
+        // When
+        assertThrows(ConnectorRoleInUseException.class, () -> service.execute(uuid));
+
+        // Then
+        verify(repository).findByUuid(uuid);
+        verify(repository).hasUsers(uuid);
+        verify(repository).deleteByUuid(uuid);
         verifyNoMoreInteractions(repository);
     }
 
@@ -85,7 +106,6 @@ class ConnectorRemoveRoleServiceTest {
     void delete_by_identifier_should_not_delete_role_when_role_not_found() {
         // Given
         var uuid = "uuid";
-
         when(repository.findByUuid(any())).thenReturn(Optional.empty());
 
         // When

@@ -141,11 +141,6 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
         return jpaRepository.existsByUsernameAndUuidNot(username, identifier);
     }
 
-    @Override
-    public boolean existsByRolesUuid(@NonNull String identifier) {
-        return jpaRepository.existsByRolesUuid(identifier);
-    }
-
     /**
      * Converts a domain user model into a JPA entity representation.
      *

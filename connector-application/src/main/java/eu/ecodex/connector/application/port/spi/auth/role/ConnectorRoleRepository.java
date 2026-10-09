@@ -76,4 +76,13 @@ public interface ConnectorRoleRepository {
      * @return a set of {@code ConnectorUserRole} entities matching the provided names
      */
     Set<ConnectorRole> findByNameIn(@Nonnull Set<String> names);
+
+    /**
+     * Checks if users has role identifier in parameter.
+     *
+     * @param identifier the unique identifier (UUID) of the user role to be deleted
+     *
+     * @return true if users has role else false
+     */
+    boolean hasUsers(@Nonnull String identifier);
 }

@@ -504,41 +504,4 @@ class ConnectorDBUserRepositoryTest {
             assertNoMoreInteractions();
         }
     }
-
-    @Nested
-    class ExistsByRolesUuid {
-        @Test
-        void should_return_true_when_user_found() {
-            // Given
-            var uuid = "uuid";
-
-            when(jpaRepository.existsByRolesUuid(any())).thenReturn(Boolean.TRUE);
-
-            // When
-            var actual = userRepository.existsByRolesUuid(uuid);
-
-            // Then
-            assertThat(actual).isTrue();
-            verify(jpaRepository).existsByRolesUuid(uuid);
-
-            assertNoMoreInteractions();
-        }
-
-        @Test
-        void should_return_false_when_user_not_found() {
-            // Given
-            var uuid = "uuid";
-
-            when(jpaRepository.existsByRolesUuid(any())).thenReturn(Boolean.FALSE);
-
-            // When
-            var actual = userRepository.existsByRolesUuid(uuid);
-
-            // Then
-            assertThat(actual).isFalse();
-            verify(jpaRepository).existsByRolesUuid(uuid);
-
-            assertNoMoreInteractions();
-        }
-    }
 }

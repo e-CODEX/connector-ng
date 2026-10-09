@@ -21,7 +21,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
+import eu.ecodex.connector.application.port.spi.exception.ConnectorRoleReferencedException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
@@ -40,7 +40,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 class ConnectorDBRoleRepositoryTest {
     @Mock
     ConnectorUserRoleJpaRepository jpaRepository;
-
     @InjectMocks
     private ConnectorDBRoleRepository repository;
 
@@ -50,7 +49,6 @@ class ConnectorDBRoleRepositoryTest {
 
     @Nested
     class Save {
-
         @Test
         void should_save_role_to_database() {
             // Given
@@ -77,7 +75,6 @@ class ConnectorDBRoleRepositoryTest {
 
     @Nested
     class FindByUuid {
-
         @Test
         void should_find_role_by_uuid() {
             // Given
@@ -108,7 +105,6 @@ class ConnectorDBRoleRepositoryTest {
 
     @Nested
     class FindByName {
-
         @Test
         void should_find_role_by_name() {
             // Given
@@ -140,7 +136,6 @@ class ConnectorDBRoleRepositoryTest {
 
     @Nested
     class FindAll {
-
         @Test
         void should_find_all_roles() {
             // Given
@@ -172,7 +167,6 @@ class ConnectorDBRoleRepositoryTest {
 
     @Nested
     class DeleteByUuid {
-
         @Test
         void should_delete_role() {
             // Given
@@ -200,7 +194,7 @@ class ConnectorDBRoleRepositoryTest {
 
             // When
             assertThrows(
-                ConnectorRoleInUseException.class,
+                ConnectorRoleReferencedException.class,
                 () -> repository.deleteByUuid(uuid)
             );
 
@@ -213,7 +207,6 @@ class ConnectorDBRoleRepositoryTest {
 
     @Nested
     class FindByNameIn {
-
         @Test
         void should_find_roles_by_name_in() {
             // Given
@@ -239,8 +232,45 @@ class ConnectorDBRoleRepositoryTest {
             assertThat(found).isNotEmpty();
             assertThat(found.stream().toList().getFirst()).isEqualTo(role);
             verify(jpaRepository).findByNameIn(names);
+            assertNoMoreInteractions();
+        }
+    }
+
+    @Nested
+    class HasUsers {
+        @Test
+        void should_return_true_when_user_found() {
+            // Given
+            var uuid = "uuid";
+
+            when(jpaRepository.existsByUuidAndUsersIsNotEmpty(any())).thenReturn(Boolean.TRUE);
+
+            // When
+            var actual = repository.hasUsers(uuid);
+
+            // Then
+            assertThat(actual).isTrue();
+            verify(jpaRepository).existsByUuidAndUsersIsNotEmpty(uuid);
 
             assertNoMoreInteractions();
         }
+
+        @Test
+        void should_return_false_when_user_not_found() {
+            // Given
+            var uuid = "uuid";
+
+            when(jpaRepository.existsByUuidAndUsersIsNotEmpty(any())).thenReturn(Boolean.FALSE);
+
+            // When
+            var actual = repository.hasUsers(uuid);
+
+            // Then
+            assertThat(actual).isFalse();
+            verify(jpaRepository).existsByUuidAndUsersIsNotEmpty(uuid);
+
+            assertNoMoreInteractions();
+        }
+
     }
 }

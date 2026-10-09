@@ -155,11 +155,13 @@ public class ConnectorDBMessageTransportStepRepository
     public ConnectorPageResult<ConnectorMessageTransportStep> findAll(
         @NonNull ConnectorPageRequest request,
         String messageOrRemoteSystemIdentifier,
-        String linkPartnerName) {
+        String linkPartnerName,
+        List<ConnectorMessageTransportStatus> statuses) {
         var pageable = paginationMapper.toPageable(request);
         var specification = TransportStepSpecification.withFilters(
             messageOrRemoteSystemIdentifier,
-            linkPartnerName
+            linkPartnerName,
+            statuses
         );
         var transportSteps = transportStepJpaRepository.findAll(specification, pageable)
                                                        .map(this::toDomain);

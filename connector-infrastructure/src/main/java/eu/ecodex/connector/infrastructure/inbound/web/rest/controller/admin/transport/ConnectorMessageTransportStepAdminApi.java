@@ -10,12 +10,14 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport;
 
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,10 +40,12 @@ public interface ConnectorMessageTransportStepAdminApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "size", defaultValue = "20") int size,
         @RequestParam(name = "messageOrRemoteSystemIdentifier", required = false)
         String messageOrRemoteSystemIdentifier,
         @RequestParam(name = "linkPartnerName", required = false) String linkPartnerName,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "20") int size
+        @RequestParam(name = "statuses", required = false)
+        List<ConnectorMessageTransportStatus> statuses
     );
 }

@@ -48,7 +48,7 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
             List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
         );
 
-        when(listTransportStepsService.execute(any(), any(), any())).thenReturn(pageResult);
+        when(listTransportStepsService.execute(any(), any(), any(), any())).thenReturn(pageResult);
 
         mockMvc.perform(get(URL)
                             .param("page", "0")

@@ -143,6 +143,9 @@ public interface ConnectorMessageTransportStepRepository {
      *                                        empty.
      * @param linkPartnerName                 an optional name of the link partner for filtering
      *                                        results; can be null or empty.
+     * @param statuses                        transport step statuses
+     *                                        ({@link ConnectorMessageTransportStatus}) to match;
+     *                                        ignored if {@code null} or empty
      *
      * @return a {@link ConnectorPageResult} containing the paginated list of matching
      *     {@link ConnectorMessageTransportStep} entities. If no matching entities are found,
@@ -151,5 +154,6 @@ public interface ConnectorMessageTransportStepRepository {
     ConnectorPageResult<ConnectorMessageTransportStep> findAll(
         @Nonnull ConnectorPageRequest request,
         String messageOrRemoteSystemIdentifier,
-        String linkPartnerName);
+        String linkPartnerName,
+        List<ConnectorMessageTransportStatus> statuses);
 }

@@ -17,7 +17,7 @@ jakarta-mail = "2.0.2"
 jakarta-xml-bind-api = "4.0.5"
 jakarta-xml-ws-api = "4.0.2"
 # jaxb
-jaxb-impl = "4.0.6"
+jaxb-impl = "4.0.9"
 jaxb-xjc = "4.0.9"
 # spring boot
 spring-boot = "4.1.1"

@@ -10,14 +10,21 @@
 
 package eu.ecodex.connector.application.service.attachment;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorListAttachmentsService;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import java.util.List;
@@ -25,6 +32,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,31 +41,68 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorListAttachmentsService")
-public class ConnectorListAttachmentsServiceTest {
+class ConnectorListAttachmentsServiceTest {
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
 
     @InjectMocks
-    private ConnectorListAttachmentsService connectorListAttachmentsService;
+    private ConnectorListAttachmentsService listAttachmentsService;
+
+    private static ConnectorPageRequest pageRequest(int page, int size) {
+        return ConnectorPageRequest.builder().page(page).size(size).build();
+    }
 
     @Nested
     @DisplayName("when retrieving succeeds")
     class WhenRetrievingSucceeds {
         @Test
-        void should_return_the_paged_attachments() {
-            var pageResult = ConnectorPageResult.of(
-                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
+        void should_return_the_page_provided_by_the_repository() {
+            var expected = ConnectorPageResult.of(
+                List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1);
+            when(attachmentRepository.findAll(any(), any(), any(), any(), any())).thenReturn(
+                expected);
+
+            var result = listAttachmentsService.execute(pageRequest(0, 20), null, null, null, null);
+
+            assertThat(result).isSameAs(expected);
+        }
+
+        @Test
+        void should_pass_the_page_request_and_filters_to_the_repository() {
+            var request = pageRequest(2, 50);
+            var messageId = "fake-message-id";
+            var name = "fake-name";
+            var types = List.of(ConnectorAttachmentType.values());
+            var storages = List.of(ConnectorAttachmentStorage.values());
+            when(attachmentRepository.findAll(any(), any(), any(), any(), any()))
+                .thenReturn(ConnectorPageResult.of(List.of(), 0, 0, 0));
+
+            listAttachmentsService.execute(
+                request,
+                messageId,
+                name,
+                types,
+                storages
             );
-            when(attachmentRepository.findAll(any())).thenReturn(pageResult);
 
-            var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
-            var result = connectorListAttachmentsService.execute(pageRequest);
+            verify(attachmentRepository)
+                .findAll(request, messageId, name, types, storages);
+        }
 
-            assertThat(result).isNotNull();
-            assertThat(result.content()).isNotEmpty();
-            assertThat(result.totalElements()).isEqualTo(1L);
-            assertThat(result.totalPages()).isEqualTo(1);
-            assertThat(result.size()).isEqualTo(1);
+        @ParameterizedTest
+        @ValueSource(ints = {1, 20, 100})
+        void should_accept_page_sizes_up_to_100(int size) {
+            when(attachmentRepository.findAll(any(), any(), any(), any(), any()))
+                .thenReturn(ConnectorPageResult.of(List.of(), 0, 0, 0));
+
+            assertThatCode(() -> listAttachmentsService.execute(
+                pageRequest(0, size),
+                null,
+                null,
+                null,
+                null
+            ))
+                .doesNotThrowAnyException();
         }
     }
 
@@ -65,32 +111,37 @@ public class ConnectorListAttachmentsServiceTest {
     class WhenThePageRequestIsInvalid {
         @Test
         void should_fail_when_the_page_is_negative() {
-            assertThrows(
-                IllegalArgumentException.class,
-                () -> {
-                    var pageRequest = ConnectorPageRequest.builder().page(-1).size(20).build();
-                    connectorListAttachmentsService.execute(pageRequest);
-                }
-            );
+            assertThatIllegalArgumentException()
+                .isThrownBy(() -> listAttachmentsService.execute(
+                    pageRequest(-1, 20),
+                    null,
+                    null,
+                    null,
+                    null
+                ));
+
+            verifyNoInteractions(attachmentRepository);
         }
 
-        @Test
-        void should_fail_when_the_size_exceeds_100() {
+        @ParameterizedTest
+        @ValueSource(ints = {0, -1, 101})
+        void should_fail_when_the_size_is_out_of_bounds(int size) {
             assertThrows(
                 IllegalArgumentException.class,
                 () -> {
-                    var pageRequest = ConnectorPageRequest.builder().page(0).size(101).build();
-                    connectorListAttachmentsService.execute(pageRequest);
+                    var request = pageRequest(0, size);
+                    listAttachmentsService.execute(request, null, null, null, null);
                 }
             );
+            verifyNoInteractions(attachmentRepository);
         }
 
         @Test
         void should_fail_when_the_page_request_is_null() {
-            assertThrows(
-                NullPointerException.class,
-                () -> connectorListAttachmentsService.execute(null)
-            );
+            assertThatNullPointerException()
+                .isThrownBy(() -> listAttachmentsService.execute(null, null, null, null, null));
+
+            verifyNoInteractions(attachmentRepository);
         }
     }
 }

@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.attachment;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +45,11 @@ public interface ConnectorAttachmentAdminApi {
     })
     ConnectorPageResult<ConnectorAttachmentDto> listAttachments(
         @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "20") int size
+        @RequestParam(name = "size", defaultValue = "20") int size,
+        @RequestParam(name = "messageIdentifier", required = false) String messageIdentifier,
+        @RequestParam(name = "name", required = false) String name,
+        @RequestParam(name = "types", required = false) List<ConnectorAttachmentType> types,
+        @RequestParam(name = "storages", required = false) List<ConnectorAttachmentStorage> storages
     );
 
     @GetMapping("/{identifier}/download")

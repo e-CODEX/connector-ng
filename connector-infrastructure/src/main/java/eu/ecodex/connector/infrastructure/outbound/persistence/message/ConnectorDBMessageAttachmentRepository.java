@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.message;
 
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
@@ -102,12 +103,24 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
-    public ConnectorPageResult<ConnectorMessageAttachment> findAll(ConnectorPageRequest request) {
+    public ConnectorPageResult<ConnectorMessageAttachment> findAll(
+        ConnectorPageRequest request,
+        String messageIdentifier,
+        String name,
+        List<ConnectorAttachmentType> types,
+        List<ConnectorAttachmentStorage> storages) {
         var pageable = paginationMapper.toPageable(request);
 
-        var attachments = attachmentJpaRepository.findAll(pageable)
-                                                 .map(ConnectorDBMessageAttachmentRepository
-                                                          ::toDomain);
+        var specification = AttachmentSpecification.withFilters(
+            messageIdentifier,
+            name,
+            types,
+            storages
+        );
+
+        var attachments = attachmentJpaRepository
+            .findAll(specification, pageable)
+            .map(ConnectorDBMessageAttachmentRepository::toDomain);
 
         return paginationMapper.toPageResult(attachments);
     }

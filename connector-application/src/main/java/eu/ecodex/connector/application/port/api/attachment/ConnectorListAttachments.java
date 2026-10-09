@@ -10,10 +10,13 @@
 
 package eu.ecodex.connector.application.port.api.attachment;
 
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
+import java.util.List;
 
 /**
  * Defines the contract for listing message attachments from a connector.
@@ -30,17 +33,31 @@ public interface ConnectorListAttachments {
      * Executes the attachment listing operation.
      *
      * <p>This method retrieves a paginated result containing
-     * {@link ConnectorMessageAttachment} objects based on the provided
-     * {@link ConnectorPageRequest}.
+     * {@link ConnectorMessageAttachment} objects based on the provided {@link ConnectorPageRequest}
+     * and the optional filter criteria. All filters are combined with a logical {@code AND}; a
+     * filter whose value is {@code null} or empty is ignored.
      *
-     * @param pageRequest the pagination and query parameters used to retrieve the attachments (must
-     *                    not be null)
+     * @param pageRequest       the pagination and query parameters used to retrieve the attachments
+     *                          (must not be null)
+     * @param messageIdentifier identifier of the message the attachments belong to; ignored if
+     *                          {@code null} or empty
+     * @param name              attachment name (or part of a name) to match; ignored if
+     *                          {@code null} or empty
+     * @param types             attachment types ({@link ConnectorAttachmentType}) to match; ignored
+     *                          if {@code null} or empty
+     * @param storages          storage modes ({@link ConnectorAttachmentStorage}) to match; ignored
+     *                          if {@code null} or empty
      *
      * @return a {@link ConnectorPageResult} containing a page of {@link ConnectorMessageAttachment}
-     *     objects
+     *     objects matching the given filters
      *
      * @throws IllegalArgumentException if {@code pageRequest} is invalid
      */
     ConnectorPageResult<ConnectorMessageAttachment> execute(
-        @Nonnull ConnectorPageRequest pageRequest);
+        @Nonnull ConnectorPageRequest pageRequest,
+        String messageIdentifier,
+        String name,
+        List<ConnectorAttachmentType> types,
+        List<ConnectorAttachmentStorage> storages
+    );
 }

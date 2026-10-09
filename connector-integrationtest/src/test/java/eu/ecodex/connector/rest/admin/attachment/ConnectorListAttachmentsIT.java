@@ -10,20 +10,34 @@
 
 package eu.ecodex.connector.rest.admin.attachment;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @DisplayName("ConnectorListAttachmentsIT REST")
 @Sql(
@@ -31,9 +45,27 @@ import org.springframework.test.web.servlet.client.RestTestClient;
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
-
+    private static final String URL = "/api/v1/admin/attachments";
+    private static final String MESSAGE_ID = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
     @Autowired
     private RestTestClient apiClient;
+
+    static Stream<Arguments> attachmentFilters() {
+        return Stream.of(
+            arguments(new AttachmentFilter(MESSAGE_ID, null, null, null), 4),
+            arguments(new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", null, null), 2),
+            arguments(new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", "ATTACHMENT", null), 2),
+            arguments(
+                new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", "ATTACHMENT", "S3_BUCKET"),
+                2
+            ),
+            arguments(new AttachmentFilter(null, "fake_file", "ATTACHMENT", "S3_BUCKET"), 3),
+            arguments(new AttachmentFilter(null, "fake_file", "ATTACHMENT", null), 3),
+            arguments(new AttachmentFilter(null, "fake_file", null, null), 3),
+            arguments(new AttachmentFilter(null, null, "ATTACHMENT", null), 3),
+            arguments(new AttachmentFilter(null, null, null, "S3_BUCKET"), 14)
+        );
+    }
 
     @AfterEach
     void cleanUp() {
@@ -41,6 +73,63 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @WithAttachmentData
+    void should_list_attachments() {
+        apiClient.get()
+                 .uri(URL)
+                 .header("Accept", MediaType.APPLICATION_JSON_VALUE)
+                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(
+                     new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
+                     })
+                 .value(result -> {
+                     assertThat(result).isNotNull();
+                     assert result != null;
+                     assertThat(result.content().size()).isEqualTo(14);
+                     assertThat(result.size()).isEqualTo(14);
+                     assertThat(result.totalElements()).isEqualTo(14);
+                     assertThat(result.totalPages()).isEqualTo(1);
+                 });
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("attachmentFilters")
+    @WithAttachmentData
+    void should_list_attachments_with_filters(AttachmentFilter filter, int expectedSize) {
+        var uri = UriComponentsBuilder
+            .fromUriString(URL)
+            .queryParamIfPresent(
+                "messageIdentifier",
+                Optional.ofNullable(filter.messageIdentifier())
+            )
+            .queryParamIfPresent("name", Optional.ofNullable(filter.filename()))
+            .queryParamIfPresent("types", Optional.ofNullable(filter.type()))
+            .queryParamIfPresent("storage", Optional.ofNullable(filter.storage()))
+            .build()
+            .toUri();
+
+        apiClient.get()
+                 .uri(uri)
+                 .accept(MediaType.APPLICATION_JSON)
+                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
+                 })
+                 .value(result -> assertThat(result)
+                     .isNotNull()
+                     .satisfies(r -> {
+                         assertThat(r.content().size()).isEqualTo(expectedSize);
+                         assertThat(r.size()).isEqualTo(expectedSize);
+                         assertThat(r.totalElements()).isEqualTo(expectedSize);
+                         assertThat(r.totalPages()).isEqualTo(1);
+                     }));
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
@@ -52,23 +141,26 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
         "classpath:sql/attachment.sql",
         "classpath:sql/user.sql"
     })
-    void should_list_attachments_for_connector_messages() {
-        apiClient.get()
-            .uri("/api/v1/admin/attachments")
-            .header("Accept", MediaType.APPLICATION_JSON_VALUE)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(
-                new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
-                })
-            .value(result -> {
-                assertThat(result).isNotNull();
-                assert result != null;
-                assertThat(result.content().size()).isEqualTo(14);
-                assertThat(result.size()).isEqualTo(14);
-                assertThat(result.totalElements()).isEqualTo(14);
-                assertThat(result.totalPages()).isEqualTo(1);
-            });
+    private @interface WithAttachmentData {
+    }
+
+    record AttachmentFilter(
+        String messageIdentifier,
+        String filename,
+        String type,
+        String storage
+    ) {
+        @Override
+        public @NonNull String toString() {
+            return Stream.of(
+                             entry("messageIdentifier", messageIdentifier),
+                             entry("name", filename),
+                             entry("type", type),
+                             entry("storage", storage)
+                         )
+                         .filter(e -> e.getValue() != null)
+                         .map(e -> e.getKey() + "=" + e.getValue())
+                         .collect(Collectors.joining(", ", "{", "}"));
+        }
     }
 }

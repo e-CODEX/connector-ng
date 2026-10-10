@@ -20,12 +20,25 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.Connecto
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditUserRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
 import java.util.Set;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ConnectorUserTestFixtures {
     public static ConnectorUser createDefaultUser() {
         return ConnectorUser.builder()
+            .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
+            .username("test_user")
+            .email("test_user@email.com")
+            .password("encoded")
+            .enabled(true)
+            .mustChangePassword(false)
+            .build();
+    }
+
+    public static ConnectorUserEntity createDefaultUserEntity() {
+        return ConnectorUserEntity.builder()
             .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
             .username("test_user")
             .email("test_user@email.com")
@@ -43,10 +56,33 @@ public class ConnectorUserTestFixtures {
             .password("encoded")
             .enabled(true)
             .mustChangePassword(false)
-            .roles(Set.of(ConnectorRole
-                .builder()
-                .name("ROLE_".concat(ConnectorRoleName.ADMIN.name()))
-                .build()))
+            .roles(Set.of(createDefaultAdminRole()))
+            .build();
+    }
+
+    public static ConnectorRole createDefaultAdminRole() {
+        return ConnectorRole
+            .builder()
+            .name("ROLE_".concat(ConnectorRoleName.ADMIN.name()))
+            .build();
+    }
+
+    public static ConnectorRoleEntity createDefaultAdminRoleEntity() {
+        return ConnectorRoleEntity
+            .builder()
+            .name("ROLE_".concat(ConnectorRoleName.ADMIN.name()))
+            .build();
+    }
+
+    public static ConnectorUserEntity createDefaultUserWithRolesEntity() {
+        return ConnectorUserEntity.builder()
+            .uuid("0ecd850c-3f8e-47a8-b95d-d56d336bb83a")
+            .username("test_user")
+            .email("test_user@email.com")
+            .password("encoded")
+            .enabled(true)
+            .mustChangePassword(false)
+            .roles(Set.of(createDefaultAdminRoleEntity()))
             .build();
     }
 

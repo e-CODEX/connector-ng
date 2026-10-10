@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.user;
 
-import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
+import eu.ecodex.connector.application.port.spi.exception.ConnectorRoleReferencedException;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.auth.ConnectorUserRoleJpaRepository;
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,13 +75,11 @@ public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
     @Override
     @Transactional
     public void deleteByUuid(@NonNull String identifier) {
-        var entity = jpaRepository.findByUuid(identifier).orElseThrow(() ->
-            new ConnectorUserNotFoundException("No user role found with id " + identifier));
-
-        if (!CollectionUtils.isEmpty(entity.getUsers())) {
-            entity.getUsers().forEach(user -> user.removeRole(entity));
+        try {
+            jpaRepository.deleteByUuid(identifier);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConnectorRoleReferencedException(e.getMessage());
         }
-        jpaRepository.delete(entity);
     }
 
     @Override
@@ -93,6 +91,10 @@ public class ConnectorDBRoleRepository implements ConnectorRoleRepository {
             .collect(Collectors.toUnmodifiableSet());
     }
 
+    @Override
+    public boolean hasUsers(@NonNull String identifier) {
+        return jpaRepository.existsByUuidAndUsersIsNotEmpty(identifier);
+    }
 
     /**
      * Converts a {@link ConnectorRole} domain object into a {@link ConnectorRoleEntity}.

@@ -133,4 +133,13 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
      * @return true if a user with the given email exists but has a different UUID, false otherwise.
      */
     boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
+
+    /**
+     * checks if users has role identifier in parameter.
+     *
+     * @param uuid role uuid to check
+     *
+     * @return true if users exists and false else
+     */
+    boolean existsByRolesUuid(@Nonnull String uuid);
 }

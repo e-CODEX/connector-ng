@@ -16,9 +16,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.port.api.auth.ConnectorLoginUser;
+import eu.ecodex.connector.application.port.api.auth.ConnectorLogoutUser;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
@@ -34,7 +35,9 @@ class ConnectorLoginControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
-    ConnectorUserAuthenticationProvider userAuthenticationProvider;
+    ConnectorLoginUser loginUser;
+    @MockitoBean
+    ConnectorLogoutUser logoutUser;
     @MockitoBean
     ConnectorRefreshUserRefreshToken userRefreshToken;
 
@@ -52,7 +55,7 @@ class ConnectorLoginControllerTest extends AbstractWebMvcTest {
             .refreshToken("refresh-token")
             .build();
 
-        when(userAuthenticationProvider.login(any(), any())).thenReturn(expected);
+        when(loginUser.execute(any(), any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -69,8 +72,8 @@ class ConnectorLoginControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(userAuthenticationProvider).login(username, password);
-        verifyNoMoreInteractions(userAuthenticationProvider, userRefreshToken,
+        verify(loginUser).execute(username, password);
+        verifyNoMoreInteractions(loginUser, logoutUser, userRefreshToken,
             updateUserPasswordAtFirstLogin);
     }
 }

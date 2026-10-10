@@ -10,9 +10,12 @@
 
 package eu.ecodex.connector.application.service.auth.role;
 
+import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRemoveRole;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
+import eu.ecodex.connector.application.port.spi.exception.ConnectorRoleReferencedException;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,16 @@ public class ConnectorRemoveRoleService implements ConnectorRemoveRole {
 
     @Override
     public void execute(@Nonnull String roleIdentifier) {
-        repository.deleteByUuid(roleIdentifier);
+        repository.findByUuid(roleIdentifier).orElseThrow(() ->
+            new ConnectorRoleNotFoundException("No user role found with id " + roleIdentifier));
+
+        if (repository.hasUsers(roleIdentifier)) {
+            throw new ConnectorRoleInUseException("User role is currently in use");
+        }
+        try {
+            repository.deleteByUuid(roleIdentifier);
+        } catch (ConnectorRoleReferencedException e) {
+            throw new ConnectorRoleInUseException(e.getMessage());
+        }
     }
 }

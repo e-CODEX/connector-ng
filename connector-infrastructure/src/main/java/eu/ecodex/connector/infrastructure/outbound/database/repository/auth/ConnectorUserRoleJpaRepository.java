@@ -56,4 +56,13 @@ public interface ConnectorUserRoleJpaRepository extends JpaRepository<ConnectorR
      *     set, or an empty set if no matching roles are found
      */
     Set<ConnectorRoleEntity> findByNameIn(@Nonnull Set<String> names);
+
+    /**
+     * Delete a ConnectorRole entity by its uuid.
+     *
+     * @param uuid identifier
+     */
+    void deleteByUuid(@Nonnull String uuid);
+
+    boolean existsByUuidAndUsersIsNotEmpty(String uuid);
 }

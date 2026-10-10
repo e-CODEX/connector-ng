@@ -23,6 +23,7 @@ import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeEx
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleIdentifierException;
+import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
@@ -53,6 +54,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorRoleInUseException.class)
+    public ErrorResponse handleUserRoleDeleteException(ConnectorRoleInUseException e) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
+    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)
@@ -269,10 +277,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-                                  .getAllErrors()
-                                  .stream()
-                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                  .collect(Collectors.joining(", "));
+            .getAllErrors()
+            .stream()
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .collect(Collectors.joining(", "));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

@@ -44,15 +44,15 @@ class ConnectorRemoveRoleIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void remove_should_succeeded_when_valid_token_is_provided() {
+    void remove_should_succeeded_when_valid_token_is_provided_and_role_is_not_in_use() {
         var username = "test-user-it";
         var existingUser = userRepository.findByUsername(username);
 
-        var roleName = "ROLE_USER";
+        var roleName = "ROLE_ADMIN_IT";
         assertThat(existingUser).isNotEmpty();
         assertThat(existingUser.get().roles()).hasSize(2);
         assertThat(existingUser.get().roles().stream().map(ConnectorRole::name).toList())
-            .contains("ROLE_TEST", "ROLE_USER");
+            .doesNotContain(roleName);
 
         var existingRole = roleRepository.findByName(roleName);
         assertThat(existingRole).isNotEmpty();
@@ -68,12 +68,41 @@ class ConnectorRemoveRoleIT extends AbstractIntegrationTest {
 
         existingUser = userRepository.findByUsername(username);
         assertThat(existingUser).isNotEmpty();
-        assertThat(existingUser.get().roles()).hasSize(1);
-        assertThat(existingUser.get().roles().stream().map(ConnectorRole::name).toList())
-            .contains("ROLE_TEST");
+        assertThat(existingUser.get().roles()).hasSize(2);
 
         existingRole = roleRepository.findByName(roleName);
         assertThat(existingRole).isEmpty();
+    }
+
+    @Test
+    @Sql({"classpath:sql/user.sql"})
+    void remove_should_return_409_when_user_role_already_in_use() {
+        var username = "test-user-it";
+        var existingUser = userRepository.findByUsername(username);
+        var roleName = "ROLE_TEST";
+        assertThat(existingUser).isNotEmpty();
+        assertThat(existingUser.get().roles()).hasSize(2);
+        assertThat(existingUser.get().roles().stream().map(ConnectorRole::name).toList())
+            .contains(roleName);
+
+        var existingRole = roleRepository.findByName(roleName);
+        assertThat(existingRole).isNotEmpty();
+
+        apiClient.delete()
+            .uri(StringUtils.joinWith("/", PATH, existingRole.get().uuid()))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .is4xxClientError();
+
+        existingUser = userRepository.findByUsername(username);
+        assertThat(existingUser).isNotEmpty();
+        assertThat(existingUser.get().roles()).hasSize(2);
+        assertThat(existingUser.get().roles().stream().map(ConnectorRole::name).toList())
+            .contains(roleName);
+
+        existingRole = roleRepository.findByName(roleName);
+        assertThat(existingRole).isNotEmpty();
     }
 
     @Test

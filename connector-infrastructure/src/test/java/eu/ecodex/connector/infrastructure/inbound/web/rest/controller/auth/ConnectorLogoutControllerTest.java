@@ -18,9 +18,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
+import eu.ecodex.connector.application.port.api.auth.ConnectorLoginUser;
+import eu.ecodex.connector.application.port.api.auth.ConnectorLogoutUser;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUserPasswordAtFirstLogin;
-import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserAuthenticationProvider;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
 import org.junit.jupiter.api.AfterEach;
@@ -44,7 +45,9 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     ConnectorUpdateUserPasswordAtFirstLogin updateUserPasswordAtFirstLogin;
     @MockitoBean
-    ConnectorUserAuthenticationProvider userAuthenticationProvider;
+    ConnectorLoginUser loginUser;
+    @MockitoBean
+    ConnectorLogoutUser logoutUser;
     @MockitoBean
     ConnectorRefreshUserRefreshToken userRefreshToken;
     @Autowired
@@ -65,7 +68,7 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
         var refreshToken = "refresh-token-abc";
         var request = ConnectorLogoutRequest.builder().refreshToken(refreshToken).build();
 
-        doNothing().when(userAuthenticationProvider).logout(any(), any());
+        doNothing().when(logoutUser).execute(any(), any());
 
         // When
         mockMvc.perform(post("/api/v1/auth/logout")
@@ -76,8 +79,8 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
             .andExpect(status().isNoContent());
 
         // Then
-        verify(userAuthenticationProvider).logout(userPrincipal.getUserId(), refreshToken);
-        verifyNoMoreInteractions(userRefreshToken, userAuthenticationProvider,
+        verify(logoutUser).execute(userPrincipal.getUserId(), refreshToken);
+        verifyNoMoreInteractions(loginUser, logoutUser, userRefreshToken,
             updateUserPasswordAtFirstLogin);
     }
 

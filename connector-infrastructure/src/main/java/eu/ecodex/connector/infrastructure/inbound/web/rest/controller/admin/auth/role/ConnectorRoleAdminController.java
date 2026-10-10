@@ -88,8 +88,8 @@ public class ConnectorRoleAdminController implements ConnectorRoleAdminApi {
     @Override
     public List<ConnectorRoleDto> listRoles() {
         return connectorListRole.execute().stream()
-                                .map(ConnectorRoleDto::from)
-                                .toList();
+            .map(ConnectorRoleDto::from)
+            .toList();
     }
 
     @Override

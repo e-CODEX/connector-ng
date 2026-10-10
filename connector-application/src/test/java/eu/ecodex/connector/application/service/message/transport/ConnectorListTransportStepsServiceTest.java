@@ -12,11 +12,11 @@ package eu.ecodex.connector.application.service.message.transport;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import java.util.List;
@@ -29,6 +29,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 public class ConnectorListTransportStepsServiceTest {
+    private static final ConnectorTransportStepsListFilter FILTER =
+        ConnectorTransportStepsListFilter.of(
+            ConnectorPageRequest.of(0, 20),
+            null,
+            null,
+            null,
+            null
+        );
     @Mock
     private ConnectorMessageTransportStepRepository transportStepRepository;
 
@@ -39,7 +47,15 @@ public class ConnectorListTransportStepsServiceTest {
     void should_fail_when_the_page_request_is_null() {
         assertThrows(
             NullPointerException.class,
-            () -> listTransportStepsService.execute(null, null, null, null)
+            () -> listTransportStepsService.execute(
+                ConnectorTransportStepsListFilter.of(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+                )
+            )
         );
     }
 
@@ -52,10 +68,9 @@ public class ConnectorListTransportStepsServiceTest {
             20
 
         );
-        when(transportStepRepository.findAll(any(), any(), any(), any())).thenReturn(pageResult);
+        when(transportStepRepository.findAll(FILTER)).thenReturn(pageResult);
 
-        var request = ConnectorPageRequest.builder().page(0).size(20).build();
-        var result = listTransportStepsService.execute(request, null, null, null);
+        var result = listTransportStepsService.execute(FILTER);
 
         assertThat(result).isNotNull();
         assertThat(result.content().size()).isEqualTo(1);

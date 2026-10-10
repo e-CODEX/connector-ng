@@ -14,6 +14,7 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAS4Prope
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -21,7 +22,6 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
@@ -37,6 +37,7 @@ import eu.ecodex.connector.infrastructure.outbound.persistence.PaginationMapper;
 import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBActionRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBPartyRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBServiceRepository;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.time.Instant;
@@ -209,23 +210,10 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
 
     @Override
     public ConnectorPageResult<ConnectorBusinessMessage> findAll(
-        ConnectorPageRequest request,
-        String identifier,
-        String backendName,
-        ConnectorMessageDirection direction,
-        String businessDomainIdentifier,
-        String service,
-        String action) {
-        var pageable = paginationMapper.toPageable(request);
+        @NonNull @Nonnull ConnectorMessagesListFilter filter) {
+        var pageable = paginationMapper.toPageable(filter.pageRequest());
 
-        var specification = MessageSpecification.withFilters(
-            identifier,
-            backendName,
-            direction,
-            businessDomainIdentifier,
-            service,
-            action
-        );
+        var specification = MessageSpecification.withFilters(filter);
 
         var messages = messageJpaRepository.findAll(specification, pageable).map(this::toDomain);
 

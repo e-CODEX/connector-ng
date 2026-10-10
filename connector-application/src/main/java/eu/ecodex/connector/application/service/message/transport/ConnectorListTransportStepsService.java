@@ -12,11 +12,9 @@ package eu.ecodex.connector.application.service.message.transport;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
-import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -34,15 +32,7 @@ public class ConnectorListTransportStepsService implements ConnectorListTranspor
 
     @Override
     public ConnectorPageResult<ConnectorMessageTransportStep> execute(
-        @NonNull ConnectorPageRequest pageRequest,
-        String messageOrRemoteSystemIdentifier,
-        String linkPartnerName,
-        List<ConnectorMessageTransportStatus> statuses) {
-        return transportStepRepository.findAll(
-            pageRequest,
-            messageOrRemoteSystemIdentifier,
-            linkPartnerName,
-            statuses
-        );
+        @NonNull ConnectorTransportStepsListFilter filter) {
+        return transportStepRepository.findAll(filter);
     }
 }

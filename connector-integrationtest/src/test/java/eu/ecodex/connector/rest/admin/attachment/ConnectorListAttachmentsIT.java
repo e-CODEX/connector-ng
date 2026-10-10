@@ -21,13 +21,14 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -47,23 +48,50 @@ import org.springframework.web.util.UriComponentsBuilder;
 class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
     private static final String URL = "/api/v1/admin/attachments";
     private static final String MESSAGE_ID = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+    private static final Instant NOW = Instant.now();
     @Autowired
     private RestTestClient apiClient;
 
     static Stream<Arguments> attachmentFilters() {
         return Stream.of(
-            arguments(new AttachmentFilter(MESSAGE_ID, null, null, null), 4),
-            arguments(new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", null, null), 2),
-            arguments(new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", "ATTACHMENT", null), 2),
+            arguments(new AttachmentFilter(null, null, null, null, null, null), 14),
+            arguments(new AttachmentFilter(MESSAGE_ID, null, null, null, null, null), 4),
+            arguments(new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", null, null, null, null), 2),
             arguments(
-                new AttachmentFilter(MESSAGE_ID, "fake_file.pdf", "ATTACHMENT", "S3_BUCKET"),
+                new AttachmentFilter(
+                    MESSAGE_ID,
+                    "fake_file.pdf",
+                    "ATTACHMENT",
+                    null,
+                    NOW.minus(1, ChronoUnit.HOURS).toString(),
+                    NOW.plus(1, ChronoUnit.HOURS).toString()
+                ), 2
+            ),
+            arguments(
+                new AttachmentFilter(
+                    MESSAGE_ID,
+                    "fake_file.pdf",
+                    "ATTACHMENT",
+                    "S3_BUCKET",
+                    null,
+                    null
+                ),
                 2
             ),
-            arguments(new AttachmentFilter(null, "fake_file", "ATTACHMENT", "S3_BUCKET"), 3),
-            arguments(new AttachmentFilter(null, "fake_file", "ATTACHMENT", null), 3),
-            arguments(new AttachmentFilter(null, "fake_file", null, null), 3),
-            arguments(new AttachmentFilter(null, null, "ATTACHMENT", null), 3),
-            arguments(new AttachmentFilter(null, null, null, "S3_BUCKET"), 14)
+            arguments(
+                new AttachmentFilter(
+                    null,
+                    "fake_file",
+                    "ATTACHMENT",
+                    "S3_BUCKET",
+                    null,
+                    null
+                ), 3
+            ),
+            arguments(new AttachmentFilter(null, "fake_file", "ATTACHMENT", null, null, null), 3),
+            arguments(new AttachmentFilter(null, "fake_file", null, null, null, null), 3),
+            arguments(new AttachmentFilter(null, null, "ATTACHMENT", null, null, null), 3),
+            arguments(new AttachmentFilter(null, null, null, "S3_BUCKET", null, null), 14)
         );
     }
 
@@ -72,32 +100,10 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
         cleanDb();
     }
 
-    @Test
-    @WithAttachmentData
-    void should_list_attachments() {
-        apiClient.get()
-                 .uri(URL)
-                 .header("Accept", MediaType.APPLICATION_JSON_VALUE)
-                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-                 .exchange()
-                 .expectStatus().isOk()
-                 .expectBody(
-                     new ParameterizedTypeReference<ConnectorPageResult<ConnectorAttachmentDto>>() {
-                     })
-                 .value(result -> {
-                     assertThat(result).isNotNull();
-                     assert result != null;
-                     assertThat(result.content().size()).isEqualTo(14);
-                     assertThat(result.size()).isEqualTo(14);
-                     assertThat(result.totalElements()).isEqualTo(14);
-                     assertThat(result.totalPages()).isEqualTo(1);
-                 });
-    }
-
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("attachmentFilters")
     @WithAttachmentData
-    void should_list_attachments_with_filters(AttachmentFilter filter, int expectedSize) {
+    void should_list_attachments(AttachmentFilter filter, int expectedSize) {
         var uri = UriComponentsBuilder
             .fromUriString(URL)
             .queryParamIfPresent(
@@ -107,6 +113,8 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
             .queryParamIfPresent("name", Optional.ofNullable(filter.filename()))
             .queryParamIfPresent("types", Optional.ofNullable(filter.type()))
             .queryParamIfPresent("storage", Optional.ofNullable(filter.storage()))
+            .queryParamIfPresent("from", Optional.ofNullable(filter.from()))
+            .queryParamIfPresent("to", Optional.ofNullable(filter.to()))
             .build()
             .toUri();
 
@@ -148,7 +156,9 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
         String messageIdentifier,
         String filename,
         String type,
-        String storage
+        String storage,
+        String from,
+        String to
     ) {
         @Override
         public @NonNull String toString() {
@@ -156,7 +166,9 @@ class ConnectorListAttachmentsIT extends AbstractIntegrationTest {
                              entry("messageIdentifier", messageIdentifier),
                              entry("name", filename),
                              entry("type", type),
-                             entry("storage", storage)
+                             entry("storage", storage),
+                             entry("from", from),
+                             entry("to", to)
                          )
                          .filter(e -> e.getValue() != null)
                          .map(e -> e.getKey() + "=" + e.getValue())

@@ -20,8 +20,10 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,34 +47,80 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     private static final String MESSAGE_ID = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
     private static final String REMOTE_SYSTEM_ID = "6e3320bb-6724-4387-822c-a2914dba559a";
     private static final String BACKEND_NAME = "backend_alice";
+    private static final Instant NOW = Instant.now();
 
     @Autowired
     private RestTestClient apiClient;
 
     static Stream<Arguments> transportStepFilters() {
-        var none = TransportStepFilter.none();
         return Stream.of(
-            arguments("no filter", none, 3, 1),
-            arguments("transported message identifier", none.withIdentifier(MESSAGE_ID), 1, 1),
-            arguments("remote system identifier", none.withIdentifier(REMOTE_SYSTEM_ID), 1, 1),
+            arguments("no filter", Map.of(), 3),
             arguments(
-                "message identifier + backend name",
-                none.withIdentifier(MESSAGE_ID).withLinkPartnerName(), 1, 1
+                "date range", Map.of(
+                    "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
+                    "to", NOW.plus(1, ChronoUnit.HOURS).toString()
+                ), 3
+            ),
+            arguments(
+                "transported message identifier",
+                Map.of("messageOrRemoteSystemIdentifier", MESSAGE_ID), 1
+            ),
+            arguments(
+                "remote system identifier",
+                Map.of("messageOrRemoteSystemIdentifier", REMOTE_SYSTEM_ID), 1
+            ),
+            arguments(
+                "message identifier + backend name + from + to",
+                Map.of(
+                    "messageOrRemoteSystemIdentifier", MESSAGE_ID,
+                    "linkPartnerName", BACKEND_NAME,
+                    "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
+                    "to", NOW.plus(1, ChronoUnit.HOURS).toString()
+                ), 1
             ),
             arguments(
                 "remote system identifier + backend name",
-                none.withIdentifier(REMOTE_SYSTEM_ID).withLinkPartnerName(), 1, 1
+                Map.of(
+                    "messageOrRemoteSystemIdentifier", REMOTE_SYSTEM_ID,
+                    "linkPartnerName", BACKEND_NAME
+                ), 1
             ),
 
-            arguments("status DELIVERED", none.withStatuses("DELIVERED"), 0, 0),
-            arguments("status FAILED", none.withStatuses("FAILED"), 0, 0),
-            arguments("status SUBMITTED", none.withStatuses("SUBMITTED"), 1, 1),
-            arguments("status DOWNLOADED", none.withStatuses("DOWNLOADED"), 1, 1),
-            arguments("status READY_FOR_DOWNLOAD", none.withStatuses("READY_FOR_DOWNLOAD"), 1, 1),
-            arguments("several statuses", none.withStatuses("FAILED", "DELIVERED"), 0, 0),
+            arguments("status SUBMITTED", Map.of("statuses", "SUBMITTED"), 1),
+            arguments("status DOWNLOADED", Map.of("statuses", "DOWNLOADED"), 1),
             arguments(
-                "identifier + status",
-                none.withIdentifier(MESSAGE_ID).withStatuses("DELIVERED"), 0, 0
+                "status READY_FOR_DOWNLOAD",
+                Map.of("statuses", "READY_FOR_DOWNLOAD"),
+                1
+            ),
+            arguments(
+                "several statuses (union)",
+                Map.of("statuses", "SUBMITTED,DOWNLOADED"), 2
+            ),
+            arguments(
+                "identifier + matching status",
+                Map.of(
+                    "messageOrRemoteSystemIdentifier", MESSAGE_ID,
+                    "statuses", "SUBMITTED"
+                ), 1
+            ),
+
+            arguments(
+                "status DELIVERED (none in seed)",
+                Map.of("statuses", "DELIVERED"),
+                0
+            ),
+            arguments("status FAILED (none in seed)", Map.of("statuses", "FAILED"), 0),
+            arguments(
+                "several statuses, none matching",
+                Map.of("statuses", "FAILED,DELIVERED"), 0
+            ),
+            arguments(
+                "identifier + non-matching status",
+                Map.of(
+                    "messageOrRemoteSystemIdentifier", MESSAGE_ID,
+                    "statuses", "DELIVERED"
+                ), 0
             )
         );
     }
@@ -87,23 +135,16 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     @WithReferenceData
     void should_list_transport_steps_with_filters(
         String description,
-        TransportStepFilter filter,
-        int expectedSize,
-        int totalPages) {
+        Map<String, String> queryParams,
+        int expectedSize) {
 
-        var uri = UriComponentsBuilder
-            .fromPath(URL)
-            .queryParamIfPresent(
-                "messageOrRemoteSystemIdentifier",
-                Optional.ofNullable(filter.identifier())
-            )
-            .queryParamIfPresent("linkPartnerName", Optional.ofNullable(filter.linkPartnerName()))
-            .queryParamIfPresent("statuses", Optional.ofNullable(filter.statuses()))
-            .build()
-            .toUri();
+        var expectedPages = expectedSize == 0 ? 0 : 1;
+
+        var uriBuilder = UriComponentsBuilder.fromPath(URL);
+        queryParams.forEach(uriBuilder::queryParam);
 
         apiClient.get()
-                 .uri(uri)
+                 .uri(uriBuilder.build().toUri())
                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
                  .exchange()
                  .expectStatus().isOk()
@@ -115,7 +156,7 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
                          assertThat(r.content().size()).isEqualTo(expectedSize);
                          assertThat(r.size()).isEqualTo(expectedSize);
                          assertThat(r.totalElements()).isEqualTo(expectedSize);
-                         assertThat(r.totalPages()).isEqualTo(totalPages);
+                         assertThat(r.totalPages()).isEqualTo(expectedPages);
                      }));
     }
 
@@ -134,27 +175,5 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
         "classpath:sql/user.sql"
     })
     private @interface WithReferenceData {
-    }
-
-    record TransportStepFilter(String identifier, String linkPartnerName, List<String> statuses) {
-        static TransportStepFilter none() {
-            return new TransportStepFilter(null, null, null);
-        }
-
-        TransportStepFilter withIdentifier(String v) {
-            return new TransportStepFilter(v, linkPartnerName, statuses);
-        }
-
-        TransportStepFilter withLinkPartnerName() {
-            return new TransportStepFilter(
-                identifier,
-                ConnectorListTransportStepsIT.BACKEND_NAME,
-                statuses
-            );
-        }
-
-        TransportStepFilter withStatuses(String... v) {
-            return new TransportStepFilter(identifier, linkPartnerName, List.of(v));
-        }
     }
 }

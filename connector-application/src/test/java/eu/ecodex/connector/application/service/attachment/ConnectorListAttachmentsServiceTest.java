@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -23,8 +22,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorListAttachmentsService;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import java.util.List;
@@ -42,6 +40,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorListAttachmentsService")
 class ConnectorListAttachmentsServiceTest {
+    private static final ConnectorAttachmentsListFilter FILTER =
+        ConnectorAttachmentsListFilter.of(pageRequest(0, 20));
+
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
 
@@ -59,50 +60,31 @@ class ConnectorListAttachmentsServiceTest {
         void should_return_the_page_provided_by_the_repository() {
             var expected = ConnectorPageResult.of(
                 List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1);
-            when(attachmentRepository.findAll(any(), any(), any(), any(), any())).thenReturn(
+            when(attachmentRepository.findAll(FILTER)).thenReturn(
                 expected);
 
-            var result = listAttachmentsService.execute(pageRequest(0, 20), null, null, null, null);
+            var result = listAttachmentsService.execute(FILTER);
 
             assertThat(result).isSameAs(expected);
         }
 
         @Test
         void should_pass_the_page_request_and_filters_to_the_repository() {
-            var request = pageRequest(2, 50);
-            var messageId = "fake-message-id";
-            var name = "fake-name";
-            var types = List.of(ConnectorAttachmentType.values());
-            var storages = List.of(ConnectorAttachmentStorage.values());
-            when(attachmentRepository.findAll(any(), any(), any(), any(), any()))
+            when(attachmentRepository.findAll(FILTER))
                 .thenReturn(ConnectorPageResult.of(List.of(), 0, 0, 0));
 
-            listAttachmentsService.execute(
-                request,
-                messageId,
-                name,
-                types,
-                storages
-            );
+            listAttachmentsService.execute(FILTER);
 
-            verify(attachmentRepository)
-                .findAll(request, messageId, name, types, storages);
+            verify(attachmentRepository).findAll(FILTER);
         }
 
         @ParameterizedTest
         @ValueSource(ints = {1, 20, 100})
         void should_accept_page_sizes_up_to_100(int size) {
-            when(attachmentRepository.findAll(any(), any(), any(), any(), any()))
-                .thenReturn(ConnectorPageResult.of(List.of(), 0, 0, 0));
+            when(attachmentRepository.findAll(FILTER))
+                .thenReturn(ConnectorPageResult.of(List.of(), size, 0, 0));
 
-            assertThatCode(() -> listAttachmentsService.execute(
-                pageRequest(0, size),
-                null,
-                null,
-                null,
-                null
-            ))
-                .doesNotThrowAnyException();
+            assertThatCode(() -> listAttachmentsService.execute(FILTER)).doesNotThrowAnyException();
         }
     }
 
@@ -113,11 +95,7 @@ class ConnectorListAttachmentsServiceTest {
         void should_fail_when_the_page_is_negative() {
             assertThatIllegalArgumentException()
                 .isThrownBy(() -> listAttachmentsService.execute(
-                    pageRequest(-1, 20),
-                    null,
-                    null,
-                    null,
-                    null
+                    ConnectorAttachmentsListFilter.of(pageRequest(-1, 20))
                 ));
 
             verifyNoInteractions(attachmentRepository);
@@ -130,7 +108,7 @@ class ConnectorListAttachmentsServiceTest {
                 IllegalArgumentException.class,
                 () -> {
                     var request = pageRequest(0, size);
-                    listAttachmentsService.execute(request, null, null, null, null);
+                    listAttachmentsService.execute(ConnectorAttachmentsListFilter.of(request));
                 }
             );
             verifyNoInteractions(attachmentRepository);
@@ -139,7 +117,9 @@ class ConnectorListAttachmentsServiceTest {
         @Test
         void should_fail_when_the_page_request_is_null() {
             assertThatNullPointerException()
-                .isThrownBy(() -> listAttachmentsService.execute(null, null, null, null, null));
+                .isThrownBy(() -> listAttachmentsService.execute(
+                    ConnectorAttachmentsListFilter.of(null)
+                ));
 
             verifyNoInteractions(attachmentRepository);
         }

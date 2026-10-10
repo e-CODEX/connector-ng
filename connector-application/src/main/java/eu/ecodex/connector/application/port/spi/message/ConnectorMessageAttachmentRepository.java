@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
@@ -61,29 +61,15 @@ public interface ConnectorMessageAttachmentRepository {
      * combined with a logical {@code AND}; a filter whose value is {@code null} or empty is
      * ignored.
      *
-     * @param request           the pagination request containing the zero-based page index and the
-     *                          number of elements per page; must not be null and must adhere to
-     *                          validation rules defined in {@code ConnectorPageRequest}.
-     * @param messageIdentifier identifier of the message the attachments belong to; ignored if
-     *                          {@code null} or empty
-     * @param name              attachment name (or part of a name, case-insensitive) to match;
-     *                          ignored if {@code null} or empty
-     * @param types             attachment types ({@link ConnectorAttachmentType}) to match; ignored
-     *                          if {@code null} or empty
-     * @param storages          storage modes ({@link ConnectorAttachmentStorage}) to match; ignored
-     *                          if {@code null} or empty
+     * @param filter the pagination parameters and filter criteria used to retrieve the attachments
+     *               (must not be null)
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessageAttachment}
      *     entities matching the given filters for the requested page, along with pagination
      *     metadata such as total elements and page size.
      */
     ConnectorPageResult<ConnectorMessageAttachment> findAll(
-        ConnectorPageRequest request,
-        String messageIdentifier,
-        String name,
-        List<ConnectorAttachmentType> types,
-        List<ConnectorAttachmentStorage> storages
-    );
+        @Nonnull ConnectorAttachmentsListFilter filter);
 
     /**
      * Associates an attachment with a specific message.

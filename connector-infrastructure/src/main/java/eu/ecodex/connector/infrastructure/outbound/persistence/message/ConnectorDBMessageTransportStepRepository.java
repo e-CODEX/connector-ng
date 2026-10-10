@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
@@ -21,7 +22,6 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepStatusEntity;
@@ -153,16 +153,9 @@ public class ConnectorDBMessageTransportStepRepository
 
     @Override
     public ConnectorPageResult<ConnectorMessageTransportStep> findAll(
-        @NonNull ConnectorPageRequest request,
-        String messageOrRemoteSystemIdentifier,
-        String linkPartnerName,
-        List<ConnectorMessageTransportStatus> statuses) {
-        var pageable = paginationMapper.toPageable(request);
-        var specification = TransportStepSpecification.withFilters(
-            messageOrRemoteSystemIdentifier,
-            linkPartnerName,
-            statuses
-        );
+        @NonNull ConnectorTransportStepsListFilter filter) {
+        var pageable = paginationMapper.toPageable(filter.pageRequest());
+        var specification = TransportStepSpecification.withFilters(filter);
         var transportSteps = transportStepJpaRepository.findAll(specification, pageable)
                                                        .map(this::toDomain);
 

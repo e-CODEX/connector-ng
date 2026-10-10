@@ -12,10 +12,10 @@ package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -32,21 +32,7 @@ public class ConnectorListMessagesService implements ConnectorListMessages {
 
     @Override
     public ConnectorPageResult<ConnectorBusinessMessage> execute(
-        @NonNull ConnectorPageRequest pageRequest,
-        String identifier,
-        String backendName,
-        ConnectorMessageDirection direction,
-        String businessDomainIdentifier,
-        String service,
-        String action) {
-        return connectorMessageRepository.findAll(
-            pageRequest,
-            identifier,
-            backendName,
-            direction,
-            businessDomainIdentifier,
-            service,
-            action
-        );
+        @NonNull @Nonnull ConnectorMessagesListFilter filter) {
+        return connectorMessageRepository.findAll(filter);
     }
 }

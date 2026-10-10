@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +50,10 @@ public interface ConnectorAttachmentAdminApi {
         @RequestParam(name = "messageIdentifier", required = false) String messageIdentifier,
         @RequestParam(name = "name", required = false) String name,
         @RequestParam(name = "types", required = false) List<ConnectorAttachmentType> types,
-        @RequestParam(name = "storages", required = false) List<ConnectorAttachmentStorage> storages
+        @RequestParam(name = "storages", required = false)
+        List<ConnectorAttachmentStorage> storages,
+        @RequestParam(name = "from", required = false) Instant from,
+        @RequestParam(name = "to", required = false) Instant to
     );
 
     @GetMapping("/{identifier}/download")

@@ -10,8 +10,10 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.specification;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.transport.ConnectorMessageTransportStepEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.DateRangeSpecifications;
 import java.util.List;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
@@ -25,6 +27,7 @@ public class TransportStepSpecification {
     private static final String REMOTE_SYSTEM_IDENTIFIER_FIELD = "remoteSystemIdentifier";
     private static final String LINK_PARTNER_NAME_FIELD = "linkPartnerName";
     private static final String STATUS_FIELD = "status";
+    private static final String CREATED_FIELD = "createdAt";
 
     /**
      * Constructs a combined {@link Specification} for filtering
@@ -32,29 +35,22 @@ public class TransportStepSpecification {
      * The specification combines conditions for the {@code transportedMessageIdentifier},
      * {@code remoteSystemIdentifier}, and {@code backendName} fields.
      *
-     * @param messageOrRemoteSystemIdentifier the identifier used to filter by transported message
-     *                                        or remote system identifier. If the value is null or
-     *                                        empty, the corresponding filters are ignored.
-     * @param linkPartnerName                 the name of the link partner used to filter by backend
-     *                                        name.
-     * @param statuses                        transport step statuses
-     *                                        ({@link ConnectorMessageTransportStatus}) to match;
-     *                                        ignored if {@code null} or empty
+     * @param filter the pagination parameters and filter criteria used to retrieve the transport
+     *               steps (must not be null)
      *
      * @return a {@link Specification} representing the combined filter criteria. Returns null if
      *     all the input parameters are null or empty.
      */
     public static Specification<ConnectorMessageTransportStepEntity> withFilters(
-        String messageOrRemoteSystemIdentifier,
-        String linkPartnerName,
-        List<ConnectorMessageTransportStatus> statuses) {
+        ConnectorTransportStepsListFilter filter) {
         return Specification
-            .where(withTransportedMessageIdentifier(messageOrRemoteSystemIdentifier))
+            .where(withTransportedMessageIdentifier(filter.messageOrRemoteSystemIdentifier()))
             .or(
-                withRemoteSystemIdentifier(messageOrRemoteSystemIdentifier)
+                withRemoteSystemIdentifier(filter.messageOrRemoteSystemIdentifier())
             )
-            .and(withLinkPartnerName(linkPartnerName))
-            .and(withStatuses(statuses));
+            .and(withLinkPartnerName(filter.linkPartnerName()))
+            .and(withStatuses(filter.statuses()))
+            .and(DateRangeSpecifications.withDateRange(filter.dateFilter(), CREATED_FIELD));
     }
 
     private static Specification<ConnectorMessageTransportStepEntity>

@@ -18,6 +18,8 @@ import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBus
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
+import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -34,6 +36,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.parser.ConnectorRestO
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.test.ConnectorTestMessageRequest;
 import eu.ecodex.connector.infrastructure.outbound.export.ConnectorMessageReportExporterFactory;
 import java.io.IOException;
+import java.time.Instant;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -103,18 +106,22 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         ConnectorMessageDirection direction,
         String businessDomain,
         String service,
-        String action) {
+        String action,
+        Instant from,
+        Instant to) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
-
-        var messages = listMessagesService.execute(
+        var filter = ConnectorMessagesListFilter.of(
             pageRequest,
             identifier,
             backendName,
             direction,
             businessDomain,
             service,
-            action
+            action,
+            ConnectorDateRangeFilter.of(from, to)
         );
+
+        var messages = listMessagesService.execute(filter);
 
         return ConnectorPageResult.of(
             messages.content().stream().map(ConnectorMessageDto::from).toList(),

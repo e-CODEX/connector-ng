@@ -10,9 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 
@@ -26,27 +25,12 @@ public interface ConnectorListMessages {
      * Executes a paginated process to retrieve a list of connector messages based on the specified
      * page request.
      *
-     * @param pageRequest              the pagination request containing parameters for retrieving a
-     *                                 specific page of connector messages. Must not be null.
-     * @param identifier               the identifier of the message to be retrieved (id,
-     *                                 ebmsMessageId, conversationId, etc.)
-     * @param backendName              the name of the backend to which the message belongs to.
-     * @param direction                the message direction.
-     * @param businessDomainIdentifier the identifier of the business domain to which the message
-     *                                 belongs to.
-     * @param service                  the service name of the message.
-     * @param action                   the action name of the message.
+     * @param filter the pagination parameters and filter criteria used to retrieve the messages
+     *               (must not be null)
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorBusinessMessage}
      *     objects and pagination metadata.
      */
     ConnectorPageResult<ConnectorBusinessMessage> execute(
-        @Nonnull ConnectorPageRequest pageRequest,
-        String identifier,
-        String backendName,
-        ConnectorMessageDirection direction,
-        String businessDomainIdentifier,
-        String service,
-        String action
-    );
+        @Nonnull ConnectorMessagesListFilter filter);
 }

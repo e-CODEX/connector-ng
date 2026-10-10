@@ -10,8 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.DateRangeSpecifications;
+import jakarta.annotation.Nonnull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -32,6 +35,7 @@ public class MessageSpecification {
     private static final String BACKEND_NAME_FIELD = "backendName";
     private static final String DIRECTION_FIELD = "direction";
     private static final String BUSINESS_DOMAIN_FIELD = "businessDomain";
+    private static final String CREATED_FIELD = "createdAt";
 
     /**
      * Creates a {@link Specification} for querying {@link ConnectorMessageEntity} instances based
@@ -39,39 +43,28 @@ public class MessageSpecification {
      * as the main identifier, backend message identifier, reference to backend message identifier,
      * conversation identifier, and EBMS identifier.
      *
-     * @param identifier               the identifier value to search for. The search will be
-     *                                 performed as a case-insensitive "LIKE" match across multiple
-     *                                 entity fields. If the identifier is {@code null}, the
-     *                                 specification will not add any criteria.
-     * @param backendName              the name of the backend to filter the results.
-     * @param direction                the direction of message to filter the results.
-     * @param businessDomainIdentifier the identifier of the business domain to filter the results.
-     * @param serviceName              the name of the service to filter the results.
-     * @param actionName               the name of the action to filter the results.
+     * @param filter the pagination parameters and filter criteria used to retrieve the messages
+     *               (must not be null)
      *
      * @return a {@link Specification} that can be used for querying {@link ConnectorMessageEntity}
      *     instances matching the given identifier across one or more relevant fields.
      */
     public static Specification<ConnectorMessageEntity> withFilters(
-        String identifier,
-        String backendName,
-        ConnectorMessageDirection direction,
-        String businessDomainIdentifier,
-        String serviceName,
-        String actionName) {
+        @Nonnull ConnectorMessagesListFilter filter) {
         return Specification
-            .where(withIdentifier(identifier))
+            .where(withIdentifier(filter.identifier()))
             .or(
-                withBackendMessageIdentifier(identifier)
-                    .or(withRefToBackendMessageIdentifier(identifier))
-                    .or(withConversationIdentifier(identifier))
-                    .or(withEbmsIdentifier(identifier))
+                withBackendMessageIdentifier(filter.identifier())
+                    .or(withRefToBackendMessageIdentifier(filter.identifier()))
+                    .or(withConversationIdentifier(filter.identifier()))
+                    .or(withEbmsIdentifier(filter.identifier()))
             )
-            .and(withDirection(direction))
-            .and(withBackendName(backendName))
-            .and(withBusinessDomain(businessDomainIdentifier))
-            .and(withServiceName(serviceName))
-            .and(withActionName(actionName));
+            .and(withDirection(filter.direction()))
+            .and(withBackendName(filter.backendName()))
+            .and(withBusinessDomain(filter.businessDomainIdentifier()))
+            .and(withServiceName(filter.service()))
+            .and(withActionName(filter.action()))
+            .and(DateRangeSpecifications.withDateRange(filter.dateFilter(), CREATED_FIELD));
     }
 
     private static Specification<ConnectorMessageEntity> withIdentifier(String identifier) {

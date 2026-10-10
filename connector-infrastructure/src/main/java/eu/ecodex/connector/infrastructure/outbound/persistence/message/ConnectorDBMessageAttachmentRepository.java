@@ -11,10 +11,9 @@
 package eu.ecodex.connector.infrastructure.outbound.persistence.message;
 
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAttachmentJpaRepository;
@@ -104,19 +103,10 @@ public class ConnectorDBMessageAttachmentRepository implements
 
     @Override
     public ConnectorPageResult<ConnectorMessageAttachment> findAll(
-        ConnectorPageRequest request,
-        String messageIdentifier,
-        String name,
-        List<ConnectorAttachmentType> types,
-        List<ConnectorAttachmentStorage> storages) {
-        var pageable = paginationMapper.toPageable(request);
+        @NonNull ConnectorAttachmentsListFilter filter) {
+        var pageable = paginationMapper.toPageable(filter.pageRequest());
 
-        var specification = AttachmentSpecification.withFilters(
-            messageIdentifier,
-            name,
-            types,
-            storages
-        );
+        var specification = AttachmentSpecification.withFilters(filter);
 
         var attachments = attachmentJpaRepository
             .findAll(specification, pageable)

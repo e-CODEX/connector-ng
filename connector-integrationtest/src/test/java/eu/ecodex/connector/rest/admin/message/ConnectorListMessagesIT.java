@@ -11,6 +11,7 @@
 package eu.ecodex.connector.rest.admin.message;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -19,16 +20,21 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @DisplayName("ConnectorListMessagesIT REST")
 @Sql(
@@ -37,104 +43,84 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 )
 public class ConnectorListMessagesIT extends AbstractIntegrationTest {
     private static final String URL = "/api/v1/admin/messages";
+    private static final String MESSAGE_ID = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+    private static final String CONVERSATION_ID = "9085a015-06f3-4631-96e6-55a216e900ff";
+    private static final Instant NOW = Instant.now();
 
     @Autowired
     private RestTestClient apiClient;
+
+    static Stream<Arguments> messageFilters() {
+        return Stream.of(
+            arguments("no filter", Map.of(), 4),
+            arguments(
+                "date range", Map.of(
+                    "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
+                    "to", NOW.plus(1, ChronoUnit.HOURS).toString()
+                ), 4
+            ),
+            arguments("message identifier", Map.of("identifier", MESSAGE_ID), 1),
+            arguments("conversation identifier", Map.of("identifier", CONVERSATION_ID), 1),
+            arguments(
+                "message identifier + backend, direction, domain, service, action, from, to",
+                Map.of(
+                    "identifier", MESSAGE_ID,
+                    "backendName", "backend_alice",
+                    "direction", "BACKEND_TO_GATEWAY",
+                    "businessDomain", "default_business_domain",
+                    "service", "Connector-TEST",
+                    "action", "Test_Form",
+                    "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
+                    "to", NOW.plus(1, ChronoUnit.HOURS).toString()
+                ),
+                1
+            ),
+            arguments(
+                "conversation identifier + backend, direction, domain, service, action",
+                Map.of(
+                    "identifier", CONVERSATION_ID,
+                    "backendName", "backend_alice",
+                    "direction", "GATEWAY_TO_BACKEND",
+                    "businessDomain", "default_business_domain",
+                    "service", "Connector-TEST",
+                    "action", "Test_Form"
+                ),
+                1
+            )
+        );
+    }
 
     @AfterEach
     void cleanUp() {
         cleanDb();
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("messageFilters")
     @WithMessageData
-    void should_list_connector_messages() {
-        apiClient.get()
-            .uri(URL)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
-            })
-            .value(result -> {
-                assertThat(result).isNotNull();
-                assert result != null;
-                assertThat(result.content().size()).isEqualTo(4);
-                assertThat(result.size()).isEqualTo(4);
-                assertThat(result.totalElements()).isEqualTo(4);
-                assertThat(result.totalPages()).isEqualTo(1);
-            });
-    }
+    void should_list_connector_messages(
+        String description,
+        Map<String, String> queryParams,
+        int expectedSize) {
 
-    @ParameterizedTest
-    @CsvSource({
-        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", // identifier
-        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu", // backendMessageIdentifier
-        "9085a015-06f3-4631-96e6-55a216e900ff", // conversationIdentifier
-    })
-    @WithMessageData
-    void should_list_connector_messages_filtered_by_identifiers(String identifier) {
-        apiClient.get()
-            .uri(String.format("%s?identifier=%s", URL, identifier))
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
-            })
-            .value(result -> {
-                assertThat(result).isNotNull();
-                assert result != null;
-                assertThat(result.content().size()).isEqualTo(1);
-                assertThat(result.size()).isEqualTo(1);
-                assertThat(result.totalElements()).isEqualTo(1);
-                assertThat(result.totalPages()).isEqualTo(1);
-            });
-    }
+        var uriBuilder = UriComponentsBuilder.fromPath(URL);
+        queryParams.forEach(uriBuilder::queryParam);
 
-    @ParameterizedTest
-    @CsvSource({
-        // identifier
-        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,BACKEND_TO_GATEWAY,"
-            + "default_business_domain,Connector-TEST,Test_Form",
-        // backendMessageIdentifier
-        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu,backend_alice,BACKEND_TO_GATEWAY,"
-            + "default_business_domain,Connector-TEST,Test_Form",
-        // conversationIdentifier
-        "9085a015-06f3-4631-96e6-55a216e900ff,backend_alice,GATEWAY_TO_BACKEND,default_business_domain,"
-            + "Connector-TEST,Test_Form",
-    })
-    @WithMessageData
-    void should_list_connector_messages_matching_identifier_backend_name_direction_and_business_domain_filters(
-        String identifier,
-        String backendName,
-        String direction,
-        String businessDomain,
-        String service,
-        String action) {
         apiClient.get()
-            .uri(String.format(
-                "%s?identifier=%s&backendName=%s&direction=%s&businessDomain=%s&service=%s&action=%s",
-                URL,
-                identifier,
-                backendName,
-                direction,
-                businessDomain,
-                service,
-                action
-            ))
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
-            .exchange()
-            .expectStatus().isOk()
-            .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
-            })
-            .value(result -> {
-                assertThat(result).isNotNull();
-                assert result != null;
-                assertThat(result.content().size()).isEqualTo(1);
-                assertThat(result.size()).isEqualTo(1);
-                assertThat(result.totalElements()).isEqualTo(1);
-                assertThat(result.totalPages()).isEqualTo(1);
-            });
+                 .uri(uriBuilder.build().toUri())
+                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                 .exchange()
+                 .expectStatus().isOk()
+                 .expectBody(new ParameterizedTypeReference<ConnectorPageResult<ConnectorMessageDto>>() {
+                 })
+                 .value(result -> assertThat(result)
+                     .isNotNull()
+                     .satisfies(r -> {
+                         assertThat(r.content().size()).isEqualTo(expectedSize);
+                         assertThat(r.size()).isEqualTo(expectedSize);
+                         assertThat(r.totalElements()).isEqualTo(expectedSize);
+                         assertThat(r.totalPages()).isEqualTo(1);
+                     }));
     }
 
     @Retention(RetentionPolicy.RUNTIME)

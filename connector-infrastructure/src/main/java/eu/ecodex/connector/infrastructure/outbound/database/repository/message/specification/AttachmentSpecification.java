@@ -10,10 +10,13 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAttachmentEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.DateRangeSpecifications;
 import java.util.List;
+import lombok.NonNull;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
@@ -26,6 +29,7 @@ public class AttachmentSpecification {
     private static final String TYPE_FIELD = "type";
     private static final String NAME_FIELD = "name";
     private static final String STORAGE_FIELD = "storage";
+    private static final String CREATED_FIELD = "createdAt";
 
     public static Specification<ConnectorMessageAttachmentEntity> hasMessageIdentifierAndTypeIn(
         String messageIdentifier,
@@ -38,28 +42,20 @@ public class AttachmentSpecification {
      * Builds a {@link Specification} that combines the search filters applicable to the attachments
      * of a connector message.
      *
-     * @param messageIdentifier identifier of the message the attachments belong to; ignored if
-     *                          {@code null} or empty
-     * @param name              attachment name (or part of a name, case-insensitive); ignored if
-     *                          {@code null} or empty
-     * @param types             attachment types ({@link ConnectorAttachmentType}) to match; ignored
-     *                          if {@code null} or empty
-     * @param storages          storage modes ({@link ConnectorAttachmentStorage}) to match; ignored
-     *                          if {@code null} or empty
+     * @param filter the pagination parameters and filter criteria used to retrieve the attachments
+     *               (must not be null)
      *
      * @return a {@link Specification} of {@link ConnectorMessageAttachmentEntity} ready to be
      *     passed to a repository ({@code JpaSpecificationExecutor})
      */
     public static Specification<ConnectorMessageAttachmentEntity> withFilters(
-        String messageIdentifier,
-        String name,
-        List<ConnectorAttachmentType> types,
-        List<ConnectorAttachmentStorage> storages) {
+        @NonNull ConnectorAttachmentsListFilter filter) {
         return Specification
-            .where(withMessageIdentifier(messageIdentifier))
-            .and(withTypes(types))
-            .and(withStorages(storages))
-            .and(withName(name));
+            .where(withMessageIdentifier(filter.messageIdentifier()))
+            .and(withTypes(filter.types()))
+            .and(withStorages(filter.storages()))
+            .and(withName(filter.name()))
+            .and(DateRangeSpecifications.withDateRange(filter.dateFilter(), CREATED_FIELD));
     }
 
     private static Specification<ConnectorMessageAttachmentEntity> withMessageIdentifier(

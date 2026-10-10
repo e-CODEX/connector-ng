@@ -12,12 +12,10 @@ package eu.ecodex.connector.application.service.attachement;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorListAttachments;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import java.util.List;
+import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -35,11 +33,7 @@ public class ConnectorListAttachmentsService implements ConnectorListAttachments
 
     @Override
     public ConnectorPageResult<ConnectorMessageAttachment> execute(
-        @NonNull ConnectorPageRequest pageRequest,
-        String messageIdentifier,
-        String name,
-        List<ConnectorAttachmentType> types,
-        List<ConnectorAttachmentStorage> storages) {
-        return attachmentRepository.findAll(pageRequest, messageIdentifier, name, types, storages);
+        @NonNull @Nonnull ConnectorAttachmentsListFilter filter) {
+        return attachmentRepository.findAll(filter);
     }
 }

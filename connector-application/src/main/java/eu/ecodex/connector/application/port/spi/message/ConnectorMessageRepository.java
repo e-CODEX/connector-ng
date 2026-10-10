@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 import java.util.List;
@@ -64,23 +64,8 @@ public interface ConnectorMessageRepository {
      * {@code backendName}. This method facilitates fetching connector messages that match the given
      * filters.
      *
-     * @param request                  the pagination and sorting information for the retrieval
-     *                                 operation. This includes details such as page size, page
-     *                                 number, and sorting order; must not be null.
-     * @param identifier               a unique identifier to filter
-     *                                 {@link ConnectorBusinessMessage} objects. This can be used to
-     *                                 narrow down the search results to messages associated with a
-     *                                 specific identifier; may be null or empty if no filtering by
-     *                                 identifier is needed.
-     * @param backendName              the name of the backend to filter
-     *                                 {@link ConnectorBusinessMessage} objects. This allows for
-     *                                 scoping the search results to messages associated with a
-     *                                 specific backend name; may be null or empty if no backend
-     *                                 filtering is required.
-     * @param direction                the direction of the message to filter.
-     * @param businessDomainIdentifier the identifier of the business domain to filter
-     * @param service                  the service name to filter messages
-     * @param action                   the action name to filter messages
+     * @param filter the pagination parameters and filter criteria used to retrieve the messages
+     *               (must not be null)
      *
      * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorBusinessMessage}
      *     instances that match the specified criteria. The result includes pagination details such
@@ -88,14 +73,7 @@ public interface ConnectorMessageRepository {
      *     returned.
      */
     ConnectorPageResult<ConnectorBusinessMessage> findAll(
-        ConnectorPageRequest request,
-        String identifier,
-        String backendName,
-        ConnectorMessageDirection direction,
-        String businessDomainIdentifier,
-        String service,
-        String action
-    );
+        @Nonnull ConnectorMessagesListFilter filter);
 
     /**
      * Retrieves a list of all {@link ConnectorBusinessMessage} instances associated with the

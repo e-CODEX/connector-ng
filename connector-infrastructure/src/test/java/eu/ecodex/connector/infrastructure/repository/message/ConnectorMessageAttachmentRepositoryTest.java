@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
@@ -111,7 +112,7 @@ public class ConnectorMessageAttachmentRepositoryTest extends AbstractRepository
             repository.save(attachment);
 
             var pageRequest = ConnectorPageRequest.builder().page(0).size(20).build();
-            var attachments = repository.findAll(pageRequest, null, null, null, null);
+            var attachments = repository.findAll(ConnectorAttachmentsListFilter.of(pageRequest));
 
             assertThat(attachments).isNotNull();
             assertThat(attachments.content()).hasSize(1);

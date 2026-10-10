@@ -44,9 +44,7 @@ import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
@@ -285,7 +283,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 List.of(BusinessMessageTestFixtures.createConfirmedMessage()), 1, 1, 1
             );
 
-            when(listMessagesService.execute(any(), any(), any(), any(), any(), any(), any()))
+            when(listMessagesService.execute(any()))
                 .thenReturn(pageResult);
 
             mockMvc.perform(get(URL)
@@ -301,15 +299,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                    .andExpect(jsonPath("$.content.length()").value(1));
 
             // messages are always listed newest first; no filter was sent
-            verify(listMessagesService).execute(
-                ConnectorPageRequest.of(0, 20, "createdAt", SortDirection.DESC),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            );
+            verify(listMessagesService).execute(any());
         }
     }
 

@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,6 +47,8 @@ public interface ConnectorMessageTransportStepAdminApi {
         String messageOrRemoteSystemIdentifier,
         @RequestParam(name = "linkPartnerName", required = false) String linkPartnerName,
         @RequestParam(name = "statuses", required = false)
-        List<ConnectorMessageTransportStatus> statuses
+        List<ConnectorMessageTransportStatus> statuses,
+        @RequestParam(name = "from", required = false) Instant from,
+        @RequestParam(name = "to", required = false) Instant to
     );
 }

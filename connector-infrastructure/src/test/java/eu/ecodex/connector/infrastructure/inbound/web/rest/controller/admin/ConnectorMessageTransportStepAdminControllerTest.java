@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin;
 
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,7 +48,7 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
             List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
         );
 
-        when(listTransportStepsService.execute(any(), any(), any(), any())).thenReturn(pageResult);
+        when(listTransportStepsService.execute(any())).thenReturn(pageResult);
 
         mockMvc.perform(get(URL)
                             .param("page", "0")

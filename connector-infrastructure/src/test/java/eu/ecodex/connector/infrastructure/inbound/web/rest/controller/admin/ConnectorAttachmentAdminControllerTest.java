@@ -62,7 +62,7 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
                 List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
             );
 
-            when(listAttachmentsService.execute(any(), any(), any(), any(), any())).thenReturn(
+            when(listAttachmentsService.execute(any())).thenReturn(
                 pageResult);
 
             mockMvc.perform(get("/api/v1/admin/attachments")
@@ -86,11 +86,11 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
         void should_return_200_when_downloading_the_attachment() throws Exception {
             when(retrieveAttachmentService.execute(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-            when(downloadAttachmentService.execute(any()))
-                .thenReturn(new byte[1]);
+            when(downloadAttachmentService.execute(any())).thenReturn(new byte[1]);
 
-            mockMvc.perform(get("/api/v1/admin/attachments/1234567890abcdef/download")
-                                .contentType(MediaType.APPLICATION_JSON))
+            mockMvc.perform(
+                       get("/api/v1/admin/attachments/1234567890abcdef/download")
+                           .contentType(MediaType.APPLICATION_JSON))
                    .andExpect(status().isOk());
         }
 

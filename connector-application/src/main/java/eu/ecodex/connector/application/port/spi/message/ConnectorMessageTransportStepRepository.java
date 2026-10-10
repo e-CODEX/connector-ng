@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 import java.util.List;
@@ -136,24 +136,13 @@ public interface ConnectorMessageTransportStepRepository {
     /**
      * Retrieves all {@link ConnectorMessageTransportStep} entities that match the given criteria.
      *
-     * @param request                         the {@link ConnectorPageRequest} containing pagination
-     *                                        and sorting details; must not be null.
-     * @param messageOrRemoteSystemIdentifier an optional identifier for filtering results based on
-     *                                        a specific message or remote system; can be null or
-     *                                        empty.
-     * @param linkPartnerName                 an optional name of the link partner for filtering
-     *                                        results; can be null or empty.
-     * @param statuses                        transport step statuses
-     *                                        ({@link ConnectorMessageTransportStatus}) to match;
-     *                                        ignored if {@code null} or empty
+     * @param filter the pagination parameters and filter criteria used to retrieve the transport
+     *               steps (must not be null)
      *
      * @return a {@link ConnectorPageResult} containing the paginated list of matching
      *     {@link ConnectorMessageTransportStep} entities. If no matching entities are found,
      *     returns an empty result.
      */
     ConnectorPageResult<ConnectorMessageTransportStep> findAll(
-        @Nonnull ConnectorPageRequest request,
-        String messageOrRemoteSystemIdentifier,
-        String linkPartnerName,
-        List<ConnectorMessageTransportStatus> statuses);
+        @Nonnull ConnectorTransportStepsListFilter filter);
 }

@@ -13,12 +13,15 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.att
 import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorListAttachments;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorRetrieveAttachment;
+import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorAttachmentDto;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -57,16 +60,21 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
         String messageIdentifier,
         String name,
         List<ConnectorAttachmentType> types,
-        List<ConnectorAttachmentStorage> storages) {
+        List<ConnectorAttachmentStorage> storages,
+        Instant from,
+        Instant to) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
 
-        var attachments = listAttachmentsService.execute(
+        var filter = ConnectorAttachmentsListFilter.of(
             pageRequest,
             messageIdentifier,
             name,
             types,
-            storages
+            storages,
+            ConnectorDateRangeFilter.of(from, to)
         );
+
+        var attachments = listAttachmentsService.execute(filter);
 
         return ConnectorPageResult.of(
             attachments.content().stream().map(ConnectorAttachmentDto::from).toList(),

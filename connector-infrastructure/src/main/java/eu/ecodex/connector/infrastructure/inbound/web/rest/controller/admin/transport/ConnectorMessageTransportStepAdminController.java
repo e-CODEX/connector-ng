@@ -11,11 +11,14 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
+import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,14 +41,19 @@ public class ConnectorMessageTransportStepAdminController
         int size,
         String messageOrRemoteSystemIdentifier,
         String linkPartnerName,
-        List<ConnectorMessageTransportStatus> statuses) {
+        List<ConnectorMessageTransportStatus> statuses,
+        Instant from,
+        Instant to) {
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
-        var transportSteps = listTransportStepsService.execute(
+        var filter = ConnectorTransportStepsListFilter.of(
             pageRequest,
             messageOrRemoteSystemIdentifier,
             linkPartnerName,
-            statuses
+            statuses,
+            ConnectorDateRangeFilter.of(from, to)
         );
+
+        var transportSteps = listTransportStepsService.execute(filter);
 
         return ConnectorPageResult.of(
             transportSteps.content()

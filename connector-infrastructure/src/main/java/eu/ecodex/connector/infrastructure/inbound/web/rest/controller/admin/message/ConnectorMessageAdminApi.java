@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -76,7 +77,9 @@ public interface ConnectorMessageAdminApi {
         @RequestParam(name = "direction", required = false) ConnectorMessageDirection direction,
         @RequestParam(name = "businessDomain", required = false) String businessDomain,
         @RequestParam(name = "service", required = false) String service,
-        @RequestParam(name = "action", required = false) String action
+        @RequestParam(name = "action", required = false) String action,
+        @RequestParam(name = "from", required = false) Instant from,
+        @RequestParam(name = "to", required = false) Instant to
     );
 
     @ResponseStatus(HttpStatus.OK)

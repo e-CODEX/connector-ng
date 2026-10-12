@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.tra
 
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +22,7 @@ import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -51,4 +53,13 @@ public interface ConnectorMessageTransportStepAdminApi {
         @RequestParam(name = "from", required = false) Instant from,
         @RequestParam(name = "to", required = false) Instant to
     );
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("{identifier}/message")
+    @Operation(summary = "Get transported message.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    ConnectorMessageDetailDto retrieveTransportedMessage(@PathVariable String identifier);
 }

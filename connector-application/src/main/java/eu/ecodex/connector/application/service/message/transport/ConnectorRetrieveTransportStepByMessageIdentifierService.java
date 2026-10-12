@@ -11,20 +11,22 @@
 package eu.ecodex.connector.application.service.message.transport;
 
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
-import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByMessageIdentifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation of the {@link ConnectorRetrieveTransportStep} interface.
+ * Service implementation of the {@link ConnectorRetrieveTransportStepByMessageIdentifier}
+ * interface.
  */
 @Service
-public class ConnectorRetrieveTransportStepService implements ConnectorRetrieveTransportStep {
+public class ConnectorRetrieveTransportStepByMessageIdentifierService
+    implements ConnectorRetrieveTransportStepByMessageIdentifier {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
 
-    public ConnectorRetrieveTransportStepService(
+    public ConnectorRetrieveTransportStepByMessageIdentifierService(
         ConnectorMessageTransportStepRepository transportStepRepository) {
         this.transportStepRepository = transportStepRepository;
     }

@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message;
 
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -128,6 +129,40 @@ public record ConnectorMessageDetailDto(
             .errors(message.errors())
             .attachments(filterAttachments(message))
             .evidences(toEvidences(message.evidences()))
+            .build();
+    }
+
+    /**
+     * Converts a {@link ConnectorEvidenceMessage} instance into a {@link ConnectorMessageDetailDto}
+     * instance.
+     *
+     * @param message     the {@link ConnectorEvidenceMessage} to be converted
+     * @param deliveredAt the instant at which the message was delivered; may be {@code null} if the
+     *                    message has not been delivered yet
+     *
+     * @return a new {@link ConnectorMessageDto} instance containing the mapped values
+     */
+    public static ConnectorMessageDetailDto from(
+        ConnectorEvidenceMessage message,
+        Instant deliveredAt) {
+        return ConnectorMessageDetailDto
+            .builder()
+            .businessDomainIdentifier(
+                message.businessDomainIdentifier().messageLaneIdentifier())
+            .identifier(message.identifier())
+            .backendMessageIdentifier(message.backendMessageIdentifier())
+            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
+            .direction(Objects.requireNonNull(message.direction()))
+            .backendName(message.backendName())
+            .gatewayName(message.gatewayName())
+            .as4Properties(message.as4Properties())
+            .createdAt(null)
+            .updatedAt(null)
+            .deletedAt(null)
+            .rejectedAt(null)
+            .confirmedAt(null)
+            .deliveredToLinkPartnerAt(deliveredAt)
+            .evidences(toEvidences(message.transportedEvidences()))
             .build();
     }
 

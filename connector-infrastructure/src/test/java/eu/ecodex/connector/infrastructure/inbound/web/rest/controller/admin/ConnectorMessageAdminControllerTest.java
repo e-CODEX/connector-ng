@@ -39,7 +39,7 @@ import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOut
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
-import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByMessageIdentifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -102,7 +102,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorRetrieveMessage retrieveMessageService;
     @MockitoBean
-    private ConnectorRetrieveTransportStep retrieveTransportStepService;
+    private ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStepService;
     @MockitoBean
     private ConnectorRetrieveMessageStats retrieveMessageStatsService;
     @MockitoBean

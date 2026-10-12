@@ -17,7 +17,7 @@ import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBus
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
-import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByMessageIdentifier;
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConnectorMessageAdminController implements ConnectorMessageAdminApi {
     private final ConnectorListMessages listMessagesService;
     private final ConnectorRetrieveMessage retrieveMessageService;
-    private final ConnectorRetrieveTransportStep retrieveTransportStepService;
+    private final ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStepService;
     private final ConnectorRetrieveMessageStats retrieveMessageStatsService;
     private final ConnectorRetrieveMessageReport retrieveMessageReportService;
     private final ConnectorMessageReportExporterFactory reportExporterFactory;
@@ -71,7 +71,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     public ConnectorMessageAdminController(
         ConnectorListMessages listMessagesService,
         ConnectorRetrieveMessage retrieveMessageService,
-        ConnectorRetrieveTransportStep retrieveTransportStepService,
+        ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStepService,
         ConnectorRetrieveMessageStats retrieveMessageStatsService,
         ConnectorRetrieveMessageReport retrieveMessageReportService,
         ConnectorMessageReportExporterFactory reportExporterFactory,

@@ -30,8 +30,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @SuppressWarnings("DataFlowIssue")
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ConnectorRetrieveTransportStepService")
-public class ConnectorRetrieveTransportStepServiceTest {
+@DisplayName("ConnectorRetrieveTransportStepByMessageIdentifierService")
+public class ConnectorRetrieveTransportStepByMessageIdentifierServiceTest {
     private static final String MESSAGE_ID =
         "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
 
@@ -39,7 +39,7 @@ public class ConnectorRetrieveTransportStepServiceTest {
     private ConnectorMessageTransportStepRepository transportStepRepository;
 
     @InjectMocks
-    private ConnectorRetrieveTransportStepService retrieveTransportStepService;
+    private ConnectorRetrieveTransportStepByMessageIdentifierService retrieveTransportStepService;
 
     @Nested
     @DisplayName("when retrieval succeeds")

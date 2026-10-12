@@ -11,12 +11,17 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.transport;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByTransportId;
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import java.time.Instant;
 import java.util.List;
@@ -29,10 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConnectorMessageTransportStepAdminController
     implements ConnectorMessageTransportStepAdminApi {
     private final ConnectorListTransportSteps listTransportStepsService;
+    private final ConnectorRetrieveTransportStepByTransportId
+        retrieveTransportStepByTransportIdService;
 
     public ConnectorMessageTransportStepAdminController(
-        ConnectorListTransportSteps listTransportStepsService) {
+        ConnectorListTransportSteps listTransportStepsService,
+        ConnectorRetrieveTransportStepByTransportId retrieveTransportStepByTransportIdService) {
         this.listTransportStepsService = listTransportStepsService;
+        this.retrieveTransportStepByTransportIdService = retrieveTransportStepByTransportIdService;
     }
 
     @Override
@@ -64,5 +73,29 @@ public class ConnectorMessageTransportStepAdminController
             transportSteps.totalElements(),
             transportSteps.totalPages()
         );
+    }
+
+    @Override
+    public ConnectorMessageDetailDto retrieveTransportedMessage(String identifier) {
+        var step = retrieveTransportStepByTransportIdService.execute(identifier);
+        var transportedMessage = step.transportedMessage();
+
+        if (transportedMessage instanceof ConnectorBusinessMessage message) {
+            return ConnectorMessageDetailDto.from(message);
+        } else {
+            return ConnectorMessageDetailDto.from(
+                (ConnectorEvidenceMessage) transportedMessage,
+                isDeliveredAt(step)
+            );
+        }
+    }
+
+    private Instant isDeliveredAt(ConnectorMessageTransportStep transportStep) {
+        if (transportStep.status() == ConnectorMessageTransportStatus.DELIVERED
+            || transportStep.status() == ConnectorMessageTransportStatus.DOWNLOADED) {
+            return transportStep.updatedAt();
+        }
+
+        return null;
     }
 }

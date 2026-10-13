@@ -70,7 +70,7 @@ The cleanup cron runs at 03:00 by default.
 [source,properties]
 ----
 # JWT session management
-connector.auth.security.jwt.secret=${JWT_SECRET}
+connector.auth.security.jwt.secret=${JWT_SECRET_KEY}
 connector.auth.security.jwt.expiration=60m
 connector.auth.security.jwt.issuer=connector.ecodex.eu
 connector.auth.security.jwt.refresh-token.expiration=30d

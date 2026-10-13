@@ -13,8 +13,14 @@ package eu.ecodex.connector.application.port.spi;
 import eu.ecodex.connector.domain.model.c2ctest.ConnectorTestMessageConfiguration;
 
 /**
- * Provides the configuration used for connector test messages.
+ * Provider (port) giving access to the configuration used for connector to connector test
+ * messages.
  */
 public interface ConnectorTestMessageConfigurationProvider {
+    /**
+     * Returns the configuration used for connector to connector test messages.
+     *
+     * @return the {@link ConnectorTestMessageConfiguration}; never {@code null}
+     */
     ConnectorTestMessageConfiguration getConfig();
 }

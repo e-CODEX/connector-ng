@@ -13,14 +13,14 @@ package eu.ecodex.connector.application.port.api.auth;
 import jakarta.annotation.Nonnull;
 
 /**
- * This contract permits to log out a connector user from the system.
+ * Use case for logging a user out by invalidating their refresh token.
  */
 public interface ConnectorLogoutUser {
     /**
-     * Execute user logout operation.
+     * Logs out the given user by invalidating the given refresh token.
      *
-     * @param uuid         the identifier of the user initiating the logout
-     * @param refreshToken the refresh token to be invalidated
+     * @param uuid         unique identifier of the user initiating the logout (must not be null)
+     * @param refreshToken the refresh token to invalidate (must not be null)
      */
     void execute(@Nonnull String uuid, @Nonnull String refreshToken);
 }

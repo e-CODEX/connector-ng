@@ -24,7 +24,7 @@ import lombok.Builder;
  * @param name The name of the action.
  */
 @Builder(toBuilder = true)
-public record ConnectorAction(
+public record ConnectorProcessingModeAction(
         @NotBlank String name
 ) implements Serializable {
     @Override

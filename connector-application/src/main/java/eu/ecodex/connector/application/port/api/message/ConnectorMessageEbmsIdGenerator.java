@@ -15,9 +15,12 @@ package eu.ecodex.connector.application.port.api.message;
  */
 public interface ConnectorMessageEbmsIdGenerator {
     /**
-     * Generates a unique ebMS message identifier for connector messages.
+     * Generates a new, unique ebMS message identifier.
      *
-     * @return a unique message identifier in the format {@code <uuid>@<suffix>}
+     * <p>The identifier has the format {@code <uuid>@<suffix>}, where {@code <uuid>} is a randomly
+     * generated UUID and {@code <suffix>} is a configured domain-like suffix.
+     *
+     * @return a new unique ebMS message identifier; never {@code null}
      */
     String execute();
 }

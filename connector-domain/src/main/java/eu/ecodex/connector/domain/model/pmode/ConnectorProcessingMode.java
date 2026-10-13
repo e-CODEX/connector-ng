@@ -42,9 +42,9 @@ public record ConnectorProcessingMode(
     @Nonnull String filename,
     @Nullable ConnectorBusinessDomain businessDomain,
     ConnectorTruststore truststore,
-    @Nullable Set<ConnectorParty> parties,
-    @Nullable Set<ConnectorService> services,
-    @Nullable Set<ConnectorAction> actions,
+    @Nullable Set<ConnectorProcessingModeParty> parties,
+    @Nullable Set<ConnectorProcessingModeService> services,
+    @Nullable Set<ConnectorProcessingModeAction> actions,
     Instant createdAt,
     Instant updatedAt
 ) implements Serializable {

@@ -17,7 +17,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListProcessingMode} service.
+ * Default implementation of {@link ConnectorListProcessingMode}.
  */
 @Service
 public class ConnectorListProcessingModeService implements ConnectorListProcessingMode {

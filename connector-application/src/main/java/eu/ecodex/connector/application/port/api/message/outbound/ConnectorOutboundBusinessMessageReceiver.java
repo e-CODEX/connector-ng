@@ -14,34 +14,29 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for processing outbound {@link ConnectorBusinessMessage} instances.
+ * Defines the contract for receiving outbound business messages submitted by a backend.
  *
- * <p>Implementations are responsible for preparing a message before it is
- * dispatched to an external party. Processing may include tasks such as:
+ * <p>Implementations are responsible for turning an outbound message command into a
+ * {@link ConnectorBusinessMessage} that is ready to be dispatched to an external party. Processing
+ * may include tasks such as:
  * <ul>
  *     <li>Enrichment of message metadata</li>
  *     <li>Validation and verification</li>
  *     <li>Transformation or normalization</li>
  * </ul>
- * </p>
- *
- * <p>The processor may modify and return the same instance or return a new,
- * processed {@link ConnectorBusinessMessage} instance depending on the implementation.
  */
 public interface ConnectorOutboundBusinessMessageReceiver {
     /**
-     * Processes the given command to prepare and return a {@link ConnectorBusinessMessage}.
+     * Processes the given command to create and return a {@link ConnectorBusinessMessage}.
      *
-     * <p>This method takes in a command, which encapsulates details about the outbound business
-     * message and processes it to generate a ready-to-dispatch {@link ConnectorBusinessMessage}.
-     * The processing may involve transformations, validations, and enrichment of message details.
+     * <p>The command encapsulates the details of the outbound business message. Processing it may
+     * involve transformations, validations, and enrichment of the message details.
      *
-     * @param command the outbound business message command to be processed; must not be
-     *                {@code null}
+     * @param command the outbound business message command to process (must not be null)
      *
-     * @return the processed {@link ConnectorBusinessMessage} instance, ready for dispatch
+     * @return the {@link ConnectorBusinessMessage} created from the command, ready for dispatch
      *
-     * @throws NullPointerException if the given command is {@code null}
+     * @throws NullPointerException if {@code command} is {@code null}
      */
     ConnectorBusinessMessage execute(@Nonnull ConnectorOutboundBusinessMessageCommand command);
 }

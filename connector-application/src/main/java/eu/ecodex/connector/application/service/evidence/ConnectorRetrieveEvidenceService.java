@@ -18,7 +18,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorRetrieveEvidence} service.
+ * Default implementation of {@link ConnectorRetrieveEvidence}.
  */
 @Service
 public class ConnectorRetrieveEvidenceService implements ConnectorRetrieveEvidence {

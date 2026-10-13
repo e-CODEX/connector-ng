@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.test;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageParty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -34,10 +34,10 @@ import lombok.Builder;
  *                               specification; must not be blank
  * @param finalRecipient         the final recipient identifier, as defined by the AS4 messaging
  *                               specification, must not be blank
- * @param fromParty              the {@link ConnectorParty} representing the sending party in the
- *                               AS4 exchange; must not be {@code null}
- * @param toParty                the {@link ConnectorParty} representing the receiving party in the
- *                               AS4 exchange; must not be {@code null}
+ * @param fromParty              the {@link ConnectorProcessingModeParty} representing the sending
+ *                               party in the AS4 exchange; must not be {@code null}
+ * @param toParty                the {@link ConnectorProcessingModeParty} representing the receiving
+ *                               party in the AS4 exchange; must not be {@code null}
  */
 @Builder(toBuilder = true)
 public record ConnectorTestMessageAS4Properties(

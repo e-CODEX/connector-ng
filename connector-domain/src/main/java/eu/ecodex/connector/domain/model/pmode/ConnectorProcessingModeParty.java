@@ -17,8 +17,7 @@ import java.io.Serializable;
 import lombok.Builder;
 
 /**
- * The Party represents a party in the Connector. It contains information about the party's ID, ID
- * type, and role.
+ * The Party represents a party in the Connector.
  *
  * @param name           The name of the party.
  * @param identifier     The ID of the party.
@@ -28,20 +27,20 @@ import lombok.Builder;
  * @param isHome         Whether the party is the home party of the connector.
  */
 @Builder(toBuilder = true)
-public record ConnectorParty(
-        @Nullable String name,
-        @NotBlank String identifier,
-        @Nonnull String identifierType,
-        @NotBlank String role,
-        @Nonnull ConnectorPartyRoleType roleType,
-        boolean isHome
+public record ConnectorProcessingModeParty(
+    @Nullable String name,
+    @NotBlank String identifier,
+    @Nonnull String identifierType,
+    @NotBlank String role,
+    @Nonnull ConnectorPartyRoleType roleType,
+    boolean isHome
 ) implements Serializable {
     @Override
     @Nonnull
     public String toString() {
         return String.format(
-                "{name=%s, uuid=%s, identifierType=%s, role=%s, roleType=%s, isHome=%s}",
-                name, identifier, identifierType, role, roleType, isHome
+            "{name=%s, uuid=%s, identifierType=%s, role=%s, roleType=%s, isHome=%s}",
+            name, identifier, identifierType, role, roleType, isHome
         );
     }
 }

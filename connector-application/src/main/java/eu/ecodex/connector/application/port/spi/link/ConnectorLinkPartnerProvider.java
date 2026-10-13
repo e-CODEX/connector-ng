@@ -16,16 +16,39 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Repository interface for accessing {@link ConnectorLinkPartner} instances.
+ * Provider (port) giving access to {@link ConnectorLinkPartner} instances.
  *
- * <p>This interface defines the contract for retrieving ConnectorLinkPartners by their unique
- * {@link ConnectorLinkPartnerName}. Implementations might use different storage mechanisms such as
- * databases, in-memory collections.
+ * <p>This interface defines the contract for retrieving link partners by their unique
+ * {@link ConnectorLinkPartnerName} or by the distinguished name (DN) of their certificate.
+ * Implementations may use different sources, such as a database, configuration properties or an
+ * in-memory collection.
  */
 public interface ConnectorLinkPartnerProvider {
+
+    /**
+     * Finds a link partner by its unique name.
+     *
+     * @param name the unique name of the link partner (must not be null)
+     *
+     * @return the matching {@link ConnectorLinkPartner}, or {@code null} if none exists
+     */
     ConnectorLinkPartner findByName(@Nonnull ConnectorLinkPartnerName name);
 
+    /**
+     * Finds a link partner by the distinguished name (DN) of its certificate.
+     *
+     * @param certificateDn the distinguished name of the partner's certificate, for example
+     *                      {@code CN=partner,O=Example,C=FR} (must not be null)
+     *
+     * @return the matching {@link ConnectorLinkPartner}, or {@code null} if none exists
+     */
     ConnectorLinkPartner findByCertificateDn(@Nonnull String certificateDn);
 
+    /**
+     * Retrieves all known link partners.
+     *
+     * @return all {@link ConnectorLinkPartner} objects; never {@code null}, and empty if none are
+     *     configured
+     */
     List<ConnectorLinkPartner> findAll();
 }

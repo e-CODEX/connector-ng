@@ -35,7 +35,7 @@ import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoun
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
-import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundTestMessage;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundC2CTestMessage;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
@@ -45,8 +45,8 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.controller.AbstractWebMvcTest;
@@ -110,7 +110,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorMessageReportExporterFactory reportExporterFactory;
     @MockitoBean
-    private ConnectorSendOutboundTestMessage sendTestMessageService;
+    private ConnectorSendOutboundC2CTestMessage sendTestMessageService;
     @MockitoBean
     private ConnectorRestOutboundMessageParser restOutboundMessageParser;
     @Mock
@@ -140,14 +140,14 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
             BusinessMessageTestFixtures.createOutboundMessage().businessContent();
         private final List<ConnectorMessageAttachment> attachments =
             List.of(MessageAttachmentTestFixtures.createAttachment());
-        private final ConnectorParty fromParty = ConnectorParty
+        private final ConnectorProcessingModeParty fromParty = ConnectorProcessingModeParty
             .builder()
             .identifier("BL")
             .identifierType(PARTY_IDENTIFIER_TYPE)
             .role("GW")
             .roleType(ConnectorPartyRoleType.INITIATOR)
             .build();
-        private final ConnectorParty toParty = ConnectorParty
+        private final ConnectorProcessingModeParty toParty = ConnectorProcessingModeParty
             .builder()
             .identifier("RE")
             .identifierType(PARTY_IDENTIFIER_TYPE)

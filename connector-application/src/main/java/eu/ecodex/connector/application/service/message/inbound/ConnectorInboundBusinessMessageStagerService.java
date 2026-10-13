@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorInboundBusinessMessageStager} interface.
+ * Default implementation of {@link ConnectorInboundBusinessMessageStager}.
  *
  * <p>The staging operation is executed within a transactional boundary to ensure
  * atomicity. If any step fails (e.g., a referenced attachment does not exist), the entire operation

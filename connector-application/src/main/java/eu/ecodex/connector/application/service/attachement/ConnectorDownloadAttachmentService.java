@@ -19,8 +19,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link ConnectorDownloadAttachment} responsible for handling the
- * download of connector attachment.
+ * Default implementation of {@link ConnectorDownloadAttachment}.
  */
 @Service
 public class ConnectorDownloadAttachmentService implements ConnectorDownloadAttachment {

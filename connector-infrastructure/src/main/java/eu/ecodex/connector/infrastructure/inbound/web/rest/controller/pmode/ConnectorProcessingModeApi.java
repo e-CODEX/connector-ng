@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeActionDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeServiceDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,5 +44,6 @@ public interface ConnectorProcessingModeApi {
 
     @GetMapping("{businessDomainIdentifier}/parties")
     @Operation(summary = "List a processing mode parties")
-    List<ConnectorParty> listProcessingModeParties(@PathVariable String businessDomainIdentifier);
+    List<ConnectorProcessingModeParty> listProcessingModeParties(
+        @PathVariable String businessDomainIdentifier);
 }

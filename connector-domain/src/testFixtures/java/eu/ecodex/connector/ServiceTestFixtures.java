@@ -10,14 +10,14 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ServiceTestFixtures {
-    public static ConnectorService createService() {
-        return ConnectorService.builder()
-                               .name("Connector-TEST")
-                               .type("urn:e-codex:services:")
-                               .build();
+    public static ConnectorProcessingModeService createService() {
+        return ConnectorProcessingModeService.builder()
+                                             .name("Connector-TEST")
+                                             .type("urn:e-codex:services:")
+                                             .build();
     }
 }

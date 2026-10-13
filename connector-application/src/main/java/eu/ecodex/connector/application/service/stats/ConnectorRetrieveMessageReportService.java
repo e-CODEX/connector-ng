@@ -17,7 +17,7 @@ import java.time.Instant;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorRetrieveMessageReport} service.
+ * Default implementation of {@link ConnectorRetrieveMessageReport}.
  */
 @Service
 public class ConnectorRetrieveMessageReportService implements ConnectorRetrieveMessageReport {

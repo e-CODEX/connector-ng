@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.domain.model.message;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
@@ -49,10 +49,10 @@ public record ConnectorMessageAS4Properties(
     @Nullable String conversationIdentifier,
     @NotBlank String originalSender,
     @NotBlank String finalRecipient,
-    @Nonnull ConnectorService service,
-    @Nonnull ConnectorAction action,
-    @Nonnull ConnectorParty fromParty,
-    @Nonnull ConnectorParty toParty
+    @Nonnull ConnectorProcessingModeService service,
+    @Nonnull ConnectorProcessingModeAction action,
+    @Nonnull ConnectorProcessingModeParty fromParty,
+    @Nonnull ConnectorProcessingModeParty toParty
 ) implements Serializable {
     @Override
     @Nonnull

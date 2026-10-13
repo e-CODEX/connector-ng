@@ -15,18 +15,19 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import jakarta.annotation.Nonnull;
 
 /**
- * Repository interface for managing AS4-specific properties associated with connector messages.
+ * Repository (port) for persisting the AS4-specific properties associated with connector messages.
  *
- * <p>The AS4 properties are essential in ensuring message integrity, routing, and alignment with
- * the AS4 messaging protocol, enabling seamless communication between involved parties.
+ * <p>The AS4 properties support message integrity, routing and alignment with the AS4 messaging
+ * protocol, enabling communication between the parties involved.
  */
 public interface ConnectorMessageAS4PropertiesRepository {
     /**
-     * Saves the provided connector business message's associated AS4 properties.
+     * Saves the AS4 properties carried by the given business message.
      *
-     * @param message The connector business message to save.
+     * @param message the {@link ConnectorBusinessMessage} whose AS4 properties are saved (must not
+     *                be null)
      *
-     * @return The saved connector message AS4 properties.
+     * @return the saved {@link ConnectorMessageAS4Properties}
      */
     ConnectorMessageAS4Properties save(@Nonnull ConnectorBusinessMessage message);
 }

@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.application.port.spi.pmode;
 
-import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
@@ -18,60 +17,69 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Defines the contract for managing and querying processing modes associated with a specific
- * business domain uuid within the connector system.
+ * Repository (port) for persisting and querying {@link ConnectorProcessingMode} objects.
+ *
+ * <p>A processing mode is associated with a business domain, which is identified by a
+ * {@link ConnectorBusinessDomainIdentifier}.
  */
 public interface ConnectorProcessingModeRepository {
     /**
-     * Persists a given {@link ConnectorProcessingMode} for a specific
-     * {@link ConnectorBusinessDomain}.
+     * Persists the given processing mode for the given business domain.
      *
-     * @param processingMode           the processing mode to be saved; must not be null.
-     * @param businessDomainIdentifier the business domain identifier associated with the processing
-     *                                 mode; must not be null.
+     * @param processingMode           the processing mode to save (must not be null)
+     * @param businessDomainIdentifier the identifier of the business domain the processing mode is
+     *                                 associated with (must not be null)
      *
      * @return the persisted {@link ConnectorProcessingMode}, which may include additional metadata
-     *     such as timestamps or identifiers.
+     *     such as timestamps or identifiers
      */
     ConnectorProcessingMode save(
         @Nonnull ConnectorProcessingMode processingMode,
         @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier
     );
 
+    /**
+     * Updates the truststore of the processing mode identified by the given UUID.
+     *
+     * @param pmodeUuid  the unique identifier of the processing mode whose truststore is updated
+     *                   (must not be null)
+     * @param truststore the new {@link ConnectorTruststore} to associate with the processing mode
+     *                   (must not be null)
+     *
+     * @return the updated {@link ConnectorProcessingMode}
+     */
     ConnectorProcessingMode updateTruststore(
         @Nonnull String pmodeUuid,
         @Nonnull ConnectorTruststore truststore
     );
 
     /**
-     * Retrieves a {@link ConnectorProcessingMode} identified by its unique UUID.
+     * Retrieves a processing mode by its unique UUID.
      *
-     * @param uuid the unique identifier of the {@link ConnectorProcessingMode} to retrieve; must
-     *             not be null.
+     * @param uuid the unique identifier of the processing mode to retrieve (must not be null)
      *
-     * @return the {@link ConnectorProcessingMode} matching the specified UUID, or null if no such
-     *     processing mode exists.
+     * @return the {@link ConnectorProcessingMode} matching the given UUID, or {@code null} if no
+     *     such processing mode exists
      */
     ConnectorProcessingMode findByUuid(@Nonnull String uuid);
 
     /**
-     * Retrieves a {@link ConnectorProcessingMode} associated with the specified
-     * {@link ConnectorBusinessDomainIdentifier}.
+     * Retrieves the processing mode associated with the given business domain.
      *
-     * @param identifier the {@link ConnectorBusinessDomainIdentifier} representing the business
-     *                   domain for which the processing mode is to be retrieved; must not be null.
+     * @param identifier the identifier of the business domain whose processing mode is retrieved
+     *                   (must not be null)
      *
-     * @return the {@link ConnectorProcessingMode} associated with the specified identifier, or null
-     *     if no matching processing mode exists.
+     * @return the {@link ConnectorProcessingMode} associated with the given business domain, or
+     *     {@code null} if no matching processing mode exists
      */
     ConnectorProcessingMode findByBusinessDomainIdentifier(
         @Nonnull ConnectorBusinessDomainIdentifier identifier);
 
     /**
-     * Retrieves all available {@link ConnectorProcessingMode} entries.
+     * Retrieves all processing modes stored in the repository.
      *
-     * @return a list of {@link ConnectorProcessingMode} instances representing all defined
-     *     processing modes, or an empty list if no processing modes are available.
+     * @return a list of all defined {@link ConnectorProcessingMode} objects; never {@code null},
+     *     and empty if none are available
      */
     List<ConnectorProcessingMode> findAll();
 }

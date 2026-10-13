@@ -15,21 +15,16 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for removing {@link ConnectorUser} entities from the system.
- *
- * <p>Defines methods to delete a user by providing the {@link ConnectorUser} instance or by
- * specifying
- * its unique identifier.
- * Facilitates the removal of user entities while ensuring type safety and consistency in handling
- * user operations.
+ * Use case for removing a user from the connector system.
  */
 public interface ConnectorRemoveUser {
     /**
-     * Deletes a {@link ConnectorUser} entity identified by its unique identifier.
+     * Deletes the {@link ConnectorUser} identified by the given unique identifier.
      *
-     * @param userIdentifier the unique identifier of the {@link ConnectorUser} to be deleted;
+     * @param userIdentifier the unique identifier of the {@link ConnectorUser} to delete (must not
+     *                       be null)
      *
-     * @throws ConnectorUserNotFoundException exception
+     * @throws ConnectorUserNotFoundException if no user matches the given identifier
      */
     void execute(@Nonnull String userIdentifier);
 }

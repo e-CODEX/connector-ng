@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of {@link ConnectorUpdateProcessingModeTruststore} service.
+ * Default implementation of {@link ConnectorUpdateProcessingModeTruststore}.
  */
 @Service
 @Transactional

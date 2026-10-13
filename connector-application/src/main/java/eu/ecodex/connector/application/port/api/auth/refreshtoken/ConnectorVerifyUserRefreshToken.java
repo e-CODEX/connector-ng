@@ -10,20 +10,25 @@
 
 package eu.ecodex.connector.application.port.api.auth.refreshtoken;
 
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines methods verifying refresh tokens in the Connector system.
+ * Use case for verifying refresh tokens of users in the connector system.
  */
 public interface ConnectorVerifyUserRefreshToken {
+
     /**
-     * Verifies the authenticity and validity of a given refresh token within the Connector system.
-     * This method checks whether the provided token is valid, not expired, and has not been
-     * revoked.
+     * Verifies the authenticity and validity of the given refresh token.
      *
-     * @param refreshToken the refresh token to be verified
+     * <p>The method checks that the token is genuine, has not expired and has not been revoked.
      *
+     * @param refreshToken the refresh token to verify (must not be null)
+     *
+     * @return the {@link ConnectorRefreshToken} matching the given token if it is valid
+     *
+     * @throws ConnectorUserBadCredentialsException if the token is unknown, expired or revoked
      */
     ConnectorRefreshToken execute(@Nonnull String refreshToken);
 }

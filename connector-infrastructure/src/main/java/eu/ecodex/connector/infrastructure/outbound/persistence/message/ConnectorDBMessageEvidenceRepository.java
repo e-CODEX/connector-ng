@@ -22,7 +22,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorMessageEvidenceRepository}.
+ * RDBMS implementation of {@link ConnectorMessageEvidenceRepository}.
  */
 @Component
 public class ConnectorDBMessageEvidenceRepository implements ConnectorMessageEvidenceRepository {

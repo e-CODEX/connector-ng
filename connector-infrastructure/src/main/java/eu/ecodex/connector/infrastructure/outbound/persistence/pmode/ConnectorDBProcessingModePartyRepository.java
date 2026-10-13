@@ -10,10 +10,10 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.pmode;
 
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
@@ -23,14 +23,15 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorPartyRepository}.
+ * RDBMS implementation of {@link ConnectorProcessingModePartyRepository}.
  */
 @Component
-public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
+public class ConnectorDBProcessingModePartyRepository
+    implements ConnectorProcessingModePartyRepository {
     private final ConnectorPartyJpaRepository partyJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
-    public ConnectorDBPartyRepository(
+    public ConnectorDBProcessingModePartyRepository(
         ConnectorPartyJpaRepository partyJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.partyJpaRepository = partyJpaRepository;
@@ -38,11 +39,11 @@ public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
     }
 
     /**
-     * Converts a {@link ConnectorParty} domain object into a {@link ConnectorPartyEntity} JPA
-     * entity for database persistence.
+     * Converts a {@link ConnectorProcessingModeParty} domain object into a
+     * {@link ConnectorPartyEntity} JPA entity for database persistence.
      *
-     * @param party          The {@link ConnectorParty} domain object to be converted. Must not be
-     *                       null for successful conversion.
+     * @param party          The {@link ConnectorProcessingModeParty} domain object to be converted.
+     *                       Must not be null for successful conversion.
      * @param processingMode The {@link ConnectorProcessingModeEntity} representing the processing
      *                       mode of the party. Used in the creation of the resulting entity.
      *
@@ -50,7 +51,7 @@ public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
      *     from both the {@code party} and {@code processingMode}.
      */
     public static ConnectorPartyEntity toEntity(
-        ConnectorParty party,
+        ConnectorProcessingModeParty party,
         ConnectorProcessingModeEntity processingMode) {
         return ConnectorPartyEntity
             .builder()
@@ -65,21 +66,23 @@ public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
     }
 
     /**
-     * Converts a {@link ConnectorPartyEntity} JPA entity into a {@link ConnectorParty} domain
-     * object. If the provided {@code entity} is {@code null}, the method returns {@code null}.
+     * Converts a {@link ConnectorPartyEntity} JPA entity into a
+     * {@link ConnectorProcessingModeParty} domain object. If the provided {@code entity} is
+     * {@code null}, the method returns {@code null}.
      *
      * @param entity The {@link ConnectorPartyEntity} instance to be converted. Can be {@code null},
      *               in which case {@code null} is returned.
      *
-     * @return A fully built {@link ConnectorParty} domain object containing information extracted
-     *     from the {@code entity}. Returns {@code null} if the {@code entity} is {@code null}.
+     * @return A fully built {@link ConnectorProcessingModeParty} domain object containing
+     *     information extracted from the {@code entity}. Returns {@code null} if the {@code entity}
+     *     is {@code null}.
      */
-    public static ConnectorParty toDomain(ConnectorPartyEntity entity) {
+    public static ConnectorProcessingModeParty toDomain(ConnectorPartyEntity entity) {
         if (entity == null) {
             return null;
         }
 
-        return ConnectorParty
+        return ConnectorProcessingModeParty
             .builder()
             .name(entity.getName())
             .identifier(entity.getIdentifier())
@@ -91,8 +94,8 @@ public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
     }
 
     @Override
-    public List<ConnectorParty> saveAll(
-        @NonNull List<ConnectorParty> parties,
+    public List<ConnectorProcessingModeParty> saveAll(
+        @NonNull List<ConnectorProcessingModeParty> parties,
         @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
             businessDomainIdentifier.messageLaneIdentifier()
@@ -102,11 +105,13 @@ public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
             parties.stream().map(party -> toEntity(party, processingMode)).toList()
         );
 
-        return savedParties.stream().map(ConnectorDBPartyRepository::toDomain).toList();
+        return savedParties.stream()
+                           .map(ConnectorDBProcessingModePartyRepository::toDomain)
+                           .toList();
     }
 
     @Override
-    public ConnectorParty findByIdentifierAndRoleTypeAndBusinessDomain(
+    public ConnectorProcessingModeParty findByIdentifierAndRoleTypeAndBusinessDomain(
         @NonNull String identifier,
         @NonNull ConnectorPartyRoleType roleType,
         @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
@@ -121,11 +126,11 @@ public class ConnectorDBPartyRepository implements ConnectorPartyRepository {
     }
 
     @Override
-    public List<ConnectorParty> findAllByBusinessDomainIdentifier(
+    public List<ConnectorProcessingModeParty> findAllByBusinessDomainIdentifier(
         @NonNull ConnectorBusinessDomainIdentifier identifier) {
         var parties = partyJpaRepository.findByProcessingModeBusinessDomainIdentifier(
             identifier.messageLaneIdentifier());
 
-        return parties.stream().map(ConnectorDBPartyRepository::toDomain).toList();
+        return parties.stream().map(ConnectorDBProcessingModePartyRepository::toDomain).toList();
     }
 }

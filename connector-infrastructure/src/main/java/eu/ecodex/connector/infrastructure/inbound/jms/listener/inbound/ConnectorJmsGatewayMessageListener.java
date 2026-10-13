@@ -25,10 +25,10 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import java.util.ArrayList;
@@ -168,13 +168,13 @@ public class ConnectorJmsGatewayMessageListener {
 
     private ConnectorMessageAS4Properties parseAS4Properties(MapMessage message)
         throws JMSException {
-        var service = ConnectorService.builder()
-                                      .name(message.getStringProperty("service"))
-                                      .type(message.getStringProperty("serviceType"))
-                                      .build();
-        var action = ConnectorAction.builder()
-                                    .name(message.getStringProperty("action"))
-                                    .build();
+        var service = ConnectorProcessingModeService.builder()
+                                                    .name(message.getStringProperty("service"))
+                                                    .type(message.getStringProperty("serviceType"))
+                                                    .build();
+        var action = ConnectorProcessingModeAction.builder()
+                                                  .name(message.getStringProperty("action"))
+                                                  .build();
 
         var fromParty = buildParty(message, "from", ConnectorPartyRoleType.INITIATOR);
         var toParty = buildParty(message, "to", ConnectorPartyRoleType.RESPONDER);
@@ -193,7 +193,7 @@ public class ConnectorJmsGatewayMessageListener {
             .build();
     }
 
-    private ConnectorParty buildParty(
+    private ConnectorProcessingModeParty buildParty(
         MapMessage message,
         String prefix,
         ConnectorPartyRoleType roleType)
@@ -207,9 +207,12 @@ public class ConnectorJmsGatewayMessageListener {
                 "[%sParty] is not allowed to be null".formatted(prefix)
             );
         }
-        return ConnectorParty.builder()
-                             .identifier(id).identifierType(type).role(role).roleType(roleType)
-                             .build();
+        return ConnectorProcessingModeParty.builder()
+                                           .identifier(id)
+                                           .identifierType(type)
+                                           .role(role)
+                                           .roleType(roleType)
+                                           .build();
     }
 
     private ParsedPayloads parsePayloads(MapMessage message) throws JMSException {

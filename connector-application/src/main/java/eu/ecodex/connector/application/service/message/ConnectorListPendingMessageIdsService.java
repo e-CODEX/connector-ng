@@ -16,7 +16,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListPendingMessageIds} service.
+ * Default implementation of {@link ConnectorListPendingMessageIds}.
  */
 @Service
 public class ConnectorListPendingMessageIdsService implements ConnectorListPendingMessageIds {

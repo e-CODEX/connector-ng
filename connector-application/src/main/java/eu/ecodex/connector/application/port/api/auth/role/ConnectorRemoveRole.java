@@ -10,29 +10,22 @@
 
 package eu.ecodex.connector.application.port.api.auth.role;
 
+import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
 import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import jakarta.annotation.Nonnull;
 
 /**
- * Provides a contract for removing user roles in the Connector system.
- * Implementations of this interface are responsible for deleting user roles
- * either through direct object references or by their unique identifier.
- *
- * <p>This interface is primarily used to manage user roles in the underlying
- * persistence mechanism by removing unwanted or obsolete entries.
+ * Use case for removing a role from the connector system.
  */
 public interface ConnectorRemoveRole {
+
     /**
-     * Deletes a user role identified by the specified unique identifier.
-     * This method removes an entry from the underlying persistence mechanism
-     * based on the provided UUID. If no entry corresponds to the given identifier,
-     * the delete operation has no effect.
+     * Deletes the role identified by the given unique identifier.
      *
-     * @param roleIdentifier the unique identifier of the user role to be deleted.
-     *                       It must correspond to an existing user role in the Connector system.
+     * @param roleIdentifier the unique identifier of the role to delete (must not be null)
      *
-     * @throws ConnectorRoleNotFoundException If no user role with the specified identifier exists
-     *                                        in the Connector system.
+     * @throws ConnectorRoleNotFoundException if no role matches the given identifier
+     * @throws ConnectorRoleInUseException    if no role is attached to at least one user
      */
     void execute(@Nonnull String roleIdentifier);
 }

@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorMessageEvidenceVerifier} service.
+ * Default implementation of {@link ConnectorMessageEvidenceVerifier}.
  */
 @Slf4j
 @Component

@@ -14,15 +14,21 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for staging inbound business messages.
+ * Defines the contract for staging an inbound {@link ConnectorBusinessMessage} within a processing
+ * workflow.
+ *
+ * <p>Staging typically represents an intermediate persistence step before the message proceeds to
+ * the next phase of processing.
  */
 public interface ConnectorInboundBusinessMessageStager {
     /**
-     * Executes the processing logic for the provided business message.
+     * Stages the given inbound message.
      *
-     * @param message The {@link ConnectorBusinessMessage} to be staged or processed. This object
-     *                encapsulates all relevant details such as identifiers, metadata, timestamps,
-     *                directional flow, and business content. The message must not be null.
+     * <p>The method returns normally if the message was staged successfully. If staging fails,
+     * the failure is reported by an exception.
+     *
+     * @param message the message to stage; it encapsulates the identifiers, metadata, timestamps,
+     *                direction and business content of the message (must not be null)
      */
     void execute(@Nonnull ConnectorBusinessMessage message);
 }

@@ -14,7 +14,7 @@ package eu.ecodex.connector.application.port.api.auth.refreshtoken;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines methods for managing and verifying refresh tokens in the Connector system.
+ * Use case for revoking the refresh token of a user in the connector system.
  *
  * <p>This interface provides operations to create, verify, and revoke refresh tokens associated
  * with user authentication sessions. It is designed to handle secure token management
@@ -27,12 +27,13 @@ import jakarta.annotation.Nonnull;
  */
 public interface ConnectorRevokeUserRefreshToken {
     /**
-     * Revokes a specified refresh token, invalidating it and preventing further use.
-     * This method ensures that the provided refresh token is disabled and
-     * cannot be used to refresh an authentication session.
+     * Revokes the given refresh token, invalidating it and preventing any further use.
      *
-     * @param uuid         authenticated user identifier
-     * @param refreshToken the refresh token to be revoked
+     * <p>Once revoked, the token can no longer be used to refresh an authentication session.
+     *
+     * @param uuid         the unique identifier of the authenticated user the token belongs to
+     *                     (must not be null)
+     * @param refreshToken the refresh token to revoke (must not be null)
      */
     void execute(@Nonnull String uuid, @Nonnull String refreshToken);
 }

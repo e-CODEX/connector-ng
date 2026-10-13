@@ -14,7 +14,7 @@ import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessage
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
-import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundTestMessage;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundC2CTestMessage;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageAS4PropertiesCommand;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
@@ -25,8 +25,8 @@ import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,7 +39,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional
-public class ConnectorSendOutboundTestMessageService implements ConnectorSendOutboundTestMessage {
+public class ConnectorSendOutboundC2CTestMessageService
+    implements ConnectorSendOutboundC2CTestMessage {
     private final ConnectorTestMessageConfigurationProvider testMessageConfigProvider;
     private final ConnectorMessageProcessingConfigurationProvider messageProcessingConfigProvider;
     private final ConnectorMessageIdGenerator messageIdGeneratorService;
@@ -63,7 +64,7 @@ public class ConnectorSendOutboundTestMessageService implements ConnectorSendOut
      *                                        area.
      */
 
-    public ConnectorSendOutboundTestMessageService(
+    public ConnectorSendOutboundC2CTestMessageService(
         ConnectorTestMessageConfigurationProvider testMessageConfigProvider,
         ConnectorMessageProcessingConfigurationProvider messageProcessingConfigProvider,
         ConnectorMessageIdGenerator messageIdGeneratorService,
@@ -120,11 +121,11 @@ public class ConnectorSendOutboundTestMessageService implements ConnectorSendOut
     private ConnectorMessageAS4Properties toAS4Properties(
         ConnectorTestBusinessMessageAS4PropertiesCommand as4PropertiesCommand) {
         var testMessageConfiguration = testMessageConfigProvider.getConfig();
-        var action = ConnectorAction
+        var action = ConnectorProcessingModeAction
             .builder()
             .name(testMessageConfiguration.action())
             .build();
-        var service = ConnectorService
+        var service = ConnectorProcessingModeService
             .builder()
             .name(testMessageConfiguration.service().name())
             .type(testMessageConfiguration.service().type())

@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUsers;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
@@ -33,7 +33,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorUserAdminController.class)
-class ConnectorListUserAdminControllerTest extends AbstractWebMvcTest {
+class ConnectorListUsersAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/users";
     @MockitoBean
     private ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier;
@@ -46,7 +46,7 @@ class ConnectorListUserAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
     private ConnectorRemoveUser connectorRemoveUser;
     @MockitoBean
-    private ConnectorListUser connectorListUser;
+    private ConnectorListUsers connectorListUsers;
 
     @Autowired
     private RestTestClient apiClient;
@@ -55,7 +55,7 @@ class ConnectorListUserAdminControllerTest extends AbstractWebMvcTest {
     void getAll_should_return_all_users() {
         // Given
         var connectorUser = ConnectorUserTestFixtures.createDefaultUser();
-        when(connectorListUser.execute()).thenReturn(List.of(connectorUser));
+        when(connectorListUsers.execute()).thenReturn(List.of(connectorUser));
 
         // When
         var response = apiClient.get()
@@ -73,8 +73,10 @@ class ConnectorListUserAdminControllerTest extends AbstractWebMvcTest {
             .usingRecursiveComparison()
             .isEqualTo(List.of(ConnectorUserTestFixtures.createUserDto()));
 
-        verify(connectorListUser).execute();
+        verify(connectorListUsers).execute();
         verifyNoMoreInteractions(connectorRegisterUser, connectorRetrieveUserByIdentifier,
-            connectorEditUser, connectorUpdateUser, connectorRemoveUser, connectorListUser);
+                                 connectorEditUser, connectorUpdateUser, connectorRemoveUser,
+                                 connectorListUsers
+        );
     }
 }

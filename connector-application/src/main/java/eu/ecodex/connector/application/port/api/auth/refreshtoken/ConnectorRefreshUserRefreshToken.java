@@ -10,24 +10,32 @@
 
 package eu.ecodex.connector.application.port.api.auth.refreshtoken;
 
+import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines methods for refreshing user tokens in the Connector system.
+ * Use case for refreshing the authentication session of a user in the connector system.
  */
 public interface ConnectorRefreshUserRefreshToken {
     /**
-     * Refreshes the authentication session by generating a new access token using
-     * the provided refresh token. This method validates the given refresh token
-     * and, if valid, issues a new access token while preserving the user's session.
+     * Refreshes the authentication session by issuing a new access token from the given refresh
+     * token.
      *
-     * @param refreshToken the refresh token used to obtain a new access token
-     * @param accessToken  the current access token associated with the user's session
+     * <p>The method validates the given refresh token and, if it is valid, issues a new access
+     * token while preserving the user's session.
      *
-     * @return a {@code LoginResponse} containing the new access token,
-     *     refresh token, and expiration details of the session
+     * @param accessToken  the current access token associated with the user's session (must not be
+     *                     null)
+     * @param refreshToken the refresh token used to obtain a new access token (must not be null)
+     *
+     * @return a {@link ConnectorUserAuthenticationResult} containing the new access token, the
+     *     refresh token and the expiration details of the session
+     *
+     * @throws ConnectorUserBadCredentialsException if the refresh token is unknown, expired or
+     *                                              revoked
      */
-    ConnectorUserAuthenticationResult execute(@Nonnull String accessToken,
-                                              @Nonnull String refreshToken);
+    ConnectorUserAuthenticationResult execute(
+        @Nonnull String accessToken,
+        @Nonnull String refreshToken);
 }

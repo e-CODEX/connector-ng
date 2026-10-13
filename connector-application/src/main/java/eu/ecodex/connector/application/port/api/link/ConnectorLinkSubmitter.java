@@ -10,12 +10,11 @@
 
 package eu.ecodex.connector.application.port.api.link;
 
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for handling the submission of link messages within the system.
+ * Submits connector messages to a link partner.
  *
  * <p>Implementations of this interface are responsible for processing and submitting
  * instances of {@code ConnectorMessage} to the appropriate endpoint or system.
@@ -28,15 +27,16 @@ import jakarta.annotation.Nonnull;
  * - Submitting messages from a backend system to a gateway. - Forwarding processed messages within
  * the connector system.
  *
- * <p>The implementation should define the behaviour and outcomes of the submission process.
+ * <p>The implementation should define the behavior and outcomes of the submission process.
  */
 public interface ConnectorLinkSubmitter {
     /**
-     * Submits a specified {@link ConnectorMessage} for processing and delivery. The method is
-     * responsible for handling the message submission to the appropriate endpoint or system,
-     * potentially involving validation, transformation, or preparation.
+     * Submits the given message to the link partner it is addressed to.
      *
-     * @param message the {@link ConnectorMessage} instance to be submitted; must not be null.
+     * <p>The method returns normally if the submission succeeds. If it fails, the failure is
+     * reported by an exception.
+     *
+     * @param message the connector message to submit (must not be null)
      */
     void submit(@Nonnull ConnectorMessage message);
 }

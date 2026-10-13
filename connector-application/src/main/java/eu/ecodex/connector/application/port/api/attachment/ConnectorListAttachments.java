@@ -16,26 +16,22 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for listing message attachments from a connector.
- *
- * <p>This interface is responsible for retrieving a paginated list of
- * {@link ConnectorMessageAttachment} objects associated with a specific message or resource within
- * a connector system.
- *
- * <p>Implementations should handle pagination, filtering, and connector-specific
- * communication details required to fetch attachments.</p>
+ * Use case for listing the attachments of connector messages.
  */
 public interface ConnectorListAttachments {
     /**
-     * Executes the attachment listing operation.
+     * Retrieves a page of {@link ConnectorMessageAttachment} objects based on the pagination
+     * parameters and the optional filter criteria carried by the provided
+     * {@link ConnectorAttachmentsListFilter}. All filters are combined with a logical {@code AND};
+     * a filter whose value is {@code null} or empty is ignored.
      *
      * @param filter the pagination parameters and filter criteria used to retrieve the attachments
      *               (must not be null)
      *
      * @return a {@link ConnectorPageResult} containing a page of {@link ConnectorMessageAttachment}
-     *     objects matching the given filters
+     *     objects matching the given filter
      *
-     * @throws IllegalArgumentException if {@code pageRequest} is invalid
+     * @throws IllegalArgumentException if the page request contained in {@code filter} is invalid
      */
     ConnectorPageResult<ConnectorMessageAttachment> execute(
         @Nonnull ConnectorAttachmentsListFilter filter);

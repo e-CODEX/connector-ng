@@ -10,26 +10,25 @@
 
 package eu.ecodex.connector.application.port.api.link;
 
-import eu.ecodex.connector.application.exception.linkpartner.ConnectorLinkPartnerException;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for verifying connector messages specifically in the context of a
- * {@link ConnectorLinkPartner}.
+ * Verifies connector messages in the context of a {@link ConnectorLinkPartner}.
  *
  * <p>Implementations are responsible for validating that a message originates from a trusted
  * partner and complies with the partner-specific configuration requirements.
  */
 public interface ConnectorLinkPartnerVerifier {
     /**
-     * Verifies the given {@link ConnectorMessage} against partner rules.
+     * Verifies that the given message originates from a trusted link partner and complies with that
+     * partner's configuration.
      *
-     * @param message the message to verify; must not be {@code null}
+     * <p>The method returns normally if the verification succeeds. If it fails, the failure is
+     * reported by an exception.
      *
-     * @throws ConnectorLinkPartnerException if verification fails or the message is invalid for the
-     *                                       partner
+     * @param message the connector message to verify (must not be null)
      */
     void verify(@Nonnull ConnectorMessage message);
 }

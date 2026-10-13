@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListBusinessDomain} service.
+ * Default implementation of {@link ConnectorListBusinessDomain}.
  */
 @Slf4j
 @Service

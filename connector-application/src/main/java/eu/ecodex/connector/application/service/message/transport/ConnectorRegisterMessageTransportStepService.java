@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorRegisterMessageTransportStep} service.
+ * Default implementation of {@link ConnectorRegisterMessageTransportStep}.
  */
 @Slf4j
 @Service

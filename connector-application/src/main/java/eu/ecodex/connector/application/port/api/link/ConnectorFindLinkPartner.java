@@ -10,26 +10,21 @@
 
 package eu.ecodex.connector.application.port.api.link;
 
-import eu.ecodex.connector.application.exception.linkpartner.ConnectorLinkPartnerException;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for retrieving {@link ConnectorLinkPartner} instances.
- *
- * <p>Implementations are responsible for locating a connector link partner based on certificate
- * information used during secure communication.
+ * Use case for finding a {@link ConnectorLinkPartner}.
  */
 public interface ConnectorFindLinkPartner {
     /**
-     * Finds a {@link ConnectorLinkPartner} associated with the given certificate distinguished name
-     * (DN).
+     * Finds the {@link ConnectorLinkPartner} whose certificate matches the given distinguished
+     * name (DN).
      *
-     * @param certificateDn the distinguished name extracted from a client certificate
+     * @param certificateDn distinguished name (DN) of the partner's certificate, for example
+     *                      {@code CN=partner,O=Example,C=FR} (must not be null)
      *
-     * @return the matching {@link ConnectorLinkPartner}
-     *
-     * @throws ConnectorLinkPartnerException if no partner matches the provided DN
+     * @return the {@link ConnectorLinkPartner} associated with the given certificate DN
      */
     ConnectorLinkPartner findByCertificateDn(@Nonnull String certificateDn);
 }

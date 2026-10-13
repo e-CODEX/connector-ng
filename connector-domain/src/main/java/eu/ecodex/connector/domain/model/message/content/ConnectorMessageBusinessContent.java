@@ -11,7 +11,7 @@
 package eu.ecodex.connector.domain.model.message.content;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import java.io.Serializable;
@@ -20,7 +20,7 @@ import lombok.Builder;
 /**
  * Message businessContent holds the main businessContent of a message. This is the XML data of
  * the main Form of the message and the printable businessDocument that most of the
- * {@link ConnectorAction} require.
+ * {@link ConnectorProcessingModeAction} require.
  *
  * <p>A message is a business message only if a messageContent is present.
  *

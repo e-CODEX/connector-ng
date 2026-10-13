@@ -13,24 +13,20 @@ package eu.ecodex.connector.application.port.api.stats;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 
 /**
- * Defines a use case for retrieving statistical data regarding messages processed by a connector
- * over a specific time range. This interface allows querying aggregated metrics for all, outbound,
- * and inbound messages within a given period.
+ * Use case for retrieving statistics about the connector messages over a period.
  */
 public interface ConnectorRetrieveMessageStats {
     /**
-     * Executes the retrieval of statistical data related to messages processed by a connector
-     * within a specified time range and business domain. The method provides aggregated metrics for
-     * all messages, as well as for outbound and inbound messages separately.
+     * Retrieves statistics about the connector messages processed between the given dates,
+     * optionally restricted to a business domain.
      *
-     * @param from           The starting timestamp of the time range (inclusive) in ISO 8601
-     *                       format.
-     * @param to             The ending timestamp of the time range (exclusive) in ISO 8601 format.
-     * @param businessDomain The unique identifier of the business domain for which the statistics
-     *                       are to be retrieved.
+     * @param from           start of the period; the format is defined by the implementation (for
+     *                       example an ISO-8601 date or date-time)
+     * @param to             end of the period; same format as {@code from}
+     * @param businessDomain identifier of the business domain to restrict the statistics to; may
+     *                       be {@code null} or empty to cover all business domains
      *
-     * @return A {@code ConnectorMessageStats} object containing aggregated metrics for the
-     *     specified time range and business domain.
+     * @return a {@link ConnectorMessageStats} object holding the statistics of the period
      */
     ConnectorMessageStats execute(String from, String to, String businessDomain);
 }

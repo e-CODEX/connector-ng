@@ -28,7 +28,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorMessageBusinessContentRepository}.
+ * RDBMS implementation of {@link ConnectorMessageBusinessContentRepository}.
  */
 @Component
 @SuppressWarnings("checkstyle:LineLength")

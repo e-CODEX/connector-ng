@@ -23,11 +23,11 @@ import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.PartyTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,11 +42,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ConnectorMessageVerifierService")
 public class ConnectorBusinessMessageVerifierServiceTest {
     @Mock
-    private ConnectorServiceRepository serviceRepository;
+    private ConnectorProcessingModeServiceRepository serviceRepository;
     @Mock
-    private ConnectorActionRepository actionRepository;
+    private ConnectorProcessingModeActionRepository actionRepository;
     @Mock
-    private ConnectorPartyRepository partyRepository;
+    private ConnectorProcessingModePartyRepository partyRepository;
 
     @InjectMocks
     private ConnectorBusinessMessageVerifierService verifierService;
@@ -184,7 +184,7 @@ public class ConnectorBusinessMessageVerifierServiceTest {
             when(actionRepository.findByNameAndBusinessDomain(any(), any()))
                 .thenReturn(ActionTestFixtures.createAction());
             when(partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any()))
-                .thenReturn(PartyTestFixtures.createToParty(), (ConnectorParty) null);
+                .thenReturn(PartyTestFixtures.createToParty(), (ConnectorProcessingModeParty) null);
 
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,
@@ -205,7 +205,7 @@ public class ConnectorBusinessMessageVerifierServiceTest {
             when(actionRepository.findByNameAndBusinessDomain(any(), any()))
                 .thenReturn(ActionTestFixtures.createAction());
             when(partyRepository.findByIdentifierAndRoleTypeAndBusinessDomain(any(), any(), any()))
-                .thenReturn(PartyTestFixtures.createToParty(), (ConnectorParty) null);
+                .thenReturn(PartyTestFixtures.createToParty(), (ConnectorProcessingModeParty) null);
 
             assertThrows(
                 ConnectorProcessingModeVerificationException.class,

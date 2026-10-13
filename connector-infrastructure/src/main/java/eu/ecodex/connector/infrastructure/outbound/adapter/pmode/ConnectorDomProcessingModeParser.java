@@ -10,10 +10,10 @@
 
 package eu.ecodex.connector.infrastructure.outbound.adapter.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeParser;
 import eu.ecodex.connector.infrastructure.outbound.adapter.exception.ConnectorProcessingModeParsingException;
 import eu.ecodex.connector.infrastructure.util.SecureXmlParserUtil;
@@ -167,7 +167,7 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
         return partyIdTypes;
     }
 
-    private Set<ConnectorParty> retrieveParties(
+    private Set<ConnectorProcessingModeParty> retrieveParties(
         NodeList partyNodes,
         Map<String, String> partyIdTypes,
         String homePartyName, RoleValues roleValues) {
@@ -176,7 +176,7 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
             ConnectorPartyRoleType.RESPONDER, roleValues.responder()
         );
 
-        var parties = new HashSet<ConnectorParty>();
+        var parties = new HashSet<ConnectorProcessingModeParty>();
 
         for (var party : elementsOf(partyNodes)) {
             var name = requiredAttribute(party, ATTRIBUTE_NAME, "party element");
@@ -200,14 +200,14 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
             // A party is usable in both directions, so one entry per role type is created.
             for (var roleType : ConnectorPartyRoleType.values()) {
                 parties.add(
-                    ConnectorParty.builder()
-                                  .name(name)
-                                  .identifier(partyId)
-                                  .identifierType(partyIdTypeValue)
-                                  .role(roleByType.get(roleType))
-                                  .roleType(roleType)
-                                  .isHome(homePartyName.equals(name))
-                                  .build());
+                    ConnectorProcessingModeParty.builder()
+                                                .name(name)
+                                                .identifier(partyId)
+                                                .identifierType(partyIdTypeValue)
+                                                .role(roleByType.get(roleType))
+                                                .roleType(roleType)
+                                                .isHome(homePartyName.equals(name))
+                                                .build());
             }
         }
 
@@ -219,17 +219,18 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
         return parties;
     }
 
-    private Set<ConnectorService> retrieveServices(NodeList serviceNodes) {
-        var services = new HashSet<ConnectorService>();
+    private Set<ConnectorProcessingModeService> retrieveServices(NodeList serviceNodes) {
+        var services = new HashSet<ConnectorProcessingModeService>();
 
         for (var service : elementsOf(serviceNodes)) {
             var value = requiredAttribute(service, ATTRIBUTE_VALUE, "service element");
 
             services.add(
-                ConnectorService.builder()
-                                .name(value)
-                                .type(emptyToNull(service.getAttribute(ATTRIBUTE_TYPE)))
-                                .build());
+                ConnectorProcessingModeService
+                    .builder()
+                    .name(value)
+                    .type(emptyToNull(service.getAttribute(ATTRIBUTE_TYPE)))
+                    .build());
         }
 
         if (services.isEmpty()) {
@@ -240,12 +241,12 @@ public class ConnectorDomProcessingModeParser implements ConnectorProcessingMode
         return services;
     }
 
-    private Set<ConnectorAction> retrieveActions(NodeList actionNodes) {
-        var actions = new HashSet<ConnectorAction>();
+    private Set<ConnectorProcessingModeAction> retrieveActions(NodeList actionNodes) {
+        var actions = new HashSet<ConnectorProcessingModeAction>();
 
         for (var action : elementsOf(actionNodes)) {
             var value = requiredAttribute(action, ATTRIBUTE_VALUE, "action element");
-            actions.add(ConnectorAction.builder().name(value).build());
+            actions.add(ConnectorProcessingModeAction.builder().name(value).build());
         }
 
         if (actions.isEmpty()) {

@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorMessageTransportStepRepository}.
+ * RDBMS implementation of {@link ConnectorMessageTransportStepRepository}.
  */
 @Slf4j
 @Component

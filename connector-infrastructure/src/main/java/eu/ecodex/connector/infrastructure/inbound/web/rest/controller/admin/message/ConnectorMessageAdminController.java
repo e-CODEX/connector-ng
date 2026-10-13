@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.mes
 
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
-import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundTestMessage;
+import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundC2CTestMessage;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageAS4PropertiesCommand;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
@@ -53,7 +53,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
     private final ConnectorRetrieveMessageStats retrieveMessageStatsService;
     private final ConnectorRetrieveMessageReport retrieveMessageReportService;
     private final ConnectorMessageReportExporterFactory reportExporterFactory;
-    private final ConnectorSendOutboundTestMessage sendTestMessageService;
+    private final ConnectorSendOutboundC2CTestMessage sendTestMessageService;
     private final ConnectorRestOutboundMessageParser restOutboundMessageParser;
 
     /**
@@ -75,7 +75,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         ConnectorRetrieveMessageStats retrieveMessageStatsService,
         ConnectorRetrieveMessageReport retrieveMessageReportService,
         ConnectorMessageReportExporterFactory reportExporterFactory,
-        ConnectorSendOutboundTestMessage sendTestMessageService,
+        ConnectorSendOutboundC2CTestMessage sendTestMessageService,
         ConnectorRestOutboundMessageParser restOutboundMessageParser) {
         this.listMessagesService = listMessagesService;
         this.retrieveMessageService = retrieveMessageService;

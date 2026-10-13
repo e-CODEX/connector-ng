@@ -14,16 +14,15 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import java.util.List;
 
 /**
- * Service interface for listing all {@link ConnectorProcessingMode} entities managed by the
- * system.
+ * Use case for listing all {@link ConnectorProcessingMode} entities managed by the system.
  */
 public interface ConnectorListProcessingMode {
+
     /**
-     * Retrieves all available {@link ConnectorProcessingMode} instances.
+     * Retrieves all configured {@link ConnectorProcessingMode} instances.
      *
      * @return a list of {@link ConnectorProcessingMode} objects representing all configured
-     *     processing modes. The list is immutable and never null, but it may be empty if no
-     *     processing modes are configured.
+     *     processing modes; never {@code null}, and empty if no processing modes are configured
      */
     List<ConnectorProcessingMode> execute();
 }

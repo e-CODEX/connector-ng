@@ -17,30 +17,27 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for managing the patch of {@link ConnectorUser} entities in the
- * system.
- * Provides methods for partially updating user information.
+ * Use case for partially updating an existing user of the connector system.
  */
 public interface ConnectorEditUser {
     /**
-     * Partially updates an existing {@link ConnectorUser} in the system based on the provided
-     * identifier.
-     * If the identifier and user information do not match, an exception is thrown. Additionally,
-     * exceptions are thrown if the user already exists or if the user corresponding to the
-     * identifier does not exist.
+     * Partially updates the {@link ConnectorUser} identified by the given identifier, applying the
+     * changes carried by the given command.
      *
-     * @param identifier the unique identifier of the {@link ConnectorUser} to be updated.
-     * @param user       the {@link ConnectorUser} object containing the updated details.
+     * @param identifier the unique identifier of the {@link ConnectorUser} to update (must not be
+     *                   null)
+     * @param user       the {@link ConnectorEditUserCommand} containing the details to update (must
+     *                   not be null)
      *
-     * @return the updated {@link ConnectorUser} after applying the changes.
+     * @return the updated {@link ConnectorUser} after the changes have been applied
      *
-     * @throws ConnectorUserAlreadyExistsException      if a user with the same details already
-     *                                                  exists in
-     *                                                  the system.
-     * @throws ConnectorUserNotFoundException           if no user is found for the provided
-     *                                                  identifier.
-     * @throws ConnectorUserIdentifierMismatchException if the identifier does not match the user's
-     *                                                  identifier.
+     * @throws ConnectorUserAlreadyExistsException      if the update would give the user details
+     *                                                  (for example a username) that are already
+     *                                                  used by another user
+     * @throws ConnectorUserNotFoundException           if no user is found for the given
+     *                                                  identifier
+     * @throws ConnectorUserIdentifierMismatchException if the identifier does not match the
+     *                                                  identifier carried by the command
      */
     ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorEditUserCommand user);
 }

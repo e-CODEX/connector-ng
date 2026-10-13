@@ -14,8 +14,19 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for sending test business messages through the connector system.
+ * Use case for sending outbound connector-to-connector (C2C) test business messages.
+ *
+ * <p>The messages allow checking that a link partner can be reached and that the message exchange
+ * works end to end.
  */
-public interface ConnectorSendOutboundTestMessage {
+public interface ConnectorSendOutboundC2CTestMessage {
+    /**
+     * Creates and sends an outbound test business message as described by the given command.
+     *
+     * @param command the {@link ConnectorTestBusinessMessageCommand} describing the test message to
+     *                send (must not be null)
+     *
+     * @return the {@link ConnectorBusinessMessage} that was created and sent
+     */
     ConnectorBusinessMessage execute(@Nonnull ConnectorTestBusinessMessageCommand command);
 }

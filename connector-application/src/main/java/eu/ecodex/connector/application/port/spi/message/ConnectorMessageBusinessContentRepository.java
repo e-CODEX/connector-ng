@@ -16,37 +16,37 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for managing and querying message businessContent within the connector
- * system.
+ * Repository (port) for persisting the business content of connector messages.
  *
- * <p>Implementations of this interface are expected to handle the persistence, retrieval,
- * and manipulation of message businessContent related to the connector's operations.
+ * <p>Implementations handle the persistence and update of the business content related to the
+ * connector's operations.
  */
 public interface ConnectorMessageBusinessContentRepository {
     /**
-     * Persists the provided message businessContent in the underlying data store.
+     * Persists the given business content for the given message.
      *
-     * @param businessContent   the {@link ConnectorMessageBusinessContent} instance to be saved;
-     * @param messageIdentifier the {@link ConnectorBusinessMessage} identifier;
+     * @param businessContent   the {@link ConnectorMessageBusinessContent} to save (must not be
+     *                          null)
+     * @param messageIdentifier the identifier of the {@link ConnectorBusinessMessage} the content
+     *                          belongs to (must not be null)
      *
-     * @return the persisted {@link ConnectorMessageBusinessContent} instance, potentially with
-     *     additional metadata or state changes applied during the save operation.
+     * @return the persisted {@link ConnectorMessageBusinessContent}, potentially with additional
+     *     metadata or state changes applied during the save operation
      */
     ConnectorMessageBusinessContent save(
         @Nonnull ConnectorMessageBusinessContent businessContent,
         @Nonnull String messageIdentifier);
 
     /**
-     * Assigns a printable business document to a message's business content identified by the given
+     * Assigns a printable business document to the message business content identified by the given
      * UUID.
      *
-     * @param uuid     the unique identifier of the message business content to which the business
-     *                 document will be assigned; must not be null
-     * @param document the business document to be assigned to the message business content; must
-     *                 not be null
+     * @param uuid     the unique identifier of the message business content to which the document
+     *                 is assigned (must not be null)
+     * @param document the {@link ConnectorMessageBusinessDocument} to assign (must not be null)
      *
-     * @return the updated {@link ConnectorMessageBusinessContent} instance with the assigned
-     *     business document
+     * @return the updated {@link ConnectorMessageBusinessContent} with the assigned business
+     *     document
      */
     ConnectorMessageBusinessContent assignBusinessDocument(
         @Nonnull String uuid, @Nonnull ConnectorMessageBusinessDocument document);

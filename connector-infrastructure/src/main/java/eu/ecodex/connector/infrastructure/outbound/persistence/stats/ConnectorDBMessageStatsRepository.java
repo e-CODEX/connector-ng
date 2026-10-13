@@ -20,7 +20,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 /**
- * Default implementation of the {@link ConnectorMessageStatsRepository} interface.
+ * RDBMS implementation of {@link ConnectorMessageStatsRepository}.
  */
 @Component
 public class ConnectorDBMessageStatsRepository implements ConnectorMessageStatsRepository {

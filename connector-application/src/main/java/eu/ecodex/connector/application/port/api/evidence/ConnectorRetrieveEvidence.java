@@ -14,15 +14,15 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for retrieving evidence messages.
+ * Use case for retrieving the evidence associated with a connector message.
  */
 public interface ConnectorRetrieveEvidence {
     /**
-     * Executes the operation to retrieve evidence for a given message identified by its UUID.
+     * Retrieves the {@link ConnectorMessageEvidence} identified by the given UUID.
      *
-     * @param uuid the unique identifier of the message evidence to be retrieved must not be null
+     * @param uuid unique identifier of the evidence to retrieve (must not be null)
      *
-     * @return the {@link ConnectorMessageEvidence} corresponding to the specified UUID
+     * @return the {@link ConnectorMessageEvidence} associated with the given identifier
      */
     ConnectorMessageEvidence execute(@Nonnull String uuid);
 }

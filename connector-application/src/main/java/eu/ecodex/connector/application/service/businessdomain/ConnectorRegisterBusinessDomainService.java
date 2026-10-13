@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorRegisterBusinessDomain} service.
+ * Default implementation of {@link ConnectorRegisterBusinessDomain}.
  */
 @Slf4j
 @Service

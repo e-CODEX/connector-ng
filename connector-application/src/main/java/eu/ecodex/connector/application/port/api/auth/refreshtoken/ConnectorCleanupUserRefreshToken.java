@@ -11,15 +11,14 @@
 package eu.ecodex.connector.application.port.api.auth.refreshtoken;
 
 /**
- * Interface for cleaning up connector refresh tokens.
+ * Use case for cleaning up the refresh tokens of users in the connector system.
  */
 public interface ConnectorCleanupUserRefreshToken {
     /**
-     * Executes the cleanup operation for connector refresh tokens.
-     * This method is responsible for performing cleanup tasks related to
-     * deleting refresh tokens in the connector system.
-     * It ensures that outdated or unused tokens are appropriately handled,
-     * enhancing security and maintaining the integrity of the authentication system.
+     * Deletes the refresh tokens that are no longer needed, such as expired or revoked tokens.
+     *
+     * <p>Removing these tokens keeps the token store small and improves the security and integrity
+     * of the authentication system. The method takes no argument and processes all users.
      */
     void execute();
 }

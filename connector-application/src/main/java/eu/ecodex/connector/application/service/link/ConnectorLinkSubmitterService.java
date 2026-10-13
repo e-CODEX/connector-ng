@@ -22,8 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorLinkSubmitter} interface responsible for handling the
- * submission of {@link ConnectorBusinessMessage} instances to appropriate connector link partners.
+ * Default implementation of {@link ConnectorLinkSubmitter}.
  *
  * <p>This service processes connector messages by determining the target link partner based on the
  * message's direction and associated partner information. It retrieves the corresponding

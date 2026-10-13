@@ -15,9 +15,9 @@ import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeAc
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeServiceNotFoundException;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
@@ -25,14 +25,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorBusinessMessageVerifier} service.
+ * Default implementation of {@link ConnectorBusinessMessageVerifier} service.
  */
 @Slf4j
 @Service
 public class ConnectorBusinessMessageVerifierService implements ConnectorBusinessMessageVerifier {
-    private final ConnectorPartyRepository partyRepository;
-    private final ConnectorServiceRepository serviceRepository;
-    private final ConnectorActionRepository actionRepository;
+    private final ConnectorProcessingModePartyRepository partyRepository;
+    private final ConnectorProcessingModeServiceRepository serviceRepository;
+    private final ConnectorProcessingModeActionRepository actionRepository;
 
     /**
      * Creates a new {@code ConnectorMessageVerifierService}.
@@ -42,9 +42,9 @@ public class ConnectorBusinessMessageVerifierService implements ConnectorBusines
      * @param actionRepository  repository used to resolve and validate message actions
      */
     public ConnectorBusinessMessageVerifierService(
-        ConnectorPartyRepository partyRepository,
-        ConnectorServiceRepository serviceRepository,
-        ConnectorActionRepository actionRepository) {
+        ConnectorProcessingModePartyRepository partyRepository,
+        ConnectorProcessingModeServiceRepository serviceRepository,
+        ConnectorProcessingModeActionRepository actionRepository) {
         this.partyRepository = partyRepository;
         this.serviceRepository = serviceRepository;
         this.actionRepository = actionRepository;

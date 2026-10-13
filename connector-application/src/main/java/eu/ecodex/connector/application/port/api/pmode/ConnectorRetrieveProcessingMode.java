@@ -14,17 +14,15 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import jakarta.annotation.Nonnull;
 
 /**
- * This interface defines the contract for retrieving and processing connector messages based on a
- * specified identifier.
+ * Use case for retrieving a {@link ConnectorProcessingMode} by its unique identifier.
  */
 public interface ConnectorRetrieveProcessingMode {
     /**
-     * Executes the retrieval of a connector message based on the provided identifier.
+     * Retrieves the {@link ConnectorProcessingMode} identified by the given UUID.
      *
-     * @param uuid the unique identifier used to locate and retrieve the specific connector
-     *             processing mode
+     * @param uuid the unique identifier of the processing mode to retrieve (must not be null)
      *
-     * @return the retrieved {@link ConnectorProcessingMode} associated with the given identifier
+     * @return the {@link ConnectorProcessingMode} associated with the given identifier
      */
     ConnectorProcessingMode execute(@Nonnull String uuid);
 }

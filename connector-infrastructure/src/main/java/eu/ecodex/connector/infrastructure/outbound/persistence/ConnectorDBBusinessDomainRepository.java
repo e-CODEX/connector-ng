@@ -20,7 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorBusinessDomainRepository}.
+ * Default implementation of {@link ConnectorBusinessDomainRepository}.
  */
 @Component
 public class ConnectorDBBusinessDomainRepository implements ConnectorBusinessDomainRepository {

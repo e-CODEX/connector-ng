@@ -15,24 +15,19 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Repository interface for managing and persisting {@link ConnectorMessageError} entities.
- *
- * <p>Provides methods to handle error information associated with connector messages. This
- * interface serves as a contract for implementing persistence and retrieval logic for
- * {@link ConnectorMessageError} objects, enabling the tracking and storage of errors tied to a
- * specific message.
+ * Repository (port) for persisting the errors associated with connector messages.
  */
 public interface ConnectorMessageErrorRepository {
     /**
-     * Persists the provided list of {@link ConnectorMessageError} entities associated with a
-     * specific message identifier.
+     * Persists the given errors for the message identified by the given identifier.
      *
-     * @param messageIdentifier the unique identifier of the message for which errors are being
-     *                          saved; must not be null.
-     * @param errors            the list of {@link ConnectorMessageError} entities to be persisted;
-     *                          must not be null.
+     * @param messageIdentifier the unique identifier of the message the errors belong to (must
+     *                          not be null)
+     * @param errors            the {@link ConnectorMessageError} objects to persist (must not be
+     *                          null)
      *
-     * @return the list of {@link ConnectorMessageError} entities that were successfully saved.
+     * @return the {@link ConnectorMessageError} objects that were saved, including any values
+     *     generated during persistence
      */
     List<ConnectorMessageError> save(
         @Nonnull String messageIdentifier,

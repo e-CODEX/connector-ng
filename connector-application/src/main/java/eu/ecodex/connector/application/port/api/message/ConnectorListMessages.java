@@ -16,20 +16,22 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 
 /**
- * Represents a contract for retrieving a paginated list of connector messages. The implementers of
- * this interface are responsible for defining the logic to retrieve the messages based on the given
- * pagination request.
+ * Use case for listing the connector business messages.
  */
 public interface ConnectorListMessages {
     /**
-     * Executes a paginated process to retrieve a list of connector messages based on the specified
-     * page request.
+     * Retrieves a page of {@link ConnectorBusinessMessage} objects based on the pagination
+     * parameters and the optional filter criteria carried by the provided
+     * {@link ConnectorMessagesListFilter}. All filters are combined with a logical
+     * {@code AND}; a filter whose value is {@code null} or empty is ignored.
      *
      * @param filter the pagination parameters and filter criteria used to retrieve the messages
      *               (must not be null)
      *
-     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorBusinessMessage}
-     *     objects and pagination metadata.
+     * @return a {@link ConnectorPageResult} containing a page of {@link ConnectorBusinessMessage}
+     *     objects matching the given filter
+     *
+     * @throws IllegalArgumentException if the page request contained in {@code filter} is invalid
      */
     ConnectorPageResult<ConnectorBusinessMessage> execute(
         @Nonnull ConnectorMessagesListFilter filter);

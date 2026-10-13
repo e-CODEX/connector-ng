@@ -32,10 +32,10 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -70,26 +70,28 @@ public class LegacyMessageHelperTest {
     private ConnectorMessageAS4Properties as4Properties() {
         return ConnectorMessageAS4Properties
             .builder()
-            .service(ConnectorService.builder()
-                                     .name("EPO")
-                                     .type("urn:e-codex:services:")
-                                     .build())
-            .action(ConnectorAction.builder()
-                                   .name("Form_A")
-                                   .build())
-            .fromParty(ConnectorParty.builder()
-                                     .identifier("BL")
-                                     .identifierType("urn:oasis:names:tc:ebcore:partyid-type"
-                                                         + ":ecodex")
-                                     .role("GW")
-                                     .roleType(ConnectorPartyRoleType.INITIATOR)
-                                     .build())
-            .toParty(ConnectorParty.builder()
-                                   .identifier("RE")
-                                   .identifierType("urn:oasis:names:tc:ebcore:partyid-type:ecodex")
-                                   .role("GW")
-                                   .roleType(ConnectorPartyRoleType.RESPONDER)
-                                   .build())
+            .service(ConnectorProcessingModeService.builder()
+                                                   .name("EPO")
+                                                   .type("urn:e-codex:services:")
+                                                   .build())
+            .action(ConnectorProcessingModeAction.builder()
+                                                 .name("Form_A")
+                                                 .build())
+            .fromParty(ConnectorProcessingModeParty.builder()
+                                                   .identifier("BL")
+                                                   .identifierType(
+                                                       "urn:oasis:names:tc:ebcore:partyid-type"
+                                                           + ":ecodex")
+                                                   .role("GW")
+                                                   .roleType(ConnectorPartyRoleType.INITIATOR)
+                                                   .build())
+            .toParty(ConnectorProcessingModeParty.builder()
+                                                 .identifier("RE")
+                                                 .identifierType(
+                                                     "urn:oasis:names:tc:ebcore:partyid-type:ecodex")
+                                                 .role("GW")
+                                                 .roleType(ConnectorPartyRoleType.RESPONDER)
+                                                 .build())
             .conversationIdentifier("3d5ec775-6602-4bb0-a23c-0311ef8dabc8")
             .ebmsMessageIdentifier("50ef4a19-916f-4e38-bc86-4f85921e6f0a@domibus.eu")
             .referenceToIdentifier(null)

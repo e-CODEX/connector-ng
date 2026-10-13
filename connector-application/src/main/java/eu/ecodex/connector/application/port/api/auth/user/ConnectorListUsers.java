@@ -14,17 +14,14 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.util.List;
 
 /**
- * Interface for listing all registered {@link ConnectorUser} instances within the system.
- *
- * <p>Provides an operation to retrieve all {@link ConnectorUser} objects, enabling access
- * to the complete list of available users and their roles within the system.
+ * Use case for listing the users of the connector system.
  */
-public interface ConnectorListUser {
+public interface ConnectorListUsers {
     /**
-     * Retrieves all instances of {@link ConnectorUser} available in the system.
+     * Retrieves all {@link ConnectorUser} instances registered in the system.
      *
-     * @return a list of {@link ConnectorUser} objects representing all registered users.
-     *     If no users are found, an empty list is returned.
+     * @return a list of {@link ConnectorUser} objects representing all registered users; never
+     *     {@code null}, and empty if no users are registered
      */
     List<ConnectorUser> execute();
 }

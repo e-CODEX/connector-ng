@@ -18,20 +18,19 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Command object representing a single file upload request.
+ * Describes a file received for upload, stored temporarily on disk until it is processed.
  *
- * <p>This record encapsulates both file metadata and its binary content and is typically used as a
- * transport object between application layers.
+ * <p>The content of the file is not held in memory: it is referenced by
+ * {@code tempFileLocation}. Once the file has been processed, the caller should call
+ * {@link #cleanup()} to delete the temporary file.
  *
- * <p>Instances of this record are immutable with respect to their fields.
- *
- * @param filename         the original name of the file; must not be {@code null}
- * @param size             the size of the file in bytes; must be greater than or equal to zero
- * @param contentType      the MIME type of the file (e.g. {@code "application/pdf"},
- *                         {@code "image/png"}); may not be {@code null}
- * @param tempFileLocation the {@link Path} pointing to the temporary file location; may not be
- *                         {@code null}
- * @param description      a description of the file content or purpose; may not be {@code null}
+ * @param filename         original name of the uploaded file (must not be null)
+ * @param size             size of the file in bytes
+ * @param contentType      MIME type of the file, for example {@code application/pdf} (must not be
+ *                         null)
+ * @param tempFileLocation location of the temporary file holding the uploaded content (must not be
+ *                         null)
+ * @param description      free-text description of the file (must not be null)
  */
 @Slf4j
 @Builder
@@ -43,7 +42,10 @@ public record FileUploadCommand(
     @Nonnull String description
 ) {
     /**
-     * Deletes the temporary file.
+     * Deletes the temporary file referenced by {@link #tempFileLocation()}.
+     *
+     * <p>The deletion is the best effort: a missing file is ignored, and an {@link IOException}
+     * during deletion is logged as an error and not propagated to the caller.
      */
     public void cleanup() {
         try {

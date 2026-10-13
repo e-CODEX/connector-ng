@@ -30,13 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * Implementation of the ConnectorUserRepository interface that provides operations for managing
- * ConnectorUser entities in the database.
- *
- * <p>This class uses JPA repositories for persistence and mapping
- * entities to domain objects and vice versa. It ensures consistency between the domain and
- * persistence layers and includes functionality for saving, retrieving, updating, and deleting
- * ConnectorUser entities.
+ * RDBMS implementation of {@link ConnectorUserRepository}.
  */
 @Slf4j
 @Service

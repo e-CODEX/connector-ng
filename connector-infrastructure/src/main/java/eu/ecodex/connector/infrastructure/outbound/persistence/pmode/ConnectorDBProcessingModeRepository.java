@@ -27,7 +27,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorProcessingModeRepository}.
+ * RDBMS implementation of {@link ConnectorProcessingModeRepository}.
  */
 @Component
 public class ConnectorDBProcessingModeRepository implements ConnectorProcessingModeRepository {
@@ -159,13 +159,13 @@ public class ConnectorDBProcessingModeRepository implements ConnectorProcessingM
             .filename(entity.getFilename())
             .truststore(toDomain(entity.getTruststore()))
             .parties(entity.getParties().stream().map(
-                ConnectorDBPartyRepository::toDomain).collect(
+                ConnectorDBProcessingModePartyRepository::toDomain).collect(
                 Collectors.toSet()))
             .actions(entity.getActions().stream().map(
-                ConnectorDBActionRepository::toDomain).collect(
+                ConnectorDBProcessingModeActionRepository::toDomain).collect(
                 Collectors.toSet()))
             .services(entity.getServices().stream().map(
-                ConnectorDBServiceRepository::toDomain).collect(
+                ConnectorDBProcessingModeServiceRepository::toDomain).collect(
                 Collectors.toSet()))
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())

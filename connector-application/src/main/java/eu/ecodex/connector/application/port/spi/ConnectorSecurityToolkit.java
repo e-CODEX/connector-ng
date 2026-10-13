@@ -14,41 +14,41 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface defining a toolkit for handling security-related operations on
- * {@link ConnectorBusinessMessage} instances within the Connector system.
+ * Toolkit for handling security-related operations on {@link ConnectorBusinessMessage} instances
+ * within the connector system.
  *
  * <p>Responsibilities:
  * <ul>
- *     <li>Validating messages to ensure compliance with security policies and system requirements.
- *     <li>Building secured message containers for transportation or storage.
+ *     <li>Validating messages received from the gateway to ensure compliance with security
+ *     policies and system requirements.</li>
+ *     <li>Building secured message containers for messages sent to the gateway.</li>
  * </ul>
  */
 public interface ConnectorSecurityToolkit {
     /**
-     * Validates the provided {@link ConnectorBusinessMessage} to ensure that it adheres to the
-     * required system and security policies.
+     * Validates the given message to ensure that it adheres to the required system and security
+     * policies.
      *
      * <p>Used to validate a message pushed to the connector system by the gateway.
      *
-     * @param message the {@link ConnectorBusinessMessage} to be validated, containing all relevant
-     *                data for verification of compliance against defined standards.
+     * <p>The method returns normally if the message is valid. If validation fails, the failure is
+     * reported by an exception.
+     *
+     * @param message the {@link ConnectorBusinessMessage} to validate (must not be null)
      */
     void validateMessage(@Nonnull ConnectorBusinessMessage message);
 
     /**
-     * Constructs a secured container for the specified {@link ConnectorBusinessMessage}. This
-     * method is responsible for building a message container that complies with the defined
-     * security standards and system requirements, ensuring the message is encapsulated properly for
-     * transportation or storage purposes.
+     * Builds a secured container for the given message, so that it is properly encapsulated for
+     * transport in line with the defined security standards.
      *
-     * <p>Used to build message containers for messages pushed to the gateway system by the
-     * connector.
+     * <p>Used to build message containers for messages pushed to the gateway by the connector.
      *
-     * @param message the {@link ConnectorBusinessMessage} to be encapsulated in a secured
-     *                container, containing the details necessary for transport or storage.
+     * @param message the {@link ConnectorBusinessMessage} to encapsulate in a secured container
+     *                (must not be null)
      *
-     * @return the {@link ConnectorBusinessMessage} instance, encapsulated in a secured container
-     *     with any enhancements or modifications required for compliance with system standards.
+     * @return the {@link ConnectorBusinessMessage} encapsulated in a secured container, with any
+     *     modifications required for compliance with the system standards
      */
     ConnectorBusinessMessage buildContainer(@Nonnull ConnectorBusinessMessage message);
 }

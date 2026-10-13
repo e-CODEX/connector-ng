@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of the {@link ConnectorInboundEvidenceMessageProcessor} service.
+ * Default implementation of {@link ConnectorInboundEvidenceMessageProcessor}.
  */
 @Slf4j
 @Service

@@ -16,12 +16,13 @@ import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessa
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorRetrieveMessageByTransportId} service.
+ * Default implementation of {@link ConnectorRetrieveMessageByTransportId}.
  */
 @Slf4j
 @Service
@@ -36,7 +37,7 @@ public class ConnectorRetrieveMessageByTransportIdService implements
     }
 
     @Override
-    public ConnectorMessage execute(String transportIdentifier) {
+    public ConnectorMessage execute(@NonNull String transportIdentifier) {
         log.info("Retrieving message for transport identifier: [{}]", transportIdentifier);
 
         var transportStep = this.transportStepRepository.findByIdentifier(transportIdentifier);

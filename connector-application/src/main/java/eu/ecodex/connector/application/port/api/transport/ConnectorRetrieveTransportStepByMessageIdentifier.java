@@ -14,20 +14,18 @@ import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransp
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for retrieving transport steps for a specific connector message.
+ * Use case for retrieving the transport step of a connector message by the message identifier.
  */
 public interface ConnectorRetrieveTransportStepByMessageIdentifier {
     /**
-     * Executes the retrieval of a transport step for a specific connector message identified by its
-     * unique message identifier. This method is responsible for obtaining the transport step
-     * details for the provided message identifier, allowing further processing or status tracking
-     * of the transport step.
+     * Retrieves the {@link ConnectorMessageTransportStep} associated with the message identified by
+     * the given identifier.
      *
-     * @param messageIdentifier the unique identifier of the connector message for which the
-     *                          transport step is to be retrieved. Must not be null.
+     * @param messageIdentifier identifier of the message whose transport step is retrieved (must
+     *                          not be null)
      *
-     * @return a {@link ConnectorMessageTransportStep} instance representing the transport step
-     *     associated with the specified message identifier.
+     * @return the {@link ConnectorMessageTransportStep} associated with the given message
+     *     identifier
      */
     ConnectorMessageTransportStep execute(@Nonnull String messageIdentifier);
 }

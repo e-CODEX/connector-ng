@@ -24,8 +24,10 @@ public interface ConnectorInboundEvidenceMessageProcessor {
      * Applies transported evidences to the referenced business message and forwards the
      * confirmation message to the backend.
      *
-     * @param confirmationMessage the persisted gateway confirmation message; must not be
-     *                            {@code null}
+     * <p>The method returns normally if the evidences were applied and the message was forwarded.
+     * If processing fails, the failure is reported by an exception.
+     *
+     * @param confirmationMessage the persisted gateway confirmation message (must not be null)
      */
     void process(@NonNull ConnectorEvidenceMessage confirmationMessage);
 }

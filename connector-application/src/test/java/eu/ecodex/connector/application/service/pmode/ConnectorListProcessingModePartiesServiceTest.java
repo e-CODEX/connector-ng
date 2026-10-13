@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.PartyTestFixtures;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ConnectorListProcessingModePartiesService")
 public class ConnectorListProcessingModePartiesServiceTest {
     @Mock
-    private ConnectorPartyRepository partyRepository;
+    private ConnectorProcessingModePartyRepository partyRepository;
 
     @InjectMocks
     private ConnectorListProcessingModePartiesService listProcessingModePartiesService;

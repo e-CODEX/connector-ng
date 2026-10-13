@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * Default implementation of the {@link ConnectorTriggeredEvidenceMessageVerifier} interface.
+ * Default implementation of {@link ConnectorTriggeredEvidenceMessageVerifier}.
  */
 @Service
 public class ConnectorTriggeredEvidenceMessageVerifierService

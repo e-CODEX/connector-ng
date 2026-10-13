@@ -10,36 +10,37 @@
 
 package eu.ecodex.connector.application.port.api.message.pipeline;
 
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 
 /**
  * Defines a processing step in the connector message workflow.
  *
- * <p>This interface is intended to process {@link ConnectorBusinessMessage} objects and return a
- * modified or new instance of {@link ConnectorBusinessMessage}. Implementations of this interface
- * can represent different stages of message handling, such as validation, transformation, or
- * routing.
+ * <p>This interface is intended to process {@link ConnectorMessage} objects and return a
+ * modified or new instance of a {@link ConnectorMessage}. Implementations can represent different
+ * stages of message handling, such as validation, transformation, or routing.
  *
  * <p>The processing step is a core element in the message lifecycle, ensuring that business or
- * technical requirements are fulfilled at each stage.
+ * technical requirements are fulfilled at each stage. Because the input and output types are
+ * generic, a step may also convert a message from one type to another.
+ *
+ * @param <I> the type of message accepted by this step
+ * @param <O> the type of message produced by this step
  */
 public interface ConnectorMessageStep<I extends ConnectorMessage, O extends ConnectorMessage> {
+
     /**
-     * Executes a processing step on the given connector message and returns the resulting message.
+     * Executes this processing step on the given message and returns the resulting message.
      *
-     * <p>This method is intended to perform a specific operation on the provided
-     * {@code ConnectorMessage}, such as validation, transformation, or enrichment. The input
-     * message is not modified directly; instead, a new instance or a modified copy of the
-     * {@code ConnectorMessage} is returned.
+     * <p>This method performs a specific operation on the provided message, such as validation,
+     * transformation, or enrichment. The input message is not modified directly; instead, a new
+     * instance or a modified copy is returned.
      *
-     * @param message the {@link ConnectorMessage} to process; must not be {@code null}
+     * @param message the message to process (must not be null)
      *
-     * @return a new or modified {@link ConnectorMessage} instance as the result of the
-     *     processing
+     * @return the message resulting from the processing; a new or modified instance
      *
-     * @throws NullPointerException if the {@code message} parameter is {@code null}
+     * @throws NullPointerException if {@code message} is {@code null}
      */
     O execute(@Nonnull I message);
 }

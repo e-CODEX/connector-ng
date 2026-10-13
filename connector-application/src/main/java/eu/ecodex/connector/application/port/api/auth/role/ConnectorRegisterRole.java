@@ -15,23 +15,18 @@ import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines a contract for registering user roles within the Connector system.
- * Implementations of this interface handle the creation of new {@link ConnectorRole}
- * instances.
- *
+ * Use case for registering a new role in the connector system.
  */
 public interface ConnectorRegisterRole {
     /**
-     * Executes the registration of a new user role in the Connector system.
+     * Registers a new {@link ConnectorRole} in the system.
      *
-     * @param userRole The {@link ConnectorRole} instance representing the role to be registered.
-     *                 It must not be null.
+     * @param userRole the {@link ConnectorRole} to register (must not be null)
      *
-     * @return The registered {@link ConnectorRole} instance, including any system-assigned
-     *     metadata, such as timestamps or unique identifiers.
+     * @return the registered {@link ConnectorRole}, including any system-assigned metadata such as
+     *     timestamps or unique identifiers
      *
-     * @throws ConnectorRoleAlreadyExistsException If a role with the same attributes already exists
-     *                                             in the Connector system.
+     * @throws ConnectorRoleAlreadyExistsException if a role with the same name already exists
      */
     ConnectorRole execute(@Nonnull ConnectorRole userRole);
 }

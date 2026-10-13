@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.outbound.persistence.pmode;
 
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
@@ -23,14 +23,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorActionRepository}.
+ * RDBMS implementation of {@link ConnectorProcessingModeActionRepository}.
  */
 @Component
-public class ConnectorDBActionRepository implements ConnectorActionRepository {
+public class ConnectorDBProcessingModeActionRepository
+    implements ConnectorProcessingModeActionRepository {
     private final ConnectorActionJpaRepository actionJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
-    public ConnectorDBActionRepository(
+    public ConnectorDBProcessingModeActionRepository(
         ConnectorActionJpaRepository actionJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.actionJpaRepository = actionJpaRepository;
@@ -38,8 +39,8 @@ public class ConnectorDBActionRepository implements ConnectorActionRepository {
     }
 
     /**
-     * Converts a {@link ConnectorAction} object and a {@link ConnectorProcessingModeEntity} into a
-     * {@link ConnectorActionEntity} object.
+     * Converts a {@link ConnectorProcessingModeAction} object and a
+     * {@link ConnectorProcessingModeEntity} into a {@link ConnectorActionEntity} object.
      *
      * @param action         the action containing the details to be mapped to the entity
      * @param processingMode the processing mode entity associated with the action
@@ -48,7 +49,7 @@ public class ConnectorDBActionRepository implements ConnectorActionRepository {
      *     arguments
      */
     public static ConnectorActionEntity toEntity(
-        ConnectorAction action,
+        ConnectorProcessingModeAction action,
         ConnectorProcessingModeEntity processingMode) {
         return ConnectorActionEntity
             .builder()
@@ -58,26 +59,26 @@ public class ConnectorDBActionRepository implements ConnectorActionRepository {
     }
 
     /**
-     * Converts a {@link ConnectorActionEntity} to a {@link ConnectorAction}.
+     * Converts a {@link ConnectorActionEntity} to a {@link ConnectorProcessingModeAction}.
      *
      * @param entity the {@link ConnectorActionEntity} to be converted
      *
-     * @return the corresponding {@link ConnectorAction} instance
+     * @return the corresponding {@link ConnectorProcessingModeAction} instance
      */
-    public static ConnectorAction toDomain(ConnectorActionEntity entity) {
+    public static ConnectorProcessingModeAction toDomain(ConnectorActionEntity entity) {
         if (entity == null) {
             return null;
         }
 
-        return ConnectorAction
+        return ConnectorProcessingModeAction
             .builder()
             .name(entity.getName())
             .build();
     }
 
     @Override
-    public List<ConnectorAction> saveAll(
-        @NonNull List<ConnectorAction> actions,
+    public List<ConnectorProcessingModeAction> saveAll(
+        @NonNull List<ConnectorProcessingModeAction> actions,
         @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var processingMode = this.processingModeJpaRepository.findByBusinessDomainIdentifier(
             businessDomainIdentifier.messageLaneIdentifier()
@@ -86,11 +87,13 @@ public class ConnectorDBActionRepository implements ConnectorActionRepository {
             actions.stream().map(action -> toEntity(action, processingMode)).toList()
         );
 
-        return savedActions.stream().map(ConnectorDBActionRepository::toDomain).toList();
+        return savedActions.stream()
+                           .map(ConnectorDBProcessingModeActionRepository::toDomain)
+                           .toList();
     }
 
     @Override
-    public ConnectorAction findByNameAndBusinessDomain(
+    public ConnectorProcessingModeAction findByNameAndBusinessDomain(
         @NonNull String name,
         @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier) {
         var action = this.actionJpaRepository.findByNameAndProcessingModeBusinessDomainIdentifier(
@@ -101,13 +104,13 @@ public class ConnectorDBActionRepository implements ConnectorActionRepository {
     }
 
     @Override
-    public List<ConnectorAction> findAllByBusinessDomainIdentifier(
+    public List<ConnectorProcessingModeAction> findAllByBusinessDomainIdentifier(
         @NonNull ConnectorBusinessDomainIdentifier identifier) {
         var actions = this.actionJpaRepository.findByProcessingModeBusinessDomainIdentifier(
             identifier.messageLaneIdentifier(),
             Sort.by(Sort.Order.asc("name"))
         );
 
-        return actions.stream().map(ConnectorDBActionRepository::toDomain).toList();
+        return actions.stream().map(ConnectorDBProcessingModeActionRepository::toDomain).toList();
     }
 }

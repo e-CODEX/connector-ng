@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorFindLinkPartner} service.
+ * Default implementation of {@link ConnectorFindLinkPartner}.
  */
 @Slf4j
 @Service

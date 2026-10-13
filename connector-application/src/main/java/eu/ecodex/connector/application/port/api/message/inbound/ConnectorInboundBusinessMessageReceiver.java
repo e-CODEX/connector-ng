@@ -13,19 +13,21 @@ package eu.ecodex.connector.application.port.api.message.inbound;
 import jakarta.annotation.Nonnull;
 
 /**
- * This interface defines the contract for processing inbound business messages received by the
- * connector system. Implementations of this interface are responsible for handling the execution of
- * operations related to the processing of inbound business messages, such as verification,
- * validation, and any necessary transformations.
+ * Defines the contract for receiving inbound business messages from the gateway.
+ *
+ * <p>Implementations are responsible for handling the processing of inbound business messages,
+ * such as verification, validation, and any necessary transformations.
  */
 public interface ConnectorInboundBusinessMessageReceiver {
     /**
-     * Executes the processing of an inbound business message within the connector system. This
-     * method is responsible for handling all operations required for processing and validating the
-     * input message according to the system's functional requirements.
+     * Processes an inbound business message described by the given command.
      *
-     * @param command A {@code ConnectorInboundBusinessMessageCommand} object encapsulating details
-     *                of the inbound business message to be processed.
+     * <p>The method is responsible for all operations required to process and validate the
+     * message according to the system's functional requirements. It returns normally if the message
+     * was processed successfully. If processing fails, the failure is reported by an exception.
+     *
+     * @param command the {@link ConnectorInboundBusinessMessageCommand} encapsulating the details
+     *                of the inbound business message to process (must not be null)
      */
     void execute(@Nonnull ConnectorInboundBusinessMessageCommand command);
 }

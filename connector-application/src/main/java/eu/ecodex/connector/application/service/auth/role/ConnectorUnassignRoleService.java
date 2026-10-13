@@ -23,22 +23,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service implementation for unassigning roles to users within the Connector system.
- * This class is responsible for creating new user roles or updating existing ones based on the
- * provided identifier and role name. It serves as the bridge between the application's business
- * logic
- * and the persistence layer through the {@link ConnectorRoleRepository}.
+ * Service implementation for unassigning roles to users within the Connector system. This class is
+ * responsible for creating new user roles or updating existing ones based on the provided
+ * identifier and role name. It serves as the bridge between the application's business logic and
+ * the persistence layer through the {@link ConnectorRoleRepository}.
  *
  * <p>Responsibilities:
- * - Handles the creation and registration of new user roles in the data source.
- * - Updates existing user role assignments when applicable.
- * - Ensures that the provided role and user identifiers are valid, throwing exceptions
- * if the required entities are not found.
+ * - Handles the creation and registration of new user roles in the data source. - Updates existing
+ * user role assignments when applicable. - Ensures that the provided role and user identifiers are
+ * valid, throwing exceptions if the required entities are not found.
  *
  * <p>Exceptions:
- * - {@link ConnectorRoleNotFoundException}: Thrown if the specified role does not exist.
- * - {@link ConnectorUserNotFoundException}: Thrown if the specified user identifier does not
- * exist.
+ * - {@link ConnectorRoleNotFoundException}: Thrown if the specified role does not exist. -
+ * {@link ConnectorUserNotFoundException}: Thrown if the specified user identifier does not exist.
  */
 @Slf4j
 @Component
@@ -47,15 +44,16 @@ public class ConnectorUnassignRoleService implements ConnectorUnassignRole {
     private final ConnectorRetrieveRoleByName retrieveRoleByName;
     private final ConnectorUserRepository userRepository;
 
-    public ConnectorUnassignRoleService(ConnectorRetrieveRoleByName retrieveRoleByName,
-                                        ConnectorUserRepository userRepository) {
+    public ConnectorUnassignRoleService(
+        ConnectorRetrieveRoleByName retrieveRoleByName,
+        ConnectorUserRepository userRepository) {
         this.retrieveRoleByName = retrieveRoleByName;
         this.userRepository = userRepository;
     }
 
     @Override
-    public ConnectorUser execute(@NonNull String roleIdentifier, @NonNull String roleName) {
-        var user = getUserByIdentifier(roleIdentifier);
+    public ConnectorUser execute(@NonNull String userIdentifier, @NonNull String roleName) {
+        var user = getUserByIdentifier(userIdentifier);
         if (user.roles() == null) {
             return user;
         }
@@ -66,6 +64,6 @@ public class ConnectorUnassignRoleService implements ConnectorUnassignRole {
 
     private ConnectorUser getUserByIdentifier(String identifier) {
         return userRepository.findByUuid(identifier)
-            .orElseThrow(() -> new ConnectorUserNotFoundException(identifier));
+                             .orElseThrow(() -> new ConnectorUserNotFoundException(identifier));
     }
 }

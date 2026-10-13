@@ -17,16 +17,23 @@ import jakarta.annotation.Nonnull;
  * Represents a processing pipeline for handling {@link ConnectorBusinessMessage} instances.
  *
  * <p>This interface defines a single method for processing messages within the pipeline.
- * Implementations of this interface are responsible for applying specific logic or transformations
- * to the message as part of a larger workflow.
+ * Implementations are responsible for applying specific logic or transformations to the message as
+ * part of a larger workflow.
  *
- * <p>The processing pipeline plays a critical role in coordinating the flow of
- * {@link ConnectorBusinessMessage} objects through various stages, ensuring compliance with
- * business and technical requirements.
- *
- * <p>Each implementation of the pipeline may encapsulate one or more processing steps,
- * such as validation, transformation, routing, or persistence.
+ * <p>The pipeline coordinates the flow of {@link ConnectorBusinessMessage} objects through various
+ * stages, ensuring compliance with business and technical requirements. Each implementation may
+ * encapsulate one or more processing steps, such as validation, transformation, routing, or
+ * persistence (see {@link ConnectorMessageStep}).
  */
 public interface ConnectorMessagePipeline {
+
+    /**
+     * Processes the given message through the pipeline.
+     *
+     * <p>The method returns normally if the message was processed successfully. If processing
+     * fails, the failure is reported by an exception.
+     *
+     * @param message the business message to process (must not be null)
+     */
     void process(@Nonnull ConnectorBusinessMessage message);
 }

@@ -17,23 +17,17 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import lombok.NonNull;
 
 /**
- * Responsible for creating {@link ConnectorMessageEvidence} instances based on the outcome of
- * processing a {@link ConnectorBusinessMessage}.
- *
- * <p>This creator encapsulates the logic for generating evidence records that
- * represent either a successful or failed handling of a connector message. The resulting
- * {@link ConnectorMessageEvidence} typically contains metadata about the message and the type of
- * evidence being produced.</p>
+ * Factory for creating {@link ConnectorMessageEvidence} objects for connector business messages.
  */
 public interface ConnectorMessageEvidenceCreator {
     /**
-     * Creates a {@link ConnectorMessageEvidence} representing successful processing of a
-     * {@link ConnectorBusinessMessage}.
+     * Creates an evidence of the given type attesting that the given message was processed
+     * successfully.
      *
-     * @param evidenceType the type of evidence to create
-     * @param message      the connector message that was successfully processed
+     * @param evidenceType type of the evidence to create (must not be null)
+     * @param message      the business message the evidence relates to (must not be null)
      *
-     * @return a {@link ConnectorMessageEvidence} instance representing the success
+     * @return the created {@link ConnectorMessageEvidence}
      */
     ConnectorMessageEvidence createSuccess(
         @NonNull ConnectorEvidenceType evidenceType,
@@ -41,14 +35,15 @@ public interface ConnectorMessageEvidenceCreator {
     );
 
     /**
-     * Creates a {@link ConnectorMessageEvidence} representing failed processing of a
-     * {@link ConnectorBusinessMessage}.
+     * Creates an evidence of the given type attesting that the given message was rejected or
+     * failed.
      *
-     * @param evidenceType the type of evidence to create
-     * @param message      the connector message whose processing failed
-     * @param reason       the reason why the message was rejected or failed
+     * @param evidenceType type of the evidence to create (must not be null)
+     * @param message      the business message the evidence relates to (must not be null)
+     * @param reason       the reason why the message was rejected; may be {@code null} if no
+     *                     specific reason is available
      *
-     * @return a {@link ConnectorMessageEvidence} instance representing the failure
+     * @return the created {@link ConnectorMessageEvidence}, carrying the rejection reason
      */
     ConnectorMessageEvidence createFailure(
         @NonNull ConnectorEvidenceType evidenceType,

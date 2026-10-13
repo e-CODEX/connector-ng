@@ -10,13 +10,13 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ActionTestFixtures {
-    public static ConnectorAction createAction() {
-        return ConnectorAction.builder()
-                              .name("ConTest_Form")
-                              .build();
+    public static ConnectorProcessingModeAction createAction() {
+        return ConnectorProcessingModeAction.builder()
+                                            .name("ConTest_Form")
+                                            .build();
     }
 }

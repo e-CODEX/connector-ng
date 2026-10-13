@@ -14,25 +14,22 @@ import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageT
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface defining the contract for acknowledging and updating the transport status of messages
- * within the connector system.
- *
- * <p>The primary responsibility of this interface is to facilitate the processing and updating of
- * transport-related information for messages identified by a unique identifier. This is essential
- * for ensuring that the transport status and any associated errors are accurately recorded and
- * processed within the connector system.
+ * Use case for acknowledging a transport step of a connector message, by updating its transport
+ * status.
  */
 public interface ConnectorAckMessageTransportStep {
     /**
-     * Executes the update of a message's transport status in the connector system. This method
-     * processes the specified command to update the transportation details of a message identified
-     * by its unique identifier or Ebms ID.
+     * Updates the transport status of a message with the information carried by the given command.
      *
-     * @param messageOrRemoteSystemIdentifier a unique identifier representing the message or ebms
-     *                                        ID within the connector system. Must not be null.
+     * <p>The message is located by its connector identifier or by the identifier assigned by the
+     * remote system (the EBMS ID).
+     *
+     * @param messageOrRemoteSystemIdentifier identifier of the message, or identifier of the
+     *                                        message as known by the remote system (EBMS ID); must
+     *                                        not be null
      * @param command                         the {@link UpdateMessageTransportCommand} containing
-     *                                        the transport status information and any associated
-     *                                        errors for the message. Must not be null.
+     *                                        the new transport status and any associated errors;
+     *                                        must not be null
      */
     void execute(
         @Nonnull String messageOrRemoteSystemIdentifier,

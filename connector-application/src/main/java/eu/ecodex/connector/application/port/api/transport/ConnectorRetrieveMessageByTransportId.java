@@ -10,25 +10,20 @@
 
 package eu.ecodex.connector.application.port.api.transport;
 
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import jakarta.annotation.Nonnull;
 
 /**
- * Interface defining a contract for retrieving a {@link ConnectorMessage} using a specific
- * transport identifier.
- *
- * <p>Implementations of this interface are expected to provide a mechanism to locate and return a
- * {@link ConnectorMessage} instance based on the given transport ID.
+ * Use case for retrieving a connector message by its transport identifier.
  */
 public interface ConnectorRetrieveMessageByTransportId {
     /**
-     * Executes a retrieval process to obtain a {@link ConnectorMessage} associated with the
-     * specified transport identifier.
+     * Retrieves the {@link ConnectorMessage} associated with the given transport identifier.
      *
-     * @param transportIdentifier the identifier used to locate the corresponding
-     *                            {@link ConnectorMessage}
+     * @param transportIdentifier the identifier assigned to the message by the transport layer,
+     *                            used to locate the message (must not be null)
      *
-     * @return the {@link ConnectorBusinessMessage} associated with the given transport identifier
+     * @return the {@link ConnectorMessage} associated with the given transport identifier
      */
-    ConnectorMessage execute(String transportIdentifier);
+    ConnectorMessage execute(@Nonnull String transportIdentifier);
 }

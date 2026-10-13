@@ -13,15 +13,15 @@ package eu.ecodex.connector.application.port.api.transport;
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for changing the transport status of connector messages from
- * {@code READY_FOR_DOWNLOAD} to {@code DOWNLOADED}.
+ * Use case for marking the pending messages of a backend as ready to be downloaded.
  */
 public interface ConnectorSetMessagesTransportStepToDownload {
     /**
-     * Changes the status of pending connector messages for a specified backend system.
+     * Sets the transport step of the messages addressed to the given backend to the "to download"
+     * state.
      *
-     * @param backendName the name of the backend system for which the status of pending messages
-     *                    needs to be updated. Must not be null.
+     * @param backendName name of the backend whose messages are marked for download (must not be
+     *                    null)
      */
     void execute(@Nonnull String backendName);
 }

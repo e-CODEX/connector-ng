@@ -22,10 +22,10 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageConfirmationType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
@@ -103,23 +103,23 @@ public class MessageHelpers {
 
     public static ConnectorMessageAS4Properties toAS4Properties(
         DomibusConnectorMessageDetailsType details) {
-        var service = ConnectorService
+        var service = ConnectorProcessingModeService
             .builder()
             .name(details.getService().getService())
             .type(details.getService().getServiceType())
             .build();
-        var action = ConnectorAction
+        var action = ConnectorProcessingModeAction
             .builder()
             .name(details.getAction().getAction())
             .build();
-        var fromParty = ConnectorParty
+        var fromParty = ConnectorProcessingModeParty
             .builder()
             .identifier(details.getFromParty().getPartyId())
             .identifierType(details.getFromParty().getPartyIdType())
             .role(details.getFromParty().getRole())
             .roleType(ConnectorPartyRoleType.INITIATOR)
             .build();
-        var toParty = ConnectorParty
+        var toParty = ConnectorProcessingModeParty
             .builder()
             .identifier(details.getToParty().getPartyId())
             .identifierType(details.getToParty().getPartyIdType())
@@ -151,8 +151,8 @@ public class MessageHelpers {
             .detachedSignature(toDetachedSignature(document.getDetachedSignature()))
             .aesType(ConnectorBusinessDocumentAESType.from(
                          document.getAesType() != null
-                         ? document.getAesType().value()
-                         : null
+                             ? document.getAesType().value()
+                             : null
                      )
             )
             .build();

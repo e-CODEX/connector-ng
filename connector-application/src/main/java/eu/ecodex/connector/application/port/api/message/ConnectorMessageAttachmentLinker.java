@@ -11,22 +11,19 @@
 package eu.ecodex.connector.application.port.api.message;
 
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
-import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 
 /**
- * Component responsible for linking {@link ConnectorMessageAttachment} instances to specific
- * messages.
- *
- * <p>This class provides functionality for associating a given message attachment with a
- * specific message.</p>
+ * Use case for linking an uploaded attachment to a connector message.
  */
 public interface ConnectorMessageAttachmentLinker {
     /**
-     * Links a message attachment to a specific message.
+     * Links the attachment identified by the given identifier to the message identified by the
+     * given identifier, with the given attachment type.
      *
-     * @param attachmentIdentifier The identifier of the message attachment.
-     * @param messageIdentifier    The identifier of the message.
-     * @param attachmentType       The type of the message attachment.
+     * @param attachmentIdentifier identifier of the attachment to link
+     * @param messageIdentifier    identifier of the message the attachment is linked to
+     * @param attachmentType       the role of the attachment within the message
+     *                             ({@link ConnectorAttachmentType})
      */
     void execute(
         String attachmentIdentifier,

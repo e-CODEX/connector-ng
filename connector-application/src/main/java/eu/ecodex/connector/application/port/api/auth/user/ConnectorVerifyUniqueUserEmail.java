@@ -10,18 +10,26 @@
 
 package eu.ecodex.connector.application.port.api.auth.user;
 
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for verifying a user's email.
+ * Use case for verifying that a user's email address is unique in the connector system, to avoid
+ * duplicates.
  */
 public interface ConnectorVerifyUniqueUserEmail {
     /**
-     * Executes an operation for the specified user.
+     * Verifies that no existing user has the same email address as the given user.
      *
-     * @param user the {@link ConnectorUser} on which the operation will be performed; must not be
-     *             null.
+     * <p>The method returns normally if the email address is unique. If another user already uses
+     * it, the failure is reported by an exception.
+     *
+     * @param user the {@link ConnectorUser} whose email address is checked for uniqueness (must not
+     *             be null)
+     *
+     * @throws ConnectorUserAlreadyExistsException if another user already has the same email
+     *                                             address
      */
     void execute(@Nonnull ConnectorUser user);
 }

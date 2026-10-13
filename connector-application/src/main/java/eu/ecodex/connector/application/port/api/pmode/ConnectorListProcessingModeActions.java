@@ -10,14 +10,23 @@
 
 package eu.ecodex.connector.application.port.api.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
 
 /**
- * Service interface for listing all {@link ConnectorAction} entities managed by the system.
+ * Use case for listing the actions configured for the processing modes of a business domain.
  */
 public interface ConnectorListProcessingModeActions {
-    List<ConnectorAction> execute(@Nonnull String businessDomainIdentifier);
+    /**
+     * Retrieves the processing mode actions associated with the given business domain.
+     *
+     * @param businessDomainIdentifier identifier of the business domain whose processing mode
+     *                                 actions are listed (must not be null)
+     *
+     * @return the list of {@link ConnectorProcessingModeAction} objects configured for the given
+     *     business domain; an empty list if none are configured, never {@code null}
+     */
+    List<ConnectorProcessingModeAction> execute(@Nonnull String businessDomainIdentifier);
 }

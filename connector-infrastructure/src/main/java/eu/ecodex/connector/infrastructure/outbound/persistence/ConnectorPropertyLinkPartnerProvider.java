@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorLinkPartnerProvider}.
+ * Default implementation of {@link ConnectorLinkPartnerProvider}.
  */
 @Slf4j
 @Component

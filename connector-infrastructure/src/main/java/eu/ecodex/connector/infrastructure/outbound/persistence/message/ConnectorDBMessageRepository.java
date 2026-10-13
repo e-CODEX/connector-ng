@@ -34,9 +34,9 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.message.C
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.specification.MessageSpecification;
 import eu.ecodex.connector.infrastructure.outbound.persistence.PaginationMapper;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBActionRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBPartyRepository;
-import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBServiceRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBProcessingModeActionRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBProcessingModePartyRepository;
+import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBProcessingModeServiceRepository;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -47,7 +47,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorMessageRepository}.
+ * RDBMS implementation of {@link ConnectorMessageRepository}.
  */
 @Component
 public class ConnectorDBMessageRepository implements ConnectorMessageRepository {
@@ -124,10 +124,10 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
             .ebmsMessageIdentifier(entity.getEbmsMessageIdentifier())
             .originalSender(entity.getOriginalSender())
             .finalRecipient(entity.getFinalRecipient())
-            .service(ConnectorDBServiceRepository.toDomain(entity.getService()))
-            .action(ConnectorDBActionRepository.toDomain(entity.getAction()))
-            .fromParty(ConnectorDBPartyRepository.toDomain(entity.getFromParty()))
-            .toParty(ConnectorDBPartyRepository.toDomain(entity.getToParty()))
+            .service(ConnectorDBProcessingModeServiceRepository.toDomain(entity.getService()))
+            .action(ConnectorDBProcessingModeActionRepository.toDomain(entity.getAction()))
+            .fromParty(ConnectorDBProcessingModePartyRepository.toDomain(entity.getFromParty()))
+            .toParty(ConnectorDBProcessingModePartyRepository.toDomain(entity.getToParty()))
             .build();
     }
 

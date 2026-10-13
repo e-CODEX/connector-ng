@@ -36,7 +36,7 @@ import org.springframework.util.LinkedMultiValueMap;
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorSendOutboundTestMessageIT extends AbstractIntegrationTest {
+public class ConnectorSendOutboundC2CTestMessageIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
 

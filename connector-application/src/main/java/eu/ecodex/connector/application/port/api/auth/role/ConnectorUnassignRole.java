@@ -17,19 +17,21 @@ import jakarta.annotation.Nonnull;
 
 
 /**
- * Defines a contract for unassigning user roles within the Connector system.
+ * Use case for removing a role from a user of the connector system.
+ *
+ * <p>This is the counterpart of {@link ConnectorAssignRole}.
  */
 public interface ConnectorUnassignRole {
     /**
-     * Removes a role from a user in the Connector system.
+     * Removes the role with the given name from the user identified by the given identifier.
      *
-     * @param roleIdentifier The unique identifier of the user.
-     * @param roleName       The role to be removed from the user.
+     * @param userIdentifier the unique identifier of the user (must not be null)
+     * @param roleName       the name of the role to remove from the user (must not be null)
      *
-     * @return The updated {@link ConnectorUser} instance after the role removal.
+     * @return the updated {@link ConnectorUser} after the role removal
      *
-     * @throws ConnectorRoleNotFoundException If the specified role is not found.
-     * @throws ConnectorUserNotFoundException If the specified user is not found.
+     * @throws ConnectorRoleNotFoundException if no role matches the given name
+     * @throws ConnectorUserNotFoundException if no user matches the given identifier
      */
-    ConnectorUser execute(@Nonnull String roleIdentifier, @Nonnull String roleName);
+    ConnectorUser execute(@Nonnull String userIdentifier, @Nonnull String roleName);
 }

@@ -12,7 +12,7 @@ package eu.ecodex.connector.domain.model.message.evidence;
 
 import eu.ecodex.connector.domain.model.as4.ConnectorAS4Action;
 import eu.ecodex.connector.domain.model.as4.ConnectorAS4Service;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import lombok.Getter;
 
 /**
@@ -77,9 +77,9 @@ public enum EvidenceAction {
      * @return a {@code ConnectorAction} object built using the name of the associated
      *         {@code ConnectorAS4Action}.
      */
-    public ConnectorAction toConnectionAction() {
-        return ConnectorAction.builder()
-                              .name(this.action.name())
-                              .build();
+    public ConnectorProcessingModeAction toConnectionAction() {
+        return ConnectorProcessingModeAction.builder()
+                                            .name(this.action.name())
+                                            .build();
     }
 }

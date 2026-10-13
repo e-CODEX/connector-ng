@@ -88,7 +88,7 @@ public class ConnectorRestOutboundMessageParser {
 
         return ConnectorMessageBusinessContent
             .builder()
-            .xmlContent(toAttachment(businessContent.contentFile()))
+            .xmlContent(toAttachment(businessContent.xmlContent()))
             .businessDocument(businessDocument)
             .build();
     }

@@ -98,7 +98,7 @@ public class ConnectorSendOutboundTestMessageIT extends AbstractIntegrationTest 
         );
 
         parts.add(
-            "businessContent.contentFile",
+            "businessContent.xmlContent",
             FilePartTestFixtures.filePart(
                 "Form_A.xml",
                 FileTestFixtures.readAsBytes("raw/Form_A.xml"),

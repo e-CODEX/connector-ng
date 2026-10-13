@@ -24,7 +24,7 @@ spring-boot = "4.1.1"
 spring-doc = "3.0.1"
 s3 = "2.41.30"
 # dbms
-h2 = "2.4.240"
+h2 = "2.5.252"
 mysql = "8.0.33"
 mariadb = "3.5.10"
 postgresql = "42.7.13"

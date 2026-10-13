@@ -14,6 +14,9 @@ import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessag
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
 import eu.ecodex.connector.application.service.message.inbound.pipeline.ConnectorInboundMessagePipeline;
 import eu.ecodex.connector.application.service.message.outbound.pipeline.ConnectorOutboundMessagePipeline;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,15 +31,15 @@ public class ApplicationConfiguration {
     @Bean
     public ConnectorMessagePipeline connectorInboundMessagePipeline(
         @Qualifier("connectorInboundMessageBackendNameStep")
-        ConnectorMessageStep backendNameStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> backendNameStep,
         @Qualifier("connectorInboundMessageAcceptanceStep")
-        ConnectorMessageStep acceptanceStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> acceptanceStep,
         @Qualifier("connectorInboundMessageSecurityStep")
-        ConnectorMessageStep securityStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> securityStep,
         @Qualifier("connectorInboundMessageNonDeliveryStep")
-        ConnectorMessageStep nonDeliveryStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> nonDeliveryStep,
         @Qualifier("connectorMessageLinkSubmissionStep")
-        ConnectorMessageStep linkSubmissionStep) {
+        ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep) {
         return new ConnectorInboundMessagePipeline(
             backendNameStep,
             acceptanceStep,
@@ -49,21 +52,21 @@ public class ApplicationConfiguration {
     @Bean
     public ConnectorMessagePipeline connectorOutboundMessagePipeline(
         @Qualifier("connectorOutboundMessageValidationStep")
-        ConnectorMessageStep validationStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> validationStep,
         @Qualifier("connectorOutboundMessageSecurityStep")
-        ConnectorMessageStep securityStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> securityStep,
         @Qualifier("connectorOutboundMessageGatewayNameStep")
-        ConnectorMessageStep gatewayNameStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> gatewayNameStep,
         @Qualifier("connectorOutboundMessageEbmsIdStep")
-        ConnectorMessageStep ebmsIdStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> ebmsIdStep,
         @Qualifier("connectorOutboundMessageAcceptanceStep")
-        ConnectorMessageStep acceptanceStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorBusinessMessage> acceptanceStep,
         @Qualifier("connectorOutboundMessageConfirmationStep")
-        ConnectorMessageStep confirmationStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> confirmationStep,
         @Qualifier("connectorOutboundMessageRejectionStep")
-        ConnectorMessageStep rejectionStep,
+        ConnectorMessageStep<ConnectorBusinessMessage, ConnectorEvidenceMessage> rejectionStep,
         @Qualifier("connectorMessageLinkSubmissionStep")
-        ConnectorMessageStep linkSubmissionStep
+        ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep
     ) {
         return new ConnectorOutboundMessagePipeline(
             validationStep,

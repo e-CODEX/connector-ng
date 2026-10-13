@@ -20,7 +20,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentTy
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.domain.transition.DomibusConnectorActionType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorConfirmationType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureMimeType;
@@ -133,7 +133,7 @@ public class LegacyMessageHelper {
         return action;
     }
 
-    private DomibusConnectorPartyType getParty(ConnectorParty party) {
+    private DomibusConnectorPartyType getParty(ConnectorProcessingModeParty party) {
         if (party == null) {
             throw new IllegalStateException("Party cannot be null");
         }

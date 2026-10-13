@@ -18,7 +18,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorQueueStatsProvider} interface for retrieving statistics.
+ * Default implementation of {@link ConnectorQueueStatsProvider}.
  */
 @Component
 public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvider {

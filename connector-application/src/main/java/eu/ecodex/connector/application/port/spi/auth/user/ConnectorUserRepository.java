@@ -16,20 +16,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Interface for managing ConnectorUser entities in the persistence layer.
- *
- * <p>This interface provides methods for creating, retrieving, updating,
- * and deleting instances of the ConnectorUser entity, as well as additional methods
- * for querying such as finding by username, email, or a combination of username and email.
- * It serves as an abstraction layer to handle database operations related to users
- * in the Connector system.
+ * Repository (port) for persisting and querying {@link ConnectorUser} objects.
  */
 public interface ConnectorUserRepository {
     /**
-     * Persists a ConnectorUser entity in the persistence layer.
-     * The method saves the provided ConnectorUser object and returns the
-     * saved instance, which may contain modifications such as assigned
-     * identifiers or updated timestamps.
+     * Persists a ConnectorUser entity in the persistence layer. The method saves the provided
+     * ConnectorUser object and returns the saved instance, which may contain modifications such as
+     * assigned identifiers or updated timestamps.
      *
      * @param user the ConnectorUser entity to be saved; must not be null
      *
@@ -41,8 +34,8 @@ public interface ConnectorUserRepository {
      * Retrieves a {@code ConnectorUser} entity by its UUID.
      *
      * <p>This method queries the persistence layer to find and return a {@code ConnectorUser}
-     * wrapped in an {@code Optional}. If no user with the given UUID is found, the method
-     * returns an empty {@code Optional}.
+     * wrapped in an {@code Optional}. If no user with the given UUID is found, the method returns
+     * an empty {@code Optional}.
      *
      * @param identifier the UUID of the {@code ConnectorUser} to retrieve; must not be null
      *
@@ -55,8 +48,8 @@ public interface ConnectorUserRepository {
      * Retrieves a ConnectorUser entity based on the provided username.
      *
      * <p>This method queries the persistence layer to find and return a ConnectorUser
-     * wrapped in an Optional. If no user with the given username is found, the method
-     * returns an empty Optional.
+     * wrapped in an Optional. If no user with the given username is found, the method returns an
+     * empty Optional.
      *
      * @param username the username of the ConnectorUser to retrieve; must not be null
      *
@@ -69,8 +62,8 @@ public interface ConnectorUserRepository {
      * Retrieves an active ConnectorUser entity based on the provided username.
      *
      * <p>This method queries the persistence layer to find and return a ConnectorUser
-     * wrapped in an Optional. If no user with the given username is found, the method
-     * returns an empty Optional.
+     * wrapped in an Optional. If no user with the given username is found, the method returns an
+     * empty Optional.
      *
      * @param username the username of the ConnectorUser to retrieve; must not be null
      * @param active   whether the user must be active
@@ -84,8 +77,8 @@ public interface ConnectorUserRepository {
      * Retrieves a list of all {@code ConnectorUser} entities.
      *
      * <p>This method fetches all the {@code ConnectorUser} records from the persistence layer
-     * and returns them as a {@code List}. If no users are found, the method will return an
-     * empty {@code List}.
+     * and returns them as a {@code List}. If no users are found, the method will return an empty
+     * {@code List}.
      *
      * @return a {@code List} of all {@code ConnectorUser} entities, or an empty {@code List} if no
      *     users exist
@@ -96,8 +89,8 @@ public interface ConnectorUserRepository {
      * Deletes the ConnectorUser entity with the specified unique identifier.
      *
      * <p>This method removes the corresponding record from the persistence layer.
-     * If no user exists with the given identifier, an exception may be thrown
-     * depending on the implementation of the calling service methods.
+     * If no user exists with the given identifier, an exception may be thrown depending on the
+     * implementation of the calling service methods.
      *
      * @param identifier the unique identifier of the ConnectorUser to delete; must not be null
      */
@@ -137,8 +130,8 @@ public interface ConnectorUserRepository {
     boolean existsByEmail(@Nonnull String email);
 
     /**
-     * Checks if a {@code ConnectorUser} entity exists with the given email
-     * and a UUID that is not equal to the provided UUID.
+     * Checks if a {@code ConnectorUser} entity exists with the given email and a UUID that is not
+     * equal to the provided UUID.
      *
      * @param email the email address of the {@code ConnectorUser} to check for existence; must not
      *              be null
@@ -146,14 +139,13 @@ public interface ConnectorUserRepository {
      *              null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified email exists and has a
-     *     different UUID
-     *     than the provided UUID, {@code false} otherwise
+     *     different UUID than the provided UUID, {@code false} otherwise
      */
     boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
 
     /**
-     * Checks if a {@code ConnectorUser} entity exists with the specified username
-     * and a UUID that is not equal to the provided UUID.
+     * Checks if a {@code ConnectorUser} entity exists with the specified username and a UUID that
+     * is not equal to the provided UUID.
      *
      * @param username the username of the {@code ConnectorUser} to check for existence; must not be
      *                 null
@@ -161,8 +153,7 @@ public interface ConnectorUserRepository {
      *                 null
      *
      * @return {@code true} if a {@code ConnectorUser} with the specified username exists and has a
-     *     different UUID
-     *     than the provided UUID, {@code false} otherwise
+     *     different UUID than the provided UUID, {@code false} otherwise
      */
     boolean existsByUsernameAndUuidNot(@Nonnull String username, @Nonnull String uuid);
 }

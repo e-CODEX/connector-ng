@@ -14,16 +14,14 @@ import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for handling user authentication operations within the connector system.
- * This includes functionalities such as user login to generate authentication tokens
- * and user logout to securely terminate sessions.
+ * Provider (port) responsible for authenticating users of the connector system from their
+ * credentials.
  */
 public interface ConnectorUserAuthenticationProvider {
     /**
-     * Authenticates a user based on their provided username and password.
-     * Upon successful authentication, returns a {@link ConnectorUserAuthenticationResult}
-     * containing the
-     * generated access token, token type, and expiration details.
+     * Authenticates a user based on their provided username and password. Upon successful
+     * authentication, returns a {@link ConnectorUserAuthenticationResult} containing the generated
+     * access token, token type, and expiration details.
      *
      * @param username the username of the user attempting to log in
      * @param password the password of the user attempting to log in
@@ -34,9 +32,9 @@ public interface ConnectorUserAuthenticationProvider {
     ConnectorUserAuthenticationResult login(@Nonnull String username, @Nonnull String password);
 
     /**
-     * Executes the logout process for a specific user.
-     * This method handles operations related to invalidating the refresh token
-     * associated with the given user to ensure secure termination of the user's session.
+     * Executes the logout process for a specific user. This method handles operations related to
+     * invalidating the refresh token associated with the given user to ensure secure termination of
+     * the user's session.
      *
      * @param userIdentifier the identifier of the user initiating the logout
      * @param refreshToken   the refresh token to be invalidated

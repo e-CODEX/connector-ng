@@ -11,27 +11,28 @@
 package eu.ecodex.connector.application.service.pmode;
 
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeActions;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListProcessingModeActions} service.
+ * Default implementation of {@link ConnectorListProcessingModeActions}.
  */
 @Service
 public class ConnectorListProcessingModeActionsService
     implements ConnectorListProcessingModeActions {
-    private final ConnectorActionRepository actionRepository;
+    private final ConnectorProcessingModeActionRepository actionRepository;
 
-    public ConnectorListProcessingModeActionsService(ConnectorActionRepository actionRepository) {
+    public ConnectorListProcessingModeActionsService(
+        ConnectorProcessingModeActionRepository actionRepository) {
         this.actionRepository = actionRepository;
     }
 
     @Override
-    public List<ConnectorAction> execute(@NonNull String businessDomainIdentifier) {
+    public List<ConnectorProcessingModeAction> execute(@NonNull String businessDomainIdentifier) {
         return actionRepository.findAllByBusinessDomainIdentifier(
             ConnectorBusinessDomainIdentifier.builder()
                                              .messageLaneIdentifier(businessDomainIdentifier)

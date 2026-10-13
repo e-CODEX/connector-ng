@@ -10,17 +10,25 @@
 
 package eu.ecodex.connector.application.port.api.auth.user;
 
+import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for verifying a user's username.
+ * Use case for verifying that a user's username is unique in the connector system, to avoid
+ * duplicates.
  */
 public interface ConnectorVerifyUniqueUsername {
     /**
-     * Executes an operation for the provided {@link ConnectorUser}.
+     * Verifies that no existing user has the same username as the given user.
      *
-     * @param user the {@link ConnectorUser} object to be processed; must not be null
+     * <p>The method returns normally if the username is unique. If another user already uses it,
+     * the failure is reported by an exception.
+     *
+     * @param user the {@link ConnectorUser} whose username is checked for uniqueness (must not be
+     *             null)
+     *
+     * @throws ConnectorUserAlreadyExistsException if another user already has the same username
      */
     void execute(@Nonnull ConnectorUser user);
 }

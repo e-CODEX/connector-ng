@@ -19,8 +19,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * A service implementation of {@link ConnectorProcessingModeVerifier} responsible for verifying the
- * processing mode for a given business domain identifier.
+ * Default implementation of {@link ConnectorProcessingModeVerifier}.
  */
 @Service
 public class ConnectorProcessingModeVerifierService implements ConnectorProcessingModeVerifier {

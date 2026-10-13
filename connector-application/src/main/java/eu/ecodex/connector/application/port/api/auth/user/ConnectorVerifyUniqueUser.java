@@ -14,23 +14,31 @@ import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for verifying a unique user to avoid duplicates.
+ * Use case for verifying that a user is unique in the connector system, to avoid duplicates.
  */
 public interface ConnectorVerifyUniqueUser {
     /**
-     * Executes an operation for the specified user.
+     * Verifies that no existing user conflicts with the given user, for example when registering a
+     * new user.
      *
-     * @param user the {@link ConnectorUser} on which the operation will be performed; must not be
-     *             null.
+     * <p>The method returns normally if the user is unique. If a conflicting user exists, the
+     * failure is reported by an exception.
+     *
+     * @param user the {@link ConnectorUser} to check for uniqueness (must not be null)
      */
     void execute(@Nonnull ConnectorUser user);
 
     /**
-     * Executes an operation using the given identifier and user.
+     * Verifies that no existing user, other than the one identified by the given identifier,
+     * conflicts with the given user, for example when updating an existing user.
      *
-     * @param identifier the unique identifier associated with the operation; must not be null
-     * @param user       the {@link ConnectorUser} on which the operation will be performed; must
-     *                   not be null
+     * <p>The method returns normally if the user is unique. If a conflicting user exists, the
+     * failure is reported by an exception.
+     *
+     * @param identifier the unique identifier of the user being updated, which is excluded from the
+     *                   check (must not be null)
+     * @param user       the {@link ConnectorUser} carrying the details to check for uniqueness
+     *                   (must not be null)
      */
     void execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
 }

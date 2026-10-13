@@ -14,20 +14,24 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for staging a {@link ConnectorBusinessMessage} within a processing
+ * Defines the contract for staging an outbound {@link ConnectorBusinessMessage} within a processing
  * workflow.
  *
- * <p>Staging typically represents an intermediate persistence or preparation step before the
- * message proceeds to the next phase of processing (e.g. transmission, validation, or archival).
+ * <p>Staging typically represents an intermediate persistence step before the message proceeds to
+ * the next phase of processing.
  *
  * <p>Implementations may store the message temporarily, update its processing state, or perform
  * additional preparation logic required by the connector pipeline.
  */
 public interface ConnectorOutboundBusinessMessageStager {
+
     /**
-     * Stages the given {@link ConnectorBusinessMessage}.
+     * Stages the given outbound message.
      *
-     * @param message the message to stage; must not be {@code null}
+     * <p>The method returns normally if the message was staged successfully. If staging fails,
+     * the failure is reported by an exception.
+     *
+     * @param message the message to stage (must not be null)
      *
      * @throws RuntimeException if staging fails (implementations should document specific exception
      *                          types where appropriate)

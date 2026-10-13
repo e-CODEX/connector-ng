@@ -16,27 +16,43 @@ import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingR
 import java.util.Map;
 
 /**
- * Defines an interface to manage and retrieve message routing configurations within the connector
- * system for specific business domains.
+ * Provides the routing configuration used to route connector messages to backends, per business
+ * domain.
  */
 public interface ConnectorMessageRouter {
     /**
-     * Checks if routing is enabled for the specified business domain within the connector system.
+     * Indicates whether message routing is enabled for the given business domain.
      *
-     * <p>This method determines whether the message routing functionality is active for the given
-     * {@code businessDomainIdentifier}. If routing is enabled, the system routes messages according
-     * to the associated configuration; otherwise, routing is inactive for the domain.
+     * @param businessDomainIdentifier identifier of the business domain to check; may be
+     *                                 {@code null} only if the implementation supports it
      *
-     * @param businessDomainIdentifier The uuid representing the business domain for which routing
-     *                                 status needs to be determined. Must not be null.
-     *
-     * @return {@code true} if routing is enabled for the specified business domain; {@code false}
-     *     otherwise.
+     * @return {@code true} if routing is enabled for the business domain, {@code false} otherwise
      */
     boolean isRoutingEnabled(ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 
+    /**
+     * Returns the name of the default backend for the given business domain.
+     *
+     * <p>The default backend is the one used when no routing rule applies, or when routing is
+     * disabled.
+     *
+     * @param businessDomainIdentifier identifier of the business domain; may be {@code null} only
+     *                                 if the implementation supports it
+     *
+     * @return the name of the default backend, or {@code null} if none is configured
+     */
     String getDefaultBackendName(ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 
+    /**
+     * Returns the backend routing rules configured for the given business domain, indexed by the
+     * name of the link partner (backend) they apply to.
+     *
+     * @param businessDomainIdentifier identifier of the business domain; may be {@code null} only
+     *                                 if the implementation supports it
+     *
+     * @return a map of {@link ConnectorMessageRoutingRule} objects keyed by
+     *     {@link ConnectorLinkPartnerName}; empty if no rules are configured
+     */
     Map<ConnectorLinkPartnerName, ConnectorMessageRoutingRule> getBackendRoutingRule(
         ConnectorBusinessDomainIdentifier businessDomainIdentifier);
 }

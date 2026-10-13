@@ -16,24 +16,20 @@ import java.util.List;
 import lombok.Builder;
 
 /**
- * Command to update the transport status of a message in the connector system.
+ * Command carrying the information needed to update the transport status of a connector message.
  *
- * <p>This record encapsulates information required for updating the state of a message
- * transport operation, along with any associated errors, to ensure accurate tracking and processing
- * within the system.
- *
- * @param remoteMessageIdentifier A unique identifier for the message in the external system.
- *                                Typically used to correlate with backend system records.
- * @param status                  The current status of the message transport process, represented
- *                                by {@link ConnectorMessageTransportStatus}, which defines various
- *                                lifecycle states.
- * @param errors                  A list of {@link ConnectorMessageError} objects describing any
- *                                issues encountered during the transport process. This is used for
- *                                error tracking and diagnostic purposes.
+ * @param remoteMessageIdentifier identifier of the message as known by the remote system, for
+ *                                example the message identifier assigned by a backend system; may
+ *                                be {@code null} if the remote system did not assign one
+ * @param status                  the new transport status ({@link ConnectorMessageTransportStatus})
+ *                                to record for the message
+ * @param errors                  the errors ({@link ConnectorMessageError}) associated with the
+ *                                transport, for example when the status denotes a failure; may be
+ *                                {@code null} or empty if there are none
  */
 @Builder(toBuilder = true)
 public record UpdateMessageTransportCommand(
-    // ex: backend system message id
+    // e.g.: backend system message id
     String remoteMessageIdentifier,
     ConnectorMessageTransportStatus status,
     List<ConnectorMessageError> errors

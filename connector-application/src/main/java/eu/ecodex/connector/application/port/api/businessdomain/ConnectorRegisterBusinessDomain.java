@@ -14,19 +14,15 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Service interface for registering a new {@link ConnectorBusinessDomain} entity into the system.
+ * Use case for registering a new {@link ConnectorBusinessDomain} in the system.
  */
 public interface ConnectorRegisterBusinessDomain {
     /**
-     * Registers a new {@link ConnectorBusinessDomain} into the system. This method ensures that the
-     * provided business domain is persisted and managed within the connector environment.
+     * Registers a new {@link ConnectorBusinessDomain}.
      *
-     * @param businessDomain the {@link ConnectorBusinessDomain} object to be registered. It must be
-     *                       a non-null value that includes the unique identifier, description, and
-     *                       other configurations of the business domain.
+     * @param businessDomain the business domain to register (must not be null)
      *
-     * @return the registered {@link ConnectorBusinessDomain} entity, potentially enriched with
-     *     system-generated or updated metadata after registration.
+     * @return the registered {@link ConnectorBusinessDomain}, as persisted
      */
     ConnectorBusinessDomain execute(@NonNull ConnectorBusinessDomain businessDomain);
 }

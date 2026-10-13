@@ -16,20 +16,20 @@ import jakarta.annotation.Nonnull;
 
 
 /**
- * Defines methods for creating refresh tokens in the Connector system.
+ * Use case for creating and registering a refresh token for a user of the connector system.
  */
 public interface ConnectorRegisterUserRefreshToken {
     /**
-     * Creates a new refresh token for the specified user in the Connector system.
-     * This method generates a secure, unique refresh token associated with the
-     * provided user, which can be used to manage authentication sessions.
+     * Creates a new refresh token for the given user.
      *
-     * @param user the {@code ConnectorUser} instance representing the user
-     *             for whom the refresh token will be created.
+     * <p>The method generates a secure, unique refresh token associated with the user, which can
+     * be used to manage authentication sessions.
      *
-     * @return a {@code ConnectorRefreshToken} representing the newly created
-     *     refresh token, which includes details such as the user, token
-     *     identifier, expiration time, and creation time.
+     * @param user the {@link ConnectorUser} for whom the refresh token is created (must not be
+     *             null)
+     *
+     * @return the newly created {@link ConnectorRefreshToken}, including details such as the user,
+     *     the token identifier, the expiration time and the creation time
      */
     ConnectorRefreshToken execute(@Nonnull ConnectorUser user);
 }

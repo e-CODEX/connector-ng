@@ -19,11 +19,14 @@ import jakarta.annotation.Nonnull;
  */
 public interface ConnectorOutboundEvidenceMessageProcessor {
     /**
-     * Processes a backend evidence trigger message by creating signed REM evidence for a referenced
-     * business message and submitting the resulting evidence message to the gateway.
+     * Processes a backend evidence trigger message by creating signed REM evidence for the
+     * referenced business message and submitting the resulting evidence message to the gateway.
      *
-     * @param triggeredEvidenceMessage the backend evidence trigger message to process; must not be
-     *                                 null
+     * <p>The method returns normally if the evidence message was created and submitted. If
+     * processing fails, the failure is reported by an exception.
+     *
+     * @param triggeredEvidenceMessage the backend evidence trigger message to process (must not
+     *                                 be null)
      */
     void execute(@Nonnull ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage);
 }

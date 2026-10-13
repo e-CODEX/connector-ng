@@ -13,8 +13,18 @@ package eu.ecodex.connector.application.port.api.pmode;
 import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
 
 /**
- * Defines the processing contract for updating a connector processing mode truststore.
+ * Use case for updating the truststore associated with a processing mode.
  */
 public interface ConnectorUpdateProcessingModeTruststore {
+    /**
+     * Updates the {@link ConnectorTruststore} of the processing mode identified by the given UUID.
+     *
+     * @param pmodeUuid  unique identifier of the processing mode whose truststore is updated (must
+     *                   not be null)
+     * @param truststore the new truststore to associate with the processing mode (must not be
+     *                   null)
+     *
+     * @return the updated {@link ConnectorTruststore}, as persisted
+     */
     ConnectorTruststore execute(String pmodeUuid, ConnectorTruststore truststore);
 }

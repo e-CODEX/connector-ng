@@ -13,13 +13,13 @@ package eu.ecodex.connector.application.port.spi;
 import eu.ecodex.connector.domain.model.message.routing.ConnectorMessageRoutingConfiguration;
 
 /**
- * Provides the connector message routing configuration.
+ * Provider (port) giving access to the connector message routing configuration.
  */
 public interface ConnectorMessageRoutingConfigurationProvider {
     /**
-     * Provides the connector message routing configuration.
+     * Returns the connector message routing configuration.
      *
-     * @return the connector message routing configuration
+     * @return the {@link ConnectorMessageRoutingConfiguration}; never {@code null}
      */
     ConnectorMessageRoutingConfiguration getConfiguration();
 }

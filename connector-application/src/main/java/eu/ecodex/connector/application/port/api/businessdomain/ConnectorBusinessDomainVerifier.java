@@ -10,24 +10,21 @@
 
 package eu.ecodex.connector.application.port.api.businessdomain;
 
-import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotEnabledException;
-import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import jakarta.annotation.Nonnull;
 
 
 /**
- * Service interface for checking whether a business domain is active and can accept messages.
+ * Use case for verifying a business domain.
  */
 public interface ConnectorBusinessDomainVerifier {
     /**
-     * Asserts that the business domain identified by {@code identifier} exists and is enabled.
+     * Verifies the business domain identified by the given identifier.
      *
-     * @param identifier the business domain identifier to check; must not be null
+     * <p>The method returns normally if the verification succeeds. If it fails, the failure is
+     * reported by an exception.
      *
-     * @throws ConnectorBusinessDomainNotFoundException   if no business domain matches the
-     *                                                    identifier
-     * @throws ConnectorBusinessDomainNotEnabledException if the business domain is disabled
+     * @param identifier identifier of the business domain to verify (must not be null)
      */
     void execute(@Nonnull ConnectorBusinessDomainIdentifier identifier);
 }

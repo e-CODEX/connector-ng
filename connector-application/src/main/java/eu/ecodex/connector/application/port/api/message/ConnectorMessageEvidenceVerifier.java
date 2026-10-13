@@ -15,23 +15,20 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import lombok.NonNull;
 
 /**
- * Verifies that a {@link ConnectorBusinessMessage} is valid for a given
- * {@link ConnectorEvidenceType}.
- *
- * <p>This component performs validation checks before evidence is created or
- * processed. Implementations may ensure that the message contains the required information,
- * structure, or metadata expected for the specified evidence type.</p>
- *
- * <p>If the verification fails, an exception should be thrown to indicate that
- * the message cannot be used to generate or process the requested evidence.</p>
+ * Verifies that a connector business message satisfies the requirements for a given type of
+ * evidence.
  */
 public interface ConnectorMessageEvidenceVerifier {
     /**
-     * Verifies that the provided {@link ConnectorBusinessMessage} satisfies the requirements for
-     * the given {@link ConnectorEvidenceType}.
+     * Verifies that the given {@link ConnectorBusinessMessage} satisfies the requirements for the
+     * given {@link ConnectorEvidenceType}.
      *
-     * @param evidenceType the type of evidence the message is expected to support
-     * @param message      the connector message to verify
+     * <p>The method returns normally if the message meets the requirements. If it does not, the
+     * failure is reported by an exception.
+     *
+     * @param evidenceType the type of evidence the message is expected to support (must not be
+     *                     null)
+     * @param message      the business message to verify (must not be null)
      *
      * @throws RuntimeException if the message does not meet the validation criteria
      */

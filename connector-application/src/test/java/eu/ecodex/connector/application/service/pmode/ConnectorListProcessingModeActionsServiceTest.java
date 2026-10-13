@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ActionTestFixtures;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class ConnectorListProcessingModeActionsServiceTest {
     @Mock
-    private ConnectorActionRepository actionRepository;
+    private ConnectorProcessingModeActionRepository actionRepository;
 
     @InjectMocks
     private ConnectorListProcessingModeActionsService listProcessingModeActionsService;

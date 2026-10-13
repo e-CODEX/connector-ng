@@ -16,9 +16,9 @@ import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutbou
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorEvidenceMessageDto;
@@ -113,11 +113,11 @@ public class ConnectorMessageController implements ConnectorMessageApi {
 
     private ConnectorMessageAS4Properties toDomainAS4Properties(
         ConnectorOutboundMessageAS4Properties as4Properties) {
-        var action = ConnectorAction
+        var action = ConnectorProcessingModeAction
             .builder()
             .name(as4Properties.action().name())
             .build();
-        var service = ConnectorService
+        var service = ConnectorProcessingModeService
             .builder()
             .name(as4Properties.service().name())
             .type(as4Properties.service().type())

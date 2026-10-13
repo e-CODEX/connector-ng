@@ -20,7 +20,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListMessages} service.
+ * Default implementation of {@link ConnectorListMessages}.
  */
 @Service
 public class ConnectorListMessagesService implements ConnectorListMessages {

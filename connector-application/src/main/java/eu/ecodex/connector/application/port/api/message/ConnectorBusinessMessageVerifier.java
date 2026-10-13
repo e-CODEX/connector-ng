@@ -10,40 +10,34 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import lombok.NonNull;
 
 /**
- * Defines a contract for verifying {@link ConnectorBusinessMessage} instances according to a
- * specific {@link ProcessingModeVerificationMode}.
+ * Defines a contract for verifying {@link ConnectorMessage} instances according to a specific
+ * {@link ProcessingModeVerificationMode}.
  *
- * <p>
- * Implementations are responsible for validating that a message complies with the required
+ * <p>Implementations are responsible for validating that a message complies with the required
  * processing mode rules, business constraints, and structural requirements before further
  * processing.
- * </p>
  *
- * <p>
- * Verification may include checks such as:
+ * <p>Verification may include checks such as:
  * <ul>
  *     <li>Service and action consistency</li>
  *     <li>Party constraints</li>
  * </ul>
- * </p>
  */
 public interface ConnectorBusinessMessageVerifier {
     /**
-     * Verifies the given {@link ConnectorMessage} according to the provided
-     * {@link ProcessingModeVerificationMode}.
+     * Verifies the given message against the rules of the given verification mode.
      *
-     * @param message          the message to verify; must not be {@code null}
-     * @param verificationMode defines the strictness or type of verification to apply; must not be
-     *                         {@code null}
+     * <p>The method returns normally if the message complies. If it does not, the failure is
+     * reported by an exception.
      *
-     * @throws ConnectorProcessingModeVerificationException if verification fails.
+     * @param message          the connector message to verify (must not be null)
+     * @param verificationMode the processing mode verification mode that determines which rules are
+     *                         applied (must not be null)
      */
     void verify(
         @NonNull ConnectorMessage message,

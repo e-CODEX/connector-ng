@@ -15,10 +15,25 @@ import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageRep
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for exporting connector message reports.
+ * Exporter (port) for rendering a connector message report summary in a given file format.
+ *
+ * <p>Each implementation handles one {@link ConnectorMessageReportExportFormat}, for example XML,
+ * XLSX or CSV, which it exposes through {@link #getFormat()}.
  */
 public interface ConnectorMessageReportExporter {
+    /**
+     * Returns the export format handled by this exporter.
+     *
+     * @return the {@link ConnectorMessageReportExportFormat} produced by {@link #export}
+     */
     ConnectorMessageReportExportFormat getFormat();
 
+    /**
+     * Exports the given report summary in the format returned by {@link #getFormat()}.
+     *
+     * @param summary the {@link ConnectorMessageReportSummary} to export (must not be null)
+     *
+     * @return the content of the exported report as a byte array
+     */
     byte[] export(@Nonnull ConnectorMessageReportSummary summary);
 }

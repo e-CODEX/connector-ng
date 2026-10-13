@@ -11,14 +11,16 @@
 package eu.ecodex.connector.application.port.api.message;
 
 /**
- * Generates a unique message identifier in the format {@code <uuid>@<suffix>}.
+ * Generates unique connector message identifiers in the format {@code <uuid>@<suffix>}.
  */
 public interface ConnectorMessageIdGenerator {
     /**
-     * Executes the operation to generate a unique message identifier.
+     * Generates a new, unique connector message identifier.
      *
-     * @return a string in the format {@code <uuid>@<suffix>}, representing the uniquely generated
-     *     message identifier
+     * <p>The identifier has the format {@code <uuid>@<suffix>}, where {@code <uuid>} is a randomly
+     * generated UUID and {@code <suffix>} is a configured suffix.
+     *
+     * @return a new unique message identifier; never {@code null}
      */
     String execute();
 }

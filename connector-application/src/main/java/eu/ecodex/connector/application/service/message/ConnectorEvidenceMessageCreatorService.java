@@ -21,15 +21,15 @@ import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessag
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import eu.ecodex.connector.domain.model.message.evidence.EvidenceAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorEvidenceMessageCreator} service.
+ * Default implementation of {@link ConnectorEvidenceMessageCreator}.
  */
 @Component
 public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidenceMessageCreator {
@@ -54,7 +54,8 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
      *     {@code ConnectorEvidenceType}. This action is mapped based on predefined rules for the
      *     evidence type.
      */
-    public static ConnectorAction getEvidenceAction(@NonNull ConnectorEvidenceType evidenceType) {
+    public static ConnectorProcessingModeAction getEvidenceAction(
+        @NonNull ConnectorEvidenceType evidenceType) {
         return switch (evidenceType) {
             case SUBMISSION_ACCEPTANCE -> EvidenceAction.submissionAcceptance.toConnectionAction();
             case SUBMISSION_REJECTION -> EvidenceAction.submissionRejection.toConnectionAction();
@@ -142,7 +143,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             .build();
     }
 
-    private ConnectorParty copyParty(ConnectorParty party) {
+    private ConnectorProcessingModeParty copyParty(ConnectorProcessingModeParty party) {
         if (party == null) {
             throw new IllegalArgumentException("Party must not be null");
         }

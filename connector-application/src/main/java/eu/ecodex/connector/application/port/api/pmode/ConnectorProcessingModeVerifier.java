@@ -14,8 +14,17 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import lombok.NonNull;
 
 /**
- * Verifies the processing mode for a given business domain identifier.
+ * Use case for verifying the processing modes of a business domain.
  */
 public interface ConnectorProcessingModeVerifier {
+    /**
+     * Verifies the processing modes configured for the given business domain.
+     *
+     * <p>The method returns normally if the verification succeeds. If it fails, the failure is
+     * reported by an exception.
+     *
+     * @param identifier identifier of the business domain whose processing modes are verified
+     *                   (must not be null)
+     */
     void execute(@NonNull ConnectorBusinessDomainIdentifier identifier);
 }

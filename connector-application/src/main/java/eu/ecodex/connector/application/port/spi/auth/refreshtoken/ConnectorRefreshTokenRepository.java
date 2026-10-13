@@ -17,54 +17,42 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository interface for managing {@link ConnectorRefreshToken} entities.
- *
- * <p>Provides methods for performing CRUD operations on refresh tokens, such as
- * finding a token by its value, saving a new token, and deleting an existing token.
- *
- * <p>Responsibilities:
- * - Retrieve a refresh token based on its unique string value.
- * - Persist a refresh token entity in the persistence layer.
- * - Delete a refresh token from the persistence layer.
- *
- * <p>This interface is designed to interact with the underlying data storage
- * and handle persistence operations for {@link ConnectorRefreshToken} entities,
- * ensuring proper data integrity and management.
+ * Repository (port) for persisting and querying {@link ConnectorRefreshToken} objects.
  */
 public interface ConnectorRefreshTokenRepository {
     /**
      * Retrieves a {@link ConnectorRefreshToken} entity based on the provided token value.
      *
-     * @param token the unique string value of the refresh token to be retrieved.
-     *              This value is used as a key to identify and fetch the corresponding
-     *              token entity from the persistence layer.
+     * @param token the unique string value of the refresh token to be retrieved. This value is used
+     *              as a key to identify and fetch the corresponding token entity from the
+     *              persistence layer.
      *
-     * @return an {@link Optional} containing the {@link ConnectorRefreshToken} if it exists;
-     *     an empty {@link Optional} if no matching token is found.
+     * @return an {@link Optional} containing the {@link ConnectorRefreshToken} if it exists; an
+     *     empty {@link Optional} if no matching token is found.
      */
     Optional<ConnectorRefreshToken> findByToken(String token);
 
     /**
-     * Persists the provided {@link ConnectorRefreshToken} entity into the persistence layer.
-     * Saves the refresh token and returns a {@link ConnectorRefreshUserRefreshToken} instance
+     * Persists the provided {@link ConnectorRefreshToken} entity into the persistence layer. Saves
+     * the refresh token and returns a {@link ConnectorRefreshUserRefreshToken} instance
      * representing the successfully persisted token.
      *
-     * @param refreshToken the {@link ConnectorRefreshToken} entity to be stored.
-     *                     Contains details about the token such as its unique identifier,
-     *                     associated user, expiration timestamp, and creation timestamp.
+     * @param refreshToken the {@link ConnectorRefreshToken} entity to be stored. Contains details
+     *                     about the token such as its unique identifier, associated user,
+     *                     expiration timestamp, and creation timestamp.
      *
      * @return a {@link ConnectorRefreshUserRefreshToken} instance representing the persisted token.
      */
     ConnectorRefreshToken save(ConnectorRefreshToken refreshToken);
 
     /**
-     * Deletes the specified {@link ConnectorRefreshToken} from the persistence layer.
-     * This operation removes the refresh token entity to ensure it is no longer available
-     * for authentication or other operations.
+     * Deletes the specified {@link ConnectorRefreshToken} from the persistence layer. This
+     * operation removes the refresh token entity to ensure it is no longer available for
+     * authentication or other operations.
      *
-     * @param refreshToken the {@link ConnectorRefreshToken} entity to delete.
-     *                     It contains information about the token to be removed,
-     *                     including its unique identifier and associated details.
+     * @param refreshToken the {@link ConnectorRefreshToken} entity to delete. It contains
+     *                     information about the token to be removed, including its unique
+     *                     identifier and associated details.
      */
     void delete(ConnectorRefreshToken refreshToken);
 
@@ -72,13 +60,11 @@ public interface ConnectorRefreshTokenRepository {
      * Retrieves a list of {@link ConnectorRefreshToken} entities based on the provided user UUID
      * and revocation status.
      *
-     * @param uuid    the unique identifier of the user whose refresh tokens are to be retrieved.
-     *                It is used to filter the tokens associated with the specified user.
-     * @param revoked a boolean flag indicating the revocation status of the tokens to be
-     *                retrieved.
+     * @param uuid    the unique identifier of the user whose refresh tokens are to be retrieved. It
+     *                is used to filter the tokens associated with the specified user.
+     * @param revoked a boolean flag indicating the revocation status of the tokens to be retrieved.
      *                If true, only revoked tokens will be returned; if false, only non-revoked
-     *                tokens
-     *                will be returned.
+     *                tokens will be returned.
      *
      * @return a list of {@link ConnectorRefreshToken} entities matching the provided user UUID and
      *     revocation status. The list may be empty if no matching tokens are found.
@@ -86,12 +72,12 @@ public interface ConnectorRefreshTokenRepository {
     List<ConnectorRefreshToken> findByUserUuidAndRevoked(String uuid, boolean revoked);
 
     /**
-     * Revokes all refresh tokens associated with the specified user UUID.
-     * This operation marks all tokens belonging to the user as invalid,
-     * ensuring they cannot be used for authentication or token renewal.
+     * Revokes all refresh tokens associated with the specified user UUID. This operation marks all
+     * tokens belonging to the user as invalid, ensuring they cannot be used for authentication or
+     * token renewal.
      *
-     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked.
-     *             It acts as a key to find and mark all associated tokens as revoked.
+     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked. It acts
+     *             as a key to find and mark all associated tokens as revoked.
      *
      * @return the number of refresh tokens that were successfully revoked.
      */
@@ -100,8 +86,8 @@ public interface ConnectorRefreshTokenRepository {
     /**
      * Deletes all refresh tokens associated with the specified user UUID.
      *
-     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked.
-     *             It acts as a key to find and mark all associated tokens as revoked.
+     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked. It acts
+     *             as a key to find and mark all associated tokens as revoked.
      *
      * @return the number of refresh tokens that were successfully revoked.
      */

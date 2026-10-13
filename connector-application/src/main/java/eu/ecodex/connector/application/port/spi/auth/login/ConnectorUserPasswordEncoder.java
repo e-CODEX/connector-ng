@@ -10,11 +10,13 @@
 
 package eu.ecodex.connector.application.port.spi.auth.login;
 
-import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface for encoding passwords of {@link ConnectorUser} entities.
+ * Port for encoding and verifying the passwords of users of the connector system.
+ *
+ * <p>Implementations hash passwords with a one-way algorithm so that clear-text passwords are
+ * never stored. It is used when registering users and updating passwords and when logging in.
  */
 public interface ConnectorUserPasswordEncoder {
     /**

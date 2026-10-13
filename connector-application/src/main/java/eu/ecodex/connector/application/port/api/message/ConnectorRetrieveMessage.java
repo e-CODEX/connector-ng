@@ -14,17 +14,15 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Represents a contract for retrieving a specific connector message using an identifier.
- * Implementations of this interface are responsible for processing the retrieval logic.
+ * Use case for retrieving a connector business message by its identifier.
  */
 public interface ConnectorRetrieveMessage {
     /**
-     * Executes the retrieval of a connector message based on the provided identifier.
+     * Retrieves the {@link ConnectorBusinessMessage} identified by the given identifier.
      *
-     * @param identifier the unique identifier used to locate and retrieve the specific connector
-     *                   message
+     * @param identifier identifier of the message to retrieve (must not be null)
      *
-     * @return the retrieved ConnectorMessage associated with the given identifier
+     * @return the {@link ConnectorBusinessMessage} associated with the given identifier
      */
     ConnectorBusinessMessage execute(@Nonnull String identifier);
 }

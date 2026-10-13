@@ -18,8 +18,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link ConnectorRetrieveAttachment} responsible for handling the
- * retrieval of connector attachment.
+ * Default implementation of {@link ConnectorRetrieveAttachment}.
  */
 @Service
 public class ConnectorRetrieveAttachmentService implements ConnectorRetrieveAttachment {

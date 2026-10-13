@@ -15,18 +15,17 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Service interface for listing all pending connector messages.
+ * Use case for listing the messages of a backend that are pending retrieval.
  */
 public interface ConnectorListPendingMessages {
     /**
-     * Executes the operation to retrieve a list of pending connector messages. This method is
-     * expected to interact with the underlying system or data source to fetch messages that are yet
-     * to be submitted to the backend system.
+     * Retrieves the pending {@link ConnectorBusinessMessage} objects addressed to the given
+     * backend.
      *
-     * @param backendName the name of the backend system for which pending messages are requested.
+     * @param backendName name of the backend whose pending messages are listed (must not be null)
      *
-     * @return a list of {@link ConnectorBusinessMessage} representing the pending messages, or an
-     *     empty list if there are no pending messages.
+     * @return a list of {@link ConnectorBusinessMessage} objects pending for the given backend;
+     *     never {@code null}, and empty if no messages are pending
      */
     List<ConnectorBusinessMessage> execute(@Nonnull String backendName);
 }

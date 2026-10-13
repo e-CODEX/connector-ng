@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.domain.spi;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import java.util.Set;
 
 /**
@@ -34,21 +34,21 @@ public interface ConnectorProcessingModeParser {
      * @param homePartyName The name of the home party associated with the processing mode. This
      *                      typically identifies the entity that owns or controls the processing
      *                      context.
-     * @param parties       The set of {@link ConnectorParty} instances associated with the
-     *                      processing mode. Each party represents a distinct entity with a defined
-     *                      role.
-     * @param services      The set of {@link ConnectorService} instances specified in the
-     *                      processing mode. Each service defines a functionality provided within
-     *                      the context of the connector.
-     * @param actions       The set of {@link ConnectorAction} instances included in the processing
-     *                      mode. Each action represents a defined task or operation relevant to
-     *                      message exchange.
+     * @param parties       The set of {@link ConnectorProcessingModeParty} instances associated
+     *                      with the processing mode. Each party represents a distinct entity with a
+     *                      defined role.
+     * @param services      The set of {@link ConnectorProcessingModeService} instances specified in
+     *                      the processing mode. Each service defines a functionality provided
+     *                      within the context of the connector.
+     * @param actions       The set of {@link ConnectorProcessingModeAction} instances included in
+     *                      the processing mode. Each action represents a defined task or operation
+     *                      relevant to message exchange.
      */
     record ParsedProcessingMode(
         String homePartyName,
-        Set<ConnectorParty> parties,
-        Set<ConnectorService> services,
-        Set<ConnectorAction> actions
+        Set<ConnectorProcessingModeParty> parties,
+        Set<ConnectorProcessingModeService> services,
+        Set<ConnectorProcessingModeAction> actions
     ) {
         /**
          * Constructs an instance of ParsedProcessingMode while ensuring the immutability of the

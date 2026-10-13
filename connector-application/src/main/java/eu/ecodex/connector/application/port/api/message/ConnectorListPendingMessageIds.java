@@ -13,23 +13,16 @@ package eu.ecodex.connector.application.port.api.message;
 import java.util.List;
 
 /**
- * Defines a contract for retrieving a list of pending message IDs associated with a specified
- * backend.
- *
- * <p>Implementations of this interface are expected to query and return a list of message
- * identifiers that are currently pending and belong to the backend identified by the provided
- * backend name.
+ * Use case for listing the identifiers of the messages of a backend that are pending retrieval.
  */
 public interface ConnectorListPendingMessageIds {
     /**
-     * Executes the process to retrieve a list of pending message transport IDs associated with the
-     * specified backend.
+     * Retrieves the identifiers of the pending messages addressed to the given backend.
      *
-     * @param backendName the name of the backend for which pending message IDs are requested. Must
-     *                    not be null or empty.
+     * @param backendName name of the backend whose pending message identifiers are listed
      *
-     * @return a list of strings representing the IDs of the pending messages associated with the
-     *     specified backend. The list may be empty if no pending messages are available.
+     * @return a list of message identifiers pending for the given backend; never {@code null},
+     *     and empty if no messages are pending
      */
     List<String> execute(String backendName);
 }

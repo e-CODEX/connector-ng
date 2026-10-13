@@ -15,20 +15,20 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for registering a new {@link ConnectorProcessingMode} entity into the system.
+ * Use case for registering a new {@link ConnectorProcessingMode} in a business domain.
  */
 public interface ConnectorRegisterProcessingMode {
     /**
-     * Registers a new {@link ConnectorProcessingMode} for a specific business domain.
+     * Registers a new {@link ConnectorProcessingMode} for the given business domain.
      *
-     * @param businessDomainIdentifier the identifier of the business domain to which the processing
-     *                                 mode belongs. Must not be null.
-     * @param mode                     the processing mode configuration to be registered. Must not
-     *                                 be null.
+     * @param businessDomainIdentifier identifier of the business domain the processing mode belongs
+     *                                 to (must not be null)
+     * @param processingMode           the processing mode configuration to register (must not be
+     *                                 null)
      *
-     * @return the registered {@link ConnectorProcessingMode} instance.
+     * @return the registered {@link ConnectorProcessingMode}, as persisted
      */
     ConnectorProcessingMode execute(
         @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
-        @Nonnull ConnectorProcessingMode mode);
+        @Nonnull ConnectorProcessingMode processingMode);
 }

@@ -11,30 +11,25 @@
 package eu.ecodex.connector.application.port.spi;
 
 import eu.ecodex.connector.domain.model.ConnectorPublishable;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * An interface defining the contract for publishing {@link ConnectorMessage} instances within a
- * connector system, facilitating downstream processing or distribution.
+ * Defines the contract for publishing {@link ConnectorPublishable} messages within the connector
+ * system, facilitating downstream processing or distribution.
  *
- * <p>Classes implementing this interface are responsible for providing mechanisms
- * to broadcast or deliver the messages to their intended consumers or systems. Implementations
- * should ensure adherence to the connector's messaging flow requirements while delivering messages
- * reliably.
+ * <p>Implementations are responsible for broadcasting or delivering the messages to their
+ * intended consumers or systems, in accordance with the connector's messaging flow.
  *
- * @param <T> The type of {@link ConnectorPublishable} message that can be published.
+ * @param <T> the type of {@link ConnectorPublishable} message that can be published
  */
 public interface ConnectorMessageEventPublisher<T extends ConnectorPublishable> {
     /**
-     * Publishes a {@link ConnectorPublishable} message for downstream processing or distribution
-     * within the connector system.
+     * Publishes the given message for downstream processing or distribution.
      *
-     * <p>Implementations of this method are responsible for broadcasting the provided
-     * message to relevant consumers or systems, ensuring that the message is delivered to its
-     * intended recipients in accordance with the connector's messaging flow.
+     * <p>The method returns normally if the message was handed over for publication. If
+     * publication fails, the failure is reported by an exception.
      *
-     * @param message The {@link ConnectorPublishable} message to be published. Must not be null.
+     * @param message the message to publish (must not be null)
      */
     void publish(@Nonnull T message);
 }

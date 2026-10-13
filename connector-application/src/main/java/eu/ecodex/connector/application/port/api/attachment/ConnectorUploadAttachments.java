@@ -15,22 +15,16 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Use case interface responsible for handling the upload of connector message attachments.
- *
- * <p>Implementations are expected to process the provided files, store them in the configured
- * attachment storage, and return the resulting {@link ConnectorMessageAttachment}.
+ * Use case for uploading one or more attachments.
  */
 public interface ConnectorUploadAttachments {
     /**
-     * Executes the upload process for the given list of files.
+     * Uploads the given files and registers them as {@link ConnectorMessageAttachment} objects.
      *
-     * @param files a non-null list of {@link FileUploadCommand} objects representing files to be
-     *              uploaded
+     * @param files the upload commands describing the files to upload (must not be null)
      *
-     * @return a list of {@link ConnectorMessageAttachment} representing the successfully uploaded
-     *     attachments
-     *
-     * @throws NullPointerException if {@code files} is null
+     * @return the list of {@link ConnectorMessageAttachment} objects created from the uploaded
+     *     files, in the same order as the given commands
      */
     List<ConnectorMessageAttachment> execute(@Nonnull List<FileUploadCommand> files);
 }

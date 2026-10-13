@@ -19,7 +19,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListTransportSteps} service.
+ * Default implementation of {@link ConnectorListTransportSteps}.
  */
 @Service
 public class ConnectorListTransportStepsService implements ConnectorListTransportSteps {

@@ -13,9 +13,9 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.pmode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeActions;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeParties;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeActionDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeServiceDto;
 import eu.ecodex.connector.infrastructure.property.c2ctest.Connector2ConnectorTestMessageProperties;
@@ -37,14 +37,14 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
      * for managing processing modes within the connector system.
      *
      * @param listProcessingModeServicesService the service handling operations related to listing
-     *                                          {@link ConnectorService} entities in the processing
-     *                                          mode.
+     *                                          {@link ConnectorProcessingModeService} entities in
+     *                                          the processing mode.
      * @param listProcessingModeActionsService  the service handling operations related to listing
-     *                                          {@link ConnectorAction} entities in the processing
-     *                                          mode.
+     *                                          {@link ConnectorProcessingModeAction} entities in
+     *                                          the processing mode.
      * @param listProcessingModePartiesService  the service handling operations related to listing
-     *                                          {@link ConnectorParty} entities in the processing
-     *                                          mode.
+     *                                          {@link ConnectorProcessingModeParty} entities in the
+     *                                          processing mode.
      * @param testMessageProperties             the property for connector2Connector test message
      */
     public ConnectorProcessingModeController(
@@ -85,7 +85,8 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     }
 
     @Override
-    public List<ConnectorParty> listProcessingModeParties(String businessDomainIdentifier) {
+    public List<ConnectorProcessingModeParty> listProcessingModeParties(
+        String businessDomainIdentifier) {
         return listProcessingModePartiesService.execute(businessDomainIdentifier);
     }
 }

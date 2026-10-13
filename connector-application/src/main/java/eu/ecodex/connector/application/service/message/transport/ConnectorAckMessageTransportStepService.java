@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
- * Implementation of the {@link ConnectorAckMessageTransportStep} service.
+ * Default implementation of {@link ConnectorAckMessageTransportStep}.
  */
 @Slf4j
 @Service

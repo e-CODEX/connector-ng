@@ -18,36 +18,31 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Interface for creating instances of {@link ConnectorMessageEvidence} to represent the results of
- * operations performed on {@link ConnectorBusinessMessage}.
+ * Toolkit for creating {@link ConnectorMessageEvidence} instances representing the results of
+ * operations performed on a {@link ConnectorBusinessMessage}.
  *
- * <p>This toolkit provides methods to create evidence objects for both successful and failed
- * operations. These evidences are associated with specific message operations and categorized by
- * their respective {@link ConnectorEvidenceType}.
- *
- * <p>Responsibilities:
- * <ul>
- *     <li>Creating success evidence for operations that complete successfully.</li>
- *     <li>
- *         Creating failure evidence for operations that fail along with detailed rejection reasons.
- *     </li>
- * </ul>
+ * <p>The evidences are associated with a specific message and categorized by their
+ * {@link ConnectorEvidenceType}. The same method creates evidences for successful operations
+ * (without a rejection reason) and for failed operations (with a rejection reason).
  */
 public interface ConnectorEvidenceToolkit {
     /**
-     * Creates an instance of {@link ConnectorMessageEvidence} based on the provided message,
-     * evidence type, and optional rejection reason. The evidence represents the outcome of an
-     * operation performed on a message within the connector domain.
+     * Creates a {@link ConnectorMessageEvidence} for the given message, evidence type and optional
+     * rejection reason.
      *
-     * @param message         The {@link ConnectorBusinessMessage} object to which the evidence is
-     *                        linked. Must not be null.
-     * @param evidenceType    The {@link ConnectorEvidenceType} categorizing the type of evidence.
-     *                        Must not be null.
-     * @param rejectionReason The {@link ConnectorMessageRejectionReason} describing the reason for
-     *                        rejection, if applicable. Can be null if the evidence does not relate
-     *                        to a rejection.
+     * <p>The evidence represents the outcome of an operation performed on the message. A
+     * {@code null} rejection reason denotes a successful operation, whereas a non-null reason
+     * denotes a rejection or failure.
      *
-     * @return A {@link ConnectorMessageEvidence} instance representing the operation result.
+     * @param message         the {@link ConnectorBusinessMessage} the evidence is linked to (must
+     *                        not be null)
+     * @param evidenceType    the {@link ConnectorEvidenceType} categorizing the evidence (must not
+     *                        be null)
+     * @param rejectionReason the {@link ConnectorMessageRejectionReason} describing why the message
+     *                        was rejected; {@code null} if the evidence does not relate to a
+     *                        rejection
+     *
+     * @return the created {@link ConnectorMessageEvidence} representing the operation result
      */
     ConnectorMessageEvidence create(
         @Nonnull ConnectorBusinessMessage message,

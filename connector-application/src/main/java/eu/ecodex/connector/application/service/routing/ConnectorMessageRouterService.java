@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the ConnectorMessageRoutingService.
+ * Default implementation of {@link ConnectorMessageRouter}.
  */
 @Slf4j
 @Component

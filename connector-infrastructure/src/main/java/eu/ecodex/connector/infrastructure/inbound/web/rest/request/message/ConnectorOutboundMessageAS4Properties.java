@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -35,14 +35,14 @@ import lombok.Builder;
  *                               specification; must not be blank
  * @param finalRecipient         the final recipient identifier, as defined by the AS4 messaging
  *                               specification, must not be blank
- * @param service                the {@link  ConnectorService} defining the business service context
- *                               of the message; must not be {@code null}
- * @param action                 the {@link ConnectorAction} defining the business action to be
- *                               executed; must not be {@code null}
- * @param fromParty              the {@link ConnectorParty} representing the sending party in the
- *                               AS4 exchange; must not be {@code null}
- * @param toParty                the {@link ConnectorParty} representing the receiving party in the
- *                               AS4 exchange; must not be {@code null}
+ * @param service                the {@link  ConnectorProcessingModeService} defining the business
+ *                               service context of the message; must not be {@code null}
+ * @param action                 the {@link ConnectorProcessingModeAction} defining the business
+ *                               action to be executed; must not be {@code null}
+ * @param fromParty              the {@link ConnectorProcessingModeParty} representing the sending
+ *                               party in the AS4 exchange; must not be {@code null}
+ * @param toParty                the {@link ConnectorProcessingModeParty} representing the receiving
+ *                               party in the AS4 exchange; must not be {@code null}
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageAS4Properties(

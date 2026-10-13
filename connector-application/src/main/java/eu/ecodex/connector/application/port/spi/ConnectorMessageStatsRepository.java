@@ -16,10 +16,33 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Provides a contract for retrieving statistics related to connector messages.
+ * Repository (port) for retrieving statistics and reports about connector messages.
  */
 public interface ConnectorMessageStatsRepository {
+    /**
+     * Retrieves the statistics of the connector messages within the given period, optionally
+     * restricted to a business domain.
+     *
+     * @param from           the start of the period; no lower limit if {@code null}
+     * @param to             the end of the period; no upper limit if {@code null}
+     * @param businessDomain the identifier of the business domain to restrict the statistics to;
+     *                       all business domains are covered if {@code null} or empty
+     *
+     * @return the {@link ConnectorMessageStats} of the period
+     */
     ConnectorMessageStats findAll(Instant from, Instant to, String businessDomain);
 
+    /**
+     * Computes the message report for the given period, optionally restricted to a business
+     * domain.
+     *
+     * @param from           the start of the period; no lower limit if {@code null}
+     * @param to             the end of the period; no upper limit if {@code null}
+     * @param businessDomain the identifier of the business domain to restrict the report to; all
+     *                       business domains are covered if {@code null} or empty
+     *
+     * @return the {@link ConnectorMessageReport} entries computed for the period (for example one
+     *     per day, direction or status); never {@code null}, and empty if no messages match
+     */
     List<ConnectorMessageReport> computeReport(Instant from, Instant to, String businessDomain);
 }

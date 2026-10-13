@@ -14,14 +14,15 @@ import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
 
 /**
- * Provides a contract for retrieving statistics related to connector queues.
+ * Provider (port) giving access to the statistics of the connector's JMS queues.
  */
 public interface ConnectorQueueStatsProvider {
     /**
      * Retrieves statistical information for all connector queues.
      *
      * @return a list of {@link ConnectorQueueStats} objects, each containing the name of the queue,
-     *     the count of pending messages, and the count of messages in the dead letter queue
+     *     the count of pending messages and the count of messages in the dead letter queue; never
+     *     {@code null}, and empty if there are no queues
      */
     List<ConnectorQueueStats> getAllStats();
 }

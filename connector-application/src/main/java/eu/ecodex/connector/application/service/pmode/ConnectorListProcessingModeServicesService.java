@@ -11,32 +11,33 @@
 package eu.ecodex.connector.application.service.pmode;
 
 import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModeServices;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorListProcessingModeServices} service.
+ * Default implementation of {@link ConnectorListProcessingModeServices}.
  */
 @Service
 public class ConnectorListProcessingModeServicesService implements
     ConnectorListProcessingModeServices {
-    private final ConnectorServiceRepository connectorServiceRepository;
+    private final ConnectorProcessingModeServiceRepository connectorProcessingModeServiceRepository;
 
     public ConnectorListProcessingModeServicesService(
-        ConnectorServiceRepository connectorServiceRepository) {
-        this.connectorServiceRepository = connectorServiceRepository;
+        ConnectorProcessingModeServiceRepository connectorProcessingModeServiceRepository) {
+        this.connectorProcessingModeServiceRepository = connectorProcessingModeServiceRepository;
     }
 
     @Override
-    public List<ConnectorService> execute(@NonNull String businessDomainIdentifier) {
+    public List<ConnectorProcessingModeService> execute(@NonNull String businessDomainIdentifier) {
         var businessDomain = ConnectorBusinessDomainIdentifier.builder()
                                                               .messageLaneIdentifier(
                                                                   businessDomainIdentifier)
                                                               .build();
-        return connectorServiceRepository.findAllByBusinessDomainIdentifier(businessDomain);
+        return connectorProcessingModeServiceRepository.findAllByBusinessDomainIdentifier(
+            businessDomain);
     }
 }

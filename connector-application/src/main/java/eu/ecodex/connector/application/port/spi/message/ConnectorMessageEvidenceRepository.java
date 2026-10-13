@@ -14,36 +14,40 @@ import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidenc
 import jakarta.annotation.Nonnull;
 
 /**
- * Repository responsible for persisting {@link ConnectorMessageEvidence} instances.
- *
- * <p>This component abstracts the storage mechanism used to store evidence generated during the
- * processing of connector messages. Implementations may persist the evidence in a database, event
- * store, or any other persistence layer.
+ * Repository (port) for persisting and querying {@link ConnectorMessageEvidence} objects.
  */
 public interface ConnectorMessageEvidenceRepository {
     /**
-     * Persists the provided {@link ConnectorMessageEvidence} and associates it with the given
-     * message identifier.
+     * Persists the given evidence and associates it with the given message.
      *
-     * @param evidence          the evidence object describing the outcome of message processing
+     * @param evidence          the evidence describing the outcome of the message processing (must
+     *                          not be null)
      * @param messageIdentifier the unique identifier of the connector message the evidence belongs
-     *                          to
+     *                          to (must not be null)
      *
      * @return the persisted {@link ConnectorMessageEvidence}, potentially enriched with
-     *     persistence-related information (e.g., generated identifiers)
+     *     persistence-related information (for example generated identifiers)
      */
     ConnectorMessageEvidence save(
         @Nonnull ConnectorMessageEvidence evidence,
         @Nonnull String messageIdentifier);
 
-    ConnectorMessageEvidence findByUuid(String uuid);
+    /**
+     * Retrieves an evidence by its unique UUID.
+     *
+     * @param uuid the unique identifier of the evidence to retrieve (must not be null)
+     *
+     * @return the {@link ConnectorMessageEvidence} matching the given UUID, or {@code null} if no
+     *     such evidence exists
+     */
+    ConnectorMessageEvidence findByUuid(@Nonnull String uuid);
 
     /**
-     * Updates the state or metadata of the connector evidence identified by the given identifier to
-     * reflect that it has been delivered to the link partner.
+     * Records that the evidence identified by the given UUID has been delivered to the link
+     * partner, by setting its delivery timestamp.
      *
-     * @param uuid the unique identifier of the connector evidence that has been delivered to the
-     *             link partner. Must not be null.
+     * @param uuid the unique identifier of the evidence that has been delivered to the link partner
+     *             (must not be null)
      */
     void setDeliveredToLinkPartnerAt(@Nonnull String uuid);
 }

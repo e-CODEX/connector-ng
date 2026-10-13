@@ -15,18 +15,17 @@ import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
 import java.util.List;
 
 /**
- * Service interface for listing all backend link partners.
+ * Use case for listing the {@link ConnectorLinkPartner} entities of a given link type.
  */
 public interface ConnectorListLinkPartners {
     /**
-     * Executes an operation to retrieve a list of connector link partners based on the specified
-     * link type.
+     * Retrieves the link partners configured for the given link type.
      *
-     * @param linkType the type of the connector link, represented by {@link ConnectorLinkType},
-     *                 used to filter the link partners
+     * @param linkType the type of link ({@link ConnectorLinkType}) whose partners are listed; may
+     *                 be {@code null} to list the partners of all link types
      *
-     * @return a list of {@link ConnectorLinkPartner} instances matching the specified link type;
-     *     the list may be empty if no partners are found
+     * @return a list of {@link ConnectorLinkPartner} objects of the given link type; never
+     *     {@code null}, and empty if no link partners are configured
      */
     List<ConnectorLinkPartner> execute(ConnectorLinkType linkType);
 }

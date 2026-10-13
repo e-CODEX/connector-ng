@@ -13,22 +13,15 @@ package eu.ecodex.connector.application.port.api.attachment;
 import jakarta.annotation.Nonnull;
 
 /**
- * Defines the contract for downloading message attachments from a connector.
- *
- * <p>The primary use case is to manage attachments that are sent alongside messages, typically in
- * the form of documents like PDFs.
+ * Use case for downloading the content of a connector message attachment.
  */
 public interface ConnectorDownloadAttachment {
     /**
-     * Downloads the binary content of a message attachment identified by the provided identifier.
-     * This method is typically used to retrieve documents or files associated with a specific
-     * message.
+     * Downloads the content of the attachment identified by the given identifier.
      *
-     * @param identifier a non-null string that uniquely identifies the attachment to be downloaded
+     * @param identifier unique identifier of the attachment to download (must not be null)
      *
-     * @return a byte array containing the binary content of the specified attachment
-     *
-     * @throws NullPointerException if {@code identifier} is null
+     * @return the raw content of the attachment as a byte array
      */
     byte[] execute(@Nonnull String identifier);
 }

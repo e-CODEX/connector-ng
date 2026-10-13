@@ -18,24 +18,27 @@ import jakarta.annotation.Nonnull;
 
 
 /**
- * Interface for managing the registration and updates of {@link ConnectorUser} entities in the
- * system.
- * Provides methods for updating user information.
+ * Use case for fully updating an existing user of the connector system.
  */
 public interface ConnectorUpdateUser {
     /**
-     * Updates an existing {@link ConnectorUser} entity in the system with the provided information.
+     * Updates the {@link ConnectorUser} identified by the given identifier with the information
+     * carried by the given user object.
      *
-     * @param identifier the unique identifier of the {@link ConnectorUser} to be updated; must not
-     *                   be null
-     * @param user       the {@link ConnectorUser} object containing the updated information; must
-     *                   not be null
+     * @param identifier the unique identifier of the {@link ConnectorUser} to update (must not be
+     *                   null)
+     * @param user       the {@link ConnectorUser} containing the updated information (must not be
+     *                   null)
      *
-     * @return the updated {@link ConnectorUser} object after applying the changes
+     * @return the updated {@link ConnectorUser} after the changes have been applied
      *
-     * @throws ConnectorUserAlreadyExistsException      when user already exists
-     * @throws ConnectorUserNotFoundException           when user identifier not found
-     * @throws ConnectorUserIdentifierMismatchException when user identifier mismatched
+     * @throws ConnectorUserAlreadyExistsException      if the update would give the user details
+     *                                                  (for example a username) that are already
+     *                                                  used by another user
+     * @throws ConnectorUserNotFoundException           if no user is found for the given
+     *                                                  identifier
+     * @throws ConnectorUserIdentifierMismatchException if the given identifier does not match the
+     *                                                  identifier of the given user
      */
     ConnectorUser execute(@Nonnull String identifier, @Nonnull ConnectorUser user);
 }

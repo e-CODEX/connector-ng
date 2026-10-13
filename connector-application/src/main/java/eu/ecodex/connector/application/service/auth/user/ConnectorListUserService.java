@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUsers;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.util.List;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class ConnectorListUserService implements ConnectorListUser {
+public class ConnectorListUserService implements ConnectorListUsers {
     private final ConnectorUserRepository repository;
 
     public ConnectorListUserService(ConnectorUserRepository repository) {

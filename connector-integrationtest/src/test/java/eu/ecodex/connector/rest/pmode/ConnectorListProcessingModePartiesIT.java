@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.pmode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ public class ConnectorListProcessingModePartiesIT extends AbstractIntegrationTes
                                 .uri("/api/v1/processing-modes/default_business_domain/parties")
                                 .exchange()
                                 .expectStatus().isOk()
-                                .returnResult(ConnectorParty[].class);
+                                .returnResult(ConnectorProcessingModeParty[].class);
 
         var parties = response.getResponseBody();
         assertThat(parties).isNotNull();

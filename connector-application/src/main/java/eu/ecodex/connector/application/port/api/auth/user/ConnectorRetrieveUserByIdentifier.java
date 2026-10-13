@@ -16,18 +16,17 @@ import jakarta.annotation.Nonnull;
 
 
 /**
- * Service interface for retrieving {@link ConnectorUser} entities by identifier.
- * Provides methods to retrieve users by their unique identifier
+ * Use case for retrieving a user of the connector system by its unique identifier.
  */
 public interface ConnectorRetrieveUserByIdentifier {
     /**
-     * Retrieves a {@link ConnectorUser} instance by its unique identifier.
+     * Retrieves the {@link ConnectorUser} identified by the given unique identifier.
      *
-     * @param identifier the unique identifier of the user to retrieve
+     * @param identifier the unique identifier of the user to retrieve (must not be null)
      *
      * @return the {@link ConnectorUser} associated with the given identifier
      *
-     * @throws ConnectorUserNotFoundException if no user is found with the specified identifier
+     * @throws ConnectorUserNotFoundException if no user is found with the given identifier
      */
     ConnectorUser execute(@Nonnull String identifier);
 }

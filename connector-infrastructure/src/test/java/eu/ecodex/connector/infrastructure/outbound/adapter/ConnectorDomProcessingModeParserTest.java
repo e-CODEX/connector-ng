@@ -15,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.outbound.adapter.exception.ConnectorProcessingModeParsingException;
 import eu.ecodex.connector.infrastructure.outbound.adapter.pmode.ConnectorDomProcessingModeParser;
 import java.nio.charset.StandardCharsets;
@@ -126,7 +126,10 @@ class ConnectorDomProcessingModeParserTest {
 
             assertThat(parsed.parties())
                 .hasSize(2 * ConnectorPartyRoleType.values().length)
-                .extracting(ConnectorParty::name, ConnectorParty::roleType)
+                .extracting(
+                    ConnectorProcessingModeParty::name,
+                    ConnectorProcessingModeParty::roleType
+                )
                 .containsExactlyInAnyOrder(
                     tuple(HOME_PARTY, ConnectorPartyRoleType.INITIATOR),
                     tuple(HOME_PARTY, ConnectorPartyRoleType.RESPONDER),
@@ -141,12 +144,12 @@ class ConnectorDomProcessingModeParserTest {
 
             assertThat(parsed.parties())
                 .filteredOn(party -> party.roleType() == ConnectorPartyRoleType.INITIATOR)
-                .extracting(ConnectorParty::role)
+                .extracting(ConnectorProcessingModeParty::role)
                 .containsOnly(INITIATOR_ROLE);
 
             assertThat(parsed.parties())
                 .filteredOn(party -> party.roleType() == ConnectorPartyRoleType.RESPONDER)
-                .extracting(ConnectorParty::role)
+                .extracting(ConnectorProcessingModeParty::role)
                 .containsOnly(RESPONDER_ROLE);
         }
 
@@ -174,7 +177,7 @@ class ConnectorDomProcessingModeParserTest {
             var parsed = parser.parse(xml(validPmode()));
 
             assertThat(parsed.parties())
-                .filteredOn(ConnectorParty::isHome)
+                .filteredOn(ConnectorProcessingModeParty::isHome)
                 .isNotEmpty()
                 .allSatisfy(party -> assertThat(party.name()).isEqualTo(HOME_PARTY));
         }

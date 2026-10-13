@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import java.io.Serializable;
 import lombok.Builder;
 
@@ -35,7 +35,7 @@ public record ConnectorProcessingModeActionDto(
      * @return a DTO representing the connector action
      */
     public static ConnectorProcessingModeActionDto from(
-        ConnectorAction action,
+        ConnectorProcessingModeAction action,
         String testActionName) {
         var name = action.name();
         return ConnectorProcessingModeActionDto.builder()

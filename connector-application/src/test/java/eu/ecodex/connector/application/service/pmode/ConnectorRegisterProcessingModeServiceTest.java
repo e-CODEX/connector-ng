@@ -27,15 +27,15 @@ import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeParser;
 import java.util.List;
 import java.util.Set;
@@ -56,11 +56,11 @@ class ConnectorRegisterProcessingModeServiceTest {
     @Mock
     private ConnectorProcessingModeRepository processingModeRepository;
     @Mock
-    private ConnectorServiceRepository serviceRepository;
+    private ConnectorProcessingModeServiceRepository serviceRepository;
     @Mock
-    private ConnectorActionRepository actionRepository;
+    private ConnectorProcessingModeActionRepository actionRepository;
     @Mock
-    private ConnectorPartyRepository partyRepository;
+    private ConnectorProcessingModePartyRepository partyRepository;
     @Mock
     private ConnectorBusinessDomainRepository businessDomainRepository;
     @Mock
@@ -132,9 +132,9 @@ class ConnectorRegisterProcessingModeServiceTest {
         void should_persist_the_parties_services_and_actions_returned_by_the_parser() {
             registerProcessingModeService.execute(businessDomain.identifier(), processingMode);
 
-            ArgumentCaptor<List<ConnectorParty>> parties = ArgumentCaptor.captor();
-            ArgumentCaptor<List<ConnectorService>> services = ArgumentCaptor.captor();
-            ArgumentCaptor<List<ConnectorAction>> actions = ArgumentCaptor.captor();
+            ArgumentCaptor<List<ConnectorProcessingModeParty>> parties = ArgumentCaptor.captor();
+            ArgumentCaptor<List<ConnectorProcessingModeService>> services = ArgumentCaptor.captor();
+            ArgumentCaptor<List<ConnectorProcessingModeAction>> actions = ArgumentCaptor.captor();
 
             verify(partyRepository).saveAll(parties.capture(), eq(businessDomain.identifier()));
             verify(serviceRepository).saveAll(services.capture(), eq(businessDomain.identifier()));

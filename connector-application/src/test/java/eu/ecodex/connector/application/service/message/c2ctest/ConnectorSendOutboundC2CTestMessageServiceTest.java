@@ -39,8 +39,8 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +53,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorSendOutboundTestMessageService")
-class ConnectorSendOutboundTestMessageServiceTest {
+class ConnectorSendOutboundC2CTestMessageServiceTest {
     private static final String MESSAGE_ID =
         "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
     private static final String BACKEND_MESSAGE_IDENTIFIER =
@@ -71,14 +71,14 @@ class ConnectorSendOutboundTestMessageServiceTest {
         BusinessMessageTestFixtures.createOutboundMessage().businessContent();
     private final List<ConnectorMessageAttachment> attachments =
         List.of(MessageAttachmentTestFixtures.createAttachment());
-    private final ConnectorParty fromParty = ConnectorParty
+    private final ConnectorProcessingModeParty fromParty = ConnectorProcessingModeParty
         .builder()
         .identifier("BL")
         .identifierType(PARTY_IDENTIFIER_TYPE)
         .role("GW")
         .roleType(ConnectorPartyRoleType.INITIATOR)
         .build();
-    private final ConnectorParty toParty = ConnectorParty
+    private final ConnectorProcessingModeParty toParty = ConnectorProcessingModeParty
         .builder()
         .identifier("RE")
         .identifierType(PARTY_IDENTIFIER_TYPE)
@@ -99,11 +99,11 @@ class ConnectorSendOutboundTestMessageServiceTest {
     private ConnectorBusinessMessageVerifier messageVerifierService;
     @Mock
     private ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher;
-    private ConnectorSendOutboundTestMessageService service;
+    private ConnectorSendOutboundC2CTestMessageService service;
 
     @BeforeEach
     void setUp() {
-        service = new ConnectorSendOutboundTestMessageService(
+        service = new ConnectorSendOutboundC2CTestMessageService(
             testMessageConfigProvider,
             messageProcessingConfigProvider,
             messageIdGeneratorService,

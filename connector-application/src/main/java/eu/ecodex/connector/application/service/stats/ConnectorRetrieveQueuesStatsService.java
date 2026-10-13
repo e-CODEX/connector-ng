@@ -17,7 +17,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorRetrieveQueuesStats} service.
+ * Default implementation of {@link ConnectorRetrieveQueuesStats}.
  */
 @Service
 public class ConnectorRetrieveQueuesStatsService implements ConnectorRetrieveQueuesStats {

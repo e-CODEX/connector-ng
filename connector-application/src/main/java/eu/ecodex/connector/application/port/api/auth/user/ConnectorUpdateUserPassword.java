@@ -16,17 +16,18 @@ import jakarta.annotation.Nonnull;
 
 
 /**
- * Interface for managing the {@link ConnectorUser} password update after login.
- * Provides methods for updating user password after login.
+ * Use case for changing the password of an existing user of the connector system.
  */
 public interface ConnectorUpdateUserPassword {
     /**
-     * Updates an existing {@link ConnectorUser} user password in the system with the provided
-     * information.
+     * Updates the password of an existing {@link ConnectorUser} with the data provided in the given
+     * command.
      *
-     * @param passwordUpdateData data used to update user password after login
+     * @param passwordUpdateData the {@link ConnectorUpdateUserPasswordCommand} carrying the data
+     *                           used to update the user's password after login (must not be null)
      *
-     * @throws ConnectorUserNotFoundException when user identifier not found
+     * @throws ConnectorUserNotFoundException if no user matches the user identifier carried by the
+     *                                        command
      */
     void execute(@Nonnull ConnectorUpdateUserPasswordCommand passwordUpdateData);
 }

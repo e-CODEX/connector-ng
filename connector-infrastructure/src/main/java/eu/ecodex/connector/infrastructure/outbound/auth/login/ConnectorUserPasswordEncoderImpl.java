@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * Service implementation for encoding passwords of {@link ConnectorUser} entities.
- *
- * <p>This class provides functionality for encoding the password of a {@link ConnectorUser}
- * and is an implementation of the {@link ConnectorUserPasswordEncoder} interface.
+ * Default implementation of {@link ConnectorUserPasswordEncoder}.
  */
 @Slf4j
 @Service

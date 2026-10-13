@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorOutboundBusinessMessageReceiver} service.
+ * Default implementation of {@link ConnectorOutboundBusinessMessageReceiver}.
  */
 @Slf4j
 @Service

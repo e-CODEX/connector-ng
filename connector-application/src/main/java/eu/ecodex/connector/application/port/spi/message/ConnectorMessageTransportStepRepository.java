@@ -18,130 +18,98 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Repository interface for managing {@link ConnectorMessageTransportStep} instances within the
- * e-CODEX Connector domain.
- *
- * <p>This interface provides the contract for persisting and manipulating transport steps during
- * the message delivery process. Implementations of this interface are responsible for storing and
- * retrieving {@link ConnectorMessageTransportStep} entities in the underlying persistence
- * mechanism.
- *
- * <p>This interface should be implemented by infrastructure modules to abstract persistence
- * details from the domain layer.
+ * Repository (port) for persisting and querying {@link ConnectorMessageTransportStep} objects.
  */
 public interface ConnectorMessageTransportStepRepository {
     /**
-     * Persists the given {@link ConnectorMessageTransportStep} entity and returns the saved
-     * instance.
+     * Persists the given transport step, inserting it or updating it if it already exists.
      *
-     * <p>This method is responsible for storing or updating the transport step in the underlying
-     * persistence mechanism. Any modifications made to the provided instance are reflected in the
-     * returned object.
+     * @param transportStep the transport step to persist (must not be null)
      *
-     * @param transportStep the {@link ConnectorMessageTransportStep} instance to be persisted or
-     *                      updated
-     *
-     * @return the persisted {@link ConnectorMessageTransportStep} instance, updated with any
-     *     additional state assigned by the persistence mechanism (e.g., timestamps)
+     * @return the persisted {@link ConnectorMessageTransportStep}, updated with any state assigned
+     *     during persistence (for example timestamps)
      */
     ConnectorMessageTransportStep save(@Nonnull ConnectorMessageTransportStep transportStep);
 
     /**
-     * Updates an existing {@link ConnectorMessageTransportStep} identified by its unique identifier
-     * with the provided updated transport step details.
+     * Updates the transport step identified by the given identifier with the given state.
      *
-     * @param identifier    the unique identifier of the {@link ConnectorMessageTransportStep} to be
-     *                      updated
-     * @param transportStep the updated {@link ConnectorMessageTransportStep} containing the new
-     *                      state to be persisted
+     * @param identifier    the unique identifier of the transport step to update (must not be
+     *                      null)
+     * @param transportStep the {@link ConnectorMessageTransportStep} carrying the new state (must
+     *                      not be null)
      *
-     * @return the updated {@link ConnectorMessageTransportStep} instance reflecting the saved
-     *     changes
+     * @return the updated {@link ConnectorMessageTransportStep}, reflecting the saved changes
      */
     ConnectorMessageTransportStep update(
         @Nonnull String identifier,
         @Nonnull ConnectorMessageTransportStep transportStep);
 
     /**
-     * Updates the status of multiple transport steps identified by their unique identifiers.
+     * Updates the status of several transport steps at once.
      *
-     * @param identifiers a list of unique identifiers corresponding to the transport steps whose
-     *                    status needs to be updated. The list must not be null and should contain
-     *                    valid, existing identifiers.
-     * @param status      the new status to be assigned to the identified transport steps. Must not
-     *                    be null and must represent a valid instance of
-     *                    {@link ConnectorMessageTransportStatus}.
+     * @param identifiers the unique identifiers of the transport steps to update (must not be
+     *                    null)
+     * @param status      the new {@link ConnectorMessageTransportStatus} to assign to the
+     *                    identified transport steps (must not be null)
      */
     void updateStatus(
         @Nonnull List<String> identifiers,
         @Nonnull ConnectorMessageTransportStatus status);
 
     /**
-     * Retrieves a {@link ConnectorMessageTransportStep} instance associated with the given message
-     * identifier or remote system identifier (backend ID or ebmsID).
+     * Retrieves a transport step by the identifier of its message or by a remote system identifier
+     * (backend ID or ebMS ID).
      *
-     * @param identifier the unique identifier of the message or remote system for which the
-     *                   transport step is being retrieved
+     * @param identifier the message identifier or remote system identifier (must not be null)
      *
-     * @return the {@link ConnectorMessageTransportStep} associated with the specified message or
-     *     the renote system identifier, or {@code null} if no matching transport step is found
+     * @return the matching {@link ConnectorMessageTransportStep}, or {@code null} if none is found
      */
     ConnectorMessageTransportStep findByMessageIdentifierOrRemoteSystemId(
         @Nonnull String identifier);
 
     /**
-     * Retrieves a {@link ConnectorMessageTransportStep} instance associated with the given unique
-     * identifier.
+     * Retrieves a transport step by its own unique identifier.
      *
-     * @param identifier the unique identifier of the {@link ConnectorMessageTransportStep} to be
-     *                   retrieved; must not be null.
+     * @param identifier the unique identifier of the transport step (must not be null)
      *
-     * @return the {@link ConnectorMessageTransportStep} instance identified by the specified
-     *     identifier, or {@code null} if no matching transport step is found.
+     * @return the matching {@link ConnectorMessageTransportStep}, or {@code null} if none is found
      */
     ConnectorMessageTransportStep findByIdentifier(@Nonnull String identifier);
 
     /**
-     * Retrieves a list of pending transport step identifiers associated with the specified backend
-     * system.
+     * Retrieves the identifiers of the pending transport steps of the given backend.
      *
-     * <p>This method queries the underlying persistence mechanism to find all transport steps that
-     * are in a pending state for the provided backend name. Pending transport steps are those that
-     * have not yet been submitted to the backend system for processing.
+     * <p>Pending transport steps are those that have not yet been submitted to the backend system
+     * for processing.
      *
-     * @param backendName the name of the backend system for which the pending transport steps are
-     *                    to be retrieved; must not be null or empty.
+     * @param backendName the name of the backend system (must not be null or empty)
      *
-     * @return a list of identifiers for the pending transport steps associated with the specified
-     *     backend. If no pending transport steps are found, an empty list is returned.
+     * @return the identifiers of the pending transport steps; empty if there are none
      */
     List<String> findPendingTransportSteps(@Nonnull String backendName);
 
     /**
-     * Retrieves a list of pending message identifiers associated with the specified backend
-     * system.
+     * Retrieves the identifiers of the pending messages of the given backend.
      *
-     * <p>This method queries the underlying persistence mechanism to find all messages that are in
-     * a pending state for the provided backend name. Pending messages are those that have not yet
-     * been submitted to the backend system for processing.
+     * <p>Pending messages are those that have not yet been submitted to the backend system for
+     * processing.
      *
-     * @param backendName the name of the backend system for which the pending messages are to be
-     *                    retrieved; must not be null or empty.
+     * @param backendName the name of the backend system (must not be null or empty)
      *
-     * @return a list of identifiers for the pending messages associated with the specified backend.
-     *     If no pending messages are found, an empty list is returned.
+     * @return the identifiers of the pending messages; empty if there are none
      */
     List<String> findPendingMessagesIds(@Nonnull String backendName);
 
     /**
-     * Retrieves all {@link ConnectorMessageTransportStep} entities that match the given criteria.
+     * Retrieves a page of transport steps based on the pagination parameters and the optional
+     * filter criteria carried by the given filter. All filters are combined with a logical
+     * {@code AND}; a filter whose value is {@code null} or empty is ignored.
      *
-     * @param filter the pagination parameters and filter criteria used to retrieve the transport
-     *               steps (must not be null)
+     * @param filter the pagination parameters and filter criteria (must not be null)
      *
-     * @return a {@link ConnectorPageResult} containing the paginated list of matching
-     *     {@link ConnectorMessageTransportStep} entities. If no matching entities are found,
-     *     returns an empty result.
+     * @return a {@link ConnectorPageResult} containing the matching transport steps for the
+     *     requested page; empty if none match
      */
     ConnectorPageResult<ConnectorMessageTransportStep> findAll(
         @Nonnull ConnectorTransportStepsListFilter filter);

@@ -14,16 +14,14 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import java.util.List;
 
 /**
- * Service interface for listing all {@link ConnectorBusinessDomain} entities managed by the
- * system.
+ * Use case for listing all {@link ConnectorBusinessDomain} entities managed by the system.
  */
 public interface ConnectorListBusinessDomain {
     /**
-     * Retrieves all {@link ConnectorBusinessDomain} entities managed by the system.
+     * Retrieves all configured {@link ConnectorBusinessDomain} instances.
      *
-     * @return a list of {@link ConnectorBusinessDomain} objects representing all business domains
-     *     available in the connector environment. The list is empty if no business domains are
-     *     registered.
+     * @return a list of {@link ConnectorBusinessDomain} objects representing all configured
+     *     business domains; never {@code null}, and empty if no business domains are configured
      */
     List<ConnectorBusinessDomain> execute();
 }

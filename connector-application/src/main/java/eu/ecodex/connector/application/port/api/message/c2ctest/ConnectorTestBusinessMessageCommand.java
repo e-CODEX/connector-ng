@@ -9,18 +9,19 @@ import java.util.List;
 import lombok.Builder;
 
 /**
- * Represents a record for sending outbound business messages through the connector system.
+ * Command describing an outbound test business message to be sent through the connector system.
  *
- * @param businessDomainIdentifier Represents the unique identifier of the business domain
- *                                 associated with this message.
- * @param backendMessageIdentifier Represents the unique identifier of the message in the backend
- *                                 system.
- * @param as4PropertiesCommand     Represents the test message AS4 properties.
- * @param businessContent          Contains the main business content of the message, including XML
- *                                 structures and associated documents. This field is required.
- * @param attachments              A list of additional attachments associated with the message,
- *                                 such as supplementary documents or metadata. Defaults to an empty
- *                                 list if not provided.
+ * @param businessDomainIdentifier unique identifier of the business domain the message is
+ *                                 associated with (must not be null)
+ * @param backendMessageIdentifier unique identifier of the message in the backend system (must not
+ *                                 be null)
+ * @param as4PropertiesCommand     the AS4 properties of the test message (must not be null)
+ * @param businessContent          the main business content of the message, including XML
+ *                                 structures and associated documents (must not be null)
+ * @param attachments              additional attachments associated with the message, such as
+ *                                 supplementary documents or metadata; may be {@code null}, in
+ *                                 which case it is replaced by an empty list, so the stored value
+ *                                 is never {@code null}
  */
 @Builder
 public record ConnectorTestBusinessMessageCommand(
@@ -30,6 +31,9 @@ public record ConnectorTestBusinessMessageCommand(
     @Nonnull ConnectorMessageBusinessContent businessContent,
     @Nullable List<ConnectorMessageAttachment> attachments
 ) {
+    /**
+     * Canonical constructor; replaces a {@code null} {@code attachments} list with an empty list.
+     */
     public ConnectorTestBusinessMessageCommand {
         attachments = attachments == null ? List.of() : attachments;
     }

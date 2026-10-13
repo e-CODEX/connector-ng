@@ -14,8 +14,13 @@ import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
 
 /**
- * Service interface for retrieving statistics related to connector queues.
+ * Use case for retrieving the statistics of the JMS queues managed by the connector.
  */
 public interface ConnectorRetrieveQueuesStats {
+    /**
+     * Retrieves the current statistics of all monitored queues.
+     *
+     * @return a list of {@link ConnectorQueueStats} objects, one per queue; never {@code null}
+     */
     List<ConnectorQueueStats> execute();
 }

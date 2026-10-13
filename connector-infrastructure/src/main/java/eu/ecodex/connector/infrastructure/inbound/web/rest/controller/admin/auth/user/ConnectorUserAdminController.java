@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.admin.aut
 import static eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest.toDomain;
 
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUser;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUsers;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
@@ -43,7 +43,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     private final ConnectorUpdateUser connectorUpdateUser;
     private final ConnectorEditUser connectorEditUser;
     private final ConnectorRemoveUser connectorRemoveUser;
-    private final ConnectorListUser connectorListUser;
+    private final ConnectorListUsers connectorListUsers;
 
     /**
      * Constructs an instance of {@code ConnectorUserAdminController} with the required service
@@ -59,7 +59,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
      *                                          entities by applying specified changes
      * @param connectorRemoveUser               service for deleting {@link ConnectorUser} entities
      *                                          from the system
-     * @param connectorListUser                 service for retrieving a list of all
+     * @param connectorListUsers                 service for retrieving a list of all
      *                                          {@link ConnectorUser} entities along with their
      *                                          roles
      */
@@ -67,13 +67,13 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier,
         ConnectorRegisterUser connectorRegisterUser, ConnectorUpdateUser connectorUpdateUser,
         ConnectorEditUser connectorEditUser, ConnectorRemoveUser connectorRemoveUser,
-        ConnectorListUser connectorListUser) {
+        ConnectorListUsers connectorListUsers) {
         this.connectorRetrieveUserByIdentifier = connectorRetrieveUserByIdentifier;
         this.connectorRegisterUser = connectorRegisterUser;
         this.connectorUpdateUser = connectorUpdateUser;
         this.connectorEditUser = connectorEditUser;
         this.connectorRemoveUser = connectorRemoveUser;
-        this.connectorListUser = connectorListUser;
+        this.connectorListUsers = connectorListUsers;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
     @Override
     public List<ConnectorUserDto> listUsers() {
-        return connectorListUser.execute().stream().map(ConnectorUserDto::from).toList();
+        return connectorListUsers.execute().stream().map(ConnectorUserDto::from).toList();
     }
 
     @Override

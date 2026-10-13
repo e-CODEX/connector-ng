@@ -25,8 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Default implementation of {@link ConnectorUploadAttachments} responsible for handling the upload
- * workflow of connector attachments.
+ * Default implementation of {@link ConnectorUploadAttachments}.
  */
 @Slf4j
 @Service

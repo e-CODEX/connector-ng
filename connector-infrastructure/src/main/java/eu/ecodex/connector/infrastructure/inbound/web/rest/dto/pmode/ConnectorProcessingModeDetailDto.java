@@ -11,12 +11,11 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
-import eu.ecodex.connector.domain.model.pmode.ConnectorAction;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import lombok.Builder;
@@ -33,12 +32,12 @@ import lombok.Builder;
  * @param businessDomainIdentifier A logical identifier representing the business domain associated
  *                                 with the processing mode.
  * @param truststore               The truststore information associated with the processing mode.
- * @param parties                  The set of {@link ConnectorParty}s involved in the processing
- *                                 mode.
- * @param services                 The set of {@link ConnectorService}s involved in the processing
- *                                 mode.
- * @param actions                  The set of {@link ConnectorAction}s associated with the
+ * @param parties                  The set of {@link ConnectorProcessingModeParty}s involved in the
  *                                 processing mode.
+ * @param services                 The set of {@link ConnectorProcessingModeService}s involved in
+ *                                 the processing mode.
+ * @param actions                  The set of {@link ConnectorProcessingModeAction}s associated with
+ *                                 the processing mode.
  * @param createdAt                The timestamp when the processing mode was created.
  * @param updatedAt                The timestamp when the processing mode was last updated.
  */
@@ -51,9 +50,9 @@ public record ConnectorProcessingModeDetailDto(
     String businessDomainIdentifier,
     ConnectorBusinessDomain businessDomain,
     ConnectorProcessingModeTruststoreDto truststore,
-    Set<ConnectorParty> parties,
-    Set<ConnectorService> services,
-    Set<ConnectorAction> actions,
+    Set<ConnectorProcessingModeParty> parties,
+    Set<ConnectorProcessingModeService> services,
+    Set<ConnectorProcessingModeAction> actions,
     Instant createdAt,
     Instant updatedAt
 ) {

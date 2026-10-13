@@ -14,24 +14,15 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import jakarta.annotation.Nonnull;
 
 /**
- * Interface defining the contract for retrieving a specific attachment associated with a message in
- * the connector system.
- *
- * <p>Usage of this interface allows clients to retrieve attachments for processing or inspection.
+ * Use case for retrieving the metadata of a connector message attachment.
  */
 public interface ConnectorRetrieveAttachment {
     /**
-     * Retrieves a specific attachment associated with a connector message.
+     * Retrieves the {@link ConnectorMessageAttachment} identified by the given identifier.
      *
-     * <p>This method fetches and returns a {@link ConnectorMessageAttachment} object corresponding
-     * to the provided unique identifier. It is used for accessing attachment details such as
-     * metadata and storage information.
+     * @param identifier unique identifier of the attachment to retrieve (must not be null)
      *
-     * @param identifier the unique identifier of the attachment; must not be null
-     *
-     * @return the {@link ConnectorMessageAttachment} corresponding to the given identifier
-     *
-     * @throws NullPointerException if {@code identifier} is null
+     * @return the {@link ConnectorMessageAttachment} associated with the given identifier
      */
     ConnectorMessageAttachment execute(@Nonnull String identifier);
 }

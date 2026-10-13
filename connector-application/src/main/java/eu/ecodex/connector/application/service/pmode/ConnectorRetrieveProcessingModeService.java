@@ -18,7 +18,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorRetrieveProcessingMode} service.
+ * Default implementation of {@link ConnectorRetrieveProcessingMode}.
  */
 @Service
 public class ConnectorRetrieveProcessingModeService implements ConnectorRetrieveProcessingMode {

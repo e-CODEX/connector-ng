@@ -16,19 +16,26 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 
 /**
- * Service interface for listing transport steps for a specific connector message.
+ * Use case for listing the transport steps of connector messages.
  */
 public interface ConnectorListTransportSteps {
     /**
-     * Executes the transport step listing operation.
+     * Retrieves a page of {@link ConnectorMessageTransportStep} objects based on the pagination
+     * parameters and the optional filter criteria carried by the provided
+     * {@link ConnectorTransportStepsListFilter}. All filters are combined with a logical
+     * {@code AND}; a filter whose value is {@code null} or empty is ignored.
+     *
+     * <p>The {@code messageOrRemoteSystemIdentifier} criterion is matched against either the
+     * identifier of the transported message or the identifier assigned by the remote system; a
+     * transport step matches if at least one of the two matches.
      *
      * @param filter the pagination parameters and filter criteria used to retrieve the transport
      *               steps (must not be null)
      *
      * @return a {@link ConnectorPageResult} containing a page of
-     *     {@link ConnectorMessageTransportStep} objects matching the given filters
+     *     {@link ConnectorMessageTransportStep} objects matching the given filter
      *
-     * @throws IllegalArgumentException if {@code pageRequest} is invalid
+     * @throws IllegalArgumentException if the page request contained in {@code filter} is invalid
      */
     ConnectorPageResult<ConnectorMessageTransportStep> execute(
         @Nonnull ConnectorTransportStepsListFilter filter);

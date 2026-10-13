@@ -13,79 +13,87 @@ package eu.ecodex.connector.application.port.spi.message;
 import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
-import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
- * Repository interface for managing {@link ConnectorMessageAttachment}.
+ * Repository (port) for persisting and querying {@link ConnectorMessageAttachment} objects.
  *
- * <p>This interface defines the contract for storing and retrieving attachments that are
- * associated with messages. Attachments typically include documents, such as PDFs, that need to be
- * sent as part of a message. Implementations of this repository interface handle storage operations
- * for these attachments.
+ * <p>Attachments are documents, such as PDFs, that are sent as part of a message. The repository
+ * stores and retrieves their metadata; the content itself is read from the file storage (see
+ * {@code ConnectorFileStorageProvider}).
  */
 public interface ConnectorMessageAttachmentRepository {
     /**
-     * Persists a given ConnectorMessageAttachment entity into the underlying data store. The
-     * attachment typically includes metadata and references to documents or files that are intended
-     * to be sent along with a message. This method ensures that the attachment is stored and made
-     * retrievable for future use.
+     * Persists the given attachment.
      *
-     * @param attachment the ConnectorMessageAttachment entity to be saved, containing details such
-     *                   as the attachment's identifier, name, MIME type, and description.
+     * <p>The attachment carries metadata such as its identifier, name, MIME type and description.
      *
-     * @return the saved ConnectorMessageAttachment entity, including any updates applied during the
-     *     persistence process, such as the generation of an identifier.
+     * @param attachment the attachment to save (must not be null)
+     *
+     * @return the saved {@link ConnectorMessageAttachment}, including any values generated during
+     *     persistence, such as an identifier
      */
     ConnectorMessageAttachment save(ConnectorMessageAttachment attachment);
 
     /**
-     * Retrieves a {@link ConnectorMessageAttachment} based on its unique identifier.
+     * Retrieves an attachment by its unique identifier.
      *
-     * @param identifier the unique identifier of the attachment to be retrieved; must not be null
-     *                   or blank.
+     * @param identifier the unique identifier of the attachment (must not be null or blank)
      *
-     * @return the {@link ConnectorMessageAttachment} matching the specified identifier, or null if
-     *     no such attachment exists.
+     * @return the {@link ConnectorMessageAttachment} matching the given identifier, or {@code null}
+     *     if no such attachment exists
      */
     ConnectorMessageAttachment findByIdentifier(@Nonnull String identifier);
 
+    /**
+     * Retrieves the attachments of a message that have one of the given types.
+     *
+     * @param messageIdentifier identifier of the message the attachments belong to (must not be
+     *                          null)
+     * @param types             the attachment types to match (must not be null)
+     *
+     * @return the matching {@link ConnectorMessageAttachment} objects; never {@code null}, and
+     *     empty if there are none
+     */
     List<ConnectorMessageAttachment> findByMessageIdentifierAndTypes(
         @Nonnull String messageIdentifier, @Nonnull List<ConnectorAttachmentType> types);
 
     /**
-     * Retrieves a paginated collection of {@link ConnectorMessageAttachment} entities based on the
-     * specified {@link ConnectorPageRequest} and the optional filter criteria. All filters are
+     * Retrieves a page of {@link ConnectorMessageAttachment} objects based on the pagination
+     * parameters and the optional filter criteria carried by the given filter. All filters are
      * combined with a logical {@code AND}; a filter whose value is {@code null} or empty is
      * ignored.
      *
      * @param filter the pagination parameters and filter criteria used to retrieve the attachments
      *               (must not be null)
      *
-     * @return a {@link ConnectorPageResult} containing a list of {@link ConnectorMessageAttachment}
-     *     entities matching the given filters for the requested page, along with pagination
-     *     metadata such as total elements and page size.
+     * @return a {@link ConnectorPageResult} containing the attachments matching the filter for the
+     *     requested page, along with pagination metadata such as the total number of elements
      */
     ConnectorPageResult<ConnectorMessageAttachment> findAll(
         @Nonnull ConnectorAttachmentsListFilter filter);
 
     /**
-     * Associates an attachment with a specific message.
+     * Associates an attachment with a message.
      *
-     * <p>This method links an attachment identified by its unique identifier
-     * to a message identified by its unique identifier. The association typically enables the
-     * attached document or file to be retrieved or referenced in communication workflows or logging
-     * purposes related to the message.
+     * <p>The link enables the attached document to be retrieved or referenced in relation to the
+     * message.
      *
-     * @param attachmentIdentifier a non-null and non-blank string representing the unique
-     *                             identifier of the attachment to be linked.
-     * @param messageIdentifier    a non-null and non-blank string representing the unique
-     *                             identifier of the message to which the attachment has to be
-     *                             associated.
+     * @param attachmentIdentifier the unique identifier of the attachment to link (must not be null
+     *                             or blank)
+     * @param messageIdentifier    the unique identifier of the message the attachment is associated
+     *                             with (must not be null or blank)
      */
     void attachToMessage(@Nonnull String attachmentIdentifier, @Nonnull String messageIdentifier);
 
+    /**
+     * Updates the type of attachment.
+     *
+     * @param attachmentIdentifier the unique identifier of the attachment to update (must not be
+     *                             null)
+     * @param type                 the new {@link ConnectorAttachmentType} (must not be null)
+     */
     void updateType(@Nonnull String attachmentIdentifier, @Nonnull ConnectorAttachmentType type);
 }

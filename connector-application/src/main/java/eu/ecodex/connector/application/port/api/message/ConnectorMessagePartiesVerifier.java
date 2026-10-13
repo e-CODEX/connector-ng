@@ -10,30 +10,26 @@
 
 package eu.ecodex.connector.application.port.api.message;
 
-import eu.ecodex.connector.application.exception.message.ConnectorMessagePartyException;
-import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import jakarta.annotation.Nonnull;
 
 /**
- * Verifier responsible for validating the parties involved in a {@link ConnectorBusinessMessage}.
+ * Verifier responsible for validating the parties involved in a {@link ConnectorMessage}.
  *
- * <p>This component ensures that the sender, receiver, and any other
- * relevant parties contained in the message meet the expected requirements (e.g. presence, format,
- * authorization, or consistency).
+ * <p>This component ensures that the sender, receiver, and any other relevant parties contained
+ * in the message meet the expected requirements.
  *
- * <p>If the verification fails, an exception should be thrown to indicate
- * that the message cannot proceed further in the processing pipeline.</p>
+ * <p>If the verification fails, an exception is thrown to indicate that the message cannot
+ * proceed further in the processing pipeline.
  */
 public interface ConnectorMessagePartiesVerifier {
     /**
-     * Verifies that the parties contained in the provided {@link ConnectorMessage} are valid,
-     * according to the implemented validation rules.
+     * Verifies the parties of the given message.
      *
-     * @param message the connector message whose parties must be verified
+     * <p>The method returns normally if the parties meet the requirements. If they do not, the
+     * failure is reported by an exception.
      *
-     * @throws ConnectorMessagePartyException if the parties are missing, invalid, or violate
-     *                                        verification rules
+     * @param message the connector message whose parties are verified (must not be null)
      */
     void verify(@Nonnull ConnectorMessage message);
 }

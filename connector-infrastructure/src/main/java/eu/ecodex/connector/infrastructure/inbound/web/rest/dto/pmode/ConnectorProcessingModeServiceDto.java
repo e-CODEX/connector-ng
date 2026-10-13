@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorService;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import java.io.Serializable;
 import lombok.Builder;
 
@@ -38,7 +38,7 @@ public record ConnectorProcessingModeServiceDto(
      * @return a DTO representing the connector service
      */
     public static ConnectorProcessingModeServiceDto from(
-        ConnectorService service,
+        ConnectorProcessingModeService service,
         String testServiceName,
         String testServiceType) {
         var name = service.name();

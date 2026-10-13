@@ -16,13 +16,13 @@ import java.io.Serializable;
 import lombok.Builder;
 
 /**
- * The Service represents a service provided by the Connector.
+ * The Service represents a service associated with a message in the system.
  *
  * @param name The name of the service
  * @param type The type of the service
  */
 @Builder(toBuilder = true)
-public record ConnectorService(
+public record ConnectorProcessingModeService(
         @NotBlank String name,
         @NotBlank String type
 ) implements Serializable {

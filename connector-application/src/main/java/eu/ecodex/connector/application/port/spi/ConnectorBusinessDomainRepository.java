@@ -15,38 +15,37 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import java.util.List;
 
 /**
- * Defines the contract for managing and querying business domains within the connector system.
+ * Repository (port) for persisting and querying {@link ConnectorBusinessDomain} objects.
  */
 public interface ConnectorBusinessDomainRepository {
     /**
-     * Persists the given ConnectorBusinessDomain in the repository.
+     * Persists the given business domain.
      *
-     * @param businessDomain the business domain to be saved; must not be null. It encapsulates
-     *                       information such as the uuid, description, activation status,
-     *                       associated properties, and configuration source of a business domain.
+     * <p>The business domain encapsulates information such as the UUID, description, activation
+     * status, associated properties and configuration source.
      *
-     * @return the persisted instance of ConnectorBusinessDomain, which reflects the state stored in
-     *     the repository.
+     * @param businessDomain the business domain to save (must not be null)
+     *
+     * @return the persisted {@link ConnectorBusinessDomain}, reflecting the state stored in the
+     *     repository
      */
     ConnectorBusinessDomain save(ConnectorBusinessDomain businessDomain);
 
     /**
-     * Retrieves a {@code ConnectorBusinessDomain} by its unique uuid.
+     * Retrieves a business domain by its identifier.
      *
-     * @param identifier the unique uuid of the business domain to retrieve; must not be null. The
-     *                   uuid encapsulates details such as the message routing lane for the business
-     *                   domain.
+     * @param identifier the identifier of the business domain to retrieve (must not be null)
      *
-     * @return the {@code ConnectorBusinessDomain} associated with the given uuid, or null if no
-     *     matching business domain is found in the repository.
+     * @return the {@link ConnectorBusinessDomain} associated with the given identifier, or
+     *     {@code null} if no matching business domain exists
      */
     ConnectorBusinessDomain findByIdentifier(ConnectorBusinessDomainIdentifier identifier);
 
     /**
-     * Retrieves all available business domain configurations from the repository.
+     * Retrieves all business domains stored in the repository.
      *
-     * @return a list of {@code ConnectorBusinessDomain} instances representing all configured
-     *     business domains. If no business domains are found, an empty list is returned.
+     * @return a list of all configured {@link ConnectorBusinessDomain} objects; never {@code null},
+     *     and empty if none are found
      */
     List<ConnectorBusinessDomain> findAll();
 }

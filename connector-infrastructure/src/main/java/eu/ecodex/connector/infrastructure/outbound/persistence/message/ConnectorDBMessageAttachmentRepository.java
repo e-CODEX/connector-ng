@@ -25,7 +25,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
- * Default Implementation of the {@link ConnectorMessageAttachmentRepository}.
+ * RDBMS implementation of {@link ConnectorMessageAttachmentRepository}.
  */
 @Component
 public class ConnectorDBMessageAttachmentRepository implements

@@ -20,9 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorRetrieveUserByIdentifier} interface, providing services for
- * retrieving {@link ConnectorUser} entities from a repository based on various attributes such as
- * identifier, username, email, or a combination of username and email.
+ * Default implementation of {@link ConnectorRetrieveUserByIdentifier}.
  *
  * <p>This service integrates with a {@link ConnectorUserRepository} to perform data operations and
  * throws a {@link NotFoundException} when a user cannot be found based on the provided parameters.

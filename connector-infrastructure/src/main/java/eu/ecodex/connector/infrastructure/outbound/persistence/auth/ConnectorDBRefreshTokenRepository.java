@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Implementation of the {@link ConnectorRefreshTokenRepository}.
+ * Default implementation of {@link ConnectorRefreshTokenRepository}.
  */
 @Slf4j
 @Service

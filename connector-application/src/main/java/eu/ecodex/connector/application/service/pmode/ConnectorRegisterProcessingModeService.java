@@ -14,10 +14,10 @@ import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusines
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.spi.ConnectorBusinessDomainRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorActionRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorPartyRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.spi.ConnectorProcessingModeParser;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementation of the {@link ConnectorRegisterProcessingMode} service.
+ * Default implementation of {@link ConnectorRegisterProcessingMode}.
  */
 @Slf4j
 @Service
@@ -36,9 +36,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorRegisterProcessingModeService implements ConnectorRegisterProcessingMode {
     private final ConnectorProcessingModeRepository processingModeRepository;
     private final ConnectorBusinessDomainRepository businessDomainRepository;
-    private final ConnectorPartyRepository partyRepository;
-    private final ConnectorActionRepository actionRepository;
-    private final ConnectorServiceRepository serviceRepository;
+    private final ConnectorProcessingModePartyRepository partyRepository;
+    private final ConnectorProcessingModeActionRepository actionRepository;
+    private final ConnectorProcessingModeServiceRepository serviceRepository;
     private final ConnectorProcessingModeParser processingModeParser;
 
     /**
@@ -60,8 +60,9 @@ public class ConnectorRegisterProcessingModeService implements ConnectorRegister
     public ConnectorRegisterProcessingModeService(
         ConnectorProcessingModeRepository processingModeRepository,
         ConnectorBusinessDomainRepository businessDomainRepository,
-        ConnectorPartyRepository partyRepository, ConnectorActionRepository actionRepository,
-        ConnectorServiceRepository serviceRepository,
+        ConnectorProcessingModePartyRepository partyRepository,
+        ConnectorProcessingModeActionRepository actionRepository,
+        ConnectorProcessingModeServiceRepository serviceRepository,
         ConnectorProcessingModeParser processingModeParser) {
         this.processingModeRepository = processingModeRepository;
         this.businessDomainRepository = businessDomainRepository;

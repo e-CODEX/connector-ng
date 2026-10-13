@@ -14,16 +14,17 @@ import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import jakarta.annotation.Nonnull;
 
 /**
- * This contract permits to log in a connector user into the system.
+ * Use case for authenticating a user with a username and a password.
  */
 public interface ConnectorLoginUser {
     /**
-     * Executes user login operation.
+     * Authenticates the user identified by the given credentials.
      *
-     * @param username the username of the user attempting to log in
-     * @param password the password of the user attempting to log in
+     * @param username the username of the user attempting to log in (must not be null)
+     * @param password the password of the user attempting to log in (must not be null)
      *
-     * @return the authentication result
+     * @return the {@link ConnectorUserAuthenticationResult} describing the outcome of the
+     *     authentication
      */
     ConnectorUserAuthenticationResult execute(@Nonnull String username, @Nonnull String password);
 }

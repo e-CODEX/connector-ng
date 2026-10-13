@@ -17,14 +17,12 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Repository interface for managing ConnectorUserRole entities.
- * Provides methods for CRUD operations and specific queries related to user roles.
+ * Repository (port) for persisting and querying {@link ConnectorRole} objects.
  */
 public interface ConnectorRoleRepository {
-
     /**
-     * Persists or updates a ConnectorUserRole entity in the repository.
-     * If the entity already exists, it will be updated. Otherwise, a new entity will be created.
+     * Persists or updates a ConnectorUserRole entity in the repository. If the entity already
+     * exists, it will be updated. Otherwise, a new entity will be created.
      *
      * @param user the ConnectorUserRole entity to be saved or updated
      *
@@ -68,8 +66,8 @@ public interface ConnectorRoleRepository {
     void deleteByUuid(@Nonnull String identifier);
 
     /**
-     * Retrieves a set of {@code ConnectorUserRole} entities whose names match any
-     * of the provided names.
+     * Retrieves a set of {@code ConnectorUserRole} entities whose names match any of the provided
+     * names.
      *
      * @param names a set of role names to search for
      *

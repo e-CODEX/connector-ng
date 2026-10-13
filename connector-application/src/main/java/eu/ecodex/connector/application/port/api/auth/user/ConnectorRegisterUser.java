@@ -16,21 +16,20 @@ import jakarta.annotation.Nonnull;
 
 
 /**
- * Interface for managing the registration and updates of {@link ConnectorUser} entities in the
- * system.
- * Provides methods for creating user information.
+ * Use case for registering a new user in the connector system.
  */
 public interface ConnectorRegisterUser {
     /**
      * Registers a new {@link ConnectorUser} in the system.
      *
-     * @param user the {@link ConnectorUser} to be registered; must not be null and should contain
-     *             valid user information
+     * @param user the {@link ConnectorUser} to register; must not be null and must contain valid
+     *             user information
      *
-     * @return the registered {@link ConnectorUser} with updated metadata (e.g., generated UUID,
-     *     creation timestamp)
+     * @return the registered {@link ConnectorUser} with updated metadata (for example the generated
+     *     UUID and the creation timestamp)
      *
-     * @throws ConnectorUserAlreadyExistsException exception
+     * @throws ConnectorUserAlreadyExistsException if a user with the same identity (for example the
+     *                                             same username) already exists
      */
     ConnectorUser execute(@Nonnull ConnectorUser user);
 }

@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of the {@link ConnectorMessagePartiesVerifier} service.
+ * Default implementation of {@link ConnectorMessagePartiesVerifier}.
  */
 @Slf4j
 @Component

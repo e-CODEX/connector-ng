@@ -13,21 +13,20 @@ package eu.ecodex.connector.application.port.api.stats;
 import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 
 /**
- * Service interface for retrieving message reports.
+ * Use case for retrieving a summary report of the connector messages over a period.
  */
 public interface ConnectorRetrieveMessageReport {
     /**
-     * Executes a request to retrieve a summary of connector message reports for the specified date
-     * range and business domain. The summary includes aggregated and sorted data about messages
-     * grouped by services, parties, months, and years.
+     * Retrieves a summary of the connector messages processed between the given dates, optionally
+     * restricted to a business domain.
      *
-     * @param from           the start date (inclusive) in ISO-8601 format (e.g., "yyyy-MM-dd")
-     * @param to             the end date (inclusive) in ISO-8601 format (e.g., "yyyy-MM-dd")
-     * @param businessDomain the identifier of the target business domain for which message reports
-     *                       are retrieved
+     * @param from           start of the period; the format is defined by the implementation (for
+     *                       example an ISO-8601 date or date-time)
+     * @param to             end of the period; same format as {@code from}
+     * @param businessDomain identifier of the business domain to restrict the report to; may be
+     *                       {@code null} or empty to cover all business domains
      *
-     * @return a {@code ConnectorMessageReportSummary} instance containing the compiled summary of
-     *     message reports for the specified parameters
+     * @return a {@link ConnectorMessageReportSummary} summarizing the messages of the period
      */
     ConnectorMessageReportSummary execute(String from, String to, String businessDomain);
 }

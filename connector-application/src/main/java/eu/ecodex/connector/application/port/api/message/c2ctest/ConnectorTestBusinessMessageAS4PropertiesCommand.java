@@ -1,7 +1,7 @@
 package eu.ecodex.connector.application.port.api.message.c2ctest;
 
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import lombok.Builder;
@@ -18,10 +18,10 @@ import lombok.Builder;
  *                                 be {@code null}.
  * @param finalRecipient           Represents the final recipient of the business message; must not
  *                                 be {@code null}.
- * @param fromParty                The {@link ConnectorParty} representing the sending party in the
- *                                 AS4 exchange; must not be {@code null}
- * @param toParty                  The {@link ConnectorParty} representing the receiving party in
- *                                 the AS4 exchange; must not be {@code null}
+ * @param fromParty                The {@link ConnectorProcessingModeParty} representing the sending
+ *                                 party in the AS4 exchange; must not be {@code null}
+ * @param toParty                  The {@link ConnectorProcessingModeParty} representing the
+ *                                 receiving party in the AS4 exchange; must not be {@code null}
  */
 @Builder
 public record ConnectorTestBusinessMessageAS4PropertiesCommand(
@@ -30,7 +30,7 @@ public record ConnectorTestBusinessMessageAS4PropertiesCommand(
     @Nonnull String conversationIdentifier,
     @Nonnull String originalSender,
     @Nonnull String finalRecipient,
-    @Nonnull ConnectorParty fromParty,
-    @Nonnull ConnectorParty toParty
+    @Nonnull ConnectorProcessingModeParty fromParty,
+    @Nonnull ConnectorProcessingModeParty toParty
 ) {
 }

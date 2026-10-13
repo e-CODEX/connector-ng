@@ -18,8 +18,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation of the {@link ConnectorRetrieveTransportStepByMessageIdentifier}
- * interface.
+ * Default implementation of {@link ConnectorRetrieveTransportStepByMessageIdentifier}.
  */
 @Service
 public class ConnectorRetrieveTransportStepByMessageIdentifierService

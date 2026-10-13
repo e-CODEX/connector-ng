@@ -18,8 +18,8 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
-import eu.ecodex.connector.domain.model.pmode.ConnectorParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageBusinessContent;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageDetachedSignature;
@@ -183,10 +183,10 @@ public class ConnectorRestOutboundMessageParser {
      *
      * @return the corresponding connector party
      */
-    public ConnectorParty toParty(
+    public ConnectorProcessingModeParty toParty(
         ConnectorOutboundMessageParty party,
         ConnectorPartyRoleType roleType) {
-        return ConnectorParty
+        return ConnectorProcessingModeParty
             .builder()
             .identifier(party.identifier())
             .identifierType(party.identifierType())

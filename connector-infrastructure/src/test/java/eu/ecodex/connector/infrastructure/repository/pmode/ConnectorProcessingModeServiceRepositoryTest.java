@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorServiceRepository;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
@@ -35,7 +35,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
 @DisplayName("ConnectorServiceRepository")
-public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorProcessingModeServiceRepositoryTest extends AbstractRepositoryTest {
     private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
 
@@ -65,7 +65,7 @@ public class ConnectorServiceRepositoryTest extends AbstractRepositoryTest {
     }
 
     @Autowired
-    private ConnectorServiceRepository repository;
+    private ConnectorProcessingModeServiceRepository repository;
     @MockitoSpyBean
     private ConnectorServiceJpaRepository jpaRepository;
 

@@ -16,34 +16,51 @@ import jakarta.annotation.Nonnull;
 import java.nio.file.Path;
 
 /**
- * Defines a contract for storing files in an external or internal storage system.
- *
- * <p>Implementations of this interface are responsible for persisting file content
- * to a storage backend such as a local filesystem, cloud storage service, database, or third-party
- * provider.
- *
- * <p>The implementation must handle stream consumption, storage location
- * resolution, and any required metadata handling.
+ * Provider (port) for storing and retrieving the content of connector message attachments in an
+ * underlying storage system, such as a file system, a database or an object store.
  */
 public interface ConnectorFileStorageProvider {
     /**
-     * Saves the given attachment content to the underlying storage system.
+     * Saves the content of the given attachment, read from a file on the local filesystem, to the
+     * underlying storage system.
      *
-     * @param attachment a non-null {@link ConnectorMessageAttachment} metadata associated with the
-     *                   file being stored
-     * @param filePath   the path to the file on the local filesystem to be stored (must not be
-     *                   null)
+     * @param attachment the {@link ConnectorMessageAttachment} metadata associated with the file
+     *                   being stored (must not be null)
+     * @param filePath   the path of the file on the local filesystem whose content is stored (must
+     *                   not be null)
      *
-     * @return a {@link String} representing the storage reference (e.g., object key, path, or URL)
-     *     of the saved file
-     *
-     * @throws NullPointerException if {@code inputStream} is null
+     * @return the storage reference of the saved file (for example an object key, a path or a URL)
      */
     String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull Path filePath);
 
+    /**
+     * Saves the given attachment content, provided as a byte array, to the underlying storage
+     * system.
+     *
+     * @param attachment the {@link ConnectorMessageAttachment} metadata associated with the content
+     *                   being stored (must not be null)
+     * @param content    the content to store (must not be null)
+     *
+     * @return the storage reference of the saved content (for example an object key, a path or a
+     *     URL)
+     */
     String save(@Nonnull ConnectorMessageAttachment attachment, @Nonnull byte[] content);
 
+    /**
+     * Retrieves the content of an attachment from the underlying storage system.
+     *
+     * @param identifier the identifier of the attachment whose content is retrieved (must not be
+     *                   null)
+     *
+     * @return the content of the attachment as a byte array, or {@code null} if no content is
+     *     stored for the given identifier
+     */
     byte[] findByIdentifier(@Nonnull String identifier);
 
+    /**
+     * Returns the type of storage handled by this provider.
+     *
+     * @return the {@link ConnectorAttachmentStorage} identifying this provider's storage mode
+     */
     ConnectorAttachmentStorage getStorage();
 }

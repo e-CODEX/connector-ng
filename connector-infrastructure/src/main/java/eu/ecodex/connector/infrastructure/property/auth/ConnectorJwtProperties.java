@@ -31,6 +31,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "connector.auth.security.jwt")
 public class ConnectorJwtProperties {
     private @NonNull String secret;
-    private @NonNull Duration expiration;
+    private Duration expiration = Duration.ofHours(1);
     private @NonNull ConnectorRefreshTokenProperties refreshToken;
 }

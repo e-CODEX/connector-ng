@@ -17,7 +17,6 @@ import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties
 import java.nio.file.Path;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -29,7 +28,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(value = "connector.file.storage.s3.enable", havingValue = "true")
 public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvider {
     private final S3Client s3Client;
     private final ConnectorS3ProviderProperties s3ProviderProperties;

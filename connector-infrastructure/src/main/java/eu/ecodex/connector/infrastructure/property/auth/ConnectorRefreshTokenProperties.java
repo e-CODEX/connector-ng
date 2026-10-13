@@ -16,6 +16,8 @@ import lombok.NonNull;
 /**
  * Refresh token configuration properties.
  */
-public record ConnectorRefreshTokenProperties(@NonNull Duration expiration,
-                                              @NonNull String cleanupCron) {
+public record ConnectorRefreshTokenProperties(
+    @NonNull Duration expiration,
+    @NonNull String cleanupCron
+) {
 }

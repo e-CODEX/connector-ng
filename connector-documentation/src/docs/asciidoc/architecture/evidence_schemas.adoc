@@ -2,12 +2,12 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-== REM Evidence XML Schemas
+= REM Evidence XML Schemas
 
 ETSI-REM evidence XML is defined by XSD schemas maintained in the `connector-infrastructure` module.
 The Java model classes used at runtime are JAXB bindings generated from these schemas.
 
-=== Schema source location
+== Schema source location
 
 [source,text]
 ----
@@ -15,7 +15,7 @@ connector-infrastructure/src/main/resources/xsd/
 connector-infrastructure/src/main/resources/xjb/spocseu.xjb
 ----
 
-=== Primary schemas (JAXB-generated)
+== Primary schemas (JAXB-generated)
 
 These three schemas drive code generation and define the core evidence structures:
 
@@ -36,7 +36,7 @@ These three schemas drive code generation and define the core evidence structure
 
 |===
 
-=== Supporting schemas (imported at compile/validation time)
+== Supporting schemas (imported at compile/validation time)
 
 |===
 | File | Purpose
@@ -61,7 +61,7 @@ These three schemas drive code generation and define the core evidence structure
 
 |===
 
-=== JAXB bindings
+== JAXB bindings
 
 Package mappings are defined in `spocseu.xjb`:
 
@@ -71,7 +71,7 @@ Package mappings are defined in `spocseu.xjb`:
 The generated Java classes are vendored under `connector-infrastructure/src/main/java/`.
 Namespace-to-class mappings are also recorded in `META-INF/sun-jaxb.episode`.
 
-=== Regenerating JAXB classes
+== Regenerating JAXB classes
 
 To regenerate bindings from the XSD sources (output goes to `build/generated-sources/jaxb/` and does not replace vendored sources):
 
@@ -80,7 +80,7 @@ To regenerate bindings from the XSD sources (output goes to `build/generated-sou
 ./gradlew :connector-infrastructure:generateEvidenceJaxb
 ----
 
-=== Sample evidence XML
+== Sample evidence XML
 
 Example REM evidence instances for testing are available at:
 

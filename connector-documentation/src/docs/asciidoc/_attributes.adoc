@@ -1,0 +1,10 @@
+ifdef::backend-pdf[]
+:imagesdir: {imagesoutdir}
+:title-page:
+:revnumber: {project-version}
+:author: eu-LISA
+:title-logo-image: image:logo.png[pdfwidth=50%,align=center]
+endif::[]
+ifndef::backend-pdf[]
+:imagesdir: ../resources
+endif::[]

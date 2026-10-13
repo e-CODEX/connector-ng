@@ -99,5 +99,7 @@ Once running, the following endpoints are available:
 |===
 | Endpoint | URL
 | Root URL | `http://localhost:30000`
+| API Health | `http://localhost:30000/actuator/health`
+| App Info | `http://localhost:30000/actuator/info`
 | Swagger UI | `http://localhost:30000/swagger-ui/index.html`
 |===

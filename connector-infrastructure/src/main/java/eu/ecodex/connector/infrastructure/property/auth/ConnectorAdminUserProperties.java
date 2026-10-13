@@ -30,6 +30,5 @@ public class ConnectorAdminUserProperties {
     private String password;
     @NonNull
     private String email;
-    @NonNull
-    private Boolean enabled;
+    private Boolean enabled = Boolean.TRUE;
 }

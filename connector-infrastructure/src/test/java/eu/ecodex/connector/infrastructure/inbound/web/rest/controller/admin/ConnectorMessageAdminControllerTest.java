@@ -171,7 +171,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
 
         private MockMultipartHttpServletRequestBuilder buildValidTestMessageRequest() {
             var businessContentFile = new MockMultipartFile(
-                "businessContent.contentFile",
+                "businessContent.xmlContent",
                 "content.xml",
                 MediaType.APPLICATION_XML_VALUE,
                 "<content>test</content>".getBytes()

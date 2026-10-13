@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
  * Represents the business content of an outbound message, comprising a primary business document
  * and its associated content file.
  *
- * @param contentFile      the multipart file that represents the actual business content; must not
+ * @param xmlContent      the multipart file that represents the actual business content; must not
  *                         be null
  * @param businessDocument the {@link ConnectorOutboundMessageBusinessDocument} containing metadata
  *                         and additional details regarding the business document; must not be null
@@ -26,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageBusinessContent(
     @NotNull(message = "The business content file must not be null.")
-    MultipartFile contentFile,
+    MultipartFile xmlContent,
     @NotNull(message = "The business document must not be null.")
     ConnectorOutboundMessageBusinessDocument businessDocument
 ) {

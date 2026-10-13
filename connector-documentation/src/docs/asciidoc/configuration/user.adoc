@@ -44,7 +44,7 @@ the database.
 
 | `connector.admin.username`
 | Username of the built-in admin account.
-| Yes
+| No
 | `admin`
 
 | `connector.admin.password`

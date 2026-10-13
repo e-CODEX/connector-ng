@@ -88,6 +88,7 @@ DB_DIALECT=org.hibernate.dialect.MySQLDialect
 
 # JWT authentication
 JWT_SECRET_KEY=<jwt_secret_key>
+ADMIN_PASSWORD=<admin_password>
 
 # File storage (S3 / MinIO)
 S3_ACCESS_KEY=<access_key>

@@ -24,7 +24,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "connector.admin")
 public class ConnectorAdminUserProperties {
-    private String username = "admin";
+    @NonNull
+    private String username;
     @NonNull
     private String password;
     @NonNull

@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
@@ -45,6 +46,8 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENT_SIGNATURES")
 public class ConnectorMessageBusinessDocumentDetachedSignatureEntity extends BaseEntity {
+    private static final int MAX_SIGNATURE_SIZE = 5 * 1024 * 1024; // 5 MB
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,10 +60,8 @@ public class ConnectorMessageBusinessDocumentDetachedSignatureEntity extends Bas
     @Column(name = "NAME", nullable = false)
     private String name;
 
-    @Lob
     @Basic(fetch = FetchType.LAZY)
-    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
-    @Column(name = "SIGNATURE", nullable = false)
+    @Column(name = "SIGNATURE", nullable = false, length = MAX_SIGNATURE_SIZE)
     private byte[] signature;
 
     @Enumerated(EnumType.STRING)

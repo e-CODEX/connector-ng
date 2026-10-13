@@ -46,6 +46,8 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_PROCESSING_MODES")
 public class ConnectorProcessingModeEntity extends BaseEntity {
+    private static final int MAX_CONTENT_SIZE = 10_000_000;
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,9 +60,9 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     @Column(name = "DESCRIPTION", nullable = false)
     private String description;
 
-    @Size(max = 10_000_000)
+    @Size(max = MAX_CONTENT_SIZE)
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "CONTENT", nullable = false, length = 10_000_000)
+    @Column(name = "CONTENT", nullable = false, length = MAX_CONTENT_SIZE)
     private String content;
 
     @Column(name = "FILENAME", nullable = false)

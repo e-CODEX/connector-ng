@@ -49,6 +49,8 @@ import org.hibernate.annotations.UuidGenerator;
         @Index(name = "IDX_CONNECTOR_MESSAGE_EVIDENCES_UUID", columnList = "UUID"),
     })
 public class ConnectorMessageEvidenceEntity extends BaseEntity {
+    private static final int MAX_CONTENT_SIZE = 10_000_000;
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,9 +64,9 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     @Column(name = "TYPE", nullable = false, updatable = false)
     private ConnectorEvidenceType type;
 
-    @Size(max = 10_000_000)
+    @Size(max = MAX_CONTENT_SIZE)
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "CONTENT", length = 10_000_000)
+    @Column(name = "CONTENT", length = MAX_CONTENT_SIZE)
     private String content;
 
     @Setter

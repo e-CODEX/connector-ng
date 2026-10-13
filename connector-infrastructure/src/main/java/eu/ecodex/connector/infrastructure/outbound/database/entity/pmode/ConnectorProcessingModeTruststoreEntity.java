@@ -42,6 +42,8 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 @Table(name = "CONNECTOR_PROCESSING_MODE_TRUSTSTORES")
 public class ConnectorProcessingModeTruststoreEntity extends BaseEntity {
+    private static final int MAX_CONTENT_SIZE = 5 * 1024 * 1024; // 5 MB
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,9 +52,7 @@ public class ConnectorProcessingModeTruststoreEntity extends BaseEntity {
     @Column(name = "FILENAME", nullable = false)
     private String filename;
 
-    @Lob
-    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
-    @Column(name = "CONTENT", nullable = false)
+    @Column(name = "CONTENT", nullable = false, length = MAX_CONTENT_SIZE)
     private byte[] content;
 
     @Column(name = "PASSWORD", nullable = false)

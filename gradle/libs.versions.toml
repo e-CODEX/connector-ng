@@ -41,6 +41,7 @@ okhttp = "5.3.2"
 opencsv = "5.12.0"
 slf4j-api = "2.0.17"
 jjwt="0.13.0"
+asciidoctor-plugin = "5.0.3"
 
 # tests
 assertj = "3.27.7"
@@ -103,3 +104,8 @@ mockito = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+
+[plugins]
+asciidoctorj = { id ="org.asciidoctor.jvm", version.ref = "asciidoctor-plugin" }
+asciidoctorj-diagram = { id ="org.asciidoctor.jvm.diagram", version.ref = "asciidoctor-plugin" }
+asciidoctorj-pdf = { id ="org.asciidoctor.jvm.pdf", version.ref = "asciidoctor-plugin" }

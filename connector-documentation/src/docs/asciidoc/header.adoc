@@ -13,3 +13,5 @@ endif::imgdir[]
 ifndef::imagesdir[]
 :imagesdir: {basepath}/{imgdir}
 endif::imagesdir[]
+
+include::_attributes.adoc[]

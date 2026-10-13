@@ -2,16 +2,16 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-== Processing of an outgoing evidence message
+= Processing of an outgoing evidence message
 
 This chapter describes how evidence is generated and submitted when triggered from the backend or as a side effect of outbound business message processing.
 
-=== Evidence trigger from the backend
+== Evidence trigger from the backend
 
 The backend can request evidence generation by submitting an evidence trigger message via the backend SOAP API.
 The trigger specifies the evidence type (for example `DELIVERY`) and references the original business message via `refToMessageId`.
 
-[plantuml,outgoing_evidence_1,format=svg, opts=inline]
+[plantuml,outgoing_evidence_1,format=png, opts=inline]
 ----
 @startuml
 
@@ -37,11 +37,11 @@ ConnectorOutboundEvidenceTriggerEventPublisher --> outboundEvidenceTriggerQueue
 
 The message is transformed from the SOAP transition model to the internal `ConnectorMessage` domain model and staged for asynchronous processing.
 
-=== Evidence trigger processing
+== Evidence trigger processing
 
 `ConnectorJmsOutboundEvidenceTriggerListener` consumes trigger messages from the outbound evidence trigger queue and delegates to `ConnectorEvidenceTriggerProcessorService` (aligned with the legacy `EvidenceMessageProcessor` and `EvidenceTriggerStep`).
 
-[plantuml,outgoing_evidence_2,format=svg, opts=inline]
+[plantuml,outgoing_evidence_2,format=png, opts=inline]
 ----
 @startuml
 
@@ -83,7 +83,7 @@ Processing steps:
 . Create a confirmation message and submit it to the gateway via `ConnectorLinkSubmitter`.
 . When `connector.message-processing.send-generated-evidences-to-backend` is enabled, also forward the evidence to the backend.
 
-=== Evidences generated during outbound business processing
+== Evidences generated during outbound business processing
 
 When an outbound business message is processed by `ConnectorOutboundMessagePipeline`, evidences are generated automatically:
 
@@ -92,11 +92,11 @@ When an outbound business message is processed by `ConnectorOutboundMessagePipel
 
 The confirmation message is submitted back to the backend via `ConnectorLinkSubmitter`.
 
-=== Message submitted to the gateway
+== Message submitted to the gateway
 
 Evidence confirmation messages destined for the gateway are submitted through the gateway link client.
 
-[plantuml,outgoing_evidence_3,format=svg, opts=inline]
+[plantuml,outgoing_evidence_3,format=png, opts=inline]
 ----
 @startuml
 

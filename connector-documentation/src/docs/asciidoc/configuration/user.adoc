@@ -1,0 +1,84 @@
+[[user-authentication]]
+= Admin User Authentication Configuration
+
+The connector ships with a built-in web administration interface secured by JWT-based session management.
+These properties configure the JWT token lifecycle and the default admin account used to log in to the admin UI.
+
+IMPORTANT: Change `connector.admin.password` and `connector.auth.security.jwt.secret`
+before deploying to any non-development environment.
+The defaults shown here are insecure placeholders.
+
+.Admin Authentication Properties (7.x)
+|===
+| Property | Description | Optional | Example
+
+| `connector.auth.security.jwt.secret`
+| Base64-encoded secret used to sign JWT session tokens for the admin UI.
+Minimum 256 bits (32 bytes). Never commit to version control.
+| No
+| `TKfopYnLbi4lCospwYxzWv2Hf4JKv2JepfN7n5lYwcE=`
+Generate with: `openssl rand -base64 32`
+
+| `connector.auth.security.jwt.expiration`
+| How long an admin UI session token remains valid before the user must
+re-authenticate.
+| Yes
+| By default, set to **`60m`**
+
+| `connector.auth.security.jwt.issuer`
+| Issuer claim embedded in the JWT.
+| Yes
+| By default, set to **`connector.ecodex.eu`**
+
+| `connector.auth.security.jwt.refresh-token.expiration`
+| How long a refresh token remains valid, allowing the admin UI to silently
+renew a session without re-login.
+| No
+| `30d`
+
+| `connector.auth.security.jwt.refresh-token.cleanup-cron`
+| Cron expression controlling when expired refresh tokens are purged from
+the database.
+| Yes
+| By default, set to **`0 0 3 * * *`** (daily at 03:00)
+
+| `connector.admin.username`
+| Username of the built-in admin account.
+| Yes
+| `admin`
+
+| `connector.admin.password`
+| Password for the built-in admin account.
+| No
+| `${ADMIN_PASSWORD}`
+
+| `connector.admin.enabled`
+| Set to `false` to disable the built-in admin account.
+| Yes
+| By default, set to **`true`**
+
+| `connector.admin.email`
+| Email address associated with the built-in admin account.
+| No
+| `admin@example.com`
+|===
+
+NOTE: Expired refresh tokens accumulate in the database over time.
+The cleanup cron runs at 03:00 by default.
+
+.Configuration example (7.x)
+[source,properties]
+----
+# JWT session management
+connector.auth.security.jwt.secret=${JWT_SECRET}
+connector.auth.security.jwt.expiration=60m
+connector.auth.security.jwt.issuer=connector.ecodex.eu
+connector.auth.security.jwt.refresh-token.expiration=30d
+connector.auth.security.jwt.refresh-token.cleanup-cron=0 0 3 * * *
+
+# Built-in admin account
+connector.admin.username=admin
+connector.admin.password=${ADMIN_PASSWORD}
+connector.admin.enabled=true
+connector.admin.email=admin@example.com
+----

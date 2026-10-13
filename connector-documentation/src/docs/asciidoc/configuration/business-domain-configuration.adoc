@@ -112,10 +112,24 @@ The processing mode and its truststore can then be uploaded at any time through 
 administration API, or through the *Processing modes* screen of the administration UI,
 which posts to the same endpoint.
 
+=== Via the administration UI
+
+Navigate to *Processing modes* in the administration UI and use the upload form to
+submit the processing mode file and its truststore.
+
+image::load_pmode.png[Processing modes upload screen,align="center"]
+
+=== Via the administration API
+
+IMPORTANT: All administration API endpoints require a valid JWT bearer token.
+Obtain a token by authenticating against the login endpoint first (see<<user-authentication>>), then
+include it in every subsequent request via the `Authorization` header.
+
 [source,http]
 ----
 POST /api/v1/admin/processing-modes
 Content-Type: multipart/form-data
+Authorization: Bearer <token>
 ----
 
 .Request parts
@@ -151,10 +165,20 @@ Must be a `.jks`, `.keystore`, `.p12` or `.pfx` file.
 | `12345`
 |===
 
-.Example
+.Step 1 — Obtain a bearer token
 [source,bash]
 ----
-curl -X POST http://localhost:8080/api/v1/admin/processing-modes \
+TOKEN=$(curl -s -X POST http://localhost:<<port>>/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"<password>"}' \
+  | jq -r '.accessToken')
+----
+
+.Step 2 — Register the processing mode
+[source,bash]
+----
+curl -X POST http://localhost:<<port>>/api/v1/admin/processing-modes \
+  -H "Authorization: Bearer ${TOKEN}" \
   -F "businessDomainIdentifier=default_business_domain" \
   -F "description=Default processing mode for domain blue" \
   -F "processingModeFile=@./config/pmode/pmode-blue.xml;type=application/xml" \

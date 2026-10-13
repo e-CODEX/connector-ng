@@ -2,16 +2,16 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-== Processing of an incoming evidence message
+= Processing of an incoming evidence message
 
 This chapter describes how an evidence confirmation message delivered by the gateway is processed.
 An incoming evidence message carries REM evidence XML (for example `DELIVERY` or `NON_DELIVERY`) and references the original business message via `refToMessageId`.
 
-=== Message from gateway to the connector
+== Message from gateway to the connector
 
 The gateway submits messages to the connector via JMS on the gateway reception queue (`connector.queues.gateway-reception-queue`).
 
-[plantuml, incoming_evidence_1, format=svg, opts=inline]
+[plantuml, incoming_evidence_1, format=png, opts=inline]
 ----
 @startuml
 
@@ -33,11 +33,11 @@ gatewayReceptionQueue --> ConnectorGatewayMessageListener : JMS MapMessage
 `ConnectorJmsGatewayMessageListener` parses AS4 properties and payloads from the JMS message.
 When the message has no business content but contains evidence payloads, it is treated as a confirmation message.
 
-=== Confirmation message processing
+== Confirmation message processing
 
 Confirmation messages are handled by `ConnectorInboundEvidenceMessageProcessorService` (aligned with the legacy `EvidenceMessageProcessor`).
 
-[plantuml,incoming_evidence_2,format=svg, opts=inline]
+[plantuml,incoming_evidence_2,format=png, opts=inline]
 ----
 @startuml
 
@@ -77,7 +77,7 @@ Processing steps:
 . Persist accepted evidences and update the business message lifecycle (confirmed/rejected).
 . Forward the confirmation message to the backend via `ConnectorLinkSubmitter`.
 
-=== Generated evidences during inbound business processing
+== Generated evidences during inbound business processing
 
 When an inbound *business* message is processed, the connector may also generate evidences as side effects:
 
@@ -86,11 +86,11 @@ When an inbound *business* message is processed, the connector may also generate
 
 These are handled by `ConnectorInboundMessagePipeline`, not by the confirmation processor above.
 
-=== Message forwarded to the backend
+== Message forwarded to the backend
 
 After processing, the confirmation message is submitted to the backend link partner with the backend routing context of the referenced business message.
 
-[plantuml,incoming_evidence_3,format=svg, opts=inline]
+[plantuml,incoming_evidence_3,format=png, opts=inline]
 ----
 @startuml
 

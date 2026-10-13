@@ -17,13 +17,13 @@ var bootstrapperJar: Provider<RegularFile> =
         }
 
 
-val copyBootJar by tasks.registering(Copy::class) {
+val copyBootJar = tasks.register<Copy>("copyBootJar") {
     description = "Copies the connector jar into the distribution directory"
     from(bootstrapperJar)
     into(layout.buildDirectory.dir("$standalonePath/bin"))
 }
 
-val copyConfig by tasks.registering(Copy::class) {
+val copyConfig = tasks.register<Copy>("copyConfig") {
     description = "Copies the connector configuration into the distribution directory"
     from("src/main/resources/config") {
         include("application.properties", "log4j2.xml", "banner.txt")
@@ -31,7 +31,7 @@ val copyConfig by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("$standalonePath/config"))
 }
 
-val copyKeystores by tasks.registering(Copy::class) {
+val copyKeystores = tasks.register<Copy>("copyKeystores") {
     description = "Copies the connector sample keystores into the distribution directory"
     from("src/main/resources/config/keystores") {
         include("*.jks")
@@ -39,7 +39,7 @@ val copyKeystores by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("$standalonePath/config/keystores"))
 }
 
-val copyScripts by tasks.registering(Copy::class) {
+val copyScripts = tasks.register<Copy>("copyScripts") {
     description = "Copy the connector startup scripts into the distribution directory"
     from("src/main/resources/bin") {
         include("start.sh", "start.bat")
@@ -52,17 +52,16 @@ val copyScripts by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir(standalonePath))
 }
 
-val copyDocumentation by tasks.registering(Copy::class) {
+val copyDocumentation = tasks.register<Copy>("copyDocumentation") {
     description = "Copy the connector documentation into the distribution directory"
     dependsOn(project(":connector-documentation").tasks.named("build"))
-    from(project(":connector-documentation").layout.buildDirectory.dir("docs")) {
+    from(project(":connector-documentation").layout.buildDirectory.dir("docs/asciidoc")) {
         exclude("**/.asciidoctor/**")
     }
     into(layout.buildDirectory.dir("connector-distribution/documentation"))
 }
 
-
-val copyJdbcDrivers by tasks.registering(Copy::class) {
+val copyJdbcDrivers = tasks.register<Copy>("copyJdbcDrivers") {
     description = "Copies JDBC drivers into the distribution lib directory"
 
     val jdbcDriverNames = setOf("mysql", "mariadb", "postgresql", "ojdbc11")
@@ -77,13 +76,13 @@ val copyJdbcDrivers by tasks.registering(Copy::class) {
     into(layout.buildDirectory.dir("$standalonePath/lib"))
 }
 
-val copyDbScripts by tasks.registering(Copy::class) {
+val copyDbScripts = tasks.register<Copy>("copyDbScripts") {
     description = "Copy the connector database scripts into the distribution directory"
     from("src/main/resources/dbscripts")
     into(layout.buildDirectory.dir("connector-distribution/dbscripts"))
 }
 
-val prepareDistribution by tasks.registering {
+val prepareDistribution = tasks.register("prepareDistribution") {
     description = "Prepares the distribution directory"
     dependsOn(
         copyBootJar,

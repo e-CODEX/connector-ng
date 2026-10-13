@@ -24,12 +24,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "connector.admin")
 public class ConnectorAdminUserProperties {
-    @NonNull
-    private String username;
+    private String username = "admin";
     @NonNull
     private String password;
     @NonNull
     private String email;
-    @NonNull
-    private Boolean enabled;
+    private Boolean enabled = Boolean.TRUE;
 }

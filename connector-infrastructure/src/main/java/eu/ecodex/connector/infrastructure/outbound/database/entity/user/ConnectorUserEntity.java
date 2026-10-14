@@ -32,38 +32,8 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
 /**
- * Represents a connector user entity in the identity and access management system.
- * This entity is responsible for persisting user data and their associated roles
- * in the database.
- *
- * <p>Features:
- * - Each user has a unique identifier and universally unique UUID.
- * - User credentials include a username and password, both of which are required and unique.
- * - An optional email address can also be associated with the user.
- * - Indicates whether the user account is enabled or disabled via a boolean flag.
- * - Maintains roles associated with the user through a many-to-many relationship.
- *
- * <p>Annotations:
- * - @Entity: Marks this class as a JPA entity.
- * - @Table: Specifies the table "CONNECTOR_USERS" this entity is mapped to, along with indexes for
- * username and email.
- * - @Id: Indicates the primary key field of the entity.
- * - @GeneratedValue: Defines the primary key generation strategy.
- * - @UuidGenerator: Automatically generates a unique UUID for the entity.
- * - @ManyToMany: Establishes the many-to-many relationship with the ConnectorUserRoleEntity.
- * - @Builder, @Getter, @NoArgsConstructor, @AllArgsConstructor: Lombok annotations to simplify the
- * model.
- *
- * <p>Table Mapping:
- * - Table name: CONNECTOR_USERS
- * - Indexes:
- * - IDX_CONNECTOR_USERS_EMAIL: Index on the "EMAIL" column.
- * - IDX_CONNECTOR_USERS_USERNAME: Index on the "USERNAME" column.
- * - IDX_CONNECTOR_USERS_UUID: Index on the "UUID" column.
- *
- * <p>Relationships:
- * - Roles: Associated roles are managed in the "CONNECTOR_USERS_ROLES_ASSIGNMENTS" join table
- * using a many-to-many relationship with the ConnectorUserRoleEntity.
+ * Represents a connector user entity in the identity and access management system. This entity is
+ * responsible for persisting user data and their associated roles in the database.
  */
 @Builder
 @Entity
@@ -121,9 +91,8 @@ public class ConnectorUserEntity extends BaseEntity {
     }
 
     /**
-     * Sets the roles associated with the user.
-     * This method replaces any existing roles with the provided set.
-     * If the provided set is null, it clears the existing roles.
+     * Sets the roles associated with the user. This method replaces any existing roles with the
+     * provided set. If the provided set is null, it clears the existing roles.
      *
      * @param roles roles to set
      */
@@ -132,17 +101,5 @@ public class ConnectorUserEntity extends BaseEntity {
         if (roles != null) {
             this.roles.addAll(roles);
         }
-    }
-
-    /**
-     * Remove a role to the user's roles.
-     *
-     * @param role role to remove
-     */
-    public void removeRole(ConnectorRoleEntity role) {
-        if (roles == null) {
-            return;
-        }
-        roles.remove(role);
     }
 }

@@ -35,7 +35,8 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_BUSINESS_DOMAINS",
+@Table(
+    name = "CONNECTOR_BUSINESS_DOMAINS",
     indexes = {
         @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_IDENTIFIER", columnList = "IDENTIFIER"),
     })
@@ -44,15 +45,20 @@ public class ConnectorBusinessDomainEntity extends BaseEntity {
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @UuidGenerator
     @Column(name = "UUID", unique = true, nullable = false, updatable = false)
     private String uuid;
+
     @Column(name = "IDENTIFIER", unique = true, nullable = false)
     private String identifier;
-    @Column(name = "DESCRIPTION")
+
+    @Column(name = "DESCRIPTION", length = 512)
     private String description;
+
     @Column(name = "ENABLED")
     private boolean enabled;
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "SOURCE")
     private ConnectorConfigurationSource source;

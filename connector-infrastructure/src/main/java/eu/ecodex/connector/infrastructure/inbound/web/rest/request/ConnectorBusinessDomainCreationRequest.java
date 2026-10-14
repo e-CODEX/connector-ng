@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 /**
@@ -30,8 +31,10 @@ import lombok.Builder;
  */
 @Builder
 public record ConnectorBusinessDomainCreationRequest(
+    @Size(max = 255, message = "The [identifier] must not exceed 255")
     @NotBlank(message = "Business domain identifier must not be blank.")
     String identifier,
+    @Size(max = 512, message = "The [description] must not exceed 512")
     @NotBlank(message = "Business domain description must not be blank.")
     String description,
     @NotNull(message = "Enabled flag must not be null.")

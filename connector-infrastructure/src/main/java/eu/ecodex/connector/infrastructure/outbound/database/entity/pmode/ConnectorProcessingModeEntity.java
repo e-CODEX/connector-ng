@@ -74,15 +74,15 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorPartyEntity> parties = new HashSet<>();
+    private Set<ConnectorProcessingModePartyEntity> parties = new HashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorActionEntity> actions = new HashSet<>();
+    private Set<ConnectorProcessingModeActionEntity> actions = new HashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorServiceEntity> services = new HashSet<>();
+    private Set<ConnectorProcessingModeServiceEntity> services = new HashSet<>();
 
     @Setter
     @OneToOne(mappedBy = "processingMode")

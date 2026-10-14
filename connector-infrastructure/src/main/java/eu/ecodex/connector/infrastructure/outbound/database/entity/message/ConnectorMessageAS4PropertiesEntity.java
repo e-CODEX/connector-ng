@@ -12,9 +12,9 @@ package eu.ecodex.connector.infrastructure.outbound.database.entity.message;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.BaseEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeActionEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModePartyEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeServiceEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,18 +41,29 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_AS4_PROPERTIES",
+@Table(
+    name = "CONNECTOR_MESSAGE_AS4_PROPERTIES",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_EBMS_MESSAGE_IDENTIFIER", columnList
-            = "EBMS_MESSAGE_IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_REFERENCE_TO_IDENTIFIER", columnList
-            = "REFERENCE_TO_IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_CONVERSATION_IDENTIFIER", columnList
-            = "CONVERSATION_IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_ORIGINAL_SENDER", columnList
-            = "ORIGINAL_SENDER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_FINAL_RECIPIENT", columnList
-            = "FINAL_RECIPIENT"),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_EBMS_MESSAGE_IDENTIFIER",
+            columnList = "EBMS_MESSAGE_IDENTIFIER"
+        ),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_REFERENCE_TO_IDENTIFIER",
+            columnList = "REFERENCE_TO_IDENTIFIER"
+        ),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_CONVERSATION_IDENTIFIER",
+            columnList = "CONVERSATION_IDENTIFIER"
+        ),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_ORIGINAL_SENDER",
+            columnList = "ORIGINAL_SENDER"
+        ),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_AS4_PROPERTIES_FINAL_RECIPIENT",
+            columnList = "FINAL_RECIPIENT"
+        )
     })
 public class ConnectorMessageAS4PropertiesEntity extends BaseEntity {
     @Id
@@ -61,13 +72,13 @@ public class ConnectorMessageAS4PropertiesEntity extends BaseEntity {
     private Long id;
 
     @Setter
-    @Column(name = "EBMS_MESSAGE_IDENTIFIER")
+    @Column(name = "EBMS_MESSAGE_IDENTIFIER", updatable = false)
     private String ebmsMessageIdentifier;
 
-    @Column(name = "REFERENCE_TO_IDENTIFIER")
+    @Column(name = "REFERENCE_TO_IDENTIFIER", updatable = false)
     private String referenceToIdentifier;
 
-    @Column(name = "CONVERSATION_IDENTIFIER")
+    @Column(name = "CONVERSATION_IDENTIFIER", updatable = false)
     private String conversationIdentifier;
 
     @Column(name = "ORIGINAL_SENDER", nullable = false)
@@ -78,19 +89,19 @@ public class ConnectorMessageAS4PropertiesEntity extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "SERVICE_ID", nullable = false)
-    private ConnectorServiceEntity service;
+    private ConnectorProcessingModeServiceEntity service;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ACTION_ID", nullable = false)
-    private ConnectorActionEntity action;
+    private ConnectorProcessingModeActionEntity action;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "FROM_PARTY_ID", nullable = false)
-    private ConnectorPartyEntity fromParty;
+    private ConnectorProcessingModePartyEntity fromParty;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "TO_PARTY_ID", nullable = false)
-    private ConnectorPartyEntity toParty;
+    private ConnectorProcessingModePartyEntity toParty;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "MESSAGE_ID", unique = true, nullable = false)

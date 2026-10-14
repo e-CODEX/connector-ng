@@ -44,9 +44,10 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_EVIDENCES",
+@Table(
+    name = "CONNECTOR_MESSAGE_EVIDENCES",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_EVIDENCES_UUID", columnList = "UUID"),
+        @Index(name = "IDX_CONNECTOR_MESSAGE_EVIDENCES_UUID", columnList = "UUID")
     })
 public class ConnectorMessageEvidenceEntity extends BaseEntity {
     private static final int MAX_CONTENT_SIZE = 10_000_000;
@@ -66,7 +67,7 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
 
     @Size(max = MAX_CONTENT_SIZE)
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "CONTENT", length = MAX_CONTENT_SIZE)
+    @Column(name = "CONTENT", nullable = false, updatable = false, length = MAX_CONTENT_SIZE)
     private String content;
 
     @Setter

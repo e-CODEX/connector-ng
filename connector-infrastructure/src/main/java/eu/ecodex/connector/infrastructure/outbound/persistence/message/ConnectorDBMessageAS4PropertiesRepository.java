@@ -5,14 +5,14 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageAS4PropertiesEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.message.ConnectorMessageEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeActionEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModePartyEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeServiceEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageAS4PropertiesJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.ConnectorMessageJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeActionJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModePartyJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBProcessingModeActionRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBProcessingModePartyRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.pmode.ConnectorDBProcessingModeServiceRepository;
@@ -27,9 +27,9 @@ public class ConnectorDBMessageAS4PropertiesRepository
     implements ConnectorMessageAS4PropertiesRepository {
     private final ConnectorMessageJpaRepository messageJpaRepository;
     private final ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository;
-    private final ConnectorServiceJpaRepository serviceJpaRepository;
-    private final ConnectorActionJpaRepository actionJpaRepository;
-    private final ConnectorPartyJpaRepository partyJpaRepository;
+    private final ConnectorProcessingModeServiceJpaRepository serviceJpaRepository;
+    private final ConnectorProcessingModeActionJpaRepository actionJpaRepository;
+    private final ConnectorProcessingModePartyJpaRepository partyJpaRepository;
 
     /**
      * Constructs a new instance of the {@link ConnectorDBMessageAS4PropertiesRepository} class.
@@ -44,9 +44,9 @@ public class ConnectorDBMessageAS4PropertiesRepository
     public ConnectorDBMessageAS4PropertiesRepository(
         ConnectorMessageJpaRepository messageJpaRepository,
         ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository,
-        ConnectorServiceJpaRepository serviceJpaRepository,
-        ConnectorActionJpaRepository actionJpaRepository,
-        ConnectorPartyJpaRepository partyJpaRepository) {
+        ConnectorProcessingModeServiceJpaRepository serviceJpaRepository,
+        ConnectorProcessingModeActionJpaRepository actionJpaRepository,
+        ConnectorProcessingModePartyJpaRepository partyJpaRepository) {
         this.messageJpaRepository = messageJpaRepository;
         this.as4PropertiesJpaRepository = as4PropertiesJpaRepository;
         this.serviceJpaRepository = serviceJpaRepository;
@@ -96,10 +96,10 @@ public class ConnectorDBMessageAS4PropertiesRepository
     private ConnectorMessageAS4PropertiesEntity toEntity(
         ConnectorMessageAS4Properties as4Properties,
         ConnectorMessageEntity message,
-        ConnectorServiceEntity service,
-        ConnectorActionEntity action,
-        ConnectorPartyEntity fromParty,
-        ConnectorPartyEntity toParty) {
+        ConnectorProcessingModeServiceEntity service,
+        ConnectorProcessingModeActionEntity action,
+        ConnectorProcessingModePartyEntity fromParty,
+        ConnectorProcessingModePartyEntity toParty) {
         return ConnectorMessageAS4PropertiesEntity
             .builder()
             .referenceToIdentifier(as4Properties.referenceToIdentifier())

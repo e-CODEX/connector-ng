@@ -41,11 +41,12 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_ATTACHMENTS",
+@Table(
+    name = "CONNECTOR_MESSAGE_ATTACHMENTS",
     indexes = {
         @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_IDENTIFIER", columnList = "IDENTIFIER"),
         @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_NAME", columnList = "NAME"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_TYPE", columnList = "TYPE"),
+        @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_TYPE", columnList = "TYPE")
     }
 )
 public class ConnectorMessageAttachmentEntity extends BaseEntity {

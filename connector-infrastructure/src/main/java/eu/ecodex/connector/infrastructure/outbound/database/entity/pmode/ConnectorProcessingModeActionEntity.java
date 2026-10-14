@@ -36,11 +36,12 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_ACTIONS",
+@Table(
+    name = "CONNECTOR_ACTIONS",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_ACTIONS_NAME", columnList = "NAME"),
+        @Index(name = "IDX_CONNECTOR_ACTIONS_NAME", columnList = "NAME")
     })
-public class ConnectorActionEntity extends BaseEntity {
+public class ConnectorProcessingModeActionEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

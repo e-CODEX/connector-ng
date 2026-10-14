@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,7 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public record ConnectorProcessingModeTruststoreRequest(
     @NotBlank(message = "The truststore password must not be empty.")
+    @Size(max = 255, message = "The [password] must not exceed 255 characters.")
     String password,
+
     @NotNull(message = "The truststore file must not be empty.")
     MultipartFile truststoreFile
 ) {

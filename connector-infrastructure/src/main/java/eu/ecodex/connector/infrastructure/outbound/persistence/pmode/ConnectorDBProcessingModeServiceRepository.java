@@ -14,9 +14,9 @@ import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeSer
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorServiceEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeServiceEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeServiceJpaRepository;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.data.domain.Sort;
@@ -28,20 +28,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorDBProcessingModeServiceRepository
     implements ConnectorProcessingModeServiceRepository {
-    private final ConnectorServiceJpaRepository serviceJpaRepository;
+    private final ConnectorProcessingModeServiceJpaRepository serviceJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
     /**
      * Constructs a new instance of {@code ConnectorServiceRepositoryImpl}.
      *
-     * @param serviceJpaRepository        the {@link ConnectorServiceJpaRepository} used to perform
-     *                                    CRUD operations on ConnectorService entities.
+     * @param serviceJpaRepository        the {@link ConnectorProcessingModeServiceJpaRepository}
+     *                                    used to perform CRUD operations on ConnectorService
+     *                                    entities.
      * @param processingModeJpaRepository the {@link ConnectorProcessingModeJpaRepository} used to
      *                                    perform CRUD operations on ConnectorProcessingMode
      *                                    entities and retrieve processing mode configurations.
      */
     public ConnectorDBProcessingModeServiceRepository(
-        ConnectorServiceJpaRepository serviceJpaRepository,
+        ConnectorProcessingModeServiceJpaRepository serviceJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.serviceJpaRepository = serviceJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
@@ -49,19 +50,20 @@ public class ConnectorDBProcessingModeServiceRepository
 
     /**
      * Converts a {@link ConnectorProcessingModeService} and a {@link ConnectorProcessingModeEntity}
-     * into a {@link ConnectorServiceEntity}.
+     * into a {@link ConnectorProcessingModeServiceEntity}.
      *
      * @param service        the {@link ConnectorProcessingModeService} to be converted
      * @param processingMode the {@link ConnectorProcessingModeEntity} to associate with the
-     *                       resulting {@link ConnectorServiceEntity}
+     *                       resulting {@link ConnectorProcessingModeServiceEntity}
      *
-     * @return a new {@link ConnectorServiceEntity} instance with values derived from the provided
-     *     {@link ConnectorProcessingModeService} and {@link ConnectorProcessingModeEntity}
+     * @return a new {@link ConnectorProcessingModeServiceEntity} instance with values derived from
+     *     the provided {@link ConnectorProcessingModeService} and
+     *     {@link ConnectorProcessingModeEntity}
      */
-    public static ConnectorServiceEntity toEntity(
+    public static ConnectorProcessingModeServiceEntity toEntity(
         ConnectorProcessingModeService service,
         ConnectorProcessingModeEntity processingMode) {
-        return ConnectorServiceEntity
+        return ConnectorProcessingModeServiceEntity
             .builder()
             .name(service.name())
             .type(service.type())
@@ -70,15 +72,16 @@ public class ConnectorDBProcessingModeServiceRepository
     }
 
     /**
-     * Converts a {@link ConnectorServiceEntity} instance to a
+     * Converts a {@link ConnectorProcessingModeServiceEntity} instance to a
      * {@link ConnectorProcessingModeService} domain object.
      *
-     * @param entity the {@link ConnectorServiceEntity} to be converted
+     * @param entity the {@link ConnectorProcessingModeServiceEntity} to be converted
      *
      * @return a new {@link ConnectorProcessingModeService} instance populated with data from the
      *     provided entity, or {@code null} if the input entity is {@code null}
      */
-    public static ConnectorProcessingModeService toDomain(ConnectorServiceEntity entity) {
+    public static ConnectorProcessingModeService toDomain(
+        ConnectorProcessingModeServiceEntity entity) {
         if (entity == null) {
             return null;
         }

@@ -19,7 +19,7 @@ import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.ServiceTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorServiceJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeServiceJpaRepository;
 import eu.ecodex.connector.infrastructure.repository.AbstractRepositoryTest;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -67,7 +67,7 @@ public class ConnectorProcessingModeServiceRepositoryTest extends AbstractReposi
     @Autowired
     private ConnectorProcessingModeServiceRepository repository;
     @MockitoSpyBean
-    private ConnectorServiceJpaRepository jpaRepository;
+    private ConnectorProcessingModeServiceJpaRepository jpaRepository;
 
     @Nested
     @DisplayName("save all")

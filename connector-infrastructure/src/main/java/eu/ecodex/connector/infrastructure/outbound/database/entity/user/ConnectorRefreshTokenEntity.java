@@ -34,9 +34,10 @@ import org.hibernate.annotations.UuidGenerator;
  */
 @Builder
 @Entity
-@Table(name = "CONNECTOR_REFRESH_TOKENS",
+@Table(
+    name = "CONNECTOR_REFRESH_TOKENS",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_TOKEN", columnList = "TOKEN"),
+        @Index(name = "IDX_CONNECTOR_REFRESH_TOKENS_TOKEN", columnList = "TOKEN")
     })
 @Getter
 @NoArgsConstructor

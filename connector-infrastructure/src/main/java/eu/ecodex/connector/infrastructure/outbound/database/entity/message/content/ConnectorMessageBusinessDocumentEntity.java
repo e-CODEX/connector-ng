@@ -42,9 +42,10 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS",
+@Table(
+    name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS_AES_TYPE", columnList = "AES_TYPE"),
+        @Index(name = "IDX_CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS_AES_TYPE", columnList = "AES_TYPE")
     }
 )
 public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {

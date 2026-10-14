@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
@@ -16,6 +16,8 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.io.Serializable;
 import lombok.Builder;
 
 /**
@@ -47,22 +49,31 @@ import lombok.Builder;
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageAS4Properties(
     String ebmsIdentifier,
+
     String conversationIdentifier,
-    @NotBlank(message = "The original sender must not be blank.")
+
+    @NotBlank(message = "The [originalSender] must not be blank.")
+    @Size(max = 255, message = "The [originalSender] must not exceed 255")
     String originalSender,
-    @NotBlank(message = "The final recipient must not be blank.")
+
+    @NotBlank(message = "The [finalRecipient] must not be blank.")
+    @Size(max = 255, message = "The [finalRecipient] must not exceed 255")
     String finalRecipient,
+
     @Valid
-    @NotNull(message = "The service must not be null.")
+    @NotNull(message = "The [service] must not be null.")
     ConnectorOutboundMessageService service,
+
     @Valid
-    @NotNull(message = "The action must not be null.")
+    @NotNull(message = "The [action] must not be null.")
     ConnectorOutboundMessageAction action,
+
     @Valid
-    @NotNull(message = "The from party must not be null.")
+    @NotNull(message = "The [fromParty] must not be null.")
     ConnectorOutboundMessageParty fromParty,
+
     @Valid
-    @NotNull(message = "The to party must not be null.")
+    @NotNull(message = "The [toParty] must not be null.")
     ConnectorOutboundMessageParty toParty
-) {
+) implements Serializable {
 }

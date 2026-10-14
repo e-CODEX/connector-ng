@@ -33,7 +33,7 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.Connector
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.parser.ConnectorRestOutboundMessageParser;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.test.ConnectorTestMessageRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.c2ctest.ConnectorTestMessageRequest;
 import eu.ecodex.connector.infrastructure.outbound.export.ConnectorMessageReportExporterFactory;
 import java.io.IOException;
 import java.time.Instant;

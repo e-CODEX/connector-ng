@@ -11,19 +11,17 @@
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
- * Represents a request to refresh a connector's access token using a provided refresh token.
- * This request is typically used in authentication flows to obtain a new access token
- * without requiring the user to re-authenticate.
+ * Represents a request to refresh a user's access token using a refresh token.
  *
- * <p>The {@code refreshToken} field is the token used to refresh the authentication state.
+ * @param refreshToken the refresh token used to refresh the authentication session (must not be
+ *                     blank)
  */
 @Builder
 public record ConnectorRefreshTokenRequest(
-    @NotNull(message = "Refresh token is mandatory")
-    @NotBlank(message = "Refresh token must not be blank")
-    String refreshToken) {
+    @NotBlank(message = "The [refreshToken] token must not be blank")
+    String refreshToken
+) {
 }

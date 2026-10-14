@@ -19,27 +19,29 @@ import lombok.Builder;
 /**
  * Represents a request for creating a new business domain within the connector system.
  *
- * <p>This record captures the necessary information required to define and register a new
- * business domain. It is used as part of the request payload for administrative operations related
- * to business domain management.
- *
- * @param identifier  The unique identifier for the business domain.
- * @param description A textual description of the business domain.
- * @param enabled     A boolean flag indicating if the business domain is active or disabled.
- * @param source      Identifies the configuration source associated with the business domain. The
- *                    value must be non-null and represents the origin of configuration data.
+ * @param identifier  the unique identifier of the business domain (must not be blank, at most 255
+ *                    characters)
+ * @param description a textual description of the business domain (must not be blank, at most 512
+ *                    characters)
+ * @param enabled     whether the business domain is active ({@code true}) or disabled
+ *                    ({@code false}) (must not be null)
+ * @param source      the {@link ConnectorConfigurationSource} identifying the origin of the
+ *                    configuration data of the business domain (must not be null)
  */
 @Builder
 public record ConnectorBusinessDomainCreationRequest(
     @Size(max = 255, message = "The [identifier] must not exceed 255")
-    @NotBlank(message = "Business domain identifier must not be blank.")
+    @NotBlank(message = "The [identifier] must not be blank.")
     String identifier,
+
     @Size(max = 512, message = "The [description] must not exceed 512")
-    @NotBlank(message = "Business domain description must not be blank.")
+    @NotBlank(message = "The [description] must not be blank.")
     String description,
-    @NotNull(message = "Enabled flag must not be null.")
+
+    @NotNull(message = "The [enabled] flag must not be null.")
     Boolean enabled,
-    @NotNull(message = "Configuration source must not be null.")
+
+    @NotNull(message = "The [source] must not be null.")
     ConnectorConfigurationSource source
 ) {
 }

@@ -104,7 +104,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
         log.debug("Editing existing user");
         var registered = connectorEditUser.execute(
             identifier,
-            ConnectorEditUserRequest.fromCommand(identifier, userRequest)
+            ConnectorEditUserRequest.toCommand(identifier, userRequest)
         );
 
         log.debug("User edited successfully");

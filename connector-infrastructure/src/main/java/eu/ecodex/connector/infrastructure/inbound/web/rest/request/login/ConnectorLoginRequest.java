@@ -10,21 +10,21 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.login;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 /**
- * Represents a request to log in to the connector system using user credentials.
- * This request is used in authentication flows to initiate a login process and
- * obtain an authentication token upon successful validation.
- *
- * <p>The request contains the following details:
- * - username: The identifier for the user attempting to log in.
- * - password: The credential associated with the provided username.
+ * Represents a request to log in to the connector system using user credentials. This request is
+ * used in authentication flows to initiate a login process and obtain an authentication token upon
+ * successful validation.
  */
 @Builder
-public record ConnectorLoginRequest(@NotNull(message = "Username is mandatory")
-                                    String username,
-                                    @NotNull(message = "Password is mandatory")
-                                    String password) {
+public record ConnectorLoginRequest(
+    @NotBlank(message = "The [username] must not be blank")
+    String username,
+
+    @NotBlank(message = "The [password] must not be blank")
+    String password
+) {
 }

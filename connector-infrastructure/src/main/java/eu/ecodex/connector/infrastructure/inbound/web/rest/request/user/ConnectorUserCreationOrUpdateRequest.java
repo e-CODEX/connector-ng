@@ -22,32 +22,43 @@ import lombok.Builder;
 
 
 /**
- * Represents a request for creating or updating a user in the connector system.
+ * Represents a request to create a new user or to fully update an existing user of the connector
+ * system.
+ *
+ * @param username the username (must not be blank, at most 255 characters)
+ * @param password the clear-text password, to be hashed by the use case; between 6 and 255
+ *                 characters if provided; may be {@code null}
+ * @param email    the email address; must be a valid email address of at most 255 characters if
+ *                 provided; may be {@code null}
+ * @param enabled  whether the user account is enabled (must not be null)
+ * @param roles    the names of the roles to assign to the user; each name must not be blank; may be
+ *                 {@code null} or empty
  */
 @Builder(toBuilder = true)
 public record ConnectorUserCreationOrUpdateRequest(
-    @NotBlank(message = "Username must not be blank")
+    @NotBlank(message = "The [username] must not be blank")
     @Size(max = 255, message = "The [username] must not exceed 255 characters")
     String username,
 
     @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
     String password,
 
-    @Email(message = "Email must be a valid email address")
+    @Email(message = "The [email] must be a valid email address")
     @Size(max = 255, message = "The [email] must not exceed 255 characters")
     String email,
 
-    @NotNull(message = "Enabled must not be null")
+    @NotNull(message = "The [enabled] must not be null")
     Boolean enabled,
 
     Set<@NotBlank(message = "Role must not be blank") String> roles
 ) {
     /**
-     * Map a request user into a domain user.
+     * Maps a user creation or update request to a domain user.
      *
-     * @param userRequest user to map
+     * @param userRequest the {@link ConnectorUserCreationOrUpdateRequest} to map (must not be
+     *                    null)
      *
-     * @return domain user
+     * @return the {@link ConnectorUser} built from the request
      */
     public static ConnectorUser toDomain(ConnectorUserCreationOrUpdateRequest userRequest) {
         return ConnectorUser.builder()

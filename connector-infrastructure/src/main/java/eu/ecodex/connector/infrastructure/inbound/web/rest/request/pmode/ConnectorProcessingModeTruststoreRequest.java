@@ -10,28 +10,27 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 
+import eu.ecodex.connector.infrastructure.inbound.web.rest.validator.constraints.NotEmptyFile;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Represents the truststore configuration required for a connector's processing mode. This record
- * encapsulates the details of the truststore, including its password and the associated truststore
- * file.
+ * Represents the truststore configuration required for a connector processing mode.
  *
- * @param password       The password used to access the truststore. It must not be null.
- * @param truststoreFile The truststore file containing the necessary certificates. It must not be
- *                       null.
+ * @param password       the password used to access the truststore (must not be blank, at most 255
+ *                       characters)
+ * @param truststoreFile the truststore file containing the trusted certificates (must not be null
+ *                       or empty)
  */
 @Builder
 public record ConnectorProcessingModeTruststoreRequest(
-    @NotBlank(message = "The truststore password must not be empty.")
+    @NotBlank(message = "The truststore password must not be blank.")
     @Size(max = 255, message = "The [password] must not exceed 255 characters.")
     String password,
 
-    @NotNull(message = "The truststore file must not be empty.")
+    @NotEmptyFile(message = "The [truststoreFile] must not be empty.")
     MultipartFile truststoreFile
 ) {
 }

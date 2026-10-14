@@ -10,15 +10,17 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 /**
- * Represents a request to log out a connector's user.
+ * Represents a request to log out a user of the connector system.
  *
- * <p>The request carries a token used to log out the user, typically obtained from authentication.
+ * @param refreshToken the refresh token to invalidate (must not be null)
  */
 @Builder
-public record ConnectorLogoutRequest(@NotNull(message = "Refresh token must not be null")
-                                     String refreshToken) {
+public record ConnectorLogoutRequest(
+    @NotBlank(message = "The [refreshToken] must not be blank")
+    String refreshToken
+) {
 }

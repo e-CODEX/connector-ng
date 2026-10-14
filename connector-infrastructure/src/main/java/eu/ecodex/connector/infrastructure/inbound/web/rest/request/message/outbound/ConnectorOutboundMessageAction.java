@@ -8,23 +8,23 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
 import jakarta.validation.constraints.NotBlank;
+import java.io.Serializable;
 import lombok.Builder;
 
 /**
  * Represents an action associated with an outbound message in the connector context.
  *
- * <p>The action typically conveys a specific instruction or intent for processing the outbound
- * message. The name of the action must be provided and cannot be blank.
+ * <p>The action conveys a specific instruction or intent for processing the outbound message
+ * (in the eDelivery/AS4 sense). Its name must be provided and cannot be blank.
  *
- * <p>Bean Validation annotations are used to ensure the validity of the provided action name.
- *
- * @param name the name of the action; must not be blank
+ * @param name the name of the action (must not be blank)
  */
 @Builder
 public record ConnectorOutboundMessageAction(
-    @NotBlank(message = "Action name must not be null") String name
-) {
+    @NotBlank(message = "The [name] must not be blank")
+    String name
+) implements Serializable {
 }

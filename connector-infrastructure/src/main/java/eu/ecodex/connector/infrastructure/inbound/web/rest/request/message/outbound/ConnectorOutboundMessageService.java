@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
@@ -16,12 +16,15 @@ import lombok.Builder;
 /**
  * Represents a service associated with an outbound message request.
  *
- * @param name the name of the service; must not be blank
- * @param type the type of the service; must not be blank
+ * @param name the name of the service (must not be blank)
+ * @param type the type of the service (must not be blank)
  */
 @Builder
 public record ConnectorOutboundMessageService(
-    @NotBlank String name,
-    @NotBlank String type
+    @NotBlank(message = "The [name] must not be blank")
+    String name,
+
+    @NotBlank(message = "The [type] must not be blank")
+    String type
 ) {
 }

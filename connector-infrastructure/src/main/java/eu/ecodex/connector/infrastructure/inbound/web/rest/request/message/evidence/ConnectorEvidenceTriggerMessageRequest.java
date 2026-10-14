@@ -17,21 +17,22 @@ import lombok.Builder;
 
 /**
  * Represents a request to trigger an evidence-related operation for a specific business message in
- * the connector. This record encapsulates the relevant information needed to initiate the process.
+ * the connector. This record encapsulates the information needed to initiate the process.
  *
- * @param evidenceType The type of evidence being triggered. It corresponds to a predefined set of
- *                     evidence types in the {@link ConnectorEvidenceType} enumeration.
- * @param identifiers  A set of identifiers associated with the trigger message. These identifiers
- *                     provide a correlation for the related business message. Refer to
- *                     {@link ConnectorEvidenceTriggerMessageIdentifiers} for details on the
- *                     structure and purpose of these identifiers.
+ * @param evidenceType the type of evidence being triggered, one of the values of
+ *                     {@link ConnectorEvidenceType} (must not be null)
+ * @param identifiers  the identifiers of the trigger message, used to correlate the request with
+ *                     the related business message; see
+ *                     {@link ConnectorEvidenceTriggerMessageIdentifiers} for their structure and
+ *                     purpose (must not be null, and is validated recursively)
  */
 @Builder(toBuilder = true)
 public record ConnectorEvidenceTriggerMessageRequest(
-    @NotNull(message = "Evidence type must not be null")
+    @NotNull(message = "The [evidenceType] must not be null")
     ConnectorEvidenceType evidenceType,
+
     @Valid
-    @NotNull(message = "Identifiers must not be null")
+    @NotNull(message = "[Identifiers] must not be null")
     ConnectorEvidenceTriggerMessageIdentifiers identifiers
 ) {
 }

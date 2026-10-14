@@ -1,0 +1,21 @@
+ifndef::header[]
+include::{basepath}/header.adoc[]
+endif::header[]
+
+= HTTPS and Transport Security
+
+The connector listens on plain HTTP and does not terminate TLS itself.
+A reverse proxy — Nginx, Apache httpd, Traefik, or equivalent — should be placed in front of it for any deployment beyond a local development setup.
+
+Without HTTPS, the following are exposed to network interception:
+
+* All traffic to the connector, except SOAP API messages which are encrypted and signed at the application level by default.
+
+NOTE: The SOAP API used for message exchange with backend partners is an exception.
+Messages are encrypted and signed at the application level by default, so transport-layer encryption is not a strict requirement for that interface — though still recommended.
+
+IMPORTANT: Do not expose the connector directly on a network without TLS.
+Ensure a reverse proxy with a valid certificate is in place before connecting any backend or gateway partner.
+
+NOTE: Native mTLS support is under development and will be available in a future release.
+In the meantime, mTLS can be enforced at the reverse proxy layer independently of the connector.

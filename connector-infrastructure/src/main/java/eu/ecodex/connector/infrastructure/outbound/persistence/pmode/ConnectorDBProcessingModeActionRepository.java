@@ -13,9 +13,9 @@ package eu.ecodex.connector.infrastructure.outbound.persistence.pmode;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeActionEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorActionJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeActionJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
 import java.util.List;
 import lombok.NonNull;
@@ -28,11 +28,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorDBProcessingModeActionRepository
     implements ConnectorProcessingModeActionRepository {
-    private final ConnectorActionJpaRepository actionJpaRepository;
+    private final ConnectorProcessingModeActionJpaRepository actionJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
     public ConnectorDBProcessingModeActionRepository(
-        ConnectorActionJpaRepository actionJpaRepository,
+        ConnectorProcessingModeActionJpaRepository actionJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.actionJpaRepository = actionJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
@@ -40,18 +40,19 @@ public class ConnectorDBProcessingModeActionRepository
 
     /**
      * Converts a {@link ConnectorProcessingModeAction} object and a
-     * {@link ConnectorProcessingModeEntity} into a {@link ConnectorActionEntity} object.
+     * {@link ConnectorProcessingModeEntity} into a {@link ConnectorProcessingModeActionEntity}
+     * object.
      *
      * @param action         the action containing the details to be mapped to the entity
      * @param processingMode the processing mode entity associated with the action
      *
-     * @return a new instance of {@link ConnectorActionEntity} populated with data from the provided
-     *     arguments
+     * @return a new instance of {@link ConnectorProcessingModeActionEntity} populated with data
+     *     from the provided arguments
      */
-    public static ConnectorActionEntity toEntity(
+    public static ConnectorProcessingModeActionEntity toEntity(
         ConnectorProcessingModeAction action,
         ConnectorProcessingModeEntity processingMode) {
-        return ConnectorActionEntity
+        return ConnectorProcessingModeActionEntity
             .builder()
             .name(action.name())
             .processingMode(processingMode)
@@ -59,13 +60,15 @@ public class ConnectorDBProcessingModeActionRepository
     }
 
     /**
-     * Converts a {@link ConnectorActionEntity} to a {@link ConnectorProcessingModeAction}.
+     * Converts a {@link ConnectorProcessingModeActionEntity} to a
+     * {@link ConnectorProcessingModeAction}.
      *
-     * @param entity the {@link ConnectorActionEntity} to be converted
+     * @param entity the {@link ConnectorProcessingModeActionEntity} to be converted
      *
      * @return the corresponding {@link ConnectorProcessingModeAction} instance
      */
-    public static ConnectorProcessingModeAction toDomain(ConnectorActionEntity entity) {
+    public static ConnectorProcessingModeAction toDomain(
+        ConnectorProcessingModeActionEntity entity) {
         if (entity == null) {
             return null;
         }

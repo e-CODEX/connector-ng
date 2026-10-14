@@ -10,21 +10,23 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.pmode;
 
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorActionEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeServiceEntity;
 import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for performing CRUD operations on the {@link ConnectorActionEntity}.
+ * Repository interface for performing CRUD operations on the
+ * {@link ConnectorProcessingModeServiceEntity}.
  */
 @Repository
-public interface ConnectorActionJpaRepository extends JpaRepository<ConnectorActionEntity, Long> {
-    ConnectorActionEntity findByNameAndProcessingModeBusinessDomainIdentifier(
+public interface ConnectorProcessingModeServiceJpaRepository
+    extends JpaRepository<ConnectorProcessingModeServiceEntity, Long> {
+    ConnectorProcessingModeServiceEntity findByNameAndProcessingModeBusinessDomainIdentifier(
         String name, String businessDomainIdentifier);
 
-    List<ConnectorActionEntity> findByProcessingModeBusinessDomainIdentifier(
+    List<ConnectorProcessingModeServiceEntity> findByProcessingModeBusinessDomainIdentifier(
         String businessDomainIdentifier,
         Sort sort
     );

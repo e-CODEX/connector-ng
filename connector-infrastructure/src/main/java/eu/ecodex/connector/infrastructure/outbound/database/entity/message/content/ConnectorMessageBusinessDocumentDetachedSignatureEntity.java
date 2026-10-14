@@ -23,17 +23,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.Length;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
 
 /**
  * Represents the Connector Message Business Document Detached Signature entity used to manage and
@@ -68,7 +64,7 @@ public class ConnectorMessageBusinessDocumentDetachedSignatureEntity extends Bas
     @Column(name = "MIME_TYPE", nullable = false)
     private DetachedSignatureMimeType mimeType;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BUSINESS_DOCUMENT_ID", unique = true, nullable = false)
     private ConnectorMessageBusinessDocumentEntity businessDocument;
 }

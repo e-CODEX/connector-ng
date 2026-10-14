@@ -44,21 +44,28 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_TRANSPORT_STEPS",
+@Table(
+    name = "CONNECTOR_MESSAGE_TRANSPORT_STEPS",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_REMOTE_SYSTEM_IDENTIFIER",
-            columnList = "REMOTE_SYSTEM_IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_LINK_PARTNER_NAME", columnList =
-            "LINK_PARTNER_NAME"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_STATUS", columnList = "STATUS"),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_REMOTE_SYSTEM_IDENTIFIER",
+            columnList = "REMOTE_SYSTEM_IDENTIFIER"
+        ),
+        @Index(
+            name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_LINK_PARTNER_NAME",
+            columnList = "LINK_PARTNER_NAME"
+        ),
+        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_STATUS", columnList = "STATUS")
     })
 public class ConnectorMessageTransportStepEntity extends BaseEntity {
+    private static final int TRANSPORTED_MESSAGE_SIZE = 5_000_000;
+
     @Id
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "IDENTIFIER", nullable = false)
+    @Column(name = "IDENTIFIER", nullable = false, unique = true, updatable = false)
     private String identifier;
 
     @Column(name = "NUMBER_OF_ATTEMPTS", nullable = false)
@@ -70,12 +77,12 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Column(name = "REMOTE_SYSTEM_IDENTIFIER")
     private String remoteSystemIdentifier;
 
-    @Size(max = 5_000_000)
+    @Size(max = TRANSPORTED_MESSAGE_SIZE)
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "TRANSPORTED_MESSAGE", length = 5_000_000, nullable = false)
+    @Column(name = "TRANSPORTED_MESSAGE", length = TRANSPORTED_MESSAGE_SIZE, nullable = false)
     private String transportedMessage;
 
-    @Column(name = "LINK_PARTNER_NAME")
+    @Column(name = "LINK_PARTNER_NAME", nullable = false, updatable = false)
     private String linkPartnerName;
 
     @Enumerated(EnumType.STRING)

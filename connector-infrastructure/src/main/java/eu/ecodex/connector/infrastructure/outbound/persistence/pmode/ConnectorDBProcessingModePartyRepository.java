@@ -14,10 +14,10 @@ import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePar
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorPartyJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModePartyEntity;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
+import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModePartyJpaRepository;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
@@ -28,11 +28,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorDBProcessingModePartyRepository
     implements ConnectorProcessingModePartyRepository {
-    private final ConnectorPartyJpaRepository partyJpaRepository;
+    private final ConnectorProcessingModePartyJpaRepository partyJpaRepository;
     private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
 
     public ConnectorDBProcessingModePartyRepository(
-        ConnectorPartyJpaRepository partyJpaRepository,
+        ConnectorProcessingModePartyJpaRepository partyJpaRepository,
         ConnectorProcessingModeJpaRepository processingModeJpaRepository) {
         this.partyJpaRepository = partyJpaRepository;
         this.processingModeJpaRepository = processingModeJpaRepository;
@@ -40,20 +40,20 @@ public class ConnectorDBProcessingModePartyRepository
 
     /**
      * Converts a {@link ConnectorProcessingModeParty} domain object into a
-     * {@link ConnectorPartyEntity} JPA entity for database persistence.
+     * {@link ConnectorProcessingModePartyEntity} JPA entity for database persistence.
      *
      * @param party          The {@link ConnectorProcessingModeParty} domain object to be converted.
      *                       Must not be null for successful conversion.
      * @param processingMode The {@link ConnectorProcessingModeEntity} representing the processing
      *                       mode of the party. Used in the creation of the resulting entity.
      *
-     * @return A fully built {@link ConnectorPartyEntity} JPA entity containing relevant information
-     *     from both the {@code party} and {@code processingMode}.
+     * @return A fully built {@link ConnectorProcessingModePartyEntity} JPA entity containing
+     *     relevant information from both the {@code party} and {@code processingMode}.
      */
-    public static ConnectorPartyEntity toEntity(
+    public static ConnectorProcessingModePartyEntity toEntity(
         ConnectorProcessingModeParty party,
         ConnectorProcessingModeEntity processingMode) {
-        return ConnectorPartyEntity
+        return ConnectorProcessingModePartyEntity
             .builder()
             .name(party.name())
             .identifier(party.identifier())
@@ -66,18 +66,18 @@ public class ConnectorDBProcessingModePartyRepository
     }
 
     /**
-     * Converts a {@link ConnectorPartyEntity} JPA entity into a
+     * Converts a {@link ConnectorProcessingModePartyEntity} JPA entity into a
      * {@link ConnectorProcessingModeParty} domain object. If the provided {@code entity} is
      * {@code null}, the method returns {@code null}.
      *
-     * @param entity The {@link ConnectorPartyEntity} instance to be converted. Can be {@code null},
-     *               in which case {@code null} is returned.
+     * @param entity The {@link ConnectorProcessingModePartyEntity} instance to be converted. Can be
+     *               {@code null}, in which case {@code null} is returned.
      *
      * @return A fully built {@link ConnectorProcessingModeParty} domain object containing
      *     information extracted from the {@code entity}. Returns {@code null} if the {@code entity}
      *     is {@code null}.
      */
-    public static ConnectorProcessingModeParty toDomain(ConnectorPartyEntity entity) {
+    public static ConnectorProcessingModeParty toDomain(ConnectorProcessingModePartyEntity entity) {
         if (entity == null) {
             return null;
         }

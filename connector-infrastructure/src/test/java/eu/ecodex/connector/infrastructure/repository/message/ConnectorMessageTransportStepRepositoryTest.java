@@ -43,18 +43,19 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
     private ConnectorMessageTransportStepRepository repository;
 
     private ConnectorMessageTransportStep generateTransportStep() {
-        return ConnectorMessageTransportStep.builder()
-                                            .identifier(STEP_IDENTIFIER)
-                                            .numberOfAttempts(0)
-                                            .status(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
-                                            .transportedMessage(
-                                                BusinessMessageTestFixtures.createInboundMessage()
-                                                                           .toBuilder()
-                                                                           .identifier(
-                                                                               MESSAGE_IDENTIFIER)
-                                                                           .build()
-                                            )
-                                            .build();
+        return ConnectorMessageTransportStep
+            .builder()
+            .identifier(STEP_IDENTIFIER)
+            .numberOfAttempts(0)
+            .linkPartnerName("default_test_backend")
+            .status(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+            .transportedMessage(
+                BusinessMessageTestFixtures.createInboundMessage()
+                                           .toBuilder()
+                                           .identifier(MESSAGE_IDENTIFIER)
+                                           .build()
+            )
+            .build();
     }
 
     /**

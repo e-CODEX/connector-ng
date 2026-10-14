@@ -10,24 +10,24 @@
 
 package eu.ecodex.connector.infrastructure.outbound.database.repository.pmode;
 
-import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorPartyEntity;
+import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModeActionEntity;
 import java.util.List;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
- * Repository interface for performing CRUD operations on the {@link ConnectorPartyEntity}.
+ * Repository interface for performing CRUD operations on the
+ * {@link ConnectorProcessingModeActionEntity}.
  */
 @Repository
-public interface ConnectorPartyJpaRepository extends JpaRepository<ConnectorPartyEntity, Long> {
-    ConnectorPartyEntity findByNameAndProcessingModeBusinessDomainIdentifier(
+public interface ConnectorProcessingModeActionJpaRepository
+    extends JpaRepository<ConnectorProcessingModeActionEntity, Long> {
+    ConnectorProcessingModeActionEntity findByNameAndProcessingModeBusinessDomainIdentifier(
         String name, String businessDomainIdentifier);
 
-    ConnectorPartyEntity findByIdentifierAndRoleTypeAndProcessingModeBusinessDomainIdentifier(
-        String identifier, ConnectorPartyRoleType roleType, String businessDomainIdentifier);
-
-    List<ConnectorPartyEntity> findByProcessingModeBusinessDomainIdentifier(
-        String businessDomainIdentifier
+    List<ConnectorProcessingModeActionEntity> findByProcessingModeBusinessDomainIdentifier(
+        String businessDomainIdentifier,
+        Sort sort
     );
 }

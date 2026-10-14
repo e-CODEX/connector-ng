@@ -13,7 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.request.user;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.NonNull;
 
@@ -22,15 +22,16 @@ import lombok.NonNull;
  * Represents a request for creating or updating a user in the connector system.
  */
 @Builder(toBuilder = true)
-public record ConnectorEditUserRequest(@NotNull(message = "Username is mandatory")
-                                       @NotBlank(message = "Username must not be blank")
-                                       String username,
-                                       @Email
-                                       String email,
-                                       Boolean enabled,
-                                       Boolean mustChangePassword
+public record ConnectorEditUserRequest(
+    @NotBlank(message = "Username must not be blank")
+    @Size(max = 255, message = "The [username] must not exceed 255")
+    String username,
+    @Email(message = "Email must be a valid email address")
+    @Size(max = 255, message = "The [email] must not exceed 255")
+    String email,
+    Boolean enabled,
+    Boolean mustChangePassword
 ) {
-
     /**
      * Map a request user into a domain user.
      *
@@ -42,11 +43,11 @@ public record ConnectorEditUserRequest(@NotNull(message = "Username is mandatory
         @NonNull String identifier,
         @NonNull ConnectorEditUserRequest userRequest) {
         return ConnectorEditUserCommand.builder()
-            .uuid(identifier)
-            .username(userRequest.username())
-            .email(userRequest.email())
-            .enabled(userRequest.enabled())
-            .mustChangePassword(userRequest.mustChangePassword())
-            .build();
+                                       .uuid(identifier)
+                                       .username(userRequest.username())
+                                       .email(userRequest.email())
+                                       .enabled(userRequest.enabled())
+                                       .mustChangePassword(userRequest.mustChangePassword())
+                                       .build();
     }
 }

@@ -26,18 +26,22 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorUserCreationOrUpdateRequest(
-    @NotNull(message = "Username is mandatory")
     @NotBlank(message = "Username must not be blank")
+    @Size(max = 255, message = "The [username] must not exceed 255 characters")
     String username,
-    @Size(min = 6, message = "Password must have at least 6 digits")
-    String password,
-    @Email
-    String email,
-    @NotNull(message = "Enable must not be null")
-    Boolean enabled,
-    Set<String> roles
-) {
 
+    @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
+    String password,
+
+    @Email(message = "Email must be a valid email address")
+    @Size(max = 255, message = "The [email] must not exceed 255 characters")
+    String email,
+
+    @NotNull(message = "Enabled must not be null")
+    Boolean enabled,
+
+    Set<@NotBlank(message = "Role must not be blank") String> roles
+) {
     /**
      * Map a request user into a domain user.
      *
@@ -47,12 +51,12 @@ public record ConnectorUserCreationOrUpdateRequest(
      */
     public static ConnectorUser toDomain(ConnectorUserCreationOrUpdateRequest userRequest) {
         return ConnectorUser.builder()
-            .username(userRequest.username())
-            .password(userRequest.password())
-            .email(userRequest.email())
-            .enabled(userRequest.enabled())
-            .roles(getRoles(userRequest))
-            .build();
+                            .username(userRequest.username())
+                            .password(userRequest.password())
+                            .email(userRequest.email())
+                            .enabled(userRequest.enabled())
+                            .roles(getRoles(userRequest))
+                            .build();
     }
 
     private static Set<ConnectorRole> getRoles(ConnectorUserCreationOrUpdateRequest request) {
@@ -61,10 +65,10 @@ public record ConnectorUserCreationOrUpdateRequest(
         }
 
         return request.roles().stream()
-            .map(role ->
-                ConnectorRole.builder()
-                    .name(role)
-                    .build())
-            .collect(Collectors.toUnmodifiableSet());
+                      .map(role ->
+                               ConnectorRole.builder()
+                                            .name(role)
+                                            .build())
+                      .collect(Collectors.toUnmodifiableSet());
     }
 }

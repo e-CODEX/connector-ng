@@ -20,26 +20,37 @@ import lombok.NonNull;
 
 /**
  * Represents a request for creating or updating a user in the connector system.
+ *
+ * @param username           the new username (must not be blank, at most 255 characters)
+ * @param email              the new email address; must be a valid email address of at most 255
+ *                           characters if provided, and may be {@code null}
+ * @param enabled            whether the user account is enabled; may be {@code null}
+ * @param mustChangePassword whether the user must change their password at next login; may be
+ *                           {@code null}
  */
 @Builder(toBuilder = true)
 public record ConnectorEditUserRequest(
-    @NotBlank(message = "Username must not be blank")
+    @NotBlank(message = "The [username] must not be blank")
     @Size(max = 255, message = "The [username] must not exceed 255")
     String username,
-    @Email(message = "Email must be a valid email address")
+
+    @Email(message = "The [email] must be a valid email address")
     @Size(max = 255, message = "The [email] must not exceed 255")
     String email,
+
     Boolean enabled,
     Boolean mustChangePassword
 ) {
     /**
-     * Map a request user into a domain user.
+     * Maps an edit user request to an edit user command.
      *
-     * @param userRequest user to map
+     * @param identifier  the unique identifier of the user to edit (must not be null)
+     * @param userRequest the {@link ConnectorEditUserRequest} carrying the new values (must not be
+     *                    null)
      *
-     * @return domain user
+     * @return the {@link ConnectorEditUserCommand} built from the identifier and the request
      */
-    public static ConnectorEditUserCommand fromCommand(
+    public static ConnectorEditUserCommand toCommand(
         @NonNull String identifier,
         @NonNull ConnectorEditUserRequest userRequest) {
         return ConnectorEditUserCommand.builder()

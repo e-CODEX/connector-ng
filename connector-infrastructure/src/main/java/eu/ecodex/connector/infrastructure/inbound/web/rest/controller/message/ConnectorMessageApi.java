@@ -12,8 +12,8 @@ package eu.ecodex.connector.infrastructure.inbound.web.rest.controller.message;
 
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorEvidenceMessageDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound.ConnectorOutboundMessageRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

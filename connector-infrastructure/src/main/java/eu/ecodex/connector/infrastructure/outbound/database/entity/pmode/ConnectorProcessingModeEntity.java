@@ -57,7 +57,7 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     @Column(name = "UUID", unique = true, nullable = false, updatable = false)
     private String uuid;
 
-    @Column(name = "DESCRIPTION", nullable = false)
+    @Column(name = "DESCRIPTION", nullable = false, length = 512)
     private String description;
 
     @Size(max = MAX_CONTENT_SIZE)

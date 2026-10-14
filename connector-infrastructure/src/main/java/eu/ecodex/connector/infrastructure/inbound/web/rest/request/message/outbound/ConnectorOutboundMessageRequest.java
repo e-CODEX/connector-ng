@@ -8,11 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.io.Serializable;
 import java.util.List;
 import lombok.Builder;
 
@@ -40,15 +42,21 @@ import lombok.Builder;
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageRequest(
-    @NotBlank(message = "The business domain identifier must not be blank.")
+    @NotBlank(message = "The [businessDomainIdentifier] must not be blank.")
     String businessDomainIdentifier,
-    @NotBlank(message = "The backend identifier must not be blank.")
+
+    @NotBlank(message = "The [backendMessageIdentifier] must not be blank.")
+    @Size(max = 255, message = "The [backendMessageIdentifier] must not exceed 255")
     String backendMessageIdentifier,
-    @NotNull(message = "The business content must not be null.")
-    ConnectorOutboundMessageBusinessContent businessContent,
+
     @Valid
-    @NotNull(message = "The as4 properties must not be null")
+    @NotNull(message = "The [businessContent] must not be null.")
+    ConnectorOutboundMessageBusinessContent businessContent,
+
+    @Valid
+    @NotNull(message = "The [as4Properties] must not be null")
     ConnectorOutboundMessageAS4Properties as4Properties,
+
     List<String> attachments
-) {
+) implements Serializable {
 }

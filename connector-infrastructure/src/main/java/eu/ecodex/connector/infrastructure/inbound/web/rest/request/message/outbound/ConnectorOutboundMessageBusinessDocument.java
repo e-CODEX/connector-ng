@@ -8,28 +8,34 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
 import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
-import jakarta.validation.constraints.NotNull;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.validator.constraints.NotEmptyFile;
+import jakarta.validation.Valid;
+import java.io.Serializable;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Represents a request for attaching a business document to an outbound message.
  *
- * @param document          the business document to attach; must not be {@code null}
+ * @param document          the business document to attach (must not be null or empty)
  * @param detachedSignature optional detached signature information for the business document; may
  *                          be {@code null} if no signature is provided
- * @param aesType           the AES encryption type to apply to the business document; may be
- *                          {@code null} if encryption is not required or determined elsewhere
+ * @param aesType           the AES encryption type ({@link ConnectorBusinessDocumentAESType}) to
+ *                          apply to the business document; may be {@code null} if encryption is not
+ *                          required or determined elsewhere
  */
 @Builder(toBuilder = true)
 @SuppressWarnings("checkstyle:LineLength")
 public record ConnectorOutboundMessageBusinessDocument(
-    @NotNull(message = "The business business document must not be null.")
+    @NotEmptyFile(message = "The [document] file must not be empty.")
     MultipartFile document,
+
+    @Valid
     ConnectorOutboundMessageDetachedSignature detachedSignature,
+
     ConnectorBusinessDocumentAESType aesType
-) {
+) implements Serializable {
 }

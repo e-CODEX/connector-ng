@@ -10,29 +10,37 @@
 
 package eu.ecodex.connector.infrastructure.inbound.web.rest.request.pmode;
 
+import eu.ecodex.connector.infrastructure.inbound.web.rest.validator.constraints.NotEmptyFile;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Represents a request to create a connector processing mode. This record encapsulates essential
- * metadata required for defining a processing mode within the connector system, including its
- * description, associated business domain, and truststore details.
+ * Represents a request to create a connector processing mode.
  *
- * @param description              A brief description of the processing mode.
- * @param businessDomainIdentifier The identifier of the business domain associated with the
- *                                 processing mode.
+ * @param businessDomainIdentifier the identifier of the business domain the processing mode is
+ *                                 associated with (must not be blank)
+ * @param description              a brief description of the processing mode (must not be blank, at
+ *                                 most 512 characters)
+ * @param processingModeFile       the uploaded processing mode file (must not be null or empty)
+ * @param truststore               the optional {@link ConnectorProcessingModeTruststoreRequest}
+ *                                 describing the truststore of the processing mode; may be
+ *                                 {@code null}, and is validated recursively when present
  */
 @Builder(toBuilder = true)
 public record ConnectorProcessingModeCreationRequest(
-    @NotBlank(message = "Business domain identifier must not be blank.")
+    @NotBlank(message = "The [businessDomainIdentifier] must not be blank.")
     String businessDomainIdentifier,
-    @NotBlank(message = "Processing mode description must not be blank.")
+
+    @NotBlank(message = "The [description] must not be blank.")
+    @Size(max = 512, message = "The [description] must not exceed 512 characters.")
     String description,
-    @NotNull(message = "processingModeFile")
+
+    @NotEmptyFile(message = "The [processingModeFile] must not be empty.")
     MultipartFile processingModeFile,
+
     @Valid
     ConnectorProcessingModeTruststoreRequest truststore
 ) {

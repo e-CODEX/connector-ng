@@ -23,9 +23,9 @@ import eu.ecodex.connector.infrastructure.inbound.web.ConnectorBackendClientVeri
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorEvidenceMessageDto;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.parser.ConnectorRestOutboundMessageParser;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageAS4Properties;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.ConnectorOutboundMessageRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound.ConnectorOutboundMessageAS4Properties;
+import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound.ConnectorOutboundMessageRequest;
 import java.io.IOException;
 import org.springframework.web.bind.annotation.RestController;
 

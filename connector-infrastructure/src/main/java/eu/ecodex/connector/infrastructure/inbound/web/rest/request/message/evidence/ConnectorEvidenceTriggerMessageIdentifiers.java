@@ -14,15 +14,20 @@ import eu.ecodex.connector.infrastructure.inbound.web.rest.validator.constraints
 import lombok.Builder;
 
 /**
- * Represents a set of identifiers associated with a trigger message for evidence-related operations
- * in the connector domain. This record encapsulates the unique identifiers used to correlate the
- * business messages.
+ * Represents the identifiers of a trigger message for evidence-related operations in the connector
+ * domain. This record carries the identifiers used to correlate the trigger with the business
+ * message it refers to.
  *
- * @param backendMessageIdentifier A unique identifier for the message in the backend system,
- *                                 providing traceability within internal processes.
- * @param referenceToIdentifier    A reference to another message or entity, aiding in the
- *                                 establishment of relationships or dependencies between different
- *                                 messages.
+ * <p>At least one of the two identifiers must be provided, as enforced by the
+ * {@code @AtLeastOneNotEmpty} constraint. Both may be given.
+ *
+ * @param backendMessageIdentifier the identifier of the message in the backend system, providing
+ *                                 traceability within internal processes; may be {@code null} or
+ *                                 empty if {@code referenceToIdentifier} is provided
+ * @param referenceToIdentifier    a reference to the message the trigger relates to, used to
+ *                                 establish the relationship between the trigger and the referenced
+ *                                 business message; may be {@code null} or empty if
+ *                                 {@code backendMessageIdentifier} is provided
  */
 @AtLeastOneNotEmpty(fields = {
     "backendMessageIdentifier",

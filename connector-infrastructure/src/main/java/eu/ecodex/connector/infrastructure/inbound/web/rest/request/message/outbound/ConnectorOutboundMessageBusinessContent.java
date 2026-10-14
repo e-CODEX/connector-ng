@@ -8,9 +8,12 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
+import eu.ecodex.connector.infrastructure.inbound.web.rest.validator.constraints.NotEmptyFile;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
 import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,16 +21,18 @@ import org.springframework.web.multipart.MultipartFile;
  * Represents the business content of an outbound message, comprising a primary business document
  * and its associated content file.
  *
- * @param xmlContent      the multipart file that represents the actual business content; must not
- *                         be null
+ * @param xmlContent       the multipart file that represents the actual business content; must not
+ *                         be null or empty
  * @param businessDocument the {@link ConnectorOutboundMessageBusinessDocument} containing metadata
  *                         and additional details regarding the business document; must not be null
  */
 @Builder(toBuilder = true)
 public record ConnectorOutboundMessageBusinessContent(
-    @NotNull(message = "The business content file must not be null.")
+    @NotEmptyFile(message = "The [xmlContent] file must not be empty.")
     MultipartFile xmlContent,
-    @NotNull(message = "The business document must not be null.")
+
+    @Valid
+    @NotNull(message = "The [businessDocument] must not be null.")
     ConnectorOutboundMessageBusinessDocument businessDocument
-) {
+) implements Serializable {
 }

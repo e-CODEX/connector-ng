@@ -8,25 +8,28 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message;
+package eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.outbound;
 
 import jakarta.validation.constraints.NotBlank;
+import java.io.Serializable;
 import lombok.Builder;
 
 /**
- * Represents a party associated with an outbound message request.
+ * Represents a party (sender or receiver) associated with an outbound message request.
  *
- * @param identifier     the unique identifier of the party; must not be empty
- * @param identifierType the type of the identifier; must not be empty
- * @param role           the role of the party in the message; must not be empty
+ * @param identifier     the unique identifier of the party (must not be blank)
+ * @param identifierType the type (scheme) of the identifier (must not be blank)
+ * @param role           the role of the party in the message (must not be blank)
  */
 @Builder
 public record ConnectorOutboundMessageParty(
-    @NotBlank(message = "Party identifier must not be empty")
+    @NotBlank(message = "The [identifier] must not be blank")
     String identifier,
-    @NotBlank(message = "Party identifier type must not be empty")
+
+    @NotBlank(message = "The [identifierType] type must not be blank")
     String identifierType,
-    @NotBlank(message = "Party role must not be empty")
+
+    @NotBlank(message = "The [role] must not be blank")
     String role
-) {
+) implements Serializable {
 }

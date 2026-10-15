@@ -46,9 +46,9 @@ public interface ConnectorMessageStatsJpaRepository extends
                         AND m.rejectedAt IS NOT NULL THEN 1 END))
         FROM ConnectorMessageEntity m
         WHERE
-            (:from IS NULL OR m.createdAt >= :from)
-            AND (:to IS NULL OR m.createdAt <= :to)
-            AND (:businessDomain IS NULL OR m.businessDomain.identifier = :businessDomain)
+            (cast(:from as Instant) IS NULL OR m.createdAt >= :from)
+            AND (cast(:to as Instant) IS NULL OR m.createdAt <= :to)
+            AND (cast(:businessDomain as String) IS NULL OR m.businessDomain.identifier = :businessDomain)
         """)
     ConnectorMessageStatsDto computeStats(
         @Param("from") Instant from,
@@ -71,9 +71,9 @@ public interface ConnectorMessageStatsJpaRepository extends
             LEFT JOIN a.fromParty fp
             LEFT JOIN a.toParty  tp
         WHERE
-            (:from IS NULL OR m.createdAt >= :from)
-            AND (:to IS NULL OR m.createdAt <= :to)
-            AND (:businessDomain IS NULL OR m.businessDomain.identifier = :businessDomain)
+            (cast(:from as Instant) IS NULL OR m.createdAt >= :from)
+            AND (cast(:to as Instant) IS NULL OR m.createdAt <= :to)
+            AND (cast(:businessDomain as String) IS NULL OR m.businessDomain.identifier = :businessDomain)
             AND m.direction IN (
                 eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND,
                 eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY)

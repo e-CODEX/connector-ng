@@ -17,23 +17,25 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties for the connector message processing.
  */
 @Getter
 @Setter
+@Validated
 @Configuration
 @SuppressWarnings("checkstyle:LineLength")
 @ConfigurationProperties(prefix = "connector.message-processing")
 public class ConnectorMessageProcessingProperties implements
     ConnectorMessageProcessingConfigurationProvider {
-    private final boolean ebmsIdGeneratorEnabled = true;
-    private final String identifierSuffix = "connector.ecodex.eu";
-    private final String ebmsIdSuffix = "connector.ecodex.eu";
-    private final String transportIdSuffix = "connector.ecodex.eu";
-    private final ProcessingModeVerificationMode outboundMessageVerificationMode = ProcessingModeVerificationMode.STRICT;
-    private final ProcessingModeVerificationMode inboundMessageVerificationMode = ProcessingModeVerificationMode.RELAXED;
+    private boolean ebmsIdGeneratorEnabled = true;
+    private String identifierSuffix = "connector.ecodex.eu";
+    private String ebmsIdSuffix = "connector.ecodex.eu";
+    private String transportIdSuffix = "connector.ecodex.eu";
+    private ProcessingModeVerificationMode outboundMessageVerificationMode = ProcessingModeVerificationMode.STRICT;
+    private ProcessingModeVerificationMode inboundMessageVerificationMode = ProcessingModeVerificationMode.RELAXED;
     private boolean sendGeneratedEvidencesToBackend = true;
     private boolean autoTriggerDeliveryEvidences = true;
 

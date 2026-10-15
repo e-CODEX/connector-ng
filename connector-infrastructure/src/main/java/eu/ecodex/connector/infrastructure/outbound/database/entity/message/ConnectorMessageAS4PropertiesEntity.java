@@ -72,7 +72,7 @@ public class ConnectorMessageAS4PropertiesEntity extends BaseEntity {
     private Long id;
 
     @Setter
-    @Column(name = "EBMS_MESSAGE_IDENTIFIER", updatable = false)
+    @Column(name = "EBMS_MESSAGE_IDENTIFIER")
     private String ebmsMessageIdentifier;
 
     @Column(name = "REFERENCE_TO_IDENTIFIER", updatable = false)

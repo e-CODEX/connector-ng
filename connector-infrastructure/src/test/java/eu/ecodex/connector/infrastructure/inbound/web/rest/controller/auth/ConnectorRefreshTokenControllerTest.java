@@ -58,7 +58,7 @@ class ConnectorRefreshTokenControllerTest extends AbstractWebMvcTest {
             .refreshToken(refreshToken)
             .build();
 
-        when(userRefreshToken.execute(any(), any())).thenReturn(expected);
+        when(userRefreshToken.execute(any())).thenReturn(expected);
 
         // When
         var result = apiClient.post()
@@ -76,7 +76,7 @@ class ConnectorRefreshTokenControllerTest extends AbstractWebMvcTest {
         assertThat(result.getResponseBody()).isNotNull();
         assertThat(result.getResponseBody()).isEqualTo(expected);
 
-        verify(userRefreshToken).execute(accessToken, refreshToken);
+        verify(userRefreshToken).execute(refreshToken);
         verifyNoMoreInteractions(loginUser, logoutUser, userRefreshToken,
             updateUserPasswordAtFirstLogin);
     }

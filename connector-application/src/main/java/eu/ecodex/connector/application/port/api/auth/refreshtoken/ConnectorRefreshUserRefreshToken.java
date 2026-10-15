@@ -25,8 +25,6 @@ public interface ConnectorRefreshUserRefreshToken {
      * <p>The method validates the given refresh token and, if it is valid, issues a new access
      * token while preserving the user's session.
      *
-     * @param accessToken  the current access token associated with the user's session (must not be
-     *                     null)
      * @param refreshToken the refresh token used to obtain a new access token (must not be null)
      *
      * @return a {@link ConnectorUserAuthenticationResult} containing the new access token, the
@@ -35,7 +33,5 @@ public interface ConnectorRefreshUserRefreshToken {
      * @throws ConnectorUserBadCredentialsException if the refresh token is unknown, expired or
      *                                              revoked
      */
-    ConnectorUserAuthenticationResult execute(
-        @Nonnull String accessToken,
-        @Nonnull String refreshToken);
+    ConnectorUserAuthenticationResult execute(@Nonnull String refreshToken);
 }

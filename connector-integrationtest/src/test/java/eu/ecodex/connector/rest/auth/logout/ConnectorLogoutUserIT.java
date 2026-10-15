@@ -51,8 +51,7 @@ class ConnectorLogoutUserIT extends AbstractIntegrationTest {
         when(clock.instant()).thenReturn(loginTime);
         when(clock.getZone()).thenReturn(ZoneOffset.UTC);
 
-        var loginRequest = ConnectorLoginRequest
-            .builder()
+        var loginRequest = ConnectorLoginRequest.builder()
             .username(DEFAULT_ADMIN_USER_NAME)
             .password(DEFAULT_ADMIN_PASSWORD)
             .build();

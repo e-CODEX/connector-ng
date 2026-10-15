@@ -20,6 +20,7 @@ import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredential
 import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -34,6 +35,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConnectorRevokeUserRefreshTokenServiceTest {
     @Mock
     private ConnectorRefreshTokenRepository refreshTokenRepository;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private ConnectorRevokeUserRefreshTokenService service;
@@ -42,26 +45,30 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
     void revoke_should_revoke_refresh_token_successfully() {
         // Given
         var userId = "uuid";
-        var refreshToken = "token";
-
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
         var user = ConnectorUser.builder().uuid(userId).build();
         var duration = Duration.ofDays(3);
+        var refreshToken = ConnectorRefreshTokenGenerator.generate();
         var expectedRefreshToken = ConnectorRefreshToken.builder()
+            .token(refreshToken)
             .revoked(false)
             .user(user)
             .expiresAt(loginTime.plus(duration))
             .build();
 
-        when(refreshTokenRepository.findByToken(any())).thenReturn(
+        when(clock.instant()).thenReturn(loginTime);
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(
             Optional.of(expectedRefreshToken));
 
         // When
         service.execute(userId, refreshToken);
 
         // Then
-        verify(refreshTokenRepository).findByToken(refreshToken);
-        verify(refreshTokenRepository).save(expectedRefreshToken.toBuilder().revoked(true).build());
+        verify(refreshTokenRepository).findByTokenHashed(
+            ConnectorRefreshTokenGenerator.hash(refreshToken));
+
+        verify(refreshTokenRepository).revokeByUserUuid(userId, loginTime);
+
         assertNoMoreInteractions();
     }
 
@@ -69,25 +76,27 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
     void revoke_should_do_nothing_when_refresh_token_already_revoked() {
         // Given
         var userId = "uuid";
-        var refreshToken = "token";
+        var refreshToken = ConnectorRefreshTokenGenerator.generate();
 
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
         var user = ConnectorUser.builder().uuid(userId).build();
         var duration = Duration.ofDays(3);
         var expectedRefreshToken = ConnectorRefreshToken.builder()
+            .token(refreshToken)
             .revoked(true)
             .user(user)
             .expiresAt(loginTime.plus(duration))
             .build();
 
-        when(refreshTokenRepository.findByToken(any())).thenReturn(
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(
             Optional.of(expectedRefreshToken));
 
         // When
         service.execute(userId, refreshToken);
 
         // Then
-        verify(refreshTokenRepository).findByToken(refreshToken);
+        verify(refreshTokenRepository).findByTokenHashed(
+            ConnectorRefreshTokenGenerator.hash(refreshToken));
         assertNoMoreInteractions();
     }
 
@@ -95,16 +104,18 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
     void revoke_should_throw_exception_when_refresh_token_not_found() {
         // Given
         var userId = "uuid";
-        var refreshToken = "token";
+        var refreshToken = ConnectorRefreshTokenGenerator.generate();
 
-        when(refreshTokenRepository.findByToken(any())).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(Optional.empty());
 
         // When
         assertThrows(ConnectorUserBadCredentialsException.class,
             () -> service.execute(userId, refreshToken));
 
         // Then
-        verify(refreshTokenRepository).findByToken(refreshToken);
+        verify(refreshTokenRepository).findByTokenHashed(
+            ConnectorRefreshTokenGenerator.hash(refreshToken));
+
         assertNoMoreInteractions();
     }
 
@@ -113,7 +124,7 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
     void revoke_should_throw_exception_when_refresh_token_userId_differs() {
         // Given
         var userId = "uuid";
-        var refreshToken = "token";
+        var refreshToken = ConnectorRefreshTokenGenerator.generate();
 
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
         var user = ConnectorUser.builder().uuid(userId).build();
@@ -124,7 +135,7 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
             .expiresAt(loginTime.plus(duration))
             .build();
 
-        when(refreshTokenRepository.findByToken(any())).thenReturn(
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(
             Optional.of(expectedRefreshToken));
 
         // When
@@ -132,7 +143,9 @@ class ConnectorRevokeUserRefreshTokenServiceTest {
             () -> service.execute("anotherUuid", refreshToken));
 
         // Then
-        verify(refreshTokenRepository).findByToken(refreshToken);
+        verify(refreshTokenRepository).findByTokenHashed(
+            ConnectorRefreshTokenGenerator.hash(refreshToken));
+
         assertNoMoreInteractions();
     }
 

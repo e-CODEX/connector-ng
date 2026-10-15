@@ -27,7 +27,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.UuidGenerator;
 
 /**
  * Represents a refresh token entity used to manage and store information about connector.
@@ -49,7 +48,6 @@ public class ConnectorRefreshTokenEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @UuidGenerator
     @Column(name = "TOKEN", nullable = false, unique = true, updatable = false)
     private String token;
 
@@ -62,4 +60,8 @@ public class ConnectorRefreshTokenEntity extends BaseEntity {
 
     @Column(name = "REVOKED", nullable = false)
     private boolean revoked;
+
+    @Column(name = "REVOKED_AT")
+    private Instant revokedAt;
 }
+

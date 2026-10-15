@@ -23,14 +23,14 @@ public interface ConnectorRefreshTokenRepository {
     /**
      * Retrieves a {@link ConnectorRefreshToken} entity based on the provided token value.
      *
-     * @param token the unique string value of the refresh token to be retrieved. This value is used
-     *              as a key to identify and fetch the corresponding token entity from the
-     *              persistence layer.
+     * @param tokenHashed the unique string value of the refresh token to be retrieved. This
+     *                    value is used  as a key to identify and fetch the corresponding
+     *                    token entity from the persistence layer.
      *
      * @return an {@link Optional} containing the {@link ConnectorRefreshToken} if it exists; an
-     *     empty {@link Optional} if no matching token is found.
+     *     empty {@link Optional} if no matching tokenHashed is found.
      */
-    Optional<ConnectorRefreshToken> findByToken(String token);
+    Optional<ConnectorRefreshToken> findByTokenHashed(String tokenHashed);
 
     /**
      * Persists the provided {@link ConnectorRefreshToken} entity into the persistence layer. Saves
@@ -76,12 +76,13 @@ public interface ConnectorRefreshTokenRepository {
      * tokens belonging to the user as invalid, ensuring they cannot be used for authentication or
      * token renewal.
      *
-     * @param uuid the unique identifier of the user whose refresh tokens are to be revoked. It acts
-     *             as a key to find and mark all associated tokens as revoked.
+     * @param uuid      the unique identifier of the user whose refresh tokens are to be revoked.
+     *                  It acts as a key to find and mark all associated tokens as revoked.
+     * @param revokedAt the date of token revocation
      *
      * @return the number of refresh tokens that were successfully revoked.
      */
-    int revokeByUserUuid(String uuid);
+    int revokeByUserUuid(String uuid, Instant revokedAt);
 
     /**
      * Deletes all refresh tokens associated with the specified user UUID.

@@ -128,8 +128,7 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
             .newPassword(newPassword)
             .build();
 
-        apiClient.post()
-            .uri(PATH)
+        apiClient.post().uri(PATH)
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
             .contentType(MediaType.APPLICATION_JSON)
             .body(request)

@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshTokenGenerator;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
 import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
@@ -107,7 +108,9 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
         when(clock.instant()).thenReturn(Instant.parse("2026-08-18T10:16:00Z"));
 
         var notRevoked = refreshTokenRepository.findByUserUuidAndRevoked(userUuid, false);
-        var existing = notRevoked.getFirst().token();
+        var existingHashed = notRevoked.getFirst().token();
+        var existing = "test-refresh-token-4";
+        assertThat(ConnectorRefreshTokenGenerator.hash(existing)).isEqualTo(existingHashed);
         var refreshRequest = ConnectorRefreshTokenRequest
             .builder()
             .refreshToken(existing)
@@ -115,7 +118,6 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
 
         var refreshResponse = apiClient.post()
             .uri("/api/v1/auth/refresh")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .contentType(MediaType.APPLICATION_JSON)
             .body(refreshRequest)
             .exchange()
@@ -199,7 +201,7 @@ class ConnectorRefreshUserTokenIT extends AbstractIntegrationTest {
 
         assertThat(newAccessToken).isNotBlank();
         assertThat(newAccessToken).isNotEqualTo(expiredAccessToken);
-        assertThat(refreshResponse.refreshToken()).isEqualTo(refreshToken);
+        assertThat(refreshResponse.refreshToken()).isNotEqualTo(refreshToken);
 
         // New access token must work
         apiClient.get()

@@ -50,19 +50,20 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
     @Test
     void verify_should_throw_exception_when_refresh_token_is_expired() {
         // Given
-        var token = "token";
+        var token = ConnectorRefreshTokenGenerator.generate();
         var userId = "uuid";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
         var user = ConnectorUser.builder().uuid(userId).build();
         var duration = Duration.ofDays(3);
         var expectedRefreshToken = ConnectorRefreshToken.builder()
+            .token(token)
             .revoked(false)
             .user(user)
             .expiresAt(loginTime.minus(duration))
             .build();
 
         when(clock.instant()).thenReturn(loginTime);
-        when(refreshTokenRepository.findByToken(any())).thenReturn(
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(
             Optional.of(expectedRefreshToken));
 
         // When
@@ -78,33 +79,35 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
         // Given
         var token = "token";
 
-        when(refreshTokenRepository.findByToken(any())).thenReturn(Optional.empty());
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(Optional.empty());
 
         // When
         assertThrows(ConnectorUserBadCredentialsException.class,
             () -> verifyUserTokenService.execute(token));
 
         // Then
-        verify(refreshTokenRepository).findByToken(token);
+        verify(refreshTokenRepository).findByTokenHashed(
+            ConnectorRefreshTokenGenerator.hash(token));
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
     }
 
     @Test
     void verify_should_return_refresh_token_when_it_is_not_expired() {
         // Given
-        var token = "token";
+        var token = ConnectorRefreshTokenGenerator.generate();
         var userId = "uuid";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
         var user = ConnectorUser.builder().uuid(userId).build();
         var duration = Duration.ofDays(3);
         var expectedRefreshToken = ConnectorRefreshToken.builder()
+            .token(token)
             .revoked(false)
             .user(user)
             .expiresAt(loginTime.plus(duration))
             .build();
 
         when(clock.instant()).thenReturn(loginTime);
-        when(refreshTokenRepository.findByToken(any())).thenReturn(
+        when(refreshTokenRepository.findByTokenHashed(any())).thenReturn(
             Optional.of(expectedRefreshToken));
 
         // When
@@ -114,6 +117,8 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
         assertThat(refreshToken).isNotNull();
         assertThat(refreshToken).isEqualTo(expectedRefreshToken);
 
+        verify(refreshTokenRepository).findByTokenHashed(
+            ConnectorRefreshTokenGenerator.hash(token));
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
     }
 }

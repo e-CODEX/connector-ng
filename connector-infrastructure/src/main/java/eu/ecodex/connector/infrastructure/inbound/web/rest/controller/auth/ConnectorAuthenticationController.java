@@ -27,10 +27,8 @@ import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDe
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -84,11 +82,8 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
 
     @Override
     public ConnectorUserAuthenticationResult refreshJwtToken(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @NonNull String authorizationHeader,
         @NonNull ConnectorRefreshTokenRequest request) {
-        var accessToken = authorizationHeader.replaceFirst("^Bearer ", "");
-
-        return refreshUserToken.execute(accessToken, request.refreshToken());
+        return refreshUserToken.execute(request.refreshToken());
     }
 
     @Override
@@ -109,10 +104,7 @@ public class ConnectorAuthenticationController implements ConnectorAuthenticatio
 
             updateUserPasswordAtFirstLogin.execute(passwordUpdateData);
         } catch (ExpiredJwtException e) {
-            var authenticationResult = refreshUserToken.execute(
-                userDetails.accessToken(),
-                userPasswordRequest.refreshToken()
-            );
+            var authenticationResult = refreshUserToken.execute(userPasswordRequest.refreshToken());
 
             var passwordUpdateData = ConnectorUpdateUserPasswordCommand
                 .builder()

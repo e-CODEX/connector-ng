@@ -29,18 +29,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @DisplayName("ConnectorBackendClientVerifier")
 public class ConnectorBackendClientVerifierTest {
     @Mock
-    private ConnectorFindLinkPartner findLinkPartnerService;
+    private ConnectorFindLinkPartner findLinkPartner;
 
     private ConnectorBackendClientVerifier verifier;
 
     @BeforeEach
     void setUp() {
-        verifier = new ConnectorBackendClientVerifier(findLinkPartnerService);
+        verifier = new ConnectorBackendClientVerifier(findLinkPartner);
     }
 
     @Test
     void should_return_the_backend_client_name() {
-        when(findLinkPartnerService.findByCertificateDn("cn=alice"))
+        when(findLinkPartner.findByCertificateDn("cn=alice"))
             .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner());
 
         var name = verifier.getBackendClient("cn=alice");

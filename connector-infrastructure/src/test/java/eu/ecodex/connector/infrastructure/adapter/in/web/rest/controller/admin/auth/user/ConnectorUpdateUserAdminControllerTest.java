@@ -41,6 +41,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @WebMvcTest(ConnectorUserAdminController.class)
 class ConnectorUpdateUserAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/users";
+
     @MockitoBean
     ConnectorUserPasswordEncoder passwordEncoder;
     @MockitoBean
@@ -55,6 +56,7 @@ class ConnectorUpdateUserAdminControllerTest extends AbstractWebMvcTest {
     private ConnectorRemoveUser connectorRemoveUser;
     @MockitoBean
     private ConnectorListUsers connectorListUsers;
+
     @Autowired
     private RestTestClient apiClient;
 

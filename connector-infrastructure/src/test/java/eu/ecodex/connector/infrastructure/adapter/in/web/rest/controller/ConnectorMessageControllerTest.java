@@ -97,12 +97,13 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
         .role("GW")
         .roleType(ConnectorPartyRoleType.RESPONDER)
         .build();
+
     @MockitoBean
-    private ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService;
+    private ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiver;
     @MockitoBean
-    private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
+    private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver;
     @MockitoBean
-    private ConnectorBackendClientVerifier backendClientVerifierService;
+    private ConnectorBackendClientVerifier backendClientVerifier;
     @MockitoBean
     private ConnectorRestOutboundMessageParser restOutboundMessageParser;
     @Autowired
@@ -115,7 +116,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
      * backend client lookup, the four public parser methods, and the receiver itself.
      */
     private void stubOutboundSubmissionSuccess() throws IOException {
-        when(backendClientVerifierService.getBackendClient(any())).thenReturn(BACKEND_NAME);
+        when(backendClientVerifier.getBackendClient(any())).thenReturn(BACKEND_NAME);
 
         when(restOutboundMessageParser.resolveBusinessDomainIdentifier(any()))
             .thenReturn(businessDomainIdentifier);
@@ -126,13 +127,13 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
         when(restOutboundMessageParser.toParty(any(), eq(ConnectorPartyRoleType.RESPONDER)))
             .thenReturn(toParty);
 
-        when(outboundBusinessMessageReceiverService.execute(any()))
+        when(outboundBusinessMessageReceiver.execute(any()))
             .thenReturn(BusinessMessageTestFixtures.createOutboundMessage());
     }
 
     private ConnectorOutboundBusinessMessageCommand captureOutboundCommand() {
         var captor = ArgumentCaptor.forClass(ConnectorOutboundBusinessMessageCommand.class);
-        verify(outboundBusinessMessageReceiverService).execute(captor.capture());
+        verify(outboundBusinessMessageReceiver).execute(captor.capture());
         return captor.getValue();
     }
 
@@ -198,7 +199,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                    .andExpect(jsonPath("$.identifier").isNotEmpty());
 
-            verifyNoInteractions(outboundEvidenceMessageReceiverService);
+            verifyNoInteractions(outboundEvidenceMessageReceiver);
         }
 
         @Test
@@ -272,7 +273,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             assertThat(boundSignature.signature().getOriginalFilename())
                 .isEqualTo("signature.xml");
 
-            verifyNoInteractions(outboundEvidenceMessageReceiverService);
+            verifyNoInteractions(outboundEvidenceMessageReceiver);
         }
 
         @Test
@@ -313,8 +314,8 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
 
             verifyNoInteractions(
                 restOutboundMessageParser,
-                outboundBusinessMessageReceiverService,
-                outboundEvidenceMessageReceiverService
+                outboundBusinessMessageReceiver,
+                outboundEvidenceMessageReceiver
             );
         }
     }
@@ -324,9 +325,9 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
     class SubmitEvidenceTrigger {
         @Test
         void should_return_201_when_the_trigger_is_submitted() throws Exception {
-            when(outboundEvidenceMessageReceiverService.execute(any()))
+            when(outboundEvidenceMessageReceiver.execute(any()))
                 .thenReturn(TriggeredEvidenceMessageTestFixtures.createDeliveryTriggeredEvidenceMessage());
-            when(backendClientVerifierService.getBackendClient(any())).thenReturn(BACKEND_NAME);
+            when(backendClientVerifier.getBackendClient(any())).thenReturn(BACKEND_NAME);
 
             mockMvc.perform(
                        post(EVIDENCE_TRIGGER_URL)
@@ -337,14 +338,14 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
                    .andExpect(jsonPath("$.identifier").isNotEmpty());
 
             var captor = ArgumentCaptor.forClass(ConnectorOutboundEvidenceMessageCommand.class);
-            verify(outboundEvidenceMessageReceiverService).execute(captor.capture());
+            verify(outboundEvidenceMessageReceiver).execute(captor.capture());
             var command = captor.getValue();
             assertThat(command.evidenceType()).isEqualTo(ConnectorEvidenceType.DELIVERY);
             assertThat(command.referenceToIdentifier()).isEqualTo(REFERENCE_TO_IDENTIFIER);
             assertThat(command.backendMessageIdentifier()).isNull();
             assertThat(command.backendName()).isEqualTo(BACKEND_NAME);
 
-            verifyNoInteractions(outboundBusinessMessageReceiverService, restOutboundMessageParser);
+            verifyNoInteractions(outboundBusinessMessageReceiver, restOutboundMessageParser);
         }
 
         @Test
@@ -361,8 +362,8 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
                    .andExpect(status().isBadRequest());
 
             verifyNoInteractions(
-                outboundBusinessMessageReceiverService,
-                outboundEvidenceMessageReceiverService
+                outboundBusinessMessageReceiver,
+                outboundEvidenceMessageReceiver
             );
         }
     }

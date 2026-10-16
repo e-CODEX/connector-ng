@@ -18,12 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 class ConnectorUserPasswordEncoderImplTest {
-
-    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     ConnectorUserPasswordEncoderImpl service =
         new ConnectorUserPasswordEncoderImpl(passwordEncoder);
-
 
     @Test
     void encodePassword_should_encode_password_with_password_encoder() {

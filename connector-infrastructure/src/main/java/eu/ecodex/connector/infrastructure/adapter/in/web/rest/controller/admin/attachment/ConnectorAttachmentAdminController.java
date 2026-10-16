@@ -33,25 +33,24 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorAttachmentAdminController implements ConnectorAttachmentAdminApi {
-    private final ConnectorListAttachments listAttachmentsService;
-    private final ConnectorDownloadAttachment downloadAttachmentService;
-    private final ConnectorRetrieveAttachment retrieveAttachmentService;
+    private final ConnectorListAttachments listAttachments;
+    private final ConnectorDownloadAttachment downloadAttachment;
+    private final ConnectorRetrieveAttachment retrieveAttachment;
 
     /**
      * Constructs a new instance of the {@code ConnectorAttachmentAdminController}.
      *
-     * @param listAttachmentsService    the service responsible for listing message attachments
-     * @param downloadAttachmentService the service used for downloading message attachments
-     * @param retrieveAttachmentService the service used for retrieving metadata of a specific
-     *                                  attachment
+     * @param listAttachments    the service responsible for listing message attachments
+     * @param downloadAttachment the service used for downloading message attachments
+     * @param retrieveAttachment the service used for retrieving metadata of a specific attachment
      */
     public ConnectorAttachmentAdminController(
-        ConnectorListAttachments listAttachmentsService,
-        ConnectorDownloadAttachment downloadAttachmentService,
-        ConnectorRetrieveAttachment retrieveAttachmentService) {
-        this.listAttachmentsService = listAttachmentsService;
-        this.downloadAttachmentService = downloadAttachmentService;
-        this.retrieveAttachmentService = retrieveAttachmentService;
+        ConnectorListAttachments listAttachments,
+        ConnectorDownloadAttachment downloadAttachment,
+        ConnectorRetrieveAttachment retrieveAttachment) {
+        this.listAttachments = listAttachments;
+        this.downloadAttachment = downloadAttachment;
+        this.retrieveAttachment = retrieveAttachment;
     }
 
     @Override
@@ -74,7 +73,7 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
             ConnectorDateRangeFilter.of(from, to)
         );
 
-        var attachments = listAttachmentsService.execute(filter);
+        var attachments = listAttachments.execute(filter);
 
         return ConnectorPageResult.of(
             attachments.content().stream().map(ConnectorAttachmentDto::from).toList(),
@@ -86,8 +85,8 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
 
     @Override
     public ResponseEntity<byte[]> download(String identifier) {
-        var attachment = retrieveAttachmentService.execute(identifier);
-        var document = downloadAttachmentService.execute(identifier);
+        var attachment = retrieveAttachment.execute(identifier);
+        var document = downloadAttachment.execute(identifier);
         return ResponseEntity.ok()
                              .contentType(MediaType.parseMediaType(
                                  attachment.contentType()

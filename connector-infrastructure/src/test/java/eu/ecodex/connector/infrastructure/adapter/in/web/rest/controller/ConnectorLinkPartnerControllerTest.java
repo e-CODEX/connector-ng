@@ -38,13 +38,14 @@ public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/link-partners";
 
     @MockitoBean
-    private ConnectorListLinkPartners listLinkPartnersService;
+    private ConnectorListLinkPartners listLinkPartners;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void should_return_200_with_all_the_link_partners() throws Exception {
-        when(listLinkPartnersService.execute(any()))
+        when(listLinkPartners.execute(any()))
             .thenReturn(List.of(LinkPartnerTestFixtures.createAliceBackendLinkPartner()));
 
         mockMvc.perform(get(URL).contentType(MediaType.APPLICATION_JSON))
@@ -52,12 +53,12 @@ public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$", hasSize(1)));
 
-        verify(listLinkPartnersService).execute(null);
+        verify(listLinkPartners).execute(null);
     }
 
     @Test
     void should_return_an_empty_list_when_no_link_partner_matches_the_type() throws Exception {
-        when(listLinkPartnersService.execute(any()))
+        when(listLinkPartners.execute(any()))
             .thenReturn(List.of());
 
         mockMvc.perform(get(URL)
@@ -67,6 +68,6 @@ public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$", hasSize(0)));
 
-        verify(listLinkPartnersService).execute(ConnectorLinkType.BACKEND);
+        verify(listLinkPartners).execute(ConnectorLinkType.BACKEND);
     }
 }

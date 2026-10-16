@@ -35,14 +35,14 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
     private static final String BASE_URL = "/api/v1/admin/jms/queues/stats";
 
     @MockitoBean
-    private ConnectorRetrieveQueuesStats retrieveQueuesStatsService;
+    private ConnectorRetrieveQueuesStats retrieveQueuesStats;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void should_return_200_with_the_queue_stats() throws Exception {
-        when(retrieveQueuesStatsService.execute())
+        when(retrieveQueuesStats.execute())
             .thenReturn(List.of(QueuesStatsTestFixtures.create()));
 
         mockMvc.perform(get(BASE_URL).contentType(MediaType.APPLICATION_JSON))

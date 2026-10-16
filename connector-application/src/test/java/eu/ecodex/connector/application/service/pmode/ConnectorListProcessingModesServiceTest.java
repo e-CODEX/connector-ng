@@ -23,12 +23,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ConnectorListProcessingModeServiceTest {
+public class ConnectorListProcessingModesServiceTest {
     @Mock
     private ConnectorProcessingModeRepository processingModeRepository;
 
     @InjectMocks
-    private ConnectorListProcessingModeService processingModeService;
+    private ConnectorListProcessingModesService processingModeService;
 
     @Test
     void should_return_all_processing_modes() {

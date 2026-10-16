@@ -34,30 +34,29 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorMessageController implements ConnectorMessageApi {
-    private final ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService;
-    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
-    private final ConnectorBackendClientVerifier backendClientVerifierService;
+    private final ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiver;
+    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver;
+    private final ConnectorBackendClientVerifier backendClientVerifier;
     private final ConnectorRestOutboundMessageParser restOutboundMessageParser;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
      *
-     * @param outboundBusinessMessageReceiverService The service responsible for receiving and
-     *                                               managing outbound messages.
-     * @param outboundEvidenceMessageReceiverService The service responsible for processing outbound
-     *                                               evidence messages.
-     * @param backendClientVerifierService           The service used for verifying backend
-     *                                               clients.
-     * @param restOutboundMessageParser              The rest outbound message parsing util.
+     * @param outboundBusinessMessageReceiver The service responsible for receiving and managing
+     *                                        outbound messages.
+     * @param outboundEvidenceMessageReceiver The service responsible for processing outbound
+     *                                        evidence messages.
+     * @param backendClientVerifier           The service used for verifying backend clients.
+     * @param restOutboundMessageParser       The rest outbound message parsing util.
      */
     public ConnectorMessageController(
-        ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiverService,
-        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService,
-        ConnectorBackendClientVerifier backendClientVerifierService,
+        ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiver,
+        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver,
+        ConnectorBackendClientVerifier backendClientVerifier,
         ConnectorRestOutboundMessageParser restOutboundMessageParser) {
-        this.outboundBusinessMessageReceiverService = outboundBusinessMessageReceiverService;
-        this.outboundEvidenceMessageReceiverService = outboundEvidenceMessageReceiverService;
-        this.backendClientVerifierService = backendClientVerifierService;
+        this.outboundBusinessMessageReceiver = outboundBusinessMessageReceiver;
+        this.outboundEvidenceMessageReceiver = outboundEvidenceMessageReceiver;
+        this.backendClientVerifier = backendClientVerifier;
         this.restOutboundMessageParser = restOutboundMessageParser;
     }
 
@@ -65,7 +64,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     public ConnectorOutboundMessageDto submitOutboundMessage(
         ConnectorOutboundMessageRequest request) throws IOException {
         var command = toOutboundMessageCommand(request);
-        var registeredMessage = outboundBusinessMessageReceiverService.execute(command);
+        var registeredMessage = outboundBusinessMessageReceiver.execute(command);
 
         return ConnectorOutboundMessageDto.from(registeredMessage);
     }
@@ -74,7 +73,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
     public ConnectorEvidenceMessageDto submitEvidenceTriggerMessage(
         ConnectorEvidenceTriggerMessageRequest request) {
         // TODO current cn is fake, retrieve the certificate dn from user principal
-        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
+        var backendClientName = this.backendClientVerifier.getBackendClient("cn=alice");
 
         var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
@@ -84,7 +83,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             .backendName(backendClientName)
             .build();
 
-        var registeredMessage = outboundEvidenceMessageReceiverService.execute(message);
+        var registeredMessage = outboundEvidenceMessageReceiver.execute(message);
 
         return ConnectorEvidenceMessageDto.of(registeredMessage.identifier());
     }
@@ -93,7 +92,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         ConnectorOutboundMessageRequest request)
         throws IOException {
         // TODO current cn is fake, retrieve the certificate dn from user principal
-        var backendClientName = this.backendClientVerifierService.getBackendClient("cn=alice");
+        var backendClientName = this.backendClientVerifier.getBackendClient("cn=alice");
         return ConnectorOutboundBusinessMessageCommand
             .builder()
             .businessDomainIdentifier(

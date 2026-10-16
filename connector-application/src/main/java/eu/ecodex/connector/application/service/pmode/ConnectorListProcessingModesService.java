@@ -10,20 +10,20 @@
 
 package eu.ecodex.connector.application.service.pmode;
 
-import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModes;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link ConnectorListProcessingMode}.
+ * Default implementation of {@link ConnectorListProcessingModes}.
  */
 @Service
-public class ConnectorListProcessingModeService implements ConnectorListProcessingMode {
+public class ConnectorListProcessingModesService implements ConnectorListProcessingModes {
     private final ConnectorProcessingModeRepository processingModeRepository;
 
-    public ConnectorListProcessingModeService(
+    public ConnectorListProcessingModesService(
         ConnectorProcessingModeRepository processingModeRepository) {
         this.processingModeRepository = processingModeRepository;
     }

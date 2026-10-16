@@ -45,13 +45,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ConnectorJmsBackendMessageDeliveryListener
     implements ConnectorEventHandler<ConnectorMessage> {
-    private final ConnectorRegisterMessageTransportStep messageTransportStep;
+    private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
     private final ConnectorMessageRepository messageRepository;
-    private final ConnectorMessageEvidenceRepository evidenceRepository;
+    private final ConnectorMessageEvidenceRepository messageEvidenceRepository;
     private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
     private final ConnectorLinkPartnerProvider linkPartnerProvider;
     private final LegacyMessageHelper legacyMessageHelper;
-    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
+    private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver;
 
     @Value("${connector.message-processing.auto-trigger-delivery-evidences:false}")
     private boolean autoTriggerDeliveryEvidences;
@@ -59,36 +59,35 @@ public class ConnectorJmsBackendMessageDeliveryListener
     /**
      * Constructs a new instance of the {@code ConnectorBackendMessageDeliveryListener} class.
      *
-     * @param messageTransportStep                   Represents the transport step responsible for
-     *                                               processing and executing message delivery
-     *                                               within the connector registration process.
-     * @param messageRepository                      Repository for handling the persistence and
-     *                                               retrieval of connector messages.
-     * @param evidenceRepository                     Repository for handling the persistence and
-     *                                               retrieval of connector evidences.
-     * @param backendDeliveryServiceClient           Client for interacting with backend services
-     *                                               required for message delivery.
-     * @param linkPartnerProvider                    Repository for managing link partners
-     *                                               associated with connector
-     * @param legacyMessageHelper                    Helper for handling legacy messages.
-     * @param outboundEvidenceMessageReceiverService Service for processing outbound evidence
-     *                                               messages.
+     * @param registerMessageTransportStep    Represents the transport step responsible for
+     *                                        processing and executing message delivery within the
+     *                                        connector registration process.
+     * @param messageRepository               Repository for handling the persistence and retrieval
+     *                                        of connector messages.
+     * @param messageEvidenceRepository       Repository for handling the persistence and retrieval
+     *                                        of connector evidences.
+     * @param backendDeliveryServiceClient    Client for interacting with backend services required
+     *                                        for message delivery.
+     * @param linkPartnerProvider             Repository for managing link partners associated with
+     *                                        connector
+     * @param legacyMessageHelper             Helper for handling legacy messages.
+     * @param outboundEvidenceMessageReceiver Service for processing outbound evidence messages.
      */
     public ConnectorJmsBackendMessageDeliveryListener(
-        ConnectorRegisterMessageTransportStep messageTransportStep,
+        ConnectorRegisterMessageTransportStep registerMessageTransportStep,
         ConnectorMessageRepository messageRepository,
-        ConnectorMessageEvidenceRepository evidenceRepository,
+        ConnectorMessageEvidenceRepository messageEvidenceRepository,
         ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
         ConnectorLinkPartnerProvider linkPartnerProvider,
         LegacyMessageHelper legacyMessageHelper,
-        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService) {
-        this.messageTransportStep = messageTransportStep;
+        ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver) {
+        this.registerMessageTransportStep = registerMessageTransportStep;
         this.messageRepository = messageRepository;
-        this.evidenceRepository = evidenceRepository;
+        this.messageEvidenceRepository = messageEvidenceRepository;
         this.backendDeliveryServiceClient = backendDeliveryServiceClient;
         this.linkPartnerProvider = linkPartnerProvider;
         this.legacyMessageHelper = legacyMessageHelper;
-        this.outboundEvidenceMessageReceiverService = outboundEvidenceMessageReceiverService;
+        this.outboundEvidenceMessageReceiver = outboundEvidenceMessageReceiver;
     }
 
     @Override
@@ -133,7 +132,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
     }
 
     private void makeReadyForPull(ConnectorMessage message) {
-        messageTransportStep.execute(
+        registerMessageTransportStep.execute(
             message,
             ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
         );
@@ -149,7 +148,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
             outcome = deliver(message);
         } catch (Exception e) {
             log.error("Failed to deliver message [{}] to the backend system", identifier, e);
-            messageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
+            registerMessageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
             return;
         }
 
@@ -182,7 +181,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
                 markEvidenceMessageAsDelivered(evidenceMessage);
             default -> throw unsupportedMessageType(message);
         }
-        messageTransportStep.execute(message, ConnectorMessageTransportStatus.DELIVERED);
+        registerMessageTransportStep.execute(message, ConnectorMessageTransportStatus.DELIVERED);
     }
 
     private void markBusinessMessageAsDelivered(
@@ -214,7 +213,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
                         throw new IllegalStateException(
                             "The evidence message contains no transported evidence");
                     }
-                    evidenceRepository.setDeliveredToLinkPartnerAt(evidence.uuid());
+                    messageEvidenceRepository.setDeliveredToLinkPartnerAt(evidence.uuid());
                 }
             );
         }
@@ -237,7 +236,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
             );
         }
 
-        evidenceRepository.setDeliveredToLinkPartnerAt(evidenceUuid);
+        messageEvidenceRepository.setDeliveredToLinkPartnerAt(evidenceUuid);
     }
 
     private void handleRejection(ConnectorMessage message, String reason) {
@@ -252,7 +251,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
             // trigger NON_DELIVERY
             messageRepository.setAsRejected(identifier);
         }
-        messageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
+        registerMessageTransportStep.execute(message, ConnectorMessageTransportStatus.FAILED);
     }
 
     private void processTestMessage(@NonNull ConnectorMessage message) {
@@ -275,7 +274,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
             .backendName(backendClientName)
             .build();
 
-        outboundEvidenceMessageReceiverService.execute(message);
+        outboundEvidenceMessageReceiver.execute(message);
     }
 
 

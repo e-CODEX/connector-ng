@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Use case for listing all {@link ConnectorProcessingMode} entities managed by the system.
  */
-public interface ConnectorListProcessingMode {
+public interface ConnectorListProcessingModes {
 
     /**
      * Retrieves all configured {@link ConnectorProcessingMode} instances.

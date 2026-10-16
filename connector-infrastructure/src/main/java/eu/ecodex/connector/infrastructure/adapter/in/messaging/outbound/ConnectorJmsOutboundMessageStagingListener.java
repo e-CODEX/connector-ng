@@ -30,11 +30,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class ConnectorJmsOutboundMessageStagingListener
     implements ConnectorEventHandler<ConnectorBusinessMessage> {
-    private final ConnectorOutboundBusinessMessageStager messageStager;
+    private final ConnectorOutboundBusinessMessageStager outboundBusinessMessageStager;
 
     public ConnectorJmsOutboundMessageStagingListener(
-        ConnectorOutboundBusinessMessageStager messageStager) {
-        this.messageStager = messageStager;
+        ConnectorOutboundBusinessMessageStager outboundBusinessMessageStager) {
+        this.outboundBusinessMessageStager = outboundBusinessMessageStager;
     }
 
     @Override
@@ -42,6 +42,6 @@ public class ConnectorJmsOutboundMessageStagingListener
     @JmsListener(destination = "${connector.queues.outbound-message-staging-queue}")
     public void handle(@NonNull ConnectorBusinessMessage message) {
         log.info("Entering outbound message [{}] staging process", message.identifier());
-        messageStager.execute(message);
+        outboundBusinessMessageStager.execute(message);
     }
 }

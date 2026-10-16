@@ -29,11 +29,11 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorAttachmentController implements ConnectorAttachmentApi {
-    private final ConnectorUploadAttachments uploadAttachmentsService;
+    private final ConnectorUploadAttachments uploadAttachments;
 
     public ConnectorAttachmentController(
-        ConnectorUploadAttachments uploadAttachmentsService) {
-        this.uploadAttachmentsService = uploadAttachmentsService;
+        ConnectorUploadAttachments uploadAttachments) {
+        this.uploadAttachments = uploadAttachments;
     }
 
     @Override
@@ -70,10 +70,10 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
             ).toList();
 
         try {
-            return this.uploadAttachmentsService.execute(fileUploadCommands)
-                                                .stream()
-                                                .map(ConnectorMessageAttachment::identifier)
-                                                .toList();
+            return this.uploadAttachments.execute(fileUploadCommands)
+                                         .stream()
+                                         .map(ConnectorMessageAttachment::identifier)
+                                         .toList();
         } finally {
             fileUploadCommands.forEach(FileUploadCommand::cleanup);
         }

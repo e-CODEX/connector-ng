@@ -20,11 +20,10 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRevokeUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRegisterUserRefreshTokenService;
-import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRevokeUserRefreshTokenService;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
-import eu.ecodex.connector.infrastructure.adapter.out.auth.login.ConnectorUserAuthenticationProviderImpl;
 import java.time.Duration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,31 +39,28 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 class ConnectorUserAuthenticationProviderImplTest {
     @Mock
     AuthenticationManager authenticationManager;
-
     @Mock
     ConnectorAuthenticationTokenProvider authenticationTokenProvider;
-
     @Mock
-    ConnectorRegisterUserRefreshTokenService refreshTokenService;
+    ConnectorRegisterUserRefreshTokenService registerUserRefreshTokenService;
+    @Mock
+    ConnectorRevokeUserRefreshToken revokeUserRefreshToken;
 
     @InjectMocks
     ConnectorUserAuthenticationProviderImpl service;
-
-    @Mock
-    ConnectorRevokeUserRefreshTokenService revokeUserTokenService;
 
     @Test
     void logout_should_succeed() {
         // Given
         var userId = "test";
         var refreshToken = "refresh-token-abc";
-        doNothing().when(revokeUserTokenService).execute(any(), any());
+        doNothing().when(revokeUserRefreshToken).execute(any(), any());
 
         // When
         service.logout(userId, refreshToken);
 
         // Then
-        verify(revokeUserTokenService).execute(userId, refreshToken);
+        verify(revokeUserRefreshToken).execute(userId, refreshToken);
     }
 
     @Test
@@ -78,15 +74,15 @@ class ConnectorUserAuthenticationProviderImplTest {
             principal, password, principal.getAuthorities());
         var token = "refresh-token-abc";
         var refreshToken = ConnectorRefreshToken.builder()
-            .token(token)
-            .user(connectorUser)
-            .revoked(false)
-            .build();
+                                                .token(token)
+                                                .user(connectorUser)
+                                                .revoked(false)
+                                                .build();
         var accessToken = "access-token";
 
         when(authenticationManager.authenticate(any())).thenReturn(authenticatedToken);
         when(authenticationTokenProvider.generateAccessToken(any())).thenReturn(accessToken);
-        when(refreshTokenService.execute(any())).thenReturn(refreshToken);
+        when(registerUserRefreshTokenService.execute(any())).thenReturn(refreshToken);
         when(authenticationTokenProvider.getAccessTokenExpiresIn()).thenReturn(
             Duration.ofMinutes(1));
 
@@ -106,10 +102,10 @@ class ConnectorUserAuthenticationProviderImplTest {
         assertThat(authCaptorValue.getCredentials()).isEqualTo(password);
 
         verify(authenticationTokenProvider).generateAccessToken(connectorUser);
-        verify(refreshTokenService).execute(connectorUser);
+        verify(registerUserRefreshTokenService).execute(connectorUser);
         verify(authenticationTokenProvider).getAccessTokenExpiresIn();
         verify(authenticationTokenProvider).getRefreshTokenExpiresIn();
-        verifyNoMoreInteractions(authenticationTokenProvider, refreshTokenService);
+        verifyNoMoreInteractions(authenticationTokenProvider, registerUserRefreshTokenService);
     }
 
     @Test
@@ -132,6 +128,6 @@ class ConnectorUserAuthenticationProviderImplTest {
         assertThat(authCaptorValue.getPrincipal()).isEqualTo(username);
         assertThat(authCaptorValue.getCredentials()).isEqualTo(password);
 
-        verifyNoMoreInteractions(authenticationTokenProvider, refreshTokenService);
+        verifyNoMoreInteractions(authenticationTokenProvider, registerUserRefreshTokenService);
     }
 }

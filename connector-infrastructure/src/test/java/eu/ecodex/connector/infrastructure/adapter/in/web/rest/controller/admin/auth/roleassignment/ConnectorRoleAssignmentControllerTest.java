@@ -31,12 +31,10 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 
 @WebMvcTest(ConnectorRoleAssignmentController.class)
 class ConnectorRoleAssignmentControllerTest extends AbstractWebMvcTest {
-
     private static final String URL = "/api/v1/admin/users/%s/roles";
 
     @MockitoBean
     ConnectorAssignRole connectorAssignRole;
-
     @MockitoBean
     ConnectorUnassignRole connectorUnassignRole;
 

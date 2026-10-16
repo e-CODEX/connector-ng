@@ -49,7 +49,6 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 public abstract class AbstractWebMvcTest {
     @MockitoBean
     protected ConnectorJwtGenerator jwtTokenService;
-
     @MockitoBean
     protected ConnectorJwtAuthenticationFilter jwtAuthenticationFilter;
 

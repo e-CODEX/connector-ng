@@ -98,19 +98,19 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
         "urn:oasis:names:tc:ebcore:partyid-type:ecodex";
 
     @MockitoBean
-    private ConnectorListMessages listMessagesService;
+    private ConnectorListMessages listMessages;
     @MockitoBean
-    private ConnectorRetrieveMessage retrieveMessageService;
+    private ConnectorRetrieveMessage retrieveMessage;
     @MockitoBean
-    private ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStepService;
+    private ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStep;
     @MockitoBean
-    private ConnectorRetrieveMessageStats retrieveMessageStatsService;
+    private ConnectorRetrieveMessageStats retrieveMessageStats;
     @MockitoBean
-    private ConnectorRetrieveMessageReport retrieveMessageReportService;
+    private ConnectorRetrieveMessageReport retrieveMessageReport;
     @MockitoBean
     private ConnectorMessageReportExporterFactory reportExporterFactory;
     @MockitoBean
-    private ConnectorSendOutboundC2CTestMessage sendTestMessageService;
+    private ConnectorSendOutboundC2CTestMessage sendTestMessage;
     @MockitoBean
     private ConnectorRestOutboundMessageParser restOutboundMessageParser;
     @Mock
@@ -165,7 +165,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
             when(restOutboundMessageParser.toParty(any(), eq(ConnectorPartyRoleType.RESPONDER)))
                 .thenReturn(toParty);
 
-            when(sendTestMessageService.execute(any()))
+            when(sendTestMessage.execute(any()))
                 .thenReturn(BusinessMessageTestFixtures.createOutboundMessage());
         }
 
@@ -190,7 +190,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 .param("businessDomainIdentifier", BUSINESS_DOMAIN_IDENTIFIER)
                 .param("backendMessageIdentifier", BACKEND_MESSAGE_IDENTIFIER)
                 .param("businessContent.businessDocument.aesType", "SIGNATURE_BASED")
-                // AS4 properties — a test message has no service/action
+                // AS4 properties — a test message has no /action
                 .param("as4Properties.conversationIdentifier", CONVERSATION_IDENTIFIER)
                 .param("as4Properties.originalSender", "alice")
                 .param("as4Properties.finalRecipient", "bob")
@@ -226,7 +226,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 .resolveBusinessDomainIdentifier(BUSINESS_DOMAIN_IDENTIFIER);
 
             var captor = ArgumentCaptor.forClass(ConnectorTestBusinessMessageCommand.class);
-            verify(sendTestMessageService).execute(captor.capture());
+            verify(sendTestMessage).execute(captor.capture());
             var command = captor.getValue();
             assertThat(command.businessDomainIdentifier()).isEqualTo(businessDomainIdentifier);
             assertThat(command.backendMessageIdentifier()).isEqualTo(BACKEND_MESSAGE_IDENTIFIER);
@@ -255,7 +255,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 .thenReturn(toParty);
 
             doThrow(ConnectorC2CTestMessageDisabledException.class)
-                .when(sendTestMessageService).execute(any());
+                .when(sendTestMessage).execute(any());
 
             mockMvc.perform(
                        buildValidTestMessageRequest()
@@ -270,7 +270,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                    .andExpect(status().isBadRequest());
 
-            verifyNoInteractions(sendTestMessageService, restOutboundMessageParser);
+            verifyNoInteractions(sendTestMessage, restOutboundMessageParser);
         }
     }
 
@@ -283,7 +283,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 List.of(BusinessMessageTestFixtures.createConfirmedMessage()), 1, 1, 1
             );
 
-            when(listMessagesService.execute(any()))
+            when(listMessages.execute(any()))
                 .thenReturn(pageResult);
 
             mockMvc.perform(get(URL)
@@ -299,7 +299,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                    .andExpect(jsonPath("$.content.length()").value(1));
 
             // messages are always listed newest first; no filter was sent
-            verify(listMessagesService).execute(any());
+            verify(listMessages).execute(any());
         }
     }
 
@@ -308,7 +308,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
     class RetrieveMessage {
         @Test
         void should_return_200_with_the_message() throws Exception {
-            when(retrieveMessageService.execute(any()))
+            when(retrieveMessage.execute(any()))
                 .thenReturn(BusinessMessageTestFixtures.createConfirmedMessage());
 
             mockMvc.perform(get(URL_MESSAGE_DETAIL.formatted(MESSAGE_ID))
@@ -317,13 +317,13 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                    .andExpect(jsonPath("$.identifier").value(MESSAGE_ID));
 
-            verify(retrieveMessageService).execute(MESSAGE_ID);
+            verify(retrieveMessage).execute(MESSAGE_ID);
         }
 
         @Test
         void should_return_404_when_the_message_is_not_found() throws Exception {
             doThrow(ConnectorMessageNotFoundException.class)
-                .when(retrieveMessageService).execute(any());
+                .when(retrieveMessage).execute(any());
 
             mockMvc.perform(get(URL_MESSAGE_DETAIL.formatted("unknown-identifier"))
                                 .contentType(MediaType.APPLICATION_JSON))
@@ -337,7 +337,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
     class RetrieveTransportSteps {
         @Test
         void should_return_200_with_the_transport_steps() throws Exception {
-            when(retrieveTransportStepService.execute(any()))
+            when(retrieveTransportStep.execute(any()))
                 .thenReturn(TransportStepFixtures.createTransportStep());
 
             mockMvc.perform(get(URL_TRANSPORT_STEP.formatted(MESSAGE_ID))
@@ -346,13 +346,13 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                    .andExpect(jsonPath("$.transportedMessageIdentifier").value(MESSAGE_ID));
 
-            verify(retrieveTransportStepService).execute(MESSAGE_ID);
+            verify(retrieveTransportStep).execute(MESSAGE_ID);
         }
 
         @Test
         void should_return_404_when_the_message_is_not_found() throws Exception {
             doThrow(ConnectorMessageTransportStepNotFoundException.class)
-                .when(retrieveTransportStepService).execute(any());
+                .when(retrieveTransportStep).execute(any());
 
             mockMvc.perform(get(URL_TRANSPORT_STEP.formatted("unknown-identifier"))
                                 .contentType(MediaType.APPLICATION_JSON))
@@ -366,7 +366,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
     class MessageStats {
         @Test
         void should_return_200_with_the_message_stats() throws Exception {
-            when(retrieveMessageStatsService.execute(any(), any(), any()))
+            when(retrieveMessageStats.execute(any(), any(), any()))
                 .thenReturn(MessageStatsTestFixtures.createStats());
 
             mockMvc.perform(get(URL_STATS).contentType(MediaType.APPLICATION_JSON))
@@ -392,7 +392,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
     class MessageReport {
         @Test
         void should_return_200_with_the_message_report() throws Exception {
-            when(retrieveMessageReportService.execute(any(), any(), any()))
+            when(retrieveMessageReport.execute(any(), any(), any()))
                 .thenReturn(ConnectorMessageReportSummary.of(MessageReportTestFixtures.createReport()));
 
             mockMvc.perform(get(URL_REPORT).contentType(MediaType.APPLICATION_JSON))
@@ -451,7 +451,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
                 ConnectorMessageReportSummary.of(MessageReportTestFixtures.createReport());
             var exportedContent = "dummy-content".getBytes(StandardCharsets.UTF_8);
 
-            when(retrieveMessageReportService.execute(any(), any(), any()))
+            when(retrieveMessageReport.execute(any(), any(), any()))
                 .thenReturn(reportSummary);
             when(reportExporterFactory.create(format)).thenReturn(exporter);
             when(exporter.export(any())).thenReturn(exportedContent);

@@ -44,11 +44,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ConnectorAttachmentAdminController.class)
 public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
     @MockitoBean
-    private ConnectorListAttachments listAttachmentsService;
+    private ConnectorListAttachments listAttachments;
     @MockitoBean
-    private ConnectorDownloadAttachment downloadAttachmentService;
+    private ConnectorDownloadAttachment downloadAttachment;
     @MockitoBean
-    private ConnectorRetrieveAttachment retrieveAttachmentService;
+    private ConnectorRetrieveAttachment retrieveAttachment;
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,7 +62,7 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
                 List.of(MessageAttachmentTestFixtures.createAttachment()), 1, 1, 1
             );
 
-            when(listAttachmentsService.execute(any())).thenReturn(
+            when(listAttachments.execute(any())).thenReturn(
                 pageResult);
 
             mockMvc.perform(get("/api/v1/admin/attachments")
@@ -84,9 +84,9 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
     class DownloadAttachment {
         @Test
         void should_return_200_when_downloading_the_attachment() throws Exception {
-            when(retrieveAttachmentService.execute(any()))
+            when(retrieveAttachment.execute(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-            when(downloadAttachmentService.execute(any())).thenReturn(new byte[1]);
+            when(downloadAttachment.execute(any())).thenReturn(new byte[1]);
 
             mockMvc.perform(
                        get("/api/v1/admin/attachments/1234567890abcdef/download")
@@ -97,7 +97,7 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_404_when_attachment_not_found() throws Exception {
             doThrow(ConnectorMessageAttachmentNotFoundException.class).when(
-                retrieveAttachmentService).execute(any());
+                retrieveAttachment).execute(any());
 
             mockMvc.perform(get("/api/v1/admin/attachments/unknown-id/download")
                                 .contentType(MediaType.APPLICATION_JSON))
@@ -108,9 +108,9 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_409_when_attachment_is_no_longer_available_in_the_storage()
             throws Exception {
-            when(retrieveAttachmentService.execute(any()))
+            when(retrieveAttachment.execute(any()))
                 .thenReturn(MessageAttachmentTestFixtures.createAttachment());
-            doThrow(ConnectorMessageAttachmentException.class).when(retrieveAttachmentService)
+            doThrow(ConnectorMessageAttachmentException.class).when(retrieveAttachment)
                                                               .execute(any());
 
             mockMvc.perform(get("/api/v1/admin/attachments/unknown-id/download")

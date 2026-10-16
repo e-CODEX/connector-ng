@@ -26,11 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class ConnectorJmsOutboundEvidenceTriggerListener
     implements ConnectorEventHandler<ConnectorTriggeredEvidenceMessage> {
-    private final ConnectorOutboundEvidenceMessageProcessor evidenceTriggerProcessor;
+    private final ConnectorOutboundEvidenceMessageProcessor outboundEvidenceMessageProcessor;
 
     public ConnectorJmsOutboundEvidenceTriggerListener(
-        ConnectorOutboundEvidenceMessageProcessor evidenceTriggerProcessor) {
-        this.evidenceTriggerProcessor = evidenceTriggerProcessor;
+        ConnectorOutboundEvidenceMessageProcessor outboundEvidenceMessageProcessor) {
+        this.outboundEvidenceMessageProcessor = outboundEvidenceMessageProcessor;
     }
 
     @Override
@@ -38,6 +38,6 @@ public class ConnectorJmsOutboundEvidenceTriggerListener
     @JmsListener(destination = "${connector.queues.outbound-evidence-trigger-queue}")
     public void handle(@NonNull ConnectorTriggeredEvidenceMessage message) {
         log.info("Processing evidence trigger message [{}]", message.identifier());
-        evidenceTriggerProcessor.execute(message);
+        outboundEvidenceMessageProcessor.execute(message);
     }
 }

@@ -68,11 +68,11 @@ public class ConnectorBusinessDomainInitializerTest {
     private static final String TRUSTSTORE_PASSWORD = "changeit";
 
     @Mock
-    private ConnectorRegisterBusinessDomain registerBusinessDomainService;
+    private ConnectorRegisterBusinessDomain registerBusinessDomain;
     @Mock
-    private ConnectorListBusinessDomain listBusinessDomainService;
+    private ConnectorListBusinessDomain listBusinessDomain;
     @Mock
-    private ConnectorRegisterProcessingMode registerProcessingModeService;
+    private ConnectorRegisterProcessingMode registerProcessingMode;
     @Mock
     private ConnectorBusinessDomainProperties domainProperties;
     @Mock
@@ -109,9 +109,9 @@ public class ConnectorBusinessDomainInitializerTest {
     @BeforeEach
     void setUp() {
         initializer = new ConnectorBusinessDomainInitializer(
-            registerBusinessDomainService,
-            listBusinessDomainService,
-            registerProcessingModeService,
+            registerBusinessDomain,
+            listBusinessDomain,
+            registerProcessingMode,
             domainProperties,
             new DefaultResourceLoader()
         );
@@ -126,14 +126,14 @@ public class ConnectorBusinessDomainInitializerTest {
         void should_register_the_built_in_default_when_none_is_registered_yet(
             List<DefaultBusinessDomainProperties> defaults) {
             when(domainProperties.getDefaults()).thenReturn(defaults);
-            when(listBusinessDomainService.execute()).thenReturn(List.of());
+            when(listBusinessDomain.execute()).thenReturn(List.of());
 
             initializer.run(applicationArguments);
 
-            verify(registerBusinessDomainService)
+            verify(registerBusinessDomain)
                 .execute(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN);
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @ParameterizedTest
@@ -142,13 +142,13 @@ public class ConnectorBusinessDomainInitializerTest {
         void should_do_nothing_when_a_business_domain_is_already_registered(
             List<DefaultBusinessDomainProperties> defaults) {
             when(domainProperties.getDefaults()).thenReturn(defaults);
-            when(listBusinessDomainService.execute())
+            when(listBusinessDomain.execute())
                 .thenReturn(List.of(mock(ConnectorBusinessDomain.class)));
 
             initializer.run(applicationArguments);
 
-            verifyNoInteractions(registerBusinessDomainService);
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerBusinessDomain);
+            verifyNoInteractions(registerProcessingMode);
         }
     }
 
@@ -164,7 +164,7 @@ public class ConnectorBusinessDomainInitializerTest {
 
             initializer.run(applicationArguments);
 
-            verify(registerBusinessDomainService).execute(
+            verify(registerBusinessDomain).execute(
                 argThat(domain ->
                             "domain-a".equals(domain.identifier().messageLaneIdentifier())
                                 && "Domain A".equals(domain.description())
@@ -172,13 +172,13 @@ public class ConnectorBusinessDomainInitializerTest {
                                 && domain.source() == ConnectorConfigurationSource.IMPLEMENTATION)
             );
 
-            verify(registerBusinessDomainService).execute(
+            verify(registerBusinessDomain).execute(
                 argThat(domain -> "domain-b".equals(domain.identifier().messageLaneIdentifier())
                     && !domain.enabled())
             );
 
-            verify(registerBusinessDomainService, times(2)).execute(any());
-            verifyNoInteractions(listBusinessDomainService);
+            verify(registerBusinessDomain, times(2)).execute(any());
+            verifyNoInteractions(listBusinessDomain);
         }
 
         @Test
@@ -195,11 +195,11 @@ public class ConnectorBusinessDomainInitializerTest {
                     throw new ConnectorBusinessDomainAlreadyExistsException("already there");
                 }
                 return null;
-            }).when(registerBusinessDomainService).execute(any());
+            }).when(registerBusinessDomain).execute(any());
 
             assertThatNoException().isThrownBy(() -> initializer.run(applicationArguments));
 
-            verify(registerBusinessDomainService, times(3)).execute(any());
+            verify(registerBusinessDomain, times(3)).execute(any());
         }
 
         @Test
@@ -208,7 +208,7 @@ public class ConnectorBusinessDomainInitializerTest {
                 .thenReturn(List.of(properties("domain-a", "Domain A", true)));
 
             doThrow(new RuntimeException("Database unreachable"))
-                .when(registerBusinessDomainService).execute(any());
+                .when(registerBusinessDomain).execute(any());
 
             assertThatExceptionOfType(RuntimeException.class)
                 .isThrownBy(() -> initializer.run(applicationArguments))
@@ -222,7 +222,7 @@ public class ConnectorBusinessDomainInitializerTest {
 
             initializer.run(applicationArguments);
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
     }
 
@@ -240,7 +240,7 @@ public class ConnectorBusinessDomainInitializerTest {
 
             ArgumentCaptor<ConnectorBusinessDomainIdentifier> identifier = ArgumentCaptor.captor();
             ArgumentCaptor<ConnectorProcessingMode> processingMode = ArgumentCaptor.captor();
-            verify(registerProcessingModeService)
+            verify(registerProcessingMode)
                 .execute(identifier.capture(), processingMode.capture());
 
             assertThat(identifier.getValue().messageLaneIdentifier()).isEqualTo("domain-a");
@@ -267,9 +267,9 @@ public class ConnectorBusinessDomainInitializerTest {
             initializer.run(applicationArguments);
 
             var inOrder = inOrder(
-                registerBusinessDomainService, registerProcessingModeService);
-            inOrder.verify(registerBusinessDomainService).execute(any());
-            inOrder.verify(registerProcessingModeService).execute(any(), any());
+                registerBusinessDomain, registerProcessingMode);
+            inOrder.verify(registerBusinessDomain).execute(any());
+            inOrder.verify(registerProcessingMode).execute(any(), any());
         }
 
         @Test
@@ -279,13 +279,13 @@ public class ConnectorBusinessDomainInitializerTest {
                 .thenReturn(List.of(withProcessingMode(tempDir)));
 
             doThrow(new ConnectorProcessingModeException("already linked"))
-                .when(registerProcessingModeService).execute(any(), any());
+                .when(registerProcessingMode).execute(any(), any());
 
             // Restarting the connector must not abort the application context.
             assertThatNoException().isThrownBy(() -> initializer.run(applicationArguments));
 
-            verify(registerBusinessDomainService).execute(any());
-            verify(registerProcessingModeService).execute(any(), any());
+            verify(registerBusinessDomain).execute(any());
+            verify(registerProcessingMode).execute(any(), any());
         }
 
         @Test
@@ -300,7 +300,7 @@ public class ConnectorBusinessDomainInitializerTest {
                 .withMessageContaining("domain-a")
                 .withRootCauseInstanceOf(java.io.FileNotFoundException.class);
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @Test
@@ -314,7 +314,7 @@ public class ConnectorBusinessDomainInitializerTest {
                 .isThrownBy(() -> initializer.run(applicationArguments))
                 .withMessageContaining("truststore");
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @Test
@@ -340,7 +340,7 @@ public class ConnectorBusinessDomainInitializerTest {
                 .thenReturn(List.of(withProcessingMode(tempDir)));
 
             doThrow(new ConnectorProcessingModeParsingException("malformed definition"))
-                .when(registerProcessingModeService).execute(any(), any());
+                .when(registerProcessingMode).execute(any(), any());
 
             assertThatExceptionOfType(ConnectorProcessingModeParsingException.class)
                 .isThrownBy(() -> initializer.run(applicationArguments));

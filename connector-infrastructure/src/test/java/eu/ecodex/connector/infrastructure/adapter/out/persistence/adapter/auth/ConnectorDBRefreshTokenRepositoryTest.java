@@ -38,8 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ConnectorDBRefreshTokenRepositoryTest {
     @Mock
-    private ConnectorUserRefreshTokenJpaRepository jpaRepository;
-
+    private ConnectorUserRefreshTokenJpaRepository refreshTokenJpaRepository;
     @Mock
     private ConnectorUserJpaRepository userJpaRepository;
 
@@ -48,23 +47,23 @@ class ConnectorDBRefreshTokenRepositoryTest {
 
     private static ConnectorRefreshToken getExpectedRefreshToken() {
         var user = ConnectorUser.builder()
-            .uuid("userId")
-            .enabled(Boolean.FALSE)
-            .mustChangePassword(Boolean.FALSE)
-            .roles(Set.of()).build();
+                                .uuid("userId")
+                                .enabled(Boolean.FALSE)
+                                .mustChangePassword(Boolean.FALSE)
+                                .roles(Set.of()).build();
         return ConnectorRefreshToken.builder().user(user).build();
     }
 
     private static ConnectorRefreshTokenEntity getRefreshTokenEntity() {
         var userEntity = ConnectorUserEntity.builder().uuid("userId").build();
         return ConnectorRefreshTokenEntity.builder()
-            .user(userEntity).build();
+                                          .user(userEntity).build();
     }
 
     @Test
     void deleteByUserUuid_should_delete_all_user_refresh_token() {
         // Given
-        when(jpaRepository.deleteByUser_Uuid(any())).thenReturn(Integer.MIN_VALUE);
+        when(refreshTokenJpaRepository.deleteByUser_Uuid(any())).thenReturn(Integer.MIN_VALUE);
 
         // When
         var deleted = repository.deleteByUserUuid("userId");
@@ -72,15 +71,15 @@ class ConnectorDBRefreshTokenRepositoryTest {
         // Then
         assertThat(deleted).isEqualTo(Integer.MIN_VALUE);
 
-        verify(jpaRepository).deleteByUser_Uuid("userId");
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verify(refreshTokenJpaRepository).deleteByUser_Uuid("userId");
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
     void deleteByExpiryDateBefore_should_delete_all_refresh_tokens_before_a_specified_date() {
         // Given
         Instant now = Instant.now();
-        when(jpaRepository.deleteByExpiresAtBefore(any())).thenReturn(Integer.MIN_VALUE);
+        when(refreshTokenJpaRepository.deleteByExpiresAtBefore(any())).thenReturn(Integer.MIN_VALUE);
 
         // When
         var deleted = repository.deleteByExpiryDateBefore(now);
@@ -88,15 +87,15 @@ class ConnectorDBRefreshTokenRepositoryTest {
         // Then
         assertThat(deleted).isEqualTo(Integer.MIN_VALUE);
 
-        verify(jpaRepository).deleteByExpiresAtBefore(now);
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verify(refreshTokenJpaRepository).deleteByExpiresAtBefore(now);
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
     void deleteByRevokedAndExpiryDateBefore_should_deleted_ll_revoked_refresh_tokens_before_a_date() {
         // Given
         Instant now = Instant.now();
-        when(jpaRepository.deleteByRevokedTrueAndExpiresAtBefore(any())).thenReturn(
+        when(refreshTokenJpaRepository.deleteByRevokedTrueAndExpiresAtBefore(any())).thenReturn(
             Integer.MIN_VALUE);
 
         // When
@@ -105,8 +104,8 @@ class ConnectorDBRefreshTokenRepositoryTest {
         // Then
         assertThat(deleted).isEqualTo(Integer.MIN_VALUE);
 
-        verify(jpaRepository).deleteByRevokedTrueAndExpiresAtBefore(now);
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verify(refreshTokenJpaRepository).deleteByRevokedTrueAndExpiresAtBefore(now);
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
@@ -114,15 +113,15 @@ class ConnectorDBRefreshTokenRepositoryTest {
         // Given
         var expected = getExpectedRefreshToken();
         var expectedEntity = Optional.of(getRefreshTokenEntity());
-        when(jpaRepository.findByToken(any())).thenReturn(expectedEntity);
+        when(refreshTokenJpaRepository.findByToken(any())).thenReturn(expectedEntity);
 
         // When
         var found = repository.findByTokenHashed("token");
 
         // Then
         assertThat(found).isPresent().contains(expected);
-        verify(jpaRepository).findByToken("token");
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verify(refreshTokenJpaRepository).findByToken("token");
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
@@ -132,7 +131,7 @@ class ConnectorDBRefreshTokenRepositoryTest {
         var expectedEntity = getRefreshTokenEntity();
 
         when(userJpaRepository.findByUuid(any())).thenReturn(Optional.of(expectedEntity.getUser()));
-        when(jpaRepository.save(any())).thenReturn(expectedEntity);
+        when(refreshTokenJpaRepository.save(any())).thenReturn(expectedEntity);
 
         // When
         var found = repository.save(token);
@@ -141,11 +140,11 @@ class ConnectorDBRefreshTokenRepositoryTest {
         assertThat(found).isNotNull().isEqualTo(token);
 
         var captor = ArgumentCaptor.forClass(ConnectorRefreshTokenEntity.class);
-        verify(jpaRepository).save(captor.capture());
+        verify(refreshTokenJpaRepository).save(captor.capture());
         assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(expectedEntity);
 
         verify(userJpaRepository).findByUuid(token.user().uuid());
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
@@ -155,19 +154,19 @@ class ConnectorDBRefreshTokenRepositoryTest {
         var expected = Optional.of(getRefreshTokenEntity());
 
         when(userJpaRepository.findByUuid(any())).thenReturn(Optional.of(expected.get().getUser()));
-        doNothing().when(jpaRepository).delete(any());
+        doNothing().when(refreshTokenJpaRepository).delete(any());
 
         // When
         repository.delete(token);
 
         // Then
         var captor = ArgumentCaptor.forClass(ConnectorRefreshTokenEntity.class);
-        verify(jpaRepository).delete(captor.capture());
+        verify(refreshTokenJpaRepository).delete(captor.capture());
         assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(expected.get());
 
         var userId = "userId";
         verify(userJpaRepository).findByUuid(userId);
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
@@ -177,7 +176,7 @@ class ConnectorDBRefreshTokenRepositoryTest {
         var token = getExpectedRefreshToken();
         var expectedEntity = List.of(getRefreshTokenEntity());
 
-        when(jpaRepository.findByUser_UuidAndRevoked(any(), anyBoolean())).thenReturn(
+        when(refreshTokenJpaRepository.findByUser_UuidAndRevoked(any(), anyBoolean())).thenReturn(
             expectedEntity);
 
         // When
@@ -185,8 +184,8 @@ class ConnectorDBRefreshTokenRepositoryTest {
 
         // Then
         assertThat(found).isNotEmpty().isEqualTo(List.of(token));
-        verify(jpaRepository).findByUser_UuidAndRevoked(userId, Boolean.TRUE);
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verify(refreshTokenJpaRepository).findByUser_UuidAndRevoked(userId, Boolean.TRUE);
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 
     @Test
@@ -194,14 +193,17 @@ class ConnectorDBRefreshTokenRepositoryTest {
         // Given
         var userId = "uuid";
         var revokedAt = Instant.now();
-        when(jpaRepository.revokeAllActiveByUserId(any(), any())).thenReturn(Integer.MIN_VALUE);
+        when(refreshTokenJpaRepository.revokeAllActiveByUserId(
+            any(),
+            any()
+        )).thenReturn(Integer.MIN_VALUE);
 
         // When
         var revoked = repository.revokeByUserUuid(userId, revokedAt);
 
         // Then
         assertThat(revoked).isEqualTo(Integer.MIN_VALUE);
-        verify(jpaRepository).revokeAllActiveByUserId(userId, revokedAt);
-        verifyNoMoreInteractions(jpaRepository, userJpaRepository);
+        verify(refreshTokenJpaRepository).revokeAllActiveByUserId(userId, revokedAt);
+        verifyNoMoreInteractions(refreshTokenJpaRepository, userJpaRepository);
     }
 }

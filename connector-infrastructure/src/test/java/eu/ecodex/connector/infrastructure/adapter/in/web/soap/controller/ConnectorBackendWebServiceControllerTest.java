@@ -64,23 +64,23 @@ public class ConnectorBackendWebServiceControllerTest {
         "2921bed4-5587-488b-93a2-c048bc130a12@connector.ecodex.eu_backend_alice";
 
     @Mock
-    private ConnectorOutboundBusinessMessageReceiver messageStagingService;
+    private ConnectorOutboundBusinessMessageReceiver businessMessageReceiver;
     @Mock
     private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
     @Mock
-    private ConnectorListPendingMessageIds listPendingMessageIdsService;
+    private ConnectorListPendingMessageIds listPendingMessageIds;
     @Mock
-    private ConnectorListPendingMessagesService listPendingMessagesService;
+    private ConnectorListPendingMessagesService listPendingMessages;
     @Mock
-    private ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
+    private ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId;
     @Mock
-    private ConnectorUploadAttachments uploadAttachmentsService;
+    private ConnectorUploadAttachments uploadAttachments;
     @Mock
-    private ConnectorBackendClientVerifier backendClientVerifierService;
+    private ConnectorBackendClientVerifier backendClientVerifier;
     @Mock
-    private ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService;
+    private ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus;
     @Mock
-    private ConnectorAckMessageTransportStep acknowledgeMessageTransportStepService;
+    private ConnectorAckMessageTransportStep acknowledgeMessageTransportStep;
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
     @Mock
@@ -97,15 +97,15 @@ public class ConnectorBackendWebServiceControllerTest {
     @BeforeEach
     void setUp() {
         backendWebService = new ConnectorBackendWebServiceController(
-            messageStagingService,
+            businessMessageReceiver,
             outboundEvidenceMessageProcessor,
-            listPendingMessageIdsService,
-            listPendingMessagesService,
-            retrieveMessageByTransportIdService,
-            uploadAttachmentsService,
-            changePendingMessagesStatusService,
-            acknowledgeMessageTransportStepService,
-            backendClientVerifierService,
+            listPendingMessageIds,
+            listPendingMessages,
+            retrieveMessageByTransportId,
+            uploadAttachments,
+            changePendingMessagesStatus,
+            acknowledgeMessageTransportStep,
+            backendClientVerifier,
             legacyMessageHelper
         );
         // @Resource field isn't constructor-injected, so set it manually
@@ -114,7 +114,7 @@ public class ConnectorBackendWebServiceControllerTest {
 
     private void stubAuthenticatedBackendClient() {
         when(webServiceContext.getUserPrincipal()).thenReturn((UserPrincipal) () -> "CN=alice");
-        when(backendClientVerifierService.getBackendClient(any()))
+        when(backendClientVerifier.getBackendClient(any()))
             .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
     }
 
@@ -134,9 +134,9 @@ public class ConnectorBackendWebServiceControllerTest {
         @Test
         void should_return_a_successful_ack() {
             stubAuthenticatedBackendClient();
-            when(uploadAttachmentsService.execute(any()))
+            when(uploadAttachments.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
-            when(messageStagingService.execute(any()))
+            when(businessMessageReceiver.execute(any()))
                 .thenReturn(BusinessMessageTestFixtures.createOutboundMessage());
 
             var payload = SoapMessageSubmitTestFixtures.createBackendToConnectorMessage();
@@ -152,9 +152,9 @@ public class ConnectorBackendWebServiceControllerTest {
         @Test
         void should_return_a_failure_ack_when_an_exception_occurs() {
             stubAuthenticatedBackendClient();
-            when(uploadAttachmentsService.execute(any()))
+            when(uploadAttachments.execute(any()))
                 .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
-            when(messageStagingService.execute(any()))
+            when(businessMessageReceiver.execute(any()))
                 .thenThrow(new RuntimeException("Error"));
 
             var payload =
@@ -174,7 +174,7 @@ public class ConnectorBackendWebServiceControllerTest {
         @Test
         void should_return_the_pending_message_ids() {
             stubAuthenticatedBackendClient();
-            when(listPendingMessageIdsService.execute(any())).thenReturn(List.of(TRANSPORT_ID));
+            when(listPendingMessageIds.execute(any())).thenReturn(List.of(TRANSPORT_ID));
 
             var response = backendWebService.listPendingMessageIds(new EmptyRequestType());
 
@@ -193,7 +193,7 @@ public class ConnectorBackendWebServiceControllerTest {
             var connectorMessage = BusinessMessageTestFixtures.createInboundMessage();
 
             stubAuthenticatedBackendClient();
-            when(retrieveMessageByTransportIdService.execute(TRANSPORT_ID, LINK_PARTNER))
+            when(retrieveMessageByTransportId.execute(TRANSPORT_ID, LINK_PARTNER))
                 .thenReturn(connectorMessage);
             when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
             when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
@@ -208,7 +208,7 @@ public class ConnectorBackendWebServiceControllerTest {
             var response = backendWebService.getMessageById(request);
 
             assertThat(response).isNotNull();
-            verify(retrieveMessageByTransportIdService).execute(TRANSPORT_ID, LINK_PARTNER);
+            verify(retrieveMessageByTransportId).execute(TRANSPORT_ID, LINK_PARTNER);
             verify(legacyMessageHelper).convertMessage(connectorMessage);
 
             var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessageAfterDownload.class);
@@ -223,7 +223,7 @@ public class ConnectorBackendWebServiceControllerTest {
 
             stubAuthenticatedBackendClient();
             doThrow(NotFoundException.class)
-                .when(retrieveMessageByTransportIdService).execute("UNKNOWN-ID", LINK_PARTNER);
+                .when(retrieveMessageByTransportId).execute("UNKNOWN-ID", LINK_PARTNER);
 
             assertThatThrownBy(() -> backendWebService.getMessageById(request))
                 .isInstanceOf(NotFoundException.class);
@@ -237,7 +237,7 @@ public class ConnectorBackendWebServiceControllerTest {
             stubAuthenticatedBackendClient();
 
             doThrow(ConnectorLinkPartnerNotOwnerException.class)
-                .when(retrieveMessageByTransportIdService).execute(TRANSPORT_ID, LINK_PARTNER);
+                .when(retrieveMessageByTransportId).execute(TRANSPORT_ID, LINK_PARTNER);
 
             assertThatThrownBy(() -> backendWebService.getMessageById(request))
                 .isInstanceOf(ConnectorLinkPartnerNotOwnerException.class);
@@ -251,7 +251,7 @@ public class ConnectorBackendWebServiceControllerTest {
         void should_return_the_pending_messages() {
             var connectorMessage = BusinessMessageTestFixtures.createInboundMessage();
 
-            when(listPendingMessagesService.execute("backend_alice"))
+            when(listPendingMessages.execute("backend_alice"))
                 .thenReturn(List.of(connectorMessage));
             stubAuthenticatedBackendClient();
             when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
@@ -264,7 +264,7 @@ public class ConnectorBackendWebServiceControllerTest {
             var response = backendWebService.requestMessages(new EmptyRequestType());
 
             assertThat(response).isNotNull();
-            verify(listPendingMessagesService).execute("backend_alice");
+            verify(listPendingMessages).execute("backend_alice");
             verify(legacyMessageHelper).convertMessage(connectorMessage);
 
             var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessagesAfterDownload.class);
@@ -280,7 +280,7 @@ public class ConnectorBackendWebServiceControllerTest {
         @Test
         void should_acknowledge_a_message_with_success() {
             stubAuthenticatedBackendClient();
-            doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
+            doNothing().when(acknowledgeMessageTransportStep).execute(any(), any());
 
             var response = backendWebService.acknowledgeMessage(acknowledgeMessage(true));
 
@@ -290,7 +290,7 @@ public class ConnectorBackendWebServiceControllerTest {
         @Test
         void should_acknowledge_a_message_with_failure() {
             stubAuthenticatedBackendClient();
-            doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
+            doNothing().when(acknowledgeMessageTransportStep).execute(any(), any());
 
             var response = backendWebService.acknowledgeMessage(acknowledgeMessage(false));
 
@@ -301,7 +301,7 @@ public class ConnectorBackendWebServiceControllerTest {
         void should_failed_when_the_backend_link_partner_does_not_own_the_message() {
             stubAuthenticatedBackendClient();
             doThrow(ConnectorLinkPartnerNotOwnerException.class)
-                .when(acknowledgeMessageTransportStepService).execute(any(), any());
+                .when(acknowledgeMessageTransportStep).execute(any(), any());
 
             assertThatThrownBy(() -> backendWebService.acknowledgeMessage(acknowledgeMessage(true)))
                 .isInstanceOf(ConnectorLinkPartnerNotOwnerException.class);

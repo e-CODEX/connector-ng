@@ -33,15 +33,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConnectorMessageTransportStepAdminController
     implements ConnectorMessageTransportStepAdminApi {
-    private final ConnectorListTransportSteps listTransportStepsService;
+    private final ConnectorListTransportSteps listTransportSteps;
     private final ConnectorRetrieveTransportStepByTransportId
-        retrieveTransportStepByTransportIdService;
+        retrieveTransportStepByTransportId;
 
     public ConnectorMessageTransportStepAdminController(
-        ConnectorListTransportSteps listTransportStepsService,
-        ConnectorRetrieveTransportStepByTransportId retrieveTransportStepByTransportIdService) {
-        this.listTransportStepsService = listTransportStepsService;
-        this.retrieveTransportStepByTransportIdService = retrieveTransportStepByTransportIdService;
+        ConnectorListTransportSteps listTransportSteps,
+        ConnectorRetrieveTransportStepByTransportId retrieveTransportStepByTransportId) {
+        this.listTransportSteps = listTransportSteps;
+        this.retrieveTransportStepByTransportId = retrieveTransportStepByTransportId;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ConnectorMessageTransportStepAdminController
             ConnectorDateRangeFilter.of(from, to)
         );
 
-        var transportSteps = listTransportStepsService.execute(filter);
+        var transportSteps = listTransportSteps.execute(filter);
 
         return ConnectorPageResult.of(
             transportSteps.content()
@@ -77,7 +77,7 @@ public class ConnectorMessageTransportStepAdminController
 
     @Override
     public ConnectorMessageDetailDto retrieveTransportedMessage(String identifier) {
-        var step = retrieveTransportStepByTransportIdService.execute(identifier);
+        var step = retrieveTransportStepByTransportId.execute(identifier);
         var transportedMessage = step.transportedMessage();
 
         if (transportedMessage instanceof ConnectorBusinessMessage message) {

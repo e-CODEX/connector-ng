@@ -17,8 +17,8 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.logout.ConnectorLogoutRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorLoginRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.logout.ConnectorLogoutRequest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;

@@ -1,0 +1,36 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.pmode;
+
+import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.pmode.ConnectorProcessingModePartyEntity;
+import java.util.List;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository interface for performing CRUD operations on the
+ * {@link ConnectorProcessingModePartyEntity}.
+ */
+@Repository
+public interface ConnectorProcessingModePartyJpaRepository
+    extends JpaRepository<ConnectorProcessingModePartyEntity, Long> {
+    ConnectorProcessingModePartyEntity
+    findByIdentifierAndRoleTypeAndProcessingModeBusinessDomainIdentifier(
+        String identifier,
+        ConnectorPartyRoleType roleType,
+        String businessDomainIdentifier);
+
+    List<ConnectorProcessingModePartyEntity> findByProcessingModeBusinessDomainIdentifier(
+        String businessDomainIdentifier, Sort sort
+    );
+}

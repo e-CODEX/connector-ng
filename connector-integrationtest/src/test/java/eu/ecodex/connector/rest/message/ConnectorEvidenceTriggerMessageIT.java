@@ -14,10 +14,10 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorOutboundMessageDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageIdentifiers;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.ErrorResponse;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorOutboundMessageDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageIdentifiers;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

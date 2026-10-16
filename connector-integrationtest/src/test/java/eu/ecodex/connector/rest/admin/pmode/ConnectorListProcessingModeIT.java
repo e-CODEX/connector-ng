@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.admin.pmode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

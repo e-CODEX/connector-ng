@@ -1,0 +1,188 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.pmode;
+
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeRepository;
+import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
+import eu.ecodex.connector.domain.model.security.ConnectorTruststore;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.ConnectorDBBusinessDomainRepository;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.pmode.ConnectorProcessingModeEntity;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.pmode.ConnectorProcessingModeTruststoreEntity;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.ConnectorBusinessDomainJpaRepository;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.pmode.ConnectorProcessingModeJpaRepository;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.pmode.ConnectorProcessingModeTruststoreJpaRepository;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import lombok.NonNull;
+import org.springframework.stereotype.Component;
+
+/**
+ * RDBMS implementation of {@link ConnectorProcessingModeRepository}.
+ */
+@Component
+public class ConnectorDBProcessingModeRepository implements ConnectorProcessingModeRepository {
+    private final ConnectorProcessingModeJpaRepository processingModeJpaRepository;
+    private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
+    private final ConnectorProcessingModeTruststoreJpaRepository truststoreJpaRepository;
+
+    /**
+     * Constructs an instance of {@code ConnectorProcessingModeRepositoryImpl} with the specified
+     * JPA repositories for processing mode, business domain, and keystore management.
+     *
+     * @param processingModeJpaRepository the repository for performing operations on
+     *                                    {@code ConnectorProcessingModeEntity}.
+     * @param businessDomainJpaRepository the repository for performing operations on
+     *                                    {@code ConnectorBusinessDomainEntity}.
+     * @param truststoreJpaRepository     the repository for performing operations on
+     *                                    {@code ConnectorProcessingModeTruststoreEntity}.
+     */
+    public ConnectorDBProcessingModeRepository(
+        ConnectorProcessingModeJpaRepository processingModeJpaRepository,
+        ConnectorBusinessDomainJpaRepository businessDomainJpaRepository,
+        ConnectorProcessingModeTruststoreJpaRepository truststoreJpaRepository) {
+        this.processingModeJpaRepository = processingModeJpaRepository;
+        this.businessDomainJpaRepository = businessDomainJpaRepository;
+        this.truststoreJpaRepository = truststoreJpaRepository;
+    }
+
+    @Override
+    public ConnectorProcessingMode save(
+        @NonNull ConnectorProcessingMode processingMode,
+        @NonNull ConnectorBusinessDomainIdentifier businessDomainIdentifier
+    ) {
+        var savedProcessingMode = this.processingModeJpaRepository.save(toEntity(processingMode));
+
+        var truststoreToSave = toEntity(processingMode.truststore());
+        truststoreToSave.setProcessingMode(savedProcessingMode);
+
+        var savedTruststore = truststoreJpaRepository.save(truststoreToSave);
+
+        savedProcessingMode.setTruststore(savedTruststore);
+
+        return toDomain(savedProcessingMode);
+    }
+
+    @Override
+    public ConnectorProcessingMode updateTruststore(
+        @NonNull String pmodeUuid,
+        @NonNull ConnectorTruststore truststore) {
+        var processingModeEntity = processingModeJpaRepository.findByUuid(pmodeUuid);
+
+        var truststoreEntity = processingModeEntity.getTruststore();
+
+        if (truststoreEntity != null) {
+            truststoreEntity = truststoreEntity.toBuilder()
+                                               .filename(truststore.filename())
+                                               .content(truststore.content())
+                                               .type(truststore.type())
+                                               .password(truststore.password())
+                                               .build();
+            var savedTruststore = truststoreJpaRepository.save(truststoreEntity);
+            processingModeEntity.setTruststore(savedTruststore);
+        } else {
+            truststoreEntity = toEntity(truststore);
+            truststoreEntity.setProcessingMode(processingModeEntity);
+            var savedTruststore = truststoreJpaRepository.save(truststoreEntity);
+            processingModeEntity.setTruststore(savedTruststore);
+        }
+
+        return toDomain(processingModeEntity);
+    }
+
+    @Override
+    public ConnectorProcessingMode findByUuid(@NonNull String uuid) {
+        var processingMode = processingModeJpaRepository.findByUuid(uuid);
+
+        return toDomain(processingMode);
+    }
+
+    @Override
+    public ConnectorProcessingMode findByBusinessDomainIdentifier(
+        @NonNull ConnectorBusinessDomainIdentifier identifier) {
+        var processingMode = processingModeJpaRepository.findByBusinessDomainIdentifier(
+            identifier.messageLaneIdentifier()
+        );
+
+        return toDomain(processingMode);
+    }
+
+    @Override
+    public List<ConnectorProcessingMode> findAll() {
+        return processingModeJpaRepository.findAll().stream().map(this::toDomain).toList();
+    }
+
+    private ConnectorProcessingModeEntity toEntity(ConnectorProcessingMode processingMode) {
+        var businessDomain = businessDomainJpaRepository.findByIdentifier(
+            Objects.requireNonNull(processingMode.businessDomain())
+                   .identifier().messageLaneIdentifier()
+        );
+
+        return ConnectorProcessingModeEntity.builder()
+                                            .description(processingMode.description())
+                                            .content(processingMode.content())
+                                            .filename(processingMode.filename())
+                                            .businessDomain(businessDomain)
+                                            .build();
+    }
+
+    private ConnectorProcessingModeTruststoreEntity toEntity(ConnectorTruststore truststore) {
+        return ConnectorProcessingModeTruststoreEntity.builder()
+                                                      .content(truststore.content())
+                                                      .password(truststore.password())
+                                                      .type(truststore.type())
+                                                      .filename(truststore.filename())
+                                                      .build();
+    }
+
+    private ConnectorProcessingMode toDomain(ConnectorProcessingModeEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorProcessingMode
+            .builder()
+            .businessDomain(
+                ConnectorDBBusinessDomainRepository.toDomain(entity.getBusinessDomain()))
+            .uuid(entity.getUuid())
+            .description(entity.getDescription())
+            .content(entity.getContent())
+            .filename(entity.getFilename())
+            .truststore(toDomain(entity.getTruststore()))
+            .parties(entity.getParties().stream().map(
+                ConnectorDBProcessingModePartyRepository::toDomain).collect(
+                Collectors.toCollection(LinkedHashSet::new)))
+            .actions(entity.getActions().stream().map(
+                ConnectorDBProcessingModeActionRepository::toDomain).collect(
+                Collectors.toCollection(LinkedHashSet::new)))
+            .services(entity.getServices().stream().map(
+                ConnectorDBProcessingModeServiceRepository::toDomain).collect(
+                Collectors.toCollection(LinkedHashSet::new)))
+            .createdAt(entity.getCreatedAt())
+            .updatedAt(entity.getUpdatedAt())
+            .build();
+    }
+
+    private ConnectorTruststore toDomain(ConnectorProcessingModeTruststoreEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ConnectorTruststore.builder()
+                                  .content(entity.getContent())
+                                  .password(entity.getPassword())
+                                  .type(entity.getType())
+                                  .filename(entity.getFilename())
+                                  .build();
+    }
+}

@@ -20,11 +20,11 @@ import org.springframework.context.annotation.Import;
  */
 @Import({DssConfig.class, EvidenceConfig.class})
 @ComponentScan(
-        basePackages = {
-                "eu.ecodex.connector.infrastructure.property",
-                "eu.ecodex.connector.infrastructure.dss",
-                "eu.ecodex.connector.infrastructure.outbound.evidence",
-        }
+    basePackages = {
+        "eu.ecodex.connector.infrastructure.config.property",
+        "eu.ecodex.connector.infrastructure.adapter.out.dss",
+        "eu.ecodex.connector.infrastructure.adapter.out.evidence"
+    }
 )
 public class EvidenceContextConfiguration extends SecurityDisabledTestConfiguration {
 }

@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.infrastructure.property.evidence.ConnectorEvidencesProperties;
-import eu.ecodex.connector.infrastructure.util.HashValueBuilder;
+import eu.ecodex.connector.infrastructure.config.property.evidence.ConnectorEvidencesProperties;
+import eu.ecodex.connector.infrastructure.helper.HashValueBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

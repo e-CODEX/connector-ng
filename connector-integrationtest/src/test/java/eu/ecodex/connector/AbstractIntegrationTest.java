@@ -11,14 +11,14 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageAcknowledgementListener;
-import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsGatewayMessageListener;
-import eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound.ConnectorJmsInboundMessagePipelineListener;
-import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsBackendMessageDeliveryListener;
-import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessagePipelineListener;
-import eu.ecodex.connector.infrastructure.inbound.jms.listener.outbound.ConnectorJmsOutboundMessageStagingListener;
-import eu.ecodex.connector.infrastructure.outbound.auth.accesstoken.ConnectorJwtGenerator;
-import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.adapter.in.messaging.inbound.ConnectorJmsGatewayMessageAcknowledgementListener;
+import eu.ecodex.connector.infrastructure.adapter.in.messaging.inbound.ConnectorJmsGatewayMessageListener;
+import eu.ecodex.connector.infrastructure.adapter.in.messaging.inbound.ConnectorJmsInboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.adapter.in.messaging.outbound.ConnectorJmsBackendMessageDeliveryListener;
+import eu.ecodex.connector.infrastructure.adapter.in.messaging.outbound.ConnectorJmsOutboundMessagePipelineListener;
+import eu.ecodex.connector.infrastructure.adapter.in.messaging.outbound.ConnectorJmsOutboundMessageStagingListener;
+import eu.ecodex.connector.infrastructure.adapter.out.auth.accesstoken.ConnectorJwtGenerator;
+import eu.ecodex.connector.infrastructure.adapter.out.auth.identity.ConnectorUserDetails;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;

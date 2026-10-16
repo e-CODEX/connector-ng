@@ -29,6 +29,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.message.t
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.ConnectorMessageTransportStepStatusJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.message.transport.specification.TransportStepSpecification;
 import eu.ecodex.connector.infrastructure.outbound.persistence.PaginationMapper;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -232,7 +233,7 @@ public class ConnectorDBMessageTransportStepRepository
                            .status(status.getStatus())
                            .createdAt(status.getCreatedAt())
                            .build())
-                       .collect(Collectors.toSet());
+                       .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private ConnectorMessage deserializeMessage(String json)

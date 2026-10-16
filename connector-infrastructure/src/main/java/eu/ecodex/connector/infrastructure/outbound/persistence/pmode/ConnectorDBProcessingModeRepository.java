@@ -20,6 +20,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.Connector
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModeTruststoreJpaRepository;
 import eu.ecodex.connector.infrastructure.outbound.persistence.ConnectorDBBusinessDomainRepository;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -160,13 +161,13 @@ public class ConnectorDBProcessingModeRepository implements ConnectorProcessingM
             .truststore(toDomain(entity.getTruststore()))
             .parties(entity.getParties().stream().map(
                 ConnectorDBProcessingModePartyRepository::toDomain).collect(
-                Collectors.toSet()))
+                Collectors.toCollection(LinkedHashSet::new)))
             .actions(entity.getActions().stream().map(
                 ConnectorDBProcessingModeActionRepository::toDomain).collect(
-                Collectors.toSet()))
+                Collectors.toCollection(LinkedHashSet::new)))
             .services(entity.getServices().stream().map(
                 ConnectorDBProcessingModeServiceRepository::toDomain).collect(
-                Collectors.toSet()))
+                Collectors.toCollection(LinkedHashSet::new)))
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
             .build();

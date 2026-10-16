@@ -27,7 +27,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -92,5 +92,5 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @Setter
     @Builder.Default
     @OneToMany(mappedBy = "transportStep", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorMessageTransportStepStatusEntity> statuses = new HashSet<>();
+    private Set<ConnectorMessageTransportStepStatusEntity> statuses = new LinkedHashSet<>();
 }

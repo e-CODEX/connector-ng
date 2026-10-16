@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
 import java.time.Instant;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -95,6 +96,6 @@ public record ConnectorMessageTransportStepDto(
                                     .status(status.status().name())
                                     .createdAt(status.createdAt())
                                     .build())
-                       .collect(Collectors.toSet());
+                       .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

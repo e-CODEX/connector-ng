@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.outbound.database.repository.pmode;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.infrastructure.outbound.database.entity.pmode.ConnectorProcessingModePartyEntity;
 import java.util.List;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +31,6 @@ public interface ConnectorProcessingModePartyJpaRepository
         String businessDomainIdentifier);
 
     List<ConnectorProcessingModePartyEntity> findByProcessingModeBusinessDomainIdentifier(
-        String businessDomainIdentifier
+        String businessDomainIdentifier, Sort sort
     );
 }

@@ -29,6 +29,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -131,6 +132,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     private List<ConnectorMessageAttachmentEntity> attachments = new ArrayList<>();
 
     @Builder.Default
+    @OrderBy("createdAt ASC")
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ConnectorMessageEvidenceEntity> evidences = new HashSet<>();
 

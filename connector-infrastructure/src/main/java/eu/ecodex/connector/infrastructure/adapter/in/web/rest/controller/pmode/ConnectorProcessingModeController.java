@@ -27,41 +27,41 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorProcessingModeController implements ConnectorProcessingModeApi {
-    private final ConnectorListProcessingModeServices listProcessingModeServicesService;
-    private final ConnectorListProcessingModeActions listProcessingModeActionsService;
-    private final ConnectorListProcessingModeParties listProcessingModePartiesService;
+    private final ConnectorListProcessingModeServices listProcessingModeServices;
+    private final ConnectorListProcessingModeActions listProcessingModeActions;
+    private final ConnectorListProcessingModeParties listProcessingModeParties;
     private final Connector2ConnectorTestMessageProperties testMessageProperties;
 
     /**
      * Constructs an instance of the {@code ConnectorProcessingModeController}, which is responsible
      * for managing processing modes within the connector system.
      *
-     * @param listProcessingModeServicesService the service handling operations related to listing
-     *                                          {@link ConnectorProcessingModeService} entities in
-     *                                          the processing mode.
-     * @param listProcessingModeActionsService  the service handling operations related to listing
-     *                                          {@link ConnectorProcessingModeAction} entities in
-     *                                          the processing mode.
-     * @param listProcessingModePartiesService  the service handling operations related to listing
-     *                                          {@link ConnectorProcessingModeParty} entities in the
-     *                                          processing mode.
-     * @param testMessageProperties             the property for connector2Connector test message
+     * @param listProcessingModeServices the service handling operations related to listing
+     *                                   {@link ConnectorProcessingModeService} entities in the
+     *                                   processing mode.
+     * @param listProcessingModeActions  the service handling operations related to listing
+     *                                   {@link ConnectorProcessingModeAction} entities in the
+     *                                   processing mode.
+     * @param listProcessingModeParties  the service handling operations related to listing
+     *                                   {@link ConnectorProcessingModeParty} entities in the
+     *                                   processing mode.
+     * @param testMessageProperties      the property for connector2Connector test message
      */
     public ConnectorProcessingModeController(
-        ConnectorListProcessingModeServices listProcessingModeServicesService,
-        ConnectorListProcessingModeActions listProcessingModeActionsService,
-        ConnectorListProcessingModeParties listProcessingModePartiesService,
+        ConnectorListProcessingModeServices listProcessingModeServices,
+        ConnectorListProcessingModeActions listProcessingModeActions,
+        ConnectorListProcessingModeParties listProcessingModeParties,
         Connector2ConnectorTestMessageProperties testMessageProperties) {
-        this.listProcessingModeServicesService = listProcessingModeServicesService;
-        this.listProcessingModeActionsService = listProcessingModeActionsService;
-        this.listProcessingModePartiesService = listProcessingModePartiesService;
+        this.listProcessingModeServices = listProcessingModeServices;
+        this.listProcessingModeActions = listProcessingModeActions;
+        this.listProcessingModeParties = listProcessingModeParties;
         this.testMessageProperties = testMessageProperties;
     }
 
     @Override
     public List<ConnectorProcessingModeServiceDto> listProcessingModeServices(
         String businessDomainIdentifier) {
-        return listProcessingModeServicesService
+        return listProcessingModeServices
             .execute(businessDomainIdentifier)
             .stream()
             .map(service -> ConnectorProcessingModeServiceDto.from(
@@ -75,7 +75,7 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     @Override
     public List<ConnectorProcessingModeActionDto> listProcessingModeActions(
         String businessDomainIdentifier) {
-        return this.listProcessingModeActionsService
+        return this.listProcessingModeActions
             .execute(businessDomainIdentifier)
             .stream()
             .map(action -> ConnectorProcessingModeActionDto.from(
@@ -87,6 +87,6 @@ public class ConnectorProcessingModeController implements ConnectorProcessingMod
     @Override
     public List<ConnectorProcessingModeParty> listProcessingModeParties(
         String businessDomainIdentifier) {
-        return listProcessingModePartiesService.execute(businessDomainIdentifier);
+        return listProcessingModeParties.execute(businessDomainIdentifier);
     }
 }

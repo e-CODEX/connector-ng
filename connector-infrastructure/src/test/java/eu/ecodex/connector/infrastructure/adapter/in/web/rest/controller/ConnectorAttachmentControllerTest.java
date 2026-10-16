@@ -39,14 +39,14 @@ public class ConnectorAttachmentControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/attachments/upload";
 
     @MockitoBean
-    private ConnectorUploadAttachments uploadAttachmentsService;
+    private ConnectorUploadAttachments uploadAttachments;
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void should_return_201_when_uploading_attachments() throws Exception {
-        when(uploadAttachmentsService.execute(any()))
+        when(uploadAttachments.execute(any()))
             .thenReturn(List.of(MessageAttachmentTestFixtures.createAttachment()));
 
         mockMvc.perform(multipart(HttpMethod.POST, URL)

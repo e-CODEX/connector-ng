@@ -86,7 +86,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
     @Mock
     private LegacyMessageHelper legacyMessageHelper;
     @Mock
-    private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiverService;
+    private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver;
 
     @InjectMocks
     private ConnectorJmsBackendMessageDeliveryListener listener;
@@ -213,7 +213,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
                 linkPartnerProvider,
                 evidenceRepository,
                 legacyMessageHelper,
-                outboundEvidenceMessageReceiverService
+                outboundEvidenceMessageReceiver
             );
         }
 
@@ -230,7 +230,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
                 registerMessageTransportStep,
                 evidenceRepository,
                 legacyMessageHelper,
-                outboundEvidenceMessageReceiverService
+                outboundEvidenceMessageReceiver
             );
         }
     }
@@ -243,7 +243,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             ReflectionTestUtils.setField(listener, "autoTriggerDeliveryEvidences", true);
             stubHappyPath();
             when(linkPartnerProvider.findByName(any())).thenReturn(linkPartner());
-            when(outboundEvidenceMessageReceiverService.execute(any())).thenReturn(null);
+            when(outboundEvidenceMessageReceiver.execute(any())).thenReturn(null);
 
             var acknowledgement = mock(DomibsConnectorAcknowledgementType.class);
             when(acknowledgement.isResult()).thenReturn(true);
@@ -270,7 +270,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
 
             var commandCaptor =
                 ArgumentCaptor.forClass(ConnectorOutboundEvidenceMessageCommand.class);
-            verify(outboundEvidenceMessageReceiverService).execute(commandCaptor.capture());
+            verify(outboundEvidenceMessageReceiver).execute(commandCaptor.capture());
             var command = commandCaptor.getValue();
             assertThat(command.evidenceType()).isEqualTo(ConnectorEvidenceType.DELIVERY);
             assertThat(command.backendMessageIdentifier())
@@ -303,7 +303,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
                 MESSAGE_ID,
                 "backend-message-id"
             );
-            verify(outboundEvidenceMessageReceiverService, never()).execute(any());
+            verify(outboundEvidenceMessageReceiver, never()).execute(any());
         }
 
         @Test
@@ -406,7 +406,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
             verify(messageRepository, never()).updateBackendIdentifier(any(), any());
             verify(messageRepository, never()).setAsRejected(any());
-            verify(outboundEvidenceMessageReceiverService, never()).execute(any());
+            verify(outboundEvidenceMessageReceiver, never()).execute(any());
         }
 
         @Test
@@ -523,7 +523,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
                 backendServiceClient,
                 evidenceRepository,
                 legacyMessageHelper,
-                outboundEvidenceMessageReceiverService
+                outboundEvidenceMessageReceiver
             );
         }
 
@@ -548,7 +548,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
                 backendServiceClient,
                 messageRepository,
                 legacyMessageHelper,
-                outboundEvidenceMessageReceiverService
+                outboundEvidenceMessageReceiver
             );
         }
     }
@@ -589,7 +589,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             verifyNoInteractions(
                 backendServiceClient,
                 legacyMessageHelper,
-                outboundEvidenceMessageReceiverService
+                outboundEvidenceMessageReceiver
             );
         }
 
@@ -624,7 +624,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
                 backendServiceClient,
                 legacyMessageHelper,
                 messageRepository,
-                outboundEvidenceMessageReceiverService
+                outboundEvidenceMessageReceiver
             );
         }
     }

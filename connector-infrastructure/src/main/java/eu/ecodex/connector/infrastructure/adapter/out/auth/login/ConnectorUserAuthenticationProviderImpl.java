@@ -54,8 +54,8 @@ public class ConnectorUserAuthenticationProviderImpl
     private final ConnectorRevokeUserRefreshToken revokeUserRefreshToken;
 
     /**
-     * Constructor for the {@code ConnectorLoginUserService}.
-     * Initializes the service with dependencies required for user login operations.
+     * Constructor for the {@code ConnectorLoginUserService}. Initializes the service with
+     * dependencies required for user login operations.
      *
      * @param authenticationManager       The {@link AuthenticationManager} used to manage
      *                                    authentication processes such as validating user
@@ -67,13 +67,11 @@ public class ConnectorUserAuthenticationProviderImpl
      *                                    to create user refresh tokens and handle related
      *                                    operations.
      */
-    public ConnectorUserAuthenticationProviderImpl(AuthenticationManager authenticationManager,
-                                                   ConnectorAuthenticationTokenProvider
-                                                       authenticationTokenProvider,
-                                                   ConnectorRegisterUserRefreshTokenService
-                                                       registerUserRefreshToken,
-                                                   ConnectorRevokeUserRefreshToken
-                                                       revokeUserRefreshToken) {
+    public ConnectorUserAuthenticationProviderImpl(
+        AuthenticationManager authenticationManager,
+        ConnectorAuthenticationTokenProvider authenticationTokenProvider,
+        ConnectorRegisterUserRefreshTokenService registerUserRefreshToken,
+        ConnectorRevokeUserRefreshToken revokeUserRefreshToken) {
         this.authenticationManager = authenticationManager;
         this.authenticationTokenProvider = authenticationTokenProvider;
         this.registerUserRefreshToken = registerUserRefreshToken;
@@ -81,8 +79,9 @@ public class ConnectorUserAuthenticationProviderImpl
     }
 
     @Override
-    public ConnectorUserAuthenticationResult login(@NonNull String username,
-                                                   @NonNull String password) {
+    public ConnectorUserAuthenticationResult login(
+        @NonNull String username,
+        @NonNull String password) {
         try {
             var authentication =
                 authenticationManager.authenticate(
@@ -100,15 +99,17 @@ public class ConnectorUserAuthenticationProviderImpl
             var accessToken = authenticationTokenProvider.generateAccessToken(authenticatedUser);
             var refreshToken = registerUserRefreshToken.execute(authenticatedUser);
 
-            return ConnectorUserAuthenticationResult.builder()
+            return ConnectorUserAuthenticationResult
+                .builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.token())
-                .expiresIn(authenticationTokenProvider.getAccessTokenExpiresIn().toSeconds())
+                .expiresIn(authenticationTokenProvider.getAccessTokenExpiresIn()
+                                                      .toSeconds())
                 .refreshExpiresIn(
-                    authenticationTokenProvider.getRefreshTokenExpiresIn().toSeconds())
+                    authenticationTokenProvider.getRefreshTokenExpiresIn()
+                                               .toSeconds())
                 .mustChangePassword(authenticatedUser.mustChangePassword())
                 .build();
-
         } catch (DisabledException exception) {
             log.error("User {} account is disabled", username);
             throw new ConnectorUserAccountInactiveException(

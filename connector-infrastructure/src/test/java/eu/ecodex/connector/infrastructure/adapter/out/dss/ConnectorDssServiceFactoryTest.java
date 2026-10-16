@@ -19,23 +19,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 @DisplayName("ConnectorDssServiceFactory")
 public class ConnectorDssServiceFactoryTest extends BaseDssTest {
     @Autowired
-    private ConnectorDssServiceFactory serviceFactory;
+    private ConnectorDssServiceFactory dssServiceFactory;
 
     @Test
     void should_create_pades_service() {
-        var padesService = serviceFactory.createPadESSService();
+        var padesService = dssServiceFactory.createPadESSService();
         assertThat(padesService).isNotNull();
     }
 
     @Test
     void should_create_xades_service() {
-        var xadesService = serviceFactory.createXadESSService();
+        var xadesService = dssServiceFactory.createXadESSService();
         assertThat(xadesService).isNotNull();
     }
 
     @Test
     void should_create_asic_with_xades_service() {
-        var asicWithXAdESService = serviceFactory.createAsicWithXAdESService();
+        var asicWithXAdESService = dssServiceFactory.createAsicWithXAdESService();
         assertThat(asicWithXAdESService).isNotNull();
     }
 }

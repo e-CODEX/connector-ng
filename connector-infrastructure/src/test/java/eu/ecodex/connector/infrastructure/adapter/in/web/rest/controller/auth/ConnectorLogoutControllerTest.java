@@ -50,9 +50,9 @@ class ConnectorLogoutControllerTest extends AbstractWebMvcTest {
     ConnectorLogoutUser logoutUser;
     @MockitoBean
     ConnectorRefreshUserRefreshToken userRefreshToken;
+
     @Autowired
     ObjectMapper objectMapper;
-
     @Autowired
     private MockMvc mockMvc;
 

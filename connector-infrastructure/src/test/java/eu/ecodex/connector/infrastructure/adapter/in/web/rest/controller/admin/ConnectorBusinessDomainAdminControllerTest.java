@@ -41,12 +41,13 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/business-domains";
 
-    @Autowired
-    private RestTestClient apiClient;
     @MockitoBean
     private ConnectorRegisterBusinessDomain registerBusinessDomain;
     @MockitoBean
     private ConnectorListBusinessDomain listBusinessDomain;
+
+    @Autowired
+    private RestTestClient apiClient;
 
     @Nested
     @DisplayName("POST (create a business domain)")

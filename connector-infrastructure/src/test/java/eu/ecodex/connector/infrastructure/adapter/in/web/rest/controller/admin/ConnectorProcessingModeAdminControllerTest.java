@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.ProcessingModeTestFixtures;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
-import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModes;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorUpdateProcessingModeTruststore;
@@ -65,11 +65,11 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     @Autowired
     private RestTestClient apiClient;
     @MockitoBean
-    private ConnectorRegisterProcessingMode registerProcessingModeService;
+    private ConnectorRegisterProcessingMode registerProcessingMode;
     @MockitoBean
-    private ConnectorListProcessingMode listProcessingModeService;
+    private ConnectorListProcessingModes listProcessingModes;
     @MockitoBean
-    private ConnectorRetrieveProcessingMode retrieveProcessingModeService;
+    private ConnectorRetrieveProcessingMode retrieveProcessingMode;
     @MockitoBean
     private ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststore;
 
@@ -99,7 +99,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         @ValueSource(strings = {MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE})
         void should_return_201_when_the_processing_mode_is_created(String contentType)
             throws Exception {
-            when(registerProcessingModeService.execute(any(), any()))
+            when(registerProcessingMode.execute(any(), any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
             mockMvc.perform(creationRequest()
@@ -108,7 +108,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isCreated());
 
-            verify(registerProcessingModeService).execute(any(), any());
+            verify(registerProcessingMode).execute(any(), any());
         }
 
         @Test
@@ -119,7 +119,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isBadRequest());
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @Test
@@ -129,7 +129,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isBadRequest());
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @Test
@@ -139,7 +139,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                 .param("truststore.password", TRUSTSTORE_PASSWORD))
                    .andExpect(status().isBadRequest());
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @ParameterizedTest
@@ -153,7 +153,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                 .param("truststore.password", password))
                    .andExpect(status().isBadRequest());
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
 
         @Test
@@ -166,7 +166,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
                                 .contentType(MediaType.MULTIPART_FORM_DATA))
                    .andExpect(status().isBadRequest());
 
-            verifyNoInteractions(registerProcessingModeService);
+            verifyNoInteractions(registerProcessingMode);
         }
     }
 
@@ -175,7 +175,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     class Listing {
         @Test
         void should_return_200_with_the_processing_modes() {
-            when(listProcessingModeService.execute())
+            when(listProcessingModes.execute())
                 .thenReturn(List.of(ProcessingModeTestFixtures.createWithBusinessDomain()));
 
             var responseBody = apiClient.get()
@@ -194,7 +194,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     class Retrieval {
         @Test
         void should_return_200_with_the_processing_mode() {
-            when(retrieveProcessingModeService.execute(any()))
+            when(retrieveProcessingMode.execute(any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
             var responseBody = apiClient.get()
@@ -210,7 +210,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         @Test
         void should_return_404_when_the_processing_mode_is_not_found() {
             doThrow(ConnectorProcessingModeNotFoundException.class)
-                .when(retrieveProcessingModeService).execute(any());
+                .when(retrieveProcessingMode).execute(any());
 
             apiClient.get()
                      .uri(URL + "/unknown-identifier")
@@ -224,7 +224,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
     class Download {
         @Test
         void should_return_200_with_the_processing_mode_file() {
-            when(retrieveProcessingModeService.execute(any()))
+            when(retrieveProcessingMode.execute(any()))
                 .thenReturn(ProcessingModeTestFixtures.createWithBusinessDomain());
 
             var response = apiClient.get()
@@ -239,7 +239,7 @@ public class ConnectorProcessingModeAdminControllerTest extends AbstractWebMvcTe
         @Test
         void should_return_404_when_the_processing_mode_is_not_found() {
             doThrow(ConnectorProcessingModeNotFoundException.class)
-                .when(retrieveProcessingModeService).execute(any());
+                .when(retrieveProcessingMode).execute(any());
 
             apiClient.get()
                      .uri(URL + "/{identifier}/download", "unknown-identifier")

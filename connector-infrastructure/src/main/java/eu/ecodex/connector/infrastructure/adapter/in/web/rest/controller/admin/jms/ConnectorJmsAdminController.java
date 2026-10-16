@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
-    private final ConnectorRetrieveQueuesStats retrieveQueuesStatsService;
+    private final ConnectorRetrieveQueuesStats retrieveQueuesStats;
 
-    public ConnectorJmsAdminController(ConnectorRetrieveQueuesStats retrieveQueuesStatsService) {
-        this.retrieveQueuesStatsService = retrieveQueuesStatsService;
+    public ConnectorJmsAdminController(ConnectorRetrieveQueuesStats retrieveQueuesStats) {
+        this.retrieveQueuesStats = retrieveQueuesStats;
     }
 
     @Override
     public List<ConnectorQueueStats> retrieveQueuesStats() {
-        return retrieveQueuesStatsService.execute();
+        return retrieveQueuesStats.execute();
     }
 }

@@ -51,9 +51,9 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
     @Mock
-    private ConnectorInboundBusinessMessageReceiver inboundMessageReceiverService;
+    private ConnectorInboundBusinessMessageReceiver inboundMessageReceiver;
     @Mock
-    private ConnectorInboundEvidenceMessageReceiver inboundEvidenceReceiverService;
+    private ConnectorInboundEvidenceMessageReceiver inboundEvidenceReceiver;
     @Mock
     private MapMessage message;
 
@@ -126,8 +126,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -142,8 +142,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -160,8 +160,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -182,8 +182,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -202,8 +202,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -224,8 +224,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
                 .hasMessage("Incoming message requires at least one transported evidence");
 
             verifyNoInteractions(
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -261,8 +261,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
 
@@ -308,8 +308,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             verifyNoInteractions(
                 attachmentRepository,
                 fileStorageProvider,
-                inboundMessageReceiverService,
-                inboundEvidenceReceiverService
+                inboundMessageReceiver,
+                inboundEvidenceReceiver
             );
         }
     }
@@ -345,7 +345,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             assertThatNoException().isThrownBy(() -> listener.handle(message));
 
             var captor = ArgumentCaptor.forClass(ConnectorInboundBusinessMessageCommand.class);
-            verify(inboundMessageReceiverService).execute(captor.capture());
+            verify(inboundMessageReceiver).execute(captor.capture());
 
             var command = captor.getValue();
             assertThat(command).isNotNull();
@@ -365,7 +365,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             assertThat(command.transportedEvidences().getFirst().type())
                 .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
 
-            verify(inboundEvidenceReceiverService, never()).execute(any());
+            verify(inboundEvidenceReceiver, never()).execute(any());
             verify(attachmentRepository, times(3)).save(any());
             verify(fileStorageProvider, times(3)).save(any(), any(byte[].class));
         }
@@ -389,12 +389,12 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             assertThatNoException().isThrownBy(() -> listener.handle(message));
 
             var captor = ArgumentCaptor.forClass(ConnectorInboundBusinessMessageCommand.class);
-            verify(inboundMessageReceiverService).execute(captor.capture());
+            verify(inboundMessageReceiver).execute(captor.capture());
 
             var command = captor.getValue();
             assertThat(command.businessContent().xmlContent().name()).isEqualTo("messagecontent");
 
-            verify(inboundEvidenceReceiverService, never()).execute(any());
+            verify(inboundEvidenceReceiver, never()).execute(any());
         }
 
         @Test
@@ -450,8 +450,8 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             assertThatNoException()
                 .isThrownBy(() -> listener.handle(message));
 
-            verify(inboundMessageReceiverService).execute(any());
-            verify(inboundEvidenceReceiverService, never()).execute(any());
+            verify(inboundMessageReceiver).execute(any());
+            verify(inboundEvidenceReceiver, never()).execute(any());
             verify(attachmentRepository, times(3)).save(any());
             verify(fileStorageProvider, times(3)).save(any(), any(byte[].class));
         }
@@ -476,7 +476,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
                 .isThrownBy(() -> listener.handle(message));
 
             var captor = ArgumentCaptor.forClass(ConnectorInboundEvidenceMessageCommand.class);
-            verify(inboundEvidenceReceiverService).execute(captor.capture());
+            verify(inboundEvidenceReceiver).execute(captor.capture());
 
             var command = captor.getValue();
             assertThat(command).isNotNull();
@@ -491,7 +491,7 @@ public class ConnectorJmsGatewayMessageListenerTest extends BaseJmsMessageTest {
             assertThat(command.transportedEvidences().getFirst().type())
                 .isEqualTo(ConnectorEvidenceType.SUBMISSION_ACCEPTANCE);
 
-            verify(inboundMessageReceiverService, never()).execute(any());
+            verify(inboundMessageReceiver, never()).execute(any());
             verifyNoInteractions(attachmentRepository, fileStorageProvider);
         }
     }

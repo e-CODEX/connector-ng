@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.ConnectorUserTestFixtures;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.service.auth.user.ConnectorRetrieveUserByUsernameService;
+import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.infrastructure.adapter.out.auth.identity.ConnectorUserDetailsServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,9 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorUserDetailsServiceImplTest {
-
     @Mock
-    ConnectorRetrieveUserByUsernameService retrieveUserService;
+    ConnectorRetrieveUserByUsername retrieveUserByUsername;
 
     @InjectMocks
     ConnectorUserDetailsServiceImpl service;
@@ -43,15 +42,15 @@ class ConnectorUserDetailsServiceImplTest {
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
         var user = ConnectorUserTestFixtures.createDefaultUserWithRoles();
 
-        when(retrieveUserService.execute(any())).thenReturn(user);
+        when(retrieveUserByUsername.execute(any())).thenReturn(user);
 
         // When
         var userDetailsFound = service.loadUserByUsername(username);
 
         // Then
         assertThat(userDetailsFound).isEqualTo(userDetails);
-        verify(retrieveUserService).execute(username);
-        verifyNoMoreInteractions(retrieveUserService);
+        verify(retrieveUserByUsername).execute(username);
+        verifyNoMoreInteractions(retrieveUserByUsername);
     }
 
     @Test
@@ -59,15 +58,17 @@ class ConnectorUserDetailsServiceImplTest {
         // Given
         var username = "test";
 
-        when(retrieveUserService.execute(any())).thenThrow(
+        when(retrieveUserByUsername.execute(any())).thenThrow(
             ConnectorUserNotFoundException.class);
 
         // When
-        assertThrows(ConnectorUserNotFoundException.class,
-            () -> service.loadUserByUsername(username));
+        assertThrows(
+            ConnectorUserNotFoundException.class,
+            () -> service.loadUserByUsername(username)
+        );
 
         // Then
-        verify(retrieveUserService).execute(username);
-        verifyNoMoreInteractions(retrieveUserService);
+        verify(retrieveUserByUsername).execute(username);
+        verifyNoMoreInteractions(retrieveUserByUsername);
     }
 }

@@ -21,15 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorEvidenceController implements ConnectorEvidenceApi {
-    private final ConnectorRetrieveEvidence retrieveEvidenceService;
+    private final ConnectorRetrieveEvidence retrieveEvidence;
 
-    public ConnectorEvidenceController(ConnectorRetrieveEvidence retrieveEvidenceService) {
-        this.retrieveEvidenceService = retrieveEvidenceService;
+    public ConnectorEvidenceController(ConnectorRetrieveEvidence retrieveEvidence) {
+        this.retrieveEvidence = retrieveEvidence;
     }
 
     @Override
     public ResponseEntity<byte[]> downloadEvidence(String uuid) {
-        var evidence = retrieveEvidenceService.execute(uuid);
+        var evidence = retrieveEvidence.execute(uuid);
         var contentLength = evidence.content() != null ? evidence.content().length : 0;
 
         return ResponseEntity.ok()

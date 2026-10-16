@@ -69,13 +69,13 @@ import org.springframework.util.StringUtils;
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
     private final ConnectorOutboundBusinessMessageReceiver businessMessageReceiver;
     private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
-    private final ConnectorListPendingMessageIds listPendingMessageIdsService;
-    private final ConnectorListPendingMessagesService listPendingMessagesService;
-    private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService;
-    private final ConnectorUploadAttachments uploadAttachmentsService;
-    private final ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService;
-    private final ConnectorAckMessageTransportStep ackMessageTransportStepService;
-    private final ConnectorBackendClientVerifier backendClientVerifierService;
+    private final ConnectorListPendingMessageIds listPendingMessageIds;
+    private final ConnectorListPendingMessagesService listPendingMessages;
+    private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId;
+    private final ConnectorUploadAttachments uploadAttachments;
+    private final ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus;
+    private final ConnectorAckMessageTransportStep ackMessageTransportStep;
+    private final ConnectorBackendClientVerifier backendClientVerifier;
     private final LegacyMessageHelper legacyMessageHelper;
     private final Tika tika;
     private WebServiceContext webServiceContext;
@@ -84,46 +84,44 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
      * Controller class for handling backend web service operations related to message
      * transportation, management, and interaction with external services.
      *
-     * @param businessMessageReceiver             Service for handling outbound message processing
-     *                                            before dispatch.
-     * @param outboundEvidenceMessageProcessor    Service for handling outbound evidence message
-     *                                            processing.
-     * @param listPendingMessageIdsService        Service for retrieving a list of pending message
-     *                                            IDs.
-     * @param listPendingMessagesService          Service for retrieving a list of pending
-     *                                            messages.
-     * @param retrieveMessageByTransportIdService Service for retrieving a message by its transport
-     *                                            ID.
-     * @param uploadAttachmentsService            Service for handling the upload of message
-     *                                            attachments.
-     * @param changePendingMessagesStatusService  Service for changing the status of pending
-     *                                            messages.
-     * @param ackMessageTransportStepService      Service for updating message transport steps.
-     * @param backendClientVerifierService        Service for verifying client requests directed to
-     *                                            the backend.
-     * @param legacyMessageHelper                 Helper for managing operations specific to legacy
-     *                                            message formats.
+     * @param businessMessageReceiver          Service for handling outbound message processing
+     *                                         before dispatch.
+     * @param outboundEvidenceMessageProcessor Service for handling outbound evidence message
+     *                                         processing.
+     * @param listPendingMessageIds            Service for retrieving a list of pending message
+     *                                         IDs.
+     * @param listPendingMessages              Service for retrieving a list of pending messages.
+     * @param retrieveMessageByTransportId     Service for retrieving a message by its transport
+     *                                         ID.
+     * @param uploadAttachments                Service for handling the upload of message
+     *                                         attachments.
+     * @param changePendingMessagesStatus      Service for changing the status of pending messages.
+     * @param ackMessageTransportStep          Service for updating message transport steps.
+     * @param backendClientVerifier            Service for verifying client requests directed to the
+     *                                         backend.
+     * @param legacyMessageHelper              Helper for managing operations specific to legacy
+     *                                         message formats.
      */
     public ConnectorBackendWebServiceController(
         ConnectorOutboundBusinessMessageReceiver businessMessageReceiver,
         ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor,
-        ConnectorListPendingMessageIds listPendingMessageIdsService,
-        ConnectorListPendingMessagesService listPendingMessagesService,
-        ConnectorRetrieveMessageByTransportId retrieveMessageByTransportIdService,
-        ConnectorUploadAttachments uploadAttachmentsService,
-        ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatusService,
-        ConnectorAckMessageTransportStep ackMessageTransportStepService,
-        ConnectorBackendClientVerifier backendClientVerifierService,
+        ConnectorListPendingMessageIds listPendingMessageIds,
+        ConnectorListPendingMessagesService listPendingMessages,
+        ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId,
+        ConnectorUploadAttachments uploadAttachments,
+        ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus,
+        ConnectorAckMessageTransportStep ackMessageTransportStep,
+        ConnectorBackendClientVerifier backendClientVerifier,
         LegacyMessageHelper legacyMessageHelper) {
         this.businessMessageReceiver = businessMessageReceiver;
         this.outboundEvidenceMessageProcessor = outboundEvidenceMessageProcessor;
-        this.listPendingMessageIdsService = listPendingMessageIdsService;
-        this.listPendingMessagesService = listPendingMessagesService;
-        this.retrieveMessageByTransportIdService = retrieveMessageByTransportIdService;
-        this.uploadAttachmentsService = uploadAttachmentsService;
-        this.changePendingMessagesStatusService = changePendingMessagesStatusService;
-        this.ackMessageTransportStepService = ackMessageTransportStepService;
-        this.backendClientVerifierService = backendClientVerifierService;
+        this.listPendingMessageIds = listPendingMessageIds;
+        this.listPendingMessages = listPendingMessages;
+        this.retrieveMessageByTransportId = retrieveMessageByTransportId;
+        this.uploadAttachments = uploadAttachments;
+        this.changePendingMessagesStatus = changePendingMessagesStatus;
+        this.ackMessageTransportStep = ackMessageTransportStep;
+        this.backendClientVerifier = backendClientVerifier;
         this.legacyMessageHelper = legacyMessageHelper;
         this.tika = new Tika();
     }
@@ -148,7 +146,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             commandBuilder.errors(toDomainErrors(responseType.getMessageErrors()));
         }
 
-        ackMessageTransportStepService.execute(
+        ackMessageTransportStep.execute(
             responseType.getResponseForMessageId(),
             commandBuilder.build()
         );
@@ -163,7 +161,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             var backendClientName = getBackendClientName();
             var response = new ListPendingMessageIdsResponse();
             response.getMessageTransportIds().addAll(
-                listPendingMessageIdsService.execute(backendClientName)
+                listPendingMessageIds.execute(backendClientName)
             );
 
             return response;
@@ -178,7 +176,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     public DomibusConnectorMessageType getMessageById(GetMessageByIdRequest getMessageByIdRequest) {
         var backendClientName = getBackendClientName();
         var transportIdentifier = getMessageByIdRequest.getMessageTransportId();
-        var message = retrieveMessageByTransportIdService.execute(
+        var message = retrieveMessageByTransportId.execute(
             transportIdentifier,
             backendClientName
         );
@@ -188,7 +186,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var wrappedMessageContext = (WrappedMessageContext) messageContext;
         var interceptor = new ProcessMessageAfterDownload(
             message,
-            ackMessageTransportStepService
+            ackMessageTransportStep
 
         );
         wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
@@ -200,7 +198,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     public DomibusConnectorMessagesType requestMessages(EmptyRequestType requestMessagesRequest) {
         try {
             var backendClientName = getBackendClientName();
-            var messages = this.listPendingMessagesService.execute(backendClientName);
+            var messages = this.listPendingMessages.execute(backendClientName);
             var legacyMessages = messages.stream()
                                          .map(this.legacyMessageHelper::convertMessage)
                                          .toList();
@@ -213,7 +211,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             var wrappedMessageContext = (WrappedMessageContext) messageContext;
             var interceptor = new ProcessMessagesAfterDownload(
                 backendClientName,
-                changePendingMessagesStatusService
+                changePendingMessagesStatus
 
             );
             wrappedMessageContext.getWrappedMessage().getInterceptorChain().add(interceptor);
@@ -283,10 +281,10 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var fileUploadCommands = toFileUploadCommands(attachments);
 
         try {
-            return uploadAttachmentsService.execute(fileUploadCommands)
-                                           .stream()
-                                           .map(ConnectorMessageAttachment::identifier)
-                                           .toList();
+            return uploadAttachments.execute(fileUploadCommands)
+                                    .stream()
+                                    .map(ConnectorMessageAttachment::identifier)
+                                    .toList();
         } finally {
             fileUploadCommands.forEach(FileUploadCommand::cleanup);
         }
@@ -296,9 +294,9 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var fileUploadCommand = toFileUploadCommand(businessContent);
 
         try {
-            return uploadAttachmentsService.execute(List.of(fileUploadCommand))
-                                           .getFirst()
-                                           .identifier();
+            return uploadAttachments.execute(List.of(fileUploadCommand))
+                                    .getFirst()
+                                    .identifier();
         } finally {
             fileUploadCommand.cleanup();
         }
@@ -308,9 +306,9 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var fileUploadCommand = toFileUploadCommand(pdfBusinessContent);
 
         try {
-            return uploadAttachmentsService.execute(List.of(fileUploadCommand))
-                                           .getFirst()
-                                           .identifier();
+            return uploadAttachments.execute(List.of(fileUploadCommand))
+                                    .getFirst()
+                                    .identifier();
         } finally {
             fileUploadCommand.cleanup();
         }
@@ -420,7 +418,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             throw new IllegalStateException(error);
         }
 
-        var backendClientName = this.backendClientVerifierService.getBackendClient(certificateDn);
+        var backendClientName = this.backendClientVerifier.getBackendClient(certificateDn);
 
         if (backendClientName == null) {
             var error = String.format(

@@ -41,16 +41,12 @@ class ConnectorRoleAdminControllerTest extends AbstractWebMvcTest {
 
     @MockitoBean
     ConnectorRegisterRole registerRole;
-
     @MockitoBean
     ConnectorEditRole updateRole;
-
     @MockitoBean
     ConnectorRetrieveRoleByIdentifier retrieveRole;
-
     @MockitoBean
     ConnectorRemoveRole removeRole;
-
     @MockitoBean
     ConnectorListRole listRole;
 

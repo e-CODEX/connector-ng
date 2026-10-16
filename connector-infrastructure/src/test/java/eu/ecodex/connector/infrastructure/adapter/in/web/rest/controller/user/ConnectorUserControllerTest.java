@@ -49,15 +49,16 @@ import tools.jackson.databind.ObjectMapper;
 @Import(ConnectorUserControllerTest.WebSecurityTestConfig.class)
 class ConnectorUserControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/auth/me";
+
     @MockitoBean
     private ConnectorEditUser editUser;
     @MockitoBean
     private ConnectorUpdateUserPassword updateUserPassword;
     @MockitoBean
     private ConnectorRetrieveUserByIdentifier retrieveUser;
+
     @Autowired
     private ObjectMapper objectMapper;
-
     @Autowired
     private MockMvc mockMvc;
 

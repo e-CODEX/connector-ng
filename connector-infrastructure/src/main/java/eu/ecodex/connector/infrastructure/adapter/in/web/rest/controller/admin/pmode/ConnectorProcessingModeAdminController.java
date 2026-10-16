@@ -12,7 +12,7 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.
 
 import static eu.ecodex.connector.domain.model.security.KeystoreType.fromFileName;
 
-import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingMode;
+import eu.ecodex.connector.application.port.api.pmode.ConnectorListProcessingModes;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRegisterProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorRetrieveProcessingMode;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorUpdateProcessingModeTruststore;
@@ -43,31 +43,30 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 public class ConnectorProcessingModeAdminController implements ConnectorProcessingModeAdminApi {
-    private final ConnectorRegisterProcessingMode registerProcessingModeService;
-    private final ConnectorListProcessingMode listProcessingModeService;
-    private final ConnectorRetrieveProcessingMode retrieveProcessingModeService;
-    private final ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststoreService;
+    private final ConnectorRegisterProcessingMode registerProcessingMode;
+    private final ConnectorListProcessingModes listProcessingModes;
+    private final ConnectorRetrieveProcessingMode retrieveProcessingMode;
+    private final ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststore;
 
     /**
      * Constructs an instance of {@code ConnectorProcessingModeAdminController}.
      *
-     * @param registerProcessingModeService         the service responsible for registering
-     *                                              processing modes
-     * @param listProcessingModeService             the service used to list processing modes
-     * @param retrieveProcessingModeService         the service for retrieving specific processing
-     *                                              modes
-     * @param updateProcessingModeTruststoreService the service for updating the truststore of
-     *                                              processing modes
+     * @param registerProcessingMode         the service responsible for registering processing
+     *                                       modes
+     * @param listProcessingModes            the service used to list processing modes
+     * @param retrieveProcessingMode         the service for retrieving specific processing modes
+     * @param updateProcessingModeTruststore the service for updating the truststore of processing
+     *                                       modes
      */
     public ConnectorProcessingModeAdminController(
-        ConnectorRegisterProcessingMode registerProcessingModeService,
-        ConnectorListProcessingMode listProcessingModeService,
-        ConnectorRetrieveProcessingMode retrieveProcessingModeService,
-        ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststoreService) {
-        this.registerProcessingModeService = registerProcessingModeService;
-        this.listProcessingModeService = listProcessingModeService;
-        this.retrieveProcessingModeService = retrieveProcessingModeService;
-        this.updateProcessingModeTruststoreService = updateProcessingModeTruststoreService;
+        ConnectorRegisterProcessingMode registerProcessingMode,
+        ConnectorListProcessingModes listProcessingModes,
+        ConnectorRetrieveProcessingMode retrieveProcessingMode,
+        ConnectorUpdateProcessingModeTruststore updateProcessingModeTruststore) {
+        this.registerProcessingMode = registerProcessingMode;
+        this.listProcessingModes = listProcessingModes;
+        this.retrieveProcessingMode = retrieveProcessingMode;
+        this.updateProcessingModeTruststore = updateProcessingModeTruststore;
     }
 
     @Override
@@ -80,7 +79,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
 
         var processingMode = processCreationRequest(request);
 
-        var created = this.registerProcessingModeService.execute(
+        var created = this.registerProcessingMode.execute(
             businessDomainIdentifier,
             processingMode
         );
@@ -90,20 +89,20 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
 
     @Override
     public List<ConnectorProcessingModeDto> listPmodes() {
-        var processingModes = listProcessingModeService.execute();
+        var processingModes = listProcessingModes.execute();
 
         return processingModes.stream().map(ConnectorProcessingModeDto::from).toList();
     }
 
     @Override
     public ConnectorProcessingModeDetailDto retrievePmode(String uuid) {
-        var processingMode = retrieveProcessingModeService.execute(uuid);
+        var processingMode = retrieveProcessingMode.execute(uuid);
         return ConnectorProcessingModeDetailDto.from(processingMode);
     }
 
     @Override
     public ResponseEntity<byte[]> downloadPmode(String uuid) {
-        var processingMode = retrieveProcessingModeService.execute(uuid);
+        var processingMode = retrieveProcessingMode.execute(uuid);
         var content = processingMode.content().getBytes(StandardCharsets.UTF_8);
         var filename = Paths.get(processingMode.filename()).getFileName().toString();
 
@@ -132,7 +131,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                                             .type(fromFileName(filename).orElse(null))
                                             .build();
 
-        var updated = updateProcessingModeTruststoreService.execute(uuid, truststore);
+        var updated = updateProcessingModeTruststore.execute(uuid, truststore);
 
         return ConnectorProcessingModeTruststoreDto.from(updated);
     }

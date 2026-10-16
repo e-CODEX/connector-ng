@@ -42,9 +42,9 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
     private static final String RETRIEVE_URL = "/api/v1/admin/transport-steps/%s/message";
 
     @MockitoBean
-    private ConnectorListTransportSteps listTransportStepsService;
+    private ConnectorListTransportSteps listTransportSteps;
     @MockitoBean
-    private ConnectorRetrieveTransportStepByTransportId retrieveTransportStepService;
+    private ConnectorRetrieveTransportStepByTransportId retrieveTransportStep;
 
     @Autowired
     private MockMvc mockMvc;
@@ -58,7 +58,7 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
                 List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
             );
 
-            when(listTransportStepsService.execute(any())).thenReturn(pageResult);
+            when(listTransportSteps.execute(any())).thenReturn(pageResult);
 
             mockMvc.perform(get(URL)
                                 .param("page", "0")
@@ -84,7 +84,7 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
 
         @Test
         void should_return_200_with_found_transport_step() throws Exception {
-            when(retrieveTransportStepService.execute(TRANSPORT_ID))
+            when(retrieveTransportStep.execute(TRANSPORT_ID))
                 .thenReturn(TransportStepFixtures.createTransportStep());
 
             mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
@@ -97,7 +97,7 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
         @Test
         void should_return_404_with_not_found_transport_step() throws Exception {
             doThrow(ConnectorMessageTransportStepNotFoundException.class)
-                .when(retrieveTransportStepService).execute(TRANSPORT_ID);
+                .when(retrieveTransportStep).execute(TRANSPORT_ID);
 
             mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
                                 .contentType(MediaType.APPLICATION_JSON))

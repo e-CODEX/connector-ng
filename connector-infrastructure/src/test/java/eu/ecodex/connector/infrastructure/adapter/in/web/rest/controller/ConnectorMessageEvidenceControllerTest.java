@@ -38,13 +38,14 @@ public class ConnectorMessageEvidenceControllerTest extends AbstractWebMvcTest {
     private static final String EVIDENCE_UUID = "12345678-1234-1234-1234-123456789012";
 
     @MockitoBean
-    private ConnectorRetrieveEvidence downloadEvidenceService;
+    private ConnectorRetrieveEvidence downloadEvidence;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void should_return_200_with_the_evidence() throws Exception {
-        when(downloadEvidenceService.execute(any()))
+        when(downloadEvidence.execute(any()))
             .thenReturn(EvidenceTestFixtures.createSubmissionAcceptanceEvidence());
 
         mockMvc.perform(get(URL_DOWNLOAD.formatted(EVIDENCE_UUID))
@@ -52,13 +53,12 @@ public class ConnectorMessageEvidenceControllerTest extends AbstractWebMvcTest {
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_XML));
 
-        verify(downloadEvidenceService).execute(EVIDENCE_UUID);
+        verify(downloadEvidence).execute(EVIDENCE_UUID);
     }
 
     @Test
     void should_return_404_when_the_evidence_is_not_found() throws Exception {
-        doThrow(ConnectorEvidenceNotFoundException.class)
-            .when(downloadEvidenceService).execute(any());
+        doThrow(ConnectorEvidenceNotFoundException.class).when(downloadEvidence).execute(any());
 
         mockMvc.perform(get(URL_DOWNLOAD.formatted("unknown-identifier"))
                             .contentType(MediaType.APPLICATION_JSON))

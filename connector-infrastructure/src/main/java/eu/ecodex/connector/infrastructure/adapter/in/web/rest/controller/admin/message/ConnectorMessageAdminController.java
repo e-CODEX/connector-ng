@@ -47,43 +47,43 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ConnectorMessageAdminController implements ConnectorMessageAdminApi {
-    private final ConnectorListMessages listMessagesService;
-    private final ConnectorRetrieveMessage retrieveMessageService;
+    private final ConnectorListMessages listMessages;
+    private final ConnectorRetrieveMessage retrieveMessage;
     private final ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStepService;
-    private final ConnectorRetrieveMessageStats retrieveMessageStatsService;
-    private final ConnectorRetrieveMessageReport retrieveMessageReportService;
+    private final ConnectorRetrieveMessageStats retrieveMessageStats;
+    private final ConnectorRetrieveMessageReport retrieveMessageReport;
     private final ConnectorMessageReportExporterFactory reportExporterFactory;
-    private final ConnectorSendOutboundC2CTestMessage sendTestMessageService;
+    private final ConnectorSendOutboundC2CTestMessage sendOutboundC2CTestMessage;
     private final ConnectorRestOutboundMessageParser restOutboundMessageParser;
 
     /**
      * Constructs a new instance of ConnectorMessageController.
      *
-     * @param listMessagesService          The service for listing messages.
-     * @param retrieveMessageService       The service for retrieving a specific message.
+     * @param listMessages                 The service for listing messages.
+     * @param retrieveMessage              The service for retrieving a specific message.
      * @param retrieveTransportStepService The service for retrieving a specific transport step.
-     * @param retrieveMessageStatsService  The service for retrieving message statistics.
-     * @param retrieveMessageReportService The service for retrieving message reports.
+     * @param retrieveMessageStats         The service for retrieving message statistics.
+     * @param retrieveMessageReport        The service for retrieving message reports.
      * @param reportExporterFactory        The factory for creating message report exporters.
-     * @param sendTestMessageService       The service for sending C2C test message.
+     * @param sendOutboundC2CTestMessage   The service for sending C2C test message.
      * @param restOutboundMessageParser    The rest outbound message parsing util.
      */
     public ConnectorMessageAdminController(
-        ConnectorListMessages listMessagesService,
-        ConnectorRetrieveMessage retrieveMessageService,
+        ConnectorListMessages listMessages,
+        ConnectorRetrieveMessage retrieveMessage,
         ConnectorRetrieveTransportStepByMessageIdentifier retrieveTransportStepService,
-        ConnectorRetrieveMessageStats retrieveMessageStatsService,
-        ConnectorRetrieveMessageReport retrieveMessageReportService,
+        ConnectorRetrieveMessageStats retrieveMessageStats,
+        ConnectorRetrieveMessageReport retrieveMessageReport,
         ConnectorMessageReportExporterFactory reportExporterFactory,
-        ConnectorSendOutboundC2CTestMessage sendTestMessageService,
+        ConnectorSendOutboundC2CTestMessage sendOutboundC2CTestMessage,
         ConnectorRestOutboundMessageParser restOutboundMessageParser) {
-        this.listMessagesService = listMessagesService;
-        this.retrieveMessageService = retrieveMessageService;
+        this.listMessages = listMessages;
+        this.retrieveMessage = retrieveMessage;
         this.retrieveTransportStepService = retrieveTransportStepService;
-        this.retrieveMessageStatsService = retrieveMessageStatsService;
-        this.retrieveMessageReportService = retrieveMessageReportService;
+        this.retrieveMessageStats = retrieveMessageStats;
+        this.retrieveMessageReport = retrieveMessageReport;
         this.reportExporterFactory = reportExporterFactory;
-        this.sendTestMessageService = sendTestMessageService;
+        this.sendOutboundC2CTestMessage = sendOutboundC2CTestMessage;
         this.restOutboundMessageParser = restOutboundMessageParser;
     }
 
@@ -92,7 +92,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         ConnectorTestMessageRequest request)
         throws IOException {
         var command = toTestBusinessMessageCommand(request);
-        var submittedMessage = sendTestMessageService.execute(command);
+        var submittedMessage = sendOutboundC2CTestMessage.execute(command);
 
         return ConnectorOutboundMessageDto.from(submittedMessage);
     }
@@ -121,7 +121,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
             ConnectorDateRangeFilter.of(from, to)
         );
 
-        var messages = listMessagesService.execute(filter);
+        var messages = listMessages.execute(filter);
 
         return ConnectorPageResult.of(
             messages.content().stream().map(ConnectorMessageDto::from).toList(),
@@ -133,7 +133,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
 
     @Override
     public ConnectorMessageDetailDto retrieveMessage(String identifier) {
-        var message = retrieveMessageService.execute(identifier);
+        var message = retrieveMessage.execute(identifier);
 
         return ConnectorMessageDetailDto.from(message);
     }
@@ -147,12 +147,12 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
 
     @Override
     public ConnectorMessageStats getStats(String from, String to, String businessDomain) {
-        return retrieveMessageStatsService.execute(from, to, businessDomain);
+        return retrieveMessageStats.execute(from, to, businessDomain);
     }
 
     @Override
     public ConnectorMessageReportSummary getReports(String from, String to, String businessDomain) {
-        return retrieveMessageReportService.execute(from, to, businessDomain);
+        return retrieveMessageReport.execute(from, to, businessDomain);
     }
 
     @Override
@@ -161,7 +161,7 @@ public class ConnectorMessageAdminController implements ConnectorMessageAdminApi
         String to,
         String businessDomain,
         ConnectorMessageReportExportFormat format) {
-        var reportsSummary = retrieveMessageReportService.execute(from, to, businessDomain);
+        var reportsSummary = retrieveMessageReport.execute(from, to, businessDomain);
         var exporter = reportExporterFactory.create(format);
         var export = exporter.export(reportsSummary);
 

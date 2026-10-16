@@ -45,10 +45,10 @@ class ConnectorAdminUserInitializerTest {
     private ConnectorRetrieveUserByUsername retrieveUserByUsername;
     @Mock
     private ConnectorRetrieveRoleByName retrieveRoleByName;
-    private ConnectorAdminUserProperties adminUserProperties;
     @Mock
     private ApplicationArguments applicationArguments;
 
+    private ConnectorAdminUserProperties adminUserProperties;
     private ConnectorAdminUserInitializer initializer;
 
     private static ConnectorAdminUserProperties properties(
@@ -68,7 +68,6 @@ class ConnectorAdminUserInitializerTest {
             retrieveRoleByName, adminUserProperties
         );
     }
-
 
     @Test
     void run_should_register_admin_user_in_props_when_no_admin_user_exists() {

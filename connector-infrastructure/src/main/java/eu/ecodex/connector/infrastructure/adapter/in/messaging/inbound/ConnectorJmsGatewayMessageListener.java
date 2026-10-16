@@ -65,8 +65,8 @@ public class ConnectorJmsGatewayMessageListener {
 
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
-    private final ConnectorInboundBusinessMessageReceiver inboundMessageReceiverService;
-    private final ConnectorInboundEvidenceMessageReceiver inboundEvidenceReceiverService;
+    private final ConnectorInboundBusinessMessageReceiver inboundBusinessMessageReceiver;
+    private final ConnectorInboundEvidenceMessageReceiver inboundEvidenceMessageReceiver;
 
 
     /**
@@ -75,18 +75,18 @@ public class ConnectorJmsGatewayMessageListener {
      *
      * @param attachmentRepository           The repository for managing message attachments.
      * @param fileStorageProvider            The provider for file storage operations.
-     * @param inboundMessageReceiverService  The service for handling inbound business messages.
-     * @param inboundEvidenceReceiverService The service for handling inbound evidence messages.
+     * @param inboundBusinessMessageReceiver The service for handling inbound business messages.
+     * @param inboundEvidenceMessageReceiver The service for handling inbound evidence messages.
      */
     public ConnectorJmsGatewayMessageListener(
         ConnectorMessageAttachmentRepository attachmentRepository,
         ConnectorFileStorageProvider fileStorageProvider,
-        ConnectorInboundBusinessMessageReceiver inboundMessageReceiverService,
-        ConnectorInboundEvidenceMessageReceiver inboundEvidenceReceiverService) {
+        ConnectorInboundBusinessMessageReceiver inboundBusinessMessageReceiver,
+        ConnectorInboundEvidenceMessageReceiver inboundEvidenceMessageReceiver) {
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
-        this.inboundMessageReceiverService = inboundMessageReceiverService;
-        this.inboundEvidenceReceiverService = inboundEvidenceReceiverService;
+        this.inboundBusinessMessageReceiver = inboundBusinessMessageReceiver;
+        this.inboundEvidenceMessageReceiver = inboundEvidenceMessageReceiver;
     }
 
     /**
@@ -129,7 +129,7 @@ public class ConnectorJmsGatewayMessageListener {
                 .transportedEvidences(payloads.transportedEvidences())
                 .build();
 
-            inboundMessageReceiverService.execute(businessMessageCommand);
+            inboundBusinessMessageReceiver.execute(businessMessageCommand);
         } else {
             log.info("Received message from the gateway is an evidence message");
             var inboundMessageCommand = ConnectorInboundEvidenceMessageCommand
@@ -139,7 +139,7 @@ public class ConnectorJmsGatewayMessageListener {
                 .gatewayName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
                 .transportedEvidences(payloads.transportedEvidences())
                 .build();
-            inboundEvidenceReceiverService.execute(inboundMessageCommand);
+            inboundEvidenceMessageReceiver.execute(inboundMessageCommand);
         }
     }
 

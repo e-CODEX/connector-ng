@@ -20,15 +20,15 @@ import org.springframework.context.annotation.Import;
 
 @Import({DssConfig.class, DatabaseConfig.class, RepositoryConfig.class, BeanConfig.class})
 @ComponentScan(
-        basePackages = {
-                "eu.ecodex.connector.domain",
-                "eu.ecodex.connector.infrastructure.outbound.database",
-                "eu.ecodex.connector.infrastructure.property",
-                "eu.ecodex.connector.infrastructure.outbound.persistence",
-                "eu.ecodex.connector.infrastructure.outbound.provider",
-                "eu.ecodex.connector.infrastructure.dss",
-                "eu.ecodex.connector.infrastructure.outbound.security"
-        }
+    basePackages = {
+        "eu.ecodex.connector.domain",
+        "eu.ecodex.connector.infrastructure.config.property",
+        "eu.ecodex.connector.infrastructure.adapter.out.provider",
+        "eu.ecodex.connector.infrastructure.adapter.out.dss",
+        "eu.ecodex.connector.infrastructure.adapter.out.security",
+        "eu.ecodex.connector.infrastructure.adapter.out.persistence.db",
+        "eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter"
+    }
 )
 public class ContainerContextConfiguration extends SecurityDisabledTestConfiguration {
 }

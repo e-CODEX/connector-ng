@@ -15,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditSelfRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

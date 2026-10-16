@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.infrastructure.property.ActiveMQAddressSettingsProperties;
-import eu.ecodex.connector.infrastructure.property.ConnectorQueueProperties;
+import eu.ecodex.connector.infrastructure.config.property.ActiveMQAddressSettingsProperties;
+import eu.ecodex.connector.infrastructure.config.property.ConnectorQueueProperties;
 import org.apache.activemq.RedeliveryPolicy;
 import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
 import org.apache.activemq.command.ActiveMQQueue;

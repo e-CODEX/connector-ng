@@ -15,7 +15,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.FilePartTestFixtures;
 import eu.ecodex.connector.FileTestFixtures;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.pmode.ConnectorProcessingModeDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.pmode.ConnectorProcessingModeDto;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

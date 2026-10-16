@@ -20,7 +20,7 @@ import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessa
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
-import eu.ecodex.connector.infrastructure.outbound.provider.ConnectorS3FileStorageProvider;
+import eu.ecodex.connector.infrastructure.adapter.out.provider.ConnectorS3FileStorageProvider;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
 import java.lang.annotation.ElementType;

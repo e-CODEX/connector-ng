@@ -15,7 +15,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.JsonTestFixtures;
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.ConnectorBusinessDomainDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorBusinessDomainDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

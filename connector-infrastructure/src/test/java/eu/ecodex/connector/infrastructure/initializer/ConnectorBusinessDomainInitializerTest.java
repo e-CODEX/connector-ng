@@ -34,10 +34,10 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.link.ConnectorConfigurationSource;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingMode;
 import eu.ecodex.connector.domain.model.security.KeystoreType;
-import eu.ecodex.connector.infrastructure.outbound.adapter.exception.ConnectorProcessingModeParsingException;
-import eu.ecodex.connector.infrastructure.property.businessdomain.ConnectorBusinessDomainProperties;
-import eu.ecodex.connector.infrastructure.property.businessdomain.DefaultBusinessDomainPmodeProperties;
-import eu.ecodex.connector.infrastructure.property.businessdomain.DefaultBusinessDomainProperties;
+import eu.ecodex.connector.infrastructure.adapter.out.parser.exception.ConnectorProcessingModeParsingException;
+import eu.ecodex.connector.infrastructure.config.property.businessdomain.ConnectorBusinessDomainProperties;
+import eu.ecodex.connector.infrastructure.config.property.businessdomain.DefaultBusinessDomainPmodeProperties;
+import eu.ecodex.connector.infrastructure.config.property.businessdomain.DefaultBusinessDomainProperties;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

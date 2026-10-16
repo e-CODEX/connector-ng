@@ -16,15 +16,15 @@ import org.springframework.context.annotation.Import;
 
 @Import(DssConfig.class)
 @ComponentScan(
-        basePackages = {
-                "eu.ecodex.connector.domain",
-                "eu.ecodex.connector.infrastructure.property",
-                "eu.ecodex.connector.infrastructure.dss",
-                "eu.ecodex.connector.infrastructure.outbound.security.exception",
-                "eu.ecodex.connector.infrastructure.outbound.security.model",
-                "eu.ecodex.connector.infrastructure.outbound.security.token",
-                "eu.ecodex.connector.infrastructure.outbound.security.util",
-        }
+    basePackages = {
+        "eu.ecodex.connector.domain",
+        "eu.ecodex.connector.infrastructure.config.property",
+        "eu.ecodex.connector.infrastructure.adapter.out.dss",
+        "eu.ecodex.connector.infrastructure.adapter.out.security.model",
+        "eu.ecodex.connector.infrastructure.adapter.out.security.token",
+        "eu.ecodex.connector.infrastructure.adapter.out.security.util",
+        "eu.ecodex.connector.infrastructure.adapter.out.security.exception",
+    }
 )
 public class TokenContextConfiguration extends SecurityDisabledTestConfiguration {
 }

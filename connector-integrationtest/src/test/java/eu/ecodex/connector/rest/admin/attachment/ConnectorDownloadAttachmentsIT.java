@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.advice.ErrorResponse;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.ErrorResponse;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

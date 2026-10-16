@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+  ~ in the Area of Freedom, Security and Justice (eu-LISA)
+  ~
+  ~ Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+  ~ European Commission - subsequent versions of the EUPL (the "Licence");
+  ~ You may not use this work except in compliance with the Licence.
+  ~ You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+  -->
+
 <bd:EOPFormA xmlns:bd="http://data.justid.nl/epo/document/EOPFormA-1" xmlns:ec="http://data.justid.nl/ec/dictionary-0" xmlns:epo="http://data.justid.nl/epo/dictionary-0" xmlns:jus="http://data.justid.nl/jus/dictionary-0" xmlns:sbdh="http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://data.justid.nl/epo/document/EOPFormA-1 EOPFormA.xsd">
     <sbdh:StandardBusinessDocumentHeader>
         <sbdh:HeaderVersion>String</sbdh:HeaderVersion>

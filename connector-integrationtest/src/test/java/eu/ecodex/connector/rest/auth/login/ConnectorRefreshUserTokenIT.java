@@ -18,8 +18,8 @@ import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefre
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.application.service.auth.refreshtoken.ConnectorRefreshTokenGenerator;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorLoginRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorRefreshTokenRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorLoginRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorRefreshTokenRequest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;

@@ -17,10 +17,10 @@ import org.springframework.context.annotation.Import;
 
 @Import(DssConfig.class)
 @ComponentScan(
-        basePackages = {
-                "eu.ecodex.connector.infrastructure.property",
-                "eu.ecodex.connector.infrastructure.dss",
-        }
+    basePackages = {
+        "eu.ecodex.connector.infrastructure.config.property",
+        "eu.ecodex.connector.infrastructure.adapter.out.dss"
+    }
 )
 public class DSSContextConfiguration extends SecurityDisabledTestConfiguration {
 }

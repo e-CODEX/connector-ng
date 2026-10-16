@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorRoleDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorRoleDto;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;

@@ -14,14 +14,14 @@ package eu.ecodex.connector;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditSelfRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorEditUserRequest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
-import eu.ecodex.connector.infrastructure.outbound.auth.identity.ConnectorUserDetails;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorRoleEntity;
-import eu.ecodex.connector.infrastructure.outbound.database.entity.user.ConnectorUserEntity;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditSelfRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
+import eu.ecodex.connector.infrastructure.adapter.out.auth.identity.ConnectorUserDetails;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.user.ConnectorRoleEntity;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.user.ConnectorUserEntity;
 import java.util.Set;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})

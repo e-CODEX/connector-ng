@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.admin.transport;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.infrastructure.inbound.web.rest.dto.message.ConnectorMessageDetailDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorMessageDetailDto;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

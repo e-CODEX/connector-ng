@@ -1,0 +1,98 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.stats;
+
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.dto.ConnectorMessageReportDto;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.dto.ConnectorMessageStatsDto;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.ConnectorMessageEntity;
+import java.time.Instant;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+/**
+ * Repository interface for performing CRUD operations on the {@link ConnectorMessageEntity}.
+ */
+@Repository
+@SuppressWarnings("checkstyle:LineLength")
+public interface ConnectorMessageStatsJpaRepository extends
+    JpaRepository<ConnectorMessageEntity, Long> {
+    @Query("""
+        SELECT new eu.ecodex.connector.infrastructure.adapter.out.persistence.db.dto.ConnectorMessageStatsDto(
+            COUNT(m),
+            COUNT(CASE WHEN m.deliveredToLinkPartnerAt IS NOT NULL THEN 1 END),
+            COUNT(CASE WHEN m.rejectedAt IS NOT NULL THEN 1 END),
+            COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                        THEN 1 END),
+            COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                        AND m.deliveredToLinkPartnerAt IS NOT NULL THEN 1 END),
+            COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY
+                        AND m.rejectedAt IS NOT NULL THEN 1 END),
+            COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                        THEN 1 END),
+            COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                        AND m.deliveredToLinkPartnerAt IS NOT NULL THEN 1 END),
+            COUNT(CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                        AND m.rejectedAt IS NOT NULL THEN 1 END))
+        FROM ConnectorMessageEntity m
+        WHERE
+            (cast(:from as Instant) IS NULL OR m.createdAt >= :from)
+            AND (cast(:to as Instant) IS NULL OR m.createdAt <= :to)
+            AND (cast(:businessDomain as String) IS NULL OR m.businessDomain.identifier = :businessDomain)
+        """)
+    ConnectorMessageStatsDto computeStats(
+        @Param("from") Instant from,
+        @Param("to") Instant to,
+        @Param("businessDomain") String businessDomain);
+
+    @Query("""
+        SELECT new eu.ecodex.connector.infrastructure.adapter.out.persistence.db.dto.ConnectorMessageReportDto(
+            EXTRACT(year  FROM m.createdAt),
+            EXTRACT(month from m.createdAt),
+            CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                 THEN fp.identifier ELSE tp.identifier END,
+            srv.name,
+            m.direction,
+            count(a)
+        )
+        FROM ConnectorMessageAS4PropertiesEntity a
+            JOIN a.message m
+            JOIN a.service srv
+            LEFT JOIN a.fromParty fp
+            LEFT JOIN a.toParty  tp
+        WHERE
+            (cast(:from as Instant) IS NULL OR m.createdAt >= :from)
+            AND (cast(:to as Instant) IS NULL OR m.createdAt <= :to)
+            AND (cast(:businessDomain as String) IS NULL OR m.businessDomain.identifier = :businessDomain)
+            AND m.direction IN (
+                eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND,
+                eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+        GROUP BY
+            EXTRACT(year  from m.createdAt),
+            EXTRACT(month from m.createdAt),
+            CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                 THEN fp.identifier ELSE tp.identifier END,
+            srv.name,
+            m.direction
+        ORDER BY
+            EXTRACT(year  from m.createdAt) DESC,
+            EXTRACT(month from m.createdAt) DESC,
+            CASE WHEN m.direction = eu.ecodex.connector.domain.model.message.ConnectorMessageDirection.GATEWAY_TO_BACKEND
+                         THEN fp.identifier ELSE tp.identifier END ASC,
+            srv.name ASC
+        """)
+    List<ConnectorMessageReportDto> computeReports(
+        @Param("from") Instant from,
+        @Param("to") Instant to,
+        @Param("businessDomain") String businessDomain);
+}

@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.infrastructure.property.dss.ConnectorDssProperties;
-import eu.ecodex.connector.infrastructure.property.dss.DssProxyProperties;
+import eu.ecodex.connector.infrastructure.config.property.dss.ConnectorDssProperties;
+import eu.ecodex.connector.infrastructure.config.property.dss.DssProxyProperties;
 import eu.europa.esig.dss.service.NonceSource;
 import eu.europa.esig.dss.service.SecureRandomNonceSource;
 import eu.europa.esig.dss.service.crl.OnlineCRLSource;

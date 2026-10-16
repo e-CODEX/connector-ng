@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.config;
 
-import eu.ecodex.connector.infrastructure.property.ConnectorS3ProviderProperties;
+import eu.ecodex.connector.infrastructure.config.property.ConnectorS3ProviderProperties;
 import java.net.URI;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

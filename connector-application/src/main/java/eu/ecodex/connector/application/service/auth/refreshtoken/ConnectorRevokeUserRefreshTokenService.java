@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.auth.refreshtoken;
 import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRevokeUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
+import java.time.Clock;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,26 +25,29 @@ import org.springframework.stereotype.Service;
 @Service
 public class ConnectorRevokeUserRefreshTokenService implements ConnectorRevokeUserRefreshToken {
     private final ConnectorRefreshTokenRepository repository;
+    private final Clock clock;
 
-    public ConnectorRevokeUserRefreshTokenService(ConnectorRefreshTokenRepository repository) {
+    public ConnectorRevokeUserRefreshTokenService(ConnectorRefreshTokenRepository repository,
+                                                  Clock clock) {
         this.repository = repository;
+        this.clock = clock;
     }
 
     @Override
     public void execute(@NonNull String uuid, @NonNull String refreshToken) {
-        var found = repository.findByToken(refreshToken)
-            .orElseThrow(() ->
-                new ConnectorUserBadCredentialsException("Invalid refresh token"));
+        var hashToken = ConnectorRefreshTokenGenerator.hash(refreshToken);
+        var found = repository.findByTokenHashed(hashToken)
+            .orElseThrow(() -> new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
         if (!found.user().uuid().equals(uuid)) {
             throw new ConnectorUserBadCredentialsException(
                 "Invalid refresh token for user " + uuid);
         }
 
-        log.info("Revoking refresh token {}", refreshToken);
+        log.info("Revoking user {} refresh token", uuid);
         if (found.revoked()) {
             return;
         }
-        repository.save(found.toBuilder().revoked(true).build());
+        repository.revokeByUserUuid(uuid, clock.instant());
     }
 }

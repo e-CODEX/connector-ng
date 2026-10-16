@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.auth.refreshtoken;
 
-import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorIssueUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRefreshUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorVerifyUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefreshUserRefreshToken {
     private final ConnectorRefreshTokenRepository repository;
     private final ConnectorVerifyUserRefreshToken verifyUserToken;
+    private final ConnectorIssueUserRefreshToken issueUserRefreshToken;
     private final ConnectorAuthenticationTokenProvider authenticationTokenProvider;
     private final Clock clock;
 
@@ -61,6 +62,7 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
      *                                    managing and persisting refresh tokens.
      * @param verifyUserToken             the {@code ConnectorVerifyUserTokenService}
      *                                    responsible for verifying the validity of user tokens.
+     * @param issueUserRefreshToken       then service responsible for issuing new refresh token
      * @param authenticationTokenProvider the {@code ConnectorAuthenticationTokenProvider}
      *                                    responsible for generating and managing authentication
      *                                    tokens.
@@ -70,37 +72,29 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
     public ConnectorRefreshUserRefreshTokenService(
         ConnectorRefreshTokenRepository repository,
         ConnectorVerifyUserRefreshToken verifyUserToken,
-        ConnectorAuthenticationTokenProvider authenticationTokenProvider, Clock clock) {
+        ConnectorIssueUserRefreshToken issueUserRefreshToken,
+        ConnectorAuthenticationTokenProvider authenticationTokenProvider,
+        Clock clock) {
         this.repository = repository;
         this.verifyUserToken = verifyUserToken;
+        this.issueUserRefreshToken = issueUserRefreshToken;
         this.authenticationTokenProvider = authenticationTokenProvider;
         this.clock = clock;
     }
 
     @Override
-    public ConnectorUserAuthenticationResult execute(@NonNull String accessToken,
-                                                     @NonNull String refreshToken) {
+    public ConnectorUserAuthenticationResult execute(@NonNull String refreshToken) {
         var verifiedRefreshToken = verifyUserToken.execute(refreshToken);
 
-        if (!authenticationTokenProvider.getUsernameFromToken(accessToken).equals(
-            verifiedRefreshToken.user().username())) {
-            throw new ConnectorUserBadCredentialsException(
-                "Access token and refresh token do not belong to the same user.");
-        }
-
         log.debug("Refreshing access token for user {}", verifiedRefreshToken.user().uuid());
-        var newAccessToken = authenticationTokenProvider.isAccessTokenExpired(accessToken)
-            ? authenticationTokenProvider.generateAccessToken(verifiedRefreshToken.user())
-            : accessToken;
+        var newAccessToken =
+            authenticationTokenProvider.generateAccessToken(verifiedRefreshToken.user());
+        var newRefreshToken = rotateRefreshToken(verifiedRefreshToken.user());
 
         var accessTokenExpiresAt =
             authenticationTokenProvider.getAccessTokenExpirationDate(newAccessToken);
 
-        var newRefreshToken = shouldRotateRefreshToken(verifiedRefreshToken, accessTokenExpiresAt)
-            ? rotateRefreshToken(verifiedRefreshToken.user())
-            : verifiedRefreshToken;
-
-        ConnectorUserAuthenticationResult result = ConnectorUserAuthenticationResult.builder()
+        var result = ConnectorUserAuthenticationResult.builder()
             .accessToken(newAccessToken)
             .refreshToken(newRefreshToken.token())
             .expiresIn(Duration.between(clock.instant(), accessTokenExpiresAt).getSeconds())
@@ -114,33 +108,6 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
     }
 
     /**
-     * Rotates the refresh token when it would expire before the access token.
-     */
-    private boolean shouldRotateRefreshToken(@NonNull ConnectorRefreshToken refreshToken,
-                                             @NonNull Instant accessTokenExpiresAt) {
-        return refreshToken.expiresAt().isBefore(accessTokenExpiresAt);
-    }
-
-    /**
-     * Creates a new refresh token for the given user.
-     *
-     * @param user user to create the refresh token for
-     *
-     * @return newly created refresh token
-     */
-    private ConnectorRefreshToken saveRefreshToken(@NonNull ConnectorUser user) {
-        var refreshToken = ConnectorRefreshToken.builder()
-            .revoked(false)
-            .user(user)
-            .expiresAt(clock
-                .instant()
-                .plus(authenticationTokenProvider.getRefreshTokenExpiresIn()))
-            .build();
-
-        return repository.save(refreshToken);
-    }
-
-    /**
      * Revokes all existing refresh tokens for the given user and creates a new one.
      *
      * @param user user to revoke refresh tokens for
@@ -150,8 +117,8 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
     private ConnectorRefreshToken rotateRefreshToken(@NonNull ConnectorUser user) {
         var revoked = repository.findByUserUuidAndRevoked(user.uuid(), Boolean.FALSE);
         if (!revoked.isEmpty()) {
-            repository.revokeByUserUuid(user.uuid());
+            repository.revokeByUserUuid(user.uuid(), Instant.now());
         }
-        return saveRefreshToken(user);
+        return issueUserRefreshToken.execute(user);
     }
 }

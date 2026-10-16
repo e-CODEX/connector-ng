@@ -117,7 +117,7 @@ class ConnectorDBRefreshTokenRepositoryTest {
         when(jpaRepository.findByToken(any())).thenReturn(expectedEntity);
 
         // When
-        var found = repository.findByToken("token");
+        var found = repository.findByTokenHashed("token");
 
         // Then
         assertThat(found).isPresent().contains(expected);
@@ -193,14 +193,15 @@ class ConnectorDBRefreshTokenRepositoryTest {
     void revokeByUserUuid() {
         // Given
         var userId = "uuid";
-        when(jpaRepository.revokeAllByUserUuid(any())).thenReturn(Integer.MIN_VALUE);
+        var revokedAt = Instant.now();
+        when(jpaRepository.revokeAllActiveByUserId(any(), any())).thenReturn(Integer.MIN_VALUE);
 
         // When
-        var revoked = repository.revokeByUserUuid(userId);
+        var revoked = repository.revokeByUserUuid(userId, revokedAt);
 
         // Then
         assertThat(revoked).isEqualTo(Integer.MIN_VALUE);
-        verify(jpaRepository).revokeAllByUserUuid(userId);
+        verify(jpaRepository).revokeAllActiveByUserId(userId, revokedAt);
         verifyNoMoreInteractions(jpaRepository, userJpaRepository);
     }
 }

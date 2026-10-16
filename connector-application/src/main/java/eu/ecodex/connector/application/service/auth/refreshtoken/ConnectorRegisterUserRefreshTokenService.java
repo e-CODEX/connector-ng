@@ -10,18 +10,19 @@
 
 package eu.ecodex.connector.application.service.auth.refreshtoken;
 
+import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorIssueUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRegisterUserRefreshToken;
 import eu.ecodex.connector.application.port.spi.auth.accesstoken.ConnectorAuthenticationTokenProvider;
 import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorRefreshToken;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
-import java.time.Clock;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Service implementation for creating user authentication tokens.
+ * Service implementation for creating user authentication  refresh tokens.
  * This service handles the creation of {@link ConnectorRefreshToken} objects.
  *
  * <p>Dependencies:
@@ -31,52 +32,31 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@Transactional
 public class ConnectorRegisterUserRefreshTokenService implements ConnectorRegisterUserRefreshToken {
     private final ConnectorRefreshTokenRepository repository;
-    private final ConnectorAuthenticationTokenProvider authenticationTokenProvider;
-    private final Clock clock;
+    private final ConnectorIssueUserRefreshToken issueUserRefreshToken;
 
     /**
      * Constructs a new instance of {@link ConnectorRegisterUserRefreshTokenService}.
      *
-     * @param repository                  The repository for managing refresh tokens.
-     * @param authenticationTokenProvider The provider for generating access tokens.
-     * @param clock                       The clock used for time-related operations.
+     * @param repository            The repository for managing refresh tokens.
+     * @param issueUserRefreshToken The service responsible for issuing new refresh token
      */
     public ConnectorRegisterUserRefreshTokenService(
         ConnectorRefreshTokenRepository repository,
-        ConnectorAuthenticationTokenProvider authenticationTokenProvider, Clock clock) {
+        ConnectorIssueUserRefreshToken issueUserRefreshToken) {
         this.repository = repository;
-        this.authenticationTokenProvider = authenticationTokenProvider;
-        this.clock = clock;
+        this.issueUserRefreshToken = issueUserRefreshToken;
     }
 
     @Override
     public ConnectorRefreshToken execute(@NonNull ConnectorUser user) {
         log.debug("Creating refresh token for user {}", user.uuid());
 
-        // Delete all existing refresh tokens for the user
+        // Delete all existing refresh tokens for the current user
         repository.deleteByUserUuid(user.uuid());
 
-        return saveRefreshToken(user);
-    }
-
-    /**
-     * Creates a new refresh token for the given user.
-     *
-     * @param user user to create the refresh token for
-     *
-     * @return newly created refresh token
-     */
-    private ConnectorRefreshToken saveRefreshToken(ConnectorUser user) {
-        var refreshToken = ConnectorRefreshToken.builder()
-            .revoked(false)
-            .user(user)
-            .expiresAt(clock
-                .instant()
-                .plus(authenticationTokenProvider.getRefreshTokenExpiresIn()))
-            .build();
-
-        return repository.save(refreshToken);
+        return issueUserRefreshToken.execute(user);
     }
 }

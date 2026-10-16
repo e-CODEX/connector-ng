@@ -42,14 +42,15 @@ public class ConnectorDBRefreshTokenRepository implements ConnectorRefreshTokenR
     }
 
     @Override
-    public Optional<ConnectorRefreshToken> findByToken(@NonNull String token) {
-        return jpaRepository.findByToken(token).map(this::toDomain);
+    public Optional<ConnectorRefreshToken> findByTokenHashed(@NonNull String tokenHashed) {
+        return jpaRepository.findByToken(tokenHashed).map(this::toDomain);
     }
 
     @Override
     public ConnectorRefreshToken save(@NonNull ConnectorRefreshToken refreshToken) {
         var user = userRepository.findByUuid(refreshToken.user().uuid()).orElseThrow();
-        var saved = jpaRepository.save(toEntity(refreshToken, user));
+        var refreshTokenEntity = toEntity(refreshToken, user);
+        var saved = jpaRepository.save(refreshTokenEntity);
         return toDomain(saved);
     }
 
@@ -64,13 +65,13 @@ public class ConnectorDBRefreshTokenRepository implements ConnectorRefreshTokenR
         @NonNull String uuid,
         boolean revoked) {
         return jpaRepository.findByUser_UuidAndRevoked(uuid, revoked).stream()
-                            .map(this::toDomain)
-                            .toList();
+            .map(this::toDomain)
+            .toList();
     }
 
     @Override
-    public int revokeByUserUuid(@NonNull String uuid) {
-        return jpaRepository.revokeAllByUserUuid(uuid);
+    public int revokeByUserUuid(@NonNull String uuid, @NonNull Instant now) {
+        return jpaRepository.revokeAllActiveByUserId(uuid, now);
     }
 
     @Override
@@ -104,11 +105,12 @@ public class ConnectorDBRefreshTokenRepository implements ConnectorRefreshTokenR
         @NonNull ConnectorRefreshToken domain,
         ConnectorUserEntity user) {
         return ConnectorRefreshTokenEntity.builder()
-                                          .token(domain.token())
-                                          .revoked(domain.revoked())
-                                          .user(user)
-                                          .expiresAt(domain.expiresAt())
-                                          .build();
+            .token(domain.token())
+            .revoked(domain.revoked())
+            .user(user)
+            .expiresAt(domain.expiresAt())
+            .revokedAt(domain.revokedAt())
+            .build();
     }
 
     /**
@@ -122,11 +124,12 @@ public class ConnectorDBRefreshTokenRepository implements ConnectorRefreshTokenR
      */
     private ConnectorRefreshToken toDomain(@NonNull ConnectorRefreshTokenEntity entity) {
         return ConnectorRefreshToken.builder()
-                                    .token(entity.getToken())
-                                    .user(ConnectorUserMapper.toDomain(entity.getUser()))
-                                    .revoked(entity.isRevoked())
-                                    .createdAt(entity.getCreatedAt())
-                                    .expiresAt(entity.getExpiresAt())
-                                    .build();
+            .token(entity.getToken())
+            .user(ConnectorUserMapper.toDomain(entity.getUser()))
+            .revoked(entity.isRevoked())
+            .revokedAt(entity.getRevokedAt())
+            .createdAt(entity.getCreatedAt())
+            .expiresAt(entity.getExpiresAt())
+            .build();
     }
 }

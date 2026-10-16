@@ -34,6 +34,7 @@ public record ConnectorRefreshToken(
     @NotNull ConnectorUser user,
     Instant expiresAt,
     Instant createdAt,
+    Instant revokedAt,
     boolean revoked
 ) {
 

@@ -25,10 +25,10 @@ VALUES (1, 1),
        (3, 2),
        (3, 3);
 
-INSERT IGNORE INTO connector_refresh_tokens(id, token, user_id, expires_at, revoked, created_at, updated_at)
-VALUES(1,'4759bc7f-eba7-4009-8987-a368a3389896', 1, '2026-08-01 15:37:03.160645', true, now(), now()),
-      (2,'ed7473ec-49e8-46de-b7c7-79eedc460273', 1, '2026-08-03 15:37:03.160645', true, now(), now()),
-      (3,'410a8371-eed9-42b6-a1e1-30980b804bfa', 1, '2026-08-04 15:37:03.160645', true, now(), now()),
-      (4,'671ffa19-c75c-4cf3-bf63-62dad240a7b9', 1, '2026-08-18 10:30:03.160645', false, now(), now()),
-      (5,'7817701a-724a-4715-8793-28339e37fccb', 3, '2026-10-01 15:37:03.160645', true, now(), now()),
-      (6,'291b571a-1511-45a0-b990-368b5139011d', 3, '2026-10-10 15:37:03.160645', false, now(), now());
+INSERT IGNORE INTO connector_refresh_tokens(id, token, user_id, expires_at, revoked, revoked_at, created_at, updated_at)
+VALUES(1,SHA2('test-refresh-token-1', 256), 1, '2026-08-01 15:37:03.160645', true, now(),now(), now()),
+      (2,SHA2('test-refresh-token-2', 256), 1, '2026-08-03 15:37:03.160645', true, now(), now(), now()),
+      (3,SHA2('test-refresh-token-3', 256), 1, '2026-08-04 15:37:03.160645', true, now(), now(), now()),
+      (4,SHA2('test-refresh-token-4', 256), 1, '2026-08-18 10:30:03.160645', false, null,now(), now()),
+      (5,SHA2('test-refresh-token-5', 256), 3, '2026-10-01 15:37:03.160645', true, now(),now(), now()),
+      (6,SHA2('test-refresh-token-6', 256), 3, '2026-10-10 15:37:03.160645', false, null, now(), now());

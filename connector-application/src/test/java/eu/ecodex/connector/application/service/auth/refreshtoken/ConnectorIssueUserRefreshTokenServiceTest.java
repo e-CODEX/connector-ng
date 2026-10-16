@@ -25,12 +25,13 @@ import java.time.Duration;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class ConnectorCreateUserTokenServiceTest {
+class ConnectorIssueUserRefreshTokenServiceTest {
     @Mock
     ConnectorRefreshTokenRepository refreshTokenRepository;
     @Mock
@@ -39,10 +40,10 @@ class ConnectorCreateUserTokenServiceTest {
     Clock clock;
 
     @InjectMocks
-    ConnectorRegisterUserRefreshTokenService service;
+    ConnectorIssueUserRefreshTokenService service;
 
     @Test
-    void createOnLogin_should_create_access_and_refresh_token_successfully_and_delete_existing() {
+    void execute_should_generate_encode_and_issue_new_refresh_token_successfully() {
         // Given
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
         var userId = "uuid";
@@ -54,7 +55,6 @@ class ConnectorCreateUserTokenServiceTest {
             .expiresAt(loginTime.plus(duration))
             .build();
 
-        when(refreshTokenRepository.deleteByUserUuid(any())).thenReturn(Integer.MAX_VALUE);
         when(authenticationTokenProvider.getRefreshTokenExpiresIn()).thenReturn(duration);
         when(clock.instant()).thenReturn(loginTime);
         when(refreshTokenRepository.save(any())).thenReturn(expectedRefreshToken);
@@ -63,9 +63,17 @@ class ConnectorCreateUserTokenServiceTest {
         var refreshToken = service.execute(user);
 
         // Then
+        var captor = ArgumentCaptor.forClass(ConnectorRefreshToken.class);
+        verify(refreshTokenRepository).save(captor.capture());
+
         assertThat(refreshToken).isNotNull();
-        verify(refreshTokenRepository).save(expectedRefreshToken);
-        verify(refreshTokenRepository).deleteByUserUuid(userId);
+        assertThat(refreshToken).usingRecursiveComparison()
+            .ignoringFields("token")
+            .isEqualTo(captor.getValue());
+
+        assertThat(ConnectorRefreshTokenGenerator.hash(refreshToken.token()))
+            .isEqualTo(captor.getValue().token());
+
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
     }
 }

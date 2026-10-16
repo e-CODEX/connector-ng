@@ -46,13 +46,14 @@ public interface ConnectorUserRefreshTokenJpaRepository
      * This method is used to look up refresh token entities in the database by their unique token
      * value.
      *
-     * @param token the unique token string used to identify the {@link ConnectorRefreshTokenEntity}
+     * @param tokenHashed the unique token string used to identify the
+     *                    {@link ConnectorRefreshTokenEntity}
      *
      * @return an {@link Optional} containing the {@link ConnectorRefreshTokenEntity} if found, or
      *     an empty {@link Optional} if no entity matches the provided token
      */
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    Optional<ConnectorRefreshTokenEntity> findByToken(@Nonnull String token);
+    Optional<ConnectorRefreshTokenEntity> findByToken(@Nonnull String tokenHashed);
 
     /**
      * Retrieves a list of {@link ConnectorRefreshTokenEntity} instances based on the specified
@@ -75,12 +76,13 @@ public interface ConnectorUserRefreshTokenJpaRepository
     @Transactional
     @Query("""
         update ConnectorRefreshTokenEntity rt
-           set rt.revoked = true
+           set rt.revoked = true, rt.revokedAt= :now
          where rt.user.uuid = :userUuid
            and rt.revoked = false
         """)
     @EntityGraph(attributePaths = {"user", "user.roles"})
-    int revokeAllByUserUuid(@Param("userUuid") @Nonnull String userUuid);
+    int revokeAllActiveByUserId(@Param("userUuid") @Nonnull String userUuid,
+                                @Param("now") Instant now);
 
     @Modifying
     @Transactional

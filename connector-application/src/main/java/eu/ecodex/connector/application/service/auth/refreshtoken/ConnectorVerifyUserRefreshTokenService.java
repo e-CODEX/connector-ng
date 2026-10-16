@@ -54,7 +54,8 @@ public class ConnectorVerifyUserRefreshTokenService implements ConnectorVerifyUs
         if (!StringUtils.hasText(refreshToken)) {
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
         }
-        var foundToken = repository.findByToken(refreshToken)
+        var hashToken = ConnectorRefreshTokenGenerator.hash(refreshToken);
+        var foundToken = repository.findByTokenHashed(hashToken)
             .orElseThrow(() -> new ConnectorUserBadCredentialsException("Invalid refresh token"));
 
         if (foundToken.user().uuid() == null) {

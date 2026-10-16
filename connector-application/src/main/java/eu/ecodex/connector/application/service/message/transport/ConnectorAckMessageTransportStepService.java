@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
+import eu.ecodex.connector.application.exception.message.ConnectorLinkPartnerNotOwnerException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
@@ -83,6 +84,15 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
             throw new ConnectorMessageTransportStepNotFoundException(
                 "No transport step found for identifier [%s]"
                     .formatted(messageOrRemoteSystemIdentifier)
+            );
+        }
+
+        if (!existingStep.linkPartnerName().equalsIgnoreCase(command.linkPartnerName())) {
+            throw new ConnectorLinkPartnerNotOwnerException(
+                ("The transport step with message/remote ID [%s] does not belong to "
+                    + "link partner [%s]")
+                    .formatted(messageOrRemoteSystemIdentifier, command.linkPartnerName()
+                )
             );
         }
 

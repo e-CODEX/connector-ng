@@ -23,6 +23,7 @@ import lombok.Builder;
  *                                be {@code null} if the remote system did not assign one
  * @param status                  the new transport status ({@link ConnectorMessageTransportStatus})
  *                                to record for the message
+ * @param linkPartnerName         name of the link partner updating the message
  * @param errors                  the errors ({@link ConnectorMessageError}) associated with the
  *                                transport, for example when the status denotes a failure; may be
  *                                {@code null} or empty if there are none
@@ -31,6 +32,7 @@ import lombok.Builder;
 public record UpdateMessageTransportCommand(
     // e.g.: backend system message id
     String remoteMessageIdentifier,
+    String linkPartnerName,
     ConnectorMessageTransportStatus status,
     List<ConnectorMessageError> errors
 ) {

@@ -27,4 +27,10 @@ values (
            now(),
            now(),
            3
+       ),
+       (
+           'READY_FOR_DOWNLOAD',
+           now(),
+           now(),
+           4
        );

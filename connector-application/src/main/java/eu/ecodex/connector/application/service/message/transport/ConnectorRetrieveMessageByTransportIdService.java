@@ -11,11 +11,13 @@
 package eu.ecodex.connector.application.service.message.transport;
 
 import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorLinkPartnerNotOwnerException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepException;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import jakarta.annotation.Nonnull;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ConnectorRetrieveMessageByTransportIdService implements
-                                                          ConnectorRetrieveMessageByTransportId {
+    ConnectorRetrieveMessageByTransportId {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
 
     public ConnectorRetrieveMessageByTransportIdService(
@@ -37,7 +39,9 @@ public class ConnectorRetrieveMessageByTransportIdService implements
     }
 
     @Override
-    public ConnectorMessage execute(@NonNull String transportIdentifier) {
+    public ConnectorMessage execute(
+        @NonNull String transportIdentifier,
+        @Nonnull String linkPartnerName) {
         log.info("Retrieving message for transport identifier: [{}]", transportIdentifier);
 
         var transportStep = this.transportStepRepository.findByIdentifier(transportIdentifier);
@@ -45,6 +49,15 @@ public class ConnectorRetrieveMessageByTransportIdService implements
         if (transportStep == null) {
             throw new NotFoundException(
                 "No transport step found for identifier: " + transportIdentifier
+            );
+        }
+
+        if (!transportStep.linkPartnerName().equalsIgnoreCase(linkPartnerName)) {
+            throw new ConnectorLinkPartnerNotOwnerException(
+                "The transport step [%s] does not belong to the link partner [%s]".formatted(
+                    transportIdentifier,
+                    linkPartnerName
+                )
             );
         }
 

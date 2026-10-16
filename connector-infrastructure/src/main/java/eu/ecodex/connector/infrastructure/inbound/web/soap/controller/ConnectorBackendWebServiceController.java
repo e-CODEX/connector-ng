@@ -135,8 +135,10 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
     @Override
     public EmptyRequestType acknowledgeMessage(DomibusConnectorMessageResponseType responseType) {
+        var backendClientName = getBackendClientName();
         var commandBuilder = UpdateMessageTransportCommand
             .builder()
+            .linkPartnerName(backendClientName)
             .remoteMessageIdentifier(responseType.getAssignedMessageId());
         if (responseType.isResult()) {
             commandBuilder.status(ConnectorMessageTransportStatus.DELIVERED);
@@ -174,8 +176,12 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
 
     @Override
     public DomibusConnectorMessageType getMessageById(GetMessageByIdRequest getMessageByIdRequest) {
+        var backendClientName = getBackendClientName();
         var transportIdentifier = getMessageByIdRequest.getMessageTransportId();
-        var message = retrieveMessageByTransportIdService.execute(transportIdentifier);
+        var message = retrieveMessageByTransportIdService.execute(
+            transportIdentifier,
+            backendClientName
+        );
 
         // add post invoke message processor
         var messageContext = webServiceContext.getMessageContext();

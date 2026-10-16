@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.inbound.jms.listener.inbound;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
@@ -85,6 +86,7 @@ public class ConnectorJmsGatewayMessageAcknowledgementListener {
                 .builder()
                 .remoteMessageIdentifier(messageOrEbmsIdentifier)
                 .status(ConnectorMessageTransportStatus.DELIVERED)
+                .linkPartnerName(ConnectorDefaults.DEFAULT_GATEWAY_NAME)
                 .errors(null)
                 .build();
 

@@ -22,8 +22,9 @@ public interface ConnectorRetrieveMessageByTransportId {
      *
      * @param transportIdentifier the identifier assigned to the message by the transport layer,
      *                            used to locate the message (must not be null)
+     * @param linkPartnerName     name of the link partner updating the message
      *
      * @return the {@link ConnectorMessage} associated with the given transport identifier
      */
-    ConnectorMessage execute(@Nonnull String transportIdentifier);
+    ConnectorMessage execute(@Nonnull String transportIdentifier, @Nonnull String linkPartnerName);
 }

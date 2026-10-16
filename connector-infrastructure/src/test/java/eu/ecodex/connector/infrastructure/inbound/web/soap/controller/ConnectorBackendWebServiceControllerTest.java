@@ -14,14 +14,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
 import eu.ecodex.connector.application.exception.NotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorLinkPartnerNotOwnerException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
@@ -117,6 +118,16 @@ public class ConnectorBackendWebServiceControllerTest {
             .thenReturn(LinkPartnerTestFixtures.createAliceBackendLinkPartner().name().name());
     }
 
+    private DomibusConnectorMessageResponseType acknowledgeMessage(boolean result) {
+        var ackResponse = new DomibusConnectorMessageResponseType();
+        ackResponse.setResult(result);
+        ackResponse.setAssignedMessageId("12345678-1234-1234-1234-123456789012");
+        ackResponse.setResponseForMessageId(
+            "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+        ackResponse.setResultMessage("Message acknowledged successfully");
+        return ackResponse;
+    }
+
     @Nested
     @DisplayName("submitMessage (backend -> connector)")
     class SubmitMessage {
@@ -175,11 +186,14 @@ public class ConnectorBackendWebServiceControllerTest {
     @Nested
     @DisplayName("getMessageById")
     class GetMessageById {
+        private static final String LINK_PARTNER = "backend_alice";
+
         @Test
         void should_return_the_message() {
             var connectorMessage = BusinessMessageTestFixtures.createInboundMessage();
 
-            when(retrieveMessageByTransportIdService.execute(TRANSPORT_ID))
+            stubAuthenticatedBackendClient();
+            when(retrieveMessageByTransportIdService.execute(TRANSPORT_ID, LINK_PARTNER))
                 .thenReturn(connectorMessage);
             when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
             when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
@@ -194,7 +208,7 @@ public class ConnectorBackendWebServiceControllerTest {
             var response = backendWebService.getMessageById(request);
 
             assertThat(response).isNotNull();
-            verify(retrieveMessageByTransportIdService).execute(TRANSPORT_ID);
+            verify(retrieveMessageByTransportIdService).execute(TRANSPORT_ID, LINK_PARTNER);
             verify(legacyMessageHelper).convertMessage(connectorMessage);
 
             var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessageAfterDownload.class);
@@ -207,13 +221,26 @@ public class ConnectorBackendWebServiceControllerTest {
             var request = new GetMessageByIdRequest();
             request.setMessageTransportId("UNKNOWN-ID");
 
-            when(retrieveMessageByTransportIdService.execute("UNKNOWN-ID"))
-                .thenThrow(new NotFoundException("not found"));
+            stubAuthenticatedBackendClient();
+            doThrow(NotFoundException.class)
+                .when(retrieveMessageByTransportIdService).execute("UNKNOWN-ID", LINK_PARTNER);
 
             assertThatThrownBy(() -> backendWebService.getMessageById(request))
                 .isInstanceOf(NotFoundException.class);
+        }
 
-            verifyNoInteractions(webServiceContext, legacyMessageHelper);
+        @Test
+        void should_fail_when_the_backend_link_partner_does_not_own_the_message() {
+            var request = new GetMessageByIdRequest();
+            request.setMessageTransportId(TRANSPORT_ID);
+
+            stubAuthenticatedBackendClient();
+
+            doThrow(ConnectorLinkPartnerNotOwnerException.class)
+                .when(retrieveMessageByTransportIdService).execute(TRANSPORT_ID, LINK_PARTNER);
+
+            assertThatThrownBy(() -> backendWebService.getMessageById(request))
+                .isInstanceOf(ConnectorLinkPartnerNotOwnerException.class);
         }
     }
 
@@ -251,7 +278,8 @@ public class ConnectorBackendWebServiceControllerTest {
     @DisplayName("acknowledgeMessage")
     class AcknowledgeMessage {
         @Test
-        void should_acknowledge_a_successful_message() {
+        void should_acknowledge_a_message_with_success() {
+            stubAuthenticatedBackendClient();
             doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
 
             var response = backendWebService.acknowledgeMessage(acknowledgeMessage(true));
@@ -260,22 +288,23 @@ public class ConnectorBackendWebServiceControllerTest {
         }
 
         @Test
-        void should_acknowledge_a_failed_message() {
+        void should_acknowledge_a_message_with_failure() {
+            stubAuthenticatedBackendClient();
             doNothing().when(acknowledgeMessageTransportStepService).execute(any(), any());
 
             var response = backendWebService.acknowledgeMessage(acknowledgeMessage(false));
 
             assertThat(response).isNotNull();
         }
-    }
 
-    private DomibusConnectorMessageResponseType acknowledgeMessage(boolean result) {
-        var ackResponse = new DomibusConnectorMessageResponseType();
-        ackResponse.setResult(result);
-        ackResponse.setAssignedMessageId("12345678-1234-1234-1234-123456789012");
-        ackResponse.setResponseForMessageId(
-            "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
-        ackResponse.setResultMessage("Message acknowledged successfully");
-        return ackResponse;
+        @Test
+        void should_failed_when_the_backend_link_partner_does_not_own_the_message() {
+            stubAuthenticatedBackendClient();
+            doThrow(ConnectorLinkPartnerNotOwnerException.class)
+                .when(acknowledgeMessageTransportStepService).execute(any(), any());
+
+            assertThatThrownBy(() -> backendWebService.acknowledgeMessage(acknowledgeMessage(true)))
+                .isInstanceOf(ConnectorLinkPartnerNotOwnerException.class);
+        }
     }
 }

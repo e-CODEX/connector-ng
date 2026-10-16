@@ -53,12 +53,12 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
 
     static Stream<Arguments> transportStepFilters() {
         return Stream.of(
-            arguments("no filter", Map.of(), 3),
+            arguments("no filter", Map.of(), 4),
             arguments(
                 "date range", Map.of(
                     "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
                     "to", NOW.plus(1, ChronoUnit.HOURS).toString()
-                ), 3
+                ), 4
             ),
             arguments(
                 "transported message identifier",
@@ -90,7 +90,7 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
             arguments(
                 "status READY_FOR_DOWNLOAD",
                 Map.of("statuses", "READY_FOR_DOWNLOAD"),
-                1
+                2
             ),
             arguments(
                 "several statuses (union)",

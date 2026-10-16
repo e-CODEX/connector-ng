@@ -35,6 +35,7 @@ import org.springframework.test.context.jdbc.Sql;
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
+    private static final String MESSAGE_ID = "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu";
     @LocalServerPort
     private int port;
 
@@ -52,8 +53,7 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
 
     @Test
     void should_failed_to_acknowledge_unknown_message() {
-        var request = acknowledgeMessage(true);
-        request.setResponseForMessageId("unknown-transport-id");
+        var request = acknowledgeMessage(true, "unknown-transport-id");
 
         assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
             .isInstanceOf(SOAPFaultException.class);
@@ -61,8 +61,8 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
 
     @Test
     @WithMessageData
-    void should_acknowledge_message_with_success_status_successfully() {
-        var request = acknowledgeMessage(true);
+    void should_acknowledge_message_with_success_status() {
+        var request = acknowledgeMessage(true, MESSAGE_ID);
         var response = soapClient.acknowledgeMessage(request);
         assertThat(response).isNotNull();
     }
@@ -70,7 +70,7 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
     @Test
     @WithMessageData
     void should_failed_to_acknowledge_message_with_failed_status_and_no_error() {
-        var request = acknowledgeMessage(false);
+        var request = acknowledgeMessage(false, MESSAGE_ID);
 
         assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
             .isInstanceOf(SOAPFaultException.class);
@@ -78,12 +78,12 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
 
     @Test
     @WithMessageData
-    void should_acknowledge_message_with_failed_status_successfully() {
+    void should_acknowledge_message_with_failed_status() {
         var error = new DomibusConnectorMessageErrorType();
         error.setErrorMessage("Error message");
         error.setErrorDetails("Error details");
         error.setErrorSource("Error source");
-        var request = acknowledgeMessage(false);
+        var request = acknowledgeMessage(false, MESSAGE_ID);
         request.getMessageErrors().add(error);
 
         var response = soapClient.acknowledgeMessage(request);
@@ -91,12 +91,25 @@ public class ConnectorAcknowledgeMessageIT extends BackendServiceTest {
         assertThat(response).isNotNull();
     }
 
-    private DomibusConnectorMessageResponseType acknowledgeMessage(boolean result) {
+    @Test
+    @WithMessageData
+    void should_fail_when_the_backend_link_partner_does_not_own_the_message() {
+        var request = acknowledgeMessage(
+            true,
+            "fe276502-739e-472c-85c6-cddff3c28d18@connector.ecodex.eu"
+        );
+
+        assertThatThrownBy(() -> soapClient.acknowledgeMessage(request))
+            .isInstanceOf(SOAPFaultException.class);
+    }
+
+    private DomibusConnectorMessageResponseType acknowledgeMessage(
+        boolean result,
+        String messageIdentifier) {
         var ackResponse = new DomibusConnectorMessageResponseType();
         ackResponse.setResult(result);
         ackResponse.setAssignedMessageId("ebf72de4-05d2-4a7b-838a-5018923996da");
-        ackResponse.setResponseForMessageId(
-            "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+        ackResponse.setResponseForMessageId(messageIdentifier);
         ackResponse.setResultMessage("Message acknowledged successfully");
         return ackResponse;
     }

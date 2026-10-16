@@ -23,6 +23,10 @@ import eu.ecodex.connector.domain.transition.GetMessageByIdRequest;
 import eu.ecodex.connector.infrastructure.outbound.provider.ConnectorS3FileStorageProvider;
 import eu.ecodex.connector.soap.BackendServiceTest;
 import jakarta.xml.ws.soap.SOAPFaultException;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,17 +63,7 @@ public class ConnectorGetPendingMessageIT extends BackendServiceTest {
     }
 
     @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
-    })
+    @WithTransportStepData
     void should_retrieve_pending_message_by_transport_step_identifier() {
         when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
                 ConnectorMessageTransportStep.class));
@@ -85,20 +79,7 @@ public class ConnectorGetPendingMessageIT extends BackendServiceTest {
     }
 
     @Test
-    @Sql({
-            "classpath:sql/business-domain.sql",
-            "classpath:sql/processing-mode.sql",
-            "classpath:sql/party.sql",
-            "classpath:sql/service.sql",
-            "classpath:sql/action.sql",
-            "classpath:sql/message.sql",
-            "classpath:sql/message-as4-properties.sql",
-            "classpath:sql/attachment.sql",
-            "classpath:sql/message-business-content.sql",
-            "classpath:sql/message-business-document.sql",
-            "classpath:sql/message-transport-step.sql",
-            "classpath:sql/message-transport-step-statuses.sql",
-    })
+    @WithTransportStepData
     void should_fail_when_identifier_does_not_exist() {
         when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
                 ConnectorMessageTransportStep.class));
@@ -108,5 +89,34 @@ public class ConnectorGetPendingMessageIT extends BackendServiceTest {
 
         assertThatThrownBy(() -> soapClient.getMessageById(request))
                 .isInstanceOf(SOAPFaultException.class);
+    }
+
+    @Test
+    @WithTransportStepData
+    void should_fail_when_the_backend_link_partner_does_not_own_the_message() {
+        when(registerMessageTransportStep.execute(any(), any())).thenReturn(mock(
+            ConnectorMessageTransportStep.class));
+
+        var request = new GetMessageByIdRequest();
+        request.setMessageTransportId("6ddf5305-fc2f-4412-8b8e-e6862a4e87c0@connector.ecodex.eu_backend_other");
+
+        assertThatThrownBy(() -> soapClient.getMessageById(request))
+            .isInstanceOf(SOAPFaultException.class);
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/party.sql",
+        "classpath:sql/service.sql",
+        "classpath:sql/action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql"
+    })
+    private @interface WithTransportStepData {
     }
 }

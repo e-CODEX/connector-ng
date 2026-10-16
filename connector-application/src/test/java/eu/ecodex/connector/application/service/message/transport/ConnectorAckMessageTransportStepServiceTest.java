@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.application.exception.message.ConnectorLinkPartnerNotOwnerException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageErrorRepository;
@@ -50,6 +51,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
     private static final String MESSAGE_ID = "msg-001";
     private static final String TRANSPORT_STEP_ID = "step-001";
     private static final String BACKEND_ID = "backend-ref-001";
+    private static final String LINK_PARTNER = "default_test_backend";
 
     @Mock
     private ConnectorMessageTransportStepRepository transportStepRepository;
@@ -82,6 +84,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
                                             .status(ConnectorMessageTransportStatus.DELIVERED)
                                             .remoteMessageIdentifier(BACKEND_ID)
                                             .errors(List.of())
+                                            .linkPartnerName(LINK_PARTNER)
                                             .build();
     }
 
@@ -89,6 +92,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
         return UpdateMessageTransportCommand.builder()
                                             .status(ConnectorMessageTransportStatus.FAILED)
                                             .errors(errors)
+                                            .linkPartnerName(LINK_PARTNER)
                                             .build();
     }
 
@@ -100,6 +104,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
                                             .status(status)
                                             .numberOfAttempts(numberOfAttempts)
                                             .transportedMessage(businessMessage())
+                                            .linkPartnerName(LINK_PARTNER)
                                             .build();
     }
 
@@ -201,6 +206,23 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
             assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
                 .isInstanceOf(ConnectorMessageTransportStepNotFoundException.class);
+
+            verifyNoInteractions(messageRepository, messageErrorRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("when the requesting link partner does not own the transport")
+    class WhenLinkPartnerNotOwner {
+        @Test
+        void should_fail_when_the_requesting_link_partner_does_not_own_the_transport_of_the_message() {
+            var step = stepWithStatus(ConnectorMessageTransportStatus.DELIVERED, 1);
+            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+                .thenReturn(step);
+
+            var command = deliveredCommand().toBuilder().linkPartnerName("alice_backend").build();
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, command))
+                .isInstanceOf(ConnectorLinkPartnerNotOwnerException.class);
 
             verifyNoInteractions(messageRepository, messageErrorRepository);
         }

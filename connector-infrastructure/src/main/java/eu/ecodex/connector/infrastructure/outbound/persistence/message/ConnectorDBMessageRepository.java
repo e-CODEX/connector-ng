@@ -191,6 +191,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
         @NonNull String identifier,
         @NonNull String ebmsIdentifier) {
         var as4Properties = as4PropertiesJpaRepository.findByMessageIdentifier(identifier);
+        // TODO if the value is <> null, dont update an raise an exception
         as4Properties.setEbmsMessageIdentifier(ebmsIdentifier);
         var updated = as4PropertiesJpaRepository.save(as4Properties);
 

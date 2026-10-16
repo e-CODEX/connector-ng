@@ -20,6 +20,7 @@ import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.Con
 import eu.ecodex.connector.infrastructure.outbound.database.repository.pmode.ConnectorProcessingModePartyJpaRepository;
 import java.util.List;
 import lombok.NonNull;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 /**
@@ -129,7 +130,9 @@ public class ConnectorDBProcessingModePartyRepository
     public List<ConnectorProcessingModeParty> findAllByBusinessDomainIdentifier(
         @NonNull ConnectorBusinessDomainIdentifier identifier) {
         var parties = partyJpaRepository.findByProcessingModeBusinessDomainIdentifier(
-            identifier.messageLaneIdentifier());
+            identifier.messageLaneIdentifier(),
+            Sort.by(Sort.Order.asc("identifier"))
+        );
 
         return parties.stream().map(ConnectorDBProcessingModePartyRepository::toDomain).toList();
     }

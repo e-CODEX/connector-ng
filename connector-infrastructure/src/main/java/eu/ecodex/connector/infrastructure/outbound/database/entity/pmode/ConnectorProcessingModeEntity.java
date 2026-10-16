@@ -24,9 +24,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -73,16 +75,19 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     private ConnectorBusinessDomainEntity businessDomain;
 
     @Builder.Default
+    @OrderBy("identifier ASC")
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorProcessingModePartyEntity> parties = new HashSet<>();
+    private Set<ConnectorProcessingModePartyEntity> parties = new LinkedHashSet<>();
 
     @Builder.Default
+    @OrderBy("name ASC")
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorProcessingModeActionEntity> actions = new HashSet<>();
+    private Set<ConnectorProcessingModeActionEntity> actions = new LinkedHashSet<>();
 
     @Builder.Default
+    @OrderBy("name ASC")
     @OneToMany(mappedBy = "processingMode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorProcessingModeServiceEntity> services = new HashSet<>();
+    private Set<ConnectorProcessingModeServiceEntity> services = new LinkedHashSet<>();
 
     @Setter
     @OneToOne(mappedBy = "processingMode")

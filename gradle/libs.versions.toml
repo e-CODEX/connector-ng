@@ -2,7 +2,7 @@
 # apache
 apache-commons-lang3 = "3.21.0"
 apache-commons-io = "2.22.0"
-apache-cxf = "4.1.0"
+apache-cxf = "4.2.4"
 apache-poi = "5.5.1"
 apache-tika = "3.3.1"
 apache-wss4j = "3.0.5" # do not migrate to 4.x series due to xmlsec 4.x serie clash

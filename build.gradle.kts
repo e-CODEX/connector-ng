@@ -3,7 +3,7 @@ plugins {
     id("jacoco")
     id("checkstyle")
     id("maven-publish")
-    id("org.cyclonedx.bom") version "3.1.1"
+    id("org.cyclonedx.bom") version "3.5.1"
     id("org.sonarqube") version "7.5.0.8588"
 }
 

@@ -62,7 +62,7 @@ public class ConnectorProcessingModeServiceRepositoryTest extends AbstractReposi
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/service.sql",
+        "classpath:sql/processing-mode-service.sql",
     })
     private @interface WithServiceData {
     }

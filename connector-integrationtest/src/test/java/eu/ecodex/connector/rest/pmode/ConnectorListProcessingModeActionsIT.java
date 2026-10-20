@@ -39,8 +39,8 @@ public class ConnectorListProcessingModeActionsIT extends AbstractIntegrationTes
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
     })
     void should_list_connector_pmode_actions() {
         var response = apiClient.get()

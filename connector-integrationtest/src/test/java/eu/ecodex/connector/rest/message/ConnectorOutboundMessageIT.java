@@ -191,9 +191,9 @@ public class ConnectorOutboundMessageIT extends AbstractIntegrationTest {
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
         "classpath:sql/processing-mode-truststores.sql",
-        "classpath:sql/party.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
     })
     private @interface WithReferenceData {
     }

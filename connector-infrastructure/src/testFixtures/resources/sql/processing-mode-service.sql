@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-INSERT INTO connector_services (id, name, type, uuid, processing_mode_id, created_at, updated_at)
+INSERT INTO connector_processing_mode_services (id, name, type, uuid, processing_mode_id, created_at, updated_at)
 VALUES  (1, 'GW-TEST', 'urn:e-codex:services:', '77f546e0-dced-4819-b48c-96aba23cebd3', 1, now(), now()),
         (2, 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/service', 'test', 'e5479b46-f001-43f6-bdaa-2942ae120c76', 1, now(), now()),
         (3, 'FP', 'urn:e-codex:services:', '59693230-f84a-4765-9926-c944c43d6b1b', 1, now(), now()),

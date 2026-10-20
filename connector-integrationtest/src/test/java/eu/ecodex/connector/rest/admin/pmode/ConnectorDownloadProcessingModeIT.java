@@ -40,9 +40,9 @@ public class ConnectorDownloadProcessingModeIT extends AbstractIntegrationTest {
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
         "classpath:sql/user.sql"
     })
     void should_download_connector_pmode() {

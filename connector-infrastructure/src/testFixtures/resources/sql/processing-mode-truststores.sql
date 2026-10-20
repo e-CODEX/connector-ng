@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-INSERT INTO connector.connector_processing_mode_truststores (
+INSERT INTO connector_processing_mode_truststores (
     id,
     created_at,
     updated_at,

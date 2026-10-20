@@ -40,12 +40,18 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-    name = "CONNECTOR_PARTIES",
+    name = "CONNECTOR_PROCESSING_MODE_PARTIES",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_PARTIES_ROLE", columnList = "ROLE"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER", columnList = "IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER_TYPE", columnList = "IDENTIFIER_TYPE"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_ROLE_TYPE", columnList = "ROLE_TYPE")
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODE_PARTIES_ROLE", columnList = "ROLE"),
+        @Index(
+            name = "IDX_CONNECTOR_PROCESSING_MODE_PARTIES_IDENTIFIER",
+            columnList = "IDENTIFIER"
+        ),
+        @Index(
+            name = "IDX_CONNECTOR_PROCESSING_MODE_PARTIES_IDENTIFIER_TYPE",
+            columnList = "IDENTIFIER_TYPE"
+        ),
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODE_PARTIES_ROLE_TYPE", columnList = "ROLE_TYPE")
     })
 public class ConnectorProcessingModePartyEntity extends BaseEntity {
     @Id

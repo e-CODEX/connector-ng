@@ -37,9 +37,9 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-    name = "CONNECTOR_ACTIONS",
+    name = "CONNECTOR_PROCESSING_MODE_ACTIONS",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_ACTIONS_NAME", columnList = "NAME")
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODE_ACTIONS_NAME", columnList = "NAME")
     })
 public class ConnectorProcessingModeActionEntity extends BaseEntity {
     @Id

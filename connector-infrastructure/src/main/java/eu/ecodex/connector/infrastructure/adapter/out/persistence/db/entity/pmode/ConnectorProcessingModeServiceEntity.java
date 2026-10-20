@@ -37,10 +37,10 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-    name = "CONNECTOR_SERVICES",
+    name = "CONNECTOR_PROCESSING_MODE_SERVICES",
     indexes = {
-        @Index(name = "IDX_CONNECTOR_SERVICES_NAME", columnList = "NAME"),
-        @Index(name = "IDX_CONNECTOR_SERVICES_TYPE", columnList = "TYPE")
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODE_SERVICES_NAME", columnList = "NAME"),
+        @Index(name = "IDX_CONNECTOR_PROCESSING_MODE_SERVICES_TYPE", columnList = "TYPE")
     })
 public class ConnectorProcessingModeServiceEntity extends BaseEntity {
     @Id

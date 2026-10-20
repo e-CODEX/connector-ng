@@ -17,28 +17,23 @@ create table connector_business_domains
     description varchar(512),
     enabled     boolean,
     identifier  varchar(255)                not null
-        constraint ukmy79mo8v7caynl1438igqdoym
+        constraint uq_cbd_identifier
             unique,
-    source      varchar(255)
+    source      varchar(255)                not null
         constraint connector_business_domains_source_check
-            check ((source)::text = ANY
-                   ((ARRAY [
-                       'DATABASE'::character varying,
-                       'IMPLEMENTATION'::character varying,
-                       'ENVIRONMENT'::character varying,
-                       'APPLICATION'::character varying
-                       ])::text[])
-                ),
+            check ((source)::text = ANY ((ARRAY [
+                'DATABASE'::character varying,
+                'IMPLEMENTATION'::character varying,
+                'ENVIRONMENT'::character varying,
+                'APPLICATION'::character varying
+                ])::text[])),
     uuid        varchar(255)                not null
-        constraint ukn51pa7n16yduxrhwe74jqshnm
+        constraint uq_cbd_uuid
             unique
 );
 
 alter table connector_business_domains
     owner to connector;
-
-create index idx_connector_business_domains_identifier
-    on connector_business_domains (identifier);
 
 create table connector_message_transport_steps
 (
@@ -47,22 +42,20 @@ create table connector_message_transport_steps
     created_at                     timestamp(6) with time zone not null,
     updated_at                     timestamp(6) with time zone not null,
     identifier                     varchar(255)                not null
-        constraint ukrbgpqcxb3um58nmms24etx093
+        constraint uq_cm_ts_identifier
             unique,
     link_partner_name              varchar(255)                not null,
     number_of_attempts             integer                     not null,
     remote_system_identifier       varchar(255),
     status                         varchar(255)                not null
         constraint connector_message_transport_steps_status_check
-            check ((status)::text = ANY
-                   ((ARRAY [
-                       'DELIVERED'::character varying,
-                       'FAILED'::character varying,
-                       'SUBMITTED'::character varying,
-                       'DOWNLOADED'::character varying,
-                       'READY_FOR_DOWNLOAD'::character varying
-                       ])::text[])
-                ),
+            check ((status)::text = ANY ((ARRAY [
+                'DELIVERED'::character varying,
+                'FAILED'::character varying,
+                'SUBMITTED'::character varying,
+                'DOWNLOADED'::character varying,
+                'READY_FOR_DOWNLOAD'::character varying
+                ])::text[])),
     transported_message            varchar(5000000)            not null,
     transported_message_identifier varchar(255)                not null
 );
@@ -78,30 +71,31 @@ create table connector_message_transport_step_statuses
     updated_at        timestamp(6) with time zone not null,
     status            varchar(255)                not null
         constraint connector_message_transport_step_statuses_status_check
-            check ((status)::text = ANY
-                   ((ARRAY [
-                       'DELIVERED'::character varying,
-                       'FAILED'::character varying,
-                       'SUBMITTED'::character varying,
-                       'DOWNLOADED'::character varying,
-                       'READY_FOR_DOWNLOAD'::character varying
-                       ])::text[])
-                ),
+            check ((status)::text = ANY ((ARRAY [
+                'DELIVERED'::character varying,
+                'FAILED'::character varying,
+                'SUBMITTED'::character varying,
+                'DOWNLOADED'::character varying,
+                'READY_FOR_DOWNLOAD'::character varying
+                ])::text[])),
     transport_step_id bigint
-        constraint fk6ke4gt642ivtvi0f6c53hmuoo
+        constraint fk_cm_tss_transport_step
             references connector_message_transport_steps
 );
 
 alter table connector_message_transport_step_statuses
     owner to connector;
 
-create index idx_connector_message_transport_steps_remote_system_identifier
+create index idx_cm_tss_transport_step_id
+    on connector_message_transport_step_statuses (transport_step_id);
+
+create index idx_cm_ts_remote_sys_id
     on connector_message_transport_steps (remote_system_identifier);
 
-create index idx_connector_message_transport_steps_link_partner_name
+create index idx_cm_ts_link_partner
     on connector_message_transport_steps (link_partner_name);
 
-create index idx_connector_message_transport_steps_status
+create index idx_cm_ts_status
     on connector_message_transport_steps (status);
 
 create table connector_messages
@@ -117,20 +111,18 @@ create table connector_messages
     delivered_to_link_partner_at            timestamp(6) with time zone,
     direction                               varchar(255)                not null
         constraint connector_messages_direction_check
-            check ((direction)::text = ANY
-                   ((ARRAY [
-                       'BACKEND_TO_GATEWAY'::character varying,
-                       'GATEWAY_TO_BACKEND'::character varying
-                       ])::text[])
-                ),
+            check ((direction)::text = ANY ((ARRAY [
+                'BACKEND_TO_GATEWAY'::character varying,
+                'GATEWAY_TO_BACKEND'::character varying
+                ])::text[])),
     gateway_name                            varchar(255),
     identifier                              varchar(255)                not null
-        constraint uk3wmhiv10xqp6wibk0cj74k8a2
+        constraint uq_cm_identifier
             unique,
     reference_to_backend_message_identifier varchar(255),
     rejected_at                             timestamp(6) with time zone,
     business_domain_id                      bigint                      not null
-        constraint fka44v5lab5jt09sum4j9xfrlen
+        constraint fk_cm_business_domain
             references connector_business_domains
 );
 
@@ -146,7 +138,7 @@ create table connector_message_attachments
     content_type varchar(255)                not null,
     description  varchar(255)                not null,
     identifier   varchar(255)                not null
-        constraint ukqkwekyau6mx7fqymuavj4bkqw
+        constraint uq_cm_attachments_identifier
             unique,
     name         varchar(255)                not null,
     file_size    bigint                      not null,
@@ -166,21 +158,21 @@ create table connector_message_attachments
                 'XML_TOKEN'::character varying
                 ])::text[])),
     message_id   bigint
-        constraint fk2p3mqcv3o24e94ngrm3lgppm1
+        constraint fk_cm_attachments_message
             references connector_messages
 );
 
 alter table connector_message_attachments
     owner to connector;
 
-create index idx_connector_message_attachments_identifier
-    on connector_message_attachments (identifier);
-
-create index idx_connector_message_attachments_name
+create index idx_cm_attachments_name
     on connector_message_attachments (name);
 
-create index idx_connector_message_attachments_type
+create index idx_cm_attachments_type
     on connector_message_attachments (type);
+
+create index idx_cm_attachments_message_id
+    on connector_message_attachments (message_id);
 
 create table connector_message_business_contents
 (
@@ -189,17 +181,17 @@ create table connector_message_business_contents
     created_at    timestamp(6) with time zone not null,
     updated_at    timestamp(6) with time zone not null,
     uuid          varchar(255)                not null
-        constraint ukpt6k5iywuwh9uy4mxuh9xs6jg
+        constraint uq_cm_bc_uuid
             unique,
     message_id    bigint                      not null
-        constraint ukbxhk118v0541xmdd7ixts5kdi
+        constraint uq_cm_bc_message
             unique
-        constraint fk2jh116b11s4cr5788pmnsit4q
+        constraint fk_cm_bc_message
             references connector_messages,
     attachment_id bigint                      not null
-        constraint ukal934nq46hlifnrn8bjq1boa0
+        constraint uq_cm_bc_attachment
             unique
-        constraint fk40gtdmg3v5o97xy94frhhtwt
+        constraint fk_cm_bc_attachment
             references connector_message_attachments
 );
 
@@ -219,17 +211,17 @@ create table connector_message_business_documents
                 'SIGNATURE_BASED'::character varying
                 ])::text[])),
     uuid                varchar(255)                not null
-        constraint uke3edkhmc1qbmtwx4c5ggclvah
+        constraint uq_cm_bd_uuid
             unique,
     attachment_id       bigint                      not null
-        constraint uk65cpf4kjdovq65tbq48t5eprf
+        constraint uq_cm_bd_attachment
             unique
-        constraint fk8br14reyq9odt8xiddk5l9bbn
+        constraint fk_cm_bd_attachment
             references connector_message_attachments,
     business_content_id bigint                      not null
-        constraint uka7dnlykk50vcil6l7fuo3gxkx
+        constraint uq_cm_bd_content
             unique
-        constraint fkrqcpkxbe9fjrqa2if6gxhasiq
+        constraint fk_cm_bd_content
             references connector_message_business_contents
 );
 
@@ -252,19 +244,19 @@ create table connector_message_business_document_signatures
     name                 varchar(255)                not null,
     signature            bytea                       not null,
     uuid                 varchar(255)                not null
-        constraint uk8agxfbqui5o0nbrqwve6lciw1
+        constraint uq_cm_bds_uuid
             unique,
     business_document_id bigint                      not null
-        constraint ukgv33cadw3gesixne6mnfbagon
+        constraint uq_cm_bds_document
             unique
-        constraint fk4ips0utvql5lind3yd3sfgsak
+        constraint fk_cm_bds_document
             references connector_message_business_documents
 );
 
 alter table connector_message_business_document_signatures
     owner to connector;
 
-create index idx_connector_message_business_documents_aes_type
+create index idx_cm_bd_aes_type
     on connector_message_business_documents (aes_type);
 
 create table connector_message_errors
@@ -277,14 +269,15 @@ create table connector_message_errors
     label      varchar(255),
     source     varchar(255)                not null,
     message_id bigint                      not null
-        constraint ukarhi6ty11tag5u92q1bcnu352
-            unique
-        constraint fkk1rsqfg9r8mptygobt5i35r1y
+        constraint fk_cm_errors_message
             references connector_messages
 );
 
 alter table connector_message_errors
     owner to connector;
+
+create index idx_cm_errors_message_id
+    on connector_message_errors (message_id);
 
 create table connector_message_evidences
 (
@@ -308,42 +301,42 @@ create table connector_message_evidences
                 'NON_RETRIEVAL'::character varying
                 ])::text[])),
     uuid                         varchar(255)                not null
-        constraint ukelxrnuc4ssw3t7phloahld1ty
+        constraint uq_cm_evidences_uuid
             unique,
     message_id                   bigint
-        constraint fkp2bdwb4xr1kc9ibgv7dkrtimf
+        constraint fk_cm_evidences_message
             references connector_messages
 );
 
 alter table connector_message_evidences
     owner to connector;
 
-create index idx_connector_message_evidences_uuid
-    on connector_message_evidences (uuid);
+create index idx_cm_evidences_message_id
+    on connector_message_evidences (message_id);
 
-create index idx_connector_messages_identifier
-    on connector_messages (identifier);
-
-create index idx_connector_messages_backend_name
+create index idx_cm_backend_name
     on connector_messages (backend_name);
 
-create index idx_connector_messages_backend_message_identifier
+create index idx_cm_backend_msg_id
     on connector_messages (backend_message_identifier);
 
-create index idx_connector_messages_reference_to_backend_message_identifier
+create index idx_cm_ref_backend_msg_id
     on connector_messages (reference_to_backend_message_identifier);
 
-create index idx_connector_messages_gateway_name
+create index idx_cm_gateway_name
     on connector_messages (gateway_name);
 
-create index idx_connector_messages_direction
+create index idx_cm_direction
     on connector_messages (direction);
 
-create index idx_connector_messages_delivered_to_link_partner_at
+create index idx_cm_delivered_at
     on connector_messages (delivered_to_link_partner_at);
 
-create index idx_connector_messages_created_at
+create index idx_cm_created_at
     on connector_messages (created_at);
+
+create index idx_cm_business_domain_id
+    on connector_messages (business_domain_id);
 
 create table connector_processing_modes
 (
@@ -355,10 +348,10 @@ create table connector_processing_modes
     description        varchar(512)                not null,
     filename           varchar(255)                not null,
     uuid               varchar(255)                not null
-        constraint ukan0eybvhh8000jplnwehvloqr
+        constraint uq_cpm_uuid
             unique,
     business_domain_id bigint                      not null
-        constraint fk2cwynu0uvtyud1y5t8olukdj4
+        constraint fk_cpm_business_domain
             references connector_business_domains
 );
 
@@ -373,18 +366,21 @@ create table connector_processing_mode_actions
     updated_at         timestamp(6) with time zone not null,
     name               varchar(255)                not null,
     uuid               varchar(255)                not null
-        constraint uki0igcjb6wk8bhfn5db9v4cf0v
+        constraint uq_cpm_actions_uuid
             unique,
     processing_mode_id bigint                      not null
-        constraint fko637xfjpq443x29307iyeqj85
+        constraint fk_cpm_actions_pm
             references connector_processing_modes
 );
 
 alter table connector_processing_mode_actions
     owner to connector;
 
-create index idx_connector_processing_mode_actions_name
+create index idx_cpm_actions_name
     on connector_processing_mode_actions (name);
+
+create index idx_cpm_actions_pm_id
+    on connector_processing_mode_actions (processing_mode_id);
 
 create table connector_processing_mode_parties
 (
@@ -404,27 +400,30 @@ create table connector_processing_mode_parties
                 'RESPONDER'::character varying
                 ])::text[])),
     uuid               varchar(255)                not null
-        constraint uk8o5vs9y5jmlka569wsr6c0u8k
+        constraint uq_cpm_parties_uuid
             unique,
     processing_mode_id bigint                      not null
-        constraint fka1x21selatt464y4do6nxr5dk
+        constraint fk_cpm_parties_pm
             references connector_processing_modes
 );
 
 alter table connector_processing_mode_parties
     owner to connector;
 
-create index idx_connector_processing_mode_parties_role
+create index idx_cpm_parties_role
     on connector_processing_mode_parties (role);
 
-create index idx_connector_processing_mode_parties_identifier
+create index idx_cpm_parties_identifier
     on connector_processing_mode_parties (identifier);
 
-create index idx_connector_processing_mode_parties_identifier_type
+create index idx_cpm_parties_ident_type
     on connector_processing_mode_parties (identifier_type);
 
-create index idx_connector_processing_mode_parties_role_type
+create index idx_cpm_parties_role_type
     on connector_processing_mode_parties (role_type);
+
+create index idx_cpm_parties_pm_id
+    on connector_processing_mode_parties (processing_mode_id);
 
 create table connector_processing_mode_services
 (
@@ -435,10 +434,10 @@ create table connector_processing_mode_services
     name               varchar(255)                not null,
     type               varchar(255)                not null,
     uuid               varchar(255)                not null
-        constraint uk6hrc2nnkkgswq2nwixnmc6geg
+        constraint uq_cpm_services_uuid
             unique,
     processing_mode_id bigint                      not null
-        constraint fkjoostkr2q7mg80ojbqje1wb6j
+        constraint fk_cpm_services_pm
             references connector_processing_modes
 );
 
@@ -457,47 +456,62 @@ create table connector_message_as4_properties
     original_sender         varchar(255)                not null,
     reference_to_identifier varchar(255),
     action_id               bigint                      not null
-        constraint fk2tnkdk5eumsfn9yewkiuseow1
+        constraint fk_cm_as4_action
             references connector_processing_mode_actions,
     from_party_id           bigint                      not null
-        constraint fkfquqhsgb3hn6u4xej3wvem1yr
+        constraint fk_cm_as4_from_party
             references connector_processing_mode_parties,
     message_id              bigint                      not null
-        constraint uko99vlibfh8nr9m7ykgveia1yb
+        constraint uq_cm_as4_message
             unique
-        constraint fkm1cypu5jqljrss1l35ll3xj7u
+        constraint fk_cm_as4_message
             references connector_messages,
     service_id              bigint                      not null
-        constraint fk82hcuwc9vifhjyyx5caa83bxa
+        constraint fk_cm_as4_service
             references connector_processing_mode_services,
     to_party_id             bigint                      not null
-        constraint fk47e9betvbghge7brvikrsa4ot
+        constraint fk_cm_as4_to_party
             references connector_processing_mode_parties
 );
 
 alter table connector_message_as4_properties
     owner to connector;
 
-create index idx_connector_message_as4_properties_ebms_message_identifier
+create index idx_cm_as4_ebms_msg_id
     on connector_message_as4_properties (ebms_message_identifier);
 
-create index idx_connector_message_as4_properties_reference_to_identifier
+create index idx_cm_as4_ref_to_id
     on connector_message_as4_properties (reference_to_identifier);
 
-create index idx_connector_message_as4_properties_conversation_identifier
+create index idx_cm_as4_conversation_id
     on connector_message_as4_properties (conversation_identifier);
 
-create index idx_connector_message_as4_properties_original_sender
+create index idx_cm_as4_orig_sender
     on connector_message_as4_properties (original_sender);
 
-create index idx_connector_message_as4_properties_final_recipient
+create index idx_cm_as4_final_recipient
     on connector_message_as4_properties (final_recipient);
 
-create index idx_connector_processing_mode_services_name
+create index idx_cm_as4_service_id
+    on connector_message_as4_properties (service_id);
+
+create index idx_cm_as4_action_id
+    on connector_message_as4_properties (action_id);
+
+create index idx_cm_as4_from_party_id
+    on connector_message_as4_properties (from_party_id);
+
+create index idx_cm_as4_to_party_id
+    on connector_message_as4_properties (to_party_id);
+
+create index idx_cpm_services_name
     on connector_processing_mode_services (name);
 
-create index idx_connector_processing_mode_services_type
+create index idx_cpm_services_type
     on connector_processing_mode_services (type);
+
+create index idx_cpm_services_pm_id
+    on connector_processing_mode_services (processing_mode_id);
 
 create table connector_processing_mode_truststores
 (
@@ -515,14 +529,17 @@ create table connector_processing_mode_truststores
                 'PKCS12'::character varying
                 ])::text[])),
     processing_mode_id bigint                      not null
-        constraint ukcajeqdd49fjmu43rdu2e177m6
+        constraint uq_cpm_truststores_pm
             unique
-        constraint fkky1tyc6ylq0tw7t9kskjl3udj
+        constraint fk_cpm_truststores_pm
             references connector_processing_modes
 );
 
 alter table connector_processing_mode_truststores
     owner to connector;
+
+create index idx_cpm_business_domain_id
+    on connector_processing_modes (business_domain_id);
 
 create table connector_roles
 (
@@ -531,10 +548,10 @@ create table connector_roles
     created_at timestamp(6) with time zone not null,
     updated_at timestamp(6) with time zone not null,
     name       varchar(255)                not null
-        constraint ukd31o71ow16y3f23e35fp8s052
+        constraint uq_cr_name
             unique,
     uuid       varchar(255)                not null
-        constraint uk3qhpwlu126u22w7ub2re765tg
+        constraint uq_cr_uuid
             unique
 );
 
@@ -547,19 +564,15 @@ create table connector_users
         primary key,
     created_at           timestamp(6) with time zone not null,
     updated_at           timestamp(6) with time zone not null,
-    email                varchar(255)
-        constraint uk1ro91noxd37mu3ajpos91iowq
-            unique,
+    email                varchar(255),
     enabled              boolean,
     must_change_password boolean,
-    password             varchar(255)                not null
-        constraint ukhom1h4thgtiw0gqfxlyyv8era
-            unique,
+    password             varchar(255)                not null,
     username             varchar(255)                not null
-        constraint ukp7wi6lwsgtii5pd7vwnmh8l5o
+        constraint uq_cu_username
             unique,
     uuid                 varchar(255)                not null
-        constraint uknhbiwgayd8dg8fjksjvmfcx62
+        constraint uq_cu_uuid
             unique
 );
 
@@ -576,30 +589,30 @@ create table connector_refresh_tokens
     revoked    boolean                     not null,
     revoked_at timestamp(6) with time zone,
     token      varchar(255)                not null
-        constraint uk7pfb1da42jx1u0kypt2olrpfs
+        constraint uq_crt_token
             unique,
     user_id    bigint                      not null
-        constraint fkrd1g2nq4dfkeabqnmsasrr0g3
+        constraint fk_crt_user
             references connector_users
 );
 
 alter table connector_refresh_tokens
     owner to connector;
 
-create index idx_connector_refresh_tokens_token
-    on connector_refresh_tokens (token);
+create index idx_crt_user_id
+    on connector_refresh_tokens (user_id);
 
 create table connector_users_roles
 (
     user_id bigint not null
-        constraint fk42p3s7vb6m0sw9hho8hu7pq1e
+        constraint fk_cur_user
             references connector_users,
     role_id bigint not null
-        constraint fkg1f9eo6qwob2a7msiew1cun6f
+        constraint fk_cur_role
             references connector_roles,
-    primary key (user_id, role_id)
+    constraint uq_cur_user_role
+        unique (user_id, role_id)
 );
 
 alter table connector_users_roles
     owner to connector;
-

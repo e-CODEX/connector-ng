@@ -17,9 +17,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -39,7 +41,12 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES")
+@Table(
+    name = "CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES",
+    indexes = {
+        @Index(name = "IDX_CM_TSS_TRANSPORT_STEP_ID", columnList = "TRANSPORT_STEP_ID")
+    }
+)
 public class ConnectorMessageTransportStepStatusEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -52,6 +59,9 @@ public class ConnectorMessageTransportStepStatusEntity extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TRANSPORT_STEP_ID")
+    @JoinColumn(
+        name = "TRANSPORT_STEP_ID",
+        foreignKey = @ForeignKey(name = "FK_CM_TSS_TRANSPORT_STEP")
+    )
     private ConnectorMessageTransportStepEntity transportStep;
 }

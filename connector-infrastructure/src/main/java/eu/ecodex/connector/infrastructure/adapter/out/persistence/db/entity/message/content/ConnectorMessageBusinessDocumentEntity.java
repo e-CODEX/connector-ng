@@ -19,6 +19,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,6 +27,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -44,8 +46,13 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(
     name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_BD_UUID", columnNames = "UUID"),
+        @UniqueConstraint(name = "UQ_CM_BD_CONTENT", columnNames = "BUSINESS_CONTENT_ID"),
+        @UniqueConstraint(name = "UQ_CM_BD_ATTACHMENT", columnNames = "ATTACHMENT_ID")
+    },
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS_AES_TYPE", columnList = "AES_TYPE")
+        @Index(name = "IDX_CM_BD_AES_TYPE", columnList = "AES_TYPE")
     }
 )
 public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
@@ -55,7 +62,7 @@ public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     private Long id;
 
     @UuidGenerator
-    @Column(name = "UUID", unique = true, nullable = false, updatable = false)
+    @Column(name = "UUID", nullable = false, updatable = false)
     private String uuid;
 
     @Enumerated(EnumType.STRING)
@@ -63,11 +70,19 @@ public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     private ConnectorBusinessDocumentAESType aesType;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "BUSINESS_CONTENT_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "BUSINESS_CONTENT_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_BD_CONTENT")
+    )
     private ConnectorMessageBusinessContentEntity businessContent;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ATTACHMENT_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "ATTACHMENT_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_BD_ATTACHMENT")
+    )
     private ConnectorMessageAttachmentEntity attachment;
 
     @Setter

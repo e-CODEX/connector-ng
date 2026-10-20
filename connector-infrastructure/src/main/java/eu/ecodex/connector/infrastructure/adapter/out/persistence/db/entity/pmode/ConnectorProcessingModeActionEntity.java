@@ -14,6 +14,7 @@ import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.Base
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,6 +22,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,9 +40,14 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(
     name = "CONNECTOR_PROCESSING_MODE_ACTIONS",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CPM_ACTIONS_UUID", columnNames = "UUID")
+    },
     indexes = {
-        @Index(name = "IDX_CONNECTOR_PROCESSING_MODE_ACTIONS_NAME", columnList = "NAME")
-    })
+        @Index(name = "IDX_CPM_ACTIONS_NAME", columnList = "NAME"),
+        @Index(name = "IDX_CPM_ACTIONS_PM_ID", columnList = "PROCESSING_MODE_ID")
+    }
+)
 public class ConnectorProcessingModeActionEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -55,6 +62,10 @@ public class ConnectorProcessingModeActionEntity extends BaseEntity {
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PROCESSING_MODE_ID", nullable = false)
+    @JoinColumn(
+        name = "PROCESSING_MODE_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CPM_ACTIONS_PM")
+    )
     private ConnectorProcessingModeEntity processingMode;
 }

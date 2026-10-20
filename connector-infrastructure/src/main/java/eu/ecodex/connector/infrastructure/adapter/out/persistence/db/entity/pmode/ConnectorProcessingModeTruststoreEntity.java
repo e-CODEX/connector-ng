@@ -17,12 +17,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,7 +39,12 @@ import lombok.Setter;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_PROCESSING_MODE_TRUSTSTORES")
+@Table(
+    name = "CONNECTOR_PROCESSING_MODE_TRUSTSTORES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CPM_TRUSTSTORES_PM", columnNames = "PROCESSING_MODE_ID")
+    }
+)
 public class ConnectorProcessingModeTruststoreEntity extends BaseEntity {
     private static final int MAX_CONTENT_SIZE = 5 * 1024 * 1024; // 5 MB
 
@@ -61,6 +68,9 @@ public class ConnectorProcessingModeTruststoreEntity extends BaseEntity {
 
     @Setter
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PROCESSING_MODE_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "PROCESSING_MODE_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CPM_TRUSTSTORES_PM"))
     private ConnectorProcessingModeEntity processingMode;
 }

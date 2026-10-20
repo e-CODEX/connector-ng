@@ -17,12 +17,14 @@ import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.mess
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +41,14 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_BUSINESS_CONTENTS")
+@Table(
+    name = "CONNECTOR_MESSAGE_BUSINESS_CONTENTS",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_BC_UUID", columnNames = "UUID"),
+        @UniqueConstraint(name = "UQ_CM_BC_ATTACHMENT", columnNames = "ATTACHMENT_ID"),
+        @UniqueConstraint(name = "UQ_CM_BC_MESSAGE", columnNames = "MESSAGE_ID")
+    }
+)
 public class ConnectorMessageBusinessContentEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -51,11 +60,17 @@ public class ConnectorMessageBusinessContentEntity extends BaseEntity {
     private String uuid;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "ATTACHMENT_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "ATTACHMENT_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_BC_ATTACHMENT"))
     private ConnectorMessageAttachmentEntity xmlContent;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "MESSAGE_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "MESSAGE_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_BC_MESSAGE"))
     private ConnectorMessageEntity message;
 
     @Setter

@@ -14,9 +14,11 @@ import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.Base
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -36,7 +38,12 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_ERRORS")
+@Table(
+    name = "CONNECTOR_MESSAGE_ERRORS",
+    indexes = {
+        @Index(name = "IDX_CM_ERRORS_MESSAGE_ID", columnList = "MESSAGE_ID")
+    }
+)
 public class ConnectorMessageErrorEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -54,6 +61,10 @@ public class ConnectorMessageErrorEntity extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "MESSAGE_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "MESSAGE_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_ERRORS_MESSAGE")
+    )
     private ConnectorMessageEntity message;
 }

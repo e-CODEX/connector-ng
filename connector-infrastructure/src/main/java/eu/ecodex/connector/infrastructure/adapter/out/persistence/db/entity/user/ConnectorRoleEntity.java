@@ -19,6 +19,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -38,7 +39,13 @@ import org.hibernate.annotations.UuidGenerator;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_ROLES")
+@Table(
+    name = "CONNECTOR_ROLES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CR_UUID", columnNames = "UUID"),
+        @UniqueConstraint(name = "UQ_CR_NAME", columnNames = "NAME")
+    }
+)
 public class ConnectorRoleEntity extends BaseEntity {
     @Id
     @Column(name = "ID")

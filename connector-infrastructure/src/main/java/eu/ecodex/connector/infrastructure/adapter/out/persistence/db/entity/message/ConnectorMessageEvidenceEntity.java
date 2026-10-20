@@ -19,6 +19,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,6 +27,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
@@ -46,9 +48,13 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(
     name = "CONNECTOR_MESSAGE_EVIDENCES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_EVIDENCES_UUID", columnNames = "UUID")
+    },
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_EVIDENCES_UUID", columnList = "UUID")
-    })
+        @Index(name = "IDX_CM_EVIDENCES_MESSAGE_ID", columnList = "MESSAGE_ID")
+    }
+)
 public class ConnectorMessageEvidenceEntity extends BaseEntity {
     private static final int MAX_CONTENT_SIZE = 10_000_000;
 
@@ -58,7 +64,7 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     private Long id;
 
     @UuidGenerator
-    @Column(name = "UUID", unique = true, nullable = false, updatable = false)
+    @Column(name = "UUID", nullable = false, updatable = false)
     private String uuid;
 
     @Enumerated(EnumType.STRING)
@@ -75,6 +81,9 @@ public class ConnectorMessageEvidenceEntity extends BaseEntity {
     private Instant deliveredToLinkPartnerAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MESSAGE_ID")
+    @JoinColumn(
+        name = "MESSAGE_ID",
+        foreignKey = @ForeignKey(name = "FK_CM_EVIDENCES_MESSAGE")
+    )
     private ConnectorMessageEntity message;
 }

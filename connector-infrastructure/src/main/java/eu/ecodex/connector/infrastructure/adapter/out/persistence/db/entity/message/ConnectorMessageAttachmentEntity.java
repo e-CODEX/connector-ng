@@ -19,6 +19,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,6 +27,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,10 +45,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(
     name = "CONNECTOR_MESSAGE_ATTACHMENTS",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_ATTACHMENTS_IDENTIFIER", columnNames = "IDENTIFIER")
+    },
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_IDENTIFIER", columnList = "IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_NAME", columnList = "NAME"),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_ATTACHMENTS_TYPE", columnList = "TYPE")
+        @Index(name = "IDX_CM_ATTACHMENTS_NAME", columnList = "NAME"),
+        @Index(name = "IDX_CM_ATTACHMENTS_TYPE", columnList = "TYPE"),
+        @Index(name = "IDX_CM_ATTACHMENTS_MESSAGE_ID", columnList = "MESSAGE_ID")
     }
 )
 public class ConnectorMessageAttachmentEntity extends BaseEntity {
@@ -55,7 +60,7 @@ public class ConnectorMessageAttachmentEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "IDENTIFIER", unique = true, nullable = false, updatable = false)
+    @Column(name = "IDENTIFIER", nullable = false, updatable = false)
     private String identifier;
 
     @Column(name = "NAME", nullable = false)
@@ -81,6 +86,8 @@ public class ConnectorMessageAttachmentEntity extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MESSAGE_ID")
+    @JoinColumn(
+        name = "MESSAGE_ID",
+        foreignKey = @ForeignKey(name = "FK_CM_ATTACHMENTS_MESSAGE"))
     private ConnectorMessageEntity message;
 }

@@ -9,21 +9,23 @@
  */
 
 /**
- * Contains domain logic related to message routing.
+ * Domain logic for routing messages to their destinations.
  *
- * <p>This package defines how messages are evaluated and directed to their appropriate
- * destinations based on domain-specific rules and metadata. Routing decisions are part of the
- * business logic and are independent of the underlying transport or infrastructure mechanisms.
+ * <p>This package holds the business rules that decide where a message must be directed, based on
+ * its metadata and the routing configuration (for example its business domain, service and action,
+ * or the link partners and backends configured for them). Routing decisions are business decisions:
+ * they are expressed in domain terms and are independent of transport and infrastructure.
  *
- * <p>Typical responsibilities include:
+ * <p>Typical content:
+ *
  * <ul>
- *   <li>Determining message destinations</li>
- *   <li>Evaluating routing rules and conditions</li>
- *   <li>Representing routing configurations and decisions</li>
+ *   <li>routing rules and the conditions they evaluate;
+ *   <li>the representation of routing configurations and routing decisions;
+ *   <li>domain services that determine the destination of a message.
  * </ul>
- * </p>
  *
- * <p>The routing logic should remain deterministic and testable and should not depend on external
- * systems or frameworks.
+ * <p>Routing logic is deterministic and free of framework and infrastructure dependencies, so it
+ * can be tested in isolation. The application layer, in the routing services, orchestrates it and
+ * supplies the configuration it needs through outbound ports.
  */
 package eu.ecodex.connector.domain.routing;

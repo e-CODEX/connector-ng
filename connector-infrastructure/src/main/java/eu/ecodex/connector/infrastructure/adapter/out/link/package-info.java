@@ -9,11 +9,9 @@
  */
 
 /**
- * Provides infrastructure-level components for managing connector link communication.
+ * Outbound link adapters: implement the ports of {@link eu.ecodex.connector.application.port.spi}
+ * that communicate with link partners (gateway or backends).
  *
- * <p>This package contains classes responsible for establishing, configuring, and operating
- * links between the connector and external communication infrastructure. Implementations in this
- * package should focus on technical integration concerns and keep business logic in the appropriate
- * application or domain layers.
+ * <p>Handle connection setup and wire-format translation only; no business rules.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.link;

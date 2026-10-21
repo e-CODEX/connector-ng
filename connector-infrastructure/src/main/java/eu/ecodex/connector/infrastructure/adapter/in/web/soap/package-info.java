@@ -9,10 +9,16 @@
  */
 
 /**
- * Provides SOAP-based inbound web adapters for receiving external requests into the connector.
+ * Inbound SOAP adapters of the connector: the web service endpoints exposing its functionality over
+ * SOAP.
  *
- * <p>Types in this package expose and support SOAP web service endpoints at the infrastructure
- * boundary. They are responsible for translating inbound SOAP messages into application-level
- * requests while keeping transport-specific concerns isolated from the core connector logic.
+ * <p>Endpoints in this package receive SOAP requests, validate and translate their payloads into
+ * domain types, and call the inbound ports of {@link eu.ecodex.connector.application.port.api}.
+ * They then translate the result, or any exception raised by the core, into a SOAP response or
+ * fault.
+ *
+ * <p>Endpoints here contain no business rules: they depend on the ports only, never on the
+ * application services directly, and keep protocol concerns (SOAP envelopes and faults, generated
+ * or WSDL-bound types, namespaces) out of the core.
  */
 package eu.ecodex.connector.infrastructure.adapter.in.web.soap;

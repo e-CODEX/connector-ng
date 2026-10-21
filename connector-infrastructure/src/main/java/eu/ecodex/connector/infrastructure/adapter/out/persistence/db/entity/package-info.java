@@ -9,14 +9,15 @@
  */
 
 /**
- * Contains JPA entity mappings for outbound database persistence.
+ * JPA entities mapping the connector's database tables.
  *
- * <p>This package defines the persistence model used by the outbound infrastructure to represent
- * outbound messages, related metadata, processing state, and other database-backed records. These
- * entities are part of the infrastructure layer and are intended to be used by repositories and
- * persistence services rather than exposed directly to higher application or domain layers.
+ * <p>Classes in this package describe how data is stored: tables, columns, relationships and
+ * constraints. They are persistence representations, distinct from the domain model of
+ * {@link eu.ecodex.connector.domain.model}, and are converted to and from domain types by the port
+ * implementations in {@link eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter}.
  *
- * <p>Entity classes in this package should remain focused on database mapping concerns and should
- * not contain business workflow logic beyond what is required to maintain persistence consistency.
+ * <p>Entities are internal to the persistence adapter: they are accessed through the
+ * repositories of {@code db.repository}, never exposed to the application or domain layers, and
+ * contain no business rules. The schema they map is versioned with Liquibase.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity;

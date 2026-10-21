@@ -9,9 +9,16 @@
  */
 
 /**
- * Contains REST-layer infrastructure for inbound web access to the connector.
+ * Inbound REST adapters of the connector: the HTTP endpoints exposing its functionality as a REST
+ * API.
  *
- * <p>Classes in this package expose HTTP endpoints, request/response models,
- * and REST-specific adapters used to receive and handle inbound calls.
+ * <p>Spring MVC controllers in this package receive HTTP requests, validate and translate their
+ * payloads into domain types, and call the inbound ports of
+ * {@link eu.ecodex.connector.application.port.api}. They then translate the result, or any
+ * exception raised by the core, into an HTTP response with the appropriate status code.
+ *
+ * <p>Controllers here contain no business rules: they depend on the ports only, never on the
+ * application services directly, and keep HTTP concerns (request and response DTOs, status codes,
+ * content negotiation) out of the core.
  */
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest;

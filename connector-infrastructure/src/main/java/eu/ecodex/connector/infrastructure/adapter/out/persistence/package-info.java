@@ -9,9 +9,9 @@
  */
 
 /**
- * Provides utility classes used by the connector application layer.
+ * Outbound persistence adapters: implement the storage-related ports of
+ * {@link eu.ecodex.connector.application.port.spi} on top of the database.
  *
- * <p>This package contains reusable application-level helper functionality that supports
- * connector services and configuration without belonging to a specific business workflow.
+ * <p>Translate between domain types and persistence entities; contain no business rules.
  */
-package eu.ecodex.connector.application.util;
+package eu.ecodex.connector.infrastructure.adapter.out.persistence;

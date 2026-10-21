@@ -9,14 +9,15 @@
  */
 
 /**
- * Provides domain-level exception types used by the connector domain model and domain services.
+ * Exception types signaling business rule violations in the connector's domain concepts.
  *
- * <p>The exceptions in this package represent business and domain rule violations related to
- * connector concepts such as messages, attachments, business domains, link partners, processing
- * modes, services, actions, evidence handling, and gateway submission.
+ * <p>These exceptions cover violations related to messages, attachments, business domains, link
+ * partners, processing modes, services, actions, evidence handling and gateway submission. They let
+ * the core report failures in business terms, without depending on transport, persistence or any
+ * other infrastructure concern.
  *
- * <p>These exception types are intended to keep domain error handling explicit and independent
- * of infrastructure concerns. Application and infrastructure layers may catch and translate them
- * into transport-specific responses, persistence errors, or user-facing error messages.
+ * <p>Inbound adapters (REST, JMS, etc.) are expected to catch these exceptions and translate them
+ * into transport-specific responses or user-facing error messages. Outbound adapters should map
+ * technical failures to these types only when a business-level meaning exists.
  */
 package eu.ecodex.connector.application.exception;

@@ -9,14 +9,15 @@
  */
 
 /**
- * Contains pipeline step implementations used while processing outbound messages.
+ * Processing steps of the outbound message pipeline.
  *
- * <p>Classes in this package represent individual stages of the outbound message pipeline.
- * Each step is responsible for a distinct part of the processing flow, such as validation,
- * transformation, persistence, routing, or handover to later application services.
+ * <p>Each class in this package implements one stage of the pipeline defined in the parent
+ * package, such as validation, transformation, persistence, evidence handling or hand-over for
+ * dispatch to the gateway. A step has a single, well-defined responsibility, so that it can be
+ * tested in isolation and the pipeline can be reordered or extended by adding or replacing steps.
  *
- * <p>The package is part of the application service layer and should contain implementation
- * details only. Public contracts used by other layers should be defined outside this implementation
- * package.
+ * <p>Steps are implementation details of the application services: other layers must not depend
+ * on them. They orchestrate their stage by delegating business rules to the domain model and
+ * technical concerns to outbound ports, and they are composed and executed only by the pipeline.
  */
 package eu.ecodex.connector.application.service.message.outbound.pipeline.step;

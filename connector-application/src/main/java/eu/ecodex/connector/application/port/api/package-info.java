@@ -9,14 +9,17 @@
  */
 
 /**
- * Defines application-level use cases for the connector.
+ * Inbound ports of the connector: the use cases the application offers to the outside world.
  *
- * <p>This package contains service contracts and use-case-oriented components that coordinate
- * application workflows across domain, infrastructure, and external integration boundaries. Classes
- * in this package should express business operations from the application's perspective and
- * delegate technical details to lower-level services or adapters.
+ * <p>Each interface in this package describes a business operation from the application's point
+ * of view, in domain terms and independent of how it is triggered. Inbound adapters (REST, JMS,
+ * etc.) call these ports to drive the core; the application services behind them orchestrate the
+ * domain model and rely on outbound ports for anything technical.
  *
- * <p>Subpackages group use cases by functional area, such as messages, evidences, attachments,
- * routing, links, business domains, and P-Mode handling.
+ * <p>Subpackages group use cases by functional area: messages, evidences, attachments, routing,
+ * links, business domains and P-Mode handling.
+ *
+ * <p>Interfaces in this package should use domain types in their signatures and must not expose
+ * transport, persistence or framework details.
  */
 package eu.ecodex.connector.application.port.api;

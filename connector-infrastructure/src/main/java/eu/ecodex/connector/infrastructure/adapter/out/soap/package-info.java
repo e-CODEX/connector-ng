@@ -9,17 +9,9 @@
  */
 
 /**
- * Provides outbound SOAP infrastructure components used by the connector to communicate with
- * external SOAP-based services.
+ * Outbound SOAP adapters of the connector: the clients through which the core calls external web
+ * services over SOAP.
  *
- * <p>This package contains the technical integration layer responsible for:
- * <ul>
- *   <li>SOAP client configuration and initialization</li>
- *   <li>SOAP protocol handling and serialization</li>
- *   <li>Transport-level security and interoperability concerns</li>
- * </ul>
- *
- * <p>The classes in this package belong to the infrastructure layer and should remain independent
- * of business-specific logic.
+ * <p>Translate between domain types and SOAP messages; contain no business rules.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.soap;

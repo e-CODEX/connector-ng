@@ -9,9 +9,12 @@
  */
 
 /**
- * Contains implementation classes for link-related application services.
+ * Application services implementing the link use cases of the connector.
  *
- * <p>Classes in this package are responsible for handling connector link operations and
- * related service-level logic within the application layer.
+ * <p>Services in this package implement the link-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.link}. They orchestrate operations on the links
+ * between the connector and its link partners, such as configuring and retrieving them, by
+ * delegating business rules to the domain model and persistence or gateway access to outbound
+ * ports.
  */
 package eu.ecodex.connector.application.service.link;

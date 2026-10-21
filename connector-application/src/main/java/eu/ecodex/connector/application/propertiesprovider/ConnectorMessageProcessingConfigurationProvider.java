@@ -10,28 +10,29 @@
 
 package eu.ecodex.connector.application.propertiesprovider;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
+import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
+
 /**
- * Provides access to the {@link ConnectorMessageProcessingConfiguration} used for message
- * processing within the connector.
+ * Provider (port) giving access to the {@link ConnectorMessageProcessingConfiguration} used for
+ * message processing within the connector.
  *
- * <p>Implementations of this interface are responsible for supplying the current processing
- * configuration. The configuration may be static, externally configured (e.g. via properties or
- * database), or dynamically resolved at runtime.
+ * <p>Implementations supply the current processing configuration. It may be static, externally
+ * configured (for example through properties or a database), or resolved dynamically at runtime.
  *
- * <p>This abstraction allows message processing components to remain decoupled from the underlying
+ * <p>This abstraction keeps the message processing components decoupled from the underlying
  * configuration source.
  */
 public interface ConnectorMessageProcessingConfigurationProvider {
     /**
-     * Retrieves the current configuration for message processing within the connector.
+     * Returns the current configuration for message processing within the connector.
      *
-     * <p>This method provides access to a {@link ConnectorMessageProcessingConfiguration} instance
-     * that encapsulates the configurable properties and parameters affecting the behaviour of
-     * message processing logic. The configuration may include settings for evidence handling,
-     * message ID generation, and message verification modes, among others.
+     * <p>The configuration encapsulates the properties that affect the behavior of the message
+     * processing logic. It may include settings for evidence handling, message ID generation (see
+     * {@link ConnectorMessageIdGenerator}) and message verification modes (see
+     * {@link ProcessingModeVerificationMode}), among others.
      *
-     * @return an instance of {@link ConnectorMessageProcessingConfiguration} representing the
-     *     current message processing configuration
+     * @return the current {@link ConnectorMessageProcessingConfiguration}; never {@code null}
      */
     ConnectorMessageProcessingConfiguration getConfiguration();
 }

@@ -9,21 +9,19 @@
  */
 
 /**
- * Defines service provider interfaces for extending or integrating with the e-CODEX Connector
- * domain layer.
+ * Ports of the connector's application layer, following the hexagonal architecture.
  *
- * <p>This package contains contracts implemented by external or infrastructure-specific components
- * that provide domain services to the Connector. The interfaces in this package allow the domain
- * layer to express required capabilities without depending on concrete implementations.
+ * <p>Ports are the interfaces through which the core communicates with the outside world. They are
+ * defined by the application and domain layers, in domain terms, and are split by direction:
  *
- * <p>Typical responsibilities include:
  * <ul>
- *   <li>Providing domain-level services through stable abstractions</li>
- *   <li>Decoupling core domain logic from infrastructure and integration details</li>
- *   <li>Supporting replaceable implementations for connector-specific behaviour</li>
+ *   <li>{@link eu.ecodex.connector.application.port.api} contains the inbound ports: the use cases
+ *       offered to inbound adapters (REST, JMS, etc.) to drive the core;
+ *   <li>{@link eu.ecodex.connector.application.port.spi} contains the outbound ports: the
+ *       capabilities the core requires from outbound adapters (persistence, gateway, etc.).
  * </ul>
  *
- * <p>Implementations of these interfaces should be supplied by infrastructure modules, while this
- * package should remain focused on the contracts required by the domain model.
+ * <p>This package holds no interfaces of its own. Dependencies always point inwards: adapters
+ * depend on these ports, never the other way round.
  */
 package eu.ecodex.connector.application.port;

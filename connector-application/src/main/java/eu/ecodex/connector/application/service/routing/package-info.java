@@ -9,10 +9,11 @@
  */
 
 /**
- * Contains routing service implementation classes for the connector application.
+ * Application services implementing the routing use cases of the connector.
  *
- * <p>This package provides the internal implementation of routing-related application
- * services, such as resolving message destinations, applying routing rules, and coordinating route
- * selection within the connector.
+ * <p>Services in this package implement the routing-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.routing}. They orchestrate the resolution of
+ * where a message must be delivered, such as selecting the target link partner or backend, by
+ * delegating routing rules to the domain model and configuration lookups to outbound ports.
  */
 package eu.ecodex.connector.application.service.routing;

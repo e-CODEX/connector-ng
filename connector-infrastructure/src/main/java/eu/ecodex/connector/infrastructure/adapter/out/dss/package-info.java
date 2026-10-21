@@ -9,12 +9,15 @@
  */
 
 /**
- * Provides infrastructure components for integrating the connector with Digital Signature Services
- * (DSS).
+ * Outbound DSS adapters of the connector: the implementations through which the core performs
+ * cryptographic operations using the Digital Signature Services (DSS) library.
  *
- * <p>This package contains adapter-level functionality related to DSS-based cryptographic
- * operations, such as certificate handling, signature validation, and trust-service interaction.
- * Classes in this package belong to the infrastructure layer and should expose DSS-specific
- * implementation details only behind application-facing abstractions.
+ * <p>Classes in this package implement the signature-related outbound ports of
+ * {@link eu.ecodex.connector.application.port.spi}, such as signing content, validating signatures,
+ * handling certificates and trust anchors, and checking certificate validity against trusted lists.
+ * They translate between domain types and DSS types, so that no DSS or cryptographic library
+ * details reach the core.
+ *
+ * <p>DSS adapters contain no business rules.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.dss;

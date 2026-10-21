@@ -9,9 +9,16 @@
  */
 
 /**
- * Provides inbound web infrastructure components for exposing connector functionality over HTTP.
+ * Inbound web adapters of the connector: the HTTP entry points (REST and SOAP) through which the
+ * outside world drives the core.
  *
- * <p>This package contains Spring MVC web-layer types responsible for receiving external requests,
- * adapting them to application-level operations, and returning appropriate web responses.
+ * <p>Spring MVC controllers and SOAP endpoints in this package receive HTTP requests, validate
+ * and translate their payloads into domain types, and call the inbound ports of
+ * {@link eu.ecodex.connector.application.port.api}. They then translate the result, or any
+ * exception raised by the core, into an HTTP response (REST) or a SOAP response or fault.
+ *
+ * <p>Endpoints here contain no business rules: they depend on the ports only, never on the
+ * application services directly, and keep protocol concerns (request and response DTOs, status
+ * codes, SOAP envelopes and faults, content negotiation) out of the core.
  */
 package eu.ecodex.connector.infrastructure.adapter.in.web;

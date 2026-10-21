@@ -9,25 +9,16 @@
  */
 
 /**
- * Provides outbound infrastructure components for communication with external systems and
- * services.
+ * Outbound adapters of the connector: the implementations through which the core reaches the
+ * outside world.
  *
- * <p>This package contains adapters and technical implementations responsible for sending data
- * outside the connector boundary, including transport, database, protocol-specific integrations,
- * and external service communication.
+ * <p>Adapters in this package (for example persistence, gateway communication or messaging)
+ * implement the outbound ports of {@link eu.ecodex.connector.application.port.spi} using concrete
+ * technologies. They translate between domain types and external representations (database rows,
+ * gateway messages, JMS payloads), so that technical details never reach the core.
  *
- * <p>Subpackages may provide support for specific outbound technologies such as:
- * </p>
- * <ul>
- *   <li>SOAP-based communication</li>
- *   <li>External API integrations</li>
- *   <li>Security and protocol interoperability concerns</li>
- *   <li>Database</li>
- *   <li>...</li>
- * </ul>
- *
- * <p>The package belongs to the infrastructure layer and should contain only
- * technical implementation details, separated from domain and application
- * business logic.
+ * <p>Outbound adapters are plugged into the application layer at startup and contain no business
+ * rules. Dependencies point inwards: they depend on the ports and the domain types, never the other
+ * way round.
  */
 package eu.ecodex.connector.infrastructure.adapter.out;

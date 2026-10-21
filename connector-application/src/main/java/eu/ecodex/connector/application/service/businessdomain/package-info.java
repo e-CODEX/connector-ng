@@ -9,7 +9,12 @@
  */
 
 /**
- * Provides business-domain service implementations for managing connector business-domain
- * configuration and registration data.
+ * Application services implementing the business domain use cases of the connector.
+ *
+ * <p>Services in this package implement the business-domain-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.businessdomain}. They orchestrate the
+ * registration and configuration of business domains, such as creating, updating, retrieving and
+ * removing them, by delegating business rules to the domain model and persistence to outbound
+ * ports.
  */
 package eu.ecodex.connector.application.service.businessdomain;

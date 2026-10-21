@@ -9,10 +9,16 @@
  */
 
 /**
- * Provides application-level services that coordinate connector use cases and business workflows.
+ * Application services implementing the connector's use cases.
  *
- * <p>Classes in this package act as the application service layer between external adapters,
- * configuration, and the domain model. They expose operations used by the application while
- * delegating domain-specific decisions and validations to the appropriate domain components.</p>
+ * <p>Each service implements one or more inbound ports from
+ * {@link eu.ecodex.connector.application.port.api}. It orchestrates a business workflow by loading
+ * and persisting domain objects through outbound ports
+ * ({@link eu.ecodex.connector.application.port.spi}) and delegating business rules and validations
+ * to the domain model.
+ *
+ * <p>Services in this package coordinate; they do not decide. Business rules belong to the domain
+ * layer, and technical concerns such as transport or persistence belong to the adapters. Services
+ * depend on ports only, never on concrete adapter implementations.
  */
 package eu.ecodex.connector.application.service;

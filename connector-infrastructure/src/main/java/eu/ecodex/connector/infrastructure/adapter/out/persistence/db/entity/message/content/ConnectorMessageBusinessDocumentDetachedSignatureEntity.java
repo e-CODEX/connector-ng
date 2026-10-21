@@ -19,12 +19,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,7 +42,13 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENT_SIGNATURES")
+@Table(
+    name = "CONNECTOR_MESSAGE_BUSINESS_DOCUMENT_SIGNATURES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_BDS_UUID", columnNames = "UUID"),
+        @UniqueConstraint(name = "UQ_CM_BDS_DOCUMENT", columnNames = "BUSINESS_DOCUMENT_ID")
+    }
+)
 public class ConnectorMessageBusinessDocumentDetachedSignatureEntity extends BaseEntity {
     private static final int MAX_SIGNATURE_SIZE = 5 * 1024 * 1024; // 5 MB
 
@@ -50,7 +58,7 @@ public class ConnectorMessageBusinessDocumentDetachedSignatureEntity extends Bas
     private Long id;
 
     @UuidGenerator
-    @Column(name = "UUID", unique = true, nullable = false, updatable = false)
+    @Column(name = "UUID", nullable = false, updatable = false)
     private String uuid;
 
     @Column(name = "NAME", nullable = false)
@@ -65,6 +73,9 @@ public class ConnectorMessageBusinessDocumentDetachedSignatureEntity extends Bas
     private DetachedSignatureMimeType mimeType;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "BUSINESS_DOCUMENT_ID", unique = true, nullable = false)
+    @JoinColumn(
+        name = "BUSINESS_DOCUMENT_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_BDS_DOCUMENT"))
     private ConnectorMessageBusinessDocumentEntity businessDocument;
 }

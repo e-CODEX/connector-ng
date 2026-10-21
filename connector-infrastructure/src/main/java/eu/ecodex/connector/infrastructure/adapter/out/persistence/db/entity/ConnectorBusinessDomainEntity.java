@@ -20,6 +20,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,9 +38,11 @@ import org.hibernate.annotations.UuidGenerator;
 @AllArgsConstructor
 @Table(
     name = "CONNECTOR_BUSINESS_DOMAINS",
-    indexes = {
-        @Index(name = "IDX_CONNECTOR_BUSINESS_DOMAINS_IDENTIFIER", columnList = "IDENTIFIER"),
-    })
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CBD_UUID", columnNames = "UUID"),
+        @UniqueConstraint(name = "UQ_CBD_IDENTIFIER", columnNames = "IDENTIFIER")
+    }
+)
 public class ConnectorBusinessDomainEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -47,10 +50,10 @@ public class ConnectorBusinessDomainEntity extends BaseEntity {
     private Long id;
 
     @UuidGenerator
-    @Column(name = "UUID", unique = true, nullable = false, updatable = false)
+    @Column(name = "UUID", nullable = false, updatable = false)
     private String uuid;
 
-    @Column(name = "IDENTIFIER", unique = true, nullable = false)
+    @Column(name = "IDENTIFIER", nullable = false)
     private String identifier;
 
     @Column(name = "DESCRIPTION", length = 512)
@@ -58,8 +61,8 @@ public class ConnectorBusinessDomainEntity extends BaseEntity {
 
     @Column(name = "ENABLED")
     private boolean enabled;
-    
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "SOURCE")
+    @Column(name = "SOURCE", nullable = false)
     private ConnectorConfigurationSource source;
 }

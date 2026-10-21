@@ -17,15 +17,18 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,7 +48,15 @@ import org.hibernate.annotations.UuidGenerator;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "CONNECTOR_PROCESSING_MODES")
+@Table(
+    name = "CONNECTOR_PROCESSING_MODES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CPM_UUID", columnNames = "UUID")
+    },
+    indexes = {
+        @Index(name = "IDX_CPM_BUSINESS_DOMAIN_ID", columnList = "BUSINESS_DOMAIN_ID")
+    }
+)
 public class ConnectorProcessingModeEntity extends BaseEntity {
     private static final int MAX_CONTENT_SIZE = 10_000_000;
 
@@ -70,7 +81,11 @@ public class ConnectorProcessingModeEntity extends BaseEntity {
     private String filename;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "BUSINESS_DOMAIN_ID", nullable = false)
+    @JoinColumn(
+        name = "BUSINESS_DOMAIN_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CPM_BUSINESS_DOMAIN")
+    )
     private ConnectorBusinessDomainEntity businessDomain;
 
     @Builder.Default

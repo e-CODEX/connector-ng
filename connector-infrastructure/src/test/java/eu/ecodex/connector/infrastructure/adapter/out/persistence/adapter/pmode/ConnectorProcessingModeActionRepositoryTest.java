@@ -57,7 +57,7 @@ public class ConnectorProcessingModeActionRepositoryTest extends AbstractReposit
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/action.sql",
+        "classpath:sql/processing-mode-action.sql",
     })
     private @interface WithActionData {
     }

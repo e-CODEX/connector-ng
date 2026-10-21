@@ -26,6 +26,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Size;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -46,16 +47,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(
     name = "CONNECTOR_MESSAGE_TRANSPORT_STEPS",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_TS_IDENTIFIER", columnNames = "IDENTIFIER")
+    },
     indexes = {
-        @Index(
-            name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_REMOTE_SYSTEM_IDENTIFIER",
-            columnList = "REMOTE_SYSTEM_IDENTIFIER"
-        ),
-        @Index(
-            name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_LINK_PARTNER_NAME",
-            columnList = "LINK_PARTNER_NAME"
-        ),
-        @Index(name = "IDX_CONNECTOR_MESSAGE_TRANSPORT_STEPS_STATUS", columnList = "STATUS")
+        @Index(name = "IDX_CM_TS_REMOTE_SYS_ID", columnList = "REMOTE_SYSTEM_IDENTIFIER"),
+        @Index(name = "IDX_CM_TS_LINK_PARTNER", columnList = "LINK_PARTNER_NAME"),
+        @Index(name = "IDX_CM_TS_STATUS", columnList = "STATUS")
     })
 public class ConnectorMessageTransportStepEntity extends BaseEntity {
     private static final int TRANSPORTED_MESSAGE_SIZE = 5_000_000;
@@ -65,7 +63,7 @@ public class ConnectorMessageTransportStepEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "IDENTIFIER", nullable = false, unique = true, updatable = false)
+    @Column(name = "IDENTIFIER", nullable = false, updatable = false)
     private String identifier;
 
     @Column(name = "NUMBER_OF_ATTEMPTS", nullable = false)

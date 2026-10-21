@@ -50,9 +50,9 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
     })
     private @interface WithReferenceData {
     }
@@ -65,9 +65,9 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
-        "classpath:sql/service.sql",
-        "classpath:sql/action.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
         "classpath:sql/attachment.sql",

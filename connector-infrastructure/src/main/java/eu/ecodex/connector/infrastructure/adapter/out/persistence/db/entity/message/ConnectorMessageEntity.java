@@ -21,6 +21,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +32,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -52,24 +54,21 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "CONNECTOR_MESSAGES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CM_IDENTIFIER", columnNames = "IDENTIFIER")
+    },
     indexes = {
-        @Index(name = "IDX_CONNECTOR_MESSAGES_IDENTIFIER", columnList = "IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_BACKEND_NAME", columnList = "BACKEND_NAME"),
+        @Index(name = "IDX_CM_BACKEND_NAME", columnList = "BACKEND_NAME"),
+        @Index(name = "IDX_CM_BACKEND_MSG_ID", columnList = "BACKEND_MESSAGE_IDENTIFIER"),
         @Index(
-            name = "IDX_CONNECTOR_MESSAGES_BACKEND_MESSAGE_IDENTIFIER",
-            columnList = "BACKEND_MESSAGE_IDENTIFIER"
-        ),
-        @Index(
-            name = "IDX_CONNECTOR_MESSAGES_REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER",
+            name = "IDX_CM_REF_BACKEND_MSG_ID",
             columnList = "REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER"
         ),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_GATEWAY_NAME", columnList = "GATEWAY_NAME"),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_DIRECTION", columnList = "DIRECTION"),
-        @Index(
-            name = "IDX_CONNECTOR_MESSAGES_DELIVERED_TO_LINK_PARTNER_AT",
-            columnList = "DELIVERED_TO_LINK_PARTNER_AT"
-        ),
-        @Index(name = "IDX_CONNECTOR_MESSAGES_CREATED_AT", columnList = "CREATED_AT")
+        @Index(name = "IDX_CM_GATEWAY_NAME", columnList = "GATEWAY_NAME"),
+        @Index(name = "IDX_CM_DIRECTION", columnList = "DIRECTION"),
+        @Index(name = "IDX_CM_DELIVERED_AT", columnList = "DELIVERED_TO_LINK_PARTNER_AT"),
+        @Index(name = "IDX_CM_CREATED_AT", columnList = "CREATED_AT"),
+        @Index(name = "IDX_CM_BUSINESS_DOMAIN_ID", columnList = "BUSINESS_DOMAIN_ID")
     })
 public class ConnectorMessageEntity extends BaseEntity {
     @Id
@@ -77,7 +76,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "IDENTIFIER", nullable = false, unique = true)
+    @Column(name = "IDENTIFIER", nullable = false)
     private String identifier;
 
     @Setter
@@ -116,7 +115,11 @@ public class ConnectorMessageEntity extends BaseEntity {
     private Instant deliveredToLinkPartnerAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "BUSINESS_DOMAIN_ID", nullable = false)
+    @JoinColumn(
+        name = "BUSINESS_DOMAIN_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CM_BUSINESS_DOMAIN")
+    )
     private ConnectorBusinessDomainEntity businessDomain;
 
     @Setter

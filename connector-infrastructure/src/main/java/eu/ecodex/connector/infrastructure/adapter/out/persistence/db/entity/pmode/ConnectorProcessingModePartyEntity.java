@@ -17,6 +17,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +25,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,13 +42,18 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-    name = "CONNECTOR_PARTIES",
+    name = "CONNECTOR_PROCESSING_MODE_PARTIES",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UQ_CPM_PARTIES_UUID", columnNames = "UUID")
+    },
     indexes = {
-        @Index(name = "IDX_CONNECTOR_PARTIES_ROLE", columnList = "ROLE"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER", columnList = "IDENTIFIER"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_IDENTIFIER_TYPE", columnList = "IDENTIFIER_TYPE"),
-        @Index(name = "IDX_CONNECTOR_PARTIES_ROLE_TYPE", columnList = "ROLE_TYPE")
-    })
+        @Index(name = "IDX_CPM_PARTIES_ROLE", columnList = "ROLE"),
+        @Index(name = "IDX_CPM_PARTIES_IDENTIFIER", columnList = "IDENTIFIER"),
+        @Index(name = "IDX_CPM_PARTIES_IDENT_TYPE", columnList = "IDENTIFIER_TYPE"),
+        @Index(name = "IDX_CPM_PARTIES_ROLE_TYPE", columnList = "ROLE_TYPE"),
+        @Index(name = "IDX_CPM_PARTIES_PM_ID", columnList = "PROCESSING_MODE_ID")
+    }
+)
 public class ConnectorProcessingModePartyEntity extends BaseEntity {
     @Id
     @Column(name = "ID")
@@ -77,6 +84,10 @@ public class ConnectorProcessingModePartyEntity extends BaseEntity {
     private boolean isHome;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "PROCESSING_MODE_ID", nullable = false)
+    @JoinColumn(
+        name = "PROCESSING_MODE_ID",
+        nullable = false,
+        foreignKey = @ForeignKey(name = "FK_CPM_PARTIES_PM")
+    )
     private ConnectorProcessingModeEntity processingMode;
 }

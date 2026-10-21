@@ -39,7 +39,7 @@ public class ConnectorListProcessingModeServicesIT extends AbstractIntegrationTe
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/service.sql",
+        "classpath:sql/processing-mode-service.sql"
     })
     void should_list_connector_pmode_services() {
         var response = apiClient.get()

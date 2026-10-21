@@ -59,7 +59,7 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
+        "classpath:sql/processing-mode-party.sql",
     })
     private @interface WithPartyData {
     }

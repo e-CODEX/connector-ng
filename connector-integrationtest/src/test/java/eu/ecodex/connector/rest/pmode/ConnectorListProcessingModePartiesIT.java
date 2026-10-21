@@ -39,7 +39,7 @@ public class ConnectorListProcessingModePartiesIT extends AbstractIntegrationTes
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/party.sql",
+        "classpath:sql/processing-mode-party.sql",
     })
     void should_list_connector_pmode_parties() {
         var response = apiClient.get()

@@ -8,33 +8,35 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-create table CONNECTOR.CONNECTOR_BUSINESS_DOMAINS
+create table CONNECTOR_BUSINESS_DOMAINS
 (
     ID          NUMBER(19) generated as identity
         primary key,
     CREATED_AT  TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT  TIMESTAMP(9) WITH TIME ZONE not null,
-    DESCRIPTION VARCHAR2(255 char),
+    DESCRIPTION VARCHAR2(512 char),
     ENABLED     BOOLEAN,
     IDENTIFIER  VARCHAR2(255 char)          not null
-        constraint UKMY79MO8V7CAYNL1438IGQDOYM
+        constraint UQ_CBD_IDENTIFIER
             unique,
-    SOURCE      VARCHAR2(255 char)
+    SOURCE      VARCHAR2(255 char)          not null
         check ((source in ('DATABASE', 'IMPLEMENTATION', 'ENVIRONMENT', 'APPLICATION'))),
     UUID        VARCHAR2(255 char)          not null
-        constraint UKN51PA7N16YDUXRHWE74JQSHNM
+        constraint UQ_CBD_UUID
             unique
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_TRANSPORT_STEPS
+create table CONNECTOR_MESSAGE_TRANSPORT_STEPS
 (
     ID                             NUMBER(19) generated as identity
         primary key,
     CREATED_AT                     TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT                     TIMESTAMP(9) WITH TIME ZONE not null,
-    IDENTIFIER                     VARCHAR2(255 char)          not null,
-    LINK_PARTNER_NAME              VARCHAR2(255 char),
+    IDENTIFIER                     VARCHAR2(255 char)          not null
+        constraint UQ_CM_TS_IDENTIFIER
+            unique,
+    LINK_PARTNER_NAME              VARCHAR2(255 char)          not null,
     NUMBER_OF_ATTEMPTS             NUMBER(10)                  not null,
     REMOTE_SYSTEM_IDENTIFIER       VARCHAR2(255 char),
     STATUS                         VARCHAR2(255 char)          not null
@@ -42,9 +44,9 @@ create table CONNECTOR.CONNECTOR_MESSAGE_TRANSPORT_STEPS
     TRANSPORTED_MESSAGE            CLOB                        not null,
     TRANSPORTED_MESSAGE_IDENTIFIER VARCHAR2(255 char)          not null
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES
+create table CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES
 (
     ID                NUMBER(19) generated as identity
         primary key,
@@ -53,12 +55,28 @@ create table CONNECTOR.CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES
     STATUS            VARCHAR2(255 char)          not null
         check ((status in ('DELIVERED', 'FAILED', 'SUBMITTED', 'DOWNLOADED', 'READY_FOR_DOWNLOAD'))),
     TRANSPORT_STEP_ID NUMBER(19)
-        constraint FK6KE4GT642IVTVI0F6C53HMUOO
-            references CONNECTOR.CONNECTOR_MESSAGE_TRANSPORT_STEPS
+        constraint FK_CM_TSS_TRANSPORT_STEP
+            references CONNECTOR_MESSAGE_TRANSPORT_STEPS
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGES
+create index IDX_CM_TSS_TRANSPORT_STEP_ID
+    on CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES (TRANSPORT_STEP_ID)
+/
+
+create index IDX_CM_TS_REMOTE_SYS_ID
+    on CONNECTOR_MESSAGE_TRANSPORT_STEPS (REMOTE_SYSTEM_IDENTIFIER)
+/
+
+create index IDX_CM_TS_LINK_PARTNER
+    on CONNECTOR_MESSAGE_TRANSPORT_STEPS (LINK_PARTNER_NAME)
+/
+
+create index IDX_CM_TS_STATUS
+    on CONNECTOR_MESSAGE_TRANSPORT_STEPS (STATUS)
+/
+
+create table CONNECTOR_MESSAGES
 (
     ID                                      NUMBER(19) generated as identity
         primary key,
@@ -72,16 +90,126 @@ create table CONNECTOR.CONNECTOR_MESSAGES
     DIRECTION                               VARCHAR2(255 char)          not null
         check ((direction in ('BACKEND_TO_GATEWAY', 'GATEWAY_TO_BACKEND'))),
     GATEWAY_NAME                            VARCHAR2(255 char),
-    IDENTIFIER                              VARCHAR2(255 char)          not null,
+    IDENTIFIER                              VARCHAR2(255 char)          not null
+        constraint UQ_CM_IDENTIFIER
+            unique,
     REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER VARCHAR2(255 char),
     REJECTED_AT                             TIMESTAMP(9) WITH TIME ZONE,
     BUSINESS_DOMAIN_ID                      NUMBER(19)                  not null
-        constraint FKA44V5LAB5JT09SUM4J9XFRLEN
-            references CONNECTOR.CONNECTOR_BUSINESS_DOMAINS
+        constraint FK_CM_BUSINESS_DOMAIN
+            references CONNECTOR_BUSINESS_DOMAINS
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_ERRORS
+create table CONNECTOR_MESSAGE_ATTACHMENTS
+(
+    ID           NUMBER(19) generated as identity
+        primary key,
+    CREATED_AT   TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT   TIMESTAMP(9) WITH TIME ZONE not null,
+    CONTENT_TYPE VARCHAR2(255 char)          not null,
+    DESCRIPTION  VARCHAR2(255 char)          not null,
+    IDENTIFIER   VARCHAR2(255 char)          not null
+        constraint UQ_CM_ATTACHMENTS_IDENTIFIER
+            unique,
+    NAME         VARCHAR2(255 char)          not null,
+    FILE_SIZE    NUMBER(19)                  not null,
+    STORAGE      VARCHAR2(255 char)          not null
+        check ((storage in ('S3_BUCKET'))),
+    TYPE         VARCHAR2(255 char)
+        check ((type in
+                ('ATTACHMENT', 'ASICS', 'BUSINESS_CONTENT', 'BUSINESS_DOCUMENT',
+                 'DETACHED_SIGNATURE', 'EVIDENCE_XML', 'PDF_TOKEN', 'XML_TOKEN'))),
+    MESSAGE_ID   NUMBER(19)
+        constraint FK_CM_ATTACHMENTS_MESSAGE
+            references CONNECTOR_MESSAGES
+)
+/
+
+create index IDX_CM_ATTACHMENTS_NAME
+    on CONNECTOR_MESSAGE_ATTACHMENTS (NAME)
+/
+
+create index IDX_CM_ATTACHMENTS_TYPE
+    on CONNECTOR_MESSAGE_ATTACHMENTS (TYPE)
+/
+
+create index IDX_CM_ATTACHMENTS_MESSAGE_ID
+    on CONNECTOR_MESSAGE_ATTACHMENTS (MESSAGE_ID)
+/
+
+create table CONNECTOR_MESSAGE_BUSINESS_CONTENTS
+(
+    ID            NUMBER(19) generated as identity
+        primary key,
+    CREATED_AT    TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT    TIMESTAMP(9) WITH TIME ZONE not null,
+    UUID          VARCHAR2(255 char)          not null
+        constraint UQ_CM_BC_UUID
+            unique,
+    MESSAGE_ID    NUMBER(19)                  not null
+        constraint UQ_CM_BC_MESSAGE
+            unique
+        constraint FK_CM_BC_MESSAGE
+            references CONNECTOR_MESSAGES,
+    ATTACHMENT_ID NUMBER(19)                  not null
+        constraint UQ_CM_BC_ATTACHMENT
+            unique
+        constraint FK_CM_BC_ATTACHMENT
+            references CONNECTOR_MESSAGE_ATTACHMENTS
+)
+/
+
+create table CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS
+(
+    ID                  NUMBER(19) generated as identity
+        primary key,
+    CREATED_AT          TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT          TIMESTAMP(9) WITH TIME ZONE not null,
+    AES_TYPE            VARCHAR2(255 char)
+        check ((aes_type in ('AUTHENTICATION_BASED', 'SIGNATURE_BASED'))),
+    UUID                VARCHAR2(255 char)          not null
+        constraint UQ_CM_BD_UUID
+            unique,
+    ATTACHMENT_ID       NUMBER(19)                  not null
+        constraint UQ_CM_BD_ATTACHMENT
+            unique
+        constraint FK_CM_BD_ATTACHMENT
+            references CONNECTOR_MESSAGE_ATTACHMENTS,
+    BUSINESS_CONTENT_ID NUMBER(19)                  not null
+        constraint UQ_CM_BD_CONTENT
+            unique
+        constraint FK_CM_BD_CONTENT
+            references CONNECTOR_MESSAGE_BUSINESS_CONTENTS
+)
+/
+
+create table CONNECTOR_MESSAGE_BUSINESS_DOCUMENT_SIGNATURES
+(
+    ID                   NUMBER(19) generated as identity
+        primary key,
+    CREATED_AT           TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT           TIMESTAMP(9) WITH TIME ZONE not null,
+    MIME_TYPE            VARCHAR2(255 char)          not null
+        check ((mime_type in ('BINARY', 'XML', 'PKCS7'))),
+    NAME                 VARCHAR2(255 char)          not null,
+    SIGNATURE            BLOB                        not null,
+    UUID                 VARCHAR2(255 char)          not null
+        constraint UQ_CM_BDS_UUID
+            unique,
+    BUSINESS_DOCUMENT_ID NUMBER(19)                  not null
+        constraint UQ_CM_BDS_DOCUMENT
+            unique
+        constraint FK_CM_BDS_DOCUMENT
+            references CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS
+)
+/
+
+create index IDX_CM_BD_AES_TYPE
+    on CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS (AES_TYPE)
+/
+
+create table CONNECTOR_MESSAGE_ERRORS
 (
     ID         NUMBER(19) generated as identity
         primary key,
@@ -91,53 +219,92 @@ create table CONNECTOR.CONNECTOR_MESSAGE_ERRORS
     LABEL      VARCHAR2(255 char),
     SOURCE     VARCHAR2(255 char)          not null,
     MESSAGE_ID NUMBER(19)                  not null
-        constraint UKARHI6TY11TAG5U92Q1BCNU352
-            unique
-        constraint FKK1RSQFG9R8MPTYGOBT5I35R1Y
-            references CONNECTOR.CONNECTOR_MESSAGES
+        constraint FK_CM_ERRORS_MESSAGE
+            references CONNECTOR_MESSAGES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_EVIDENCES
+create index IDX_CM_ERRORS_MESSAGE_ID
+    on CONNECTOR_MESSAGE_ERRORS (MESSAGE_ID)
+/
+
+create table CONNECTOR_MESSAGE_EVIDENCES
 (
     ID                           NUMBER(19) generated as identity
         primary key,
     CREATED_AT                   TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT                   TIMESTAMP(9) WITH TIME ZONE not null,
-    CONTENT                      CLOB,
+    CONTENT                      CLOB                        not null,
     DELIVERED_TO_LINK_PARTNER_AT TIMESTAMP(9) WITH TIME ZONE,
     TYPE                         VARCHAR2(255 char)          not null
         check ((type in
-                ('SUBMISSION_ACCEPTANCE', 'SUBMISSION_REJECTION', 'RELAY_REMMD_ACCEPTANCE', 'RELAY_REMMD_REJECTION',
-                 'RELAY_REMMD_FAILURE', 'DELIVERY', 'NON_DELIVERY', 'RETRIEVAL', 'NON_RETRIEVAL'))),
+                ('SUBMISSION_ACCEPTANCE', 'SUBMISSION_REJECTION', 'RELAY_REMMD_ACCEPTANCE',
+                 'RELAY_REMMD_REJECTION', 'RELAY_REMMD_FAILURE', 'DELIVERY', 'NON_DELIVERY',
+                 'RETRIEVAL', 'NON_RETRIEVAL'))),
     UUID                         VARCHAR2(255 char)          not null
-        constraint UKELXRNUC4SSW3T7PHLOAHLD1TY
+        constraint UQ_CM_EVIDENCES_UUID
             unique,
     MESSAGE_ID                   NUMBER(19)
-        constraint FKP2BDWB4XR1KC9IBGV7DKRTIMF
-            references CONNECTOR.CONNECTOR_MESSAGES
+        constraint FK_CM_EVIDENCES_MESSAGE
+            references CONNECTOR_MESSAGES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_PROCESSING_MODES
+create index IDX_CM_EVIDENCES_MESSAGE_ID
+    on CONNECTOR_MESSAGE_EVIDENCES (MESSAGE_ID)
+/
+
+create index IDX_CM_BACKEND_NAME
+    on CONNECTOR_MESSAGES (BACKEND_NAME)
+/
+
+create index IDX_CM_BACKEND_MSG_ID
+    on CONNECTOR_MESSAGES (BACKEND_MESSAGE_IDENTIFIER)
+/
+
+create index IDX_CM_REF_BACKEND_MSG_ID
+    on CONNECTOR_MESSAGES (REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER)
+/
+
+create index IDX_CM_GATEWAY_NAME
+    on CONNECTOR_MESSAGES (GATEWAY_NAME)
+/
+
+create index IDX_CM_DIRECTION
+    on CONNECTOR_MESSAGES (DIRECTION)
+/
+
+create index IDX_CM_DELIVERED_AT
+    on CONNECTOR_MESSAGES (SYS_EXTRACT_UTC("DELIVERED_TO_LINK_PARTNER_AT"))
+/
+
+create index IDX_CM_CREATED_AT
+    on CONNECTOR_MESSAGES (SYS_EXTRACT_UTC("CREATED_AT"))
+/
+
+create index IDX_CM_BUSINESS_DOMAIN_ID
+    on CONNECTOR_MESSAGES (BUSINESS_DOMAIN_ID)
+/
+
+create table CONNECTOR_PROCESSING_MODES
 (
     ID                 NUMBER(19) generated as identity
         primary key,
     CREATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
     CONTENT            CLOB                        not null,
-    DESCRIPTION        VARCHAR2(255 char)          not null,
+    DESCRIPTION        VARCHAR2(512 char)          not null,
     FILENAME           VARCHAR2(255 char)          not null,
     UUID               VARCHAR2(255 char)          not null
-        constraint UKAN0EYBVHH8000JPLNWEHVLOQR
+        constraint UQ_CPM_UUID
             unique,
     BUSINESS_DOMAIN_ID NUMBER(19)                  not null
-        constraint FK2CWYNU0UVTYUD1Y5T8OLUKDJ4
-            references CONNECTOR.CONNECTOR_BUSINESS_DOMAINS
+        constraint FK_CPM_BUSINESS_DOMAIN
+            references CONNECTOR_BUSINESS_DOMAINS
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_ACTIONS
+create table CONNECTOR_PROCESSING_MODE_ACTIONS
 (
     ID                 NUMBER(19) generated as identity
         primary key,
@@ -145,15 +312,23 @@ create table CONNECTOR.CONNECTOR_ACTIONS
     UPDATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
     NAME               VARCHAR2(255 char)          not null,
     UUID               VARCHAR2(255 char)          not null
-        constraint UKJNBBWQ3Q6LY14MCFXBY4AX7LW
+        constraint UQ_CPM_ACTIONS_UUID
             unique,
     PROCESSING_MODE_ID NUMBER(19)                  not null
-        constraint FKNC17V09YJFH75XQGKV3165S94
-            references CONNECTOR.CONNECTOR_PROCESSING_MODES
+        constraint FK_CPM_ACTIONS_PM
+            references CONNECTOR_PROCESSING_MODES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_PARTIES
+create index IDX_CPM_ACTIONS_NAME
+    on CONNECTOR_PROCESSING_MODE_ACTIONS (NAME)
+/
+
+create index IDX_CPM_ACTIONS_PM_ID
+    on CONNECTOR_PROCESSING_MODE_ACTIONS (PROCESSING_MODE_ID)
+/
+
+create table CONNECTOR_PROCESSING_MODE_PARTIES
 (
     ID                 NUMBER(19) generated as identity
         primary key,
@@ -167,34 +342,35 @@ create table CONNECTOR.CONNECTOR_PARTIES
     ROLE_TYPE          VARCHAR2(255 char)          not null
         check ((role_type in ('INITIATOR', 'RESPONDER'))),
     UUID               VARCHAR2(255 char)          not null
-        constraint UK555WOD80P30WB11OHAE3CS60G
+        constraint UQ_CPM_PARTIES_UUID
             unique,
     PROCESSING_MODE_ID NUMBER(19)                  not null
-        constraint FKAYI25J0B3FVBDLI0C5IWBO3N
-            references CONNECTOR.CONNECTOR_PROCESSING_MODES
+        constraint FK_CPM_PARTIES_PM
+            references CONNECTOR_PROCESSING_MODES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_PROCESSING_MODE_TRUSTSTORES
-(
-    ID                 NUMBER(19) generated as identity
-        primary key,
-    CREATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
-    UPDATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
-    CONTENT            BLOB                        not null,
-    FILENAME           VARCHAR2(255 char)          not null,
-    PASSWORD           VARCHAR2(255 char)          not null,
-    TYPE               VARCHAR2(255 char)          not null
-        check ((type in ('JKS', 'PKCS12'))),
-    PROCESSING_MODE_ID NUMBER(19)                  not null
-        constraint UKCAJEQDD49FJMU43RDU2E177M6
-            unique
-        constraint FKKY1TYC6YLQ0TW7T9KSKJL3UDJ
-            references CONNECTOR.CONNECTOR_PROCESSING_MODES
-)
-    /
+create index IDX_CPM_PARTIES_ROLE
+    on CONNECTOR_PROCESSING_MODE_PARTIES (ROLE)
+/
 
-create table CONNECTOR.CONNECTOR_SERVICES
+create index IDX_CPM_PARTIES_IDENTIFIER
+    on CONNECTOR_PROCESSING_MODE_PARTIES (IDENTIFIER)
+/
+
+create index IDX_CPM_PARTIES_IDENT_TYPE
+    on CONNECTOR_PROCESSING_MODE_PARTIES (IDENTIFIER_TYPE)
+/
+
+create index IDX_CPM_PARTIES_ROLE_TYPE
+    on CONNECTOR_PROCESSING_MODE_PARTIES (ROLE_TYPE)
+/
+
+create index IDX_CPM_PARTIES_PM_ID
+    on CONNECTOR_PROCESSING_MODE_PARTIES (PROCESSING_MODE_ID)
+/
+
+create table CONNECTOR_PROCESSING_MODE_SERVICES
 (
     ID                 NUMBER(19) generated as identity
         primary key,
@@ -203,15 +379,15 @@ create table CONNECTOR.CONNECTOR_SERVICES
     NAME               VARCHAR2(255 char)          not null,
     TYPE               VARCHAR2(255 char)          not null,
     UUID               VARCHAR2(255 char)          not null
-        constraint UKS6BNKKAGWS812CM80FNQQSSB6
+        constraint UQ_CPM_SERVICES_UUID
             unique,
     PROCESSING_MODE_ID NUMBER(19)                  not null
-        constraint FKDRGIYB2SV0D5YVDIKNHMNG7BG
-            references CONNECTOR.CONNECTOR_PROCESSING_MODES
+        constraint FK_CPM_SERVICES_PM
+            references CONNECTOR_PROCESSING_MODES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_AS4_PROPERTIES
+create table CONNECTOR_MESSAGE_AS4_PROPERTIES
 (
     ID                      NUMBER(19) generated as identity
         primary key,
@@ -223,113 +399,161 @@ create table CONNECTOR.CONNECTOR_MESSAGE_AS4_PROPERTIES
     ORIGINAL_SENDER         VARCHAR2(255 char)          not null,
     REFERENCE_TO_IDENTIFIER VARCHAR2(255 char),
     ACTION_ID               NUMBER(19)                  not null
-        constraint FKNAHUNYL5RY75T6DFBV5B8P9TY
-            references CONNECTOR.CONNECTOR_ACTIONS,
+        constraint FK_CM_AS4_ACTION
+            references CONNECTOR_PROCESSING_MODE_ACTIONS,
     FROM_PARTY_ID           NUMBER(19)                  not null
-        constraint FKJRT8QYO6GJB9IUFMVFQD6BNS3
-            references CONNECTOR.CONNECTOR_PARTIES,
+        constraint FK_CM_AS4_FROM_PARTY
+            references CONNECTOR_PROCESSING_MODE_PARTIES,
     MESSAGE_ID              NUMBER(19)                  not null
-        constraint UKO99VLIBFH8NR9M7YKGVEIA1YB
+        constraint UQ_CM_AS4_MESSAGE
             unique
-        constraint FKM1CYPU5JQLJRSS1L35LL3XJ7U
-            references CONNECTOR.CONNECTOR_MESSAGES,
+        constraint FK_CM_AS4_MESSAGE
+            references CONNECTOR_MESSAGES,
     SERVICE_ID              NUMBER(19)                  not null
-        constraint FK3FTH7L1BM4XNLRXB58JSBU3OI
-            references CONNECTOR.CONNECTOR_SERVICES,
+        constraint FK_CM_AS4_SERVICE
+            references CONNECTOR_PROCESSING_MODE_SERVICES,
     TO_PARTY_ID             NUMBER(19)                  not null
-        constraint FKKXTRY3DO0SRU52ULIPUHLAJ7
-            references CONNECTOR.CONNECTOR_PARTIES
+        constraint FK_CM_AS4_TO_PARTY
+            references CONNECTOR_PROCESSING_MODE_PARTIES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_ATTACHMENTS
-(
-    ID           NUMBER(19) generated as identity
-        primary key,
-    CREATED_AT   TIMESTAMP(9) WITH TIME ZONE not null,
-    UPDATED_AT   TIMESTAMP(9) WITH TIME ZONE not null,
-    CONTENT_TYPE VARCHAR2(255 char)          not null,
-    DESCRIPTION  VARCHAR2(255 char)          not null,
-    IDENTIFIER   VARCHAR2(255 char)          not null
-        constraint UKQKWEKYAU6MX7FQYMUAVJ4BKQW
-            unique,
-    NAME         VARCHAR2(255 char)          not null,
-    FILE_SIZE    NUMBER(19)                  not null,
-    STORAGE      VARCHAR2(255 char)          not null
-        check ((storage in ('S3_BUCKET'))),
-    TYPE         VARCHAR2(255 char)
-        check ((type in
-                ('ATTACHMENT', 'ASICS', 'BUSINESS_CONTENT', 'BUSINESS_DOCUMENT', 'DETACHED_SIGNATURE', 'EVIDENCE_XML',
-                 'PDF_TOKEN', 'XML_TOKEN'))),
-    MESSAGE_ID   NUMBER(19)
-        constraint FK2P3MQCV3O24E94NGRM3LGPPM1
-            references CONNECTOR.CONNECTOR_MESSAGES
-)
-    /
+create index IDX_CM_AS4_EBMS_MSG_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (EBMS_MESSAGE_IDENTIFIER)
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_BUSINESS_CONTENTS
+create index IDX_CM_AS4_REF_TO_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (REFERENCE_TO_IDENTIFIER)
+/
+
+create index IDX_CM_AS4_CONVERSATION_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (CONVERSATION_IDENTIFIER)
+/
+
+create index IDX_CM_AS4_ORIG_SENDER
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (ORIGINAL_SENDER)
+/
+
+create index IDX_CM_AS4_FINAL_RECIPIENT
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (FINAL_RECIPIENT)
+/
+
+create index IDX_CM_AS4_SERVICE_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (SERVICE_ID)
+/
+
+create index IDX_CM_AS4_ACTION_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (ACTION_ID)
+/
+
+create index IDX_CM_AS4_FROM_PARTY_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (FROM_PARTY_ID)
+/
+
+create index IDX_CM_AS4_TO_PARTY_ID
+    on CONNECTOR_MESSAGE_AS4_PROPERTIES (TO_PARTY_ID)
+/
+
+create index IDX_CPM_SERVICES_NAME
+    on CONNECTOR_PROCESSING_MODE_SERVICES (NAME)
+/
+
+create index IDX_CPM_SERVICES_TYPE
+    on CONNECTOR_PROCESSING_MODE_SERVICES (TYPE)
+/
+
+create index IDX_CPM_SERVICES_PM_ID
+    on CONNECTOR_PROCESSING_MODE_SERVICES (PROCESSING_MODE_ID)
+/
+
+create table CONNECTOR_PROCESSING_MODE_TRUSTSTORES
 (
-    ID            NUMBER(19) generated as identity
+    ID                 NUMBER(19) generated as identity
         primary key,
-    CREATED_AT    TIMESTAMP(9) WITH TIME ZONE not null,
-    UPDATED_AT    TIMESTAMP(9) WITH TIME ZONE not null,
-    UUID          VARCHAR2(255 char)          not null
-        constraint UKPT6K5IYWUWH9UY4MXUH9XS6JG
-            unique,
-    MESSAGE_ID    NUMBER(19)                  not null
-        constraint UKBXHK118V0541XMDD7IXTS5KDI
+    CREATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT         TIMESTAMP(9) WITH TIME ZONE not null,
+    CONTENT            BLOB                        not null,
+    FILENAME           VARCHAR2(255 char)          not null,
+    PASSWORD           VARCHAR2(255 char)          not null,
+    TYPE               VARCHAR2(255 char)          not null
+        check ((type in ('JKS', 'PKCS12'))),
+    PROCESSING_MODE_ID NUMBER(19)                  not null
+        constraint UQ_CPM_TRUSTSTORES_PM
             unique
-        constraint FK2JH116B11S4CR5788PMNSIT4Q
-            references CONNECTOR.CONNECTOR_MESSAGES,
-    ATTACHMENT_ID NUMBER(19)                  not null
-        constraint UKAL934NQ46HLIFNRN8BJQ1BOA0
-            unique
-        constraint FK40GTDMG3V5O97XY94FRHHTWT
-            references CONNECTOR.CONNECTOR_MESSAGE_ATTACHMENTS
+        constraint FK_CPM_TRUSTSTORES_PM
+            references CONNECTOR_PROCESSING_MODES
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS
+create index IDX_CPM_BUSINESS_DOMAIN_ID
+    on CONNECTOR_PROCESSING_MODES (BUSINESS_DOMAIN_ID)
+/
+
+create table CONNECTOR_ROLES
 (
-    ID                  NUMBER(19) generated as identity
+    ID         NUMBER(19) generated as identity
         primary key,
-    CREATED_AT          TIMESTAMP(9) WITH TIME ZONE not null,
-    UPDATED_AT          TIMESTAMP(9) WITH TIME ZONE not null,
-    AES_TYPE            VARCHAR2(255 char)
-    check ((aes_type in ('AUTHENTICATION_BASED', 'SIGNATURE_BASED'))),
-UUID                VARCHAR2(255 char)          not null
-    constraint UKE3EDKHMC1QBMTWX4C5GGCLVAH
-        unique,
-ATTACHMENT_ID       NUMBER(19)                  not null
-    constraint UK65CPF4KJDOVQ65TBQ48T5EPRF
-        unique
-    constraint FK8BR14REYQ9ODT8XIDDK5L9BBN
-        references CONNECTOR.CONNECTOR_MESSAGE_ATTACHMENTS,
-BUSINESS_CONTENT_ID NUMBER(19)                  not null
-    constraint UKA7DNLYKK50VCIL6L7FUO3GXKX
-        unique
-    constraint FKRQCPKXBE9FJRQA2IF6GXHASIQ
-        references CONNECTOR.CONNECTOR_MESSAGE_BUSINESS_CONTENTS
+    CREATED_AT TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT TIMESTAMP(9) WITH TIME ZONE not null,
+    NAME       VARCHAR2(255 char)          not null
+        constraint UQ_CR_NAME
+            unique,
+    UUID       VARCHAR2(255 char)          not null
+        constraint UQ_CR_UUID
+            unique
 )
-    /
+/
 
-create table CONNECTOR.CONNECTOR_MESSAGE_BUSINESS_DOCUMENT_SIGNATURES
+create table CONNECTOR_USERS
 (
     ID                   NUMBER(19) generated as identity
         primary key,
     CREATED_AT           TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT           TIMESTAMP(9) WITH TIME ZONE not null,
-    MIME_TYPE            VARCHAR2(255 char)          not null
-        check ((mime_type in ('BINARY', 'XML', 'PKCS7'))),
-    NAME                 VARCHAR2(255 char)          not null,
-    SIGNATURE            BLOB                        not null,
-    UUID                 VARCHAR2(255 char)          not null
-        constraint UK8AGXFBQUI5O0NBRQWVE6LCIW1
+    EMAIL                VARCHAR2(255 char),
+    ENABLED              BOOLEAN,
+    MUST_CHANGE_PASSWORD BOOLEAN,
+    PASSWORD             VARCHAR2(255 char)          not null,
+    USERNAME             VARCHAR2(255 char)          not null
+        constraint UQ_CU_USERNAME
             unique,
-    BUSINESS_DOCUMENT_ID NUMBER(19)                  not null
-        constraint UKGV33CADW3GESIXNE6MNFBAGON
+    UUID                 VARCHAR2(255 char)          not null
+        constraint UQ_CU_UUID
             unique
-        constraint FK4IPS0UTVQL5LIND3YD3SFGSAK
-            references CONNECTOR.CONNECTOR_MESSAGE_BUSINESS_DOCUMENTS
 )
-    /
+/
+
+create table CONNECTOR_REFRESH_TOKENS
+(
+    ID         NUMBER(19) generated as identity
+        primary key,
+    CREATED_AT TIMESTAMP(9) WITH TIME ZONE not null,
+    UPDATED_AT TIMESTAMP(9) WITH TIME ZONE not null,
+    EXPIRES_AT TIMESTAMP(9) WITH TIME ZONE not null,
+    REVOKED    BOOLEAN                     not null,
+    REVOKED_AT TIMESTAMP(9) WITH TIME ZONE,
+    TOKEN      VARCHAR2(255 char)          not null
+        constraint UQ_CRT_TOKEN
+            unique,
+    USER_ID    NUMBER(19)                  not null
+        constraint FK_CRT_USER
+            references CONNECTOR_USERS
+)
+/
+
+create index IDX_CRT_USER_ID
+    on CONNECTOR_REFRESH_TOKENS (USER_ID)
+/
+
+create table CONNECTOR_USERS_ROLES
+(
+    USER_ID NUMBER(19) not null
+        constraint FK_CUR_USER
+            references CONNECTOR_USERS,
+    ROLE_ID NUMBER(19) not null
+        constraint FK_CUR_ROLE
+            references CONNECTOR_ROLES,
+    constraint UQ_CUR_USER_ROLE
+        unique (USER_ID, ROLE_ID)
+)
+/

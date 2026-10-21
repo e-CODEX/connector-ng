@@ -104,7 +104,7 @@ public class ConnectorPropertyMessageRoutingConfigurationProvider implements
 
         var pattern = ("|(&(equals(ServiceName, '%s'),equals(ServiceType, '%s')), "
             + "equals(Action, '%s'))").formatted(
-                testService.getName(), testService.getType(), action
+            testService.getName(), testService.getType(), action
         );
 
         return ConnectorMessageRoutingRule

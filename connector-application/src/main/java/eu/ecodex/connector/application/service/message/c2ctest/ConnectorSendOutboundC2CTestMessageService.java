@@ -19,8 +19,8 @@ import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBus
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.port.spi.ConnectorTestMessageConfigurationProvider;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;

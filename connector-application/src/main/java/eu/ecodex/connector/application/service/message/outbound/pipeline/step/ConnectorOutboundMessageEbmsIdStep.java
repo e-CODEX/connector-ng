@@ -12,8 +12,8 @@ package eu.ecodex.connector.application.service.message.outbound.pipeline.step;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEbmsIdGenerator;
 import eu.ecodex.connector.application.port.api.message.pipeline.ConnectorMessageStep;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

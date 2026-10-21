@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.propertiesprovider;
+package eu.ecodex.connector.domain.model.message.processing;
 
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import lombok.Builder;

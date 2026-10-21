@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.domain.spi;
+package eu.ecodex.connector.application.port.spi;
 
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;

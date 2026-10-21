@@ -10,8 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.config.property;
 
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,8 +26,7 @@ import org.springframework.validation.annotation.Validated;
 @Configuration
 @SuppressWarnings("checkstyle:LineLength")
 @ConfigurationProperties(prefix = "connector.message-processing")
-public class ConnectorMessageProcessingProperties implements
-    ConnectorMessageProcessingConfigurationProvider {
+public class ConnectorMessageProcessingProperties {
     private boolean ebmsIdGeneratorEnabled = true;
     private String identifierSuffix = "connector.ecodex.eu";
     private String ebmsIdSuffix = "connector.ecodex.eu";
@@ -38,19 +35,4 @@ public class ConnectorMessageProcessingProperties implements
     private ProcessingModeVerificationMode inboundMessageVerificationMode = ProcessingModeVerificationMode.RELAXED;
     private boolean sendGeneratedEvidencesToBackend = true;
     private boolean autoTriggerDeliveryEvidences = true;
-
-    @Override
-    public ConnectorMessageProcessingConfiguration getConfiguration() {
-        return ConnectorMessageProcessingConfiguration
-            .builder()
-            .ebmsIdSuffix(ebmsIdSuffix)
-            .identifierSuffix(identifierSuffix)
-            .transportIdSuffix(transportIdSuffix)
-            .sendGeneratedEvidencesToBackend(sendGeneratedEvidencesToBackend)
-            .inboundMessageVerificationMode(inboundMessageVerificationMode)
-            .outboundMessageVerificationMode(outboundMessageVerificationMode)
-            .ebmsIdGeneratorEnabled(ebmsIdGeneratorEnabled)
-            .autoTriggerDeliveryEvidences(autoTriggerDeliveryEvidences)
-            .build();
-    }
 }

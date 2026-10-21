@@ -10,11 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.adapter.out.parser.pmode;
 
+import eu.ecodex.connector.application.port.spi.ConnectorProcessingModeParser;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
-import eu.ecodex.connector.domain.spi.ConnectorProcessingModeParser;
 import eu.ecodex.connector.infrastructure.adapter.out.parser.exception.ConnectorProcessingModeParsingException;
 import eu.ecodex.connector.infrastructure.helper.SecureXmlParserUtil;
 import java.util.ArrayList;

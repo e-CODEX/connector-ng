@@ -28,13 +28,13 @@ import eu.ecodex.connector.application.port.api.evidence.ConnectorMessageEvidenc
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
+import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -126,7 +126,8 @@ class ConnectorOutboundEvidenceMessageProcessorServiceTest {
                 TriggeredEvidenceMessageTestFixtures.createDeliveryTriggeredEvidenceMessage();
             var gatewayEvidenceMessage = EvidenceMessageTestFixtures.createDeliveryEvidenceMessage()
                                                                     .toBuilder()
-                                                                    .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                                                                    .direction(
+                                                                        ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                                                                     .build();
 
             when(messageRepository.findReferencedBusinessMessage(

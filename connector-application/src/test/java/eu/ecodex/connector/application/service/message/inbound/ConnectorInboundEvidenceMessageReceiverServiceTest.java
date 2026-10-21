@@ -32,13 +32,13 @@ import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenera
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageCommand;
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomain;
 import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

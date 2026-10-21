@@ -17,7 +17,7 @@ import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInbound
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import lombok.NonNull;

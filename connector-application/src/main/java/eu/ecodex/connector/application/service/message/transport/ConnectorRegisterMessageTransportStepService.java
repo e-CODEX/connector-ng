@@ -11,8 +11,8 @@
 package eu.ecodex.connector.application.service.message.transport;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;

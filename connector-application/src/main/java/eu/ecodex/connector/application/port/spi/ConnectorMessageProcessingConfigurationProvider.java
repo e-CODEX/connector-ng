@@ -8,10 +8,11 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.propertiesprovider;
+package eu.ecodex.connector.application.port.spi;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
+import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 
 /**
  * Provider (port) giving access to the {@link ConnectorMessageProcessingConfiguration} used for

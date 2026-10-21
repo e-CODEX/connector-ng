@@ -18,8 +18,8 @@ import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.message.ConnectorEvidenceMessageCreator;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageEvidenceVerifier;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageProcessor;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessage;
@@ -153,8 +153,8 @@ public class ConnectorOutboundEvidenceMessageProcessorService
 
         var reloaded = messageRepository.findByIdentifier(businessMessage.identifier());
         var accumulated = reloaded.evidences() != null
-                          ? new ArrayList<>(reloaded.evidences())
-                          : new ArrayList<ConnectorMessageEvidence>();
+            ? new ArrayList<>(reloaded.evidences())
+            : new ArrayList<ConnectorMessageEvidence>();
         accumulated.add(createdEvidence);
 
         var messageForVerification = reloaded.toBuilder()

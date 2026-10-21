@@ -37,11 +37,11 @@ import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInbound
 import eu.ecodex.connector.application.port.api.message.inbound.ConnectorInboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVerifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -13,8 +13,8 @@ package eu.ecodex.connector.application.service.message;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfiguration;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

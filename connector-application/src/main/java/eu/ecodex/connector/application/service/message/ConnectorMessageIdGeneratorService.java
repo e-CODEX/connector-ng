@@ -11,7 +11,7 @@
 package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
-import eu.ecodex.connector.application.propertiesprovider.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

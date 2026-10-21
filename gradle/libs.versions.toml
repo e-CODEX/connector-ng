@@ -34,7 +34,7 @@ atomikos = "6.0.1"
 # other
 dss-tool = "6.1"
 itextpdf = "9.8.0"
-jackson-databind = "2.22.3"
+jackson-databind = "2.22.4"
 lombok = "1.18.48"
 micrometer = "1.7.1"
 okhttp = "5.5.0"

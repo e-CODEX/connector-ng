@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message.inbound.pipeline.step;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
@@ -41,11 +41,14 @@ public class ConnectorInboundMessageSecurityStepTest {
     void should_validate_the_message_and_return_it_unchanged() {
         var inboundMessage = BusinessMessageTestFixtures.createInboundMessage();
 
-        doNothing().when(securityToolkit).validateMessage(any());
+        when(securityToolkit.validateMessage(any())).thenReturn(
+            BusinessMessageTestFixtures.createValidatedInboundMessage()
+        );
 
         var outputMessage = securityStep.execute(inboundMessage);
 
-        assertThat(outputMessage).isEqualTo(inboundMessage);
+        assertThat(outputMessage).isNotEqualTo(inboundMessage);
+        assertThat(outputMessage.attachments()).hasSize(2);
     }
 
     @Test

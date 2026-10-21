@@ -27,16 +27,18 @@ import jakarta.annotation.Nonnull;
 public interface ConnectorSecurityToolkit {
     /**
      * Validates the given message to ensure that it adheres to the required system and security
-     * policies.
+     * policies, and returns the validated message.
      *
      * <p>Used to validate a message pushed to the connector system by the gateway.
      *
-     * <p>The method returns normally if the message is valid. If validation fails, the failure is
-     * reported by an exception.
+     * <p>If validation fails, the failure is reported by an exception.
      *
      * @param message the {@link ConnectorBusinessMessage} to validate (must not be null)
+     *
+     * @return the {@link ConnectorBusinessMessage} resulting from the validation; a new or enriched
+     *     instance
      */
-    void validateMessage(@Nonnull ConnectorBusinessMessage message);
+    ConnectorBusinessMessage validateMessage(@Nonnull ConnectorBusinessMessage message);
 
     /**
      * Builds a secured container for the given message, so that it is properly encapsulated for

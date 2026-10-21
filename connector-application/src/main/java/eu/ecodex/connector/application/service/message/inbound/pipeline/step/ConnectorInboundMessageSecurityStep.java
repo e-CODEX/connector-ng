@@ -18,8 +18,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Represents a processing step for handling the security aspects of inbound messages within the
+ * Processing step that handles the security aspects of inbound business messages within the
  * connector system.
+ *
+ * <p>The step delegates to a {@link ConnectorSecurityToolkit} to validate each incoming message
+ * against the security policies and system requirements (see
+ * {@link ConnectorSecurityToolkit#validateMessage}). It takes and returns a
+ * {@link ConnectorBusinessMessage}, as defined by {@link ConnectorMessageStep}.
  */
 @Slf4j
 @Component
@@ -28,11 +33,10 @@ public class ConnectorInboundMessageSecurityStep
     private final ConnectorSecurityToolkit securityToolkit;
 
     /**
-     * Constructs a new instance of the {@code ConnectorInboundMessageSecurityStep} class.
+     * Creates the step.
      *
-     * @param securityToolkit the toolkit responsible for handling security-related operations such
-     *                        as validating incoming messages to ensure compliance with security
-     *                        policies and system requirements within the connector system.
+     * @param securityToolkit the toolkit used to validate incoming messages and ensure compliance
+     *                        with the security policies and system requirements
      */
     public ConnectorInboundMessageSecurityStep(ConnectorSecurityToolkit securityToolkit) {
         this.securityToolkit = securityToolkit;
@@ -40,19 +44,21 @@ public class ConnectorInboundMessageSecurityStep
 
     @Override
     public ConnectorBusinessMessage execute(@NonNull ConnectorBusinessMessage inboundMessage) {
+        var messageIdentifier = inboundMessage.identifier();
+
         log.debug(
-            "Processing inbound message [{}] ASIC-S container verification: ",
-            inboundMessage.identifier()
+            "Processing inbound message [{}] ASIC-S container verification: ", messageIdentifier
         );
 
         // validate the ASIC-S container
-        this.securityToolkit.validateMessage(inboundMessage);
+        // unzip the ASIC-S container, set the business document, set the business attachments
+        // remove the ASIC-S attachment from the list of attachments
+        var validatedMessage = this.securityToolkit.validateMessage(inboundMessage);
 
         log.debug(
-            "ASIC-S container verification completed for the message: [{}]",
-            inboundMessage.identifier()
+            "ASIC-S container verification completed for the message: [{}]", messageIdentifier
         );
 
-        return inboundMessage;
+        return validatedMessage;
     }
 }

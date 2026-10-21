@@ -28,6 +28,21 @@ public class BusinessMessageTestFixtures {
     public static ConnectorBusinessMessage createInboundMessage() {
         return backendToGatewayMessage()
             .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .attachments(List.of(
+                MessageAttachmentTestFixtures.createXMLTrustOKTokenAttachment()
+            ))
+            .transportedEvidences(
+                List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
+            ).build();
+    }
+
+    public static ConnectorBusinessMessage createValidatedInboundMessage() {
+        return createInboundMessage()
+            .toBuilder()
+            .attachments(List.of(
+                MessageAttachmentTestFixtures.createPDFTrustOKTokenAttachment(),
+                MessageAttachmentTestFixtures.createXMLTrustOKTokenAttachment()
+            ))
             .transportedEvidences(
                 List.of(EvidenceTestFixtures.createRelayREMMDAcceptanceEvidence())
             ).build();

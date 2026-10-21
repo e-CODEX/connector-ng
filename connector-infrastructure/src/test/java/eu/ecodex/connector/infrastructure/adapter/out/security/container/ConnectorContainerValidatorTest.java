@@ -11,9 +11,11 @@
 package eu.ecodex.connector.infrastructure.adapter.out.security.container;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,6 +23,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
+import eu.ecodex.connector.BusinessMessageTestFixtures;
+import eu.ecodex.connector.MessageAttachmentTestFixtures;
+import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
@@ -131,16 +136,12 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
     private ConnectorBusinessMessage messageWith(
         List<ConnectorMessageAttachment> attachments
     ) {
-        return ConnectorBusinessMessage
-            .builder()
-            .businessDomainIdentifier(
-                BusinessDomainIdentifierTestFixtures
-                    .createDefaultBusinessDomainIdentifier()
-            )
-            .identifier(MESSAGE_ID)
-            .businessContent(businessContent())
-            .attachments(attachments)
-            .build();
+        return BusinessMessageTestFixtures.createInboundMessage()
+                                          .toBuilder()
+                                          .identifier(MESSAGE_ID)
+                                          .businessContent(businessContent())
+                                          .attachments(attachments)
+                                          .build();
     }
 
     private ConnectorContainerValidator validatorWithContainer(
@@ -279,6 +280,14 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             .thenReturn(new byte[]{2});
     }
 
+    private void stubAdditionalAttachments() {
+        when(attachmentRepository.save(any()))
+            .thenReturn(MessageAttachmentTestFixtures.createPDFTrustOKTokenAttachment());
+        when(fileStorageProvider.save(any(), any(byte[].class)))
+            .thenReturn(UUID.randomUUID().toString());
+        doNothing().when(attachmentRepository).attachToMessage(any(), any());
+    }
+
     @Nested
     @DisplayName("message validation")
     class MessageValidation {
@@ -287,10 +296,7 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             assertThatThrownBy(() -> validator.validate(null))
                 .isInstanceOf(NullPointerException.class);
 
-            verifyNoInteractions(
-                fileStorageProvider,
-                attachmentRepository
-            );
+            verifyNoInteractions(fileStorageProvider, attachmentRepository);
         }
 
         @Test
@@ -349,13 +355,23 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             validator = validatorWithContainer(minimalContainer());
 
             stubContainerAttachments();
+            when(attachmentRepository.save(any()))
+                .thenReturn(MessageAttachmentTestFixtures.createPDFTrustOKTokenAttachment());
+            when(fileStorageProvider.save(any(), any(byte[].class)))
+                .thenReturn(UUID.randomUUID().toString());
+            doNothing().when(attachmentRepository).attachToMessage(any(), any());
 
-            validator.validate(
+            var validatedMessage = validator.validate(
                 messageWith(List.of(
                     asicsAttachment(),
                     xmlTokenAttachment()
                 ))
             );
+
+            assertThat(validatedMessage).isNotNull();
+            assertThat(validatedMessage.attachments())
+                .noneMatch(a -> a.type() == ConnectorAttachmentType.ASICS)
+                .size().isEqualTo(2);
 
             verify(fileStorageProvider).findByIdentifier(ASICS_ID);
             verify(fileStorageProvider).findByIdentifier(XML_TOKEN_ID);
@@ -366,13 +382,19 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             validator = validatorWithContainer(minimalContainer());
 
             stubContainerAttachments();
+            stubAdditionalAttachments();
 
-            validator.validate(
+            var validatedMessage = validator.validate(
                 messageWith(List.of(
                     asicsAttachment(),
                     xmlTokenAttachment()
                 ))
             );
+
+            assertThat(validatedMessage).isNotNull();
+            assertThat(validatedMessage.attachments())
+                .noneMatch(a -> a.type() == ConnectorAttachmentType.ASICS)
+                .size().isEqualTo(2);
 
             verify(attachmentRepository).save(
                 argThat(attachment ->
@@ -382,9 +404,7 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
                 ));
 
             verify(attachmentRepository).attachToMessage(
-                argThat(id ->
-                            id.contains(ConnectorContainerFileDefinitions.TOKEN_PDF.name())
-                ),
+                argThat(id -> id.contains(ConnectorContainerFileDefinitions.TOKEN_PDF.name())),
                 eq(MESSAGE_ID)
             );
         }
@@ -396,57 +416,49 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             );
 
             stubContainerAttachments();
+            stubAdditionalAttachments();
+            when(businessContentRepository.assignBusinessDocument(any(), any()))
+                .thenReturn(MessageContentTestFixtures.createContent());
 
-            validator.validate(
+            var validatedMessage = validator.validate(
                 messageWith(List.of(
                     asicsAttachment(),
                     xmlTokenAttachment()
                 ))
             );
 
-            verify(attachmentRepository).save(argThat(attachment ->
-                                                          attachment.type()
-                                                              == ConnectorAttachmentType.BUSINESS_DOCUMENT
-            ));
+            assertThat(validatedMessage).isNotNull();
+            assertThat(validatedMessage.attachments())
+                .noneMatch(a -> a.type() == ConnectorAttachmentType.ASICS)
+                .size().isEqualTo(2);
+
+            verify(attachmentRepository).save(
+                argThat(attachment -> attachment.type() == ConnectorAttachmentType.BUSINESS_DOCUMENT)
+            );
 
             verify(businessContentRepository).assignBusinessDocument(
                 any(),
-                argThat(document ->
-                            document.detachedSignature() == null
-                )
+                argThat(document -> document.detachedSignature() == null)
             );
-        }
-
-        @Test
-        void should_not_persist_business_document_for_evidence_message() {
-            validator = validatorWithContainer(minimalContainer());
-
-            stubContainerAttachments();
-
-            validator.validate(
-                messageWith(List.of(
-                    asicsAttachment(),
-                    xmlTokenAttachment()
-                ))
-            );
-
-            verifyNoInteractions(businessContentRepository);
         }
 
         @Test
         void should_persist_detached_signature_when_present() {
-            validator = validatorWithContainer(
-                containerWithDetachedSignature()
-            );
+            validator = validatorWithContainer(containerWithDetachedSignature());
 
             stubContainerAttachments();
+            stubAdditionalAttachments();
+            when(businessContentRepository.assignBusinessDocument(any(), any()))
+                .thenReturn(MessageContentTestFixtures.createContent());
 
-            validator.validate(
-                messageWith(List.of(
-                    asicsAttachment(),
-                    xmlTokenAttachment()
-                ))
+            var validatedMessage = validator.validate(
+                messageWith(List.of(asicsAttachment(), xmlTokenAttachment()))
             );
+
+            assertThat(validatedMessage).isNotNull();
+            assertThat(validatedMessage.attachments())
+                .noneMatch(a -> a.type() == ConnectorAttachmentType.ASICS)
+                .size().isEqualTo(2);
 
             verify(attachmentRepository).save(
                 argThat(attachment -> attachment.type() == ConnectorAttachmentType.DETACHED_SIGNATURE
@@ -624,13 +636,11 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
 
             stubContainerAttachments();
 
-            assertThatThrownBy(() ->
-                                   validator.validate(
-                                       messageWith(List.of(
-                                           asicsAttachment(),
-                                           xmlTokenAttachment()
-                                       ))
-                                   )
+            assertThatThrownBy(
+                () ->
+                    validator.validate(
+                        messageWith(List.of(asicsAttachment(), xmlTokenAttachment()))
+                    )
             )
                 .isInstanceOf(ConnectorContainerException.class)
                 .hasCauseInstanceOf(ConnectorContainerException.class);

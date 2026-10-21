@@ -58,4 +58,24 @@ public class MessageAttachmentTestFixtures {
             .name("Form_A.pdf")
             .build();
     }
+
+    public static ConnectorMessageAttachment createPDFTrustOKTokenAttachment() {
+        return createAttachment()
+            .toBuilder()
+            .identifier("5ba2556d-a77f-4b30-a6b4-6e7920e6109d_pdf_trust_ok_token")
+            .type(ConnectorAttachmentType.PDF_TOKEN)
+            .contentType("application/pdf")
+            .name("PDFTrustOKToken.pdf")
+            .build();
+    }
+
+    public static ConnectorMessageAttachment createXMLTrustOKTokenAttachment() {
+        return createAttachment()
+            .toBuilder()
+            .identifier("16e8bfe9-3763-4cb3-9587-10c813ec0938_xml_trust_ok_token")
+            .type(ConnectorAttachmentType.XML_TOKEN)
+            .contentType("application/xml")
+            .name("XMLTrustOKToken.xml")
+            .build();
+    }
 }

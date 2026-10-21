@@ -17,6 +17,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentStorage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
@@ -35,6 +36,7 @@ import jakarta.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -88,18 +90,24 @@ public class ConnectorContainerValidator {
     }
 
     /**
-     * Validates the presence and integrity of required attachments in the given connector message,
-     * specifically the ASIC-S container and XML trust token. Ensures the attachments are
-     * retrievable from storage, processes their contents, and persists the extracted content.
+     * Validates the presence and integrity of the required attachments of the given business
+     * message, namely the ASiC-S container and the XML trust token.
      *
-     * @param message the connector message containing attachments to be validated
+     * <p>The method checks that the attachments are retrievable from storage, processes their
+     * contents, and persists the extracted content.
      *
-     * @throws IllegalArgumentException    if the message lacks attachments or required attachment
-     *                                     types
+     * @param message the business message whose attachments are validated (must not be null)
+     *
+     * @return the {@link ConnectorBusinessMessage} after validation, with the extracted content
+     *     applied;
+     *
+     * @throws IllegalArgumentException    if the message has no attachments or lacks one of the
+     *                                     required attachment types
      * @throws ConnectorContainerException if an error occurs while processing the attachments, such
-     *                                     as I/O issues or XML parsing errors
+     *                                     as an I/O error or an XML parsing error
+     * @throws NullPointerException        if {@code message} is {@code null}
      */
-    public void validate(@NonNull ConnectorBusinessMessage message) {
+    public ConnectorBusinessMessage validate(@NonNull ConnectorBusinessMessage message) {
         log.info("Validating ASIC-S container for message {}", message.identifier());
         var attachments = message.attachments();
 
@@ -133,7 +141,7 @@ public class ConnectorContainerValidator {
         }
 
         try {
-            persistAsicsContent(container, message);
+            return persistAsicsContent(container, message);
         } catch (IOException e) {
             // TODO: remove ASIC-S from S3 bucket on failure
             throw new ConnectorContainerException("Failed to persist ASiC-S container content", e);
@@ -248,18 +256,36 @@ public class ConnectorContainerValidator {
                           .findFirst();
     }
 
-    private void persistAsicsContent(ConnectorContainer container, ConnectorBusinessMessage message)
-        throws IOException {
-        persistPdfTrustToken(container, message);
-        persistBusinessContent(container, message);
-        persistAdditionalAttachments(container, message);
-    }
-
-    private void persistPdfTrustToken(
+    private ConnectorBusinessMessage persistAsicsContent(
         ConnectorContainer container,
         ConnectorBusinessMessage message)
         throws IOException {
-        persistAttachment(
+        var attachments = message.attachments() != null
+            ? new ArrayList<>(message.attachments())
+            : new ArrayList<ConnectorMessageAttachment>();
+        attachments.removeIf(a -> a.type() == ConnectorAttachmentType.ASICS);
+
+        attachments.add(persistPdfTrustToken(container, message));
+        attachments.addAll(persistAdditionalAttachments(container, message));
+
+        var businessDocument = persistBusinessDocument(container, message);
+        var businessContent = message.businessContent().toBuilder()
+                                     .businessDocument(businessDocument)
+                                     .build();
+
+        // update the message business document
+        // this is only possible there because it is contained in the ASIC-S container
+        return message.toBuilder()
+                      .businessContent(businessContent)
+                      .attachments(attachments)
+                      .build();
+    }
+
+    private ConnectorMessageAttachment persistPdfTrustToken(
+        ConnectorContainer container,
+        ConnectorBusinessMessage message)
+        throws IOException {
+        return persistAttachment(
             newAttachmentMetadata(
                 ConnectorContainerFileDefinitions.TOKEN_PDF.name(),
                 MediaType.APPLICATION_PDF_VALUE,
@@ -272,13 +298,13 @@ public class ConnectorContainerValidator {
         );
     }
 
-    private void persistBusinessContent(
+    private ConnectorMessageBusinessDocument persistBusinessDocument(
         ConnectorContainer container,
         ConnectorBusinessMessage message)
         throws IOException {
         var businessDssDocument = container.businessContent().getDocument();
         if (businessDssDocument == null) {
-            return;
+            return null;
         }
 
         var businessDocumentAttachment = newAttachmentMetadata(
@@ -294,20 +320,24 @@ public class ConnectorContainerValidator {
             message.identifier()
         );
 
-        var businessDocument = ConnectorMessageBusinessDocument
+        var businessDocumentBuilder = ConnectorMessageBusinessDocument
             .builder()
             .attachment(businessDocumentAttachment);
 
         var detachedSignature =
             persistDetachedSignature(container.businessContent().getDetachedSignature(), message);
         if (detachedSignature != null) {
-            businessDocument.detachedSignature(detachedSignature);
+            businessDocumentBuilder.detachedSignature(detachedSignature);
+            businessDocumentBuilder.aesType(ConnectorBusinessDocumentAESType.SIGNATURE_BASED);
         }
 
-        this.businessContentRepository.assignBusinessDocument(
+        var businessDocument = businessDocumentBuilder.build();
+        var businessContent = this.businessContentRepository.assignBusinessDocument(
             message.businessContent().uuid(),
-            businessDocument.build()
+            businessDocument
         );
+
+        return businessContent.businessDocument();
     }
 
     private DetachedSignature persistDetachedSignature(
@@ -341,12 +371,13 @@ public class ConnectorContainerValidator {
                                 .build();
     }
 
-    private void persistAdditionalAttachments(
+    private List<ConnectorMessageAttachment> persistAdditionalAttachments(
         ConnectorContainer container,
         ConnectorBusinessMessage message)
         throws IOException {
+        List<ConnectorMessageAttachment> attachments = new ArrayList<>();
         for (var attachment : container.businessContent().getAttachments()) {
-            persistAttachment(
+            var connectorMessageAttachment = persistAttachment(
                 newAttachmentMetadata(
                     attachment.getName(),
                     mimeTypeString(attachment),
@@ -357,7 +388,10 @@ public class ConnectorContainerValidator {
                 attachment.openStream(),
                 message.identifier()
             );
+            attachments.add(connectorMessageAttachment);
         }
+
+        return attachments;
     }
 
     private ConnectorMessageAttachment newAttachmentMetadata(
@@ -382,7 +416,7 @@ public class ConnectorContainerValidator {
      * Uploads to storage first, then writes the DB record. This ordering prevents orphaned metadata
      * rows if the upload fails.
      */
-    private void persistAttachment(
+    private ConnectorMessageAttachment persistAttachment(
         ConnectorMessageAttachment attachment,
         InputStream inputStream,
         String messageIdentifier) throws IOException {
@@ -394,8 +428,10 @@ public class ConnectorContainerValidator {
         }
 
         fileStorageProvider.save(attachment, content);
-        attachmentRepository.save(attachment);
+        var persisted = attachmentRepository.save(attachment);
         attachmentRepository.attachToMessage(attachment.identifier(), messageIdentifier);
+
+        return persisted;
     }
 
     /**

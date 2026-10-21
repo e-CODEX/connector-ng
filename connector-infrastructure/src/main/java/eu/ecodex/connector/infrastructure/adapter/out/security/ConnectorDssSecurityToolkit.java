@@ -64,9 +64,9 @@ public class ConnectorDssSecurityToolkit implements ConnectorSecurityToolkit {
     }
 
     @Override
-    public void validateMessage(@NonNull ConnectorBusinessMessage message) {
+    public ConnectorBusinessMessage validateMessage(@NonNull ConnectorBusinessMessage message) {
         log.debug("Validating message [{}] ASIC-S container", message.identifier());
-        this.containerValidator.validate(message);
+        return this.containerValidator.validate(message);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class ConnectorInboundMessageSecurityStepTest {
         var outputMessage = securityStep.execute(inboundMessage);
 
         assertThat(outputMessage).isNotEqualTo(inboundMessage);
-        assertThat(outputMessage.attachments().size()).isEqualTo(2);
+        assertThat(outputMessage.attachments()).hasSize(2);
     }
 
     @Test

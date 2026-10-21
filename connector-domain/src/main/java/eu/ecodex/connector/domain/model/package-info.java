@@ -9,20 +9,22 @@
  */
 
 /**
- * Contains the core domain model of the e-CODEX Connector.
+ * Domain model of the e-CODEX Connector: its entities, value objects and enumerations.
  *
- * <p>This package defines the business entities and value objects used across the connector
- * application. It represents the central data structures that model the system's domain and are
- * independent of technical concerns such as persistence or transport layers.
+ * <p>Classes in this package express the connector's business concepts (messages and their
+ * metadata, attachments, evidences, link partners, business domains, P-Modes) as plain Java types.
+ * They carry the state and invariants of those concepts and know nothing about persistence,
+ * transport or any other technical concern.
  *
- * <p>Typical classes in this package include:
+ * <p>Typical content:
+ *
  * <ul>
- *   <li>Domain entities representing core business concepts
- *   <li>Value objects used for immutable data representation
- *   <li>Enumerations defining domain-specific constants
+ *   <li>entities, identified by their identity and carrying business behavior;
+ *   <li>value objects, immutable and compared by value;
+ *   <li>enumerations of domain-specific states and types (for example message or evidence types).
  * </ul>
  *
- * <p>The domain model should remain stable and free of framework-specific
- * dependencies to ensure maintainability and portability.
+ * <p>The model is free of framework dependencies and depends on no other layer, which keeps it
+ * portable and testable in isolation.
  */
 package eu.ecodex.connector.domain.model;

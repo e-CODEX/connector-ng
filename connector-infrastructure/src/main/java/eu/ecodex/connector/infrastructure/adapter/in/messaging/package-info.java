@@ -9,10 +9,15 @@
  */
 
 /**
- * Provides messaging listener infrastructure for the connector.
+ * Inbound messaging adapters of the connector.
  *
- * <p>Types in this package receive and process inbound messaging events at the infrastructure
- * boundary. They adapt transport-specific listener mechanisms to connector application services,
- * keeping message consumption concerns separate from application and domain logic.
+ * <p>Classes in this package listen to messaging destinations (for example JMS queues) and turn
+ * the messages they receive into calls to the inbound ports of
+ * {@link eu.ecodex.connector.application.port.api}. They translate the technical message (payload)
+ * into domain types, and handle messaging concerns such as acknowledgement and redelivery, so that
+ * none of these details reach the core.
+ *
+ * <p>Listeners here contain no business rules: they depend on the ports only, never on the
+ * application services directly.
  */
 package eu.ecodex.connector.infrastructure.adapter.in.messaging;

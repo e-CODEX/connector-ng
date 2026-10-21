@@ -9,9 +9,9 @@
  */
 
 /**
- * Provides infrastructure-level property support for the e-CODEX Connector.
+ * Typed, validated configuration properties of the infrastructure layer, bound from application
+ * properties and the environment.
  *
- * <p>This package contains classes related to configuration properties, property binding,
- * validation, and access to connector infrastructure settings.
+ * <p>Settings only; no business rules.
  */
 package eu.ecodex.connector.infrastructure.config.property;

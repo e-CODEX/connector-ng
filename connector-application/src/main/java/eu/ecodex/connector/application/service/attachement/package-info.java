@@ -9,9 +9,11 @@
  */
 
 /**
- * Contains implementation classes for application-level attachment handling services.
+ * Application services implementing the attachment use cases of the connector.
  *
- * <p>Classes in this package are responsible for processing, managing, and coordinating
- * attachment-related operations within the connector application service layer.
+ * <p>Services in this package implement the attachment-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.attachment}. They orchestrate operations on
+ * message attachments, such as registering, retrieving and validating them, by delegating business
+ * rules to the domain model and storage or other technical concerns to outbound ports.
  */
 package eu.ecodex.connector.application.service.attachement;

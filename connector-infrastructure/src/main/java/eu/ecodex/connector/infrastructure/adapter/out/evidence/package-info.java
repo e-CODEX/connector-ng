@@ -9,11 +9,17 @@
  */
 
 /**
- * Provides infrastructure components for handling evidences within the connector.
+ * Outbound evidence adapters of the connector: the implementations through which the core produces
+ * and handles evidences using concrete technologies.
  *
- * <p>This package contains implementation-level classes responsible for creating, processing,
- * storing, or exchanging evidence-related data used by the connector runtime. These components
- * support the evidence lifecycle and are intended to be used by higher-level application rather
- * than directly by external clients.
+ * <p>Classes in this package implement the evidence-related outbound ports of
+ * {@link eu.ecodex.connector.application.port.spi}, such as building the technical representation
+ * of an evidence (for example its XML content), signing it, or handing it over for storage or
+ * transmission. They translate between domain types and the evidence's technical format, so that no
+ * format or library details reach the core.
+ *
+ * <p>Evidence adapters contain no business
+ * rules: deciding which evidence applies to a message, and when, belongs to the domain model and
+ * the evidence services of the application layer.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.evidence;

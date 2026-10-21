@@ -9,20 +9,15 @@
  */
 
 /**
- * Contains the core domain model of the e-CODEX Connector.
+ * Core domain model of the e-CODEX Connector.
  *
- * <p>This package defines the business entities and value objects that represent the core concepts
- * of the Connector. These classes are independent of infrastructure concerns such as persistence or
- * transport and focus purely on the domain logic.
+ * <p>This package is the heart of the hexagonal architecture: it expresses the connector's
+ * business concepts (messages and their metadata, attachments, evidences, link partners, business
+ * domains, P-Modes) as entities, value objects and domain services, together with the business
+ * rules and validations that apply to them.
  *
- * <p>Typical responsibilities include:
- * <ul>
- *   <li>Representation of messages and their metadata</li>
- *   <li>Domain-specific identifiers and value objects</li>
- *   <li>Business rules and validation logic</li>
- * </ul>
- *
- * <p>The domain layer should remain stable and should not depend on other layers such as
- * infrastructure or application services.
+ * <p>The domain layer is self-contained and framework-agnostic. It depends on no other layer:
+ * not on the application layer, and not on persistence, transport or any other infrastructure.
+ * Other layers depend on it, never the other way round.
  */
 package eu.ecodex.connector.domain;

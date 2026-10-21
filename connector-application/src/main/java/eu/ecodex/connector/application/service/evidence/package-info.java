@@ -9,10 +9,11 @@
  */
 
 /**
- * Provides application-service implementations for creating and managing connector message
- * evidences.
+ * Application services implementing the evidence use cases of the connector.
  *
- * <p>This package contains components responsible for producing success and failure evidences for
- * connector messages and persisting them through the configured evidence repository.
+ * <p>Services in this package implement the evidence-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.evidence}. They produce the success and failure
+ * evidences of connector messages and persist them through outbound ports, delegating the rules
+ * that determine which evidence applies to the domain model.
  */
 package eu.ecodex.connector.application.service.evidence;

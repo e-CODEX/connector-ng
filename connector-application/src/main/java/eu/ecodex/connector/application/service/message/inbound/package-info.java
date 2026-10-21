@@ -9,10 +9,11 @@
  */
 
 /**
- * Contains the inbound message service implementation classes.
+ * Application services implementing the inbound message use cases of the connector.
  *
- * <p>This package provides application-service components responsible for handling inbound message
- * processing, including preparation, validation orchestration, persistence coordination, and
- * dispatch-related workflow logic.
+ * <p>Services in this package handle messages traveling from the gateway towards a backend. They
+ * orchestrate the inbound workflow (receiving the message, triggering its validation, persisting it
+ * and handing it over for delivery to the backend) by delegating business rules and validation to
+ * the domain model and persistence or backend delivery to outbound ports.
  */
 package eu.ecodex.connector.application.service.message.inbound;

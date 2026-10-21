@@ -9,23 +9,23 @@
  */
 
 /**
- * Contains configuration for the connector application module.
+ * Spring configuration that assembles the application layer of the connector.
  *
- * <p>In the hexagonal architecture of the connector, the application module coordinates the domain
- * model with inbound and outbound adapters. This package provides the configuration required to
- * assemble that application layer, wire use-case services, and expose the ports needed by the
- * surrounding infrastructure.
+ * <p>In the hexagonal architecture of the connector, the application module orchestrates the
+ * domain model through its use cases, exposing inbound ports and depending on outbound ports. This
+ * package holds the configuration that wires those pieces together at startup, so that the core
+ * stays free of framework and infrastructure concerns.
  *
- * <p>Configuration in this package should focus on application orchestration concerns, such as:
+ * <p>Typical responsibilities of this package:
+ *
  * <ul>
- *   <li>creating and wiring application services and use cases;
- *   <li>connecting application ports to their adapter implementations;
- *   <li>binding application properties required by the connector runtime;
- *   <li>keeping domain logic independent of framework and infrastructure-specific setup.
+ *   <li>declaring application services and use-case beans;
+ *   <li>binding outbound ports to their adapter implementations;
+ *   <li>binding the configuration properties required by the application layer;
+ *   <li>defining cross-cutting application concerns such as transaction boundaries.
  * </ul>
  *
- * <p>Classes in this package should avoid implementing business rules directly. Business decisions
- * belong to the domain layer, while transport, persistence, and other technical integrations belong
- * to adapter or infrastructure modules.
+ * <p>This package must not contain business rules. Business decisions belong to the domain layer,
+ * while transport, persistence and other technical integrations belong to the adapter modules.
  */
 package eu.ecodex.connector.application.config;

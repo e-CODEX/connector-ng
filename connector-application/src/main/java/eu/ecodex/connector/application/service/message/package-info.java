@@ -9,10 +9,11 @@
  */
 
 /**
- * Provides message-related service implementations for the connector application.
+ * Application services implementing the message use cases of the connector.
  *
- * <p>This package contains implementation classes responsible for handling application-level
- * message processing concerns, such as preparing, dispatching, receiving, and managing messages
- * within the connector service layer.
+ * <p>Services in this package implement the message-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.message}. They orchestrate the lifecycle of
+ * connector messages, such as submitting, receiving, dispatching and tracking them, by delegating
+ * business rules to the domain model and persistence or gateway communication to outbound ports.
  */
 package eu.ecodex.connector.application.service.message;

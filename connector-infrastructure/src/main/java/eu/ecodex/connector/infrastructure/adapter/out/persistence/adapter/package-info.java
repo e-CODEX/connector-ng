@@ -9,10 +9,9 @@
  */
 
 /**
- * Provides repository-layer infrastructure components for persistence access.
+ * Implementations of the storage-related ports of {@link eu.ecodex.connector.application.port.spi}.
  *
- * <p>This package contains repository implementations and supporting persistence infrastructure
- * used to access, store, and query connector data. Classes in this package form the integration
- * boundary between the application/domain layers and the underlying data storage technology.
+ * <p>Delegate to the persistence repositories and map between domain types and entities; no
+ * business rules.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter;

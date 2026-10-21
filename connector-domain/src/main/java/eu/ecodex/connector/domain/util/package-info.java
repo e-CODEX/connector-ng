@@ -9,10 +9,8 @@
  */
 
 /**
- * Provides domain-level utility classes used by the connector domain model and related business
- * logic.
+ * Stateless helpers shared by the domain model and domain services.
  *
- * <p>Classes in this package contain reusable helper functionality that supports domain operations
- * while remaining independent of infrastructure, persistence, and presentation concerns.
+ * <p>Free of framework and infrastructure dependencies; contains no business rules.
  */
 package eu.ecodex.connector.domain.util;

@@ -9,10 +9,14 @@
  */
 
 /**
- * Provides the bootstrap entry point and startup configuration for the e-CODEX Connector
- * application.
+ * Entry point of the e-CODEX Connector application.
  *
- * <p>This package contains the application-level classes responsible for initializing and
- * launching the connector runtime.
+ * <p>This root package holds the Spring Boot bootstrap class that starts the connector runtime.
+ * It is the only place where the layers of the hexagonal architecture are assembled: the domain
+ * model, the application layer (use cases and ports) and the adapters are wired together at
+ * startup, with dependencies pointing inwards towards the core.
+ *
+ * <p>This package contains startup code only: it must not contain business rules, use cases or
+ * adapter implementations.
  */
 package eu.ecodex.connector;

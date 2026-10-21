@@ -9,13 +9,14 @@
  */
 
 /**
- * Provides infrastructure-level configuration for the connector application.
+ * Spring configuration of the connector's infrastructure layer.
  *
- * <p>This package contains configuration classes that wire technical concerns required by the
- * application runtime, such as persistence, messaging, security, serialization, scheduling, or
- * framework integration.
+ * <p>Classes in this package declare and configure the technical beans the adapters rely on, such
+ * as persistence, messaging (JMS), web and SOAP, security, serialization, scheduling and the DSS
+ * library.
  *
- * <p>Classes in this package should focus on application infrastructure setup and integration
- * with external frameworks rather than business-domain behaviour.
+ * <p>This package contains wiring and framework setup only: it must not contain business rules,
+ * use cases or adapter logic. Application-level wiring (use-case beans, properties of the
+ * application layer) lives in {@code eu.ecodex.connector.application.config}.
  */
 package eu.ecodex.connector.infrastructure.config;

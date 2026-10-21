@@ -9,9 +9,14 @@
  */
 
 /**
- * Provides configuration property access and mapping support for the connector application.
+ * Provides the application layer with access to the connector's configuration properties.
  *
- * <p>This package contains components responsible for supplying, grouping, and exposing
- * infrastructure-level connector properties used by the application module.
+ * <p>Components in this package read connector properties from their underlying source, group
+ * them into typed, application-level views and make them available to use cases and services, so
+ * that the rest of the application layer does not depend on how or where the configuration is
+ * stored.
+ *
+ * <p>This package exposes and maps properties only: it must not contain business rules, and it
+ * should not leak framework-specific configuration types into the domain model.
  */
 package eu.ecodex.connector.application.propertiesprovider;

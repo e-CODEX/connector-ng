@@ -9,15 +9,16 @@
  */
 
 /**
- * Provides the inbound connector message processing pipeline.
+ * Pipeline orchestrating the processing of inbound messages received by the connector.
  *
- * <p>This package contains the pipeline orchestration responsible for handling messages received
- * by the connector before they are handed over to the application-specific processing flow. The
- * pipeline coordinates the ordered execution of inbound processing steps, such as validation,
- * enrichment, evidence handling, persistence, and routing preparation.
+ * <p>The pipeline runs an ordered sequence of processing steps on each message received from the
+ * gateway, such as validation, enrichment, evidence handling, persistence and routing preparation,
+ * before the message is handed over for delivery to a backend. It is responsible for composing the
+ * steps and controlling their execution, including how a failing step affects the rest of the run.
  *
- * <p>Classes in this package should focus on pipeline composition and execution control.
- * Individual processing concerns should be implemented as dedicated pipeline steps in the
- * corresponding {@code step} subpackage.
+ * <p>Classes in this package contain no processing logic of their own. Each processing concern is
+ * implemented as a dedicated step in the
+ * {@link eu.ecodex.connector.application.service.message.inbound.pipeline.step} subpackage, which
+ * keeps steps small, independently testable and easy to reorder or extend.
  */
 package eu.ecodex.connector.application.service.message.inbound.pipeline;

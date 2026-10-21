@@ -9,7 +9,11 @@
  */
 
 /**
- * Contains implementation classes for managing and processing connector P-Mode configuration within
- * the application service layer.
+ * Application services implementing the P-Mode use cases of the connector.
+ *
+ * <p>Services in this package implement the P-Mode-related inbound ports of
+ * {@link eu.ecodex.connector.application.port.api.pmode}. They orchestrate the management of P-Mode
+ * configuration, such as importing, activating and retrieving P-Mode sets, by delegating validation
+ * and business rules to the domain model and persistence to outbound ports.
  */
 package eu.ecodex.connector.application.service.pmode;

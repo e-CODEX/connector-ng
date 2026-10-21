@@ -9,14 +9,10 @@
  */
 
 /**
- * Contains Spring Data JPA repositories for database persistence.
+ * Spring Data repositories on the persistence entities.
  *
- * <p>This package defines repository interfaces used by the infrastructure layer to access and
- * manage persisted connector data, such as parties, services, actions, evidences, keystores,
- * processing modes, and business domains.
- *
- * <p>Repositories in this package are responsible for database access only. Higher layers should
- * interact with persistence through application or domain-facing abstractions where applicable,
- * keeping database-specific concerns isolated within the infrastructure layer.
+ * <p>Internal to the persistence adapter: used only by the port implementations in
+ * {@code out.persistence.adapter}; they handle entities, never domain types, and hold no business
+ * rules.
  */
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository;

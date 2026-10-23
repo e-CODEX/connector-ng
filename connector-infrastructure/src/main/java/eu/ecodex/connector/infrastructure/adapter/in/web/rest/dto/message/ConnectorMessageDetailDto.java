@@ -78,21 +78,13 @@ public record ConnectorMessageDetailDto(
 ) {
     private static final Set<ConnectorAttachmentType> INBOUND_INCLUDED_ATTACHMENT_TYPES =
         EnumSet.of(
-            ConnectorAttachmentType.BUSINESS_CONTENT,
-            ConnectorAttachmentType.BUSINESS_DOCUMENT,
             ConnectorAttachmentType.ATTACHMENT,
-            ConnectorAttachmentType.DETACHED_SIGNATURE,
             ConnectorAttachmentType.PDF_TOKEN,
             ConnectorAttachmentType.XML_TOKEN
         );
 
     private static final Set<ConnectorAttachmentType> OUTBOUND_INCLUDED_ATTACHMENT_TYPES =
-        EnumSet.of(
-            ConnectorAttachmentType.BUSINESS_CONTENT,
-            ConnectorAttachmentType.BUSINESS_DOCUMENT,
-            ConnectorAttachmentType.ATTACHMENT,
-            ConnectorAttachmentType.DETACHED_SIGNATURE
-        );
+        EnumSet.of(ConnectorAttachmentType.ATTACHMENT);
 
     /**
      * Converts a {@link ConnectorBusinessMessage} object into a {@link ConnectorMessageDetailDto}.

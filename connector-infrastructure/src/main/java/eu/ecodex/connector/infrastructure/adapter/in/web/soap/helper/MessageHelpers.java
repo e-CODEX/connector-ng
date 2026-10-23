@@ -73,7 +73,6 @@ public class MessageHelpers {
             .builder()
             .backendMessageIdentifier(details.getBackendMessageId())
             .backendName(backendClientName)
-            .referenceToBackendMessageIdentifier(details.getRefToMessageId())
             .businessDomainIdentifier(ConnectorBusinessDomain.DEFAULT_BUSINESS_DOMAIN_ID)
             .as4Properties(toAS4Properties(details))
             .businessContent(toBusinessContent(
@@ -96,7 +95,6 @@ public class MessageHelpers {
             .builder()
             .evidenceType(ConnectorEvidenceType.valueOf(confirmation.getConfirmationType().value()))
             .backendName(backendClientName)
-            .backendMessageIdentifier(details.getBackendMessageId())
             .referenceToIdentifier(details.getRefToMessageId())
             .build();
     }
@@ -131,6 +129,7 @@ public class MessageHelpers {
             .builder()
             .conversationIdentifier(details.getConversationId())
             .ebmsMessageIdentifier(details.getEbmsMessageId())
+            .referenceToIdentifier(details.getRefToMessageId())
             .originalSender(details.getOriginalSender())
             .finalRecipient(details.getFinalRecipient())
             .service(service)

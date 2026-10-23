@@ -70,22 +70,21 @@ create index IDX_CM_TS_STATUS
 
 create table connector_messages
 (
-    id                                      bigint auto_increment
+    id                           bigint auto_increment
         primary key,
-    created_at                              datetime(6)  not null,
-    updated_at                              datetime(6)  not null,
-    backend_message_identifier              varchar(255) null,
-    backend_name                            varchar(255) null,
-    confirmed_at                            datetime(6)  null,
-    deleted_at                              datetime(6)  null,
-    delivered_to_link_partner_at            datetime(6)  null,
-    direction                               enum (
-        'BACKEND_TO_GATEWAY', 'GATEWAY_TO_BACKEND')      not null,
-    gateway_name                            varchar(255) null,
-    identifier                              varchar(255) not null,
-    reference_to_backend_message_identifier varchar(255) null,
-    rejected_at                             datetime(6)  null,
-    business_domain_id                      bigint       not null,
+    created_at                   datetime(6)        not null,
+    updated_at                   datetime(6)        not null,
+    backend_message_identifier   varchar(255)       null,
+    backend_name                 varchar(255)       null,
+    confirmed_at                 datetime(6)        null,
+    deleted_at                   datetime(6)        null,
+    delivered_to_link_partner_at datetime(6)        null,
+    direction                    enum (
+        'BACKEND_TO_GATEWAY', 'GATEWAY_TO_BACKEND') not null,
+    gateway_name                 varchar(255)       null,
+    identifier                   varchar(255)       not null,
+    rejected_at                  datetime(6)        null,
+    business_domain_id           bigint             not null,
     constraint UQ_CM_IDENTIFIER
         unique (identifier),
     constraint FK_CM_BUSINESS_DOMAIN
@@ -247,9 +246,6 @@ create index IDX_CM_DIRECTION
 
 create index IDX_CM_GATEWAY_NAME
     on connector_messages (gateway_name);
-
-create index IDX_CM_REF_BACKEND_MSG_ID
-    on connector_messages (reference_to_backend_message_identifier);
 
 create table connector_processing_modes
 (

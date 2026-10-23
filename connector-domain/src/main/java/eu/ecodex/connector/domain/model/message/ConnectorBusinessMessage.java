@@ -36,8 +36,6 @@ import lombok.NonNull;
  *                                            system scope.
  * @param backendMessageIdentifier            A mandatory unique uuid for the message from the
  *                                            backend perspective.
- * @param referenceToBackendMessageIdentifier An optional reference to a related backend message
- *                                            uuid.
  * @param backendName                         The name of the backend system. Maybe null.
  * @param gatewayName                         The name of the gateway associated with this message.
  *                                            Maybe null.
@@ -77,7 +75,6 @@ public record ConnectorBusinessMessage(
     @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
     @Nonnull String identifier,
     @Nullable String backendMessageIdentifier,
-    @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
     @Nullable String backendName,
     @Nullable String gatewayName,
     @Nonnull ConnectorMessageAS4Properties as4Properties,
@@ -94,7 +91,6 @@ public record ConnectorBusinessMessage(
     @Nullable List<ConnectorMessageEvidence> evidences,
     @Nullable List<ConnectorMessageEvidence> transportedEvidences
 ) implements Serializable, ConnectorMessage {
-
     /**
      * Initializes the message with default values for optional fields.
      */
@@ -122,10 +118,10 @@ public record ConnectorBusinessMessage(
     public String toString() {
         return String.format(
             "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
-                + "referenceToBackendMessageIdentifier=%s, direction=%s, as4Properties=%s "
-                + "businessContent=%s, attachments=%s, errors=%s, evidences=%s",
+                + "direction=%s, as4Properties=%s businessContent=%s, attachments=%s, errors=%s, "
+                + "evidences=%s",
             identifier, backendMessageIdentifier, backendName, gatewayName,
-            referenceToBackendMessageIdentifier, direction, as4Properties, businessContent,
+            direction, as4Properties, businessContent,
             attachments, errors, evidences
         );
     }

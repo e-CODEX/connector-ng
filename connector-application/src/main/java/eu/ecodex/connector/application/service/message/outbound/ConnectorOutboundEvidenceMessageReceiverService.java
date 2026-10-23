@@ -57,8 +57,6 @@ public class ConnectorOutboundEvidenceMessageReceiverService
         var triggeredEvidenceMessage = ConnectorTriggeredEvidenceMessage
             .builder()
             .identifier(messageIdGeneratorService.execute())
-            .backendMessageIdentifier(command.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(command.backendMessageIdentifier())
             .backendName(command.backendName())
             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
             .evidenceType(command.evidenceType())

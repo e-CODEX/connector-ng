@@ -182,3 +182,8 @@ tasks.named<JavaCompile>("compileTestJava") {
 tasks.named<JavaCompile>("compileTestFixturesJava") {
     dependsOn(tasks.named("generateEvidenceJaxb"))
 }
+
+tasks.test {
+    // Avoid ConnectException noise: no OTLP collector is running during tests
+    systemProperty("management.otlp.metrics.export.enabled", "false")
+}

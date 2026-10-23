@@ -34,9 +34,6 @@ import lombok.Builder;
  * @param identifier                          unique identifier of the connector message
  * @param backendMessageIdentifier            identifier assigned to the message by the backend
  *                                            system
- * @param referenceToBackendMessageIdentifier reference to another backend message identifier,
- *                                            typically used for replies, acknowledgements, or
- *                                            correlations
  * @param backendName                         name of the backend system associated with the
  *                                            message
  * @param gatewayName                         name of the gateway responsible for transmitting or
@@ -63,7 +60,6 @@ public record ConnectorMessageDetailDto(
     String businessDomainIdentifier,
     String identifier,
     String backendMessageIdentifier,
-    String referenceToBackendMessageIdentifier,
     String backendName,
     String gatewayName,
     ConnectorMessageBusinessContent businessContent,
@@ -113,7 +109,6 @@ public record ConnectorMessageDetailDto(
                 message.businessDomainIdentifier().messageLaneIdentifier())
             .identifier(message.identifier())
             .backendMessageIdentifier(message.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
             .direction(Objects.requireNonNull(message.direction()))
             .isBusiness(true)
             .backendName(message.backendName())
@@ -151,7 +146,6 @@ public record ConnectorMessageDetailDto(
                 message.businessDomainIdentifier().messageLaneIdentifier())
             .identifier(message.identifier())
             .backendMessageIdentifier(message.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
             .direction(Objects.requireNonNull(message.direction()))
             .backendName(message.backendName())
             .gatewayName(message.gatewayName())

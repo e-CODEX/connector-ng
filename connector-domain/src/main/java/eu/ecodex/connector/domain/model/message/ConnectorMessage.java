@@ -37,8 +37,6 @@ public sealed interface ConnectorMessage extends ConnectorPublishable
 
     String backendMessageIdentifier();
 
-    String referenceToBackendMessageIdentifier();
-
     String backendName();
 
     String gatewayName();

@@ -162,7 +162,7 @@ public class ConnectorBackendWebServiceControllerTest {
             var ack = backendWebService.submitMessage(payload);
 
             assertThat(ack).isNotNull();
-            assertThat(ack.getMessageId()).isNullOrEmpty();
+            assertThat(ack.getMessageId()).isEqualTo("0093ac10-447c-4946-89a8-dcd9e7a2f4ab");
             assertThat(ack.getResultMessage()).isNotNull();
             assertThat(ack.isResult()).isFalse();
         }

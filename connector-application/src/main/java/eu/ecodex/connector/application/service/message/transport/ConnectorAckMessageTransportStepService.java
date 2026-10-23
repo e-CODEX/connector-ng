@@ -92,7 +92,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
                 ("The transport step with message/remote ID [%s] does not belong to "
                     + "link partner [%s]")
                     .formatted(messageOrRemoteSystemIdentifier, command.linkPartnerName()
-                )
+                    )
             );
         }
 
@@ -133,6 +133,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         UpdateMessageTransportCommand command) {
 
         var update = ConnectorMessageTransportStep.builder()
+                                                  .identifier(existingStep.identifier())
                                                   .status(command.status())
                                                   .numberOfAttempts(existingStep.numberOfAttempts())
                                                   .build();

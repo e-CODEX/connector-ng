@@ -124,12 +124,8 @@ public class ConnectorOutboundEvidenceMessageProcessorService
         var referenceToMessageId = triggerMessage.referenceToIdentifier();
 
         if (!StringUtils.hasText(referenceToMessageId)) {
-            referenceToMessageId = triggerMessage.referenceToBackendMessageIdentifier();
-        }
-
-        if (!StringUtils.hasText(referenceToMessageId)) {
             throw new ConnectorEvidenceException(
-                "Evidence trigger must set refToMessageId to the referenced business message"
+                "Evidence trigger must set referenceToIdentifier to the referenced business message"
             );
         }
 

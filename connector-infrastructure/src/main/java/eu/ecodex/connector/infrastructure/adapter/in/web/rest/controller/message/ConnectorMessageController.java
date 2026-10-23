@@ -78,8 +78,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
             .evidenceType(request.evidenceType())
-            .backendMessageIdentifier(request.identifiers().backendMessageIdentifier())
-            .referenceToIdentifier(request.identifiers().referenceToIdentifier())
+            .referenceToIdentifier(request.referenceToIdentifier())
             .backendName(backendClientName)
             .build();
 
@@ -101,7 +100,6 @@ public class ConnectorMessageController implements ConnectorMessageApi {
                 )
             )
             .backendMessageIdentifier(request.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(null)
             .backendName(backendClientName)
             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
             .as4Properties(toDomainAS4Properties(request.as4Properties()))

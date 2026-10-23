@@ -79,8 +79,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         var as4Properties = ConnectorMessageAS4Properties
             .builder()
             .conversationIdentifier(businessAs4.conversationIdentifier())
-            .ebmsMessageIdentifier(
-                resolveEbmsIdentifier(businessMessage))
+            .ebmsMessageIdentifier(resolveEbmsIdentifier(businessMessage))
             .finalRecipient(businessAs4.finalRecipient())
             .originalSender(businessAs4.originalSender())
             .fromParty(copyParty(businessAs4.fromParty()))
@@ -95,7 +94,6 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             .identifier(messageIdGeneratorService.execute())
             .backendMessageIdentifier(businessMessage.backendMessageIdentifier())
             .businessDomainIdentifier(businessMessage.businessDomainIdentifier())
-            .referenceToBackendMessageIdentifier(businessMessage.backendMessageIdentifier())
             .direction(businessMessage.direction())
             .backendName(businessMessage.backendName())
             .gatewayName(businessMessage.gatewayName())
@@ -118,8 +116,7 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
             // will cross the gateway, so we need to
             // generate a new ebms
             // identifier
-            .ebmsMessageIdentifier(
-                messageEbmsIdGeneratorService.execute())
+            .ebmsMessageIdentifier(messageEbmsIdGeneratorService.execute())
             .originalSender(businessAs4.finalRecipient())
             .finalRecipient(businessAs4.originalSender())
             .fromParty(copyParty(businessAs4.toParty()))
@@ -132,9 +129,8 @@ public class ConnectorEvidenceMessageCreatorService implements ConnectorEvidence
         return ConnectorEvidenceMessage
             .builder()
             .identifier(messageIdGeneratorService.execute())
-            .backendMessageIdentifier(triggeredMessage.backendMessageIdentifier())
+            .backendMessageIdentifier(businessMessage.backendMessageIdentifier())
             .businessDomainIdentifier(businessMessage.businessDomainIdentifier())
-            .referenceToBackendMessageIdentifier(businessMessage.backendMessageIdentifier())
             .direction(triggeredMessage.direction())
             .backendName(triggeredMessage.backendName())
             .gatewayName(businessMessage.gatewayName())

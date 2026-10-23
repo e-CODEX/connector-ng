@@ -20,8 +20,6 @@ public class TriggeredEvidenceMessageTestFixtures {
         return ConnectorTriggeredEvidenceMessage
             .builder()
             .identifier("aa86b9d2-59f8-4d20-8051-35d67f0e8fd1@connector.ecodex.eu")
-            .backendMessageIdentifier("125579fe-3279-4277-9a30-95231513e2bf")
-            .referenceToBackendMessageIdentifier("125579fe-3279-4277-9a30-95231513e2bf")
             .backendName("default_backend")
             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
             .evidenceType(ConnectorEvidenceType.DELIVERY)

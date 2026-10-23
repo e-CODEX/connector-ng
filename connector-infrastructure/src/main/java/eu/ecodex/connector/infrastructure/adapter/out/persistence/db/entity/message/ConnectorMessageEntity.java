@@ -60,10 +60,6 @@ import lombok.Setter;
     indexes = {
         @Index(name = "IDX_CM_BACKEND_NAME", columnList = "BACKEND_NAME"),
         @Index(name = "IDX_CM_BACKEND_MSG_ID", columnList = "BACKEND_MESSAGE_IDENTIFIER"),
-        @Index(
-            name = "IDX_CM_REF_BACKEND_MSG_ID",
-            columnList = "REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER"
-        ),
         @Index(name = "IDX_CM_GATEWAY_NAME", columnList = "GATEWAY_NAME"),
         @Index(name = "IDX_CM_DIRECTION", columnList = "DIRECTION"),
         @Index(name = "IDX_CM_DELIVERED_AT", columnList = "DELIVERED_TO_LINK_PARTNER_AT"),
@@ -82,10 +78,6 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Setter
     @Column(name = "BACKEND_MESSAGE_IDENTIFIER")
     private String backendMessageIdentifier;
-
-    @Setter
-    @Column(name = "REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER")
-    private String referenceToBackendMessageIdentifier;
 
     @Setter
     @Column(name = "BACKEND_NAME")

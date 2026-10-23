@@ -52,13 +52,10 @@ public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
     }
 
     private ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage(
-        String referenceToIdentifier,
-        String backendMessageIdentifier) {
+        String referenceToIdentifier) {
         return ConnectorTriggeredEvidenceMessage
             .builder()
             .identifier("2df7c881-5548-4edd-8bcd-868af750b859@connector.ecodex.eu")
-            .backendMessageIdentifier(backendMessageIdentifier)
-            .referenceToBackendMessageIdentifier(backendMessageIdentifier)
             .backendName("backend_alice")
             .direction(TRIGGER_DIRECTION)
             .evidenceType(ConnectorEvidenceType.DELIVERY)
@@ -71,9 +68,9 @@ public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
     class WhenReferenceIsInvalid {
         @Test
         void should_fail_when_both_reference_ids_are_blank() {
-            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage("", "")))
+            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage("")))
                 .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("refToMessageId");
+                .hasMessageContaining("referenceToIdentifier");
         }
     }
 
@@ -85,7 +82,7 @@ public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
             when(messageRepository.findReferencedBusinessMessage(REF_ID, TRIGGER_DIRECTION))
                 .thenReturn(null);
 
-            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage(REF_ID, "")))
+            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage(REF_ID)))
                 .isInstanceOf(ConnectorMessageNotFoundException.class)
                 .hasMessageContaining(REF_ID);
         }
@@ -100,7 +97,7 @@ public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
                 .thenReturn(inboundBusinessMessage());
 
             assertThatNoException()
-                .isThrownBy(() -> service.verify(triggeredEvidenceMessage("", BACKEND_ID)));
+                .isThrownBy(() -> service.verify(triggeredEvidenceMessage(BACKEND_ID)));
         }
 
         @Test
@@ -110,7 +107,7 @@ public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
                                                     .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                                                     .build());
 
-            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage("", BACKEND_ID)))
+            assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage(BACKEND_ID)))
                 .isInstanceOf(ConnectorEvidenceException.class)
                 .hasMessageContaining("GATEWAY_TO_BACKEND")
                 .hasMessageContaining("BACKEND_TO_GATEWAY");

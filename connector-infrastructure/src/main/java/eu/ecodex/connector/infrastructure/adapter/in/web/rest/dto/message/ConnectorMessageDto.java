@@ -32,8 +32,6 @@ import lombok.Builder;
  *                                            the message.
  * @param identifier                          The unique identifier for this message.
  * @param backendMessageIdentifier            The identifier for the message in the backend system.
- * @param referenceToBackendMessageIdentifier The identifier of a related message in the backend
- *                                            system.
  * @param backendName                         The name of the backend system processing this
  *                                            message.
  * @param gatewayName                         The name of the gateway involved in processing this
@@ -56,7 +54,6 @@ public record ConnectorMessageDto(
     String businessDomainIdentifier,
     String identifier,
     String backendMessageIdentifier,
-    String referenceToBackendMessageIdentifier,
     String backendName,
     String gatewayName,
     ConnectorMessageAS4Properties as4Properties,
@@ -80,11 +77,9 @@ public record ConnectorMessageDto(
     public static ConnectorMessageDto from(ConnectorBusinessMessage message) {
         return ConnectorMessageDto
             .builder()
-            .businessDomainIdentifier(
-                message.businessDomainIdentifier().messageLaneIdentifier())
+            .businessDomainIdentifier(message.businessDomainIdentifier().messageLaneIdentifier())
             .identifier(message.identifier())
             .backendMessageIdentifier(message.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
             .direction(Objects.requireNonNull(message.direction()))
             .delivered(isDelivered(message))
             .backendName(message.backendName())

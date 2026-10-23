@@ -9,7 +9,7 @@ This chapter describes how evidence is generated and submitted when triggered fr
 == Evidence trigger from the backend
 
 The backend can request evidence generation by submitting an evidence trigger message via the backend SOAP API.
-The trigger specifies the evidence type (for example `DELIVERY`) and references the original business message via `refToMessageId`.
+The trigger specifies the evidence type (for example `DELIVERY`) and references the original business message via `referenceToIdentifier`.
 
 [plantuml,outgoing_evidence_1,format=png, opts=inline]
 ----
@@ -77,7 +77,7 @@ ConnectorEvidenceTriggerProcessorService --> ConnectorLinkSubmitter : optionally
 Processing steps:
 
 . Validate that the message is an evidence trigger and triggering is allowed.
-. Resolve the referenced gateway-to-backend business message via `refToMessageId`.
+. Resolve the referenced gateway-to-backend business message via `referenceToIdentifier`.
 . Build the ETSI-REM evidence XML of the requested type using `ConnectorMessageEvidenceCreator` and `ConnectorEvidenceToolkitImpl`.
 . Verify evidence applicability against previously received evidence.
 . Create a confirmation message and submit it to the gateway via `ConnectorLinkSubmitter`.

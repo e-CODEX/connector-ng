@@ -266,6 +266,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         } catch (Exception e) {
             log.error("Error submitting message to the connector via SOAP endpoint", e);
             answer.setResult(false);
+            answer.setMessageId(submitMessageRequest.getMessageDetails().getBackendMessageId());
             answer.setResultMessage(e.getMessage());
         }
 

@@ -5,7 +5,7 @@ endif::header[]
 = Processing of an incoming evidence message
 
 This chapter describes how an evidence confirmation message delivered by the gateway is processed.
-An incoming evidence message carries REM evidence XML (for example `DELIVERY` or `NON_DELIVERY`) and references the original business message via `refToMessageId`.
+An incoming evidence message carries REM evidence XML (for example `DELIVERY` or `NON_DELIVERY`) and references the original business message via `referenceToIdentifier`.
 
 == Message from gateway to the connector
 
@@ -62,7 +62,7 @@ database ConnectorMessageEvidenceRepository
 
 gatewayReceptionQueue --> ConnectorGatewayMessageListener
 ConnectorGatewayMessageListener --> ConnectorGatewayConfirmationMessageProcessorService : confirmation message
-ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageRepository : find referenced business message (refToMessageId)
+ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageRepository : find referenced business message (referenceToIdentifier)
 ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageEvidenceVerifier : validate evidence priority
 ConnectorGatewayConfirmationMessageProcessorService --> ConnectorMessageEvidenceRepository : persist evidence
 ConnectorGatewayConfirmationMessageProcessorService --> ConnectorLinkSubmitter : forward to backend
@@ -72,7 +72,7 @@ ConnectorGatewayConfirmationMessageProcessorService --> ConnectorLinkSubmitter :
 
 Processing steps:
 
-. Load the referenced business message using `refToMessageId` (ebMS message identifier).
+. Load the referenced business message using `referenceToIdentifier` (ebMS message identifier).
 . For each transported evidence, verify applicability via `ConnectorMessageEvidenceVerifier` (priority rules).
 . Persist accepted evidences and update the business message lifecycle (confirmed/rejected).
 . Forward the confirmation message to the backend via `ConnectorLinkSubmitter`.

@@ -191,7 +191,6 @@ public class ConnectorJmsBackendMessageDeliveryListener
 
         if (autoTriggerDeliveryEvidences) {
             triggerDeliveryConfirmation(
-                message.backendMessageIdentifier(),
                 message.as4Properties().ebmsMessageIdentifier(),
                 message.backendName()
             );
@@ -262,21 +261,18 @@ public class ConnectorJmsBackendMessageDeliveryListener
     }
 
     private void triggerDeliveryConfirmation(
-        String backendMessageIdentifier,
-        String referenceToIdentifier,
+        String ebmsMessageIdentifier,
         String backendClientName) {
 
         var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
-            .backendMessageIdentifier(backendMessageIdentifier)
-            .referenceToIdentifier(referenceToIdentifier)
+            .referenceToIdentifier(ebmsMessageIdentifier)
             .backendName(backendClientName)
             .build();
 
         outboundEvidenceMessageReceiver.execute(message);
     }
-
 
     private record DeliveryOutcome(
         boolean accepted,

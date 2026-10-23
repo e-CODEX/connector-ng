@@ -36,14 +36,20 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.Connecto
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorInternalServerException;
 import io.swagger.v3.oas.annotations.Hidden;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 /**
  * Global exception handler for handling exceptions thrown across the application. It provides
@@ -54,6 +60,37 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
+    private static List<String> allowedValues(Class<?> enumType) {
+        return Arrays.stream(enumType.getEnumConstants())
+            .map(constant -> ((Enum<?>) constant).name())
+            .toList();
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ErrorResponse handleInvalidEnumeration(MethodArgumentTypeMismatchException e) {
+        Class<?> type = e.getRequiredType();
+        var message = (type != null && type.isEnum())
+            ? "%s must be one of: %s".formatted(e.getName(), allowedValues(type))
+            : "Parameter '%s' has an invalid value".formatted(e.getName());
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ErrorResponse handleInvalidEnumeration(HttpMessageNotReadableException e) {
+        if (e.getCause() instanceof InvalidFormatException ex && ex.getTargetType().isEnum()) {
+            var field = ex.getPath().stream()
+                .map(JacksonException.Reference::getPropertyName)
+                .collect(Collectors.joining("."));
+            var allowedValues = allowedValues(ex.getTargetType());
+            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+                field + " must be one of " + allowedValues);
+        }
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Malformed request body");
+    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.CONFLICT)

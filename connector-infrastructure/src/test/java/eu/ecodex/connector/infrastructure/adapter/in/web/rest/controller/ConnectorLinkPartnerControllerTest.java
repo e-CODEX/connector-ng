@@ -28,6 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -49,9 +50,9 @@ public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
             .thenReturn(List.of(LinkPartnerTestFixtures.createAliceBackendLinkPartner()));
 
         mockMvc.perform(get(URL).contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isOk())
-               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$", hasSize(1)));
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize(1)));
 
         verify(listLinkPartners).execute(null);
     }
@@ -62,12 +63,25 @@ public class ConnectorLinkPartnerControllerTest extends AbstractWebMvcTest {
             .thenReturn(List.of());
 
         mockMvc.perform(get(URL)
-                            .param("linkType", "BACKEND")
-                            .contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isOk())
-               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-               .andExpect(jsonPath("$", hasSize(0)));
+                .param("linkType", "BACKEND")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$", hasSize(0)));
 
         verify(listLinkPartners).execute(ConnectorLinkType.BACKEND);
+    }
+
+    @Test
+    void should_return_400_when_invalid_link_partner_type() throws Exception {
+        mockMvc.perform(get(URL)
+                .param("linkType", "INVALID")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().is4xxClientError())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.value()))
+            .andExpect(jsonPath("$.message").value(
+                "linkType must be one of: [BACKEND, GATEWAY]"
+            ));
     }
 }

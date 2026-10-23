@@ -12,8 +12,9 @@ package eu.ecodex.connector.application.service.stats;
 
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageStatsRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import java.time.Instant;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
@@ -27,12 +28,10 @@ public class ConnectorRetrieveMessageStatsService implements ConnectorRetrieveMe
         this.statsRepository = statsRepository;
     }
 
-    private static Instant parseInstant(String value) {
-        return (value == null || value.isBlank()) ? null : Instant.parse(value);
-    }
-
     @Override
-    public ConnectorMessageStats execute(String from, String to, String businessDomain) {
-        return statsRepository.findAll(parseInstant(from), parseInstant(to), businessDomain);
+    public ConnectorMessageStats execute(
+        @NonNull ConnectorDateRangeFilter dateFilter,
+        String businessDomain) {
+        return statsRepository.findAll(dateFilter, businessDomain);
     }
 }

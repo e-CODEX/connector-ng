@@ -10,9 +10,10 @@
 
 package eu.ecodex.connector.application.port.spi;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
-import java.time.Instant;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -23,26 +24,30 @@ public interface ConnectorMessageStatsRepository {
      * Retrieves the statistics of the connector messages within the given period, optionally
      * restricted to a business domain.
      *
-     * @param from           the start of the period; no lower limit if {@code null}
-     * @param to             the end of the period; no upper limit if {@code null}
+     * @param dateFilter     the {@link ConnectorDateRangeFilter} defining the period (must not be
+     *                       null); the bounds are inclusive
      * @param businessDomain the identifier of the business domain to restrict the statistics to;
      *                       all business domains are covered if {@code null} or empty
      *
      * @return the {@link ConnectorMessageStats} of the period
      */
-    ConnectorMessageStats findAll(Instant from, Instant to, String businessDomain);
+    ConnectorMessageStats findAll(
+        @Nonnull ConnectorDateRangeFilter dateFilter,
+        String businessDomain);
 
     /**
      * Computes the message report for the given period, optionally restricted to a business
      * domain.
      *
-     * @param from           the start of the period; no lower limit if {@code null}
-     * @param to             the end of the period; no upper limit if {@code null}
+     * @param dateFilter     the {@link ConnectorDateRangeFilter} defining the period (must not be
+     *                       null); the bounds are inclusive
      * @param businessDomain the identifier of the business domain to restrict the report to; all
      *                       business domains are covered if {@code null} or empty
      *
      * @return the {@link ConnectorMessageReport} entries computed for the period (for example one
      *     per day, direction or status); never {@code null}, and empty if no messages match
      */
-    List<ConnectorMessageReport> computeReport(Instant from, Instant to, String businessDomain);
+    List<ConnectorMessageReport> computeReport(
+        @Nonnull ConnectorDateRangeFilter dateFilter,
+        String businessDomain);
 }

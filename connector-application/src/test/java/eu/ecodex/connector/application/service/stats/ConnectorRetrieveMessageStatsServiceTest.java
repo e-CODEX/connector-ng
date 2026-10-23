@@ -11,11 +11,14 @@
 package eu.ecodex.connector.application.service.stats;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageStatsTestFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageStatsRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@SuppressWarnings("DataFlowIssue")
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorRetrieveMessageStatsService")
 public class ConnectorRetrieveMessageStatsServiceTest {
@@ -32,19 +36,30 @@ public class ConnectorRetrieveMessageStatsServiceTest {
     @InjectMocks
     private ConnectorRetrieveMessageStatsService service;
 
+    private final ConnectorDateRangeFilter dateRange = ConnectorDateRangeFilter.of(
+        Instant.now(), Instant.now()
+    );
+
     @Test
-    void should_retrieve_message_stats_successfully() {
+    void should_retrieve_message_stats() {
         when(statsRepository.findAll(
-            any(),
             any(),
             any()
         )).thenReturn(MessageStatsTestFixtures.createStats());
 
-        var stats = service.execute(any(), any(), any());
+        var stats = service.execute(dateRange, null);
 
         assertThat(stats).isNotNull();
         assertThat(stats.all()).isNotNull();
         assertThat(stats.inbound()).isNotNull();
         assertThat(stats.outbound()).isNotNull();
+    }
+
+    @Test
+    void should_fail_when_date_range_is_null() {
+        assertThrows(
+            NullPointerException.class,
+            () -> service.execute(null, null)
+        );
     }
 }

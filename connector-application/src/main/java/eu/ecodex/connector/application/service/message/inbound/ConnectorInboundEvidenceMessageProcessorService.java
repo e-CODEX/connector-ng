@@ -94,7 +94,7 @@ public class ConnectorInboundEvidenceMessageProcessorService
         var referenceToMessageId = confirmationMessage.as4Properties().referenceToIdentifier();
         if (!StringUtils.hasText(referenceToMessageId)) {
             log.warn(
-                "Confirmation message [{}] has no refToMessageId, skipping lifecycle update",
+                "Confirmation message [{}] has no referenceToIdentifier, skipping lifecycle update",
                 confirmationMessage.identifier()
             );
 
@@ -194,7 +194,6 @@ public class ConnectorInboundEvidenceMessageProcessorService
         var messageForBackend = confirmationMessage
             .toBuilder()
             .backendName(referencedMessage.backendName())
-            .referenceToBackendMessageIdentifier(backendMessageIdentifier)
             .as4Properties(
                 confirmationMessage.as4Properties()
                                    .toBuilder()

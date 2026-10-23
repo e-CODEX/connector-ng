@@ -41,7 +41,6 @@ import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.adapter.in.web.ConnectorBackendClientVerifier;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.message.ConnectorMessageController;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.parser.ConnectorRestOutboundMessageParser;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageIdentifiers;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound.ConnectorOutboundMessageBusinessContent;
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
@@ -178,11 +177,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
         return ConnectorEvidenceTriggerMessageRequest
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
-            .identifiers(ConnectorEvidenceTriggerMessageIdentifiers
-                             .builder()
-                             .referenceToIdentifier(REFERENCE_TO_IDENTIFIER)
-                             .build()
-            )
+            .referenceToIdentifier(REFERENCE_TO_IDENTIFIER)
             .build();
     }
 
@@ -217,7 +212,6 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             var command = captureOutboundCommand();
             assertThat(command.businessDomainIdentifier()).isEqualTo(businessDomainIdentifier);
             assertThat(command.backendMessageIdentifier()).isEqualTo(BACKEND_MESSAGE_IDENTIFIER);
-            assertThat(command.referenceToBackendMessageIdentifier()).isNull();
             assertThat(command.backendName()).isEqualTo(BACKEND_NAME);
             assertThat(command.direction())
                 .isEqualTo(ConnectorMessageDirection.BACKEND_TO_GATEWAY);
@@ -342,7 +336,6 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             var command = captor.getValue();
             assertThat(command.evidenceType()).isEqualTo(ConnectorEvidenceType.DELIVERY);
             assertThat(command.referenceToIdentifier()).isEqualTo(REFERENCE_TO_IDENTIFIER);
-            assertThat(command.backendMessageIdentifier()).isNull();
             assertThat(command.backendName()).isEqualTo(BACKEND_NAME);
 
             verifyNoInteractions(outboundBusinessMessageReceiver, restOutboundMessageParser);
@@ -353,7 +346,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             var request = ConnectorEvidenceTriggerMessageRequest
                 .builder()
                 .evidenceType(null)
-                .identifiers(buildValidEvidenceTriggerRequest().identifiers())
+                .referenceToIdentifier(buildValidEvidenceTriggerRequest().referenceToIdentifier())
                 .build();
 
             mockMvc.perform(post(EVIDENCE_TRIGGER_URL)

@@ -24,8 +24,6 @@ import org.springframework.util.StringUtils;
 public class MessageSpecification {
     private static final String IDENTIFIER_FIELD = "identifier";
     private static final String BACKEND_MESSAGE_IDENTIFIER_FIELD = "backendMessageIdentifier";
-    private static final String REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER =
-        "referenceToBackendMessageIdentifier";
     private static final String AS4_PROPERTIES_FIELD = "as4Properties";
     private static final String SERVICE_FIELD = "service";
     private static final String ACTION_FIELD = "action";
@@ -55,7 +53,6 @@ public class MessageSpecification {
             .where(withIdentifier(filter.identifier()))
             .or(
                 withBackendMessageIdentifier(filter.identifier())
-                    .or(withRefToBackendMessageIdentifier(filter.identifier()))
                     .or(withConversationIdentifier(filter.identifier()))
                     .or(withEbmsIdentifier(filter.identifier()))
             )
@@ -89,19 +86,6 @@ public class MessageSpecification {
             var pattern = "%" + identifier + "%";
 
             return cb.like(root.get(BACKEND_MESSAGE_IDENTIFIER_FIELD), pattern);
-        });
-    }
-
-    private static Specification<ConnectorMessageEntity> withRefToBackendMessageIdentifier(
-        String identifier) {
-        return ((root, query, cb) -> {
-            if (!StringUtils.hasText(identifier)) {
-                return null;
-            }
-
-            var pattern = "%" + identifier + "%";
-
-            return cb.like(root.get(REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER), pattern);
         });
     }
 

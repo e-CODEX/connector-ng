@@ -39,25 +39,16 @@ public class ConnectorTriggeredEvidenceMessageVerifierService
 
     @Override
     public void verify(@Nonnull ConnectorTriggeredEvidenceMessage triggeredEvidenceMessage) {
-        var referenceToMessageId = resolveReferenceToMessageIdentifier(
-            triggeredEvidenceMessage.referenceToBackendMessageIdentifier(),
-            triggeredEvidenceMessage.referenceToIdentifier()
-        );
+        var referenceToMessageIdentifier = triggeredEvidenceMessage.referenceToIdentifier();
 
         var direction = triggeredEvidenceMessage.direction();
 
-        validateTriggerMessage(referenceToMessageId, direction);
+        validateTriggerMessage(referenceToMessageIdentifier, direction);
 
-        var businessMessage = findReferencedBusinessMessage(referenceToMessageId, direction);
+        var businessMessage = findReferencedBusinessMessage(
+            referenceToMessageIdentifier, direction
+        );
         checkRelatedBusinessMessageDirection(businessMessage);
-    }
-
-    private String resolveReferenceToMessageIdentifier(
-        String referenceToBackendMessageIdentifier,
-        String referenceToIdentifier) {
-        return StringUtils.hasText(referenceToIdentifier)
-               ? referenceToIdentifier
-               : referenceToBackendMessageIdentifier;
     }
 
     private void validateTriggerMessage(
@@ -65,7 +56,8 @@ public class ConnectorTriggeredEvidenceMessageVerifierService
         ConnectorMessageDirection direction) {
         if (!StringUtils.hasText(referenceToMessageId)) {
             throw new ConnectorEvidenceException(
-                "Evidence trigger must set refToMessageId to the referenced business message");
+                "Evidence trigger must set referenceToIdentifier to the referenced business message"
+            );
         }
 
         if (direction == null) {
@@ -91,8 +83,9 @@ public class ConnectorTriggeredEvidenceMessageVerifierService
 
         if (relatedBusinessMessage == null) {
             throw new ConnectorMessageNotFoundException(
-                "Referenced business message not found for evidence trigger message with ref ["
-                    + referenceToMessageId + "]");
+                "Referenced business message not found for evidence trigger message with reference"
+                    + " identifier [%s]".formatted(referenceToMessageId)
+            );
         }
 
         return relatedBusinessMessage;

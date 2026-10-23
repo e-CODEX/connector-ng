@@ -35,7 +35,10 @@ import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
+import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -99,9 +102,15 @@ public class ConnectorAckMessageTransportStepServiceTest {
     private ConnectorMessageTransportStep stepWithStatus(
         ConnectorMessageTransportStatus status,
         int numberOfAttempts) {
+        var statuses = ConnectorMessageTransportStepStatus.builder()
+                                                          .status(status)
+                                                          .createdAt(Instant.now())
+                                                          .build();
         return ConnectorMessageTransportStep.builder()
                                             .identifier(TRANSPORT_STEP_ID)
+                                            .transportedMessageIdentifier(MESSAGE_ID)
                                             .status(status)
+                                            .statuses(Set.of(statuses))
                                             .numberOfAttempts(numberOfAttempts)
                                             .transportedMessage(businessMessage())
                                             .linkPartnerName(LINK_PARTNER)

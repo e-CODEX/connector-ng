@@ -66,8 +66,7 @@ public class ConnectorOutboundEvidenceMessageReceiverServiceTest {
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
             .backendName("backend_alice")
-            .backendMessageIdentifier("85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu")
-            .referenceToIdentifier(null)
+            .referenceToIdentifier("85964ab5-b04b-4d45-97d1-962b565e22df@connector.ecodex.eu")
             .build();
     }
 

@@ -273,8 +273,6 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             verify(outboundEvidenceMessageReceiver).execute(commandCaptor.capture());
             var command = commandCaptor.getValue();
             assertThat(command.evidenceType()).isEqualTo(ConnectorEvidenceType.DELIVERY);
-            assertThat(command.backendMessageIdentifier())
-                .isEqualTo(message.backendMessageIdentifier());
             assertThat(command.referenceToIdentifier())
                 .isEqualTo(message.as4Properties().ebmsMessageIdentifier());
             assertThat(command.backendName()).isEqualTo(message.backendName());

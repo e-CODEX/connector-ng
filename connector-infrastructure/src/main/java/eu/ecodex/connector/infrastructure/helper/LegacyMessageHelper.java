@@ -107,10 +107,6 @@ public class LegacyMessageHelper {
     }
 
     private DomibusConnectorServiceType toService(ConnectorMessageAS4Properties as4Properties) {
-        if (as4Properties.service() == null) {
-            throw new IllegalStateException("Service is null");
-        }
-
         var service = new DomibusConnectorServiceType();
         service.setService(as4Properties.service().name());
         service.setServiceType(as4Properties.service().type());
@@ -119,10 +115,6 @@ public class LegacyMessageHelper {
     }
 
     private DomibusConnectorActionType toAction(ConnectorMessageAS4Properties as4Properties) {
-        if (as4Properties.action() == null) {
-            throw new IllegalStateException();
-        }
-
         if (as4Properties.action().name() == null) {
             throw new IllegalStateException();
         }

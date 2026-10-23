@@ -93,7 +93,6 @@ create table CONNECTOR_MESSAGES
     IDENTIFIER                              VARCHAR2(255 char)          not null
         constraint UQ_CM_IDENTIFIER
             unique,
-    REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER VARCHAR2(255 char),
     REJECTED_AT                             TIMESTAMP(9) WITH TIME ZONE,
     BUSINESS_DOMAIN_ID                      NUMBER(19)                  not null
         constraint FK_CM_BUSINESS_DOMAIN
@@ -260,10 +259,6 @@ create index IDX_CM_BACKEND_NAME
 
 create index IDX_CM_BACKEND_MSG_ID
     on CONNECTOR_MESSAGES (BACKEND_MESSAGE_IDENTIFIER)
-/
-
-create index IDX_CM_REF_BACKEND_MSG_ID
-    on CONNECTOR_MESSAGES (REFERENCE_TO_BACKEND_MESSAGE_IDENTIFIER)
 /
 
 create index IDX_CM_GATEWAY_NAME

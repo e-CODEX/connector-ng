@@ -85,7 +85,6 @@ public class ConnectorOutboundBusinessMessageReceiverService
             .identifier(this.messageIdGeneratorService.execute())
             .businessDomainIdentifier(command.businessDomainIdentifier())
             .backendMessageIdentifier(command.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(command.referenceToBackendMessageIdentifier())
             .backendName(command.backendName())
             .as4Properties(command.as4Properties())
             .direction(command.direction())

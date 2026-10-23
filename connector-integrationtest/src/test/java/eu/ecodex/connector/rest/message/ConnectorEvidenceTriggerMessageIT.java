@@ -16,7 +16,6 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.ErrorResponse;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorOutboundMessageDto;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageIdentifiers;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -50,11 +49,7 @@ public class ConnectorEvidenceTriggerMessageIT extends AbstractIntegrationTest {
         return ConnectorEvidenceTriggerMessageRequest
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
-            .identifiers(ConnectorEvidenceTriggerMessageIdentifiers
-                             .builder()
-                             .referenceToIdentifier(null)
-                             .backendMessageIdentifier("1f30e203-f89c-4568-a076-469c4f8b35a5")
-                             .build())
+            .referenceToIdentifier("1f30e203-f89c-4568-a076-469c4f8b35a5")
             .build();
     }
 

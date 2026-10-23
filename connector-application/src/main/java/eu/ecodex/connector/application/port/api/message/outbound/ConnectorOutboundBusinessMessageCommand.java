@@ -28,11 +28,6 @@ import lombok.Builder;
  * @param backendMessageIdentifier            The unique identifier of the message in the backend
  *                                            system. This value is optional and may not always be
  *                                            present.
- * @param referenceToBackendMessageIdentifier A backend-specific reference to the identifier of a
- *                                            related message. This field is marked for removal.
- * @param backendName                         Represents the name of the backend system responsible
- *                                            for this message. This field is required and cannot be
- *                                            null.
  * @param as4Properties                       Encapsulates the AS4-specific properties related to
  *                                            the message, including sender, recipient, and routing
  *                                            details. This field is mandatory.
@@ -49,7 +44,6 @@ import lombok.Builder;
 public record ConnectorOutboundBusinessMessageCommand(
     @Nonnull ConnectorBusinessDomainIdentifier businessDomainIdentifier,
     @Nullable String backendMessageIdentifier,
-    @Nullable String referenceToBackendMessageIdentifier, // TODO to be removed
     @Nonnull String backendName,
     @Nonnull ConnectorMessageAS4Properties as4Properties,
     @Nonnull ConnectorMessageDirection direction,

@@ -277,8 +277,6 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 .isEqualTo(outboundMessageCommand.businessDomainIdentifier());
             assertThat(message.backendMessageIdentifier())
                 .isEqualTo(outboundMessageCommand.backendMessageIdentifier());
-            assertThat(message.referenceToBackendMessageIdentifier())
-                .isEqualTo(outboundMessageCommand.referenceToBackendMessageIdentifier());
             assertThat(message.backendName()).isEqualTo(outboundMessageCommand.backendName());
             assertThat(message.as4Properties()).isEqualTo(outboundMessageCommand.as4Properties());
             assertThat(message.direction())

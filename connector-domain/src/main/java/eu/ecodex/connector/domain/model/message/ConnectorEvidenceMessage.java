@@ -34,29 +34,26 @@ import lombok.Builder;
  * <p>The {@link ConnectorEvidenceMessage} class implements {@link ConnectorMessage}, making it a
  * compliant part of the connector's message-publishing mechanism.
  *
- * @param businessDomainIdentifier            The business domain this message belongs to.
- * @param identifier                          The unique identifier for the evidence message.
- * @param backendMessageIdentifier            An identifier specific to the backend system for this
- *                                            message, if available.
- * @param referenceToBackendMessageIdentifier The identifier of any backend-referenced message, if
- *                                            applicable.
- * @param backendName                         The name of the backend system associated with this
- *                                            message, if available.
- * @param gatewayName                         The name of the gateway associated with this message,
- *                                            if available.
- * @param as4Properties                       The AS4-specific properties of the evidence message,
- *                                            if available.
- * @param direction                           The directional flow of the evidence message (e.g.,
- *                                            backend-to-gateway or gateway-to-backend).
- * @param transportedEvidences                A non-empty list of evidences transported within this
- *                                            message. It must contain at least one item.
+ * @param businessDomainIdentifier The business domain this message belongs to.
+ * @param identifier               The unique identifier for the evidence message.
+ * @param backendMessageIdentifier An identifier specific to the backend system for this message, if
+ *                                 available.
+ * @param backendName              The name of the backend system associated with this message, if
+ *                                 available.
+ * @param gatewayName              The name of the gateway associated with this message, if
+ *                                 available.
+ * @param as4Properties            The AS4-specific properties of the evidence message, if
+ *                                 available.
+ * @param direction                The directional flow of the evidence message (e.g.,
+ *                                 backend-to-gateway or gateway-to-backend).
+ * @param transportedEvidences     A non-empty list of evidences transported within this message. It
+ *                                 must contain at least one item.
  */
 @Builder(toBuilder = true)
 public record ConnectorEvidenceMessage(
     ConnectorBusinessDomainIdentifier businessDomainIdentifier,
     @Nonnull String identifier,
     @Nullable String backendMessageIdentifier,
-    @Nullable String referenceToBackendMessageIdentifier,
     @Nullable String backendName,
     @Nullable String gatewayName,
     @Nonnull ConnectorMessageAS4Properties as4Properties,
@@ -130,9 +127,8 @@ public record ConnectorEvidenceMessage(
     public String toString() {
         return String.format(
             "{identifier=%s, backendMessageIdentifier=%s, backendName=%s, gatewayName=%s, "
-                + "referenceToBackendMessageIdentifier=%s, direction=%s, as4Properties=%s}",
-            identifier, backendMessageIdentifier, backendName, gatewayName,
-            referenceToBackendMessageIdentifier, direction, as4Properties
+                + "direction=%s, as4Properties=%s}",
+            identifier, backendMessageIdentifier, backendName, gatewayName, direction, as4Properties
         );
     }
 }

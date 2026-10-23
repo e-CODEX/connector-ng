@@ -103,8 +103,6 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
                         evidence.type()).name());
             assertThat(evidenceMessage.as4Properties().service()).isEqualTo(
                 message.as4Properties().service());
-            assertThat(evidenceMessage.referenceToBackendMessageIdentifier())
-                .isEqualTo(message.backendMessageIdentifier());
             assertThat(evidenceMessage.as4Properties()
                                       .referenceToIdentifier()).isIn(
                 message.as4Properties().ebmsMessageIdentifier(),
@@ -180,9 +178,7 @@ public class ConnectorEvidenceMessageCreatorServiceTest {
             assertNotNull(evidenceMessage);
             assertThat(evidenceMessage.businessDomainIdentifier()).isEqualTo(businessMessage.businessDomainIdentifier());
             assertThat(evidenceMessage.identifier()).isEqualTo(IDENTIFIER);
-            assertThat(evidenceMessage.backendMessageIdentifier()).isEqualTo(triggeredMessage.backendMessageIdentifier());
-            assertThat(evidenceMessage.referenceToBackendMessageIdentifier()).isEqualTo(
-                businessMessage.backendMessageIdentifier());
+            assertThat(evidenceMessage.backendMessageIdentifier()).isEqualTo(businessMessage.backendMessageIdentifier());
             assertThat(evidenceMessage.as4Properties().referenceToIdentifier())
                 .isEqualTo(businessMessage.as4Properties().ebmsMessageIdentifier());
             assertThat(evidenceMessage.backendName()).isEqualTo(businessMessage.backendName());

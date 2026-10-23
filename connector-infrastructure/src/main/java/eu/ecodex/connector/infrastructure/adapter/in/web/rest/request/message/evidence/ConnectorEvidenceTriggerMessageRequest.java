@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.e
 
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
@@ -19,12 +20,11 @@ import lombok.Builder;
  * Represents a request to trigger an evidence-related operation for a specific business message in
  * the connector. This record encapsulates the information needed to initiate the process.
  *
- * @param evidenceType the type of evidence being triggered, one of the values of
- *                     {@link ConnectorEvidenceType} (must not be null)
- * @param identifiers  the identifiers of the trigger message, used to correlate the request with
- *                     the related business message; see
- *                     {@link ConnectorEvidenceTriggerMessageIdentifiers} for their structure and
- *                     purpose (must not be null, and is validated recursively)
+ * @param evidenceType          the type of evidence being triggered, one of the values of
+ *                              {@link ConnectorEvidenceType} (must not be null)
+ * @param referenceToIdentifier a reference to the message the trigger relates to, used to establish
+ *                              the relationship between the trigger and the referenced business
+ *                              message; (ebms ID or backend ID or message ID) (must not be blank)
  */
 @Builder(toBuilder = true)
 public record ConnectorEvidenceTriggerMessageRequest(
@@ -32,7 +32,7 @@ public record ConnectorEvidenceTriggerMessageRequest(
     ConnectorEvidenceType evidenceType,
 
     @Valid
-    @NotNull(message = "[Identifiers] must not be null")
-    ConnectorEvidenceTriggerMessageIdentifiers identifiers
+    @NotBlank(message = "[referenceToIdentifier] must not be blank")
+    String referenceToIdentifier
 ) {
 }

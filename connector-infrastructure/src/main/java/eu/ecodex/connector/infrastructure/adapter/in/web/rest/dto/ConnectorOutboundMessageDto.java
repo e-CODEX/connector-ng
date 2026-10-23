@@ -27,14 +27,12 @@ import lombok.Builder;
  *
  * @param identifier                          the unique identifier of the outbound message
  * @param backendMessageIdentifier            the identifier assigned by the backend system
- * @param referenceToBackendMessageIdentifier optional reference to a related backend message;
  * @param direction                           the message direction
  */
 @Builder
 public record ConnectorOutboundMessageDto(
     @NotBlank String identifier,
     @NotBlank String backendMessageIdentifier,
-    @Nullable String referenceToBackendMessageIdentifier,
     @Nonnull ConnectorMessageDirection direction
 ) {
     /**
@@ -51,7 +49,6 @@ public record ConnectorOutboundMessageDto(
             .builder()
             .identifier(message.identifier())
             .backendMessageIdentifier(message.backendMessageIdentifier())
-            .referenceToBackendMessageIdentifier(message.referenceToBackendMessageIdentifier())
             .direction(Objects.requireNonNull(message.direction()))
             .build();
     }

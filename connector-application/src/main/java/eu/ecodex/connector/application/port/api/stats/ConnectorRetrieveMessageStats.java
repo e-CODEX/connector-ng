@@ -10,23 +10,26 @@
 
 package eu.ecodex.connector.application.port.api.stats;
 
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
+import jakarta.annotation.Nonnull;
 
 /**
  * Use case for retrieving statistics about the connector messages over a period.
  */
 public interface ConnectorRetrieveMessageStats {
     /**
-     * Retrieves statistics about the connector messages processed between the given dates,
+     * Retrieves statistics about the connector messages processed within the given period,
      * optionally restricted to a business domain.
      *
-     * @param from           start of the period; the format is defined by the implementation (for
-     *                       example an ISO-8601 date or date-time)
-     * @param to             end of the period; same format as {@code from}
-     * @param businessDomain identifier of the business domain to restrict the statistics to; may
-     *                       be {@code null} or empty to cover all business domains
+     * @param dateFilter     the {@link ConnectorDateRangeFilter} defining the period (must not be
+     *                       null); the bounds are inclusive
+     * @param businessDomain identifier of the business domain to restrict the statistics to; may be
+     *                       {@code null} or empty to cover all business domains
      *
      * @return a {@link ConnectorMessageStats} object holding the statistics of the period
      */
-    ConnectorMessageStats execute(String from, String to, String businessDomain);
+    ConnectorMessageStats execute(
+        @Nonnull ConnectorDateRangeFilter dateFilter,
+        String businessDomain);
 }

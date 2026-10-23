@@ -108,8 +108,8 @@ public interface ConnectorMessageAdminApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ConnectorMessageStats getStats(
-        @RequestParam(name = "from", required = false) String from,
-        @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "from", required = false) Instant from,
+        @RequestParam(name = "to", required = false) Instant to,
         @RequestParam(name = "businessDomain", required = false) String businessDomain
     );
 
@@ -120,8 +120,8 @@ public interface ConnectorMessageAdminApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ConnectorMessageReportSummary getReports(
-        @RequestParam(name = "from", required = false) String from,
-        @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "from", required = false) Instant from,
+        @RequestParam(name = "to", required = false) Instant to,
         @RequestParam(name = "businessDomain", required = false) String businessDomain
     );
 
@@ -132,8 +132,8 @@ public interface ConnectorMessageAdminApi {
         @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     ResponseEntity<byte[]> exportReports(
-        @RequestParam(name = "from", required = false) String from,
-        @RequestParam(name = "to", required = false) String to,
+        @RequestParam(name = "from", required = false) Instant from,
+        @RequestParam(name = "to", required = false) Instant to,
         @RequestParam(name = "businessDomain", required = false) String businessDomain,
         @RequestParam(name = "format") ConnectorMessageReportExportFormat format
     );

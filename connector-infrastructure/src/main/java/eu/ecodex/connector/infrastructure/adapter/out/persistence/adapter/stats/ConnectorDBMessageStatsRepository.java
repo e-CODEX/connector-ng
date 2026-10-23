@@ -11,12 +11,13 @@
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.stats;
 
 import eu.ecodex.connector.application.port.spi.ConnectorMessageStatsRepository;
+import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
 import eu.ecodex.connector.domain.model.stats.ConnectorMessageStatsItem;
 import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.stats.ConnectorMessageStatsJpaRepository;
-import java.time.Instant;
 import java.util.List;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,8 +33,14 @@ public class ConnectorDBMessageStatsRepository implements ConnectorMessageStatsR
     }
 
     @Override
-    public ConnectorMessageStats findAll(Instant from, Instant to, String businessDomain) {
-        var stats = messageStatsJpaRepository.computeStats(from, to, businessDomain);
+    public ConnectorMessageStats findAll(
+        @NonNull ConnectorDateRangeFilter dateFilter,
+        String businessDomain) {
+        var stats = messageStatsJpaRepository.computeStats(
+            dateFilter.from(),
+            dateFilter.to(),
+            businessDomain
+        );
 
         if (stats == null) {
             return ConnectorMessageStats.ofZero();
@@ -76,10 +83,13 @@ public class ConnectorDBMessageStatsRepository implements ConnectorMessageStatsR
 
     @Override
     public List<ConnectorMessageReport> computeReport(
-        Instant from,
-        Instant to,
+        @NonNull ConnectorDateRangeFilter dateFilter,
         String businessDomain) {
-        var reports = messageStatsJpaRepository.computeReports(from, to, businessDomain);
+        var reports = messageStatsJpaRepository.computeReports(
+            dateFilter.from(),
+            dateFilter.to(),
+            businessDomain
+        );
         return reports.stream()
                       .map((report) -> new ConnectorMessageReport(
                           report.year(),

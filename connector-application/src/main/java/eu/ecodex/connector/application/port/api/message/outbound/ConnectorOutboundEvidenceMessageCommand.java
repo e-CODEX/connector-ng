@@ -19,15 +19,15 @@ import lombok.Builder;
  * details about the type of evidence, the backend message identifier, the reference to identifier,
  * and the backend name.
  *
- * @param evidenceType          the type of evidence
- * @param referenceToIdentifier the identifier to which the evidence is referenced (ebms ID or
- *                              backend ID or message ID)
- * @param backendName           the name of the backend
+ * @param evidenceType                 the type of evidence
+ * @param referenceToMessageIdentifier the identifier to which the evidence is referenced (ebms ID
+ *                                     or backend ID or message ID)
+ * @param backendName                  the name of the backend
  */
 @Builder
 public record ConnectorOutboundEvidenceMessageCommand(
     @Nonnull ConnectorEvidenceType evidenceType,
-    String referenceToIdentifier,
+    String referenceToMessageIdentifier,
     @Nonnull String backendName
 ) {
 }

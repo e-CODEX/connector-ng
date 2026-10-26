@@ -78,7 +78,7 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
             .evidenceType(request.evidenceType())
-            .referenceToIdentifier(request.referenceToIdentifier())
+            .referenceToMessageIdentifier(request.referenceToMessageIdentifier())
             .backendName(backendClientName)
             .build();
 

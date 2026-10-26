@@ -121,8 +121,8 @@ public class ConnectorInboundEvidenceMessageProcessorService
         );
 
         var accumulatedEvidences = referencedBusinessMessage.evidences() != null
-                                   ? new ArrayList<>(referencedBusinessMessage.evidences())
-                                   : new ArrayList<ConnectorMessageEvidence>();
+            ? new ArrayList<>(referencedBusinessMessage.evidences())
+            : new ArrayList<ConnectorMessageEvidence>();
 
 
         var appliedEvidences = new LinkedList<ConnectorMessageEvidence>();

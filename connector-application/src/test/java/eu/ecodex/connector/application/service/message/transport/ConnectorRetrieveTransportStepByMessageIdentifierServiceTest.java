@@ -47,7 +47,7 @@ public class ConnectorRetrieveTransportStepByMessageIdentifierServiceTest {
         @Test
         void should_retrieve_the_transport_step() {
             when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
-                .thenReturn(TransportStepFixtures.createTransportStep());
+                .thenReturn(TransportStepFixtures.createTransportStepWithEvidenceMessage());
 
             var transportStep = retrieveTransportStepService.execute(MESSAGE_ID);
 

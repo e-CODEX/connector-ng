@@ -62,7 +62,7 @@ public class ConnectorListTransportStepsServiceTest {
     @Test
     void should_return_paginated_transport_steps() {
         var pageResult = ConnectorPageResult.of(
-            List.of(TransportStepFixtures.createTransportStep()),
+            List.of(TransportStepFixtures.createTransportStepWithEvidenceMessage()),
             1,
             0,
             20

@@ -18,8 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByTransportId;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -45,6 +47,8 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
     private ConnectorListTransportSteps listTransportSteps;
     @MockitoBean
     private ConnectorRetrieveTransportStepByTransportId retrieveTransportStep;
+    @MockitoBean
+    private ConnectorRetrieveMessage retrieveMessage;
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,7 +59,7 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
         @Test
         void should_return_200_with_the_paged_transport_steps() throws Exception {
             var pageResult = new ConnectorPageResult<>(
-                List.of(TransportStepFixtures.createTransportStep()), 1, 1, 1
+                List.of(TransportStepFixtures.createTransportStepWithEvidenceMessage()), 1, 1, 1
             );
 
             when(listTransportSteps.execute(any())).thenReturn(pageResult);
@@ -75,23 +79,39 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
     }
 
     @Nested
-    @DisplayName("retrieve transport steps")
-    class RetrieveTransportSteps {
+    @DisplayName("retrieve transport steps transported message")
+    class RetrieveTransportStepsTransportedMessage {
         private static final String TRANSPORT_ID =
             "1c544c2e-7e60-4647-a4b2-c3c89958b2a7@connector.ecodex.eu";
         private static final String TRANSPORTED_MESSAGE_ID =
             "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
 
         @Test
-        void should_return_200_with_found_transport_step() throws Exception {
+        void should_return_200_with_found_transport_step_transported_evidence_message() throws Exception {
             when(retrieveTransportStep.execute(TRANSPORT_ID))
-                .thenReturn(TransportStepFixtures.createTransportStep());
+                .thenReturn(TransportStepFixtures.createTransportStepWithEvidenceMessage());
 
             mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
                                 .contentType(MediaType.APPLICATION_JSON))
                    .andExpect(status().isOk())
                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID));
+                   .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID))
+                   .andExpect(jsonPath("$.isBusiness").value(false));
+        }
+
+        @Test
+        void should_return_200_with_found_transport_step_transported_business_message() throws Exception {
+            when(retrieveTransportStep.execute(TRANSPORT_ID))
+                .thenReturn(TransportStepFixtures.createTransportStepWithBusinessMessage());
+            when(retrieveMessage.execute(any()))
+                .thenReturn(BusinessMessageTestFixtures.createValidatedInboundMessage());
+
+            mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
+                                .contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(status().isOk())
+                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                   .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID))
+                   .andExpect(jsonPath("$.isBusiness").value(true));
         }
 
         @Test

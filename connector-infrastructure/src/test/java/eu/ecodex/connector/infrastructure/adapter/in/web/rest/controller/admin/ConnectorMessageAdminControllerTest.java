@@ -338,7 +338,7 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_200_with_the_transport_steps() throws Exception {
             when(retrieveTransportStep.execute(any()))
-                .thenReturn(TransportStepFixtures.createTransportStep());
+                .thenReturn(TransportStepFixtures.createTransportStepWithEvidenceMessage());
 
             mockMvc.perform(get(URL_TRANSPORT_STEP.formatted(MESSAGE_ID))
                                 .contentType(MediaType.APPLICATION_JSON))

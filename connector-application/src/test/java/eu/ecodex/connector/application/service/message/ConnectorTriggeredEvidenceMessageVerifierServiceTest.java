@@ -67,10 +67,10 @@ public class ConnectorTriggeredEvidenceMessageVerifierServiceTest {
     @DisplayName("when the reference is invalid")
     class WhenReferenceIsInvalid {
         @Test
-        void should_fail_when_both_reference_ids_are_blank() {
+        void should_fail_when_reference_id_is_blank() {
             assertThatThrownBy(() -> service.verify(triggeredEvidenceMessage("")))
                 .isInstanceOf(ConnectorEvidenceException.class)
-                .hasMessageContaining("referenceToIdentifier");
+                .hasMessageContaining("referenceToMessageIdentifier");
         }
     }
 

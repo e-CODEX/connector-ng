@@ -49,7 +49,7 @@ public class ConnectorEvidenceTriggerMessageIT extends AbstractIntegrationTest {
         return ConnectorEvidenceTriggerMessageRequest
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
-            .referenceToIdentifier("1f30e203-f89c-4568-a076-469c4f8b35a5")
+            .referenceToMessageIdentifier("1f30e203-f89c-4568-a076-469c4f8b35a5")
             .build();
     }
 

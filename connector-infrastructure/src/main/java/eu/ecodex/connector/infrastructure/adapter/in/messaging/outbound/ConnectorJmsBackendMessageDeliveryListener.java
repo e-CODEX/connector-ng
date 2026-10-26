@@ -267,7 +267,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
         var message = ConnectorOutboundEvidenceMessageCommand
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
-            .referenceToIdentifier(ebmsMessageIdentifier)
+            .referenceToMessageIdentifier(ebmsMessageIdentifier)
             .backendName(backendClientName)
             .build();
 

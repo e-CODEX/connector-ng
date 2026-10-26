@@ -20,11 +20,13 @@ import eu.ecodex.connector.domain.model.message.ConnectorTriggeredEvidenceMessag
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for receiving outbound evidence messages.
  */
 @Service
+@Transactional
 public class ConnectorOutboundEvidenceMessageReceiverService
     implements ConnectorOutboundEvidenceMessageReceiver {
     private final ConnectorMessageIdGenerator messageIdGeneratorService;
@@ -60,7 +62,7 @@ public class ConnectorOutboundEvidenceMessageReceiverService
             .backendName(command.backendName())
             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
             .evidenceType(command.evidenceType())
-            .referenceToIdentifier(command.referenceToIdentifier())
+            .referenceToIdentifier(command.referenceToMessageIdentifier())
             .build();
 
         triggeredEvidenceMessageVerifier.verify(triggeredEvidenceMessage);

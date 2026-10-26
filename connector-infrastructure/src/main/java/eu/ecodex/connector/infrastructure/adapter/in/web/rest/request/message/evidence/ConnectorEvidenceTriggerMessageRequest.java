@@ -22,7 +22,7 @@ import lombok.Builder;
  *
  * @param evidenceType          the type of evidence being triggered, one of the values of
  *                              {@link ConnectorEvidenceType} (must not be null)
- * @param referenceToIdentifier a reference to the message the trigger relates to, used to establish
+ * @param referenceToMessageIdentifier a reference to the message the trigger relates to, used to establish
  *                              the relationship between the trigger and the referenced business
  *                              message; (ebms ID or backend ID or message ID) (must not be blank)
  */
@@ -32,7 +32,7 @@ public record ConnectorEvidenceTriggerMessageRequest(
     ConnectorEvidenceType evidenceType,
 
     @Valid
-    @NotBlank(message = "[referenceToIdentifier] must not be blank")
-    String referenceToIdentifier
+    @NotBlank(message = "[referenceToMessageIdentifier] must not be blank")
+    String referenceToMessageIdentifier
 ) {
 }

@@ -56,7 +56,8 @@ public class ConnectorTriggeredEvidenceMessageVerifierService
         ConnectorMessageDirection direction) {
         if (!StringUtils.hasText(referenceToMessageId)) {
             throw new ConnectorEvidenceException(
-                "Evidence trigger must set referenceToIdentifier to the referenced business message"
+                "Evidence trigger must set referenceToMessageIdentifier to the "
+                    + "referenced business message"
             );
         }
 

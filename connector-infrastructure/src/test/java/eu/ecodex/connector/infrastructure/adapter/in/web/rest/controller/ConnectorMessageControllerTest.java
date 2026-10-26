@@ -177,7 +177,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
         return ConnectorEvidenceTriggerMessageRequest
             .builder()
             .evidenceType(ConnectorEvidenceType.DELIVERY)
-            .referenceToIdentifier(REFERENCE_TO_IDENTIFIER)
+            .referenceToMessageIdentifier(REFERENCE_TO_IDENTIFIER)
             .build();
     }
 
@@ -335,7 +335,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             verify(outboundEvidenceMessageReceiver).execute(captor.capture());
             var command = captor.getValue();
             assertThat(command.evidenceType()).isEqualTo(ConnectorEvidenceType.DELIVERY);
-            assertThat(command.referenceToIdentifier()).isEqualTo(REFERENCE_TO_IDENTIFIER);
+            assertThat(command.referenceToMessageIdentifier()).isEqualTo(REFERENCE_TO_IDENTIFIER);
             assertThat(command.backendName()).isEqualTo(BACKEND_NAME);
 
             verifyNoInteractions(outboundBusinessMessageReceiver, restOutboundMessageParser);
@@ -346,7 +346,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             var request = ConnectorEvidenceTriggerMessageRequest
                 .builder()
                 .evidenceType(null)
-                .referenceToIdentifier(buildValidEvidenceTriggerRequest().referenceToIdentifier())
+                .referenceToMessageIdentifier(buildValidEvidenceTriggerRequest().referenceToMessageIdentifier())
                 .build();
 
             mockMvc.perform(post(EVIDENCE_TRIGGER_URL)

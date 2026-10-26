@@ -95,7 +95,7 @@ public class MessageHelpers {
             .builder()
             .evidenceType(ConnectorEvidenceType.valueOf(confirmation.getConfirmationType().value()))
             .backendName(backendClientName)
-            .referenceToIdentifier(details.getRefToMessageId())
+            .referenceToMessageIdentifier(details.getRefToMessageId())
             .build();
     }
 

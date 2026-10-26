@@ -64,33 +64,32 @@ class WebSecurityConfigurationRulesTest {
         "POST, /api/v1/admin/business-domains,   USER,  403",
         "POST, /api/v1/admin/business-domains,   ADMIN, 200"
     })
-    void roleMatrix(String method, String path, String role, int expected) throws Exception {
+    void user_role_access_matrix(String method, String path, String role, int expected) throws Exception {
         mockMvc.perform(request(HttpMethod.valueOf(method), path).with(user("test").roles(role)))
             .andExpect(status().is(expected));
     }
 
     @Test
-    void securityChainIsActive() {
+    void security_chain_is_active() {
         assertThat(filterChainProxy.getFilterChains()).isNotEmpty();
         assertThat(filterChainProxy.getFilterChains().getFirst().getFilters())
             .anyMatch(f -> f instanceof ConnectorJwtAuthenticationFilter);
     }
 
     @Test
-    void anonymousCaller_gets_Unauthorized() throws Exception {
+    void anonymous_caller_gets_unauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/probe").with(anonymous()))
             .andExpect(status().isUnauthorized());
     }
 
-
     @Test
-    void loginIsPublic() throws Exception {
+    void login_is_public() throws Exception {
         mockMvc.perform(post("/api/v1/auth/login"))
             .andExpect(status().isOk());
     }
 
     @Test
-    void refreshIsPublic() throws Exception {
+    void refresh_is_public() throws Exception {
         mockMvc.perform(post("/api/v1/auth/refresh"))
             .andExpect(status().isOk());
     }

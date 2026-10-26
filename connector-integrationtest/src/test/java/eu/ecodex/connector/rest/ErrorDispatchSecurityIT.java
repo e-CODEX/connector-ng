@@ -32,7 +32,7 @@ class ErrorDispatchSecurityIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void invalidEnum_whenAuthenticated_returns_400_not_403() {
+    void invalid_enum_should_return_400_not_403_when_authenticated() {
         apiClient.get()
             .uri(String.format(URL, "INVALID"))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
@@ -42,7 +42,7 @@ class ErrorDispatchSecurityIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void unknownUrl_withoutToken_returns_401_not_403() {
+    void unknown_url_return_401_not_403_when_not_authenticated() {
         apiClient.get().uri("/api/v1/does-not-exist").exchange().expectStatus().isUnauthorized();
     }
 }

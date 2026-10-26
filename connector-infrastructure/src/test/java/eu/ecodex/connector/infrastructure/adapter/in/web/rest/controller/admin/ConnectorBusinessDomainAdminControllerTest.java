@@ -53,18 +53,40 @@ public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTe
     @DisplayName("POST (create a business domain)")
     class CreateBusinessDomain {
         @Test
+        void should_return_400_when_the_business_domain_source_is_invalid() {
+            var body = JsonTestFixtures.readJson(
+                "json/business-domain/business-domain-creation-with-invalid-source.json");
+            var response = apiClient.post()
+                .uri(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .returnResult(ErrorResponse.class);
+
+            var responseBody = response.getResponseBody();
+            assertThat(responseBody).isNotNull();
+            assert responseBody != null;
+            assertThat(responseBody.status()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+            assertThat(responseBody.message()).isNotNull()
+                .isEqualTo(
+                    "source must be one of [DATABASE, IMPLEMENTATION, ENVIRONMENT, APPLICATION]");
+        }
+
+        @Test
         void should_return_201_when_the_business_domain_is_created() {
             when(registerBusinessDomain.execute(any()))
                 .thenReturn(BusinessDomainTestFixtures.createDefaultBusinessDomain());
 
-            var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
+            var body = JsonTestFixtures.readJson(
+                "json/business-domain/business-domain.creation.json");
             var response = apiClient.post()
-                                    .uri(URL)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .body(body)
-                                    .exchange()
-                                    .expectStatus().isCreated()
-                                    .returnResult(ConnectorBusinessDomainDto.class);
+                .uri(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().isCreated()
+                .returnResult(ConnectorBusinessDomainDto.class);
 
             var responseBody = response.getResponseBody();
 
@@ -82,14 +104,15 @@ public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTe
             doThrow(ConnectorBusinessDomainAlreadyExistsException.class)
                 .when(registerBusinessDomain).execute(any());
 
-            var body = JsonTestFixtures.readJson("json/business-domain.creation.json");
+            var body = JsonTestFixtures.readJson(
+                "json/business-domain/business-domain.creation.json");
             var response = apiClient.post()
-                                    .uri(URL)
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .body(body)
-                                    .exchange()
-                                    .expectStatus().is4xxClientError()
-                                    .returnResult(ErrorResponse.class);
+                .uri(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .returnResult(ErrorResponse.class);
 
             var responseBody = response.getResponseBody();
 
@@ -101,11 +124,11 @@ public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTe
         @Test
         void should_return_400_when_the_request_body_is_invalid() {
             apiClient.post()
-                     .uri(URL)
-                     .contentType(MediaType.APPLICATION_JSON)
-                     .body("{}")
-                     .exchange()
-                     .expectStatus().isBadRequest();
+                .uri(URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{}")
+                .exchange()
+                .expectStatus().isBadRequest();
         }
     }
 
@@ -115,9 +138,9 @@ public class ConnectorBusinessDomainAdminControllerTest extends AbstractWebMvcTe
         @Test
         void should_return_200_when_listing_the_business_domains() {
             apiClient.get()
-                     .uri(URL)
-                     .exchange()
-                     .expectStatus().isOk();
+                .uri(URL)
+                .exchange()
+                .expectStatus().isOk();
         }
     }
 }

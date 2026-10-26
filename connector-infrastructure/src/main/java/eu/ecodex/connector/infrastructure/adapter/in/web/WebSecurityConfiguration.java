@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.adapter.in.web;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.infrastructure.adapter.out.auth.accesstoken.ConnectorJwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorCorsProperties;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,6 +69,11 @@ public class WebSecurityConfiguration {
             .httpBasic(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(request -> request
+                // Allow internal ERROR (400, 404, 405, 415 ,500) dispatch (forward to /error)
+                // without authentication. Without this, Spring Security 6+ also applies
+                // authorization to that dispatch. As it has no user the request is rejected with
+                // 403
+                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                 // Specific admin-only
                 .requestMatchers("/api/v1/admin/users/**")
                 .hasRole(ConnectorRoleName.ADMIN.name())
@@ -110,8 +116,7 @@ public class WebSecurityConfiguration {
                 .authenticationEntryPoint((req, resp, ex)
                     -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 .accessDeniedHandler((req, resp, ex)
-                    -> resp.sendError(HttpServletResponse.SC_FORBIDDEN))
-            )
+                    -> resp.sendError(HttpServletResponse.SC_FORBIDDEN)))
             .build();
     }
 

@@ -20,11 +20,12 @@ import lombok.Builder;
  * Represents a request to trigger an evidence-related operation for a specific business message in
  * the connector. This record encapsulates the information needed to initiate the process.
  *
- * @param evidenceType          the type of evidence being triggered, one of the values of
- *                              {@link ConnectorEvidenceType} (must not be null)
- * @param referenceToMessageIdentifier a reference to the message the trigger relates to, used to establish
- *                              the relationship between the trigger and the referenced business
- *                              message; (ebms ID or backend ID or message ID) (must not be blank)
+ * @param evidenceType                 the type of evidence being triggered, one of the values of
+ *                                     {@link ConnectorEvidenceType} (must not be null)
+ * @param referenceToMessageIdentifier a reference to the message the trigger relates to, used to
+ *                                     establish the relationship between the trigger and the
+ *                                     referenced business message; (ebms ID or backend ID or
+ *                                     message ID) (must not be blank)
  */
 @Builder(toBuilder = true)
 public record ConnectorEvidenceTriggerMessageRequest(

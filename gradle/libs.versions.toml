@@ -26,7 +26,7 @@ s3 = "2.57.0"
 # dbms
 h2 = "2.5.252"
 mysql = "8.0.33"
-mariadb = "3.5.10"
+mariadb = "4.0.0"
 postgresql = "42.7.14"
 oracle = "23.26.3.0.0"
 # jta

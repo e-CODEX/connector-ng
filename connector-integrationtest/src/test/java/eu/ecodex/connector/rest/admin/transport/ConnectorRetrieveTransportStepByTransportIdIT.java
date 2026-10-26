@@ -83,6 +83,9 @@ public class ConnectorRetrieveTransportStepByTransportIdIT extends AbstractInteg
         "classpath:sql/processing-mode-action.sql",
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
         "classpath:sql/message-transport-step.sql",
         "classpath:sql/message-transport-step-statuses.sql",
         "classpath:sql/user.sql"

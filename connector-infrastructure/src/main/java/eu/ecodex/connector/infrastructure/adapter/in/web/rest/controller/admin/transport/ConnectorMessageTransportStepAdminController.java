@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.transport;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByTransportId;
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
@@ -36,12 +37,25 @@ public class ConnectorMessageTransportStepAdminController
     private final ConnectorListTransportSteps listTransportSteps;
     private final ConnectorRetrieveTransportStepByTransportId
         retrieveTransportStepByTransportId;
+    private final ConnectorRetrieveMessage retrieveMessage;
 
+    /**
+     * Creates the controller.
+     *
+     * @param listTransportSteps                 the use case listing transport steps (must not be
+     *                                           null)
+     * @param retrieveTransportStepByTransportId the use case retrieving a transport step by its
+     *                                           transport identifier (must not be null)
+     * @param retrieveMessage                    the use case retrieving a business message by its
+     *                                           identifier (must not be null)
+     */
     public ConnectorMessageTransportStepAdminController(
         ConnectorListTransportSteps listTransportSteps,
-        ConnectorRetrieveTransportStepByTransportId retrieveTransportStepByTransportId) {
+        ConnectorRetrieveTransportStepByTransportId retrieveTransportStepByTransportId,
+        ConnectorRetrieveMessage retrieveMessage) {
         this.listTransportSteps = listTransportSteps;
         this.retrieveTransportStepByTransportId = retrieveTransportStepByTransportId;
+        this.retrieveMessage = retrieveMessage;
     }
 
     @Override
@@ -81,7 +95,7 @@ public class ConnectorMessageTransportStepAdminController
         var transportedMessage = step.transportedMessage();
 
         if (transportedMessage instanceof ConnectorBusinessMessage message) {
-            return ConnectorMessageDetailDto.from(message);
+            return ConnectorMessageDetailDto.from(retrieveMessage.execute(message.identifier()));
         } else {
             return ConnectorMessageDetailDto.from(
                 (ConnectorEvidenceMessage) transportedMessage,

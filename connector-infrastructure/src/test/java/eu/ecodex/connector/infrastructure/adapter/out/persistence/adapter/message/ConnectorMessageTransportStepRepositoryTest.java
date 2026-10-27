@@ -209,14 +209,14 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
         void should_throw_when_the_backend_name_is_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.findPendingMessagesIds(null)
+                () -> repository.findReadyToDownloadTransportSteps(null)
             );
         }
 
         @Test
         @WithTransportStepData
         void should_find_the_pending_message_ids() {
-            var messagesIds = repository.findPendingMessagesIds("backend_alice");
+            var messagesIds = repository.findReadyToDownloadTransportSteps("backend_alice");
 
             assertThat(messagesIds).isNotNull();
             assertThat(messagesIds).hasSize(1);

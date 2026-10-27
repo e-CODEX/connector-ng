@@ -35,7 +35,8 @@ public class ConnectorSetMessagesTransportStepToDownloadService
 
     @Override
     public void execute(@NonNull String backendName) {
-        var identifiers = this.transportStepRepository.findPendingTransportSteps(backendName);
+        var identifiers = this.transportStepRepository.findReadyToDownloadTransportStepsIds(
+            backendName);
         this.transportStepRepository.updateStatus(
             identifiers,
             ConnectorMessageTransportStatus.DOWNLOADED

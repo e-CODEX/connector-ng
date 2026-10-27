@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.transport;
 
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.transport.ConnectorMessageTransportStepEntity;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -56,18 +57,6 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     )
     List<String> findAllPendingByBackendName(@Param("backendName") String backendName);
 
-    @Query(
-        value = """
-            SELECT DISTINCT MTS.transported_message_identifier
-            FROM connector_message_transport_steps MTS
-            WHERE MTS.status = 'READY_FOR_DOWNLOAD'
-            AND MTS.link_partner_name = :backendName
-            """,
-        nativeQuery = true
-    )
-    List<String> findAllPendingMessageIdsByBackendName(
-        @Param("backendName") String backendName);
-
     @Modifying
     @Transactional
     @Query(
@@ -84,4 +73,8 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     void updateStatus(
         @Param("identifiers") List<String> identifiers,
         @Param("status") String status);
+
+    List<ConnectorMessageTransportStepEntity> findAllByStatusAndLinkPartnerNameOrderByCreatedAtAsc(
+        ConnectorMessageTransportStatus status, String linkPartnerName
+    );
 }

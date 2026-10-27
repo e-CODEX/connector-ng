@@ -76,9 +76,7 @@ public class LegacyMessageHelper {
         if (message instanceof ConnectorBusinessMessage businessMessage) {
             messageType.setMessageContent(toContent(businessMessage.businessContent()));
             messageType.getMessageErrors().addAll(toErrors(businessMessage.errors()));
-            messageType.getMessageAttachments().addAll(
-                toAttachments(message.identifier())
-            );
+            messageType.getMessageAttachments().addAll(toAttachments(message.identifier()));
         }
 
         messageType.getMessageConfirmations().addAll(

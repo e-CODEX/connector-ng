@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
@@ -79,28 +80,33 @@ public interface ConnectorMessageTransportStepRepository {
     ConnectorMessageTransportStep findByIdentifier(@Nonnull String identifier);
 
     /**
-     * Retrieves the identifiers of the pending transport steps of the given backend.
+     * Retrieves the identifiers of the transport steps of the given backend that are ready to be
+     * downloaded.
      *
-     * <p>Pending transport steps are those that have not yet been submitted to the backend system
-     * for processing.
+     * <p>A transport step is ready to download when its message has been made available to the
+     * backend and has not yet been retrieved (see
+     * {@link ConnectorSetMessagesTransportStepToDownload}).
      *
      * @param backendName the name of the backend system (must not be null or empty)
      *
-     * @return the identifiers of the pending transport steps; empty if there are none
+     * @return the identifiers of the transport steps ready to download; never {@code null}, and
+     *     empty if there are none
      */
-    List<String> findPendingTransportSteps(@Nonnull String backendName);
+    List<String> findReadyToDownloadTransportStepsIds(@Nonnull String backendName);
 
     /**
-     * Retrieves the identifiers of the pending messages of the given backend.
+     * Retrieves the pending transport steps of the given backend.
      *
-     * <p>Pending messages are those that have not yet been submitted to the backend system for
-     * processing.
+     * <p>Pending transport steps are those whose message has not yet been submitted to the backend
+     * system for processing.
      *
      * @param backendName the name of the backend system (must not be null or empty)
      *
-     * @return the identifiers of the pending messages; empty if there are none
+     * @return the pending {@link ConnectorMessageTransportStep} objects of the backend; never
+     *     {@code null}, and empty if there are none
      */
-    List<String> findPendingMessagesIds(@Nonnull String backendName);
+    List<ConnectorMessageTransportStep> findReadyToDownloadTransportSteps(
+        @Nonnull String backendName);
 
     /**
      * Retrieves a page of transport steps based on the pagination parameters and the optional

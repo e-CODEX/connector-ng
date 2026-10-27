@@ -32,8 +32,8 @@ public class ConnectorRetrieveTransportStepByMessageIdentifierService
 
     @Override
     public ConnectorMessageTransportStep execute(@NonNull String messageIdentifier) {
-        var transportStep = this.transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
-            messageIdentifier);
+        var transportStep = this.transportStepRepository
+            .findByStepOrMessageOrRemoteSystemIdentifier(messageIdentifier);
 
         if (transportStep == null) {
             throw new ConnectorMessageTransportStepNotFoundException(

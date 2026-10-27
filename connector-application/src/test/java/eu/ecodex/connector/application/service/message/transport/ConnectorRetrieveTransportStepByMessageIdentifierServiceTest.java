@@ -46,7 +46,7 @@ public class ConnectorRetrieveTransportStepByMessageIdentifierServiceTest {
     class WhenRetrievalSucceeds {
         @Test
         void should_retrieve_the_transport_step() {
-            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID))
+            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
                 .thenReturn(TransportStepFixtures.createTransportStepWithEvidenceMessage());
 
             var transportStep = retrieveTransportStepService.execute(MESSAGE_ID);
@@ -72,7 +72,7 @@ public class ConnectorRetrieveTransportStepByMessageIdentifierServiceTest {
 
         @Test
         void should_fail_when_the_transport_step_is_not_found() {
-            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any()))
+            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(any()))
                 .thenReturn(null);
 
             assertThrows(

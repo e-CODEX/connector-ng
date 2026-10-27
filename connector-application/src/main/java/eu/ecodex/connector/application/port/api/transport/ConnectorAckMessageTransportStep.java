@@ -24,14 +24,14 @@ public interface ConnectorAckMessageTransportStep {
      * <p>The message is located by its connector identifier or by the identifier assigned by the
      * remote system (the EBMS ID).
      *
-     * @param messageOrRemoteSystemIdentifier identifier of the message, or identifier of the
-     *                                        message as known by the remote system (EBMS ID); must
-     *                                        not be null
-     * @param command                         the {@link UpdateMessageTransportCommand} containing
-     *                                        the new transport status and any associated errors;
-     *                                        must not be null
+     * @param stepOrMessageOrRemoteSystemIdentifier identifier of the transport step, of the
+     *                                              message, or of the message as known by the
+     *                                              remote system (must not be null)
+     * @param command                               the {@link UpdateMessageTransportCommand}
+     *                                              containing the new transport status and any
+     *                                              associated errors; must not be null
      */
     void execute(
-        @Nonnull String messageOrRemoteSystemIdentifier,
+        @Nonnull String stepOrMessageOrRemoteSystemIdentifier,
         @Nonnull UpdateMessageTransportCommand command);
 }

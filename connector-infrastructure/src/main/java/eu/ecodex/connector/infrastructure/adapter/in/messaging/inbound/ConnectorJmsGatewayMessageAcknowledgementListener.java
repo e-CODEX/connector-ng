@@ -73,7 +73,7 @@ public class ConnectorJmsGatewayMessageAcknowledgementListener {
                 messageOrEbmsIdentifier
             );
 
-            var transportStep = transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
+            var transportStep = transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(
                 messageOrEbmsIdentifier);
 
             if (transportStep == null) {

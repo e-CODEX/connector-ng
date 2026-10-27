@@ -73,17 +73,17 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
 
     @Override
     public void execute(
-        @NonNull String messageOrRemoteSystemIdentifier,
+        @NonNull String stepOrMessageOrRemoteSystemIdentifier,
         @NonNull UpdateMessageTransportCommand command) {
-        validateRequest(messageOrRemoteSystemIdentifier, command);
+        validateRequest(stepOrMessageOrRemoteSystemIdentifier, command);
 
-        var existingStep = this.transportStepRepository.findByMessageIdentifierOrRemoteSystemId(
-            messageOrRemoteSystemIdentifier);
+        var existingStep = this.transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(
+            stepOrMessageOrRemoteSystemIdentifier);
 
         if (existingStep == null) {
             throw new ConnectorMessageTransportStepNotFoundException(
                 "No transport step found for identifier [%s]"
-                    .formatted(messageOrRemoteSystemIdentifier)
+                    .formatted(stepOrMessageOrRemoteSystemIdentifier)
             );
         }
 
@@ -91,7 +91,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
             throw new ConnectorLinkPartnerNotOwnerException(
                 ("The transport step with message/remote ID [%s] does not belong to "
                     + "link partner [%s]")
-                    .formatted(messageOrRemoteSystemIdentifier, command.linkPartnerName()
+                    .formatted(stepOrMessageOrRemoteSystemIdentifier, command.linkPartnerName()
                     )
             );
         }
@@ -99,7 +99,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         if (TERMINAL_STATUSES.contains(existingStep.status())) {
             log.warn(
                 "Message [{}] is already in terminal transport status [{}]",
-                messageOrRemoteSystemIdentifier, existingStep.status()
+                stepOrMessageOrRemoteSystemIdentifier, existingStep.status()
             );
 
             return;

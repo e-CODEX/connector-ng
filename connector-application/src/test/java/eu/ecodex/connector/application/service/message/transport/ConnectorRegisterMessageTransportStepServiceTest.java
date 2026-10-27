@@ -112,7 +112,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
             assertThrows(
                 IllegalArgumentException.class,
-                () -> service.execute(message, ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+                () -> service.execute(message, ConnectorMessageTransportStatus.DOWNLOADED)
             );
 
             verifyNoInteractions(transportStepRepository, processingConfigurationProvider);

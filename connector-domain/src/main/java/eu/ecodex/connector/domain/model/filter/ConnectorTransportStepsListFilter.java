@@ -22,25 +22,25 @@ import lombok.NonNull;
  * Groups the pagination parameters and the optional filter criteria used to list the transport
  * steps of connector messages.
  *
- * @param pageRequest                     the pagination and query parameters used to retrieve the
- *                                        transport steps (must not be null)
- * @param messageOrRemoteSystemIdentifier identifier of the message, or of the message as known by
- *                                        the remote system, that the transport steps belong to;
- *                                        ignored if {@code null} or empty
- * @param linkPartnerName                 name of the link partner involved in the transport step;
- *                                        ignored if {@code null} or empty
- * @param statuses                        transport statuses
- *                                        ({@link ConnectorMessageTransportStatus}) to match;
- *                                        ignored if {@code null} or empty
- * @param dateFilter                      date range ({@link ConnectorDateRangeFilter}) restricting
- *                                        the transport steps to a time window; ignored if
- *                                        {@code null}, and a {@code null} bound means the range is
- *                                        open on that side
+ * @param pageRequest                           the pagination and query parameters used to retrieve
+ *                                              the transport steps (must not be null)
+ * @param stepOrMessageOrRemoteSystemIdentifier identifier of the message, or of the message as
+ *                                              known by the remote system, that the transport steps
+ *                                              belong to; ignored if {@code null} or empty
+ * @param linkPartnerName                       name of the link partner involved in the transport
+ *                                              step; ignored if {@code null} or empty
+ * @param statuses                              transport statuses
+ *                                              ({@link ConnectorMessageTransportStatus}) to match;
+ *                                              ignored if {@code null} or empty
+ * @param dateFilter                            date range ({@link ConnectorDateRangeFilter})
+ *                                              restricting the transport steps to a time window;
+ *                                              ignored if {@code null}, and a {@code null} bound
+ *                                              means the range is open on that side
  */
 @Builder
 public record ConnectorTransportStepsListFilter(
     @Nonnull ConnectorPageRequest pageRequest,
-    String messageOrRemoteSystemIdentifier,
+    String stepOrMessageOrRemoteSystemIdentifier,
     String linkPartnerName,
     List<ConnectorMessageTransportStatus> statuses,
     ConnectorDateRangeFilter dateFilter
@@ -56,27 +56,28 @@ public record ConnectorTransportStepsListFilter(
     /**
      * Creates a filter with all criteria.
      *
-     * @param pageRequest                     pagination and sorting information; never
-     *                                        {@code null}
-     * @param messageOrRemoteSystemIdentifier message or remote system identifier to match, or
-     *                                        {@code null} to ignore
-     * @param linkPartnerName                 link partner name to match, or {@code null} to ignore
-     * @param statuses                        transport statuses to include, or {@code null}/empty
-     *                                        to ignore
-     * @param dateFilter                      creation date range, or {@code null} to ignore
+     * @param pageRequest                           pagination and sorting information; never
+     *                                              {@code null}
+     * @param stepOrMessageOrRemoteSystemIdentifier message or transport step or remote system
+     *                                              identifier to match, or {@code null} to ignore
+     * @param linkPartnerName                       link partner name to match, or {@code null} to
+     *                                              ignore
+     * @param statuses                              transport statuses to include, or
+     *                                              {@code null}/empty to ignore
+     * @param dateFilter                            creation date range, or {@code null} to ignore
      *
      * @return a new filter instance
      */
     public static ConnectorTransportStepsListFilter of(
         @NonNull ConnectorPageRequest pageRequest,
-        String messageOrRemoteSystemIdentifier,
+        String stepOrMessageOrRemoteSystemIdentifier,
         String linkPartnerName,
         List<ConnectorMessageTransportStatus> statuses,
         ConnectorDateRangeFilter dateFilter
     ) {
         return new ConnectorTransportStepsListFilter(
             pageRequest,
-            messageOrRemoteSystemIdentifier,
+            stepOrMessageOrRemoteSystemIdentifier,
             linkPartnerName,
             statuses,
             dateFilter

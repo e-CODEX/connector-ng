@@ -62,7 +62,7 @@ public class ConnectorMessageTransportStepAdminController
     public ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
         int page,
         int size,
-        String messageOrRemoteSystemIdentifier,
+        String stepOrMessageOrRemoteSystemIdentifier,
         String linkPartnerName,
         List<ConnectorMessageTransportStatus> statuses,
         Instant from,
@@ -70,7 +70,7 @@ public class ConnectorMessageTransportStepAdminController
         var pageRequest = ConnectorPageRequest.of(page, size, "createdAt", SortDirection.DESC);
         var filter = ConnectorTransportStepsListFilter.of(
             pageRequest,
-            messageOrRemoteSystemIdentifier,
+            stepOrMessageOrRemoteSystemIdentifier,
             linkPartnerName,
             statuses,
             ConnectorDateRangeFilter.of(from, to)

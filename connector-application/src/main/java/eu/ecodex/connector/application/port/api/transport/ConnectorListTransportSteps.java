@@ -25,9 +25,9 @@ public interface ConnectorListTransportSteps {
      * {@link ConnectorTransportStepsListFilter}. All filters are combined with a logical
      * {@code AND}; a filter whose value is {@code null} or empty is ignored.
      *
-     * <p>The {@code messageOrRemoteSystemIdentifier} criterion is matched against either the
-     * identifier of the transported message or the identifier assigned by the remote system; a
-     * transport step matches if at least one of the two matches.
+     * <p>The {@code stepOrMessageOrRemoteSystemIdentifier} criterion is matched against either the
+     * identifier of the transport step or the transported message or the identifier assigned by the
+     * remote system; a transport step matches if at least one of the three matches.
      *
      * @param filter the pagination parameters and filter criteria used to retrieve the transport
      *               steps (must not be null)

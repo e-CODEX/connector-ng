@@ -37,7 +37,7 @@ public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
     @Test
     void should_update_pending_message_status() {
         var pendingMessagesIds = List.of("1", "2");
-        when(transportStepRepository.findPendingTransportSteps(BACKEND_NAME))
+        when(transportStepRepository.findReadyToDownloadTransportStepsIds(BACKEND_NAME))
             .thenReturn(pendingMessagesIds);
         doNothing().when(transportStepRepository)
                    .updateStatus(pendingMessagesIds, ConnectorMessageTransportStatus.DOWNLOADED);
@@ -46,7 +46,7 @@ public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
             BACKEND_NAME
         );
 
-        verify(transportStepRepository).findPendingTransportSteps(BACKEND_NAME);
+        verify(transportStepRepository).findReadyToDownloadTransportStepsIds(BACKEND_NAME);
         verify(transportStepRepository).updateStatus(
             pendingMessagesIds,
             ConnectorMessageTransportStatus.DOWNLOADED

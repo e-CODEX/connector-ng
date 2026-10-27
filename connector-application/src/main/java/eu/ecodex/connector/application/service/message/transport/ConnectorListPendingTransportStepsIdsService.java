@@ -8,27 +8,29 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.message;
+package eu.ecodex.connector.application.service.message.transport;
 
-import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
+import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportStepsIds;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import java.util.List;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link ConnectorListPendingMessageIds}.
+ * Default implementation of {@link ConnectorListPendingTransportStepsIds}.
  */
 @Service
-public class ConnectorListPendingMessageIdsService implements ConnectorListPendingMessageIds {
+public class ConnectorListPendingTransportStepsIdsService
+    implements ConnectorListPendingTransportStepsIds {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
 
-    public ConnectorListPendingMessageIdsService(
+    public ConnectorListPendingTransportStepsIdsService(
         ConnectorMessageTransportStepRepository transportStepRepository) {
         this.transportStepRepository = transportStepRepository;
     }
 
     @Override
-    public List<String> execute(String backendName) {
-        return this.transportStepRepository.findPendingTransportSteps(backendName);
+    public List<String> execute(@NonNull String backendName) {
+        return this.transportStepRepository.findReadyToDownloadTransportStepsIds(backendName);
     }
 }

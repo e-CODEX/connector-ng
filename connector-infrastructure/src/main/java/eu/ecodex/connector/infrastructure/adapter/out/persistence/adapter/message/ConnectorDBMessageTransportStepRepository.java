@@ -143,13 +143,17 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
-    public List<String> findPendingTransportSteps(@NonNull String backendName) {
+    public List<String> findReadyToDownloadTransportStepsIds(@NonNull String backendName) {
         return transportStepJpaRepository.findAllPendingByBackendName(backendName);
     }
 
     @Override
-    public List<String> findPendingMessagesIds(@NonNull String backendName) {
-        return transportStepJpaRepository.findAllPendingMessageIdsByBackendName(backendName);
+    public List<ConnectorMessageTransportStep> findReadyToDownloadTransportSteps(
+        @NonNull String backendName) {
+        return transportStepJpaRepository.findAllByStatusAndLinkPartnerNameOrderByCreatedAtAsc(
+            ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD,
+            backendName
+        ).stream().map(this::toDomain).toList();
     }
 
     @Override

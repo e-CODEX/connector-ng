@@ -12,14 +12,14 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.soap.controller;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
-import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportSteps;
+import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportStepsIds;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
-import eu.ecodex.connector.application.service.message.ConnectorListPendingMessagesService;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
@@ -69,8 +69,8 @@ import org.springframework.util.StringUtils;
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
     private final ConnectorOutboundBusinessMessageReceiver businessMessageReceiver;
     private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
-    private final ConnectorListPendingMessageIds listPendingMessageIds;
-    private final ConnectorListPendingMessagesService listPendingMessages;
+    private final ConnectorListPendingTransportStepsIds listPendingMessageIds;
+    private final ConnectorListPendingTransportSteps listPendingMessages;
     private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId;
     private final ConnectorUploadAttachments uploadAttachments;
     private final ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus;
@@ -105,8 +105,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     public ConnectorBackendWebServiceController(
         ConnectorOutboundBusinessMessageReceiver businessMessageReceiver,
         ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor,
-        ConnectorListPendingMessageIds listPendingMessageIds,
-        ConnectorListPendingMessagesService listPendingMessages,
+        ConnectorListPendingTransportStepsIds listPendingMessageIds,
+        ConnectorListPendingTransportSteps listPendingMessages,
         ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId,
         ConnectorUploadAttachments uploadAttachments,
         ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus,
@@ -200,9 +200,10 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         try {
             var backendClientName = getBackendClientName();
             var messages = this.listPendingMessages.execute(backendClientName);
-            var legacyMessages = messages.stream()
-                                         .map(this.legacyMessageHelper::convertMessage)
-                                         .toList();
+            var legacyMessages = messages
+                .stream()
+                .map((step) -> this.legacyMessageHelper.convertMessage(step.transportedMessage()))
+                .toList();
 
             var response = new DomibusConnectorMessagesType();
             response.getMessages().addAll(legacyMessages);

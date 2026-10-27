@@ -21,16 +21,17 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.SoapMessageSubmitTestFixtures;
+import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.exception.NotFoundException;
 import eu.ecodex.connector.application.exception.message.ConnectorLinkPartnerNotOwnerException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
-import eu.ecodex.connector.application.port.api.message.ConnectorListPendingMessageIds;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundBusinessMessageReceiver;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
+import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportStepsIds;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
 import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
-import eu.ecodex.connector.application.service.message.ConnectorListPendingMessagesService;
+import eu.ecodex.connector.application.service.message.transport.ConnectorListPendingTransportStepsService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageType;
@@ -68,9 +69,9 @@ public class ConnectorBackendWebServiceControllerTest {
     @Mock
     private ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
     @Mock
-    private ConnectorListPendingMessageIds listPendingMessageIds;
+    private ConnectorListPendingTransportStepsIds listPendingMessageIds;
     @Mock
-    private ConnectorListPendingMessagesService listPendingMessages;
+    private ConnectorListPendingTransportStepsService listPendingTransportStepsService;
     @Mock
     private ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId;
     @Mock
@@ -100,7 +101,7 @@ public class ConnectorBackendWebServiceControllerTest {
             businessMessageReceiver,
             outboundEvidenceMessageProcessor,
             listPendingMessageIds,
-            listPendingMessages,
+            listPendingTransportStepsService,
             retrieveMessageByTransportId,
             uploadAttachments,
             changePendingMessagesStatus,
@@ -249,22 +250,23 @@ public class ConnectorBackendWebServiceControllerTest {
     class RequestMessages {
         @Test
         void should_return_the_pending_messages() {
-            var connectorMessage = BusinessMessageTestFixtures.createInboundMessage();
+            var transportStep = TransportStepFixtures.createTransportStepWithBusinessMessage();
 
-            when(listPendingMessages.execute("backend_alice"))
-                .thenReturn(List.of(connectorMessage));
+            when(listPendingTransportStepsService.execute("backend_alice"))
+                .thenReturn(List.of(transportStep));
             stubAuthenticatedBackendClient();
             when(webServiceContext.getMessageContext()).thenReturn(wrappedMessageContext);
             when(wrappedMessageContext.getWrappedMessage()).thenReturn(cxfMessage);
             when(cxfMessage.getInterceptorChain()).thenReturn(interceptorChain);
 
             var expectedResult = new DomibusConnectorMessageType();
+            var connectorMessage = transportStep.transportedMessage();
             when(legacyMessageHelper.convertMessage(connectorMessage)).thenReturn(expectedResult);
 
             var response = backendWebService.requestMessages(new EmptyRequestType());
 
             assertThat(response).isNotNull();
-            verify(listPendingMessages).execute("backend_alice");
+            verify(listPendingTransportStepsService).execute("backend_alice");
             verify(legacyMessageHelper).convertMessage(connectorMessage);
 
             var interceptorCaptor = ArgumentCaptor.forClass(ProcessMessagesAfterDownload.class);

@@ -127,10 +127,10 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
-    public ConnectorMessageTransportStep findByMessageIdentifierOrRemoteSystemId(
+    public ConnectorMessageTransportStep findByStepOrMessageOrRemoteSystemIdentifier(
         @NonNull String identifier) {
         var entity = this.transportStepJpaRepository
-            .findByTransportedMessageIdentifierOrRemoteSystemIdentifier(identifier);
+            .findByTransportOrMessageOrRemoteSystemIdentifier(identifier);
 
         return toDomain(entity);
     }

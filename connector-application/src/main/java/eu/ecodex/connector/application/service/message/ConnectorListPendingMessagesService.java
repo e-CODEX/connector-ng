@@ -38,7 +38,7 @@ public class ConnectorListPendingMessagesService implements ConnectorListPending
 
     @Override
     public List<ConnectorBusinessMessage> execute(@NonNull String backendName) {
-        // TODO retireve message from transport step repository
+        // TODO retreve message from transport step repository
         var pendingIds = this.transportStepRepository.findPendingMessagesIds(backendName);
         return this.messageRepository.findAllByIdentifier(pendingIds);
     }

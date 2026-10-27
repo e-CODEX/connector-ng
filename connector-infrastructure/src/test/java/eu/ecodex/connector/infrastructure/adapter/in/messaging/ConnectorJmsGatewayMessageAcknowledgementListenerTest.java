@@ -81,7 +81,7 @@ public class ConnectorJmsGatewayMessageAcknowledgementListenerTest extends BaseJ
         void should_acknowledge_gateway_reply_successfully() throws JMSException {
             when(mapMessage.getStringProperty("messageId"))
                 .thenReturn(MESSAGE_ID);
-            when(transportStepRepository.findByMessageIdentifierOrRemoteSystemId(any()))
+            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(any()))
                 .thenReturn(ConnectorMessageTransportStep.builder().build());
             doNothing()
                 .when(acknowledgeMessageTransportStep)
@@ -90,7 +90,7 @@ public class ConnectorJmsGatewayMessageAcknowledgementListenerTest extends BaseJ
             listener.handle(mapMessage);
 
             verify(transportStepRepository)
-                .findByMessageIdentifierOrRemoteSystemId(MESSAGE_ID);
+                .findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID);
             verify(acknowledgeMessageTransportStep)
                 .execute(any(), any());
         }

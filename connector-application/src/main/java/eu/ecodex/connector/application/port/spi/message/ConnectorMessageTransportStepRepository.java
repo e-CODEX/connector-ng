@@ -58,14 +58,15 @@ public interface ConnectorMessageTransportStepRepository {
         @Nonnull ConnectorMessageTransportStatus status);
 
     /**
-     * Retrieves a transport step by the identifier of its message or by a remote system identifier
-     * (backend ID or ebMS ID).
+     * Retrieves a transport step by its own identifier, by the identifier of its message, or by a
+     * remote system identifier (backend ID or ebMS ID).
      *
-     * @param identifier the message identifier or remote system identifier (must not be null)
+     * @param identifier the transport step identifier, the message identifier or the remote system
+     *                   identifier (must not be null)
      *
      * @return the matching {@link ConnectorMessageTransportStep}, or {@code null} if none is found
      */
-    ConnectorMessageTransportStep findByMessageIdentifierOrRemoteSystemId(
+    ConnectorMessageTransportStep findByStepOrMessageOrRemoteSystemIdentifier(
         @Nonnull String identifier);
 
     /**

@@ -36,12 +36,13 @@ public interface ConnectorMessageTransportStepJpaRepository extends
         value = """
             SELECT MTS.*
             FROM connector_message_transport_steps MTS
-            WHERE MTS.transported_message_identifier = :identifier
+            WHERE MTS.identifier = :identifier
+            OR MTS.transported_message_identifier = :identifier
             OR MTS.remote_system_identifier = :identifier
             """,
         nativeQuery = true
     )
-    ConnectorMessageTransportStepEntity findByTransportedMessageIdentifierOrRemoteSystemIdentifier(
+    ConnectorMessageTransportStepEntity findByTransportOrMessageOrRemoteSystemIdentifier(
         @Param("identifier") String identifier);
 
     @Query(

@@ -37,7 +37,8 @@ public class ConnectorRegisterMessageTransportStepService
     private static final Set<ConnectorMessageTransportStatus> ALLOWED_STATUSES = Set.of(
         ConnectorMessageTransportStatus.SUBMITTED,
         ConnectorMessageTransportStatus.DELIVERED,
-        ConnectorMessageTransportStatus.FAILED
+        ConnectorMessageTransportStatus.FAILED,
+        ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
     );
 
     private final ConnectorMessageTransportStepRepository transportStepRepository;

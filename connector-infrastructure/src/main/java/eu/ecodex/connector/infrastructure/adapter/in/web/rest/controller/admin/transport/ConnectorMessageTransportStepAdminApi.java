@@ -45,8 +45,8 @@ public interface ConnectorMessageTransportStepAdminApi {
     ConnectorPageResult<ConnectorMessageTransportStepDto> listTransportSteps(
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "20") int size,
-        @RequestParam(name = "messageOrRemoteSystemIdentifier", required = false)
-        String messageOrRemoteSystemIdentifier,
+        @RequestParam(name = "stepOrMessageOrRemoteSystemIdentifier", required = false)
+        String stepOrMessageOrRemoteSystemIdentifier,
         @RequestParam(name = "linkPartnerName", required = false) String linkPartnerName,
         @RequestParam(name = "statuses", required = false)
         List<ConnectorMessageTransportStatus> statuses,

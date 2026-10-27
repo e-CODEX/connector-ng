@@ -43,6 +43,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 )
 public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
     private static final String URL = "/api/v1/admin/transport-steps";
+    private static final String STEP_ID = "8af8af19-839a-4594-a19d-40d67868474c@connector.ecodex.eu_backend_alice";
     private static final String MESSAGE_ID = "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
     private static final String REMOTE_SYSTEM_ID = "6e3320bb-6724-4387-822c-a2914dba559a";
     private static final String BACKEND_NAME = "backend_alice";
@@ -58,31 +59,41 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
                 "date range", Map.of(
                     "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
                     "to", NOW.plus(1, ChronoUnit.HOURS).toString()
-                ), 4
+                ),
+                4
             ),
             arguments(
                 "transported message identifier",
-                Map.of("messageOrRemoteSystemIdentifier", MESSAGE_ID), 1
+                Map.of("stepOrMessageOrRemoteSystemIdentifier", MESSAGE_ID),
+                1
+            ),
+            arguments(
+                "transport step identifier",
+                Map.of("stepOrMessageOrRemoteSystemIdentifier", STEP_ID),
+                1
             ),
             arguments(
                 "remote system identifier",
-                Map.of("messageOrRemoteSystemIdentifier", REMOTE_SYSTEM_ID), 1
+                Map.of("stepOrMessageOrRemoteSystemIdentifier", REMOTE_SYSTEM_ID),
+                1
             ),
             arguments(
                 "message identifier + backend name + from + to",
                 Map.of(
-                    "messageOrRemoteSystemIdentifier", MESSAGE_ID,
+                    "stepOrMessageOrRemoteSystemIdentifier", MESSAGE_ID,
                     "linkPartnerName", BACKEND_NAME,
                     "from", NOW.minus(1, ChronoUnit.HOURS).toString(),
                     "to", NOW.plus(1, ChronoUnit.HOURS).toString()
-                ), 1
+                ),
+                1
             ),
             arguments(
                 "remote system identifier + backend name",
                 Map.of(
-                    "messageOrRemoteSystemIdentifier", REMOTE_SYSTEM_ID,
+                    "stepOrMessageOrRemoteSystemIdentifier", REMOTE_SYSTEM_ID,
                     "linkPartnerName", BACKEND_NAME
-                ), 1
+                ),
+                1
             ),
 
             arguments("status SUBMITTED", Map.of("statuses", "SUBMITTED"), 1),
@@ -94,14 +105,16 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
             ),
             arguments(
                 "several statuses (union)",
-                Map.of("statuses", "SUBMITTED,DOWNLOADED"), 2
+                Map.of("statuses", "SUBMITTED,DOWNLOADED"),
+                2
             ),
             arguments(
                 "identifier + matching status",
                 Map.of(
-                    "messageOrRemoteSystemIdentifier", MESSAGE_ID,
+                    "stepOrMessageOrRemoteSystemIdentifier", MESSAGE_ID,
                     "statuses", "SUBMITTED"
-                ), 1
+                ),
+                1
             ),
 
             arguments(
@@ -112,14 +125,16 @@ public class ConnectorListTransportStepsIT extends AbstractIntegrationTest {
             arguments("status FAILED (none in seed)", Map.of("statuses", "FAILED"), 0),
             arguments(
                 "several statuses, none matching",
-                Map.of("statuses", "FAILED,DELIVERED"), 0
+                Map.of("statuses", "FAILED,DELIVERED"),
+                0
             ),
             arguments(
                 "identifier + non-matching status",
                 Map.of(
-                    "messageOrRemoteSystemIdentifier", MESSAGE_ID,
+                    "stepOrMessageOrRemoteSystemIdentifier", MESSAGE_ID,
                     "statuses", "DELIVERED"
-                ), 0
+                ),
+                0
             )
         );
     }

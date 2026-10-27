@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
  * Specification for {@link ConnectorMessageTransportStepEntity}.
  */
 public class TransportStepSpecification {
+    private static final String IDENTIFIER_FIELD = "identifier";
     private static final String TRANSPORTED_MESSAGE_IDENTIFIER_FIELD
         = "transportedMessageIdentifier";
     private static final String REMOTE_SYSTEM_IDENTIFIER_FIELD = "remoteSystemIdentifier";
@@ -44,13 +45,27 @@ public class TransportStepSpecification {
     public static Specification<ConnectorMessageTransportStepEntity> withFilters(
         ConnectorTransportStepsListFilter filter) {
         return Specification
-            .where(withTransportedMessageIdentifier(filter.messageOrRemoteSystemIdentifier()))
+            .where(withTransportedMessageIdentifier(filter.stepOrMessageOrRemoteSystemIdentifier()))
             .or(
-                withRemoteSystemIdentifier(filter.messageOrRemoteSystemIdentifier())
+                withRemoteSystemIdentifier(filter.stepOrMessageOrRemoteSystemIdentifier())
+                    .or(withIdentifier(filter.stepOrMessageOrRemoteSystemIdentifier()))
             )
             .and(withLinkPartnerName(filter.linkPartnerName()))
             .and(withStatuses(filter.statuses()))
             .and(DateRangeSpecifications.withDateRange(filter.dateFilter(), CREATED_FIELD));
+    }
+
+    private static Specification<ConnectorMessageTransportStepEntity> withIdentifier(
+        String identifier) {
+        return ((root, query, cb) -> {
+            if (!StringUtils.hasText(identifier)) {
+                return null;
+            }
+
+            var pattern = "%" + identifier + "%";
+
+            return cb.like(root.get(IDENTIFIER_FIELD), pattern);
+        });
     }
 
     private static Specification<ConnectorMessageTransportStepEntity>

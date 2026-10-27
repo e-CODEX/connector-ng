@@ -186,6 +186,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         var wrappedMessageContext = (WrappedMessageContext) messageContext;
         var interceptor = new ProcessMessageAfterDownload(
             message,
+            backendClientName,
             ackMessageTransportStep
 
         );

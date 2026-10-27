@@ -26,6 +26,7 @@ import org.apache.cxf.phase.Phase;
 @Slf4j
 public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Message> {
     private final ConnectorMessage connectorMessage;
+    private final String linkPartnerName;
     private final ConnectorAckMessageTransportStep ackMessageTransportStep;
 
     /**
@@ -34,15 +35,19 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
      *
      * @param connectorMessage        the connector message that contains details of the message to
      *                                be processed
+     * @param linkPartnerName         the name of the link partner the message was downloaded from
+     *                                or for (must not be null)
      * @param ackMessageTransportStep the service responsible for updating the status of the message
      *                                transport step
      */
     public ProcessMessageAfterDownload(
         ConnectorMessage connectorMessage,
+        String linkPartnerName,
         ConnectorAckMessageTransportStep ackMessageTransportStep) {
         super(Phase.POST_INVOKE);
 
         this.connectorMessage = connectorMessage;
+        this.linkPartnerName = linkPartnerName;
         this.ackMessageTransportStep = ackMessageTransportStep;
     }
 
@@ -58,6 +63,7 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
                 .builder()
                 .remoteMessageIdentifier(this.connectorMessage.identifier())
                 .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                .linkPartnerName(this.linkPartnerName)
                 .errors(null)
                 .build();
             ackMessageTransportStep.execute(this.connectorMessage.identifier(), command);

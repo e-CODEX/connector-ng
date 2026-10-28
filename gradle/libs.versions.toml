@@ -5,7 +5,7 @@ apache-commons-io = "2.22.0"
 apache-cxf = "4.1.0"
 apache-poi = "6.0.0"
 apache-tika = "4.1.0"
-apache-wss4j = "3.0.5" # do not migrate to 4.x series due to xmlsec 4.x serie clash
+apache-wss4j = "3.0.6" # do not migrate to 4.x series due to xmlsec 4.x serie clash
 apache-xmlsec = "3.0.5" # keep this due to limitation of DSS library
 # jakarta
 jakarta-annotation = "3.0.0"

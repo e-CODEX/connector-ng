@@ -176,10 +176,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     public DomibusConnectorMessageType getMessageById(GetMessageByIdRequest getMessageByIdRequest) {
         var backendClientName = getBackendClientName();
         var transportIdentifier = getMessageByIdRequest.getMessageTransportId();
-        var message = retrieveMessageByTransportId.execute(
-            transportIdentifier,
-            backendClientName
-        );
+        var message = retrieveMessageByTransportId.execute(transportIdentifier, backendClientName);
 
         // add post invoke message processor
         var messageContext = webServiceContext.getMessageContext();

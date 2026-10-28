@@ -61,7 +61,7 @@ public class ProcessMessageAfterDownload extends AbstractPhaseInterceptor<Messag
         try {
             var command = UpdateMessageTransportCommand
                 .builder()
-                .remoteMessageIdentifier(this.connectorMessage.identifier())
+                .remoteMessageIdentifier(null)
                 .status(ConnectorMessageTransportStatus.DOWNLOADED)
                 .linkPartnerName(this.linkPartnerName)
                 .errors(null)

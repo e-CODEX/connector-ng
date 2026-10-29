@@ -2,7 +2,7 @@ ifndef::header[]
 include::{basepath}/header.adoc[]
 endif::header[]
 
-= File cleanup
+= Files cleanup
 
 The connector periodically deletes the files of attachments that are no longer needed.
 Each cleanup is a scheduled job with its own age threshold and its own schedule.

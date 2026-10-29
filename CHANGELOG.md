@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 - ***Admin-only endpoints*** — `/api/v1/admin/users/**` requires the caller to hold the `ADMIN` role, in addition to being authenticated.
 - ***Public endpoints*** — require no authentication.
 - **Message** — Support Connector-to-Connector test message.
+- **Orphaned Attachments Cleanup** — Support automatic deletion of `orphaned attachment` files.
+- **Unresolved Messages Cleanup** — Support automatic deletion of attachment files of `unresolved messages`.
 
 #### Fixes
 - **Ebms** — Set the correct message description for `ebms:description` for outbound messages.

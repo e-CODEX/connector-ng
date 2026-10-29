@@ -13,10 +13,16 @@ package eu.ecodex.connector.infrastructure.config;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.ecodex.connector.infrastructure.config.property.ConnectorS3ProviderProperties;
+import java.net.URI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * BeanConfig class for configuring the infrastructure-specific components.
@@ -32,5 +38,22 @@ public class BeanConfig {
             .findAndRegisterModules()
             .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    }
+
+    @Bean
+    public S3Client s3Client(ConnectorS3ProviderProperties properties) {
+        return S3Client.builder()
+                       .region(Region.of(properties.getRegion()))
+                       .endpointOverride(URI.create(properties.getEndpoint()))
+                       .credentialsProvider(
+                           StaticCredentialsProvider.create(
+                               AwsBasicCredentials.create(
+                                   properties.getAccessKey(),
+                                   properties.getSecretKey()
+                               )
+                           )
+                       )
+                       .forcePathStyle(true)
+                       .build();
     }
 }

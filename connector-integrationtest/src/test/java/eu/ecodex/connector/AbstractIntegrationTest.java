@@ -97,9 +97,9 @@ public abstract class AbstractIntegrationTest {
     @MockitoBean
     ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    protected JdbcTemplate jdbcTemplate;
     @Autowired
-    private ConnectorJwtGenerator jwtTokenService;
+    protected ConnectorJwtGenerator jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {

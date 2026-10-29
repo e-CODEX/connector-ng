@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -86,6 +87,18 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
     @Override
     public ConnectorAttachmentStorage getStorage() {
         return ConnectorAttachmentStorage.S3_BUCKET;
+    }
+
+    @Override
+    public void deleteByIdentifier(@NonNull String identifier) {
+        log.debug("Deleting attachment [{}] from s3", identifier);
+
+        var deleteObjectRequest = DeleteObjectRequest.builder()
+                                                     .bucket(this.s3ProviderProperties.getBucket())
+                                                     .key(identifier)
+                                                     .build();
+
+        this.s3Client.deleteObject(deleteObjectRequest);
     }
 
     private PutObjectRequest buildObjectRequest(ConnectorMessageAttachment attachment) {

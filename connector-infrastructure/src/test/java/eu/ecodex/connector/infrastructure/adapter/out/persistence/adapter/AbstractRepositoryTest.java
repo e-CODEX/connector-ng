@@ -11,7 +11,9 @@
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,4 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
     }
 )
 public abstract class AbstractRepositoryTest {
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
 }

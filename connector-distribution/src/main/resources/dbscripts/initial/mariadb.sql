@@ -97,6 +97,7 @@ create table connector.connector_message_attachments
         primary key,
     created_at   datetime(6)                                            not null,
     updated_at   datetime(6)                                            not null,
+    deleted_at   datetime(6)                                            null,
     content_type varchar(255)                                           not null,
     description  varchar(255)                                           not null,
     identifier   varchar(255)                                           not null,

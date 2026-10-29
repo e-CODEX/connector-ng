@@ -20,6 +20,7 @@ import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.mess
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.ConnectorMessageAttachmentJpaRepository;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.ConnectorMessageJpaRepository;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.specification.AttachmentSpecification;
+import java.time.Instant;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorDBMessageAttachmentRepository implements
     ConnectorMessageAttachmentRepository {
+    private static final int BATCH_SIZE = 500;
+
     private final ConnectorMessageAttachmentJpaRepository attachmentJpaRepository;
     private final ConnectorMessageJpaRepository messageJpaRepository;
     private final PaginationMapper paginationMapper;
@@ -68,6 +71,7 @@ public class ConnectorDBMessageAttachmentRepository implements
             .type(entity.getType())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
+            .deletedAt(entity.getDeletedAt())
             .build();
     }
 
@@ -116,6 +120,14 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    public List<ConnectorMessageAttachment> findAllOrphaned(Instant threshold) {
+        return attachmentJpaRepository.findOrphansToDelete(threshold)
+                                      .stream()
+                                      .map(ConnectorDBMessageAttachmentRepository::toDomain)
+                                      .toList();
+    }
+
+    @Override
     public void attachToMessage(
         @NonNull String attachmentIdentifier,
         @NonNull String messageIdentifier) {
@@ -136,6 +148,19 @@ public class ConnectorDBMessageAttachmentRepository implements
         var attachment = this.attachmentJpaRepository.findByIdentifier(attachmentIdentifier);
         attachment.setType(type);
         this.attachmentJpaRepository.save(attachment);
+    }
+
+    @Override
+    public void markAsDeleted(List<String> identifiers, Instant deletedAt) {
+        if (identifiers.isEmpty()) {
+            return;
+        }
+
+        var list = List.copyOf(identifiers);
+        for (int from = 0; from < list.size(); from += BATCH_SIZE) {
+            var batch = list.subList(from, Math.min(from + BATCH_SIZE, list.size()));
+            attachmentJpaRepository.markAsDeleted(batch, deletedAt);
+        }
     }
 
     private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {

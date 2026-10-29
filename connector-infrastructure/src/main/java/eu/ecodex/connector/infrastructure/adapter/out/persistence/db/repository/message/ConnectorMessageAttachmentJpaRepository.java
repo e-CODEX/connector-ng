@@ -11,10 +11,14 @@
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message;
 
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.ConnectorMessageAttachmentEntity;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,5 +32,26 @@ public interface ConnectorMessageAttachmentJpaRepository extends
     @EntityGraph(attributePaths = {"message"})
     ConnectorMessageAttachmentEntity findByIdentifier(String identifier);
 
-    List<ConnectorMessageAttachmentEntity> findAllByMessageIdentifier(String messageIdentifier);
+    @Query(value = """
+        SELECT CMA.*
+        FROM connector_message_attachments CMA
+        WHERE CMA.MESSAGE_ID IS NULL
+        AND CMA.DELETED_AT IS NULL
+        AND CMA.CREATED_AT <= :threshold
+        """,
+        nativeQuery = true
+    )
+    List<ConnectorMessageAttachmentEntity> findOrphansToDelete(
+        @Param("threshold") Instant threshold);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = """
+        UPDATE connector_message_attachments CMA
+           SET CMA.deleted_at = :deletedAt
+         WHERE CMA.identifier IN (:identifiers)
+           AND CMA.deleted_at IS NULL
+        """, nativeQuery = true)
+    int markAsDeleted(
+        @Param("identifiers") List<String> identifiers,
+        @Param("deletedAt") Instant deletedAt);
 }

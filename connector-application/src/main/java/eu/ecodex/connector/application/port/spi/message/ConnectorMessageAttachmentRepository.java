@@ -15,6 +15,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentTy
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -75,6 +76,8 @@ public interface ConnectorMessageAttachmentRepository {
     ConnectorPageResult<ConnectorMessageAttachment> findAll(
         @Nonnull ConnectorAttachmentsListFilter filter);
 
+    List<ConnectorMessageAttachment> findAllOrphaned(Instant threshold);
+
     /**
      * Associates an attachment with a message.
      *
@@ -96,4 +99,17 @@ public interface ConnectorMessageAttachmentRepository {
      * @param type                 the new {@link ConnectorAttachmentType} (must not be null)
      */
     void updateType(@Nonnull String attachmentIdentifier, @Nonnull ConnectorAttachmentType type);
+
+    /**
+     * Marks the attachments identified by the given identifiers as deleted, recording the instant
+     * of the deletion.
+     *
+     * <p>This is a soft delete: the attachments are flagged as deleted at the given instant rather
+     * than removed from the repository.
+     *
+     * @param identifiers the unique identifiers of the attachments to mark as deleted (must not be
+     *                    null); if the list is empty, nothing is updated
+     * @param deletedAt   the instant at which the attachments were deleted (must not be null)
+     */
+    void markAsDeleted(List<String> identifiers, Instant deletedAt);
 }

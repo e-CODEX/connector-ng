@@ -55,7 +55,7 @@ public class ConnectorOrphanedAttachmentsCleanupJob {
         this.clock = clock;
     }
 
-    @Scheduled(cron = "${connector.file-deletion.orphan.cron:0 0 * * * *}")
+    @Scheduled(cron = "${connector.file-deletion.orphan.cron:0 0 0 * * *}")
     public void run() {
         var threshold = Instant.now(clock).minus(properties.getOrphan().getThreshold());
         cleanupOrphanedAttachments.execute(threshold);

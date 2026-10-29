@@ -103,7 +103,7 @@ public class ConnectorOrphanedAttachmentsCleanupJobTest {
 
             assertThat(scheduled).isNotNull();
             assertThat(scheduled.cron())
-                .isEqualTo("${connector.file-deletion.orphan.cron:0 0 * * * *}");
+                .isEqualTo("${connector.file-deletion.orphan.cron:0 0 0 * * *}");
         }
     }
 }

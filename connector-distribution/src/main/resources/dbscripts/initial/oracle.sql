@@ -106,6 +106,7 @@ create table CONNECTOR_MESSAGE_ATTACHMENTS
         primary key,
     CREATED_AT   TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT   TIMESTAMP(9) WITH TIME ZONE not null,
+    DELETED_AT   TIMESTAMP(9) WITH TIME ZONE null,
     CONTENT_TYPE VARCHAR2(255 char)          not null,
     DESCRIPTION  VARCHAR2(255 char)          not null,
     IDENTIFIER   VARCHAR2(255 char)          not null

@@ -134,6 +134,7 @@ create table connector_message_attachments
         primary key,
     created_at   timestamp(6) with time zone not null,
     updated_at   timestamp(6) with time zone not null,
+    deleted_at   timestamp(6) with time zone null,
     content_type varchar(255)                not null,
     description  varchar(255)                not null,
     identifier   varchar(255)                not null

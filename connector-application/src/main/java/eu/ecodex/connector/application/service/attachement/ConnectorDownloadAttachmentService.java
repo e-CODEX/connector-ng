@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.application.service.attachement;
 
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentDeletedException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
@@ -38,14 +39,25 @@ public class ConnectorDownloadAttachmentService implements ConnectorDownloadAtta
         var attachment = this.attachmentRepository.findByIdentifier(identifier);
 
         if (attachment == null) {
-            throw new ConnectorMessageAttachmentNotFoundException("Attachment not found");
+            throw new ConnectorMessageAttachmentNotFoundException(
+                "Attachment %s not found".formatted(identifier)
+            );
+        }
+
+        if (attachment.deletedAt() != null) {
+            throw new ConnectorMessageAttachmentDeletedException(
+                "File [%s] has been deleted and its content is no longer available"
+                    .formatted(identifier)
+            );
         }
 
         var document = this.storageProvider.findByIdentifier(attachment.identifier());
 
         if (document == null) {
             throw new ConnectorMessageAttachmentException(
-                "Attachment is no longer available in the storage"
+                ("Content of attachment %s is missing from the %s storage although "
+                    + "the attachment is not marked as deleted")
+                    .formatted(identifier, storageProvider.getStorage())
             );
         }
 

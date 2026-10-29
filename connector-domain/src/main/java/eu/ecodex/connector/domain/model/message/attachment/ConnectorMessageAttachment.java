@@ -29,6 +29,7 @@ import lombok.Builder;
  * @param type        The type of the attachment.
  * @param createdAt   The creation date of the attachment.
  * @param updatedAt   The last update date of the attachment.
+ * @param deletedAt   The deletion date of the attachment.
  */
 @Builder(toBuilder = true)
 public record ConnectorMessageAttachment(
@@ -40,7 +41,8 @@ public record ConnectorMessageAttachment(
         ConnectorAttachmentStorage storage,
         ConnectorAttachmentType type,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        Instant deletedAt
 ) implements Serializable {
     @Override
     @Nonnull

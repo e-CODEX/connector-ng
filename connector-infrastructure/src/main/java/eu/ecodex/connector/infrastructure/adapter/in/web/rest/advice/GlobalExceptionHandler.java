@@ -15,6 +15,7 @@ import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusines
 import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentDeletedException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
@@ -277,6 +278,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConnectorMessageAttachmentException.class)
     public ErrorResponse handleMessageAttachmentException(
         ConnectorMessageAttachmentException exception) {
+        return new ErrorResponse(
+            HttpStatus.CONFLICT.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorMessageAttachmentDeletedException.class)
+    public ErrorResponse handleMessageAttachmentDeletionException(
+        ConnectorMessageAttachmentDeletedException exception) {
         return new ErrorResponse(
             HttpStatus.CONFLICT.value(), exception.getMessage()
         );

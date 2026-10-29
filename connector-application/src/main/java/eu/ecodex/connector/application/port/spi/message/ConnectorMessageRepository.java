@@ -10,11 +10,13 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
+import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessagesAttachments;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -90,6 +92,22 @@ public interface ConnectorMessageRepository {
         @Nonnull ConnectorMessagesListFilter filter);
 
     /**
+     * Retrieves the unresolved business messages created before the given threshold.
+     *
+     * <p>A message is unresolved when it has not reached a final state, that is, it is still
+     * waiting
+     * for a transport or processing outcome (for example an acknowledgement or an evidence). It is
+     * used by {@link ConnectorCleanupUnresolvedMessagesAttachments}.
+     *
+     * @param threshold the instant before which unresolved messages are returned; messages created
+     *                  at or after this instant are excluded (must not be null)
+     *
+     * @return the unresolved {@link ConnectorBusinessMessage} objects created before the threshold;
+     *     never {@code null}, and empty if there are none
+     */
+    List<ConnectorBusinessMessage> findAllUnresolved(Instant threshold);
+
+    /**
      * Retrieves all messages whose identifier is in the given list.
      *
      * @param identifiers the identifiers of the messages to retrieve (must not be null); if the
@@ -118,16 +136,6 @@ public interface ConnectorMessageRepository {
      */
     ConnectorBusinessMessage findByEbmsMessageIdentifierAndDirection(
         @Nonnull String ebmsMessageIdentifier, @Nonnull ConnectorMessageDirection direction);
-
-    /**
-     * Finds a message by its backend-assigned message identifier.
-     *
-     * @param backendMessageIdentifier the backend message identifier (must not be null or blank)
-     *
-     * @return the matching {@link ConnectorBusinessMessage}, or {@code null} if none exists
-     */
-    ConnectorBusinessMessage findByBackendMessageIdentifier(
-        @Nonnull String backendMessageIdentifier);
 
     /**
      * Finds the business message referenced by an evidence trigger.

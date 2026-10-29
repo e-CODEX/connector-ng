@@ -110,6 +110,94 @@ public class ConnectorDBMessageAttachmentRepositoryTest extends AbstractReposito
     }
 
     @Nested
+    @DisplayName("find all active by message identifier")
+    class FindAllActiveByMessageIdentifier {
+        private static final String ORPHAN_IDENTIFIER =
+            "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file";
+        private static final String ASICS_IDENTIFIER_OF_OTHER_MESSAGE =
+            "d9368fda-92f2-498f-95bf-1ca6f4985b85_ASIC-S";
+        private static final List<String> MESSAGE_ATTACHMENT_IDENTIFIERS = List.of(
+            "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file",
+            "c12f879b-3c9a-4d26-b36c-b6d67a84f0ed_test_attachment",
+            "1875f1b7-5ea2-494d-8932-29966189f02c_messageContent",
+            "dd5a7178-c1aa-4723-bc7b-d3f007ccd7ac_messageContent"
+        );
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_return_all_the_active_attachments_of_the_message() {
+            var attachments = repository.findAllActiveByMessageIdentifier(MESSAGE_ID);
+
+            assertThat(attachments)
+                .extracting(ConnectorMessageAttachment::identifier)
+                .containsExactlyInAnyOrderElementsOf(MESSAGE_ATTACHMENT_IDENTIFIERS);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_not_return_the_attachments_marked_as_deleted() {
+            var deletedIdentifier = MESSAGE_ATTACHMENT_IDENTIFIERS.getFirst();
+            repository.markAsDeleted(List.of(deletedIdentifier), Instant.now());
+
+            var attachments = repository.findAllActiveByMessageIdentifier(MESSAGE_ID);
+
+            assertThat(attachments)
+                .extracting(ConnectorMessageAttachment::identifier)
+                .doesNotContain(deletedIdentifier)
+                .containsExactlyInAnyOrderElementsOf(
+                    MESSAGE_ATTACHMENT_IDENTIFIERS.subList(1, MESSAGE_ATTACHMENT_IDENTIFIERS.size())
+                );
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_return_an_empty_list_when_all_the_attachments_are_deleted() {
+            repository.markAsDeleted(MESSAGE_ATTACHMENT_IDENTIFIERS, Instant.now());
+
+            var attachments = repository.findAllActiveByMessageIdentifier(MESSAGE_ID);
+
+            assertThat(attachments).isEmpty();
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_not_return_the_attachments_of_other_messages() {
+            var attachments = repository.findAllActiveByMessageIdentifier(MESSAGE_ID);
+
+            assertThat(attachments)
+                .extracting(ConnectorMessageAttachment::identifier)
+                .doesNotContain(ASICS_IDENTIFIER_OF_OTHER_MESSAGE);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_not_return_the_orphan_attachments() {
+            var attachments = repository.findAllActiveByMessageIdentifier(MESSAGE_ID);
+
+            assertThat(attachments)
+                .extracting(ConnectorMessageAttachment::identifier)
+                .doesNotContain(ORPHAN_IDENTIFIER);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_return_an_empty_list_when_the_message_is_unknown() {
+            var attachments =
+                repository.findAllActiveByMessageIdentifier("unknown@connector.ecodex.eu");
+
+            assertThat(attachments).isEmpty();
+        }
+
+        @Test
+        void should_throw_when_the_message_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findAllActiveByMessageIdentifier(null)
+            );
+        }
+    }
+
+    @Nested
     @DisplayName("find all")
     class FindAll {
         @Test

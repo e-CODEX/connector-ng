@@ -35,14 +35,17 @@ public interface ConnectorMessageAttachmentJpaRepository extends
     @Query(value = """
         SELECT CMA.*
         FROM connector_message_attachments CMA
-        WHERE CMA.MESSAGE_ID IS NULL
-        AND CMA.DELETED_AT IS NULL
-        AND CMA.CREATED_AT <= :threshold
+        WHERE CMA.message_id IS NULL
+        AND CMA.deleted_at IS NULL
+        AND CMA.created_at <= :threshold
         """,
         nativeQuery = true
     )
     List<ConnectorMessageAttachmentEntity> findOrphansToDelete(
         @Param("threshold") Instant threshold);
+
+    List<ConnectorMessageAttachmentEntity> findAllByMessageIdentifierAndDeletedAtIsNull(
+        @Param("messageIdentifier") String messageIdentifier);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = """

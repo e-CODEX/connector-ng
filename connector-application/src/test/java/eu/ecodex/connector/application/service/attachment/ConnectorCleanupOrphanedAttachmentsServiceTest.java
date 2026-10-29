@@ -40,7 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("")
+@DisplayName("ConnectorCleanupOrphanedAttachmentsService")
 public class ConnectorCleanupOrphanedAttachmentsServiceTest {
     private static final Instant NOW = Instant.parse("2026-10-28T22:00:00Z");
     private static final Instant THRESHOLD = NOW.minus(Duration.ofDays(1));

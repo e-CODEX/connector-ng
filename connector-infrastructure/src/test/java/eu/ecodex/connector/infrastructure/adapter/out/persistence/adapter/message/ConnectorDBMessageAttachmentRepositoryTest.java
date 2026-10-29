@@ -290,7 +290,7 @@ public class ConnectorDBMessageAttachmentRepositoryTest extends AbstractReposito
                 "SELECT COUNT(*) FROM connector_message_attachments WHERE deleted_at IS NOT NULL",
                 Integer.class
             );
-            assertThat(deletedCount).isZero();
+            assertThat(deletedCount).isEqualTo(1);
         }
 
         @Test

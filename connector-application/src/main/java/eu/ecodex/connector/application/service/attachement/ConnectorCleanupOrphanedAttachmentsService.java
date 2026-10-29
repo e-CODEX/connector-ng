@@ -72,7 +72,10 @@ public class ConnectorCleanupOrphanedAttachmentsService implements
                 deleted.add(orphaned.identifier());
             } catch (RuntimeException e) {
                 failed++;
-                log.warn("Could not delete orphaned attachment {}", orphaned.identifier(), e);
+                log.warn(
+                    "Could not delete orphaned attachment [{}] from [{}] storage",
+                    orphaned.identifier(), fileStorageProvider.getStorage(), e
+                );
             }
         }
 

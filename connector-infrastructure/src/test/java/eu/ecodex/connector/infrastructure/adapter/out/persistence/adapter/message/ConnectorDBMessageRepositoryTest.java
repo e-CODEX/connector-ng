@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.AbstractRepositoryTest;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.ConnectorMessageJpaRepository;
@@ -22,6 +23,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -33,7 +36,7 @@ import org.springframework.test.context.jdbc.Sql;
 @SuppressWarnings("DataFlowIssue")
 
 @DisplayName("ConnectorMessageRepository")
-public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBMessageRepositoryTest extends AbstractRepositoryTest {
     private static final String MESSAGE_ID = "fd2f35e0-1981-4d21-b718-10a802e884b0@connector"
         + ".ecodex.eu";
 
@@ -82,7 +85,7 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
     @DisplayName("save a message")
     class Save {
         @Test
-        void should_fail_if_the_message_is_null() {
+        void should_fail_when_the_message_is_null() {
             assertThrows(
                 NullPointerException.class, () -> repository.save(null)
             );
@@ -335,6 +338,91 @@ public class ConnectorMessageRepositoryTest extends AbstractRepositoryTest {
                 NullPointerException.class,
                 () -> repository.findByConversationIdentifier(null)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("find all unresolved")
+    class FindAllUnresolved {
+        private static final String CONFIRMED_IDENTIFIER =
+            "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+        private static final String REJECTED_IDENTIFIER =
+            "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
+
+        @Test
+        @WithMessageData
+        void should_return_the_unresolved_messages_created_before_the_threshold() {
+            var threshold = Instant.now().plus(Duration.ofDays(1));
+
+            var messages = repository.findAllUnresolved(threshold);
+
+            assertThat(messages)
+                .extracting(ConnectorBusinessMessage::identifier)
+                .containsExactlyInAnyOrder(
+                    "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu",
+                    "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu",
+                    "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu",
+                    "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu"
+                );
+        }
+
+        @Test
+        @WithMessageData
+        void should_not_return_the_messages_created_after_the_threshold() {
+            var threshold = Instant.now().minus(Duration.ofDays(1));
+
+            var messages = repository.findAllUnresolved(threshold);
+
+            assertThat(messages).isEmpty();
+        }
+
+        @Test
+        @WithMessageData
+        void should_not_return_a_confirmed_message() {
+            var threshold = Instant.now().plus(Duration.ofDays(1));
+            repository.setAsConfirmed(CONFIRMED_IDENTIFIER);
+
+            var messages = repository.findAllUnresolved(threshold);
+
+            assertThat(messages)
+                .extracting(ConnectorBusinessMessage::identifier)
+                .hasSize(3)
+                .doesNotContain(CONFIRMED_IDENTIFIER);
+        }
+
+        @Test
+        @WithMessageData
+        void should_not_return_a_rejected_message() {
+            var threshold = Instant.now().plus(Duration.ofDays(1));
+            repository.setAsRejected(REJECTED_IDENTIFIER);
+
+            var messages = repository.findAllUnresolved(threshold);
+
+            assertThat(messages)
+                .extracting(ConnectorBusinessMessage::identifier)
+                .hasSize(3)
+                .doesNotContain(REJECTED_IDENTIFIER);
+        }
+
+        @Test
+        @WithMessageData
+        void should_return_no_message_when_all_the_messages_are_resolved() {
+            var threshold = Instant.now().plus(Duration.ofDays(1));
+            repository.setAsConfirmed(CONFIRMED_IDENTIFIER);
+            repository.setAsRejected(REJECTED_IDENTIFIER);
+            repository.setAsConfirmed("7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu");
+            repository.setAsRejected("3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu");
+
+            var messages = repository.findAllUnresolved(threshold);
+
+            assertThat(messages).isEmpty();
+        }
+
+        @Test
+        void should_return_an_empty_list_when_there_is_no_message() {
+            var messages = repository.findAllUnresolved(Instant.now().plus(Duration.ofDays(1)));
+
+            assertThat(messages).isEmpty();
         }
     }
 

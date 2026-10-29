@@ -47,7 +47,6 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
 
     @Mock
     private ConnectorMessageAttachmentRepository attachmentRepository;
-
     @Mock
     private ConnectorFileStorageProvider fileStorageProvider;
 
@@ -70,7 +69,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
     @DisplayName("when there are no orphans")
     class WhenThereAreNoOrphans {
         @Test
-        void does_not_touch_the_storage_nor_mark_anything_as_deleted() {
+        void should_not_touch_the_storage_nor_mark_anything_as_deleted() {
             when(attachmentRepository.findAllOrphaned(THRESHOLD)).thenReturn(List.of());
 
             service.execute(THRESHOLD);
@@ -84,7 +83,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
     @DisplayName("when all deletions succeed")
     class WhenAllDeletionsSucceed {
         @Test
-        void deletes_every_file_from_the_storage() {
+        void should_delete_every_file_from_the_storage() {
             when(attachmentRepository.findAllOrphaned(THRESHOLD))
                 .thenReturn(List.of(attachment("id-1"), attachment("id-2")));
             doNothing().when(attachmentRepository).markAsDeleted(anyList(), any());
@@ -96,7 +95,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
         }
 
         @Test
-        void marks_all_as_deleted_with_the_clock_instant() {
+        void should_mark_all_as_deleted_with_the_clock_instant() {
             when(attachmentRepository.findAllOrphaned(THRESHOLD))
                 .thenReturn(List.of(attachment("id-1"), attachment("id-2")));
 
@@ -118,7 +117,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
         }
 
         @Test
-        void continues_with_the_remaining_attachments() {
+        void should_continue_with_the_remaining_attachments() {
             service.execute(THRESHOLD);
 
             verify(fileStorageProvider).deleteByIdentifier("id-1");
@@ -127,7 +126,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
         }
 
         @Test
-        void marks_only_the_successful_ones_as_deleted_so_the_failed_one_is_retried() {
+        void should_mark_only_the_successful_ones_as_deleted_so_the_failed_one_is_retried() {
             service.execute(THRESHOLD);
 
             verify(attachmentRepository).markAsDeleted(List.of("id-1", "id-3"), NOW);
@@ -138,7 +137,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
     @DisplayName("when all deletions fail")
     class WhenAllDeletionsFail {
         @Test
-        void does_not_mark_anything_as_deleted() {
+        void should_not_mark_anything_as_deleted() {
             when(attachmentRepository.findAllOrphaned(THRESHOLD))
                 .thenReturn(List.of(attachment("id-1"), attachment("id-2")));
             doThrow(new RuntimeException("S3 unavailable"))
@@ -155,7 +154,7 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
     @DisplayName("when the threshold is null")
     class WhenTheThresholdIsNull {
         @Test
-        void throws_a_null_pointer_exception_and_does_nothing() {
+        void should_throw_a_null_pointer_exception_and_does_nothing() {
             assertThatThrownBy(() -> service.execute(null))
                 .isInstanceOf(NullPointerException.class);
 

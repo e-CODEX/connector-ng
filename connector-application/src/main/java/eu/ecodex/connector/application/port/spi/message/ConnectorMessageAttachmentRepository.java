@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
+import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorMessageAttachmentLinker;
 import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -49,6 +51,23 @@ public interface ConnectorMessageAttachmentRepository {
     ConnectorMessageAttachment findByIdentifier(@Nonnull String identifier);
 
     /**
+     * Retrieves all attachments of the message identified by the given identifier that have not
+     * been marked as deleted, whatever their type.
+     *
+     * <p>Attachments marked as deleted (see {@link #markAsDeleted}) are excluded, so the returned
+     * attachments are those whose content is expected to still be available. Unlike
+     * {@link #findByMessageIdentifierAndTypes}, no type filter is applied.
+     *
+     * @param messageIdentifier the unique identifier of the message the attachments belong to (must
+     *                          not be null)
+     *
+     * @return the active {@link ConnectorMessageAttachment} objects of the message; never
+     *     {@code null}, and empty if the message has no active attachments or does not exist
+     */
+    List<ConnectorMessageAttachment> findAllActiveByMessageIdentifier(
+        @Nonnull String messageIdentifier);
+
+    /**
      * Retrieves the attachments of a message that have one of the given types.
      *
      * @param messageIdentifier identifier of the message the attachments belong to (must not be
@@ -76,6 +95,19 @@ public interface ConnectorMessageAttachmentRepository {
     ConnectorPageResult<ConnectorMessageAttachment> findAll(
         @Nonnull ConnectorAttachmentsListFilter filter);
 
+    /**
+     * Retrieves the orphaned attachments created before the given threshold.
+     *
+     * <p>An attachment is orphaned when it was uploaded (see {@link ConnectorUploadAttachments})
+     * but never linked to a message (see {@link ConnectorMessageAttachmentLinker}). Attachments
+     * already marked as deleted (see {@link #markAsDeleted}) are not returned.
+     *
+     * @param threshold the instant before which orphaned attachments are returned; attachments
+     *                  created at or after this instant are excluded (must not be null)
+     *
+     * @return the orphaned {@link ConnectorMessageAttachment} objects created before the threshold;
+     *     never {@code null}, and empty if there are none
+     */
     List<ConnectorMessageAttachment> findAllOrphaned(Instant threshold);
 
     /**

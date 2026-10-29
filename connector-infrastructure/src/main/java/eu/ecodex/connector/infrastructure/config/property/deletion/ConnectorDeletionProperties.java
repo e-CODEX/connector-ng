@@ -30,5 +30,9 @@ import org.springframework.validation.annotation.Validated;
 public class ConnectorDeletionProperties {
     @Valid
     @NotNull
-    private DeletionRule orphan = new DeletionRule(Duration.ofDays(1), "0 0 0 * * *");
+    private DeletionRule orphan = new DeletionRule(Duration.ofDays(1), "0 0 * * * *");
+
+    @Valid
+    @NotNull
+    private DeletionRule unresolvedMessages = new DeletionRule(Duration.ofDays(7), "0 0 3 * * *");
 }

@@ -45,11 +45,13 @@ import java.util.List;
 import java.util.Set;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * RDBMS implementation of {@link ConnectorMessageRepository}.
  */
 @Component
+@Transactional(readOnly = true)
 public class ConnectorDBMessageRepository implements ConnectorMessageRepository {
     private final ConnectorMessageJpaRepository messageJpaRepository;
     private final ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository;
@@ -150,6 +152,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
 
     @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     @Override
+    @Transactional
     public ConnectorBusinessMessage save(@NonNull ConnectorBusinessMessage message) {
         var messageToSave = toEntity(message);
         var savedMessage = this.messageJpaRepository.save(messageToSave);
@@ -164,6 +167,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage updateGatewayName(
         @NonNull String identifier,
         @NonNull String name) {
@@ -175,6 +179,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage updateBackendName(
         @NonNull String identifier,
         @NonNull String name) {
@@ -186,6 +191,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage updateEbmsIdentifier(
         @NonNull String identifier,
         @NonNull String ebmsIdentifier) {
@@ -198,6 +204,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage updateBackendIdentifier(
         @NonNull String identifier,
         @NonNull String backendIdentifier) {
@@ -218,6 +225,13 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
         var messages = messageJpaRepository.findAll(specification, pageable).map(this::toDomain);
 
         return paginationMapper.toPageResult(messages);
+    }
+
+    @Override
+    public List<ConnectorBusinessMessage> findAllUnresolved(Instant threshold) {
+        var messages = messageJpaRepository.findUnresolveToDelete(threshold);
+
+        return messages.stream().map(this::toDomain).toList();
     }
 
     @Override
@@ -243,16 +257,6 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
             .findByAs4PropertiesEbmsMessageIdentifierAndDirection(
                 ebmsMessageIdentifier, direction
             );
-
-        return toDomain(message);
-    }
-
-    @Override
-    public ConnectorBusinessMessage findByBackendMessageIdentifier(
-        @NonNull String backendMessageIdentifier) {
-        var message = this.messageJpaRepository.findByBackendMessageIdentifier(
-            backendMessageIdentifier
-        );
 
         return toDomain(message);
     }
@@ -292,6 +296,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage setAsRejected(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setRejectedAt(Instant.now());
@@ -301,6 +306,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage setAsConfirmed(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setConfirmedAt(Instant.now());
@@ -310,6 +316,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    @Transactional
     public ConnectorBusinessMessage setDeliveredToLinkPartnerAt(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setDeliveredToLinkPartnerAt(Instant.now());

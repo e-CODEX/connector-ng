@@ -91,6 +91,15 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    public List<ConnectorMessageAttachment> findAllActiveByMessageIdentifier(
+        @NonNull String messageIdentifier) {
+        var attachments = this.attachmentJpaRepository.findAllByMessageIdentifierAndDeletedAtIsNull(
+            messageIdentifier);
+
+        return attachments.stream().map(ConnectorDBMessageAttachmentRepository::toDomain).toList();
+    }
+
+    @Override
     public List<ConnectorMessageAttachment> findByMessageIdentifierAndTypes(
         @NonNull String messageIdentifier,
         @NonNull List<ConnectorAttachmentType> types) {

@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * that threshold.
  *
  * <p>The schedule is configured with the property {@code connector.file-deletion.orphan.cron},
- * which defaults to {@code 0 0 * * * *} (every hour, on the hour).
+ * which defaults to {@code 0 0 0 * * *} (every day at 00:00:00).
  */
 @Component
 public class ConnectorOrphanedAttachmentsCleanupJob {
@@ -55,6 +55,14 @@ public class ConnectorOrphanedAttachmentsCleanupJob {
         this.clock = clock;
     }
 
+    /**
+     * Runs the cleanup: deletes the orphaned attachments created before the threshold, that is, the
+     * current instant minus the configured orphan threshold.
+     *
+     * <p>Invoked by the scheduler according to {@code connector.file-deletion.orphan.cron}; it is
+     * not meant to be called directly. A failure thrown by the use case propagates to the
+     * scheduler, which logs it and runs the job again at the next trigger.
+     */
     @Scheduled(cron = "${connector.file-deletion.orphan.cron:0 0 0 * * *}")
     public void run() {
         var threshold = Instant.now(clock).minus(properties.getOrphan().getThreshold());

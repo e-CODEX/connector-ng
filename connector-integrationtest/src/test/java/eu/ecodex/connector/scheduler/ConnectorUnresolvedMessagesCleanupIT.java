@@ -1,0 +1,199 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.scheduler;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.infrastructure.adapter.in.scheduler.ConnectorUnresolvedMessagesCleanupJob;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
+
+@TestPropertySource(properties = {
+    "connector.scheduling.enabled=false",
+    "connector.file-deletion.unresolved-messages.threshold=1d"
+})
+@Sql(
+    statements = "DELETE FROM connector_business_domains WHERE id IS NOT NULL",
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
+@Sql(
+    scripts = {
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/evidence.sql",
+    },
+    executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
+)
+@DisplayName("ConnectorUnresolvedMessagesCleanupIT CRON")
+public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest {
+    private static final String MESSAGE_1 =
+        "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
+    private static final String MESSAGE_2 =
+        "7b70aa96-dadc-4bca-87d8-5765846bf9ca@connector.ecodex.eu";
+    private static final String MESSAGE_3 =
+        "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu";
+    private static final String MESSAGE_4 =
+        "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu";
+
+    private static final String ORPHAN_ATTACHMENT =
+        "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file";
+    private static final String ATTACHMENT_OF_MESSAGE_3 =
+        "b9bd63c7-5a5a-4701-a23c-e5e714436585_messageContent";
+
+    @Autowired
+    private ConnectorUnresolvedMessagesCleanupJob job;
+    @Autowired
+    private ConnectorMessageRepository messageRepository;
+
+    private int totalAttachmentsOf(String messageIdentifier) {
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(*) FROM connector_message_attachments a
+                  JOIN connector_messages m ON a.message_id = m.id
+                 WHERE m.identifier = ?
+                """,
+            Integer.class,
+            messageIdentifier
+        );
+    }
+
+    private int deletedAttachmentsOf(String messageIdentifier) {
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(*) FROM connector_message_attachments a
+                  JOIN connector_messages m ON a.message_id = m.id
+                 WHERE m.identifier = ? AND a.deleted_at IS NOT NULL
+                """,
+            Integer.class,
+            messageIdentifier
+        );
+    }
+
+    private boolean isDeleted(String attachmentIdentifier) {
+        return jdbcTemplate.queryForObject(
+            "SELECT deleted_at IS NOT NULL FROM connector_message_attachments "
+                + "WHERE identifier = ?",
+            Boolean.class,
+            attachmentIdentifier
+        );
+    }
+
+    @AfterEach
+    void cleanUp() {
+        cleanDb();
+    }
+
+    @Test
+    @DisplayName("marks the attachments of every unresolved message as deleted")
+    void should_mark_the_attachments_of_every_unresolved_message_as_deleted() {
+        job.run();
+
+        for (var message : new String[]{MESSAGE_1, MESSAGE_2, MESSAGE_3, MESSAGE_4}) {
+            assertThat(totalAttachmentsOf(message)).isPositive();
+            assertThat(deletedAttachmentsOf(message)).isEqualTo(totalAttachmentsOf(message));
+        }
+    }
+
+    @Test
+    @DisplayName("deletes the content of the attachments from the storage")
+    void should_delete_the_content_of_the_attachments_from_the_storage() {
+        job.run();
+
+        verify(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+    }
+
+    @Test
+    @DisplayName("does not touch the attachments of a confirmed message")
+    void should_not_touch_the_attachments_of_a_confirmed_message() {
+        messageRepository.setAsConfirmed(MESSAGE_1);
+
+        job.run();
+
+        assertThat(deletedAttachmentsOf(MESSAGE_1)).isZero();
+        assertThat(deletedAttachmentsOf(MESSAGE_2)).isEqualTo(totalAttachmentsOf(MESSAGE_2));
+    }
+
+    @Test
+    @DisplayName("does not touch the attachments of a rejected message")
+    void should_not_touch_the_attachments_of_a_rejected_message() {
+        messageRepository.setAsRejected(MESSAGE_2);
+
+        job.run();
+
+        assertThat(deletedAttachmentsOf(MESSAGE_2)).isZero();
+        assertThat(deletedAttachmentsOf(MESSAGE_1)).isEqualTo(totalAttachmentsOf(MESSAGE_1));
+    }
+
+    @Test
+    @DisplayName("does not touch the orphan attachments")
+    void should_not_touch_the_orphan_attachments() {
+        job.run();
+
+        assertThat(isDeleted(ORPHAN_ATTACHMENT)).isFalse();
+        verify(fileStorageProvider, never()).deleteByIdentifier(ORPHAN_ATTACHMENT);
+    }
+
+    @Test
+    @DisplayName("keeps an attachment active when its content could not be deleted")
+    void should_keep_an_attachment_active_when_its_content_could_not_be_deleted() {
+        doThrow(new ConnectorMessageAttachmentException("storage error"))
+            .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+
+        job.run();
+
+        assertThat(isDeleted(ATTACHMENT_OF_MESSAGE_3)).isFalse();
+        assertThat(deletedAttachmentsOf(MESSAGE_3)).isEqualTo(totalAttachmentsOf(MESSAGE_3) - 1);
+        assertThat(deletedAttachmentsOf(MESSAGE_4)).isEqualTo(totalAttachmentsOf(MESSAGE_4));
+    }
+
+    @Test
+    @DisplayName("does not delete the same content again when run twice")
+    void should_not_delete_the_same_content_again_when_run_twice() {
+        job.run();
+        job.run();
+
+        verify(fileStorageProvider, times(1)).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+    }
+
+    @TestConfiguration
+    static class FixedClockConfiguration {
+        @Bean
+        @Primary
+        Clock fixedClock() {
+            return Clock.fixed(Instant.now().plus(Duration.ofDays(30)), ZoneOffset.UTC);
+        }
+    }
+}

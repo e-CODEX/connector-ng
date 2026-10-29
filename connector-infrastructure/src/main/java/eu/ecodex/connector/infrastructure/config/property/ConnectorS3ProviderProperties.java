@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "connector.file.storage.s3")
 public class ConnectorS3ProviderProperties {
+    private boolean autoCreateBucket = true;
     private String region;
     private String accessKey;
     private String secretKey;

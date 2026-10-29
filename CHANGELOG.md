@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - **Message** — Support Connector-to-Connector test message.
 - **Orphaned Attachments Cleanup** — Support automatic deletion of `orphaned attachment` files.
 - **Unresolved Messages Cleanup** — Support automatic deletion of attachment files of `unresolved messages`.
+- **S3 Bucket Auto-Creation** — Support automatic creation of the S3 bucket at startup via `connector.s3.auto-create-bucket` (enabled by default).
 
 #### Fixes
 - **Ebms** — Set the correct message description for `ebms:description` for outbound messages.

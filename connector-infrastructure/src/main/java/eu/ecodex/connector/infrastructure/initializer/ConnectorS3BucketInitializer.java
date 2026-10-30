@@ -35,7 +35,11 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "connector.s3.auto-create-bucket", havingValue = "true")
+@ConditionalOnProperty(
+    name = "connector.s3.auto-create-bucket",
+    havingValue = "true",
+    matchIfMissing = true
+)
 public class ConnectorS3BucketInitializer implements ApplicationRunner {
     private final S3Client s3Client;
     private final ConnectorS3ProviderProperties properties;

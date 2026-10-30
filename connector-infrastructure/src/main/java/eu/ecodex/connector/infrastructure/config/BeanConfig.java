@@ -32,7 +32,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class BeanConfig {
     @Bean
-    @ConditionalOnMissingBean   // won't conflict if another module already defines one
+    @ConditionalOnMissingBean
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
             .findAndRegisterModules()

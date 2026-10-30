@@ -22,7 +22,7 @@ jaxb-xjc = "4.0.9"
 # spring boot
 spring-boot = "4.1.2"
 spring-doc = "3.2.0"
-s3 = "2.57.3"
+s3 = "2.57.4"
 # dbms
 h2 = "2.5.252"
 mysql = "8.0.33"

@@ -33,4 +33,5 @@ public class ConnectorQueueProperties {
     private final String backendDeliveryQueue = "connector.queues.backend-delivery-queue";
     private final String gatewaySubmissionQueue = "domibus.backend.jms.inQueue";
     private final String gatewaySubmissionReplyQueue = "domibus.backend.jms.replyQueue";
+    private final String resolvedMassageCleanupQueue = "connector.queues.resolved-message-cleanup-processing-queue";
 }

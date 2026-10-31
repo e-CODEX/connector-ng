@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.service.attachement;
 
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentDeletedException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentDeletedException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorDownloadAttachment;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;

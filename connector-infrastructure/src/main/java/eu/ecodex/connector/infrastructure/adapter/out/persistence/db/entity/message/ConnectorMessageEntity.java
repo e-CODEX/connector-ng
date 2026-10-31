@@ -91,6 +91,7 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Column(name = "DIRECTION", nullable = false)
     private ConnectorMessageDirection direction;
 
+    @Setter
     @Column(name = "DELETED_AT")
     private Instant deletedAt;
 

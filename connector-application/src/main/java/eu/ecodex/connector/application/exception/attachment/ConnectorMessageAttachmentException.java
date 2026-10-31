@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.exception.message;
+package eu.ecodex.connector.application.exception.attachment;
 
 /**
  * Exception thrown when a file storage operation fails within the connector storage layer.

@@ -17,14 +17,12 @@ import java.time.Instant;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Default implementation of {@link ConnectorCleanupUnresolvedMessagesAttachments}.
  */
 @Slf4j
 @Service
-@Transactional
 public class ConnectorCleanupUnresolvedMessagesAttachmentsService
     implements ConnectorCleanupUnresolvedMessagesAttachments {
     private final ConnectorMessageRepository messageRepository;
@@ -33,8 +31,8 @@ public class ConnectorCleanupUnresolvedMessagesAttachmentsService
     /**
      * Creates the service.
      *
-     * @param messageRepository the repository used to find the unresolved messages (must not be
-     *                          null)
+     * @param messageRepository the repository used to find the unresolved messages and to mark them
+     *                          as deleted (must not be null)
      * @param filesDeleter      the component that deletes the content of the attachments from the
      *                          file storage and marks them as deleted (must not be null)
      */
@@ -61,7 +59,12 @@ public class ConnectorCleanupUnresolvedMessagesAttachmentsService
 
         for (var message : unresolvedMessages) {
             try {
-                total = total.plus(filesDeleter.deleteActiveAttachmentsOf(message.identifier()));
+                var result = filesDeleter.deleteActiveAttachmentsOf(message.identifier());
+                total = total.plus(result);
+
+                if (result.failed() == 0) {
+                    messageRepository.setAsDeleted(message.identifier());
+                }
             } catch (RuntimeException e) {
                 // e.g. database error: do not abort the other messages, retried at next run
                 log.warn(

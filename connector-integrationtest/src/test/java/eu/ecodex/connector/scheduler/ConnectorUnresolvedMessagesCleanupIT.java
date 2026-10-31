@@ -13,12 +13,14 @@ package eu.ecodex.connector.scheduler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.adapter.in.scheduler.ConnectorUnresolvedMessagesCleanupJob;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -111,13 +113,28 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
         );
     }
 
+    private boolean isMessageDeleted(String messageIdentifier) {
+        return jdbcTemplate.queryForObject(
+            "SELECT deleted_at IS NOT NULL FROM connector_messages WHERE identifier = ?",
+            Boolean.class,
+            messageIdentifier
+        );
+    }
+
+    private Timestamp messageDeletedAt(String messageIdentifier) {
+        return jdbcTemplate.queryForObject(
+            "SELECT deleted_at FROM connector_messages WHERE identifier = ?",
+            Timestamp.class,
+            messageIdentifier
+        );
+    }
+
     @AfterEach
     void cleanUp() {
         cleanDb();
     }
 
     @Test
-    @DisplayName("marks the attachments of every unresolved message as deleted")
     void should_mark_the_attachments_of_every_unresolved_message_as_deleted() {
         job.run();
 
@@ -128,7 +145,15 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     @Test
-    @DisplayName("deletes the content of the attachments from the storage")
+    void should_set_deleted_at_on_every_unresolved_message() {
+        job.run();
+
+        for (var message : new String[]{MESSAGE_1, MESSAGE_2, MESSAGE_3, MESSAGE_4}) {
+            assertThat(isMessageDeleted(message)).isTrue();
+        }
+    }
+
+    @Test
     void should_delete_the_content_of_the_attachments_from_the_storage() {
         job.run();
 
@@ -136,7 +161,6 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     @Test
-    @DisplayName("does not touch the attachments of a confirmed message")
     void should_not_touch_the_attachments_of_a_confirmed_message() {
         messageRepository.setAsConfirmed(MESSAGE_1);
 
@@ -147,7 +171,16 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     @Test
-    @DisplayName("does not touch the attachments of a rejected message")
+    void should_not_set_deleted_at_on_a_confirmed_message() {
+        messageRepository.setAsConfirmed(MESSAGE_1);
+
+        job.run();
+
+        assertThat(isMessageDeleted(MESSAGE_1)).isFalse();
+        assertThat(isMessageDeleted(MESSAGE_2)).isTrue();
+    }
+
+    @Test
     void should_not_touch_the_attachments_of_a_rejected_message() {
         messageRepository.setAsRejected(MESSAGE_2);
 
@@ -158,7 +191,16 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     @Test
-    @DisplayName("does not touch the orphan attachments")
+    void should_not_set_deleted_at_on_a_rejected_message() {
+        messageRepository.setAsRejected(MESSAGE_2);
+
+        job.run();
+
+        assertThat(isMessageDeleted(MESSAGE_2)).isFalse();
+        assertThat(isMessageDeleted(MESSAGE_1)).isTrue();
+    }
+
+    @Test
     void should_not_touch_the_orphan_attachments() {
         job.run();
 
@@ -167,7 +209,6 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     @Test
-    @DisplayName("keeps an attachment active when its content could not be deleted")
     void should_keep_an_attachment_active_when_its_content_could_not_be_deleted() {
         doThrow(new ConnectorMessageAttachmentException("storage error"))
             .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
@@ -180,12 +221,45 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     @Test
-    @DisplayName("does not delete the same content again when run twice")
+    void should_not_set_deleted_at_on_a_message_whose_attachment_could_not_be_deleted() {
+        doThrow(new ConnectorMessageAttachmentException("storage error"))
+            .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+
+        job.run();
+
+        assertThat(isMessageDeleted(MESSAGE_3)).isFalse();   // retried at the next run
+        assertThat(isMessageDeleted(MESSAGE_4)).isTrue();    // other messages are not affected
+    }
+
+    @Test
+    void should_set_deleted_at_on_the_next_run_once_the_storage_works_again() {
+        doThrow(new ConnectorMessageAttachmentException("storage error"))
+            .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+        job.run();
+        reset(fileStorageProvider);
+
+        job.run();
+
+        assertThat(isMessageDeleted(MESSAGE_3)).isTrue();
+        assertThat(deletedAttachmentsOf(MESSAGE_3)).isEqualTo(totalAttachmentsOf(MESSAGE_3));
+    }
+
+    @Test
     void should_not_delete_the_same_content_again_when_run_twice() {
         job.run();
         job.run();
 
         verify(fileStorageProvider, times(1)).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+    }
+
+    @Test
+    void should_keep_the_original_deleted_at_when_run_twice() {
+        job.run();
+        var first = messageDeletedAt(MESSAGE_1);
+
+        job.run();
+
+        assertThat(messageDeletedAt(MESSAGE_1)).isEqualTo(first);
     }
 
     @TestConfiguration

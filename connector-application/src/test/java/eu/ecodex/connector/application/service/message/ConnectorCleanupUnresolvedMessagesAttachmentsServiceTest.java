@@ -11,8 +11,10 @@
 package eu.ecodex.connector.application.service.message;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -58,42 +60,149 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
     @Nested
     @DisplayName("execute")
     class Execute {
-        @Test
-        void should_not_call_the_deleter_when_there_are_no_unresolved_messages() {
-            when(messageRepository.findAllUnresolved(THRESHOLD)).thenReturn(List.of());
+        @Nested
+        @DisplayName("when there are no unresolved messages")
+        class WhenThereAreNoUnresolvedMessages {
 
-            service.execute(THRESHOLD);
+            @Test
+            void should_not_call_the_deleter() {
+                when(messageRepository.findAllUnresolved(THRESHOLD)).thenReturn(List.of());
 
-            verifyNoInteractions(filesDeleter);
+                service.execute(THRESHOLD);
+
+                verifyNoInteractions(filesDeleter);
+            }
+
+            @Test
+            void should_not_mark_any_message_as_deleted() {
+                when(messageRepository.findAllUnresolved(THRESHOLD)).thenReturn(List.of());
+
+                service.execute(THRESHOLD);
+
+                verify(messageRepository, never()).setAsDeleted(anyString());
+            }
         }
 
-        @Test
-        void should_clean_up_the_attachments_of_every_unresolved_message() {
-            when(messageRepository.findAllUnresolved(THRESHOLD))
-                .thenReturn(List.of(message("msg-1"), message("msg-2")));
-            when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
-                .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 0));
+        @Nested
+        @DisplayName("when all deletions succeed")
+        class WhenAllDeletionsSucceed {
+            @Test
+            void should_clean_up_the_attachments_of_every_unresolved_message() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1"), message("msg-2")));
+                when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
+                    .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 0));
 
-            service.execute(THRESHOLD);
+                service.execute(THRESHOLD);
 
-            verify(filesDeleter).deleteActiveAttachmentsOf("msg-1");
-            verify(filesDeleter).deleteActiveAttachmentsOf("msg-2");
+                verify(filesDeleter).deleteActiveAttachmentsOf("msg-1");
+                verify(filesDeleter).deleteActiveAttachmentsOf("msg-2");
+            }
+
+            @Test
+            void should_mark_every_message_as_deleted() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1"), message("msg-2")));
+                when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
+                    .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 0));
+
+                service.execute(THRESHOLD);
+
+                verify(messageRepository).setAsDeleted("msg-1");
+                verify(messageRepository).setAsDeleted("msg-2");
+            }
+
+            @Test
+            void should_mark_the_message_as_deleted_when_it_has_no_active_attachment() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1")));
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
+                    .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
+
+                service.execute(THRESHOLD);
+
+                verify(messageRepository).setAsDeleted("msg-1");
+            }
         }
 
-        @Test
-        void should_continue_with_the_next_message_when_one_cleanup_throws() {
-            when(messageRepository.findAllUnresolved(THRESHOLD))
-                .thenReturn(List.of(message("msg-1"), message("msg-2"), message("msg-3")));
-            when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
-                .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
-            doThrow(new RuntimeException("database error"))
-                .when(filesDeleter).deleteActiveAttachmentsOf("msg-2");
-            when(filesDeleter.deleteActiveAttachmentsOf("msg-3"))
-                .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
+        @Nested
+        @DisplayName("when a file deletion fails")
+        class WhenAFileDeletionFails {
+            @Test
+            void should_not_mark_the_message_as_deleted() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1")));
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
+                    .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 1));
 
-            assertThatCode(() -> service.execute(THRESHOLD)).doesNotThrowAnyException();
+                service.execute(THRESHOLD);
 
-            verify(filesDeleter).deleteActiveAttachmentsOf("msg-3");
+                verify(messageRepository, never()).setAsDeleted(anyString());
+            }
+
+            @Test
+            void should_still_mark_the_other_messages_as_deleted() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1"), message("msg-2")));
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
+                    .thenReturn(new ConnectorAttachmentFilesDeleter.Result(0, 1));
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-2"))
+                    .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 0));
+
+                service.execute(THRESHOLD);
+
+                verify(messageRepository, never()).setAsDeleted("msg-1");
+                verify(messageRepository).setAsDeleted("msg-2");
+            }
+        }
+
+        @Nested
+        @DisplayName("when the cleanup of one message throws")
+        class WhenTheCleanupOfOneMessageThrows {
+            @Test
+            void should_continue_with_the_next_message_when_the_deleter_throws() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1"), message("msg-2"), message("msg-3")));
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
+                    .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
+                doThrow(new RuntimeException("database error"))
+                    .when(filesDeleter).deleteActiveAttachmentsOf("msg-2");
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-3"))
+                    .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
+
+                assertThatCode(() -> service.execute(THRESHOLD)).doesNotThrowAnyException();
+
+                verify(filesDeleter).deleteActiveAttachmentsOf("msg-3");
+                verify(messageRepository, never()).setAsDeleted("msg-2");
+                verify(messageRepository).setAsDeleted("msg-3");
+            }
+
+            @Test
+            void should_continue_with_the_next_message_when_marking_one_as_deleted_fails() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1"), message("msg-2")));
+                when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
+                    .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
+                doThrow(new RuntimeException("database error"))
+                    .when(messageRepository).setAsDeleted("msg-1");
+
+                assertThatCode(() -> service.execute(THRESHOLD)).doesNotThrowAnyException();
+
+                verify(messageRepository).setAsDeleted("msg-2");
+            }
+        }
+
+        @Nested
+        @DisplayName("when the threshold is null")
+        class WhenTheThresholdIsNull {
+            @SuppressWarnings("DataFlowIssue")
+            @Test
+            void should_throw_and_do_nothing() {
+                assertThatThrownBy(() -> service.execute(null))
+                    .isInstanceOf(NullPointerException.class);
+
+                verifyNoInteractions(messageRepository, filesDeleter);
+            }
         }
     }
 }

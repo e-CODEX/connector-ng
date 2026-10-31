@@ -24,11 +24,13 @@ import java.time.Instant;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * RDBMS implementation of {@link ConnectorMessageAttachmentRepository}.
  */
 @Component
+@Transactional(readOnly = true)
 public class ConnectorDBMessageAttachmentRepository implements
     ConnectorMessageAttachmentRepository {
     private static final int BATCH_SIZE = 500;
@@ -76,6 +78,7 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    @Transactional
     public ConnectorMessageAttachment save(ConnectorMessageAttachment attachment) {
         var attachmentToSave = toEntity(attachment);
         var savedAttachment = attachmentJpaRepository.save(attachmentToSave);
@@ -137,6 +140,7 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    @Transactional
     public void attachToMessage(
         @NonNull String attachmentIdentifier,
         @NonNull String messageIdentifier) {
@@ -152,6 +156,7 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    @Transactional
     public void updateType(
         @NonNull String attachmentIdentifier, @NonNull ConnectorAttachmentType type) {
         var attachment = this.attachmentJpaRepository.findByIdentifier(attachmentIdentifier);
@@ -160,6 +165,7 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    @Transactional
     public void markAsDeleted(List<String> identifiers, Instant deletedAt) {
         if (identifiers.isEmpty()) {
             return;

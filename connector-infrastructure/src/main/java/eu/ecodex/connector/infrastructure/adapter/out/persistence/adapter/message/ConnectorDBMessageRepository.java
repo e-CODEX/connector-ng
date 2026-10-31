@@ -317,6 +317,12 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
 
     @Override
     @Transactional
+    public void setAsDeleted(@NonNull String identifier) {
+        this.messageJpaRepository.markAsDeleted(identifier, Instant.now());
+    }
+
+    @Override
+    @Transactional
     public ConnectorBusinessMessage setDeliveredToLinkPartnerAt(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setDeliveredToLinkPartnerAt(Instant.now());

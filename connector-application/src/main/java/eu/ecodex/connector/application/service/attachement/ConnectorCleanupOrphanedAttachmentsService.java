@@ -11,11 +11,8 @@
 package eu.ecodex.connector.application.service.attachement;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorCleanupOrphanedAttachments;
-import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,58 +31,39 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorCleanupOrphanedAttachmentsService implements
     ConnectorCleanupOrphanedAttachments {
     private final ConnectorMessageAttachmentRepository attachmentRepository;
-    private final ConnectorFileStorageProvider fileStorageProvider;
-    private final Clock clock;
+    private final ConnectorAttachmentFilesDeleter filesDeleter;
 
     /**
      * Creates the service.
      *
-     * @param attachmentRepository the repository used to find the orphaned attachments and mark
-     *                             them as deleted
-     * @param fileStorageProvider  the provider used to delete the content of the attachments from
-     *                             the file storage
-     * @param clock                the clock used to record the deletion instant, which allows a
-     *                             fixed clock in tests
+     * @param attachmentRepository the repository used to find the orphaned attachments (must not be
+     *                             null)
+     * @param filesDeleter         the component that deletes the content of the attachments from
+     *                             the file storage and marks them as deleted (must not be null)
      */
     public ConnectorCleanupOrphanedAttachmentsService(
         ConnectorMessageAttachmentRepository attachmentRepository,
-        ConnectorFileStorageProvider fileStorageProvider, Clock clock) {
+        ConnectorAttachmentFilesDeleter filesDeleter) {
         this.attachmentRepository = attachmentRepository;
-        this.fileStorageProvider = fileStorageProvider;
-        this.clock = clock;
+        this.filesDeleter = filesDeleter;
     }
 
     @Override
     public void execute(@NonNull Instant threshold) {
-        var orphanedAttachments = attachmentRepository.findAllOrphaned(threshold);
-        if (orphanedAttachments.isEmpty()) {
+        var orphaned = attachmentRepository.findAllOrphaned(threshold);
+
+        if (orphaned.isEmpty()) {
             log.debug("No orphaned attachments older than {}", threshold);
             return;
         }
-        log.info("{} orphaned attachments to delete", orphanedAttachments.size());
 
-        var deleted = new ArrayList<String>();
-        var failed = 0;
-        for (var orphaned : orphanedAttachments) {
-            try {
-                fileStorageProvider.deleteByIdentifier(orphaned.identifier());
-                deleted.add(orphaned.identifier());
-            } catch (RuntimeException e) {
-                failed++;
-                log.warn(
-                    "Could not delete orphaned attachment [{}] from [{}] storage",
-                    orphaned.identifier(), fileStorageProvider.getStorage(), e
-                );
-            }
-        }
+        log.info("{} orphaned attachments to delete", orphaned.size());
 
-        if (!deleted.isEmpty()) {
-            attachmentRepository.markAsDeleted(deleted, clock.instant());
-        }
+        var result = filesDeleter.delete(orphaned);
+
         log.info(
             "Orphaned attachments cleanup done: [{}] deleted, [{}] failed",
-            deleted.size(),
-            failed
+            result.deleted(), result.failed()
         );
     }
 }

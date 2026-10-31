@@ -10,14 +10,14 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice;
 
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentDeletedException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
 import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentDeletedException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
@@ -63,8 +63,8 @@ import tools.jackson.databind.exc.InvalidFormatException;
 public class GlobalExceptionHandler {
     private static List<String> allowedValues(Class<?> enumType) {
         return Arrays.stream(enumType.getEnumConstants())
-            .map(constant -> ((Enum<?>) constant).name())
-            .toList();
+                     .map(constant -> ((Enum<?>) constant).name())
+                     .toList();
     }
 
     @ResponseBody
@@ -84,11 +84,13 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleInvalidEnumeration(HttpMessageNotReadableException e) {
         if (e.getCause() instanceof InvalidFormatException ex && ex.getTargetType().isEnum()) {
             var field = ex.getPath().stream()
-                .map(JacksonException.Reference::getPropertyName)
-                .collect(Collectors.joining("."));
+                          .map(JacksonException.Reference::getPropertyName)
+                          .collect(Collectors.joining("."));
             var allowedValues = allowedValues(ex.getTargetType());
-            return new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                field + " must be one of " + allowedValues);
+            return new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                field + " must be one of " + allowedValues
+            );
         }
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Malformed request body");
     }
@@ -325,10 +327,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-            .getAllErrors()
-            .stream()
-            .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.joining(", "));
+                                  .getAllErrors()
+                                  .stream()
+                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                  .collect(Collectors.joining(", "));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

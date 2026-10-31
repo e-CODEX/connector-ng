@@ -13,12 +13,17 @@ package eu.ecodex.connector.application.service.message;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotRelevantException;
+import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageResolvedEvent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,6 +45,9 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
 
     @Mock
     private ConnectorMessageRepository messageRepository;
+    @Mock
+    private ConnectorMessageEventPublisher<ConnectorMessageResolvedEvent>
+        attachmentCleanupPublisher;
 
     @InjectMocks
     private ConnectorMessageEvidenceVerifierService messageEvidenceVerifierService;
@@ -53,10 +61,41 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
             var message =
                 BusinessMessageTestFixtures.createMessageWithSubmissionAcceptanceEvidence();
             when(messageRepository.findByIdentifier(any())).thenReturn(message);
-            when(messageRepository.setAsConfirmed(any())).thenReturn(
-                BusinessMessageTestFixtures.createConfirmedMessage());
 
             messageEvidenceVerifierService.verify(evidenceType, message);
+
+            verify(messageRepository).setAsConfirmed(message.identifier());
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = ConnectorEvidenceType.class, names = {"DELIVERY", "RETRIEVAL"})
+        void should_publish_the_resolved_event_when_the_message_is_confirmed(
+            ConnectorEvidenceType evidenceType) {
+            var message =
+                BusinessMessageTestFixtures.createMessageWithSubmissionAcceptanceEvidence();
+            when(messageRepository.findByIdentifier(any())).thenReturn(message);
+
+            messageEvidenceVerifierService.verify(evidenceType, message);
+
+            verify(attachmentCleanupPublisher)
+                .publish(new ConnectorMessageResolvedEvent(message.identifier()));
+        }
+
+        @Test
+        void should_propagate_the_failure_of_the_publisher() {
+            var message =
+                BusinessMessageTestFixtures.createMessageWithSubmissionAcceptanceEvidence();
+            when(messageRepository.findByIdentifier(any())).thenReturn(message);
+            doThrow(new IllegalStateException("JMS unavailable"))
+                .when(attachmentCleanupPublisher).publish(any());
+
+            var exception = assertThrows(
+                IllegalStateException.class,
+                () -> messageEvidenceVerifierService.verify(
+                    ConnectorEvidenceType.DELIVERY, message)
+            );
+
+            assertThat(exception.getMessage()).isEqualTo("JMS unavailable");
         }
     }
 
@@ -76,10 +115,31 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
         )
         void should_process_the_message_as_rejected(ConnectorEvidenceType evidenceType) {
             var message = BusinessMessageTestFixtures.createRejectedMessage();
-            when(messageRepository.setAsRejected(any())).thenReturn(
-                BusinessMessageTestFixtures.createConfirmedMessage());
 
             messageEvidenceVerifierService.verify(evidenceType, message);
+
+            verify(messageRepository).setAsRejected(message.identifier());
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorEvidenceType.class,
+            names = {
+                "SUBMISSION_REJECTION",
+                "NON_DELIVERY",
+                "NON_RETRIEVAL",
+                "RELAY_REMMD_REJECTION",
+                "RELAY_REMMD_FAILURE"
+            }
+        )
+        void should_publish_the_resolved_event_when_the_message_is_rejected(
+            ConnectorEvidenceType evidenceType) {
+            var message = BusinessMessageTestFixtures.createRejectedMessage();
+
+            messageEvidenceVerifierService.verify(evidenceType, message);
+
+            verify(attachmentCleanupPublisher)
+                .publish(new ConnectorMessageResolvedEvent(message.identifier()));
         }
     }
 
@@ -100,6 +160,21 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
             assertThat(exception.getMessage()).contains(ALREADY_REJECTED_MESSAGE);
         }
 
+        @ParameterizedTest
+        @EnumSource(value = ConnectorEvidenceType.class, names = {"DELIVERY", "RETRIEVAL"})
+        void should_not_confirm_nor_publish_when_the_message_is_already_rejected(
+            ConnectorEvidenceType evidenceType) {
+            var message = BusinessMessageTestFixtures.createRejectedMessage();
+            when(messageRepository.findByIdentifier(any())).thenReturn(message);
+
+            assertThrows(
+                ConnectorEvidenceNotRelevantException.class,
+                () -> messageEvidenceVerifierService.verify(evidenceType, message)
+            );
+
+            verifyNoInteractions(attachmentCleanupPublisher);
+        }
+
         @Test
         void should_fail_when_the_evidence_priority_is_lower_than_the_current_highest() {
             var message = BusinessMessageTestFixtures.createRejectedMessage();
@@ -111,6 +186,21 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
                     message
                 )
             );
+        }
+
+        @Test
+        void should_not_publish_when_the_evidence_priority_is_lower_than_the_current_highest() {
+            var message = BusinessMessageTestFixtures.createRejectedMessage();
+
+            assertThrows(
+                ConnectorEvidenceNotRelevantException.class,
+                () -> messageEvidenceVerifierService.verify(
+                    ConnectorEvidenceType.SUBMISSION_ACCEPTANCE,
+                    message
+                )
+            );
+
+            verifyNoInteractions(attachmentCleanupPublisher);
         }
     }
 
@@ -131,16 +221,17 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
                     message
                 )
             );
+
+            verifyNoInteractions(attachmentCleanupPublisher);
         }
 
         @Test
         void should_fail_when_the_evidence_type_is_null() {
+            var message = BusinessMessageTestFixtures.createOutboundMessage();
+
             assertThrows(
                 NullPointerException.class,
-                () -> messageEvidenceVerifierService.verify(
-                    null,
-                    BusinessMessageTestFixtures.createOutboundMessage()
-                )
+                () -> messageEvidenceVerifierService.verify(null, message)
             );
         }
 
@@ -156,4 +247,5 @@ public class ConnectorMessageEvidenceVerifierServiceTest {
         }
     }
 }
+
 

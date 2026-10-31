@@ -95,9 +95,8 @@ public interface ConnectorMessageRepository {
      * Retrieves the unresolved business messages created before the given threshold.
      *
      * <p>A message is unresolved when it has not reached a final state, that is, it is still
-     * waiting
-     * for a transport or processing outcome (for example an acknowledgement or an evidence). It is
-     * used by {@link ConnectorCleanupUnresolvedMessagesAttachments}.
+     * waiting for a transport or processing outcome (for example an acknowledgement or an
+     * evidence). It is used by {@link ConnectorCleanupUnresolvedMessagesAttachments}.
      *
      * @param threshold the instant before which unresolved messages are returned; messages created
      *                  at or after this instant are excluded (must not be null)
@@ -177,6 +176,19 @@ public interface ConnectorMessageRepository {
      * @return the updated {@link ConnectorBusinessMessage}, reflecting the confirmed status
      */
     ConnectorBusinessMessage setAsConfirmed(@Nonnull String identifier);
+
+    /**
+     * Marks a message as deleted by recording the deletion instant (soft delete).
+     *
+     * <p>A message is deleted once its attachments and its business content (the business content
+     * and business document files) have been deleted. The method records this state on the message;
+     * the deletion of the files and of the attachment and business content rows is done beforehand
+     * The message itself is not removed from the repository: it is flagged as deleted.
+     *
+     * @param identifier the unique identifier of the message to mark as deleted (must not be null)
+     */
+
+    void setAsDeleted(@Nonnull String identifier);
 
     /**
      * Records that a message has been delivered to the link partner, by setting its delivery

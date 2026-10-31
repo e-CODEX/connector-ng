@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.message;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -23,6 +24,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -282,6 +284,44 @@ public class ConnectorDBMessageRepositoryTest extends AbstractRepositoryTest {
                 NullPointerException.class,
                 () -> repository.setAsConfirmed(null)
             );
+        }
+    }
+
+    @Nested
+    @DisplayName("set as deleted")
+    class SetAsDeleted {
+        @Test
+        @WithMessageData
+        void should_set_the_deletion_date_on_the_message() {
+            repository.setAsDeleted(MESSAGE_ID);
+
+            assertThat(deletedAtOfMessage()).isNotNull();
+        }
+
+        @Test
+        @WithMessageData
+        void should_keep_the_original_deletion_date_when_called_twice() {
+            repository.setAsDeleted(MESSAGE_ID);
+            var first = deletedAtOfMessage();
+
+            repository.setAsDeleted(MESSAGE_ID);
+
+            assertThat(deletedAtOfMessage()).isEqualTo(first);
+        }
+
+        @Test
+        void should_do_nothing_when_the_message_does_not_exist() {
+            assertThatCode(() -> repository.setAsDeleted("unknown"))
+                .doesNotThrowAnyException();
+        }
+
+        private Instant deletedAtOfMessage() {
+            var timestamp = jdbcTemplate.queryForObject(
+                "SELECT deleted_at FROM connector_messages WHERE identifier = ?",
+                Timestamp.class,
+                MESSAGE_ID
+            );
+            return timestamp == null ? null : timestamp.toInstant();
         }
     }
 

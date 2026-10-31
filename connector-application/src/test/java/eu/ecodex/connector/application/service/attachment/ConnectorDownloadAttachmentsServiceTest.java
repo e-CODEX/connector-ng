@@ -17,9 +17,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentDeletedException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageAttachmentNotFoundException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentDeletedException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorDownloadAttachmentService;

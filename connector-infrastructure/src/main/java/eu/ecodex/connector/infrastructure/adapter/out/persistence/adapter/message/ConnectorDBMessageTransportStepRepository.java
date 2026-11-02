@@ -29,6 +29,7 @@ import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.mess
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.transport.ConnectorMessageTransportStepJpaRepository;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.transport.ConnectorMessageTransportStepStatusJpaRepository;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.transport.specification.TransportStepSpecification;
+import java.time.Instant;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -121,9 +122,10 @@ public class ConnectorDBMessageTransportStepRepository
     public void updateStatus(
         @NonNull List<String> identifiers,
         @NonNull ConnectorMessageTransportStatus status) {
-        this.transportStepJpaRepository.updateStatus(identifiers, status.name());
+        var now = Instant.now();
+        this.transportStepJpaRepository.updateStatus(identifiers, status, now);
 
-        this.stepStatusJpaRepository.insert(identifiers, status.name());
+        this.stepStatusJpaRepository.insert(identifiers, status.name(), now);
     }
 
     @Override

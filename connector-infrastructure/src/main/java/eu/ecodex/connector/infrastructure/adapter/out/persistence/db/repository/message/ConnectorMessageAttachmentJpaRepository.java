@@ -32,14 +32,13 @@ public interface ConnectorMessageAttachmentJpaRepository extends
     @EntityGraph(attributePaths = {"message"})
     ConnectorMessageAttachmentEntity findByIdentifier(String identifier);
 
-    @Query(value = """
-        SELECT CMA.*
-        FROM connector_message_attachments CMA
-        WHERE CMA.message_id IS NULL
-        AND CMA.deleted_at IS NULL
-        AND CMA.created_at <= :threshold
-        """,
-        nativeQuery = true
+    @Query("""
+        SELECT cma
+        FROM ConnectorMessageAttachmentEntity cma
+        WHERE cma.message IS NULL
+            AND cma.deletedAt IS NULL
+            AND cma.createdAt <= :threshold
+        """
     )
     List<ConnectorMessageAttachmentEntity> findOrphansToDelete(
         @Param("threshold") Instant threshold);
@@ -48,12 +47,13 @@ public interface ConnectorMessageAttachmentJpaRepository extends
         @Param("messageIdentifier") String messageIdentifier);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query(value = """
-        UPDATE connector_message_attachments CMA
-           SET CMA.deleted_at = :deletedAt
-         WHERE CMA.identifier IN (:identifiers)
-           AND CMA.deleted_at IS NULL
-        """, nativeQuery = true)
+    @Query("""
+        UPDATE ConnectorMessageAttachmentEntity cma
+        SET cma.deletedAt = :deletedAt
+        WHERE cma.identifier IN :identifiers
+            AND cma.deletedAt IS NULL
+        """
+    )
     int markAsDeleted(
         @Param("identifiers") List<String> identifiers,
         @Param("deletedAt") Instant deletedAt);

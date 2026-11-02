@@ -26,7 +26,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
  * <p>The initializer is active only when the property {@code connector.s3.auto-create-bucket} is
  * set to {@code true}; otherwise the bucket must already exist. It runs as an
  * {@link ApplicationRunner}, after the application context has been loaded. The bucket name comes
- * from {@link ConnectorS3ProviderProperties#getBucket()}.
+ * from {@link ConnectorS3ProviderProperties#bucket()}.
  *
  * <p>The existence of the bucket is checked with a {@code HEAD} request. If the bucket is not
  * found (HTTP 404), it is created. If several instances start at the same time and another one
@@ -68,7 +68,7 @@ public class ConnectorS3BucketInitializer implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) {
-        var bucket = properties.getBucket();
+        var bucket = properties.bucket();
 
         try {
             s3Client.headBucket(b -> b.bucket(bucket));

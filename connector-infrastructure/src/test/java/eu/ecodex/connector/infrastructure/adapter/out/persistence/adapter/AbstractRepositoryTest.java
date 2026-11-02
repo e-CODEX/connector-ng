@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
-@ActiveProfiles(value = {"dss", "security"})
+@ActiveProfiles(value = {"dss", "security", "evidence", "local"})
 @SpringBootTest(
     classes = RepositoryContextConfiguration.class,
     properties = {

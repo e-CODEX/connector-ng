@@ -27,8 +27,9 @@ import org.apache.cxf.ext.logging.LoggingOutInterceptor;
 import org.apache.cxf.jaxws.JaxWsProxyFactoryBean;
 import org.apache.cxf.rt.security.SecurityConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
-public class BackendServiceTest extends AbstractIntegrationTest {
+public abstract class AbstractSoapBackendServiceTest extends AbstractIntegrationTest {
     @Autowired
     private ConnectorMerlinPropertiesFactory merlinPropertiesFactory;
 
@@ -110,7 +111,7 @@ public class BackendServiceTest extends AbstractIntegrationTest {
         properties.setEndpoint(endpoint);
         properties.setPublishAddress("/backend");
         properties.setLoggingEnabled(false);
-        properties.setWsPolicy("classpath:/policy/backend.policy.xml");
+        properties.setWsPolicy(new ClassPathResource("policy/backend.policy.xml"));
 
         return properties;
     }

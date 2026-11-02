@@ -61,7 +61,7 @@ public class ConnectorS3FileStorageProviderTest {
     class SaveFile {
         @Test
         void should_store_the_file() throws IOException {
-            when(s3ProviderProperties.getBucket()).thenReturn("attachments");
+            when(s3ProviderProperties.bucket()).thenReturn("attachments");
             when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
@@ -104,7 +104,7 @@ public class ConnectorS3FileStorageProviderTest {
         @Test
         void should_find_the_file() {
             var attachment = MessageAttachmentTestFixtures.createAttachment();
-            when(s3ProviderProperties.getBucket()).thenReturn("attachments");
+            when(s3ProviderProperties.bucket()).thenReturn("attachments");
             when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
                 .thenReturn(ResponseBytes.fromByteArray(
                     GetObjectResponse.builder().build(), new byte[1]));
@@ -118,7 +118,7 @@ public class ConnectorS3FileStorageProviderTest {
         @Test
         void should_return_null_when_the_identifier_is_unknown() {
             var attachment = MessageAttachmentTestFixtures.createAttachment();
-            when(s3ProviderProperties.getBucket()).thenReturn("attachments");
+            when(s3ProviderProperties.bucket()).thenReturn("attachments");
             doThrow(RuntimeException.class).when(s3Client)
                                            .getObjectAsBytes(any(GetObjectRequest.class));
             var foundAttachment = fileStorageProvider.findByIdentifier(attachment.identifier());

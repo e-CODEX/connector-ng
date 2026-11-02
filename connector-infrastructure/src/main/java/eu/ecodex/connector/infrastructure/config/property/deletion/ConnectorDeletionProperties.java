@@ -11,12 +11,11 @@
 package eu.ecodex.connector.infrastructure.config.property.deletion;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -25,14 +24,13 @@ import org.springframework.validation.annotation.Validated;
 @Getter
 @Setter
 @Validated
-@Configuration
 @ConfigurationProperties(prefix = "connector.file-deletion")
 public class ConnectorDeletionProperties {
     @Valid
-    @NotNull
-    private DeletionRule orphan = new DeletionRule(Duration.ofDays(1), "0 0 * * * *");
+    @NestedConfigurationProperty
+    private DeletionRule orphan = new DeletionRule(Duration.ofDays(1), "0 0 0 * * *");
 
     @Valid
-    @NotNull
+    @NestedConfigurationProperty
     private DeletionRule unresolvedMessages = new DeletionRule(Duration.ofDays(7), "0 0 3 * * *");
 }

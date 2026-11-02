@@ -10,17 +10,23 @@
 
 package eu.ecodex.connector.infrastructure.config.property.deletion;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.scheduling.support.CronExpression;
 
 /**
  * Configuration properties for the file deletion rule.
  */
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class DeletionRule {
     @NotNull
     private Duration threshold;
@@ -28,8 +34,13 @@ public class DeletionRule {
     @NotBlank
     private String cron;
 
-    public DeletionRule(Duration threshold, String cron) {
-        this.threshold = threshold;
-        this.cron = cron;
+    @AssertTrue(message = "threshold must be positive")
+    public boolean isThresholdPositive() {
+        return threshold == null || (!threshold.isZero() && !threshold.isNegative());
+    }
+
+    @AssertTrue(message = "cron must be a valid Spring cron expression")
+    public boolean isCronValid() {
+        return cron == null || CronExpression.isValidExpression(cron);
     }
 }

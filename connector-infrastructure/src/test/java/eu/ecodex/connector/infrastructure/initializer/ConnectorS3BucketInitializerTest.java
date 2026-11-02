@@ -59,7 +59,7 @@ class ConnectorS3BucketInitializerTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.getBucket()).thenReturn(BUCKET);
+        when(properties.bucket()).thenReturn(BUCKET);
         initializer = new ConnectorS3BucketInitializer(s3Client, properties);
     }
 

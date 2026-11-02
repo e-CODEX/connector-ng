@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorCleanupOrphanedAttachments;
 import eu.ecodex.connector.infrastructure.config.property.deletion.ConnectorDeletionProperties;
+import eu.ecodex.connector.infrastructure.config.property.deletion.DeletionRule;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;

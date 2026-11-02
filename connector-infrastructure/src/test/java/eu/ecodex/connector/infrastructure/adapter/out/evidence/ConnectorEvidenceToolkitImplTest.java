@@ -24,6 +24,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
+import eu.ecodex.connector.infrastructure.config.PropertiesConfig;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +43,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
-@ActiveProfiles({"evidence", "dss", "security"})
-@SpringBootTest(classes = EvidenceContextConfiguration.class)
+@ActiveProfiles({"evidence", "dss", "security", "local"})
+@SpringBootTest(classes = {EvidenceContextConfiguration.class, PropertiesConfig.class})
 @Import(ConnectorEvidenceToolkitImplTest.MockAttachmentBeans.class)
 @DisplayName("ConnectorEvidenceToolkit")
 class ConnectorEvidenceToolkitImplTest {

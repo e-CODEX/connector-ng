@@ -14,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorS3ProviderProperties;
-import java.net.URI;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Bean;
@@ -43,17 +42,17 @@ public class BeanConfig {
     @Bean
     public S3Client s3Client(ConnectorS3ProviderProperties properties) {
         return S3Client.builder()
-                       .region(Region.of(properties.getRegion()))
-                       .endpointOverride(URI.create(properties.getEndpoint()))
+                       .region(Region.of(properties.region()))
+                       .endpointOverride(properties.endpoint())
                        .credentialsProvider(
                            StaticCredentialsProvider.create(
                                AwsBasicCredentials.create(
-                                   properties.getAccessKey(),
-                                   properties.getSecretKey()
+                                   properties.accessKey(),
+                                   properties.secretKey()
                                )
                            )
                        )
-                       .forcePathStyle(true)
+                       .forcePathStyle(properties.endpoint() != null)
                        .build();
     }
 }

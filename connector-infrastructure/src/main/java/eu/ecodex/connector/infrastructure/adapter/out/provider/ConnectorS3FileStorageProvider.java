@@ -71,7 +71,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
         log.debug("Downloading attachment [{}] from s3", identifier);
 
         var getObjectRequest = GetObjectRequest.builder()
-                                               .bucket(this.s3ProviderProperties.getBucket())
+                                               .bucket(this.s3ProviderProperties.bucket())
                                                .key(identifier)
                                                .build();
 
@@ -94,7 +94,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
         log.debug("Deleting attachment [{}] from s3", identifier);
 
         var deleteObjectRequest = DeleteObjectRequest.builder()
-                                                     .bucket(this.s3ProviderProperties.getBucket())
+                                                     .bucket(this.s3ProviderProperties.bucket())
                                                      .key(identifier)
                                                      .build();
 
@@ -103,7 +103,7 @@ public class ConnectorS3FileStorageProvider implements ConnectorFileStorageProvi
 
     private PutObjectRequest buildObjectRequest(ConnectorMessageAttachment attachment) {
         return PutObjectRequest.builder()
-                               .bucket(this.s3ProviderProperties.getBucket())
+                               .bucket(this.s3ProviderProperties.bucket())
                                .key(attachment.identifier())
                                .build();
     }

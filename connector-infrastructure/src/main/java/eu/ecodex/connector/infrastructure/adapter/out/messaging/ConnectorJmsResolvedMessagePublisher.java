@@ -42,7 +42,7 @@ public class ConnectorJmsResolvedMessagePublisher
             event.messageIdentifier()
         );
         this.jmsTemplate.convertAndSend(
-            this.queueProperties.getResolvedMassageCleanupQueue(),
+            this.queueProperties.resolvedMessageCleanupProcessingQueue(),
             event
         );
     }

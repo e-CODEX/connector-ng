@@ -48,7 +48,7 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     @Query("""
         SELECT DISTINCT mts.identifier
         FROM ConnectorMessageTransportStepEntity mts
-        WHERE mts.status = READY_FOR_DOWNLOAD
+        WHERE mts.status = READY_FOR_PULL
             AND mts.linkPartnerName = :backendName
         """
     )

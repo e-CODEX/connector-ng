@@ -48,7 +48,7 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
             .identifier(STEP_IDENTIFIER)
             .numberOfAttempts(0)
             .linkPartnerName("default_test_backend")
-            .status(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+            .status(ConnectorMessageTransportStatus.READY_FOR_PULL)
             .transportedMessage(
                 BusinessMessageTestFixtures.createInboundMessage()
                                            .toBuilder()
@@ -147,7 +147,7 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
         void should_update_an_existing_transport_step() {
             var transportStep = generateTransportStep()
                 .toBuilder()
-                .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                .status(ConnectorMessageTransportStatus.PULLED)
                 .build();
 
             var updatedStep = repository.update(STEP_IDENTIFIER, transportStep);
@@ -165,7 +165,7 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
         void should_throw_when_the_identifiers_are_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.updateStatus(null, ConnectorMessageTransportStatus.DOWNLOADED)
+                () -> repository.updateStatus(null, ConnectorMessageTransportStatus.PULLED)
             );
         }
 
@@ -190,14 +190,14 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
         void should_update_the_status() {
             repository.updateStatus(
                 List.of(PENDING_STEP_IDENTIFIER),
-                ConnectorMessageTransportStatus.DOWNLOADED
+                ConnectorMessageTransportStatus.PULLED
             );
 
             var updatedTransportStep = repository.findByIdentifier(PENDING_STEP_IDENTIFIER);
 
             assertThat(updatedTransportStep).isNotNull();
             assertThat(updatedTransportStep.status())
-                .isEqualTo(ConnectorMessageTransportStatus.DOWNLOADED);
+                .isEqualTo(ConnectorMessageTransportStatus.PULLED);
             assertThat(updatedTransportStep.statuses()).hasSize(2);
         }
     }

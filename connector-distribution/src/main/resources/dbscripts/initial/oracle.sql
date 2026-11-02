@@ -40,7 +40,7 @@ create table CONNECTOR_MESSAGE_TRANSPORT_STEPS
     NUMBER_OF_ATTEMPTS             NUMBER(10)                  not null,
     REMOTE_SYSTEM_IDENTIFIER       VARCHAR2(255 char),
     STATUS                         VARCHAR2(255 char)          not null
-        check ((status in ('DELIVERED', 'FAILED', 'SUBMITTED', 'DOWNLOADED', 'READY_FOR_DOWNLOAD'))),
+        check ((status in ('DELIVERED', 'FAILED', 'SUBMITTED', 'PULLED', 'READY_FOR_PULL'))),
     TRANSPORTED_MESSAGE            CLOB                        not null,
     TRANSPORTED_MESSAGE_IDENTIFIER VARCHAR2(255 char)          not null
 )
@@ -53,7 +53,7 @@ create table CONNECTOR_MESSAGE_TRANSPORT_STEP_STATUSES
     CREATED_AT        TIMESTAMP(9) WITH TIME ZONE not null,
     UPDATED_AT        TIMESTAMP(9) WITH TIME ZONE not null,
     STATUS            VARCHAR2(255 char)          not null
-        check ((status in ('DELIVERED', 'FAILED', 'SUBMITTED', 'DOWNLOADED', 'READY_FOR_DOWNLOAD'))),
+        check ((status in ('DELIVERED', 'FAILED', 'SUBMITTED', 'PULLED', 'READY_FOR_PULL'))),
     TRANSPORT_STEP_ID NUMBER(19)
         constraint FK_CM_TSS_TRANSPORT_STEP
             references CONNECTOR_MESSAGE_TRANSPORT_STEPS

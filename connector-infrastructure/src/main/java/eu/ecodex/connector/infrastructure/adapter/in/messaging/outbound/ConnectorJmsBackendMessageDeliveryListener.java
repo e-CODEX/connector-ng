@@ -134,7 +134,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
     private void makeReadyForPull(ConnectorMessage message) {
         registerMessageTransportStep.execute(
             message,
-            ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
+            ConnectorMessageTransportStatus.READY_FOR_PULL
         );
         log.info("Message [{}] is ready for pull", message.identifier());
     }

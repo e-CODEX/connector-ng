@@ -38,7 +38,7 @@ public class ConnectorRegisterMessageTransportStepService
         ConnectorMessageTransportStatus.SUBMITTED,
         ConnectorMessageTransportStatus.DELIVERED,
         ConnectorMessageTransportStatus.FAILED,
-        ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
+        ConnectorMessageTransportStatus.READY_FOR_PULL
     );
 
     private final ConnectorMessageTransportStepRepository transportStepRepository;

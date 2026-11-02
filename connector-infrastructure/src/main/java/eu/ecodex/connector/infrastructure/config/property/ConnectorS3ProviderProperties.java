@@ -10,24 +10,55 @@
 
 package eu.ecodex.connector.infrastructure.config.property;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import java.net.URI;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * Configuration properties required to connect to an Amazon S3 (or compatible) object storage
  * service.
  */
-@Setter
-@Getter
-@Configuration
+@Validated
 @ConfigurationProperties(prefix = "connector.file.storage.s3")
-public class ConnectorS3ProviderProperties {
-    private boolean autoCreateBucket = true;
-    private String region;
-    private String accessKey;
-    private String secretKey;
-    private String bucket;
-    private String endpoint;
+public record ConnectorS3ProviderProperties(
+    @DefaultValue("true")
+    boolean autoCreateBucket,
+
+    @NotBlank
+    String region,
+
+    @NotBlank
+    String accessKey,
+
+    @NotBlank
+    String secretKey,
+
+    @NotBlank
+    @Pattern(
+        regexp = "[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]",
+        message = "must be a valid S3 bucket name"
+    )
+    String bucket,
+
+    URI endpoint
+) {
+    /**
+     * Validates that the endpoint, when present, is an absolute {@code http} or {@code https} URL
+     * with a host.
+     *
+     * @return {@code true} if the endpoint is {@code null} or an absolute http(s) URL with a host,
+     *     {@code false} otherwise
+     */
+    @AssertTrue(message = "endpoint must be an absolute http(s) URL, e.g. http://localhost:9000")
+    public boolean isEndpointValid() {
+        return endpoint == null
+            || (endpoint.getScheme() != null
+            && (endpoint.getScheme().equalsIgnoreCase("http")
+            || endpoint.getScheme().equalsIgnoreCase("https"))
+            && endpoint.getHost() != null);
+    }
 }

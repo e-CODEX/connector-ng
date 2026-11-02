@@ -8,16 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.configuration;
+package eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.configuration.container;
 
-import eu.ecodex.connector.infrastructure.config.property.container.ContainerSignatureProperties;
-import lombok.Builder;
+import eu.ecodex.connector.infrastructure.config.property.common.PrivateKeyProperties;
 
-/**
- * DTO for the connector container configuration.
- */
-@Builder
-public record ConnectorContainerPropertiesDto(
-    ContainerSignatureProperties signature
-) {
+@SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
+public record PrivateKeyDto(String alias) {
+    public static PrivateKeyDto from(PrivateKeyProperties p) {
+        return p == null ? null : new PrivateKeyDto(p.getAlias());
+    }
 }

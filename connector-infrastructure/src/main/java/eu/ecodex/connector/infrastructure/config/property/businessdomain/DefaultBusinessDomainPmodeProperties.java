@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.config.property.businessdomain;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
@@ -24,14 +24,14 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class DefaultBusinessDomainPmodeProperties {
     @Valid
-    @NotEmpty
+    @NotBlank
     private String file;
 
     @Valid
-    @NotEmpty
+    @NotBlank
     private String truststore;
 
     @Valid
-    @NotEmpty
+    @NotBlank
     private String truststorePassword;
 }

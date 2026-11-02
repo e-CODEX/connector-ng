@@ -20,19 +20,27 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import eu.ecodex.connector.infrastructure.adapter.in.scheduler.ConnectorOrphanedAttachmentsCleanupJob;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
+@Import(OrphanedAttachmentsCleanupIT.FixedClockConfiguration.class)
 @TestPropertySource(properties = {
     "connector.scheduling.enabled=false",
-    // negative threshold => now + 1 day, so rows created "now" count as old enough
-    "connector.file-deletion.orphan.threshold=-1d"
+    "connector.file-deletion.orphan.threshold=1d"
 })
 @Sql(
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
@@ -69,9 +77,10 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
     }
 
     @Nested
+    @DisplayName("when the storage deletion succeeds")
     class WhenTheStorageDeletionSucceeds {
         @Test
-        void deletes_the_orphan_file_and_sets_deleted_at() {
+        void should_delete_the_orphan_file_and_set_deleted_at() {
             job.run();
 
             verify(fileStorageProvider).deleteByIdentifier(ORPHAN);
@@ -79,7 +88,7 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
         }
 
         @Test
-        void leaves_attachments_linked_to_a_message_untouched() {
+        void should_leave_attachments_linked_to_a_message_untouched() {
             job.run();
 
             verify(fileStorageProvider, never()).deleteByIdentifier(LINKED);
@@ -87,7 +96,7 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
         }
 
         @Test
-        void is_idempotent_when_run_twice() {
+        void should_be_idempotent_when_run_twice() {
             job.run();
             clearInvocations(fileStorageProvider);
 
@@ -100,6 +109,7 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
     }
 
     @Nested
+    @DisplayName("when the storage deletion fails")
     class WhenTheStorageDeletionFails {
         @BeforeEach
         void givenTheStorageIsUnavailable() {
@@ -108,20 +118,30 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
         }
 
         @Test
-        void does_not_set_deleted_at_so_the_orphan_is_retried_next_run() {
+        void should_not_set_deleted_at_so_the_orphan_is_retried_next_run() {
             assertThatCode(job::run).doesNotThrowAnyException();
 
             assertThat(deletedAt(ORPHAN)).isNull();
         }
 
         @Test
-        void retries_and_succeeds_on_the_next_run() {
+        void should_retry_and_succeed_on_the_next_run() {
             job.run();
             doNothing().when(fileStorageProvider).deleteByIdentifier(ORPHAN);
 
             job.run();
 
             assertThat(deletedAt(ORPHAN)).isNotNull();
+        }
+    }
+
+    @TestConfiguration
+    static class FixedClockConfiguration {
+        // 30 days ahead: with a 1d threshold, rows created "now" count as old enough
+        @Bean
+        @Primary
+        Clock fixedClock() {
+            return Clock.fixed(Instant.now().plus(Duration.ofDays(30)), ZoneOffset.UTC);
         }
     }
 }

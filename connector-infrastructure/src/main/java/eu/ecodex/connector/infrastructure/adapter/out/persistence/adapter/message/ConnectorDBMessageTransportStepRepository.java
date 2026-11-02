@@ -153,7 +153,7 @@ public class ConnectorDBMessageTransportStepRepository
     public List<ConnectorMessageTransportStep> findReadyToDownloadTransportSteps(
         @NonNull String backendName) {
         return transportStepJpaRepository.findAllByStatusAndLinkPartnerNameOrderByCreatedAtAsc(
-            ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD,
+            ConnectorMessageTransportStatus.READY_FOR_PULL,
             backendName
         ).stream().map(this::toDomain).toList();
     }

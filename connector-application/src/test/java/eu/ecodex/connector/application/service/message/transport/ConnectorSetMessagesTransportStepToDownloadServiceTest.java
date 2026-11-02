@@ -40,7 +40,7 @@ public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
         when(transportStepRepository.findReadyToDownloadTransportStepsIds(BACKEND_NAME))
             .thenReturn(pendingMessagesIds);
         doNothing().when(transportStepRepository)
-                   .updateStatus(pendingMessagesIds, ConnectorMessageTransportStatus.DOWNLOADED);
+                   .updateStatus(pendingMessagesIds, ConnectorMessageTransportStatus.PULLED);
 
         changePendingMessagesStatusService.execute(
             BACKEND_NAME
@@ -49,7 +49,7 @@ public class ConnectorSetMessagesTransportStepToDownloadServiceTest {
         verify(transportStepRepository).findReadyToDownloadTransportStepsIds(BACKEND_NAME);
         verify(transportStepRepository).updateStatus(
             pendingMessagesIds,
-            ConnectorMessageTransportStatus.DOWNLOADED
+            ConnectorMessageTransportStatus.PULLED
         );
     }
 }

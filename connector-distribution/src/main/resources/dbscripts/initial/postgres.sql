@@ -53,8 +53,8 @@ create table connector_message_transport_steps
                 'DELIVERED'::character varying,
                 'FAILED'::character varying,
                 'SUBMITTED'::character varying,
-                'DOWNLOADED'::character varying,
-                'READY_FOR_DOWNLOAD'::character varying
+                'PULLED'::character varying,
+                'READY_FOR_PULL'::character varying
                 ])::text[])),
     transported_message            varchar(5000000)            not null,
     transported_message_identifier varchar(255)                not null
@@ -75,8 +75,8 @@ create table connector_message_transport_step_statuses
                 'DELIVERED'::character varying,
                 'FAILED'::character varying,
                 'SUBMITTED'::character varying,
-                'DOWNLOADED'::character varying,
-                'READY_FOR_DOWNLOAD'::character varying
+                'PULLED'::character varying,
+                'READY_FOR_PULL'::character varying
                 ])::text[])),
     transport_step_id bigint
         constraint fk_cm_tss_transport_step

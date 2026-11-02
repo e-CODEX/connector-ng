@@ -122,7 +122,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
             throw new IllegalArgumentException("Errors must be provided for failed transport");
         }
 
-        if (command.status() == ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD) {
+        if (command.status() == ConnectorMessageTransportStatus.READY_FOR_PULL) {
             throw new IllegalArgumentException(
                 "Ready for download status cannot be apply to an existing transport step");
         }

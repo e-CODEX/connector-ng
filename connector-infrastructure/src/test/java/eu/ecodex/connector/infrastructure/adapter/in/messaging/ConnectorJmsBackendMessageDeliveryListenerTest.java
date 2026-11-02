@@ -512,7 +512,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
 
             verify(registerMessageTransportStep).execute(
                 any(),
-                eq(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+                eq(ConnectorMessageTransportStatus.READY_FOR_PULL)
             );
             verify(messageRepository, never()).setDeliveredToLinkPartnerAt(any());
             verify(messageRepository, never()).updateBackendIdentifier(any(), any());
@@ -539,7 +539,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
 
             verify(registerMessageTransportStep).execute(
                 any(),
-                eq(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD)
+                eq(ConnectorMessageTransportStatus.READY_FOR_PULL)
             );
             verify(evidenceRepository, never()).setDeliveredToLinkPartnerAt(any());
             verifyNoInteractions(

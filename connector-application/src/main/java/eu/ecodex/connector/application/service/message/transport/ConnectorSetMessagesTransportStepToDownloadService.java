@@ -39,7 +39,7 @@ public class ConnectorSetMessagesTransportStepToDownloadService
             backendName);
         this.transportStepRepository.updateStatus(
             identifiers,
-            ConnectorMessageTransportStatus.DOWNLOADED
+            ConnectorMessageTransportStatus.PULLED
         );
     }
 }

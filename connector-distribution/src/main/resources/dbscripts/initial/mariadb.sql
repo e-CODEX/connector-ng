@@ -36,7 +36,7 @@ create table connector.connector_message_transport_steps
     number_of_attempts             int                                          not null,
     remote_system_identifier       varchar(255)                                 null,
     status                         enum (
-        'DELIVERED', 'DOWNLOADED', 'FAILED', 'READY_FOR_DOWNLOAD', 'SUBMITTED') not null,
+        'DELIVERED', 'PULLED', 'FAILED', 'READY_FOR_PULL', 'SUBMITTED') not null,
     transported_message            mediumtext                                   not null,
     transported_message_identifier varchar(255)                                 not null,
     constraint UQ_CM_TS_IDENTIFIER
@@ -50,7 +50,7 @@ create table connector.connector_message_transport_step_statuses
     created_at        datetime(6)                                               not null,
     updated_at        datetime(6)                                               not null,
     status            enum (
-        'DELIVERED', 'DOWNLOADED', 'FAILED', 'READY_FOR_DOWNLOAD', 'SUBMITTED') not null,
+        'DELIVERED', 'PULLED', 'FAILED', 'READY_FOR_PULL', 'SUBMITTED') not null,
     transport_step_id bigint                                                    null,
     constraint FK_CM_TSS_TRANSPORT_STEP
         foreign key (transport_step_id) references connector.connector_message_transport_steps (id)

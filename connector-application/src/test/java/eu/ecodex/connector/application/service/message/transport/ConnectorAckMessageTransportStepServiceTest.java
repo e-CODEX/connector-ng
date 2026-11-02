@@ -313,7 +313,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
         @Test
         void should_update_the_business_message_step_and_the_message() {
             when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
             when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(businessMessage());
 
             service.execute(MESSAGE_ID, deliveredCommand());
@@ -335,19 +335,19 @@ public class ConnectorAckMessageTransportStepServiceTest {
         @Test
         void should_update_the_step_without_incrementing_the_attempts() {
             when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD, 0));
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.READY_FOR_PULL, 0));
 
             service.execute(
                 MESSAGE_ID,
                 deliveredCommand().toBuilder()
-                                  .status(ConnectorMessageTransportStatus.DOWNLOADED)
+                                  .status(ConnectorMessageTransportStatus.PULLED)
                                   .build()
             );
 
             verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
             verify(transportStepRepository).update(
                 eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.DOWNLOADED)
+                argThat(step -> step.status() == ConnectorMessageTransportStatus.PULLED)
             );
             verify(transportStepRepository).update(
                 eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 0)
@@ -388,7 +388,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
         @Test
         void should_not_update_the_message_info_when_the_message_does_not_exist() {
             when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
             when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(null);
 
             assertThatNoException()
@@ -409,7 +409,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
                 ConnectorMessageError.builder().label("connection refused").build()
             );
             when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DOWNLOADED, 1));
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
 
             service.execute(MESSAGE_ID, failedCommand(errors));
 

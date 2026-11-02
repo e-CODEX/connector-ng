@@ -92,7 +92,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         void should_fail_when_the_message_is_null() {
             assertThatThrownBy(() -> service.execute(
                 null,
-                ConnectorMessageTransportStatus.READY_FOR_DOWNLOAD
+                ConnectorMessageTransportStatus.READY_FOR_PULL
             )).isInstanceOf(NullPointerException.class);
 
             verifyNoInteractions(transportStepRepository, processingConfigurationProvider);
@@ -112,7 +112,7 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
             assertThrows(
                 IllegalArgumentException.class,
-                () -> service.execute(message, ConnectorMessageTransportStatus.DOWNLOADED)
+                () -> service.execute(message, ConnectorMessageTransportStatus.PULLED)
             );
 
             verifyNoInteractions(transportStepRepository, processingConfigurationProvider);

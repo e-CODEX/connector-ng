@@ -44,20 +44,21 @@ public interface ConnectorMessageJpaRepository extends
         SELECT m
         FROM ConnectorMessageEntity m
         WHERE m.confirmedAt IS NULL
-           AND m.rejectedAt IS NULL
-          AND m.createdAt <= :threshold
+            AND m.rejectedAt IS NULL
+            AND m.createdAt <= :threshold
         """
     )
     List<ConnectorMessageEntity> findUnresolveToDelete(@Param("threshold") Instant threshold);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
-    UPDATE ConnectorMessageEntity m
-       SET m.deletedAt = :deletedAt,
+        UPDATE ConnectorMessageEntity m
+        SET m.deletedAt = :deletedAt,
            m.updatedAt = :deletedAt
-     WHERE m.identifier = :identifier
-       AND m.deletedAt IS NULL
-    """)
-    int markAsDeleted(@Param("identifier") String identifier,
+        WHERE m.identifier = :identifier
+            AND m.deletedAt IS NULL
+        """
+    )
+    void markAsDeleted(@Param("identifier") String identifier,
                       @Param("deletedAt") Instant deletedAt);
 }

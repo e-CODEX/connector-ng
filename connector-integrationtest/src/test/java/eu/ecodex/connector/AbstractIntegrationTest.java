@@ -155,7 +155,6 @@ public abstract class AbstractIntegrationTest {
                     "connector_message_transport_steps",
                     "connector_message_evidences",
                     "connector_message_errors",
-                    "connector_message_business_document_signatures",
                     "connector_message_business_documents",
                     "connector_message_business_contents",
                     "connector_message_as4_properties",

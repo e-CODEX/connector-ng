@@ -25,6 +25,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.transition.DomibsConnectorAcknowledgementType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
+import eu.ecodex.connector.domain.transition.DomibusConnectorDetachedSignatureType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageAttachmentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageContentType;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageDocumentType;
@@ -42,6 +43,7 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.soap.helper.MessageHelp
 import eu.ecodex.connector.infrastructure.adapter.in.web.soap.interceptor.ProcessMessageAfterDownload;
 import eu.ecodex.connector.infrastructure.adapter.in.web.soap.interceptor.ProcessMessagesAfterDownload;
 import eu.ecodex.connector.infrastructure.helper.LegacyMessageHelper;
+import eu.europa.esig.dss.enumerations.MimeType;
 import jakarta.annotation.Resource;
 import jakarta.xml.ws.WebServiceContext;
 import jakarta.xml.ws.soap.MTOM;
@@ -199,7 +201,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             var messages = this.listPendingMessages.execute(backendClientName);
             var legacyMessages = messages
                 .stream()
-                .map((step) -> this.legacyMessageHelper.convertMessage(step.transportedMessage()))
+                .map(step -> this.legacyMessageHelper.convertMessage(step.transportedMessage()))
                 .toList();
 
             var response = new DomibusConnectorMessagesType();
@@ -248,12 +250,22 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 var businessDocumentAttachmentIdentifier = persistBusinessDocument(
                     businessContent.getDocument()
                 );
+                var detachedSignature = businessContent.getDocument().getDetachedSignature();
+
+                String businessDocDetachedSigAttachmentId = null;
+
+                if (detachedSignature != null) {
+                    businessDocDetachedSigAttachmentId =
+                        persistBusinessDocumentDetachedSignature(detachedSignature);
+                }
+
                 var businessContentAttachmentIdentifier = persistBusinessContent(businessContent);
                 var parsedMessage = MessageHelpers.toBusinessCommand(
                     submitMessageRequest,
                     attachmentIdentifiers,
                     businessContentAttachmentIdentifier,
                     businessDocumentAttachmentIdentifier,
+                    businessDocDetachedSigAttachmentId,
                     backendClientName
                 );
 
@@ -275,7 +287,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     private List<String> persistAttachments(
         List<DomibusConnectorMessageAttachmentType> attachments) {
         if (attachments.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
 
         var fileUploadCommands = toFileUploadCommands(attachments);
@@ -314,6 +326,19 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         }
     }
 
+    private String persistBusinessDocumentDetachedSignature(
+        DomibusConnectorDetachedSignatureType detachedSignature) {
+        var fileUploadCommand = toFileUploadCommand(detachedSignature);
+
+        try {
+            return uploadAttachments.execute(List.of(fileUploadCommand))
+                                    .getFirst()
+                                    .identifier();
+        } finally {
+            fileUploadCommand.cleanup();
+        }
+    }
+
     private FileUploadCommand toFileUploadCommand(
         DomibusConnectorMessageDocumentType pdfBusinessContent) {
         try {
@@ -329,6 +354,32 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 .size(file.length())
                 .tempFileLocation(tempFile)
                 .description("Registered business document")
+                .build();
+        } catch (Exception e) {
+            throw new ConnectorInternalServerException(e.getMessage());
+        }
+    }
+
+    private FileUploadCommand toFileUploadCommand(
+        DomibusConnectorDetachedSignatureType detachedSignature) {
+        try {
+            var tempFile = AttachmentHelpers.bytesToTempFile(
+                detachedSignature.getDetachedSignature(),
+                detachedSignature.getDetachedSignatureName()
+            );
+            var file = tempFile.toFile();
+
+            var contentType = MimeType.fromMimeTypeString(
+                detachedSignature.getMimeType().toString()
+            ).getMimeTypeString();
+
+            return FileUploadCommand
+                .builder()
+                .filename(StringUtils.cleanPath(detachedSignature.getDetachedSignatureName()))
+                .contentType(contentType)
+                .size(file.length())
+                .tempFileLocation(tempFile)
+                .description("Business document detached signature")
                 .build();
         } catch (Exception e) {
             throw new ConnectorInternalServerException(e.getMessage());

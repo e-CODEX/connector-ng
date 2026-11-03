@@ -14,6 +14,7 @@ import jakarta.activation.DataHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -72,6 +73,33 @@ public class AttachmentHelpers {
         }
 
         return tempFile;
+    }
+
+    public static Path bytesToTempFile(byte[] data, String filename) throws IOException {
+        var ext = extractExtension(filename);
+        var tempFile = Files.createTempFile(
+            "ws-detached-signature-%s-".formatted(UUID.randomUUID()),
+            ext
+        );
+
+        try {
+            Files.write(tempFile, data);
+        } catch (IOException e) {
+            Files.deleteIfExists(tempFile);
+            throw e;
+        }
+
+        return tempFile;
+    }
+
+    private static String extractExtension(String filename) {
+        if (filename == null) {
+            return "";
+        }
+
+        int dot = filename.lastIndexOf('.');
+
+        return dot >= 0 ? filename.substring(dot) : "";
     }
 
     private static TransformerFactory getTransformerFactory() {

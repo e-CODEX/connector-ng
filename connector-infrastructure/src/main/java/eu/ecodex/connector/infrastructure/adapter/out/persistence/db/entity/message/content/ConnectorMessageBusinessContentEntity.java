@@ -45,7 +45,7 @@ import org.hibernate.annotations.UuidGenerator;
     name = "CONNECTOR_MESSAGE_BUSINESS_CONTENTS",
     uniqueConstraints = {
         @UniqueConstraint(name = "UQ_CM_BC_UUID", columnNames = "UUID"),
-        @UniqueConstraint(name = "UQ_CM_BC_ATTACHMENT", columnNames = "ATTACHMENT_ID"),
+        @UniqueConstraint(name = "UQ_CM_BC_ATTACHMENT", columnNames = "XML_CONTENT_ATTACHMENT_ID"),
         @UniqueConstraint(name = "UQ_CM_BC_MESSAGE", columnNames = "MESSAGE_ID")
     }
 )
@@ -61,9 +61,9 @@ public class ConnectorMessageBusinessContentEntity extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-        name = "ATTACHMENT_ID",
+        name = "XML_CONTENT_ATTACHMENT_ID",
         nullable = false,
-        foreignKey = @ForeignKey(name = "FK_CM_BC_ATTACHMENT"))
+        foreignKey = @ForeignKey(name = "FK_CM_BC_XML_CT_ATTACHMENT"))
     private ConnectorMessageAttachmentEntity xmlContent;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)

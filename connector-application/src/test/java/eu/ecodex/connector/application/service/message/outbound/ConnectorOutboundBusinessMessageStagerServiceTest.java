@@ -84,7 +84,7 @@ public class ConnectorOutboundBusinessMessageStagerServiceTest {
                 ConnectorAttachmentType.BUSINESS_CONTENT
             );
             verify(attachmentLinkerService).execute(
-                message.businessContent().businessDocument().attachment().identifier(),
+                message.businessContent().businessDocument().content().identifier(),
                 message.identifier(),
                 ConnectorAttachmentType.BUSINESS_DOCUMENT
             );
@@ -109,7 +109,7 @@ public class ConnectorOutboundBusinessMessageStagerServiceTest {
                 ConnectorAttachmentType.BUSINESS_CONTENT
             );
             verify(attachmentLinkerService).execute(
-                message.businessContent().businessDocument().attachment().identifier(),
+                message.businessContent().businessDocument().content().identifier(),
                 message.identifier(),
                 ConnectorAttachmentType.BUSINESS_DOCUMENT
             );

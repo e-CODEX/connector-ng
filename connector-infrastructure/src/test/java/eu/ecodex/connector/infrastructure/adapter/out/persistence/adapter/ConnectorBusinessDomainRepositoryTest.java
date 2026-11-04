@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@SuppressWarnings("checkstyle:MissingJavadocType")
 @DisplayName("ConnectorBusinessDomainRepository")
 public class ConnectorBusinessDomainRepositoryTest extends AbstractRepositoryTest {
     @Autowired

@@ -40,13 +40,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class ConnectorRestOutboundMessageParser {
     private final ConnectorUploadAttachments uploadAttachmentsService;
-    private final ConnectorTempFilesHelper tempFiles;
+    private final ConnectorTempFilesHelper tempFilesHelper;
 
     public ConnectorRestOutboundMessageParser(
         ConnectorUploadAttachments uploadAttachmentsService,
-        ConnectorTempFilesHelper tempFiles) {
+        ConnectorTempFilesHelper tempFilesHelper) {
         this.uploadAttachmentsService = uploadAttachmentsService;
-        this.tempFiles = tempFiles;
+        this.tempFilesHelper = tempFilesHelper;
     }
 
     /**
@@ -123,7 +123,7 @@ public class ConnectorRestOutboundMessageParser {
     public ConnectorMessageAttachment toAttachment(MultipartFile file, String description)
         throws IOException {
         var filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        var tempLocation = tempFiles.create("upload-", filename);
+        var tempLocation = tempFilesHelper.create("upload-", filename);
 
         try {
             file.transferTo(tempLocation);

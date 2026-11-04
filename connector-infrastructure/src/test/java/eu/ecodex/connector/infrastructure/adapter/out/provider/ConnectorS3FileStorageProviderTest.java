@@ -8,24 +8,28 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.provider;
+package eu.ecodex.connector.infrastructure.adapter.out.provider;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.MessageAttachmentTestFixtures;
-import eu.ecodex.connector.infrastructure.adapter.out.provider.ConnectorS3FileStorageProvider;
 import eu.ecodex.connector.infrastructure.config.property.filestorage.ConnectorFileStorageProperties;
+import eu.ecodex.connector.infrastructure.config.property.filestorage.ConnectorS3ProviderProperties;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,6 +45,9 @@ import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorS3FileStorageProvider")
 public class ConnectorS3FileStorageProviderTest {
+    @TempDir
+    Path tempDir;
+
     @Mock
     private S3Client s3Client;
     @Mock
@@ -49,11 +56,21 @@ public class ConnectorS3FileStorageProviderTest {
     @InjectMocks
     private ConnectorS3FileStorageProvider fileStorageProvider;
 
-    private Path provideTemporaryPath() throws IOException {
-        var tempPath = Files.createTempFile("test-upload-", ".txt");
-        Files.writeString(tempPath, "test content");
+    @BeforeEach
+    void setUp() {
+        lenient().when(fileStorageProperties.s3()).thenReturn(
+            ConnectorS3ProviderProperties.builder()
+                                         .bucket("attachments")
+                                         .autoCreateBucket(false)
+                                         .secretKey("test-secret")
+                                         .accessKey("test-access")
+                                         .endpoint(URI.create("http://fake-endpoint"))
+                                         .build()
+        );
+    }
 
-        return tempPath;
+    private Path provideTemporaryPath() throws IOException {
+        return Files.createTempDirectory(tempDir, "test-upload-");
     }
 
     @Nested
@@ -61,7 +78,15 @@ public class ConnectorS3FileStorageProviderTest {
     class SaveFile {
         @Test
         void should_store_the_file() throws IOException {
-            when(fileStorageProperties.s3().bucket()).thenReturn("attachments");
+            when(fileStorageProperties.s3()).thenReturn(
+                ConnectorS3ProviderProperties.builder()
+                                             .bucket("test-bucket")
+                                             .autoCreateBucket(false)
+                                             .secretKey("test-secret")
+                                             .accessKey("test-access")
+                                             .endpoint(URI.create("http://fake-endpoint"))
+                                             .build()
+            );
             when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(PutObjectResponse.builder().build());
 
@@ -104,7 +129,6 @@ public class ConnectorS3FileStorageProviderTest {
         @Test
         void should_find_the_file() {
             var attachment = MessageAttachmentTestFixtures.createAttachment();
-            when(fileStorageProperties.s3().bucket()).thenReturn("attachments");
             when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
                 .thenReturn(ResponseBytes.fromByteArray(
                     GetObjectResponse.builder().build(), new byte[1]));
@@ -118,7 +142,6 @@ public class ConnectorS3FileStorageProviderTest {
         @Test
         void should_return_null_when_the_identifier_is_unknown() {
             var attachment = MessageAttachmentTestFixtures.createAttachment();
-            when(fileStorageProperties.s3().bucket()).thenReturn("attachments");
             doThrow(RuntimeException.class).when(s3Client)
                                            .getObjectAsBytes(any(GetObjectRequest.class));
             var foundAttachment = fileStorageProvider.findByIdentifier(attachment.identifier());

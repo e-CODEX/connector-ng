@@ -13,12 +13,15 @@ package eu.ecodex.connector.infrastructure.initializer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.infrastructure.config.property.filestorage.ConnectorFileStorageProperties;
+import eu.ecodex.connector.infrastructure.config.property.filestorage.ConnectorS3ProviderProperties;
+import java.net.URI;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -59,7 +62,15 @@ class ConnectorS3BucketInitializerTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.s3().bucket()).thenReturn(BUCKET);
+        lenient().when(properties.s3()).thenReturn(
+            ConnectorS3ProviderProperties.builder()
+                                         .bucket(BUCKET)
+                                         .autoCreateBucket(false)
+                                         .secretKey("test-secret")
+                                         .accessKey("test-access")
+                                         .endpoint(URI.create("http://fake-endpoint"))
+                                         .build());
+
         initializer = new ConnectorS3BucketInitializer(s3Client, properties);
     }
 

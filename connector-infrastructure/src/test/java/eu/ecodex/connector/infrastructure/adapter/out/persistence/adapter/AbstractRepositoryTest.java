@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
+import eu.ecodex.connector.WithUploadTempDirectory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @ActiveProfiles(value = {"dss", "security", "evidence", "local"})
+@WithUploadTempDirectory
 @SpringBootTest(
     classes = RepositoryContextConfiguration.class,
     properties = {

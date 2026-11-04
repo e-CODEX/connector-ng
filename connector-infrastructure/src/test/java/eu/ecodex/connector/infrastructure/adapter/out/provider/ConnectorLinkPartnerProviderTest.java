@@ -8,12 +8,13 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter;
+package eu.ecodex.connector.infrastructure.adapter.out.provider;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
+import eu.ecodex.connector.WithUploadTempDirectory;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartnerName;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+@WithUploadTempDirectory
 @SuppressWarnings("DataFlowIssue")
 @DisplayName("ConnectorLinkPartnerRepository")
 @ActiveProfiles(value = {"dss", "security", "evidence", "local"})

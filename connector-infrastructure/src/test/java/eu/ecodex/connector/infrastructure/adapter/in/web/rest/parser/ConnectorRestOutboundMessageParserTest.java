@@ -85,9 +85,9 @@ class ConnectorRestOutboundMessageParserTest {
                 uploadDirectory, PosixFilePermissions.fromString("rwx------"));
         }
 
-        var tempFiles = new ConnectorTempFilesHelper(
+        var tempFilesHelper = new ConnectorTempFilesHelper(
             new ConnectorFileStorageProperties(uploadDirectory, null));
-        parser = new ConnectorRestOutboundMessageParser(uploadAttachmentsService, tempFiles);
+        parser = new ConnectorRestOutboundMessageParser(uploadAttachmentsService, tempFilesHelper);
     }
 
     private List<Path> remainingTempFiles() throws IOException {

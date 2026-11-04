@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Import;
 @ComponentScan(
     basePackages = {
         "eu.ecodex.connector.domain",
+        "eu.ecodex.connector.infrastructure.helper",
         "eu.ecodex.connector.infrastructure.config.property",
         "eu.ecodex.connector.infrastructure.adapter.out.provider",
         "eu.ecodex.connector.infrastructure.adapter.out.dss",

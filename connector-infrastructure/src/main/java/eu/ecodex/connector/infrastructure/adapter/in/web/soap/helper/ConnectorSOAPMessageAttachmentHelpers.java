@@ -42,10 +42,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorSOAPMessageAttachmentHelpers {
     private static final TransformerFactory transformerFactory = getTransformerFactory();
-    private final ConnectorTempFilesHelper tempFiles;
+    private final ConnectorTempFilesHelper tempFilesHelper;
 
-    public ConnectorSOAPMessageAttachmentHelpers(ConnectorTempFilesHelper tempFiles) {
-        this.tempFiles = tempFiles;
+    public ConnectorSOAPMessageAttachmentHelpers(ConnectorTempFilesHelper tempFilesHelper) {
+        this.tempFilesHelper = tempFilesHelper;
     }
 
     private static void discard(Path tempFile, Exception cause) {
@@ -184,7 +184,7 @@ public class ConnectorSOAPMessageAttachmentHelpers {
      *                     or copied
      */
     public Path dataHandlerToTempFile(DataHandler dh) throws IOException {
-        var tempFile = tempFiles.create(
+        var tempFile = tempFilesHelper.create(
             "ws-attachment-",
             contentTypeToExtension(dh.getContentType())
         );
@@ -203,7 +203,7 @@ public class ConnectorSOAPMessageAttachmentHelpers {
     }
 
     private Path writeToTempFile(String prefix, String filename, byte[] data) throws IOException {
-        var tempFile = tempFiles.create(prefix, filename);
+        var tempFile = tempFilesHelper.create(prefix, filename);
 
         try {
             Files.write(tempFile, data);

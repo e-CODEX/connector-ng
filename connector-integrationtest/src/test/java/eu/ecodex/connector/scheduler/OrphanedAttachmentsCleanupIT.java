@@ -19,25 +19,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import eu.ecodex.connector.FixedClockConfiguration;
 import eu.ecodex.connector.infrastructure.adapter.in.scheduler.ConnectorOrphanedAttachmentsCleanupJob;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
-@Import(OrphanedAttachmentsCleanupIT.FixedClockConfiguration.class)
+@Import(FixedClockConfiguration.class)
 @TestPropertySource(properties = {
     "connector.scheduling.enabled=false",
     "connector.file-deletion.orphan.threshold=1d"
@@ -132,16 +126,6 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
             job.run();
 
             assertThat(deletedAt(ORPHAN)).isNotNull();
-        }
-    }
-
-    @TestConfiguration
-    static class FixedClockConfiguration {
-        // 30 days ahead: with a 1d threshold, rows created "now" count as old enough
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return Clock.fixed(Instant.now().plus(Duration.ofDays(30)), ZoneOffset.UTC);
         }
     }
 }

@@ -17,7 +17,6 @@ import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainId
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
-import eu.ecodex.connector.domain.model.message.content.DetachedSignature;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorAttachmentUploadException;
@@ -81,34 +80,28 @@ public class ConnectorRestOutboundMessageParser {
         var businessDocumentRequest = businessContent.businessDocument();
         var businessDocument = ConnectorMessageBusinessDocument
             .builder()
-            .attachment(toAttachment(businessContent.businessDocument().document()))
+            .content(toAttachment(
+                businessContent.businessDocument().document(),
+                "Business document"
+            ))
             .detachedSignature(toDetachedSignature(businessDocumentRequest.detachedSignature()))
             .aesType(businessDocumentRequest.aesType())
             .build();
 
         return ConnectorMessageBusinessContent
             .builder()
-            .xmlContent(toAttachment(businessContent.xmlContent()))
+            .xmlContent(toAttachment(businessContent.xmlContent(), "Business content"))
             .businessDocument(businessDocument)
             .build();
     }
 
-    private DetachedSignature toDetachedSignature(
+    private ConnectorMessageAttachment toDetachedSignature(
         ConnectorOutboundMessageDetachedSignature detachedSignature) throws IOException {
         if (detachedSignature == null || detachedSignature.signature() == null) {
             return null;
         }
 
-        return DetachedSignature
-            .builder()
-            .name(
-                StringUtils.cleanPath(
-                    Objects.requireNonNull(detachedSignature.signature()
-                                                            .getOriginalFilename()))
-            )
-            .signature(detachedSignature.signature().getBytes())
-            .mimeType(detachedSignature.mimeType())
-            .build();
+        return toAttachment(detachedSignature.signature(), "Business document detached signature");
     }
 
     /**
@@ -122,7 +115,8 @@ public class ConnectorRestOutboundMessageParser {
      *                                            cannot be deleted
      * @throws ConnectorAttachmentUploadException if the attachment upload fails
      */
-    public ConnectorMessageAttachment toAttachment(MultipartFile file) throws IOException {
+    public ConnectorMessageAttachment toAttachment(MultipartFile file, String description)
+        throws IOException {
         var filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
 
         var tempLocation = Files.createTempFile(
@@ -138,7 +132,7 @@ public class ConnectorRestOutboundMessageParser {
                 .filename(filename)
                 .tempFileLocation(tempLocation)
                 .size(file.getSize())
-                .description("Registered business content/document")
+                .description(description)
                 .build();
 
             return uploadAttachmentsService.execute(List.of(uploadCommand)).getFirst();

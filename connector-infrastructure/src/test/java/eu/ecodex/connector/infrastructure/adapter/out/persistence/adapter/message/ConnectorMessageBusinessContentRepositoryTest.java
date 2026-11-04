@@ -64,13 +64,15 @@ public class ConnectorMessageBusinessContentRepositoryTest extends AbstractRepos
 
         if (savedBusinessContent.businessDocument() != null) {
             assertNotNull(savedBusinessContent.businessDocument().uuid());
-            assertNotNull(savedBusinessContent.businessDocument().attachment());
+            assertNotNull(savedBusinessContent.businessDocument().content());
             assertThat(savedBusinessContent.businessDocument().aesType()).isEqualTo(
                 businessContent.businessDocument().aesType()
             );
-            assertThat(savedBusinessContent.businessDocument().detachedSignature()).isEqualTo(
-                businessContent.businessDocument().detachedSignature()
-            );
+
+            if (businessContent.businessDocument().detachedSignature() != null) {
+                assertThat(savedBusinessContent.businessDocument().detachedSignature().identifier())
+                    .isEqualTo(businessContent.businessDocument().detachedSignature().identifier());
+            }
         }
     }
 

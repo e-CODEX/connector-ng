@@ -18,7 +18,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.infrastructure.config.property.ConnectorS3ProviderProperties;
+import eu.ecodex.connector.infrastructure.config.property.filestorage.ConnectorFileStorageProperties;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ class ConnectorS3BucketInitializerTest {
     @Mock
     private S3Client s3Client;
     @Mock
-    private ConnectorS3ProviderProperties properties;
+    private ConnectorFileStorageProperties properties;
 
     @Captor
     private ArgumentCaptor<Consumer<HeadBucketRequest.Builder>> headBucketCaptor;
@@ -59,7 +59,7 @@ class ConnectorS3BucketInitializerTest {
 
     @BeforeEach
     void setUp() {
-        when(properties.bucket()).thenReturn(BUCKET);
+        when(properties.s3().bucket()).thenReturn(BUCKET);
         initializer = new ConnectorS3BucketInitializer(s3Client, properties);
     }
 

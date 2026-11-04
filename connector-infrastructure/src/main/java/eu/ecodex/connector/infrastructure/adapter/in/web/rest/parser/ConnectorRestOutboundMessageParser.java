@@ -23,12 +23,12 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.Connecto
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound.ConnectorOutboundMessageBusinessContent;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound.ConnectorOutboundMessageDetachedSignature;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound.ConnectorOutboundMessageParty;
+import eu.ecodex.connector.infrastructure.helper.ConnectorTempFilesHelper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,9 +40,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 public class ConnectorRestOutboundMessageParser {
     private final ConnectorUploadAttachments uploadAttachmentsService;
+    private final ConnectorTempFilesHelper tempFiles;
 
-    public ConnectorRestOutboundMessageParser(ConnectorUploadAttachments uploadAttachmentsService) {
+    public ConnectorRestOutboundMessageParser(
+        ConnectorUploadAttachments uploadAttachmentsService,
+        ConnectorTempFilesHelper tempFiles) {
         this.uploadAttachmentsService = uploadAttachmentsService;
+        this.tempFiles = tempFiles;
     }
 
     /**
@@ -107,22 +111,19 @@ public class ConnectorRestOutboundMessageParser {
     /**
      * Uploads a multipart file and converts it into a connector message attachment.
      *
-     * @param file the multipart file to upload
+     * @param file        the multipart file to upload
+     * @param description the attachment description
      *
      * @return the resulting connector message attachment
      *
-     * @throws IOException                        if the file cannot be read or the temporary file
-     *                                            cannot be deleted
+     * @throws IOException                        if the temporary file cannot be created or
+     *                                            deleted
      * @throws ConnectorAttachmentUploadException if the attachment upload fails
      */
     public ConnectorMessageAttachment toAttachment(MultipartFile file, String description)
         throws IOException {
         var filename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-
-        var tempLocation = Files.createTempFile(
-            "upload-%s".formatted(UUID.randomUUID()),
-            filename
-        );
+        var tempLocation = tempFiles.create("upload-", filename);
 
         try {
             file.transferTo(tempLocation);
@@ -140,7 +141,7 @@ public class ConnectorRestOutboundMessageParser {
             throw new ConnectorAttachmentUploadException(
                 "Failed to upload attachment: " + file.getName(), e);
         } finally {
-            // Always runs — covers both success and failure paths
+            // Always runs, covering both success and failure paths
             Files.deleteIfExists(tempLocation);
         }
     }

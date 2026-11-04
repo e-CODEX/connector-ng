@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.config.property;
+package eu.ecodex.connector.infrastructure.config.property.filestorage;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
@@ -22,8 +22,6 @@ import org.springframework.validation.annotation.Validated;
  * Configuration properties required to connect to an Amazon S3 (or compatible) object storage
  * service.
  */
-@Validated
-@ConfigurationProperties(prefix = "connector.file.storage.s3")
 public record ConnectorS3ProviderProperties(
     @DefaultValue("true")
     boolean autoCreateBucket,

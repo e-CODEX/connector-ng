@@ -23,18 +23,34 @@ The following S3-compatible providers are supported:
 * MinIO
 * Other S3-compatible object storage services
 
-== S3 Storage Configuration
+== File Storage Configuration
 
 Configuration is provided via `application.properties` under the
-`connector.file.storage.s3.*` prefix.
-The automatic bucket creation is controlled by the separate `connector.s3.auto-create-bucket` property.
+`connector.file.storage.*` prefix.
+
+.File Storage Configuration Properties
+[cols="35,40,10,15"]
+|===
+| Property | Description | Optional | Example
+
+| `connector.file.storage.upload-temp-directory`
+| Local directory used for temporary files while uploads are being processed.
+The connector fails at startup if the value is blank or the placeholder cannot be resolved.
+| No
+| `${TEMP_DIR_LOCATION}`
+|===
+
+== S3 Storage Configuration
+
+Configuration is provided under the `connector.file.storage.s3.*` prefix.
+All properties below, including the automatic bucket creation, share this prefix.
 
 .S3 File Storage Configuration Properties
 [cols="35,40,10,15"]
 |===
 | Property | Description | Optional | Example
 
-| `connector.s3.auto-create-bucket`
+| `connector.file.storage.s3.auto-create-bucket`
 | Whether the connector creates the configured bucket at startup when it does not exist.
 Defaults to `true`. If set to `false`, the bucket must be created manually beforehand.
 | Yes
@@ -58,16 +74,19 @@ an arbitrary placeholder value required by the S3 client.
 
 | `connector.file.storage.s3.bucket`
 | Name of the S3 bucket used to store connector files.
-If `connector.s3.auto-create-bucket` is `true` (the default), the bucket is created at startup
+Must be a valid S3 bucket name: 3 to 63 characters, lowercase letters, digits, dots and hyphens,
+starting and ending with a letter or digit.
+If `connector.file.storage.s3.auto-create-bucket` is `true` (the default), the bucket is created at startup
 when it does not exist yet. If it is `false`, the bucket must be created manually before starting
 the connector, otherwise the connector cannot store any data.
 | No
 | `attachments`
 
 | `connector.file.storage.s3.endpoint`
-| S3 endpoint URL. Required for non-AWS providers (MinIO, OVH Object Storage, etc.)
-or when targeting a specific regional/VPC endpoint.
-| No
+| S3 endpoint URL. Must be an absolute `http` or `https` URL including a host and, if needed, a port.
+Required for non-AWS providers (MinIO, OVH Object Storage, etc.) or when targeting a specific
+regional/VPC endpoint. When omitted, the standard AWS endpoint for the configured region is used.
+| Yes
 | `https://s3.eu-west-1.amazonaws.com`
 |===
 
@@ -75,9 +94,13 @@ WARNING: Never commit S3 credentials to version control.
 Inject `access-key` and
 `secret-key` at runtime via environment variables or a secrets manager.
 
+NOTE: The configuration is validated at startup. A missing mandatory property, an invalid bucket name
+or an endpoint without a scheme (for example `localhost:9000`) stops the connector with an error
+naming the offending property.
+
 === Automatic Bucket Creation
 
-By default (`connector.s3.auto-create-bucket=true`), the connector checks at startup whether the configured bucket exists:
+By default (`connector.file.storage.s3.auto-create-bucket=true`), the connector checks at startup whether the configured bucket exists:
 
 * If the bucket exists, nothing is changed.
 * If the bucket does not exist, the connector creates it.
@@ -87,19 +110,20 @@ By default (`connector.s3.auto-create-bucket=true`), the connector checks at sta
 The configured credentials need permission to check for and create buckets (`s3:ListBucket` and `s3:CreateBucket` on Amazon S3).
 The bucket is created with the provider's default settings, so versioning, encryption, lifecycle rules and access policies are not configured by the connector.
 
-WARNING: If automatic bucket creation is disabled (`connector.s3.auto-create-bucket=false`), the connector does not check for or create the bucket.
+WARNING: If automatic bucket creation is disabled (`connector.file.storage.s3.auto-create-bucket=false`), the connector does not check for or create the bucket.
 Make sure that the bucket configured in
 `connector.file.storage.s3.bucket` has been created manually before starting the connector.
 Otherwise, the connector will not be able to store any data (business content, business documents, attachments, ASiC-S containers and temporary files) in S3, and operations that write files will fail.
 
-NOTE: For production environments, it is recommended to provision the bucket yourself with the required settings and to set `connector.s3.auto-create-bucket=false`.
+NOTE: For production environments, it is recommended to provision the bucket yourself with the required settings and to set `connector.file.storage.s3.auto-create-bucket=false`.
 This also lets you run the connector with credentials that cannot create buckets.
 Remember that the bucket must then exist before the connector starts (see the warning above).
 
 .Configuration example
 [source,properties]
 ----
-connector.s3.auto-create-bucket=true
+connector.file.storage.upload-temp-directory=${TEMP_DIR_LOCATION}
+connector.file.storage.s3.auto-create-bucket=true
 connector.file.storage.s3.access-key=${S3_ACCESS_KEY}
 connector.file.storage.s3.secret-key=${S3_SECRET_KEY}
 connector.file.storage.s3.region=eu-west-1

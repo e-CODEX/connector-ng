@@ -23,7 +23,7 @@ The following S3-compatible providers are supported:
 * MinIO
 * Other S3-compatible object storage services
 
-== File Storage Configuration
+== Temporary File Storage Configuration
 
 Configuration is provided via `application.properties` under the
 `connector.file.storage.*` prefix.
@@ -35,10 +35,46 @@ Configuration is provided via `application.properties` under the
 
 | `connector.file.storage.upload-temp-directory`
 | Local directory used for temporary files while uploads are being processed.
-The connector fails at startup if the value is blank or the placeholder cannot be resolved.
+The directory must already exist and meet the requirements listed below.
+The connector fails at startup if the value is blank, the placeholder cannot be resolved
+or the directory does not meet the requirements.
 | No
 | `${TEMP_DIR_LOCATION}`
 |===
+
+=== Directory Requirements
+
+The connector does not create the temporary directory. It must be created beforehand,
+and at startup the connector checks that the directory:
+
+* exists and is writable by the user running the connector,
+* is not a symbolic link,
+* is not writable by group or others (for example, mode `700`).
+
+If one of these checks fails, the connector does not start.
+
+Temporary files are created inside this directory with random names and owner-only
+permissions (`600`). Only a sanitized extension of the uploaded file name is kept in the
+temporary file name, so client-supplied names never influence the location of the file.
+Temporary files are deleted once the upload has been processed, whether it succeeds or fails.
+
+WARNING: Do not point `connector.file.storage.upload-temp-directory` at a shared, world-writable
+directory such as `/tmp`. Use a dedicated directory owned by the user running the connector.
+
+When running the connector outside Docker, create the directory before starting it:
+
+[source,shell]
+----
+install -d -m 700 -o <connector-user> /path/to/connector/temp
+export TEMP_DIR_LOCATION=/path/to/connector/temp
+----
+
+The Docker image provides `/app/temp`, owned by the `connector` user with mode `700`, and the
+image sets `TEMP_DIR_LOCATION` to this path.
+
+NOTE: When a volume or host folder is mounted on `/app/temp`, the owner and permissions of the mount
+replace the ones set in the image. Make sure the mounted folder is owned by the container user
+(UID `1000` by default) and has mode `700`, otherwise the connector does not start.
 
 == S3 Storage Configuration
 

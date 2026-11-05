@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -51,19 +50,6 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
     ConnectorUserDto registerUser(
-        @Valid @RequestBody @Nonnull ConnectorUserCreationOrUpdateRequest userRequest);
-
-    @Operation(summary = "Update a connector user.")
-    @PutMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "409", description = "Conflict")
-    })
-    ConnectorUserDto update(
-        @PathVariable("uuid") @Nonnull String identifier,
         @Valid @RequestBody @Nonnull ConnectorUserCreationOrUpdateRequest userRequest);
 
     @Operation(summary = "Update partially a connector user.")

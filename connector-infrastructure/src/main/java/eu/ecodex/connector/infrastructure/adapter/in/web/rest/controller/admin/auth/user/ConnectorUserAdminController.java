@@ -17,12 +17,10 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUsers;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
-import jakarta.validation.Valid;
 import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConnectorUserAdminController implements ConnectorUserAdminApi {
     private final ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier;
     private final ConnectorRegisterUser connectorRegisterUser;
-    private final ConnectorUpdateUser connectorUpdateUser;
     private final ConnectorEditUser connectorEditUser;
     private final ConnectorRemoveUser connectorRemoveUser;
     private final ConnectorListUsers connectorListUsers;
@@ -53,24 +50,22 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
      *                                          entities by identifier
      * @param connectorRegisterUser             service for registering new {@link ConnectorUser}
      *                                          entities in the system
-     * @param connectorUpdateUser               service for updating existing {@link ConnectorUser}
-     *                                          entities in the system
      * @param connectorEditUser                 service for partially updating {@link ConnectorUser}
      *                                          entities by applying specified changes
      * @param connectorRemoveUser               service for deleting {@link ConnectorUser} entities
      *                                          from the system
-     * @param connectorListUsers                 service for retrieving a list of all
+     * @param connectorListUsers                service for retrieving a list of all
      *                                          {@link ConnectorUser} entities along with their
      *                                          roles
      */
     public ConnectorUserAdminController(
         ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier,
-        ConnectorRegisterUser connectorRegisterUser, ConnectorUpdateUser connectorUpdateUser,
-        ConnectorEditUser connectorEditUser, ConnectorRemoveUser connectorRemoveUser,
+        ConnectorRegisterUser connectorRegisterUser,
+        ConnectorEditUser connectorEditUser,
+        ConnectorRemoveUser connectorRemoveUser,
         ConnectorListUsers connectorListUsers) {
         this.connectorRetrieveUserByIdentifier = connectorRetrieveUserByIdentifier;
         this.connectorRegisterUser = connectorRegisterUser;
-        this.connectorUpdateUser = connectorUpdateUser;
         this.connectorEditUser = connectorEditUser;
         this.connectorRemoveUser = connectorRemoveUser;
         this.connectorListUsers = connectorListUsers;
@@ -84,17 +79,6 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
         log.debug("New user registered successfully");
         return ConnectorUserDto.from(registered);
-    }
-
-    @Override
-    public ConnectorUserDto update(
-        @NonNull String identifier,
-        @NonNull @Valid ConnectorUserCreationOrUpdateRequest userRequest) {
-        log.debug("Updating existing user");
-        var updated = connectorUpdateUser.execute(identifier, toDomain(userRequest));
-
-        log.debug("User updated successfully");
-        return ConnectorUserDto.from(updated);
     }
 
     @Override

@@ -20,11 +20,13 @@ import lombok.NonNull;
 /**
  * Represents a request for creating or updating a user in the connector system.
  *
- * @param email              the new email address; must be a valid email address of at most 255
- *                           characters if provided, and may be {@code null}
- * @param enabled            whether the user account is enabled; may be {@code null}
- * @param mustChangePassword whether the user must change their password at next login; may be
- *                           {@code null}
+ * <p>The {@code email} value is the new email address; it must be a valid email address of at most
+ * 255 characters if provided, and may be {@code null} to leave the current email unchanged.
+ *
+ * <p>The {@code enabled} boolean parameter,whether the user account is enabled; may be {@code null}
+ *
+ * <p>The {@code mustChangePassword} mustChangePassword whether the user must change their password
+ * at next login; may be {@code null}
  */
 @Builder(toBuilder = true)
 public record ConnectorEditUserRequest(

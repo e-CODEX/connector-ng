@@ -23,7 +23,6 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUsers;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRegisterUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
-import eu.ecodex.connector.application.port.api.auth.user.ConnectorUpdateUser;
 import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPasswordEncoder;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
@@ -48,8 +47,6 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     private ConnectorRetrieveUserByIdentifier connectorRetrieveUserByIdentifier;
     @MockitoBean
     private ConnectorRegisterUser connectorRegisterUser;
-    @MockitoBean
-    private ConnectorUpdateUser connectorUpdateUser;
     @MockitoBean
     private ConnectorEditUser connectorEditUser;
     @MockitoBean
@@ -173,6 +170,6 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
     private void assertNoMoreInteractions() {
         verifyNoMoreInteractions(connectorEditUser,
                                  connectorListUsers, connectorRemoveUser,
-                                 connectorRegisterUser, connectorUpdateUser, connectorRetrieveUserByIdentifier);
+                                 connectorRegisterUser, connectorRetrieveUserByIdentifier);
     }
 }

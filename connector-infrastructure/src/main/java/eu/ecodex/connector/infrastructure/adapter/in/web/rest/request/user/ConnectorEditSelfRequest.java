@@ -20,8 +20,8 @@ import lombok.NonNull;
 /**
  * Represents a request by a user to edit his own account.
  *
- * @param email the new email address; must be a valid email address of at most 255 characters if
- *              provided, and may be {@code null} to leave the current email unchanged
+ * <p>The {@code email} value is the new email address; it must be a valid email address of at most
+ * 255 characters if provided, and may be {@code null} to leave the current email unchanged.
  */
 @Builder(toBuilder = true)
 public record ConnectorEditSelfRequest(

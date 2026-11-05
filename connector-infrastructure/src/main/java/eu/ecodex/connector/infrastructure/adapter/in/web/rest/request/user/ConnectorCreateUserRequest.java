@@ -61,12 +61,12 @@ public record ConnectorCreateUserRequest(
      */
     public static ConnectorUser toDomain(ConnectorCreateUserRequest userRequest) {
         return ConnectorUser.builder()
-                            .username(userRequest.username())
-                            .password(userRequest.password())
-                            .email(userRequest.email())
-                            .enabled(userRequest.enabled())
-                            .roles(getRoles(userRequest))
-                            .build();
+            .username(userRequest.username())
+            .password(userRequest.password())
+            .email(userRequest.email())
+            .enabled(userRequest.enabled())
+            .roles(getRoles(userRequest))
+            .build();
     }
 
     private static Set<ConnectorRole> getRoles(ConnectorCreateUserRequest request) {
@@ -75,10 +75,10 @@ public record ConnectorCreateUserRequest(
         }
 
         return request.roles().stream()
-                      .map(role ->
-                               ConnectorRole.builder()
-                                            .name(role)
-                                            .build())
-                      .collect(Collectors.toUnmodifiableSet());
+            .map(role ->
+                ConnectorRole.builder()
+                    .name(role)
+                    .build())
+            .collect(Collectors.toUnmodifiableSet());
     }
 }

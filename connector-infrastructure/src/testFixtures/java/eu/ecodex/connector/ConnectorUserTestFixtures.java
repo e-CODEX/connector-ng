@@ -19,6 +19,7 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.Conn
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorCreateUserRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditSelfRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRolesRequest;
 import eu.ecodex.connector.infrastructure.adapter.out.auth.identity.ConnectorUserDetails;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.user.ConnectorRoleEntity;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.user.ConnectorUserEntity;
@@ -142,6 +143,18 @@ public class ConnectorUserTestFixtures {
     public static ConnectorEditSelfRequest createDefaultPatchMeUserRequest() {
         return ConnectorEditSelfRequest.builder()
             .email("test_user_new@email.com")
+            .build();
+    }
+
+    public static ConnectorEditUserRolesRequest createEditUserRolesRequest() {
+        return ConnectorEditUserRolesRequest.builder()
+            .roles(Set.of("ROLE_ADMIN", "ROLE_USER"))
+            .build();
+    }
+
+    public static ConnectorEditUserRolesRequest createInvalidEditUserRolesRequest() {
+        return ConnectorEditUserRolesRequest.builder()
+            .roles(Set.of("INVALID_ROLE_ADMIN"))
             .build();
     }
 

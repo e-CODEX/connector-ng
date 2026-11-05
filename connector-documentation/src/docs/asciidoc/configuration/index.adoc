@@ -16,7 +16,7 @@ include::{basepath}/configuration/business-document-configuration.adoc[leveloffs
 
 include::{basepath}/configuration/evidence-configuration.adoc[leveloffset=+1]
 
-include::{basepath}/configuration/s3-configuration.adoc[leveloffset=+1]
+include::{basepath}/configuration/file-storage-configuration.adoc[leveloffset=+1]
 
 include::{basepath}/configuration/link-partner-configuration.adoc[leveloffset=+1]
 

@@ -17,24 +17,20 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import eu.ecodex.connector.FixedClockConfiguration;
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.adapter.in.scheduler.ConnectorUnresolvedMessagesCleanupJob;
 import java.sql.Timestamp;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneOffset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
+@Import(FixedClockConfiguration.class)
 @TestPropertySource(properties = {
     "connector.scheduling.enabled=false",
     "connector.file-deletion.unresolved-messages.threshold=1d"
@@ -260,14 +256,5 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
         job.run();
 
         assertThat(messageDeletedAt(MESSAGE_1)).isEqualTo(first);
-    }
-
-    @TestConfiguration
-    static class FixedClockConfiguration {
-        @Bean
-        @Primary
-        Clock fixedClock() {
-            return Clock.fixed(Instant.now().plus(Duration.ofDays(30)), ZoneOffset.UTC);
-        }
     }
 }

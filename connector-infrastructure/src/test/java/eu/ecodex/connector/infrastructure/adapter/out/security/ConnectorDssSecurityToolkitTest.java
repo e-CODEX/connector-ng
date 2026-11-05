@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.adapter.out.security;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,9 @@ import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.ConnectorSecurityToolkit;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.infrastructure.adapter.out.security.exception.ConnectorContainerException;
+import eu.ecodex.connector.infrastructure.helper.ConnectorTempFilesHelper;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.util.List;
@@ -39,13 +43,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings("DataFlowIssue")
-public class ConnectorSecurityToolkitTest extends BaseContainerTest {
+public class ConnectorDssSecurityToolkitTest extends BaseContainerTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private ConnectorSecurityToolkit securityToolkit;
     @MockitoBean
     private ConnectorFileStorageProvider fileStorageProvider;
+    @MockitoBean
+    private ConnectorTempFilesHelper tempFilesHelper;
 
     @BeforeEach
     void setUp() {
@@ -112,11 +118,12 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
     @DisplayName("When building a container")
     class BuildContainer {
         @Test
-        void should_build_container_when_message_has_no_attachments() {
-            when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
-                                                                               .toString());
+        void should_build_container_when_message_has_no_attachments() throws IOException {
+            when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID().toString());
             when(fileStorageProvider.findByIdentifier(any()))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"));
+            when(tempFilesHelper.create(anyString(), anyString()))
+                .thenAnswer(invocation -> Files.createTempFile("connector", ".tmp"));
 
             var message = createMessage();
 
@@ -126,12 +133,13 @@ public class ConnectorSecurityToolkitTest extends BaseContainerTest {
         }
 
         @Test
-        void should_build_container_when_message_has_an_attachment() {
-            when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID()
-                                                                               .toString());
+        void should_build_container_when_message_has_an_attachment() throws IOException {
+            when(fileStorageProvider.save(any(), (Path) any())).thenReturn(UUID.randomUUID().toString());
             when(fileStorageProvider.findByIdentifier(any()))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/document/NonSigned.pdf"))
                 .thenReturn(FileTestFixtures.readAsBytes("raw/attachment/Attachment.png"));
+            when(tempFilesHelper.create(anyString(), anyString()))
+                .thenAnswer(invocation -> Files.createTempFile("connector", ".tmp"));
 
             var message = createMessageWithAttachment();
 

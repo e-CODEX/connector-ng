@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceContextConfiguration;
+import eu.ecodex.connector.WithUploadTempDirectory;
 import eu.ecodex.connector.application.port.spi.ConnectorEvidenceToolkit;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
@@ -43,10 +44,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
+@WithUploadTempDirectory
+@DisplayName("ConnectorEvidenceToolkit")
 @ActiveProfiles({"evidence", "dss", "security", "local"})
 @SpringBootTest(classes = {EvidenceContextConfiguration.class, PropertiesConfig.class})
 @Import(ConnectorEvidenceToolkitImplTest.MockAttachmentBeans.class)
-@DisplayName("ConnectorEvidenceToolkit")
 class ConnectorEvidenceToolkitImplTest {
     private final Map<String, byte[]> storedContent = new ConcurrentHashMap<>();
 

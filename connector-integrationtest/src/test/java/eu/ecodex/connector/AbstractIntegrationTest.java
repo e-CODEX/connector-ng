@@ -48,6 +48,7 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @Tag("integration")
 @ActiveProfiles("test")
+@WithUploadTempDirectory
 @AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest {

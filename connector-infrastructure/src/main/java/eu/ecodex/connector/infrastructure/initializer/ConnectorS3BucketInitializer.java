@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.initializer;
 
-import eu.ecodex.connector.infrastructure.config.property.ConnectorS3ProviderProperties;
+import eu.ecodex.connector.infrastructure.config.property.filestorage.ConnectorFileStorageProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -26,7 +26,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
  * <p>The initializer is active only when the property {@code connector.s3.auto-create-bucket} is
  * set to {@code true}; otherwise the bucket must already exist. It runs as an
  * {@link ApplicationRunner}, after the application context has been loaded. The bucket name comes
- * from {@link ConnectorS3ProviderProperties#bucket()}.
+ * from {@link ConnectorFileStorageProperties#s3()}.
  *
  * <p>The existence of the bucket is checked with a {@code HEAD} request. If the bucket is not
  * found (HTTP 404), it is created. If several instances start at the same time and another one
@@ -42,7 +42,7 @@ import software.amazon.awssdk.services.s3.model.S3Exception;
 )
 public class ConnectorS3BucketInitializer implements ApplicationRunner {
     private final S3Client s3Client;
-    private final ConnectorS3ProviderProperties properties;
+    private final ConnectorFileStorageProperties properties;
 
     /**
      * Creates the initializer.
@@ -52,7 +52,7 @@ public class ConnectorS3BucketInitializer implements ApplicationRunner {
      */
     public ConnectorS3BucketInitializer(
         S3Client s3Client,
-        ConnectorS3ProviderProperties properties) {
+        ConnectorFileStorageProperties properties) {
         this.s3Client = s3Client;
         this.properties = properties;
     }
@@ -68,7 +68,7 @@ public class ConnectorS3BucketInitializer implements ApplicationRunner {
      */
     @Override
     public void run(ApplicationArguments args) {
-        var bucket = properties.bucket();
+        var bucket = properties.s3().bucket();
 
         try {
             s3Client.headBucket(b -> b.bucket(bucket));

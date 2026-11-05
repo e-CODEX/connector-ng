@@ -99,17 +99,18 @@ public class ConnectorUploadAttachmentsServiceTest {
             when(attachmentRepository.save(any())).thenReturn(savedAttachment);
             doThrow(RuntimeException.class).when(storageProvider).save(any(), (Path) any());
 
-            var fileUploadCommand = new FileUploadCommand(
+            var tempFile = provideTemporaryPath();
+            var commands = List.of(new FileUploadCommand(
                 "test_attachment.txt",
                 100L,
                 "text/plain",
-                provideTemporaryPath(),
+                tempFile,
                 "test_message"
-            );
+            ));
 
             assertThrows(
                 ConnectorMessageAttachmentException.class,
-                () -> uploadAttachmentsService.execute(List.of(fileUploadCommand))
+                () -> uploadAttachmentsService.execute(commands)
             );
         }
 

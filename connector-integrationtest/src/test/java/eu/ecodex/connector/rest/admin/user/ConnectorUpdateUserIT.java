@@ -54,8 +54,7 @@ class ConnectorUpdateUserIT extends AbstractIntegrationTest {
             .enabled(false)
             .build();
 
-        var registeredUser = apiClient
-            .put()
+        var registeredUser = apiClient.put()
             .uri(StringUtils.joinWith("/", PATH, before.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .contentType(MediaType.APPLICATION_JSON)
@@ -91,8 +90,7 @@ class ConnectorUpdateUserIT extends AbstractIntegrationTest {
             .enabled(true)
             .build();
 
-        apiClient
-            .put()
+        apiClient.put()
             .uri(StringUtils.joinWith("/", PATH, existing.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer ")
             .contentType(MediaType.APPLICATION_JSON)
@@ -120,8 +118,7 @@ class ConnectorUpdateUserIT extends AbstractIntegrationTest {
             .enabled(true)
             .build();
 
-        apiClient
-            .put()
+        apiClient.put()
             .uri(StringUtils.joinWith("/", PATH, before.get().uuid()))
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .contentType(MediaType.APPLICATION_JSON)

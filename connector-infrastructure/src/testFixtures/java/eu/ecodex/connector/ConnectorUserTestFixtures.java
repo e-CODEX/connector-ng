@@ -134,7 +134,6 @@ public class ConnectorUserTestFixtures {
 
     public static ConnectorEditUserRequest createDefaultPatchUserRequest() {
         return ConnectorEditUserRequest.builder()
-            .username("test_user")
             .email("test_user@email.com")
             .enabled(Boolean.TRUE)
             .build();
@@ -142,7 +141,6 @@ public class ConnectorUserTestFixtures {
 
     public static ConnectorEditSelfRequest createDefaultPatchMeUserRequest() {
         return ConnectorEditSelfRequest.builder()
-            .username("test_user")
             .email("test_user_new@email.com")
             .build();
     }

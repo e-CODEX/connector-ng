@@ -63,7 +63,6 @@ class ConnectorEditUserAdminControllerTest extends AbstractWebMvcTest {
         var connectorUserRequest = ConnectorUserTestFixtures.createDefaultPatchUserRequest();
         var editUserCommand = ConnectorEditUserCommand.builder()
             .uuid(connectorUser.uuid())
-            .username("test_user")
             .email("test_user@email.com")
             .enabled(Boolean.TRUE)
             .build();

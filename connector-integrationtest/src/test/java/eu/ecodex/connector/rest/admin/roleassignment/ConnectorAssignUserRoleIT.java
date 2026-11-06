@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorCreateUserRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,7 @@ class ConnectorAssignUserRoleIT extends AbstractIntegrationTest {
         var existing = userRepository.findByUsername(username);
         assertThat(existing).isEmpty();
 
-        var request = ConnectorUserCreationOrUpdateRequest
-            .builder()
+        var request = ConnectorCreateUserRequest.builder()
             .username(username)
             .password("password")
             .email("test@email.com")
@@ -64,7 +63,7 @@ class ConnectorAssignUserRoleIT extends AbstractIntegrationTest {
             .getResponseBody();
 
         assertThat(registeredUser).isNotNull();
-        assertThat(registeredUser.roles()).isNull();
+        assertThat(registeredUser.roles()).isEmpty();
 
         existing = userRepository.findByUsername(username);
         assertThat(existing).isNotEmpty();

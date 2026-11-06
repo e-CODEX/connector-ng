@@ -22,8 +22,7 @@ import lombok.Builder;
 
 
 /**
- * Represents a request to create a new user or to fully update an existing user of the connector
- * system.
+ * Represents a request to create a new user in the connector system.
  *
  * @param username the username (must not be blank, at most 255 characters)
  * @param password the clear-text password, to be hashed by the use case; between 6 and 255
@@ -35,7 +34,7 @@ import lombok.Builder;
  *                 {@code null} or empty
  */
 @Builder(toBuilder = true)
-public record ConnectorUserCreationOrUpdateRequest(
+public record ConnectorCreateUserRequest(
     @NotBlank(message = "The [username] must not be blank")
     @Size(max = 255, message = "The [username] must not exceed 255 characters")
     String username,
@@ -55,12 +54,12 @@ public record ConnectorUserCreationOrUpdateRequest(
     /**
      * Maps a user creation or update request to a domain user.
      *
-     * @param userRequest the {@link ConnectorUserCreationOrUpdateRequest} to map (must not be
+     * @param userRequest the {@link ConnectorCreateUserRequest} to map (must not be
      *                    null)
      *
      * @return the {@link ConnectorUser} built from the request
      */
-    public static ConnectorUser toDomain(ConnectorUserCreationOrUpdateRequest userRequest) {
+    public static ConnectorUser toDomain(ConnectorCreateUserRequest userRequest) {
         return ConnectorUser.builder()
                             .username(userRequest.username())
                             .password(userRequest.password())
@@ -70,9 +69,9 @@ public record ConnectorUserCreationOrUpdateRequest(
                             .build();
     }
 
-    private static Set<ConnectorRole> getRoles(ConnectorUserCreationOrUpdateRequest request) {
+    private static Set<ConnectorRole> getRoles(ConnectorCreateUserRequest request) {
         if (request.roles() == null) {
-            return null;
+            return Set.of();
         }
 
         return request.roles().stream()

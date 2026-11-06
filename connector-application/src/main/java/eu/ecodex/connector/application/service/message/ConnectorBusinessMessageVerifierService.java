@@ -66,11 +66,11 @@ public class ConnectorBusinessMessageVerifierService implements ConnectorBusines
         }
     }
 
-    private void processStrictVerification(ConnectorMessage message) {
+    private void processRelaxedVerification(ConnectorMessage message) {
         this.processServiceAndActionVerification(message);
     }
 
-    private void processRelaxedVerification(ConnectorMessage message) {
+    private void processStrictVerification(ConnectorMessage message) {
         this.processServiceAndActionVerification(message);
 
         if (message.businessDomainIdentifier() == null) {

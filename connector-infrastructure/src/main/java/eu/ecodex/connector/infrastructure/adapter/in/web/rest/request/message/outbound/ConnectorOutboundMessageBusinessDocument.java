@@ -10,11 +10,16 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumentAESType;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.validator.constraints.NotEmptyFile;
 import jakarta.validation.Valid;
 import java.io.Serializable;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -27,15 +32,16 @@ import org.springframework.web.multipart.MultipartFile;
  *                          apply to the business document; may be {@code null} if encryption is not
  *                          required or determined elsewhere
  */
-@Builder(toBuilder = true)
-@SuppressWarnings("checkstyle:LineLength")
-public record ConnectorOutboundMessageBusinessDocument(
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageBusinessDocument implements Serializable {
     @NotEmptyFile(message = "The [document] file must not be empty.")
-    MultipartFile document,
+    MultipartFile document;
 
     @Valid
-    ConnectorOutboundMessageDetachedSignature detachedSignature,
+    ConnectorOutboundMessageDetachedSignature detachedSignature;
 
-    ConnectorBusinessDocumentAESType aesType
-) implements Serializable {
+    ConnectorBusinessDocumentAESType aesType;
 }

@@ -10,8 +10,13 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Represents a service associated with an outbound message request.
@@ -19,12 +24,14 @@ import lombok.Builder;
  * @param name the name of the service (must not be blank)
  * @param type the type of the service (must not be blank)
  */
-@Builder
-public record ConnectorOutboundMessageService(
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageService {
     @NotBlank(message = "The [name] must not be blank")
-    String name,
+    String name;
 
     @NotBlank(message = "The [type] must not be blank")
-    String type
-) {
+    String type;
 }

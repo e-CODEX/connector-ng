@@ -96,15 +96,16 @@ public class ConnectorMessageController implements ConnectorMessageApi {
             .builder()
             .businessDomainIdentifier(
                 restOutboundMessageParser.resolveBusinessDomainIdentifier(
-                    request.businessDomainIdentifier()
+                    request.getBusinessDomainIdentifier()
                 )
             )
-            .backendMessageIdentifier(request.backendMessageIdentifier())
+            .backendMessageIdentifier(request.getBackendMessageIdentifier())
             .backendName(backendClientName)
             .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-            .as4Properties(toDomainAS4Properties(request.as4Properties()))
-            .businessContent(restOutboundMessageParser.toBusinessContent(request.businessContent()))
-            .attachments(restOutboundMessageParser.toAttachments(request.attachments()))
+            .as4Properties(toDomainAS4Properties(request.getAs4Properties()))
+            .businessContent(
+                restOutboundMessageParser.toBusinessContent(request.getBusinessContent()))
+            .attachments(restOutboundMessageParser.toAttachments(request.getAttachments()))
             .build();
     }
 
@@ -112,28 +113,28 @@ public class ConnectorMessageController implements ConnectorMessageApi {
         ConnectorOutboundMessageAS4Properties as4Properties) {
         var action = ConnectorProcessingModeAction
             .builder()
-            .name(as4Properties.action().name())
+            .name(as4Properties.getAction().getName())
             .build();
         var service = ConnectorProcessingModeService
             .builder()
-            .name(as4Properties.service().name())
-            .type(as4Properties.service().type())
+            .name(as4Properties.getService().getName())
+            .type(as4Properties.getService().getType())
             .build();
         var fromParty = restOutboundMessageParser.toParty(
-            as4Properties.fromParty(),
+            as4Properties.getFromParty(),
             ConnectorPartyRoleType.INITIATOR
         );
         var toParty = restOutboundMessageParser.toParty(
-            as4Properties.toParty(),
+            as4Properties.getToParty(),
             ConnectorPartyRoleType.RESPONDER
         );
 
         return ConnectorMessageAS4Properties
             .builder()
-            .originalSender(as4Properties.originalSender())
-            .finalRecipient(as4Properties.finalRecipient())
-            .ebmsMessageIdentifier(as4Properties.ebmsIdentifier())
-            .conversationIdentifier(as4Properties.conversationIdentifier())
+            .originalSender(as4Properties.getOriginalSender())
+            .finalRecipient(as4Properties.getFinalRecipient())
+            .ebmsMessageIdentifier(as4Properties.getEbmsIdentifier())
+            .conversationIdentifier(as4Properties.getConversationIdentifier())
             .service(service)
             .action(action)
             .fromParty(fromParty)

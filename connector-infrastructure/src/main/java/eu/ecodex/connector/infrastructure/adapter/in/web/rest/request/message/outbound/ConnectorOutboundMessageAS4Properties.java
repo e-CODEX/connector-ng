@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeService;
@@ -18,7 +20,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Represents AS4-specific properties associated with an outbound message request.
@@ -46,34 +51,37 @@ import lombok.Builder;
  * @param toParty                the {@link ConnectorProcessingModeParty} representing the receiving
  *                               party in the AS4 exchange; must not be {@code null}
  */
-@Builder(toBuilder = true)
-public record ConnectorOutboundMessageAS4Properties(
-    String ebmsIdentifier,
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageAS4Properties implements Serializable {
+    String ebmsIdentifier;
 
-    String conversationIdentifier,
+    String conversationIdentifier;
 
     @NotBlank(message = "The [originalSender] must not be blank.")
     @Size(max = 255, message = "The [originalSender] must not exceed 255")
-    String originalSender,
+    String originalSender;
 
     @NotBlank(message = "The [finalRecipient] must not be blank.")
     @Size(max = 255, message = "The [finalRecipient] must not exceed 255")
-    String finalRecipient,
+    String finalRecipient;
 
     @Valid
     @NotNull(message = "The [service] must not be null.")
-    ConnectorOutboundMessageService service,
+    ConnectorOutboundMessageService service;
 
     @Valid
     @NotNull(message = "The [action] must not be null.")
-    ConnectorOutboundMessageAction action,
+    ConnectorOutboundMessageAction action;
 
     @Valid
     @NotNull(message = "The [fromParty] must not be null.")
-    ConnectorOutboundMessageParty fromParty,
+    ConnectorOutboundMessageParty fromParty;
 
     @Valid
     @NotNull(message = "The [toParty] must not be null.")
-    ConnectorOutboundMessageParty toParty
-) implements Serializable {
+    ConnectorOutboundMessageParty toParty;
+
 }

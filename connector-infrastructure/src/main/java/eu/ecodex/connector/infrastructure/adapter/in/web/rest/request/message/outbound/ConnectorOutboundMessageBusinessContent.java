@@ -10,11 +10,16 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.validator.constraints.NotEmptyFile;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -26,13 +31,15 @@ import org.springframework.web.multipart.MultipartFile;
  * @param businessDocument the {@link ConnectorOutboundMessageBusinessDocument} containing metadata
  *                         and additional details regarding the business document; must not be null
  */
-@Builder(toBuilder = true)
-public record ConnectorOutboundMessageBusinessContent(
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageBusinessContent implements Serializable {
     @NotEmptyFile(message = "The [xmlContent] file must not be empty.")
-    MultipartFile xmlContent,
+    MultipartFile xmlContent;
 
     @Valid
     @NotNull(message = "The [businessDocument] must not be null.")
-    ConnectorOutboundMessageBusinessDocument businessDocument
-) implements Serializable {
+    ConnectorOutboundMessageBusinessDocument businessDocument;
 }

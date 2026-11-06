@@ -10,10 +10,15 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import eu.ecodex.connector.domain.model.message.content.DetachedSignatureMimeType;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.validator.constraints.NotEmptyFile;
 import java.io.Serializable;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -27,11 +32,13 @@ import org.springframework.web.multipart.MultipartFile;
  * @param signature the raw signature bytes; (must not be null or empty)
  * @param mimeType  the MIME type describing the signature format; may be {@code null}
  */
-@Builder
-public record ConnectorOutboundMessageDetachedSignature(
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageDetachedSignature implements Serializable {
     @NotEmptyFile(message = "The [signature] file must not be empty.")
-    MultipartFile signature,
+    MultipartFile signature;
 
-    DetachedSignatureMimeType mimeType
-) implements Serializable {
+    DetachedSignatureMimeType mimeType;
 }

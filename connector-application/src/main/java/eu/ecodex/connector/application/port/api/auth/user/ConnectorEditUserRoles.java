@@ -8,30 +8,26 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.port.api.auth.role;
+package eu.ecodex.connector.application.port.api.auth.user;
 
-import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import jakarta.annotation.Nonnull;
-
+import java.util.Set;
 
 /**
- * Use case for removing a role from a user of the connector system.
- *
- * <p>This is the counterpart of {@link ConnectorAssignRole}.
+ * Use case for editing user roles in the connector system.
  */
-public interface ConnectorUnassignRole {
+public interface ConnectorEditUserRoles {
     /**
-     * Removes the role with the given name from the user identified by the given identifier.
+     * Assigns the role with the given name to the user identified by the given identifier.
      *
      * @param userIdentifier the unique identifier of the user (must not be null)
-     * @param roleName       the name of the role to remove from the user (must not be null)
+     * @param roles          the roles name to apply to user (must not be null)
      *
-     * @return the updated {@link ConnectorUser} after the role removal
+     * @return the updated {@link ConnectorUser} after the role assignment
      *
-     * @throws ConnectorRoleNotFoundException if no role matches the given name
      * @throws ConnectorUserNotFoundException if no user matches the given identifier
      */
-    ConnectorUser execute(@Nonnull String userIdentifier, @Nonnull String roleName);
+    ConnectorUser execute(@Nonnull String userIdentifier, @Nonnull Set<String> roles);
 }

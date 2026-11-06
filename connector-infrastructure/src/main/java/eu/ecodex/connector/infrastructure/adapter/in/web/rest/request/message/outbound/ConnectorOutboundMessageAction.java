@@ -10,9 +10,14 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Represents an action associated with an outbound message in the connector context.
@@ -22,9 +27,11 @@ import lombok.Builder;
  *
  * @param name the name of the action (must not be blank)
  */
-@Builder
-public record ConnectorOutboundMessageAction(
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageAction implements Serializable {
     @NotBlank(message = "The [name] must not be blank")
-    String name
-) implements Serializable {
+    String name;
 }

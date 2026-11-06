@@ -10,13 +10,18 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.List;
-import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Represents a request to submit an outbound message to the connector.
@@ -40,23 +45,27 @@ import lombok.Builder;
  * @param attachments              a list of attachment identifiers associated with the message; may
  *                                 be null or empty
  */
-@Builder(toBuilder = true)
-public record ConnectorOutboundMessageRequest(
+@Getter
+@Setter
+@NoArgsConstructor
+@FieldDefaults(level = PRIVATE)
+public class ConnectorOutboundMessageRequest implements Serializable {
+
     @NotBlank(message = "The [businessDomainIdentifier] must not be blank.")
-    String businessDomainIdentifier,
+    String businessDomainIdentifier;
 
     @NotBlank(message = "The [backendMessageIdentifier] must not be blank.")
     @Size(max = 255, message = "The [backendMessageIdentifier] must not exceed 255")
-    String backendMessageIdentifier,
+    String backendMessageIdentifier;
 
     @Valid
-    @NotNull(message = "The [businessContent] must not be null.")
-    ConnectorOutboundMessageBusinessContent businessContent,
+    @NotNull(message = "The [businessContent] is required and must contain [xmlContent] and "
+        + "[businessDocument].")
+    ConnectorOutboundMessageBusinessContent businessContent;
 
     @Valid
     @NotNull(message = "The [as4Properties] must not be null")
-    ConnectorOutboundMessageAS4Properties as4Properties,
+    ConnectorOutboundMessageAS4Properties as4Properties;
 
-    List<String> attachments
-) implements Serializable {
+    List<String> attachments;
 }

@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
@@ -46,6 +47,7 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.ou
 import eu.ecodex.connector.link.LinkPartnerTestFixtures;
 import java.io.IOException;
 import java.util.List;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -110,6 +112,53 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private static @NonNull MockMultipartHttpServletRequestBuilder buildOutboundMessageRequest(
+        MockMultipartFile businessContentFile, MockMultipartFile businessDocument) {
+        var multipartBuilder = multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL);
+        if (businessContentFile != null) {
+            multipartBuilder.file(businessContentFile);
+        }
+        if (businessDocument != null) {
+            multipartBuilder.file(businessDocument);
+            multipartBuilder.param("businessContent.businessDocument.aesType", "SIGNATURE_BASED");
+        }
+
+        return multipartBuilder
+            .param("businessDomainIdentifier", BUSINESS_DOMAIN_IDENTIFIER)
+            .param("backendMessageIdentifier", BACKEND_MESSAGE_IDENTIFIER)
+            // AS4 properties — add all @NotNull nested fields here
+            .param("as4Properties.conversationIdentifier", CONVERSATION_IDENTIFIER)
+            .param("as4Properties.originalSender", "alice")
+            .param("as4Properties.finalRecipient", "bob")
+            .param("as4Properties.service.name", "Connector-TEST")
+            .param("as4Properties.service.type", "urn:e-codex:services:")
+            .param("as4Properties.action.name", "ConTest_Form")
+            .param("as4Properties.fromParty.identifier", "BL")
+            .param("as4Properties.fromParty.identifierType", PARTY_IDENTIFIER_TYPE)
+            .param("as4Properties.fromParty.role", "GW")
+            .param("as4Properties.toParty.identifier", "RE")
+            .param("as4Properties.toParty.identifierType", PARTY_IDENTIFIER_TYPE)
+            .param("as4Properties.toParty.role", "GW");
+    }
+
+    private static @NonNull MockMultipartFile createBusinessDocument() {
+        return new MockMultipartFile(
+            "businessContent.businessDocument.document",
+            "document.pdf",
+            MediaType.APPLICATION_PDF_VALUE,
+            "%PDF-1.7 test".getBytes()
+        );
+    }
+
+    private static @NonNull MockMultipartFile createBusinessContentFile() {
+        return new MockMultipartFile(
+            "businessContent.xmlContent",
+            "content.xml",
+            MediaType.APPLICATION_XML_VALUE,
+            "<content>test</content>".getBytes()
+        );
+    }
+
     /**
      * Stubs every collaborator the controller calls while building the outbound command: the
      * backend client lookup, the four public parser methods, and the receiver itself.
@@ -137,41 +186,12 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
     }
 
     private MockMultipartHttpServletRequestBuilder buildValidOutboundMessageRequest() {
-        var businessContentFile = new MockMultipartFile(
-            "businessContent.xmlContent",
-            "content.xml",
-            MediaType.APPLICATION_XML_VALUE,
-            "<content>test</content>".getBytes()
-        );
+        var businessContentFile = createBusinessContentFile();
+        var businessDocument = createBusinessDocument();
 
-        var businessDocument = new MockMultipartFile(
-            "businessContent.businessDocument.document",
-            "document.pdf",
-            MediaType.APPLICATION_PDF_VALUE,
-            "%PDF-1.7 test".getBytes()
-        );
-
-        return multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
-            .file(businessContentFile)
-            .file(businessDocument)
-            .param("businessDomainIdentifier", BUSINESS_DOMAIN_IDENTIFIER)
-            .param("backendMessageIdentifier", BACKEND_MESSAGE_IDENTIFIER)
-            // business content properties
-            .param("businessContent.businessDocument.aesType", "SIGNATURE_BASED")
-            // AS4 properties — add all @NotNull nested fields here
-            .param("as4Properties.conversationIdentifier", CONVERSATION_IDENTIFIER)
-            .param("as4Properties.originalSender", "alice")
-            .param("as4Properties.finalRecipient", "bob")
-            .param("as4Properties.service.name", "Connector-TEST")
-            .param("as4Properties.service.type", "urn:e-codex:services:")
-            .param("as4Properties.action.name", "ConTest_Form")
-            .param("as4Properties.fromParty.identifier", "BL")
-            .param("as4Properties.fromParty.identifierType", PARTY_IDENTIFIER_TYPE)
-            .param("as4Properties.fromParty.role", "GW")
-            .param("as4Properties.toParty.identifier", "RE")
-            .param("as4Properties.toParty.identifierType", PARTY_IDENTIFIER_TYPE)
-            .param("as4Properties.toParty.role", "GW");
+        return buildOutboundMessageRequest(businessContentFile, businessDocument);
     }
+
 
     private ConnectorEvidenceTriggerMessageRequest buildValidEvidenceTriggerRequest() {
         return ConnectorEvidenceTriggerMessageRequest
@@ -185,14 +205,37 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
     @DisplayName("POST (submit an outbound message)")
     class SubmitOutboundMessage {
         @Test
+        void should_return_400_when_business_document_is_missing() throws Exception {
+            mockMvc.perform(buildOutboundMessageRequest(createBusinessContentFile(), null)
+                    .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(containsString("[businessDocument]")));
+
+            verifyNoInteractions(outboundEvidenceMessageReceiver);
+        }
+
+        @Test
+        void should_return_400_when_business_xml_content_file_is_missing() throws Exception {
+            mockMvc.perform(buildOutboundMessageRequest(null, createBusinessDocument())
+                    .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value(containsString("[xmlContent]")));
+
+            verifyNoInteractions(outboundEvidenceMessageReceiver);
+        }
+
+
+        @Test
         void should_return_201_when_the_message_is_submitted() throws Exception {
             stubOutboundSubmissionSuccess();
 
             mockMvc.perform(buildValidOutboundMessageRequest()
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
-                   .andExpect(status().isCreated())
-                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(jsonPath("$.identifier").isNotEmpty());
+                    .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.identifier").isNotEmpty());
 
             verifyNoInteractions(outboundEvidenceMessageReceiver);
         }
@@ -203,8 +246,8 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             stubOutboundSubmissionSuccess();
 
             mockMvc.perform(buildValidOutboundMessageRequest()
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
-                   .andExpect(status().isCreated());
+                    .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated());
 
             verify(restOutboundMessageParser)
                 .resolveBusinessDomainIdentifier(BUSINESS_DOMAIN_IDENTIFIER);
@@ -224,8 +267,8 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             stubOutboundSubmissionSuccess();
 
             mockMvc.perform(buildValidOutboundMessageRequest()
-                                .contentType(MediaType.MULTIPART_FORM_DATA))
-                   .andExpect(status().isCreated());
+                    .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isCreated());
 
             var as4Properties = captureOutboundCommand().as4Properties();
             assertThat(as4Properties.originalSender()).isEqualTo("alice");
@@ -256,15 +299,15 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
                 .param("businessContent.businessDocument.detachedSignature.mimeType", "XML");
 
             mockMvc.perform(request.contentType(MediaType.MULTIPART_FORM_DATA))
-                   .andExpect(status().isCreated())
-                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(jsonPath("$.identifier").isNotEmpty());
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.identifier").isNotEmpty());
 
             var captor = ArgumentCaptor.forClass(ConnectorOutboundMessageBusinessContent.class);
             verify(restOutboundMessageParser).toBusinessContent(captor.capture());
-            var boundSignature = captor.getValue().businessDocument().detachedSignature();
+            var boundSignature = captor.getValue().getBusinessDocument().getDetachedSignature();
             assertThat(boundSignature).isNotNull();
-            assertThat(boundSignature.signature().getOriginalFilename())
+            assertThat(boundSignature.getSignature().getOriginalFilename())
                 .isEqualTo("signature.xml");
 
             verifyNoInteractions(outboundEvidenceMessageReceiver);
@@ -279,7 +322,7 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
                 .param("attachments", "attachment-1", "attachment-2");
 
             mockMvc.perform(request.contentType(MediaType.MULTIPART_FORM_DATA))
-                   .andExpect(status().isCreated());
+                .andExpect(status().isCreated());
 
             verify(restOutboundMessageParser)
                 .toAttachments(List.of("attachment-1", "attachment-2"));
@@ -289,22 +332,22 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_400_when_the_message_is_invalid() throws Exception {
             mockMvc.perform(
-                       multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
-                           .file(MultipartFileTestFixtures.createPart(
-                               "businessXMLDocument",
-                               MediaType.TEXT_XML_VALUE,
-                               "raw/Form_A.xml",
-                               "Form_A.xml"
-                           ))
-                           .file(MultipartFileTestFixtures.createPart(
-                               "businessPDFDocument",
-                               MediaType.APPLICATION_PDF_VALUE,
-                               "raw/Form_A.pdf",
-                               "Form_A.pdf"
-                           ))
-                           .contentType(MediaType.MULTIPART_FORM_DATA)
-                   )
-                   .andExpect(status().isBadRequest());
+                    multipart(HttpMethod.POST, OUTBOUND_MESSAGE_URL)
+                        .file(MultipartFileTestFixtures.createPart(
+                            "businessXMLDocument",
+                            MediaType.TEXT_XML_VALUE,
+                            "raw/Form_A.xml",
+                            "Form_A.xml"
+                        ))
+                        .file(MultipartFileTestFixtures.createPart(
+                            "businessPDFDocument",
+                            MediaType.APPLICATION_PDF_VALUE,
+                            "raw/Form_A.pdf",
+                            "Form_A.pdf"
+                        ))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                )
+                .andExpect(status().isBadRequest());
 
             verifyNoInteractions(
                 restOutboundMessageParser,
@@ -320,16 +363,17 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_201_when_the_trigger_is_submitted() throws Exception {
             when(outboundEvidenceMessageReceiver.execute(any()))
-                .thenReturn(TriggeredEvidenceMessageTestFixtures.createDeliveryTriggeredEvidenceMessage());
+                .thenReturn(
+                    TriggeredEvidenceMessageTestFixtures.createDeliveryTriggeredEvidenceMessage());
             when(backendClientVerifier.getBackendClient(any())).thenReturn(BACKEND_NAME);
 
             mockMvc.perform(
-                       post(EVIDENCE_TRIGGER_URL)
-                           .contentType(MediaType.APPLICATION_JSON)
-                           .content(objectMapper.writeValueAsString(buildValidEvidenceTriggerRequest()))
-                   )
-                   .andExpect(status().isCreated())
-                   .andExpect(jsonPath("$.identifier").isNotEmpty());
+                    post(EVIDENCE_TRIGGER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(buildValidEvidenceTriggerRequest()))
+                )
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.identifier").isNotEmpty());
 
             var captor = ArgumentCaptor.forClass(ConnectorOutboundEvidenceMessageCommand.class);
             verify(outboundEvidenceMessageReceiver).execute(captor.capture());
@@ -346,13 +390,14 @@ public class ConnectorMessageControllerTest extends AbstractWebMvcTest {
             var request = ConnectorEvidenceTriggerMessageRequest
                 .builder()
                 .evidenceType(null)
-                .referenceToMessageIdentifier(buildValidEvidenceTriggerRequest().referenceToMessageIdentifier())
+                .referenceToMessageIdentifier(
+                    buildValidEvidenceTriggerRequest().referenceToMessageIdentifier())
                 .build();
 
             mockMvc.perform(post(EVIDENCE_TRIGGER_URL)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                   .andExpect(status().isBadRequest());
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
 
             verifyNoInteractions(
                 outboundBusinessMessageReceiver,

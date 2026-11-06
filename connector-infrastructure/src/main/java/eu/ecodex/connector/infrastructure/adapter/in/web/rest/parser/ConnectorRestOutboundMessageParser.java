@@ -81,31 +81,32 @@ public class ConnectorRestOutboundMessageParser {
      */
     public ConnectorMessageBusinessContent toBusinessContent(
         ConnectorOutboundMessageBusinessContent businessContent) throws IOException {
-        var businessDocumentRequest = businessContent.businessDocument();
+        var businessDocumentRequest = businessContent.getBusinessDocument();
         var businessDocument = ConnectorMessageBusinessDocument
             .builder()
             .content(toAttachment(
-                businessContent.businessDocument().document(),
+                businessContent.getBusinessDocument().getDocument(),
                 "Business document"
             ))
-            .detachedSignature(toDetachedSignature(businessDocumentRequest.detachedSignature()))
-            .aesType(businessDocumentRequest.aesType())
+            .detachedSignature(toDetachedSignature(businessDocumentRequest.getDetachedSignature()))
+            .aesType(businessDocumentRequest.getAesType())
             .build();
 
         return ConnectorMessageBusinessContent
             .builder()
-            .xmlContent(toAttachment(businessContent.xmlContent(), "Business content"))
+            .xmlContent(toAttachment(businessContent.getXmlContent(), "Business content"))
             .businessDocument(businessDocument)
             .build();
     }
 
     private ConnectorMessageAttachment toDetachedSignature(
         ConnectorOutboundMessageDetachedSignature detachedSignature) throws IOException {
-        if (detachedSignature == null || detachedSignature.signature() == null) {
+        if (detachedSignature == null || detachedSignature.getSignature() == null) {
             return null;
         }
 
-        return toAttachment(detachedSignature.signature(), "Business document detached signature");
+        return toAttachment(detachedSignature.getSignature(),
+            "Business document detached signature");
     }
 
     /**
@@ -166,8 +167,8 @@ public class ConnectorRestOutboundMessageParser {
         }
 
         return identifiers.stream()
-                          .map(this::toAttachment)
-                          .toList();
+            .map(this::toAttachment)
+            .toList();
     }
 
     /**
@@ -183,9 +184,9 @@ public class ConnectorRestOutboundMessageParser {
         ConnectorPartyRoleType roleType) {
         return ConnectorProcessingModeParty
             .builder()
-            .identifier(party.identifier())
-            .identifierType(party.identifierType())
-            .role(party.role())
+            .identifier(party.getIdentifier())
+            .identifierType(party.getIdentifierType())
+            .role(party.getRole())
             .roleType(roleType)
             .build();
     }

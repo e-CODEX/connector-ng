@@ -27,7 +27,7 @@ import eu.ecodex.connector.application.port.spi.auth.login.ConnectorUserPassword
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorCreateUserRequest;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +84,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
         verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
         assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
+            ConnectorCreateUserRequest.toDomain(connectorUserRequest)
         );
         assertNoMoreInteractions();
     }
@@ -116,7 +116,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
         verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
         assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
+            ConnectorCreateUserRequest.toDomain(connectorUserRequest)
         );
         assertNoMoreInteractions();
     }
@@ -162,7 +162,7 @@ class ConnectorRegisterUserAdminControllerTest extends AbstractWebMvcTest {
         var userArgumentCaptor = ArgumentCaptor.forClass(ConnectorUser.class);
         verify(connectorRegisterUser).execute(userArgumentCaptor.capture());
         assertThat(userArgumentCaptor.getValue()).usingRecursiveComparison().isEqualTo(
-            ConnectorUserCreationOrUpdateRequest.toDomain(connectorUserRequest)
+            ConnectorCreateUserRequest.toDomain(connectorUserRequest)
         );
         assertNoMoreInteractions();
     }

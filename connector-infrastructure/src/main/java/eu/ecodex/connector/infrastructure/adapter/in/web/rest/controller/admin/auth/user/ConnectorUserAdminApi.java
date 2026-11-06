@@ -11,8 +11,8 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.auth.user;
 
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorCreateUserRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRequest;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -50,7 +50,7 @@ public interface ConnectorUserAdminApi {
         @ApiResponse(responseCode = "409", description = "Conflict")
     })
     ConnectorUserDto registerUser(
-        @Valid @RequestBody @Nonnull ConnectorUserCreationOrUpdateRequest userRequest);
+        @Valid @RequestBody @Nonnull ConnectorCreateUserRequest userRequest);
 
     @Operation(summary = "Update partially a connector user.")
     @PatchMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)

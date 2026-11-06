@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.auth.user;
 
-import static eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest.toDomain;
+import static eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorCreateUserRequest.toDomain;
 
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorListUsers;
@@ -19,8 +19,8 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorUserDto;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorCreateUserRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRequest;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorUserCreationOrUpdateRequest;
 import java.util.List;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +73,7 @@ public class ConnectorUserAdminController implements ConnectorUserAdminApi {
 
     @Override
     public ConnectorUserDto registerUser(
-        @NonNull ConnectorUserCreationOrUpdateRequest userRequest) {
+        @NonNull ConnectorCreateUserRequest userRequest) {
         log.debug("Registering new user");
         var registered = connectorRegisterUser.execute(toDomain(userRequest));
 

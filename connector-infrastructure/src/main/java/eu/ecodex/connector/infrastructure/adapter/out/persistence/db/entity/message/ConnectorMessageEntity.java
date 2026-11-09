@@ -36,7 +36,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.AllArgsConstructor;
@@ -134,9 +134,9 @@ public class ConnectorMessageEntity extends BaseEntity {
     private List<ConnectorMessageAttachmentEntity> attachments = new ArrayList<>();
 
     @Builder.Default
-    @OrderBy("createdAt ASC")
+    @OrderBy("createdAt DESC")
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ConnectorMessageEvidenceEntity> evidences = new HashSet<>();
+    private Set<ConnectorMessageEvidenceEntity> evidences = new LinkedHashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)

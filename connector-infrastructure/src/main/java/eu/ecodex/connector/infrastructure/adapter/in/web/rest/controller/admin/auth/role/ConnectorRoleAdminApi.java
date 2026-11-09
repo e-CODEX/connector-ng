@@ -13,7 +13,6 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.ConnectorRoleDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.http.MediaType;
@@ -32,12 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping(path = "/api/v1/admin/users/roles", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "AdministrateRoles", description = "API for managing connector's users roles")
 public interface ConnectorRoleAdminApi {
-
     @Operation(summary = "Retrieve all connector's user roles.")
     @GetMapping
-    @ApiResponses({
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     List<ConnectorRoleDto> listRoles();
 }

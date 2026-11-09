@@ -15,7 +15,6 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.Conne
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
@@ -42,53 +41,43 @@ public interface ConnectorUserAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Persist a connector user.")
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "409", description = "Conflict")
-    })
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "409", description = "Conflict")
     ConnectorUserDto registerUser(
         @Valid @RequestBody @Nonnull ConnectorCreateUserRequest userRequest);
 
     @Operation(summary = "Update partially a connector user.")
     @PatchMapping(path = "/{uuid}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Not Found"),
-        @ApiResponse(responseCode = "409", description = "Conflict")
-    })
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @ApiResponse(responseCode = "409", description = "Conflict")
     ConnectorUserDto editUser(
         @PathVariable("uuid") @Nonnull String identifier,
         @Valid @RequestBody @Nonnull ConnectorEditUserRequest userRequest);
 
     @Operation(summary = "Retrieve a connector user.")
     @GetMapping(path = "/{uuid}")
-    @ApiResponses({
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Not Found")
-    })
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
     ConnectorUserDto retrieveUser(@PathVariable("uuid") @Nonnull String identifier);
 
     @Operation(summary = "Retrieve all connector's users.")
     @GetMapping
-    @ApiResponses({
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden")
-    })
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     List<ConnectorUserDto> listUsers();
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a connector user by Identifier.")
     @DeleteMapping(path = "/{uuid}")
-    @ApiResponses({
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Not Found")
-    })
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
     Void removeUser(@PathVariable("uuid") @Nonnull String userIdentifier);
 }

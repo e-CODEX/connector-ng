@@ -12,7 +12,6 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.eviden
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import org.springframework.http.HttpStatus;
@@ -31,8 +30,6 @@ public interface ConnectorEvidenceApi {
     @ResponseStatus(HttpStatus.CREATED)
     @GetMapping(value = "/{uuid}/download")
     @Operation(summary = "Download a message evidence by its uuid")
-    @ApiResponses(
-        @ApiResponse(responseCode = "404", description = "Not Found")
-    )
+    @ApiResponse(responseCode = "404", description = "Not Found")
     ResponseEntity<byte[]> downloadEvidence(@PathVariable String uuid) throws IOException;
 }

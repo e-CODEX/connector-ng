@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.attachement;
+package eu.ecodex.connector.application.service.attachment;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
+import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentVerifierService;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ class ConnectorAttachmentVerifierServiceTest {
     private ConnectorAttachmentVerifierService attachmentVerifierService;
 
     @Test
-    void execute_should_succeeded() {
+    void should_succeeded() {
         // Given
         var attachment = ConnectorMessageAttachment.builder()
             .identifier("identifier")
@@ -61,7 +62,7 @@ class ConnectorAttachmentVerifierServiceTest {
     }
 
     @Test
-    void execute_should_succeeded_when_attachments_is_empty() {
+    void should_succeeded_when_attachments_is_empty() {
         // Given
         // When
         attachmentVerifierService.execute(List.of());
@@ -71,7 +72,7 @@ class ConnectorAttachmentVerifierServiceTest {
     }
 
     @Test
-    void execute_should_failed_when_not_exists() {
+    void should_failed_when_not_exists() {
         // Given
         var attachment = ConnectorMessageAttachment.builder()
             .identifier("identifier")

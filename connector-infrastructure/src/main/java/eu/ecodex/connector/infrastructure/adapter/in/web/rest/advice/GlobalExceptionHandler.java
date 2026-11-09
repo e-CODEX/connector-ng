@@ -40,6 +40,8 @@ import io.swagger.v3.oas.annotations.Hidden;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -57,14 +59,15 @@ import tools.jackson.databind.exc.InvalidFormatException;
  * centralized exception handling using Spring's @RestControllerAdvice and @ExceptionHandler
  * annotations.
  */
+@Slf4j
 @Hidden
 @RestControllerAdvice
 @SuppressWarnings("checkstyle:MissingJavadocMethod")
 public class GlobalExceptionHandler {
     private static List<String> allowedValues(Class<?> enumType) {
         return Arrays.stream(enumType.getEnumConstants())
-                     .map(constant -> ((Enum<?>) constant).name())
-                     .toList();
+            .map(constant -> ((Enum<?>) constant).name())
+            .toList();
     }
 
     @ResponseBody
@@ -84,8 +87,8 @@ public class GlobalExceptionHandler {
     public ErrorResponse handleInvalidEnumeration(HttpMessageNotReadableException e) {
         if (e.getCause() instanceof InvalidFormatException ex && ex.getTargetType().isEnum()) {
             var field = ex.getPath().stream()
-                          .map(JacksonException.Reference::getPropertyName)
-                          .collect(Collectors.joining("."));
+                .map(JacksonException.Reference::getPropertyName)
+                .collect(Collectors.joining("."));
             var allowedValues = allowedValues(ex.getTargetType());
             return new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
@@ -322,15 +325,37 @@ public class GlobalExceptionHandler {
         );
     }
 
+
+    /**
+     * Safety reply for a request whose binding crossed a nested object that could not be built.
+     *
+     * <p>The response is intentionally generic. The details are logged at WARN level so that an
+     * unprotected endpoint can be found and added to {@link RecordBindingAdvice}.
+     *
+     * @param ex the exception raised while binding request values to the model
+     *
+     * @return a 400 response with a generic message
+     */
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NullValueInNestedPathException.class)
+    public ErrorResponse handleNestedPath(NullValueInNestedPathException ex) {
+        log.warn("Request binding failed on nested path '{}': {}", ex.getPropertyName(),
+            ex.getMessage());
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
+            "The [" + ex.getPropertyName() + "] is malformed or incomplete");
+    }
+
+
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ErrorResponse handleValidationException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-                                  .getAllErrors()
-                                  .stream()
-                                  .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                                  .collect(Collectors.joining(", "));
+            .getAllErrors()
+            .stream()
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .collect(Collectors.joining(", "));
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 }

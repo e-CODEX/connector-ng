@@ -16,6 +16,7 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageReposito
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageAS4Properties;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
@@ -107,6 +108,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
             .backendName(entity.getBackendName())
             .gatewayName(entity.getGatewayName())
             .direction(entity.getDirection())
+            .status(entity.getStatus())
             .createdAt(entity.getCreatedAt())
             .updatedAt(entity.getUpdatedAt())
             .deletedAt(entity.getDeletedAt())
@@ -216,6 +218,17 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     }
 
     @Override
+    public ConnectorBusinessMessage updateStatus(
+        @NonNull String identifier,
+        @NonNull ConnectorBusinessMessageStatus status) {
+        var message = this.messageJpaRepository.findByIdentifier(identifier);
+        message.setStatus(status);
+        var updated = this.messageJpaRepository.save(message);
+
+        return toDomain(updated);
+    }
+
+    @Override
     public ConnectorPageResult<ConnectorBusinessMessage> findAll(
         @NonNull @Nonnull ConnectorMessagesListFilter filter) {
         var pageable = paginationMapper.toPageable(filter.pageRequest());
@@ -300,6 +313,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     public ConnectorBusinessMessage setAsRejected(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setRejectedAt(Instant.now());
+        foundMessage.setStatus(ConnectorBusinessMessageStatus.REJECTED);
         var updatedMessage = this.messageJpaRepository.save(foundMessage);
 
         return toDomain(updatedMessage);
@@ -310,6 +324,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     public ConnectorBusinessMessage setAsConfirmed(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setConfirmedAt(Instant.now());
+        foundMessage.setStatus(ConnectorBusinessMessageStatus.CONFIRMED);
         var updatedMessage = this.messageJpaRepository.save(foundMessage);
 
         return toDomain(updatedMessage);
@@ -326,6 +341,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     public ConnectorBusinessMessage setDeliveredToLinkPartnerAt(@NonNull String identifier) {
         var foundMessage = this.messageJpaRepository.findByIdentifier(identifier);
         foundMessage.setDeliveredToLinkPartnerAt(Instant.now());
+        foundMessage.setStatus(ConnectorBusinessMessageStatus.SUBMITTED);
         var updatedMessage = this.messageJpaRepository.save(foundMessage);
 
         return toDomain(updatedMessage);
@@ -344,6 +360,7 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
             .backendName(message.backendName())
             .gatewayName(message.gatewayName())
             .direction(message.direction())
+            .status(message.status())
             .build();
     }
 

@@ -90,6 +90,10 @@ create table CONNECTOR_MESSAGES
     DIRECTION                    VARCHAR2(255 char)          not null
         check ((direction in ('BACKEND_TO_GATEWAY', 'GATEWAY_TO_BACKEND'))),
     GATEWAY_NAME                 VARCHAR2(255 char),
+    STATUS                       VARCHAR2(255 char)          not null
+        check ((status in ('CONFIRMED', 'CREATED', 'DELETED', 'DELIVERED',
+                           'FAILED', 'PULLED', 'READY_FOR_PULL',
+                           'RECEIVED_BY_OPPOSITE_CONNECTOR', 'REJECTED', 'SUBMITTED'))),
     IDENTIFIER                   VARCHAR2(255 char)          not null
         constraint UQ_CM_IDENTIFIER
             unique,

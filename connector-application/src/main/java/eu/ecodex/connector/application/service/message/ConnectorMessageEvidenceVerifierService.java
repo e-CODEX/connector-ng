@@ -17,6 +17,8 @@ import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.ConnectorErrorCode;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageResolvedEvent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorEvidenceType;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
@@ -105,6 +107,14 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
             );
         }
 
+        if (evidenceType == ConnectorEvidenceType.RELAY_REMMD_ACCEPTANCE
+            && message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY) {
+            messageRepository.updateStatus(
+                messageIdentifier,
+                ConnectorBusinessMessageStatus.RECEIVED_BY_OPPOSITE_CONNECTOR
+            );
+        }
+
         if (NEGATIVE_EVIDENCE_TYPES.contains(evidenceType)) {
             log.warn(
                 "Message [{}] has been rejected by evidence [{}]",
@@ -126,7 +136,7 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
                 log.warn(
                     "Message [{}] has already been rejected by an negative evidence! "
                         + "The positive evidence of type [{}] will be ignored!",
-                    message, evidenceType
+                    messageIdentifier, evidenceType
                 );
 
                 throw new ConnectorEvidenceNotRelevantException(
@@ -139,7 +149,11 @@ public class ConnectorMessageEvidenceVerifierService implements ConnectorMessage
                 new ConnectorMessageResolvedEvent(messageIdentifier)
             );
 
-            log.info("Message [{}] has been confirmed by evidence [{}]", message, evidenceType);
+            log.info(
+                "Message [{}] has been confirmed by evidence [{}]",
+                messageIdentifier,
+                evidenceType
+            );
         }
     }
 

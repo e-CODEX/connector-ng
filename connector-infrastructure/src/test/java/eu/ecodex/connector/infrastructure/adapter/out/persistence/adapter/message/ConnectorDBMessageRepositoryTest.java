@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.AbstractRepositoryTest;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.ConnectorMessageJpaRepository;
@@ -250,6 +251,7 @@ public class ConnectorDBMessageRepositoryTest extends AbstractRepositoryTest {
 
             assertThat(update).isNotNull();
             assertThat(update.rejectedAt()).isNotNull();
+            assertThat(update.status()).isEqualTo(ConnectorBusinessMessageStatus.REJECTED);
         }
 
         @Test
@@ -275,6 +277,7 @@ public class ConnectorDBMessageRepositoryTest extends AbstractRepositoryTest {
 
             assertThat(update).isNotNull();
             assertThat(update.confirmedAt()).isNotNull();
+            assertThat(update.status()).isEqualTo(ConnectorBusinessMessageStatus.CONFIRMED);
         }
 
         @Test

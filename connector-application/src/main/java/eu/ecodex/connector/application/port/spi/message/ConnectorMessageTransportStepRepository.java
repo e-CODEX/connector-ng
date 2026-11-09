@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
-import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToPull;
 import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
@@ -85,7 +85,7 @@ public interface ConnectorMessageTransportStepRepository {
      *
      * <p>A transport step is ready to download when its message has been made available to the
      * backend and has not yet been retrieved (see
-     * {@link ConnectorSetMessagesTransportStepToDownload}).
+     * {@link ConnectorSetMessagesTransportStepToPull}).
      *
      * @param backendName the name of the backend system (must not be null or empty)
      *

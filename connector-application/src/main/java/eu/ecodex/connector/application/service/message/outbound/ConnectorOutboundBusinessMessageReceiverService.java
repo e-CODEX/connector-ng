@@ -20,6 +20,7 @@ import eu.ecodex.connector.application.port.api.pmode.ConnectorProcessingModeVer
 import eu.ecodex.connector.application.port.spi.ConnectorMessageEventPublisher;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +84,7 @@ public class ConnectorOutboundBusinessMessageReceiverService
     @Override
     public ConnectorBusinessMessage execute(
         @NonNull ConnectorOutboundBusinessMessageCommand command) {
+        log.info("Received outbound business message {}", command);
         businessDomainVerifierService.execute(command.businessDomainIdentifier());
         processingModeVerifierService.execute(command.businessDomainIdentifier());
         attachmentVerifierService.execute(command.attachments());
@@ -95,6 +97,7 @@ public class ConnectorOutboundBusinessMessageReceiverService
             .backendName(command.backendName())
             .as4Properties(command.as4Properties())
             .direction(command.direction())
+            .status(ConnectorBusinessMessageStatus.CREATED)
             .businessContent(command.businessContent())
             .attachments(command.attachments())
             .build();

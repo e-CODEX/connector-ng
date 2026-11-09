@@ -13,11 +13,11 @@ package eu.ecodex.connector.application.port.api.transport;
 import jakarta.annotation.Nonnull;
 
 /**
- * Use case for marking the pending messages of a backend as ready to be downloaded.
+ * Use case for marking the pending messages of a backend as pulled.
  */
-public interface ConnectorSetMessagesTransportStepToDownload {
+public interface ConnectorSetMessagesTransportStepToPull {
     /**
-     * Sets the transport step of the messages addressed to the given backend to the "to download"
+     * Sets the transport step of the messages addressed to the given backend to the "to pulled"
      * state.
      *
      * @param backendName name of the backend whose messages are marked for download (must not be

@@ -148,7 +148,6 @@ public class ConnectorBusinessMessageVerifierService implements ConnectorBusines
         var as4Properties = message.as4Properties();
 
         try {
-
             var serviceName = as4Properties.service().name();
             var service = this.serviceRepository.findByNameAndBusinessDomain(
                 serviceName,

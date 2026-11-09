@@ -18,7 +18,7 @@ import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTra
 import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportSteps;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportStepsIds;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
-import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToPull;
 import eu.ecodex.connector.application.port.api.transport.command.UpdateMessageTransportCommand;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageError;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -75,7 +75,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
     private final ConnectorListPendingTransportSteps listPendingMessages;
     private final ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId;
     private final ConnectorUploadAttachments uploadAttachments;
-    private final ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus;
+    private final ConnectorSetMessagesTransportStepToPull changePendingMessagesStatus;
     private final ConnectorAckMessageTransportStep ackMessageTransportStep;
     private final ConnectorBackendClientVerifier backendClientVerifier;
     private final LegacyMessageHelper legacyMessageHelper;
@@ -122,7 +122,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
         ConnectorListPendingTransportSteps listPendingMessages,
         ConnectorRetrieveMessageByTransportId retrieveMessageByTransportId,
         ConnectorUploadAttachments uploadAttachments,
-        ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus,
+        ConnectorSetMessagesTransportStepToPull changePendingMessagesStatus,
         ConnectorAckMessageTransportStep ackMessageTransportStep,
         ConnectorBackendClientVerifier backendClientVerifier,
         LegacyMessageHelper legacyMessageHelper,

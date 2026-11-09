@@ -54,7 +54,8 @@ public interface ConnectorMessageJpaRepository extends
     @Query("""
         UPDATE ConnectorMessageEntity m
         SET m.deletedAt = :deletedAt,
-           m.updatedAt = :deletedAt
+           m.updatedAt = :deletedAt,
+           m.status = DELETED
         WHERE m.identifier = :identifier
             AND m.deletedAt IS NULL
         """

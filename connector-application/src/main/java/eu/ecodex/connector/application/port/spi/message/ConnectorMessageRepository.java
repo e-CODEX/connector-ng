@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.port.spi.message;
 import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessagesAttachments;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import jakarta.annotation.Nonnull;
@@ -63,7 +64,8 @@ public interface ConnectorMessageRepository {
      * @return the updated {@link ConnectorBusinessMessage}
      */
     ConnectorBusinessMessage updateEbmsIdentifier(
-        @Nonnull String identifier, @Nonnull String ebmsIdentifier);
+        @Nonnull String identifier,
+        @Nonnull String ebmsIdentifier);
 
     /**
      * Updates the backend message identifier of a message.
@@ -74,7 +76,21 @@ public interface ConnectorMessageRepository {
      * @return the updated {@link ConnectorBusinessMessage}
      */
     ConnectorBusinessMessage updateBackendIdentifier(
-        @Nonnull String identifier, @Nonnull String backendIdentifier);
+        @Nonnull String identifier,
+        @Nonnull String backendIdentifier);
+
+    /**
+     * Updates the status of the message identified by the given identifier.
+     *
+     * @param identifier the unique identifier of the message to update (must not be null)
+     * @param status     the new {@link ConnectorBusinessMessageStatus} of the message (must not be
+     *                   null)
+     *
+     * @return the updated {@link ConnectorBusinessMessage}, reflecting the new status
+     */
+    ConnectorBusinessMessage updateStatus(
+        @Nonnull String identifier,
+        @Nonnull ConnectorBusinessMessageStatus status);
 
     /**
      * Retrieves a page of {@link ConnectorBusinessMessage} objects based on the pagination

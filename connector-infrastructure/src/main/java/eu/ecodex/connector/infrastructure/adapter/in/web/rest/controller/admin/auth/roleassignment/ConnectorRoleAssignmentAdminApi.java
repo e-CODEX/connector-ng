@@ -14,7 +14,6 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.user.Connector
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.user.ConnectorEditUserRolesRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
@@ -38,12 +37,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface ConnectorRoleAssignmentAdminApi {
     @Operation(summary = "Assign an existing role to user.")
     @PatchMapping(path = "/{uuid}/roles")
-    @ApiResponses({
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "403", description = "Forbidden"),
-        @ApiResponse(responseCode = "404", description = "Not Found")
-    })
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
     ConnectorUserDto editUserRoles(
         @PathVariable("uuid") @Nonnull String userIdentifier,
         @Valid @RequestBody ConnectorEditUserRolesRequest roles);

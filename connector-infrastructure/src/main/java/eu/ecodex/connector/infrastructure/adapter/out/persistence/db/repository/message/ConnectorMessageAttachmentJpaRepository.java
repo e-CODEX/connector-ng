@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.ConnectorMessageAttachmentEntity;
 import java.time.Instant;
 import java.util.List;
+import lombok.NonNull;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -57,4 +58,6 @@ public interface ConnectorMessageAttachmentJpaRepository extends
     int markAsDeleted(
         @Param("identifiers") List<String> identifiers,
         @Param("deletedAt") Instant deletedAt);
+
+    boolean existsByIdentifier(@NonNull String identifier);
 }

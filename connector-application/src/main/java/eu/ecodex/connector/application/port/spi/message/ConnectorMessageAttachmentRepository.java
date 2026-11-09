@@ -51,6 +51,15 @@ public interface ConnectorMessageAttachmentRepository {
     ConnectorMessageAttachment findByIdentifier(@Nonnull String identifier);
 
     /**
+     * Verifies if any attachment exists and matched by it identifier.
+     *
+     * @param identifier the unique identifier to check
+     *
+     * @return true if any attachment matches this identifier
+     */
+    boolean existsByIdentifier(@Nonnull String identifier);
+
+    /**
      * Retrieves all attachments of the message identified by the given identifier that have not
      * been marked as deleted, whatever their type.
      *

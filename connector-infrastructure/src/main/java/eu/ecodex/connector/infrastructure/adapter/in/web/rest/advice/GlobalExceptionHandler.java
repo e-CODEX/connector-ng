@@ -10,30 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice;
 
-import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentDeletedException;
-import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
-import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
-import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainAlreadyExistsException;
-import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
-import eu.ecodex.connector.application.exception.c2ctest.ConnectorC2CTestMessageDisabledException;
-import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceException;
-import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
-import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
-import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeException;
-import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
-import eu.ecodex.connector.application.exception.role.ConnectorRoleAlreadyExistsException;
-import eu.ecodex.connector.application.exception.role.ConnectorRoleIdentifierException;
-import eu.ecodex.connector.application.exception.role.ConnectorRoleInUseException;
-import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserAccountInactiveException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserIdentifierMismatchException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserInvalidPasswordException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
-import eu.ecodex.connector.application.exception.user.ConnectorUserPasswordUpdateNotRequiredException;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorAttachmentUploadException;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorInternalServerException;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -99,220 +75,11 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorRoleInUseException.class)
-    public ErrorResponse handleUserRoleDeleteException(ConnectorRoleInUseException e) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorUserPasswordUpdateNotRequiredException.class)
-    public ErrorResponse handleUserPasswordException(
-        ConnectorUserPasswordUpdateNotRequiredException e) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConnectorUserInvalidPasswordException.class)
-    public ErrorResponse handleUserPasswordException(ConnectorUserInvalidPasswordException e) {
-        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(ConnectorUserAccountInactiveException.class)
-    public ErrorResponse handleDisabledUserAccount(
-        ConnectorUserAccountInactiveException exception) {
-        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(ConnectorUserBadCredentialsException.class)
-    public ErrorResponse handleInvalidCredentials(ConnectorUserBadCredentialsException exception) {
-        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorUserAlreadyExistsException.class)
-    public ErrorResponse handleUserIdentifierException(
-        ConnectorUserAlreadyExistsException exception) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorUserNotFoundException.class)
-    public ErrorResponse handleUserNotFoundException(ConnectorUserNotFoundException exception) {
-        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorUserIdentifierMismatchException.class)
-    public ErrorResponse handleUserException(ConnectorUserIdentifierMismatchException e) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorRoleAlreadyExistsException.class)
-    public ErrorResponse handleUserRoleIdentifierException(
-        ConnectorRoleAlreadyExistsException exception) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorRoleNotFoundException.class)
-    public ErrorResponse handleUserRoleNotFoundException(
-        ConnectorRoleNotFoundException exception) {
-        return new ErrorResponse(HttpStatus.NOT_FOUND.value(), exception.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorRoleIdentifierException.class)
-    public ErrorResponse handleUserRoleException(ConnectorRoleIdentifierException e) {
-        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorBusinessDomainAlreadyExistsException.class)
-    public ErrorResponse handleBusinessDomainException(
-        ConnectorBusinessDomainAlreadyExistsException exception) {
-        return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorC2CTestMessageDisabledException.class)
-    public ErrorResponse handleBTestMessageDisabledException(
-        ConnectorC2CTestMessageDisabledException exception) {
-        return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorBusinessDomainNotFoundException.class)
-    public ErrorResponse handleBusinessDomainNotFoundException(
-        ConnectorBusinessDomainNotFoundException exception) {
-        return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorProcessingModeNotFoundException.class)
-    public ErrorResponse handleProcessingModeNotFoundException(
-        ConnectorProcessingModeNotFoundException exception) {
-        return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorMessageNotFoundException.class)
-    public ErrorResponse handleMessageNotFoundException(
-        ConnectorMessageNotFoundException exception) {
-        return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorMessageTransportStepNotFoundException.class)
-    public ErrorResponse handleMessageTransportStepsNotFoundException(
-        ConnectorMessageTransportStepNotFoundException exception) {
-        return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorEvidenceNotFoundException.class)
-    public ErrorResponse handleMessageEvidenceNotFoundException(
-        ConnectorEvidenceNotFoundException exception) {
-        return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(ConnectorMessageAttachmentNotFoundException.class)
-    public ErrorResponse handleMessageAttachmentNotFoundException(
-        ConnectorMessageAttachmentNotFoundException exception) {
-        return new ErrorResponse(
-            HttpStatus.NOT_FOUND.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorProcessingModeException.class)
-    public ErrorResponse handleProcessingModeException(ConnectorProcessingModeException exception) {
-        return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorEvidenceException.class)
-    public ErrorResponse handleConnectorEvidenceException(ConnectorEvidenceException exception) {
-        return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorMessageAttachmentException.class)
-    public ErrorResponse handleMessageAttachmentException(
-        ConnectorMessageAttachmentException exception) {
-        return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.CONFLICT)
-    @ExceptionHandler(ConnectorMessageAttachmentDeletedException.class)
-    public ErrorResponse handleMessageAttachmentDeletionException(
-        ConnectorMessageAttachmentDeletedException exception) {
-        return new ErrorResponse(
-            HttpStatus.CONFLICT.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConnectorBadRequestException.class)
     public ErrorResponse handleBadRequestException(ConnectorBadRequestException exception) {
         return new ErrorResponse(
             HttpStatus.BAD_REQUEST.value(), exception.getMessage()
-        );
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(ConnectorAttachmentUploadException.class)
-    public ErrorResponse handleAttachmentUploadException(ConnectorAttachmentUploadException e) {
-        return new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()
         );
     }
 
@@ -324,7 +91,6 @@ public class GlobalExceptionHandler {
             HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );
     }
-
 
     /**
      * Safety reply for a request whose binding crossed a nested object that could not be built.

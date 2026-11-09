@@ -23,11 +23,13 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.AS4PropertiesTestFixtures;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotEnabledException;
 import eu.ecodex.connector.application.exception.businessdomain.ConnectorBusinessDomainNotFoundException;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeInvalidTruststoreException;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeNotFoundException;
 import eu.ecodex.connector.application.exception.pmode.ConnectorProcessingModeVerificationException;
+import eu.ecodex.connector.application.port.api.attachment.ConnectorAttachmentVerifier;
 import eu.ecodex.connector.application.port.api.businessdomain.ConnectorBusinessDomainVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorBusinessMessageVerifier;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageIdGenerator;
@@ -39,7 +41,9 @@ import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfig
 import eu.ecodex.connector.domain.model.ProcessingModeVerificationMode;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -67,6 +71,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
     @Mock
     private ConnectorMessageIdGenerator messageIdGeneratorService;
     @Mock
+    private ConnectorAttachmentVerifier attachmentVerifierService;
+    @Mock
     private ConnectorMessageEventPublisher<ConnectorBusinessMessage> stagingEventPublisher;
 
     private ConnectorOutboundBusinessMessageReceiver outboundBusinessMessageReceiver;
@@ -79,7 +85,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
             stagingEventPublisher,
             messageIdGeneratorService,
             businessDomainVerifierService,
-            processingModeVerifierService
+            processingModeVerifierService,
+            attachmentVerifierService
         );
     }
 
@@ -88,7 +95,7 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
             .builder()
             .businessDomainIdentifier(
                 BusinessDomainTestFixtures.createDefaultBusinessDomain()
-                                          .identifier()
+                    .identifier()
             )
             .businessContent(MessageContentTestFixtures.createContent())
             .backendMessageIdentifier(
@@ -115,7 +122,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
-                stagingEventPublisher
+                stagingEventPublisher,
+                attachmentVerifierService
             );
         }
     }
@@ -142,7 +150,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
-                stagingEventPublisher
+                stagingEventPublisher,
+                attachmentVerifierService
             );
         }
 
@@ -165,7 +174,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
-                stagingEventPublisher
+                stagingEventPublisher,
+                attachmentVerifierService
             );
         }
 
@@ -189,7 +199,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
-                stagingEventPublisher
+                stagingEventPublisher,
+                attachmentVerifierService
             );
         }
 
@@ -213,14 +224,52 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 configurationProvider,
                 messageVerifierService,
                 messageIdGeneratorService,
+                stagingEventPublisher,
+                attachmentVerifierService
+            );
+        }
+
+        @Test
+        void should_fail_when_attachments_are_invalid() {
+            doNothing().when(businessDomainVerifierService).execute(any());
+            doNothing().when(processingModeVerifierService).execute(any());
+            doThrow(ConnectorMessageAttachmentNotFoundException.class)
+                .when(attachmentVerifierService).execute(any());
+
+            var outboundMessageCommand = createBusinessMessageCommand();
+            var outboundMessageCommandWithAttachment = outboundMessageCommand.toBuilder()
+                .attachments(List.of(ConnectorMessageAttachment.builder()
+                    .identifier("identifier")
+                    .build()))
+                .build();
+
+
+            assertThrows(
+                ConnectorMessageAttachmentNotFoundException.class,
+                () -> outboundBusinessMessageReceiver.execute(outboundMessageCommandWithAttachment)
+            );
+
+            verify(businessDomainVerifierService)
+                .execute(outboundMessageCommand.businessDomainIdentifier());
+            verify(processingModeVerifierService)
+                .execute(outboundMessageCommand.businessDomainIdentifier());
+            verify(attachmentVerifierService)
+                .execute(outboundMessageCommandWithAttachment.attachments());
+            verifyNoInteractions(
+                configurationProvider,
+                messageVerifierService,
+                messageIdGeneratorService,
                 stagingEventPublisher
             );
         }
+
 
         @Test
         void should_fail_when_the_message_verification_fails() {
             doNothing().when(businessDomainVerifierService).execute(any());
             doNothing().when(processingModeVerifierService).execute(any());
+            doNothing().when(attachmentVerifierService).execute(any());
+
             when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
             when(configurationProvider.getConfiguration())
                 .thenReturn(
@@ -253,6 +302,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
         void should_submit_the_message_to_the_staging_queue() {
             doNothing().when(businessDomainVerifierService).execute(any());
             doNothing().when(processingModeVerifierService).execute(any());
+            doNothing().when(attachmentVerifierService).execute(any());
+
             when(messageIdGeneratorService.execute()).thenReturn(MESSAGE_ID);
             when(configurationProvider.getConfiguration())
                 .thenReturn(
@@ -291,6 +342,8 @@ public class ConnectorOutboundBusinessMessageReceiverServiceTest {
                 .execute(outboundMessageCommand.businessDomainIdentifier());
             verify(messageVerifierService)
                 .verify(message, ProcessingModeVerificationMode.STRICT);
+            verify(attachmentVerifierService)
+                .execute(outboundMessageCommand.attachments());
         }
     }
 }

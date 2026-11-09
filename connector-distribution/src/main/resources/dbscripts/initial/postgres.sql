@@ -116,6 +116,20 @@ create table connector_messages
                 'GATEWAY_TO_BACKEND'::character varying
                 ])::text[])),
     gateway_name                 varchar(255),
+    status                       varchar(255)                not null
+        constraint connector_messages_direction_check
+            check ((status)::text = ANY ((ARRAY [
+                'CONFIRMED'::character varying,
+                'CREATED'::character varying,
+                'DELETED'::character varying,
+                'DELIVERED'::character varying,
+                'FAILED'::character varying,
+                'PULLED'::character varying,
+                'READY_FOR_PULL'::character varying,
+                'RECEIVED_BY_OPPOSITE_CONNECTOR'::character varying,
+                'REJECTED'::character varying,
+                'SUBMITTED'::character varying
+                ])::text[])),
     identifier                   varchar(255)                not null
         constraint uq_cm_identifier
             unique,

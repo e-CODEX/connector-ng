@@ -33,7 +33,7 @@ import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutbou
 import eu.ecodex.connector.application.port.api.transport.ConnectorAckMessageTransportStep;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListPendingTransportStepsIds;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveMessageByTransportId;
-import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToPull;
 import eu.ecodex.connector.application.service.message.transport.ConnectorListPendingTransportStepsService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.DomibusConnectorMessageResponseType;
@@ -92,7 +92,7 @@ public class ConnectorBackendWebServiceControllerTest {
     @Mock
     private ConnectorBackendClientVerifier backendClientVerifier;
     @Mock
-    private ConnectorSetMessagesTransportStepToDownload changePendingMessagesStatus;
+    private ConnectorSetMessagesTransportStepToPull changePendingMessagesStatus;
     @Mock
     private ConnectorAckMessageTransportStep acknowledgeMessageTransportStep;
     @Mock

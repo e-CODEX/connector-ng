@@ -12,7 +12,10 @@ package eu.ecodex.connector.application.service.message.transport;
 
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
@@ -43,12 +46,26 @@ public class ConnectorRegisterMessageTransportStepService
 
     private final ConnectorMessageTransportStepRepository transportStepRepository;
     private final ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider;
+    private final ConnectorMessageRepository messageRepository;
 
+    /**
+     * Creates the service.
+     *
+     * @param transportStepRepository         the repository used to save the registered transport
+     *                                        steps (must not be null)
+     * @param processingConfigurationProvider the provider of the message processing configuration,
+     *                                        which parameterizes how transport steps are registered
+     *                                        (must not be null)
+     * @param messageRepository               the repository used to read and update the message
+     *                                        whose transport step is registered (must not be null)
+     */
     public ConnectorRegisterMessageTransportStepService(
         ConnectorMessageTransportStepRepository transportStepRepository,
-        ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider) {
+        ConnectorMessageProcessingConfigurationProvider processingConfigurationProvider,
+        ConnectorMessageRepository messageRepository) {
         this.transportStepRepository = transportStepRepository;
         this.processingConfigurationProvider = processingConfigurationProvider;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -74,7 +91,7 @@ public class ConnectorRegisterMessageTransportStepService
         var transportStep = ConnectorMessageTransportStep
             .builder()
             .identifier(buildIdentifier(message))
-            .transportedMessage(message)
+            .transportedMessage(updateMessageStatus(message, status))
             .status(status)
             .numberOfAttempts(ALLOWED_STATUSES.contains(status) ? 1 : 0)
             .linkPartnerName(resolveLinkPartnerName(message))
@@ -96,5 +113,23 @@ public class ConnectorRegisterMessageTransportStepService
         return message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
             ? message.gatewayName()
             : message.backendName();
+    }
+
+    private ConnectorMessage updateMessageStatus(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status) {
+        if (message instanceof ConnectorBusinessMessage businessMessage) {
+            var messageStatus = ConnectorBusinessMessageStatus.fromTransportStep(status.name());
+            messageRepository.updateStatus(
+                businessMessage.identifier(),
+                messageStatus
+            );
+
+            return businessMessage.toBuilder()
+                                  .status(messageStatus)
+                                  .build();
+        }
+
+        return message;
     }
 }

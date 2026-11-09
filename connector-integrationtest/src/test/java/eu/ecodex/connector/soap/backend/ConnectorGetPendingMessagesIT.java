@@ -15,7 +15,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToPull;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.transition.DomibusConnectorBackendWebService;
 import eu.ecodex.connector.domain.transition.EmptyRequestType;
@@ -37,7 +37,7 @@ public class ConnectorGetPendingMessagesIT extends AbstractSoapBackendServiceTes
     @LocalServerPort
     private int port;
     @MockitoBean
-    private ConnectorSetMessagesTransportStepToDownload setMessagesTransportStepToDownloadService;
+    private ConnectorSetMessagesTransportStepToPull setMessagesTransportStepToDownloadService;
     @MockitoBean
     private ConnectorFileStorageProvider fileStorageProvider;
 

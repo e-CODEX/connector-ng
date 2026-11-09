@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message;
 
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.ConnectorBusinessDomainEntity;
@@ -90,6 +91,11 @@ public class ConnectorMessageEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "DIRECTION", nullable = false)
     private ConnectorMessageDirection direction;
+
+    @Setter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = false)
+    private ConnectorBusinessMessageStatus status;
 
     @Setter
     @Column(name = "DELETED_AT")

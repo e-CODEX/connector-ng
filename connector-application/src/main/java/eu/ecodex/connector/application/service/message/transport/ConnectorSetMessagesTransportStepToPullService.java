@@ -10,27 +10,31 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
-import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToDownload;
+import eu.ecodex.connector.application.port.api.transport.ConnectorSetMessagesTransportStepToPull;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Default implementation of {@link ConnectorSetMessagesTransportStepToDownload}.
+ * Default implementation of {@link ConnectorSetMessagesTransportStepToPull}.
  */
-@Slf4j
 @Service
 @Transactional
-public class ConnectorSetMessagesTransportStepToDownloadService
-    implements ConnectorSetMessagesTransportStepToDownload {
+public class ConnectorSetMessagesTransportStepToPullService
+    implements ConnectorSetMessagesTransportStepToPull {
     private final ConnectorMessageTransportStepRepository transportStepRepository;
+    private final ConnectorMessageRepository messageRepository;
 
-    public ConnectorSetMessagesTransportStepToDownloadService(
-        ConnectorMessageTransportStepRepository transportStepRepository) {
+    public ConnectorSetMessagesTransportStepToPullService(
+        ConnectorMessageTransportStepRepository transportStepRepository,
+        ConnectorMessageRepository messageRepository) {
         this.transportStepRepository = transportStepRepository;
+        this.messageRepository = messageRepository;
     }
 
     @Override
@@ -41,5 +45,16 @@ public class ConnectorSetMessagesTransportStepToDownloadService
             identifiers,
             ConnectorMessageTransportStatus.PULLED
         );
+
+        for (var identifier : identifiers) {
+            var step = this.transportStepRepository.findByIdentifier(identifier);
+            var transportedMessage = step.transportedMessage();
+            if (transportedMessage instanceof ConnectorBusinessMessage businessMessage) {
+                this.messageRepository.updateStatus(
+                    businessMessage.identifier(),
+                    ConnectorBusinessMessageStatus.PULLED
+                );
+            }
+        }
     }
 }

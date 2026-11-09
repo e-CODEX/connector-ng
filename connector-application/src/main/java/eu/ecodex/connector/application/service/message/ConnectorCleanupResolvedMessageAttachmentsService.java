@@ -14,6 +14,7 @@ import eu.ecodex.connector.application.exception.attachment.ConnectorAttachmentC
 import eu.ecodex.connector.application.port.api.message.ConnectorCleanupResolvedMessageAttachments;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageResolvedEvent;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,7 @@ public class ConnectorCleanupResolvedMessageAttachmentsService implements
         }
 
         messageRepository.setAsDeleted(messageIdentifier);
+        messageRepository.updateStatus(messageIdentifier, ConnectorBusinessMessageStatus.DELETED);
 
         log.info(
             "Resolved message [{}]: [{}] attachments deleted",

@@ -94,6 +94,11 @@ public class ConnectorDBMessageAttachmentRepository implements
     }
 
     @Override
+    public boolean existsByIdentifier(@NonNull String identifier) {
+        return this.attachmentJpaRepository.existsByIdentifier(identifier);
+    }
+
+    @Override
     public List<ConnectorMessageAttachment> findAllActiveByMessageIdentifier(
         @NonNull String messageIdentifier) {
         var attachments = this.attachmentJpaRepository.findAllByMessageIdentifierAndDeletedAtIsNull(
@@ -112,9 +117,9 @@ public class ConnectorDBMessageAttachmentRepository implements
         );
 
         return attachmentJpaRepository.findAll(specification)
-                                      .stream()
-                                      .map(ConnectorDBMessageAttachmentRepository::toDomain)
-                                      .toList();
+            .stream()
+            .map(ConnectorDBMessageAttachmentRepository::toDomain)
+            .toList();
     }
 
     @Override
@@ -134,9 +139,9 @@ public class ConnectorDBMessageAttachmentRepository implements
     @Override
     public List<ConnectorMessageAttachment> findAllOrphaned(Instant threshold) {
         return attachmentJpaRepository.findOrphansToDelete(threshold)
-                                      .stream()
-                                      .map(ConnectorDBMessageAttachmentRepository::toDomain)
-                                      .toList();
+            .stream()
+            .map(ConnectorDBMessageAttachmentRepository::toDomain)
+            .toList();
     }
 
     @Override

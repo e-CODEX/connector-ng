@@ -47,7 +47,6 @@ public enum ConnectorBusinessMessageStatus {
      * @return the matching {@link ConnectorBusinessMessageStatus}, or {@code null} if no status has
      *     this name
      */
-
     public static ConnectorBusinessMessageStatus fromTransportStep(@NonNull String stepStatus) {
         return Stream.of(values())
                      .filter(status -> status.name().equals(stepStatus))

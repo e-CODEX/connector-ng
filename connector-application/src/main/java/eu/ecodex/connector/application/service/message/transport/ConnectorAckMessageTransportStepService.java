@@ -179,9 +179,9 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         String remoteMessageIdentifier) {
         switch (transportedMessage) {
             case ConnectorBusinessMessage businessMessage ->
-                markBusinessMessageDelivered(businessMessage, remoteMessageIdentifier);
+                markBusinessMessageAsDelivered(businessMessage, remoteMessageIdentifier);
             case ConnectorEvidenceMessage evidenceMessage ->
-                markEvidenceMessageDelivered(evidenceMessage);
+                markEvidenceMessageAsDelivered(evidenceMessage);
         }
     }
 
@@ -199,7 +199,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         }
     }
 
-    private void markBusinessMessageDelivered(
+    private void markBusinessMessageAsDelivered(
         ConnectorBusinessMessage message,
         String remoteMessageIdentifier) {
         var identifier = message.identifier();
@@ -221,7 +221,7 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         messageRepository.setDeliveredToLinkPartnerAt(identifier);
     }
 
-    private void markEvidenceMessageDelivered(ConnectorEvidenceMessage message) {
+    private void markEvidenceMessageAsDelivered(ConnectorEvidenceMessage message) {
         var evidenceUuid = message.transportedEvidences()
                                   .stream()
                                   .findFirst()

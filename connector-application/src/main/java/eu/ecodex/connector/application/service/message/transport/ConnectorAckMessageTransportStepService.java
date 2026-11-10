@@ -141,13 +141,11 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
         ConnectorMessageTransportStep existingStep,
         UpdateMessageTransportCommand command) {
 
-        var update = ConnectorMessageTransportStep.builder()
-                                                  .identifier(existingStep.identifier())
-                                                  .status(command.status())
-                                                  .numberOfAttempts(existingStep.numberOfAttempts())
-                                                  .build();
-
-        transportStepRepository.update(existingStep.identifier(), update);
+        transportStepRepository.update(
+            existingStep.identifier(),
+            command.status(),
+            existingStep.numberOfAttempts()
+        );
     }
 
     private void handlePostUpdate(

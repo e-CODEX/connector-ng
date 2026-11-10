@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message.transport;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -284,7 +284,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
                 .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
 
             verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
-            verify(transportStepRepository, never()).update(any(), any());
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
         }
 
         @Test
@@ -296,7 +296,7 @@ public class ConnectorAckMessageTransportStepServiceTest {
                 .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
 
             verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
-            verify(transportStepRepository, never()).update(any(), any());
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
         }
     }
 
@@ -326,13 +326,11 @@ public class ConnectorAckMessageTransportStepServiceTest {
             assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
                 .isInstanceOf(IllegalStateException.class);
 
-            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any(), anyInt());
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
-            );
-            verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.DELIVERED,
+                1
             );
             verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
             verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
@@ -356,13 +354,11 @@ public class ConnectorAckMessageTransportStepServiceTest {
                 commandWithStatus(ConnectorMessageTransportStatus.PULLED)
             );
 
-            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any(), anyInt());
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.PULLED)
-            );
-            verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 0)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.PULLED,
+                0
             );
             verify(messageRepository).updateStatus(
                 MESSAGE_ID,
@@ -389,8 +385,9 @@ public class ConnectorAckMessageTransportStepServiceTest {
             );
 
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.PULLED)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.PULLED,
+                0
             );
             verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
         }
@@ -410,9 +407,9 @@ public class ConnectorAckMessageTransportStepServiceTest {
             );
 
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.SUBMITTED
-                    && step.numberOfAttempts() == 1)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.SUBMITTED,
+                1
             );
             verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
         }
@@ -429,13 +426,11 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
             service.execute(MESSAGE_ID, deliveredCommand());
 
-            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any(), anyInt());
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
-            );
-            verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.DELIVERED,
+                1
             );
             verify(messageRepository).findByIdentifier(MESSAGE_ID);
             verify(messageRepository).updateBackendIdentifier(MESSAGE_ID, BACKEND_ID);
@@ -464,8 +459,9 @@ public class ConnectorAckMessageTransportStepServiceTest {
             service.execute(MESSAGE_ID, deliveredCommand());
 
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.DELIVERED,
+                1
             );
             verify(messageRepository).setDeliveredToLinkPartnerAt(MESSAGE_ID);
             verify(messageRepository, never()).updateBackendIdentifier(any(), any());
@@ -484,13 +480,11 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
             service.execute(MESSAGE_ID, deliveredCommand());
 
-            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any(), anyInt());
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.DELIVERED)
-            );
-            verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.DELIVERED,
+                1
             );
             verify(messageRepository, never()).findByIdentifier(MESSAGE_ID);
             verify(messageRepository, never()).setDeliveredToLinkPartnerAt(MESSAGE_ID);
@@ -529,13 +523,11 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
             service.execute(MESSAGE_ID, failedCommand(errors));
 
-            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any());
+            verify(transportStepRepository).update(eq(TRANSPORT_STEP_ID), any(), anyInt());
             verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID),
-                argThat(step -> step.status() == ConnectorMessageTransportStatus.FAILED)
-            );
-            verify(transportStepRepository).update(
-                eq(TRANSPORT_STEP_ID), argThat(step -> step.numberOfAttempts() == 1)
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.FAILED,
+                1
             );
             verify(messageErrorRepository).save(MESSAGE_ID, errors);
             verify(messageRepository).updateStatus(

@@ -35,16 +35,16 @@ public interface ConnectorMessageTransportStepRepository {
     /**
      * Updates the transport step identified by the given identifier with the given state.
      *
-     * @param identifier    the unique identifier of the transport step to update (must not be
-     *                      null)
-     * @param transportStep the {@link ConnectorMessageTransportStep} carrying the new state (must
-     *                      not be null)
-     *
-     * @return the updated {@link ConnectorMessageTransportStep}, reflecting the saved changes
+     * @param identifier       the unique identifier of the transport step to update (must not be
+     *                         null)
+     * @param status           the new {@link ConnectorMessageTransportStatus} of the transport step
+     *                         (must not be null)
+     * @param numberOfAttempts the new number of transport attempts made so far
      */
     ConnectorMessageTransportStep update(
         @Nonnull String identifier,
-        @Nonnull ConnectorMessageTransportStep transportStep);
+        @Nonnull ConnectorMessageTransportStatus status,
+        int numberOfAttempts);
 
     /**
      * Updates the status of several transport steps at once.

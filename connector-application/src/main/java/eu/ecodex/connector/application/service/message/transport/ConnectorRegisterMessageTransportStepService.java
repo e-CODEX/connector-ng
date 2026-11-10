@@ -91,6 +91,7 @@ public class ConnectorRegisterMessageTransportStepService
         var transportStep = ConnectorMessageTransportStep
             .builder()
             .identifier(buildIdentifier(message))
+            .transportedMessageIdentifier(message.identifier())
             .transportedMessage(updateMessageStatus(message, status))
             .status(status)
             .numberOfAttempts(ALLOWED_STATUSES.contains(status) ? 1 : 0)

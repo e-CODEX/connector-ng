@@ -101,7 +101,8 @@ public class ConnectorDBMessageTransportStepRepository
     @Transactional
     public ConnectorMessageTransportStep update(
         @NonNull String identifier,
-        @NonNull ConnectorMessageTransportStep transportStep) {
+        @NonNull ConnectorMessageTransportStatus status,
+        int numberOfAttempts) {
         var entity = transportStepJpaRepository.findByIdentifier(identifier);
 
         if (entity == null) {
@@ -110,10 +111,13 @@ public class ConnectorDBMessageTransportStepRepository
             );
         }
 
-        var updatedEntity = updateEntity(entity, transportStep);
+        var updatedEntity = entity.toBuilder()
+                                  .numberOfAttempts(numberOfAttempts)
+                                  .status(status)
+                                  .build();
         var updated = this.transportStepJpaRepository.save(updatedEntity);
 
-        var stepStatusEntity = toEntity(transportStep.status());
+        var stepStatusEntity = toEntity(status);
         stepStatusEntity.setTransportStep(updated);
         var savedStepStatusEntity = this.stepStatusJpaRepository.save(stepStatusEntity);
 
@@ -215,13 +219,8 @@ public class ConnectorDBMessageTransportStepRepository
             .identifier(transportStep.identifier())
             .numberOfAttempts(transportStep.numberOfAttempts())
             .linkPartnerName(transportStep.linkPartnerName())
-            .transportedMessageIdentifier(transportStep.transportedMessage().identifier())
-            .remoteSystemIdentifier(
-                transportedMessage.direction()
-                    == ConnectorMessageDirection.BACKEND_TO_GATEWAY
-                    ? transportedMessage.as4Properties().ebmsMessageIdentifier()
-                    : transportedMessage.backendMessageIdentifier()
-            )
+            .transportedMessageIdentifier(transportStep.transportedMessageIdentifier())
+            .remoteSystemIdentifier(transportStep.remoteSystemIdentifier())
             .transportedMessage(
                 objectMapper.writeValueAsString(transportStep.transportedMessage()))
             .status(transportStep.status())
@@ -231,15 +230,6 @@ public class ConnectorDBMessageTransportStepRepository
     private ConnectorMessageTransportStepStatusEntity toEntity(
         ConnectorMessageTransportStatus status) {
         return ConnectorMessageTransportStepStatusEntity.builder().status(status).build();
-    }
-
-    ConnectorMessageTransportStepEntity updateEntity(
-        ConnectorMessageTransportStepEntity entity,
-        ConnectorMessageTransportStep transportStep) {
-        return entity.toBuilder()
-                     .numberOfAttempts(transportStep.numberOfAttempts())
-                     .status(transportStep.status())
-                     .build();
     }
 
     private Set<ConnectorMessageTransportStepStatus> toStatuses(

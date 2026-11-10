@@ -30,8 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings("DataFlowIssue")
-@DisplayName("ConnectorMessageTransportStepRepository")
-public class ConnectorMessageTransportStepRepositoryTest extends AbstractRepositoryTest {
+@DisplayName("ConnectorDBMessageTransportStepRepository")
+public class ConnectorDBMessageTransportStepRepositoryTest extends AbstractRepositoryTest {
     private static final String STEP_IDENTIFIER =
         "8af8af19-839a-4594-a19d-40d67868474c@connector.ecodex.eu_backend_alice";
     private static final String MESSAGE_IDENTIFIER =
@@ -119,10 +119,10 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
     @DisplayName("update a transport step")
     class Update {
         @Test
-        void should_throw_when_the_transport_step_is_null() {
+        void should_throw_when_the_transport_step_status_is_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.update(STEP_IDENTIFIER, null)
+                () -> repository.update(STEP_IDENTIFIER, null, 2)
             );
         }
 
@@ -130,7 +130,7 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
         void should_throw_when_the_identifier_is_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.update(null, generateTransportStep())
+                () -> repository.update(null, ConnectorMessageTransportStatus.DELIVERED, 2)
             );
         }
 
@@ -138,19 +138,18 @@ public class ConnectorMessageTransportStepRepositoryTest extends AbstractReposit
         void should_throw_when_both_arguments_are_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.update(null, null)
+                () -> repository.update(null, null, 1)
             );
         }
 
         @Test
         @WithTransportStepData
         void should_update_an_existing_transport_step() {
-            var transportStep = generateTransportStep()
-                .toBuilder()
-                .status(ConnectorMessageTransportStatus.PULLED)
-                .build();
-
-            var updatedStep = repository.update(STEP_IDENTIFIER, transportStep);
+            var updatedStep = repository.update(
+                STEP_IDENTIFIER,
+                ConnectorMessageTransportStatus.PULLED,
+                2
+            );
 
             assertThat(updatedStep).isNotNull();
             assertThat(updatedStep.identifier()).isEqualTo(STEP_IDENTIFIER);

@@ -168,6 +168,9 @@ val jacocoExclusions = listOf(
     "**/*Configuration.class",
     "**/entity/**",
     "**/property/**",
+    "**/org/etsi/uri/**",
+    "**/org/w3/**",
+    "**/oasis/names/tc/saml/**",
 )
 
 tasks.register<JacocoReport>("jacocoRootReport") {

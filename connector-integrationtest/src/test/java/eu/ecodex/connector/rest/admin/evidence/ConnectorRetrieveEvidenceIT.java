@@ -17,6 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -45,30 +46,39 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
         "classpath:sql/processing-mode-action.sql",
         "classpath:sql/message.sql",
         "classpath:sql/message-as4-properties.sql",
-        "classpath:sql/evidence.sql"
+        "classpath:sql/evidence.sql",
+        "classpath:sql/user.sql"
     })
     void should_export_connector_messages_report() {
         byte[] body = apiClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                .build())
-            .exchange()
-            .expectStatus().isOk()
-            .expectHeader().contentType(MediaType.APPLICATION_XML)
-            .expectBody(byte[].class)
-            .returnResult()
-            .getResponseBody();
+                               .uri(uriBuilder -> uriBuilder
+                                   .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
+                                   .build())
+                               .header(
+                                   HttpHeaders.AUTHORIZATION,
+                                   "Bearer " + generateDefaultAdminToken()
+                               )
+                               .exchange()
+                               .expectStatus().isOk()
+                               .expectHeader().contentType(MediaType.APPLICATION_XML)
+                               .expectBody(byte[].class)
+                               .returnResult()
+                               .getResponseBody();
 
         assertThat(body).isNotNull().isNotEmpty();
     }
 
     @Test
+    @Sql({
+        "classpath:sql/user.sql"
+    })
     void should_return_404_when_evidence_does_not_exist() {
         apiClient.get()
-            .uri(uriBuilder -> uriBuilder
-                .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                .build())
-            .exchange()
-            .expectStatus().isNotFound();
+                 .uri(uriBuilder -> uriBuilder
+                     .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
+                     .build())
+                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+                 .exchange()
+                 .expectStatus().isNotFound();
     }
 }

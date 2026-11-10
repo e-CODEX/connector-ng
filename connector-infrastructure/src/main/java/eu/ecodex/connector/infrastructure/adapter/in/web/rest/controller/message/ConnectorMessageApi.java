@@ -14,6 +14,7 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorOutbo
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorEvidenceMessageDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.evidence.ConnectorEvidenceTriggerMessageRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.outbound.ConnectorOutboundMessageRequest;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Defines the REST API for managing connector messages.
  */
+@Hidden
 @Tag(name = "Message", description = "API for managing message.")
 @RequestMapping("/api/v1/messages")
 public interface ConnectorMessageApi {

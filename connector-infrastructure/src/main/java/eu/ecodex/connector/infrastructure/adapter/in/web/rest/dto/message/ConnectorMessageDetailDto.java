@@ -21,6 +21,7 @@ import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttac
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
 import eu.ecodex.connector.domain.model.message.evidence.ConnectorMessageEvidence;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -157,8 +158,10 @@ public record ConnectorMessageDetailDto(
         }
 
         return evidences.stream()
-                        .map(ConnectorMessageEvidenceDto::from)
-                        .toList();
+            .sorted(Comparator.comparing(ConnectorMessageEvidence::createdAt,
+                Comparator.nullsLast(Comparator.reverseOrder())))
+            .map(ConnectorMessageEvidenceDto::from)
+            .toList();
     }
 
     private static List<ConnectorMessageAttachment> filterAttachments(
@@ -174,7 +177,7 @@ public record ConnectorMessageDetailDto(
             : OUTBOUND_INCLUDED_ATTACHMENT_TYPES;
 
         return attachments.stream()
-                          .filter(att -> includedTypes.contains(att.type()))
-                          .toList();
+            .filter(att -> includedTypes.contains(att.type()))
+            .toList();
     }
 }

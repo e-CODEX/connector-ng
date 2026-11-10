@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @DisplayName("ConnectorBusinessDomainRepository")
-public class ConnectorBusinessDomainRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBBusinessDomainRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorBusinessDomainRepository repository;
 

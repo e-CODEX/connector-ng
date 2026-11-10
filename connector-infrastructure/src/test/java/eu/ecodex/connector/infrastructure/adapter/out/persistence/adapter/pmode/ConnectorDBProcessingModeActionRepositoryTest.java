@@ -31,7 +31,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DisplayName("ConnectorActionRepository")
 @SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
-public class ConnectorProcessingModeActionRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBProcessingModeActionRepositoryTest extends AbstractRepositoryTest {
     private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
     @Autowired

@@ -12,13 +12,15 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.pmode
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.verify;
 
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
-import eu.ecodex.connector.PartyTestFixtures;
-import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModePartyRepository;
+import eu.ecodex.connector.ServiceTestFixtures;
+import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeServiceRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
-import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.AbstractRepositoryTest;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.pmode.ConnectorProcessingModeServiceJpaRepository;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,19 +30,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 
-
-@SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
-@DisplayName("ConnectorPartyRepository")
-public class ConnectorProcessingModePartyRepositoryTest extends AbstractRepositoryTest {
+@SuppressWarnings({"checkstyle:MissingJavadocType", "DataFlowIssue", "checkstyle:LineLength"})
+@DisplayName("ConnectorServiceRepository")
+public class ConnectorDBProcessingModeServiceRepositoryTest extends AbstractRepositoryTest {
     private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();
     @Autowired
-    private ConnectorProcessingModePartyRepository repository;
+    private ConnectorProcessingModeServiceRepository repository;
+    @MockitoSpyBean
+    private ConnectorProcessingModeServiceJpaRepository jpaRepository;
 
     /**
-     * Reference data (business domain + processing mode), without parties.
+     * Reference data (business domain + processing mode), without services.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -50,18 +54,17 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
     })
     private @interface WithProcessingModeData {
     }
-
     /**
-     * Reference data plus seeded parties.
+     * Reference data plus seeded services.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
-        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
     })
-    private @interface WithPartyData {
+    private @interface WithServiceData {
     }
 
     @Nested
@@ -69,17 +72,19 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
     class SaveAll {
         @Test
         @WithProcessingModeData
-        void should_save_all_the_parties() {
-            var party = PartyTestFixtures.createToParty();
+        void should_save_all_the_services() {
+            var service = ServiceTestFixtures.createService();
 
-            var savedParties = repository.saveAll(List.of(party), DEFAULT_BUSINESS_DOMAIN);
+            var savedServices = repository.saveAll(List.of(service), DEFAULT_BUSINESS_DOMAIN);
 
-            assertThat(savedParties).isNotNull();
-            assertThat(savedParties).hasSize(1);
+            assertThat(savedServices).isNotNull();
+            assertThat(savedServices).hasSize(1);
+
+            verify(jpaRepository).saveAll(anyList());
         }
 
         @Test
-        void should_fail_when_the_parties_are_null() {
+        void should_fail_when_the_services_are_null() {
             assertThrows(
                 NullPointerException.class,
                 () -> repository.saveAll(null, DEFAULT_BUSINESS_DOMAIN)
@@ -90,7 +95,7 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
         void should_fail_when_the_business_domain_identifier_is_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.saveAll(List.of(PartyTestFixtures.createToParty()), null)
+                () -> repository.saveAll(List.of(ServiceTestFixtures.createService()), null)
             );
         }
 
@@ -104,53 +109,32 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
     }
 
     @Nested
-    @DisplayName("find by identifier, role and business domain")
-    class FindByIdentifierRoleAndBusinessDomain {
+    @DisplayName("find by name and business domain")
+    class FindByNameAndBusinessDomain {
         @Test
-        @WithPartyData
-        void should_find_the_party() {
-            var found = repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                "BL",
-                ConnectorPartyRoleType.INITIATOR,
-                DEFAULT_BUSINESS_DOMAIN
-            );
+        @WithServiceData
+        void should_find_the_service() {
+            var service =
+                repository.findByNameAndBusinessDomain("Connector-TEST", DEFAULT_BUSINESS_DOMAIN);
 
-            assertThat(found).isNotNull();
+            assertThat(service).isNotNull();
+            assertThat(service.name()).isEqualTo("Connector-TEST");
         }
 
         @Test
-        @WithPartyData
-        void should_return_null_when_the_party_identifier_is_unknown() {
-            var found = repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                "AT",
-                ConnectorPartyRoleType.INITIATOR,
-                DEFAULT_BUSINESS_DOMAIN
-            );
+        @WithServiceData
+        void should_return_null_when_the_service_name_is_unknown() {
+            var service =
+                repository.findByNameAndBusinessDomain("unknown", DEFAULT_BUSINESS_DOMAIN);
 
-            assertThat(found).isNull();
+            assertThat(service).isNull();
         }
 
         @Test
-        void should_fail_when_the_identifier_is_null() {
+        void should_fail_when_the_name_is_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                    null,
-                    ConnectorPartyRoleType.INITIATOR,
-                    DEFAULT_BUSINESS_DOMAIN
-                )
-            );
-        }
-
-        @Test
-        void should_fail_when_the_role_type_is_null() {
-            assertThrows(
-                NullPointerException.class,
-                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                    "AT",
-                    null,
-                    DEFAULT_BUSINESS_DOMAIN
-                )
+                () -> repository.findByNameAndBusinessDomain(null, DEFAULT_BUSINESS_DOMAIN)
             );
         }
 
@@ -158,19 +142,15 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
         void should_fail_when_the_business_domain_identifier_is_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(
-                    "AT",
-                    ConnectorPartyRoleType.INITIATOR,
-                    null
-                )
+                () -> repository.findByNameAndBusinessDomain("Connector-TEST", null)
             );
         }
 
         @Test
-        void should_fail_when_all_arguments_are_null() {
+        void should_fail_when_both_arguments_are_null() {
             assertThrows(
                 NullPointerException.class,
-                () -> repository.findByIdentifierAndRoleTypeAndBusinessDomain(null, null, null)
+                () -> repository.findByNameAndBusinessDomain(null, null)
             );
         }
     }
@@ -179,12 +159,12 @@ public class ConnectorProcessingModePartyRepositoryTest extends AbstractReposito
     @DisplayName("find all by business domain identifier")
     class FindAllByBusinessDomainIdentifier {
         @Test
-        @WithPartyData
-        void should_find_all_the_parties() {
-            var parties = repository.findAllByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN);
+        @WithServiceData
+        void should_find_all_the_services() {
+            var services = repository.findAllByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN);
 
-            assertThat(parties).isNotNull();
-            assertThat(parties).hasSize(4);
+            assertThat(services).isNotNull();
+            assertThat(services).hasSize(7);
         }
     }
 }

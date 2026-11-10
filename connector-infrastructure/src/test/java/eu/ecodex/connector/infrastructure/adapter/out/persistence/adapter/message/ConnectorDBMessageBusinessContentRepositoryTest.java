@@ -36,7 +36,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings("DataFlowIssue")
 @DisplayName("ConnectorMessageBusinessContentRepository")
-public class ConnectorMessageBusinessContentRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBMessageBusinessContentRepositoryTest extends AbstractRepositoryTest {
     private static final String MESSAGE_ID =
         "fd2f35e0-1981-4d21-b718-10a802e884b0@connector.ecodex.eu";
     private static final String OTHER_MESSAGE_ID =

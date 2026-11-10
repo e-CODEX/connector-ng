@@ -31,7 +31,7 @@ import org.springframework.test.context.jdbc.Sql;
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
 )
 @DisplayName("ConnectorMessageAS4PropertiesRepository")
-public class ConnectorMessageAS4PropertiesRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBMessageAS4PropertiesRepositoryTest extends AbstractRepositoryTest {
     @Autowired
     private ConnectorMessageAS4PropertiesRepository repository;
 

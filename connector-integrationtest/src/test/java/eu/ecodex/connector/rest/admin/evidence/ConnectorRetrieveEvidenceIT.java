@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.rest.evidence;
+package eu.ecodex.connector.rest.admin.evidence;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
 public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
-    private static final String URL = "/api/v1/evidences/%s/download";
+    private static final String URL = "/api/v1/admin/evidences/%s/download";
     @Autowired
     private RestTestClient apiClient;
 

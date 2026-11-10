@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.evidence;
+package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.evidence;
 
 import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
 import org.springframework.http.HttpHeaders;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
  * Defines the REST controller for managing connector messages evidence.
  */
 @RestController
-public class ConnectorEvidenceController implements ConnectorEvidenceApi {
+public class ConnectorEvidenceAdminController implements ConnectorEvidenceAdminApi {
     private final ConnectorRetrieveEvidence retrieveEvidence;
 
-    public ConnectorEvidenceController(ConnectorRetrieveEvidence retrieveEvidence) {
+    public ConnectorEvidenceAdminController(ConnectorRetrieveEvidence retrieveEvidence) {
         this.retrieveEvidence = retrieveEvidence;
     }
 

@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.evidence;
+package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.evidence;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -24,9 +24,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Defines the REST API for managing connector messages evidence.
  */
-@Tag(name = "Evidence", description = "API for managing message evidence.")
-@RequestMapping("/api/v1/evidences")
-public interface ConnectorEvidenceApi {
+@Tag(
+    name = "EvidenceAdmin",
+    description = "API for managing message evidence for administrative purposes."
+)
+@RequestMapping("/api/v1/admin/evidences")
+public interface ConnectorEvidenceAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @GetMapping(value = "/{uuid}/download")
     @Operation(summary = "Download a message evidence by its uuid")

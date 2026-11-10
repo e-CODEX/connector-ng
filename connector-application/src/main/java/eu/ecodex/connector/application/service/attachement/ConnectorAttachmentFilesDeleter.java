@@ -45,8 +45,8 @@ public class ConnectorAttachmentFilesDeleter {
     /**
      * Creates the deleter.
      *
-     * @param attachmentRepository the repository used to mark the attachments as deleted (must not
-     *                             be null)
+     * @param attachmentRepository the repository used to update the attachments once their content
+     *                             has been deleted (must not be null)
      * @param fileStorageProvider  the provider used to delete the content of the attachments from
      *                             the file storage (must not be null)
      * @param clock                the clock used to record the deletion instant, which allows a
@@ -62,43 +62,75 @@ public class ConnectorAttachmentFilesDeleter {
     }
 
     /**
-     * Deletes the files of the active (not yet deleted) attachments of a message.
+     * Deletes the files of the active (not yet deleted) attachments of a message, then marks them
+     * as deleted.
      */
     public Result deleteActiveAttachmentsOf(@NonNull String messageIdentifier) {
-        var attachments = attachmentRepository.findAllActiveByMessageIdentifier(messageIdentifier);
-        return delete(attachments);
+        return delete(attachmentRepository.findAllActiveByMessageIdentifier(messageIdentifier));
     }
 
     /**
      * Deletes the files of the given attachments from the storage, then marks the successfully
-     * deleted ones as deleted. A failure on one file does not stop the others: the failed
-     * attachment is left untouched and will be picked up again by the next run.
+     * deleted ones as deleted (soft delete: the rows are kept). A failure on one file does not stop
+     * the others: the failed attachment is left untouched and picked up by the next run.
      */
     public Result delete(@NonNull List<ConnectorMessageAttachment> attachments) {
+        var outcome = deleteFiles(attachments);
+        if (!outcome.deletedIdentifiers().isEmpty()) {
+            attachmentRepository.markAsDeleted(outcome.deletedIdentifiers(), clock.instant());
+        }
+        return outcome.toResult();
+    }
+
+    /**
+     * Deletes the files of the given attachments from the storage, then permanently removes the
+     * rows of the successfully deleted ones. A failure on one file does not stop the others: the
+     * failed attachment row is kept so that the next run retries it.
+     *
+     * <p>If the row removal fails after the files are gone, the exception propagates. The next
+     * run retries, which is safe because deleting a missing file is not an error.
+     */
+    public Result purge(@NonNull List<ConnectorMessageAttachment> attachments) {
+        var outcome = deleteFiles(attachments);
+
+        if (!outcome.deletedIdentifiers().isEmpty()) {
+            attachmentRepository.deleteAllByIdentifiers(outcome.deletedIdentifiers());
+        }
+
+        return outcome.toResult();
+    }
+
+    private FilesOutcome deleteFiles(List<ConnectorMessageAttachment> attachments) {
         if (attachments.isEmpty()) {
-            return Result.NONE;
+            return FilesOutcome.EMPTY;
         }
 
         var deleted = new ArrayList<String>(attachments.size());
         var failed = 0;
+
         for (var attachment : attachments) {
+            var identifier = attachment.identifier();
             try {
-                fileStorageProvider.deleteByIdentifier(attachment.identifier());
-                deleted.add(attachment.identifier());
+                fileStorageProvider.deleteByIdentifier(identifier);
+                deleted.add(identifier);
             } catch (RuntimeException e) {
                 failed++;
                 log.warn(
                     "Could not delete attachment [{}] from [{}] storage",
-                    attachment.identifier(), fileStorageProvider.getStorage(), e
+                    identifier, fileStorageProvider.getStorage(), e
                 );
             }
         }
 
-        if (!deleted.isEmpty()) {
-            attachmentRepository.markAsDeleted(deleted, clock.instant());
-        }
+        return new FilesOutcome(deleted, failed);
+    }
 
-        return new Result(deleted.size(), failed);
+    private record FilesOutcome(List<String> deletedIdentifiers, int failed) {
+        static final FilesOutcome EMPTY = new FilesOutcome(List.of(), 0);
+
+        Result toResult() {
+            return new Result(deletedIdentifiers.size(), failed);
+        }
     }
 
     /**

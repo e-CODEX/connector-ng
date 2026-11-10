@@ -183,6 +183,20 @@ public class ConnectorDBMessageAttachmentRepository implements
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteAllByIdentifiers(@NonNull List<String> identifiers) {
+        if (identifiers.isEmpty()) {
+            return;
+        }
+
+        var list = List.copyOf(identifiers);
+        for (int from = 0; from < list.size(); from += BATCH_SIZE) {
+            var batch = list.subList(from, Math.min(from + BATCH_SIZE, list.size()));
+            attachmentJpaRepository.deleteAllByIdentifiers(batch);
+        }
+    }
+
     private ConnectorMessageAttachmentEntity toEntity(ConnectorMessageAttachment attachment) {
         return ConnectorMessageAttachmentEntity
             .builder()

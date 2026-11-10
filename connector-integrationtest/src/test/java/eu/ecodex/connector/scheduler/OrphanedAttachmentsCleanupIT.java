@@ -53,6 +53,8 @@ import org.springframework.test.context.jdbc.Sql;
 class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
     private static final String ORPHAN = "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file";
     private static final String LINKED = "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file";
+    // Orphan (no message) that is already soft deleted in attachment.sql
+    private static final String ALREADY_DELETED = "f07d1bfd-685a-4fee-b70d-a582cd0711c7_test_attachment";
 
     @Autowired
     private ConnectorOrphanedAttachmentsCleanupJob job;
@@ -60,6 +62,14 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
     @AfterEach
     void cleanUp() {
         cleanDb();
+    }
+
+    private Integer rowCount(String identifier) {
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM connector_message_attachments WHERE identifier = ?",
+            Integer.class,
+            identifier
+        );
     }
 
     private Object deletedAt(String identifier) {
@@ -74,11 +84,11 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
     @DisplayName("when the storage deletion succeeds")
     class WhenTheStorageDeletionSucceeds {
         @Test
-        void should_delete_the_orphan_file_and_set_deleted_at() {
+        void should_delete_the_orphan_file_and_remove_its_row() {
             job.run();
 
             verify(fileStorageProvider).deleteByIdentifier(ORPHAN);
-            assertThat(deletedAt(ORPHAN)).isNotNull();
+            assertThat(rowCount(ORPHAN)).isZero();
         }
 
         @Test
@@ -86,7 +96,24 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
             job.run();
 
             verify(fileStorageProvider, never()).deleteByIdentifier(LINKED);
+            assertThat(rowCount(LINKED)).isEqualTo(1);
             assertThat(deletedAt(LINKED)).isNull();
+        }
+
+        @Test
+        void should_leave_the_orphans_already_marked_as_deleted_untouched() {
+            job.run();
+
+            verify(fileStorageProvider, never()).deleteByIdentifier(ALREADY_DELETED);
+            assertThat(rowCount(ALREADY_DELETED)).isEqualTo(1);
+            assertThat(deletedAt(ALREADY_DELETED)).isNotNull();
+        }
+
+        @Test
+        void should_not_mark_the_orphan_as_deleted_but_remove_it() {
+            job.run();
+
+            assertThat(rowCount(ORPHAN)).isZero();
         }
 
         @Test
@@ -96,9 +123,9 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
 
             assertThatCode(job::run).doesNotThrowAnyException();
 
-            // already marked as deleted, so it is not picked up again
+            // the row is gone, so it is not picked up again
             verifyNoInteractions(fileStorageProvider);
-            assertThat(deletedAt(ORPHAN)).isNotNull();
+            assertThat(rowCount(ORPHAN)).isZero();
         }
     }
 
@@ -112,20 +139,21 @@ class OrphanedAttachmentsCleanupIT extends AbstractSchedulerTest {
         }
 
         @Test
-        void should_not_set_deleted_at_so_the_orphan_is_retried_next_run() {
+        void should_keep_the_row_so_the_orphan_is_retried_next_run() {
             assertThatCode(job::run).doesNotThrowAnyException();
 
+            assertThat(rowCount(ORPHAN)).isEqualTo(1);
             assertThat(deletedAt(ORPHAN)).isNull();
         }
 
         @Test
-        void should_retry_and_succeed_on_the_next_run() {
+        void should_retry_and_remove_the_row_on_the_next_run() {
             job.run();
             doNothing().when(fileStorageProvider).deleteByIdentifier(ORPHAN);
 
             job.run();
 
-            assertThat(deletedAt(ORPHAN)).isNotNull();
+            assertThat(rowCount(ORPHAN)).isZero();
         }
     }
 }

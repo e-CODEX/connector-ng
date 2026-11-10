@@ -12,6 +12,7 @@ package eu.ecodex.connector.application.port.spi.message;
 
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.application.port.api.message.ConnectorMessageAttachmentLinker;
+import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.domain.model.filter.ConnectorAttachmentsListFilter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorAttachmentType;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
@@ -153,4 +154,17 @@ public interface ConnectorMessageAttachmentRepository {
      * @param deletedAt   the instant at which the attachments were deleted (must not be null)
      */
     void markAsDeleted(List<String> identifiers, Instant deletedAt);
+
+    /**
+     * Permanently deletes the attachments identified by the given identifiers.
+     *
+     * <p>Unlike {@link #markAsDeleted}, which only flags attachments as deleted, this physically
+     * removes the attachment rows. Identifiers that match no attachment are ignored, and nothing
+     * happens if the list is empty. Only the metadata is removed: the content of the attachments in
+     * the file storage is not affected (see
+     * {@link ConnectorFileStorageProvider#deleteByIdentifier}).
+     *
+     * @param identifiers the unique identifiers of the attachments to delete (must not be null)
+     */
+    void deleteAllByIdentifiers(@Nonnull List<String> identifiers);
 }

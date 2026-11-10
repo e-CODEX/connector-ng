@@ -24,7 +24,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.time.Clock;
 import java.time.Instant;

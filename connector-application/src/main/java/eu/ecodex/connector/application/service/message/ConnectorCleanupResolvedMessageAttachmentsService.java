@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.message;
 import eu.ecodex.connector.application.exception.attachment.ConnectorAttachmentCleanupException;
 import eu.ecodex.connector.application.port.api.message.ConnectorCleanupResolvedMessageAttachments;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
+import eu.ecodex.connector.application.service.attachment.ConnectorAttachmentFilesDeleter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageResolvedEvent;
 import lombok.NonNull;

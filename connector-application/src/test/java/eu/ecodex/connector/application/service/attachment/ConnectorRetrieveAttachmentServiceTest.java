@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorRetrieveAttachmentService;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

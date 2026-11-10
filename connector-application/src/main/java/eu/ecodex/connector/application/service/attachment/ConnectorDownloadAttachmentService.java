@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.application.service.attachement;
+package eu.ecodex.connector.application.service.attachment;
 
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentDeletedException;
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;

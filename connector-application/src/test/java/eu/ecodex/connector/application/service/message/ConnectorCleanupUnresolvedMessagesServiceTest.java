@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.MessageContentTestFixtures;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
+import eu.ecodex.connector.application.service.attachment.ConnectorAttachmentFilesDeleter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import java.time.Instant;
 import java.util.List;

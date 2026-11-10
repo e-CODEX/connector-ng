@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.exception.attachment;
 
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
+import eu.ecodex.connector.application.service.attachment.ConnectorAttachmentFilesDeleter;
 import lombok.Getter;
 
 /**

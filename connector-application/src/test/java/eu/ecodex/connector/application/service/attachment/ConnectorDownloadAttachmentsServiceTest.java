@@ -22,7 +22,6 @@ import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAtta
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorDownloadAttachmentService;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;

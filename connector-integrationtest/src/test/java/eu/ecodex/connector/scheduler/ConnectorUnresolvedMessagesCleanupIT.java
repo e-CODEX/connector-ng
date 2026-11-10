@@ -21,9 +21,10 @@ import eu.ecodex.connector.FixedClockConfiguration;
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.infrastructure.adapter.in.scheduler.ConnectorUnresolvedMessagesCleanupJob;
-import java.sql.Timestamp;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
@@ -65,6 +66,7 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
         "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu";
     private static final String MESSAGE_4 =
         "3fae4358-7cc9-4929-a17b-4432cbb8b9cc@connector.ecodex.eu";
+    private static final String[] ALL_MESSAGES = {MESSAGE_1, MESSAGE_2, MESSAGE_3, MESSAGE_4};
 
     private static final String ORPHAN_ATTACHMENT =
         "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file";
@@ -76,16 +78,26 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     @Autowired
     private ConnectorMessageRepository messageRepository;
 
-    private int totalAttachmentsOf(String messageIdentifier) {
+    private boolean messageExists(String messageIdentifier) {
         return jdbcTemplate.queryForObject(
-            """
-                SELECT COUNT(*) FROM connector_message_attachments a
-                  JOIN connector_messages m ON a.message_id = m.id
-                 WHERE m.identifier = ?
-                """,
+            "SELECT COUNT(*) FROM connector_messages WHERE identifier = ?",
+            Integer.class,
+            messageIdentifier
+        ) > 0;
+    }
+
+    /** Counts the rows of a child table (it must have a message_id column) of a message. */
+    private int childRowsOf(String table, String messageIdentifier) {
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM " + table + " c JOIN connector_messages m "
+                + "ON c.message_id = m.id WHERE m.identifier = ?",
             Integer.class,
             messageIdentifier
         );
+    }
+
+    private int attachmentsOf(String messageIdentifier) {
+        return childRowsOf("connector_message_attachments", messageIdentifier);
     }
 
     private int deletedAttachmentsOf(String messageIdentifier) {
@@ -100,7 +112,15 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
         );
     }
 
-    private boolean isDeleted(String attachmentIdentifier) {
+    private boolean attachmentExists(String attachmentIdentifier) {
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM connector_message_attachments WHERE identifier = ?",
+            Integer.class,
+            attachmentIdentifier
+        ) > 0;
+    }
+
+    private boolean isAttachmentDeleted(String attachmentIdentifier) {
         return jdbcTemplate.queryForObject(
             "SELECT deleted_at IS NOT NULL FROM connector_message_attachments "
                 + "WHERE identifier = ?",
@@ -109,152 +129,153 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
         );
     }
 
-    private boolean isMessageDeleted(String messageIdentifier) {
-        return jdbcTemplate.queryForObject(
-            "SELECT deleted_at IS NOT NULL FROM connector_messages WHERE identifier = ?",
-            Boolean.class,
-            messageIdentifier
-        );
-    }
-
-    private Timestamp messageDeletedAt(String messageIdentifier) {
-        return jdbcTemplate.queryForObject(
-            "SELECT deleted_at FROM connector_messages WHERE identifier = ?",
-            Timestamp.class,
-            messageIdentifier
-        );
-    }
-
     @AfterEach
     void cleanUp() {
         cleanDb();
     }
 
-    @Test
-    void should_mark_the_attachments_of_every_unresolved_message_as_deleted() {
-        job.run();
+    @Nested
+    @DisplayName("when all the unresolved messages can be cleaned up")
+    class WhenAllTheUnresolvedMessagesCanBeCleanedUp {
+        @Test
+        void should_delete_every_unresolved_message() {
+            job.run();
 
-        for (var message : new String[]{MESSAGE_1, MESSAGE_2, MESSAGE_3, MESSAGE_4}) {
-            assertThat(totalAttachmentsOf(message)).isPositive();
-            assertThat(deletedAttachmentsOf(message)).isEqualTo(totalAttachmentsOf(message));
+            for (var message : ALL_MESSAGES) {
+                assertThat(messageExists(message)).isFalse();
+            }
+        }
+
+        @Test
+        void should_delete_the_attachments_of_every_unresolved_message() {
+            job.run();
+
+            for (var message : ALL_MESSAGES) {
+                assertThat(attachmentsOf(message)).isZero();
+            }
+        }
+
+        @Test
+        void should_delete_the_evidences_of_every_unresolved_message() {
+            // adjust the table name to your schema
+            job.run();
+
+            for (var message : ALL_MESSAGES) {
+                assertThat(childRowsOf("connector_message_evidences", message)).isZero();
+            }
+        }
+
+        @Test
+        void should_delete_the_content_of_the_attachments_from_the_storage() {
+            job.run();
+
+            verify(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+        }
+
+        @Test
+        void should_not_delete_the_same_content_again_when_run_twice() {
+            job.run();
+            job.run();
+
+            verify(fileStorageProvider, times(1)).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
         }
     }
 
-    @Test
-    void should_set_deleted_at_on_every_unresolved_message() {
-        job.run();
+    @Nested
+    @DisplayName("when a message is already resolved")
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
+    class WhenAMessageIsAlreadyResolved {
+        @Test
+        void should_keep_a_confirmed_message_and_its_attachments() {
+            var attachmentsBefore = attachmentsOf(MESSAGE_1);
+            messageRepository.setAsConfirmed(MESSAGE_1);
 
-        for (var message : new String[]{MESSAGE_1, MESSAGE_2, MESSAGE_3, MESSAGE_4}) {
-            assertThat(isMessageDeleted(message)).isTrue();
+            job.run();
+
+            assertThat(messageExists(MESSAGE_1)).isTrue();
+            assertThat(attachmentsOf(MESSAGE_1)).isEqualTo(attachmentsBefore);
+            assertThat(deletedAttachmentsOf(MESSAGE_1)).isZero();
+            assertThat(messageExists(MESSAGE_2)).isFalse();
+        }
+
+        @Test
+        void should_keep_a_rejected_message_and_its_attachments() {
+            var attachmentsBefore = attachmentsOf(MESSAGE_2);
+            messageRepository.setAsRejected(MESSAGE_2);
+
+            job.run();
+
+            assertThat(messageExists(MESSAGE_2)).isTrue();
+            assertThat(attachmentsOf(MESSAGE_2)).isEqualTo(attachmentsBefore);
+            assertThat(deletedAttachmentsOf(MESSAGE_2)).isZero();
+            assertThat(messageExists(MESSAGE_1)).isFalse();
         }
     }
 
-    @Test
-    void should_delete_the_content_of_the_attachments_from_the_storage() {
-        job.run();
+    @Nested
+    @DisplayName("orphan attachments")
+    class OrphanAttachments {
+        @Test
+        void should_not_touch_the_orphan_attachments() {
+            job.run();
 
-        verify(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+            assertThat(attachmentExists(ORPHAN_ATTACHMENT)).isTrue();
+            assertThat(isAttachmentDeleted(ORPHAN_ATTACHMENT)).isFalse();
+            verify(fileStorageProvider, never()).deleteByIdentifier(ORPHAN_ATTACHMENT);
+        }
     }
 
-    @Test
-    void should_not_touch_the_attachments_of_a_confirmed_message() {
-        messageRepository.setAsConfirmed(MESSAGE_1);
+    @Nested
+    @DisplayName("when the content of an attachment cannot be deleted")
+    class WhenTheContentOfAnAttachmentCannotBeDeleted {
+        @BeforeEach
+        void given_the_storage_fails_for_an_attachment_of_message_3() {
+            doThrow(new ConnectorMessageAttachmentException("storage error"))
+                .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
+        }
 
-        job.run();
+        @Test
+        void should_keep_the_message_so_that_the_files_are_retried() {
+            job.run();
 
-        assertThat(deletedAttachmentsOf(MESSAGE_1)).isZero();
-        assertThat(deletedAttachmentsOf(MESSAGE_2)).isEqualTo(totalAttachmentsOf(MESSAGE_2));
-    }
+            assertThat(messageExists(MESSAGE_3)).isTrue();
+        }
 
-    @Test
-    void should_not_set_deleted_at_on_a_confirmed_message() {
-        messageRepository.setAsConfirmed(MESSAGE_1);
+        @Test
+        void should_keep_the_attachment_row_that_could_not_be_deleted_active() {
+            job.run();
 
-        job.run();
+            assertThat(attachmentExists(ATTACHMENT_OF_MESSAGE_3)).isTrue();
+            assertThat(isAttachmentDeleted(ATTACHMENT_OF_MESSAGE_3)).isFalse();
+        }
 
-        assertThat(isMessageDeleted(MESSAGE_1)).isFalse();
-        assertThat(isMessageDeleted(MESSAGE_2)).isTrue();
-    }
+        @Test
+        void should_mark_the_other_attachments_of_the_message_as_deleted() {
+            var attachmentsBefore = attachmentsOf(MESSAGE_3);
 
-    @Test
-    void should_not_touch_the_attachments_of_a_rejected_message() {
-        messageRepository.setAsRejected(MESSAGE_2);
+            job.run();
 
-        job.run();
+            assertThat(attachmentsOf(MESSAGE_3)).isEqualTo(attachmentsBefore);
+            assertThat(deletedAttachmentsOf(MESSAGE_3)).isEqualTo(attachmentsBefore - 1);
+        }
 
-        assertThat(deletedAttachmentsOf(MESSAGE_2)).isZero();
-        assertThat(deletedAttachmentsOf(MESSAGE_1)).isEqualTo(totalAttachmentsOf(MESSAGE_1));
-    }
+        @Test
+        void should_still_delete_the_other_messages() {
+            job.run();
 
-    @Test
-    void should_not_set_deleted_at_on_a_rejected_message() {
-        messageRepository.setAsRejected(MESSAGE_2);
+            assertThat(messageExists(MESSAGE_4)).isFalse();
+            assertThat(attachmentsOf(MESSAGE_4)).isZero();
+        }
 
-        job.run();
+        @Test
+        void should_delete_the_message_at_the_next_run_once_the_storage_works_again() {
+            job.run();
+            reset(fileStorageProvider);
 
-        assertThat(isMessageDeleted(MESSAGE_2)).isFalse();
-        assertThat(isMessageDeleted(MESSAGE_1)).isTrue();
-    }
+            job.run();
 
-    @Test
-    void should_not_touch_the_orphan_attachments() {
-        job.run();
-
-        assertThat(isDeleted(ORPHAN_ATTACHMENT)).isFalse();
-        verify(fileStorageProvider, never()).deleteByIdentifier(ORPHAN_ATTACHMENT);
-    }
-
-    @Test
-    void should_keep_an_attachment_active_when_its_content_could_not_be_deleted() {
-        doThrow(new ConnectorMessageAttachmentException("storage error"))
-            .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
-
-        job.run();
-
-        assertThat(isDeleted(ATTACHMENT_OF_MESSAGE_3)).isFalse();
-        assertThat(deletedAttachmentsOf(MESSAGE_3)).isEqualTo(totalAttachmentsOf(MESSAGE_3) - 1);
-        assertThat(deletedAttachmentsOf(MESSAGE_4)).isEqualTo(totalAttachmentsOf(MESSAGE_4));
-    }
-
-    @Test
-    void should_not_set_deleted_at_on_a_message_whose_attachment_could_not_be_deleted() {
-        doThrow(new ConnectorMessageAttachmentException("storage error"))
-            .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
-
-        job.run();
-
-        assertThat(isMessageDeleted(MESSAGE_3)).isFalse();   // retried at the next run
-        assertThat(isMessageDeleted(MESSAGE_4)).isTrue();    // other messages are not affected
-    }
-
-    @Test
-    void should_set_deleted_at_on_the_next_run_once_the_storage_works_again() {
-        doThrow(new ConnectorMessageAttachmentException("storage error"))
-            .when(fileStorageProvider).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
-        job.run();
-        reset(fileStorageProvider);
-
-        job.run();
-
-        assertThat(isMessageDeleted(MESSAGE_3)).isTrue();
-        assertThat(deletedAttachmentsOf(MESSAGE_3)).isEqualTo(totalAttachmentsOf(MESSAGE_3));
-    }
-
-    @Test
-    void should_not_delete_the_same_content_again_when_run_twice() {
-        job.run();
-        job.run();
-
-        verify(fileStorageProvider, times(1)).deleteByIdentifier(ATTACHMENT_OF_MESSAGE_3);
-    }
-
-    @Test
-    void should_keep_the_original_deleted_at_when_run_twice() {
-        job.run();
-        var first = messageDeletedAt(MESSAGE_1);
-
-        job.run();
-
-        assertThat(messageDeletedAt(MESSAGE_1)).isEqualTo(first);
+            assertThat(messageExists(MESSAGE_3)).isFalse();
+            assertThat(attachmentsOf(MESSAGE_3)).isZero();
+        }
     }
 }

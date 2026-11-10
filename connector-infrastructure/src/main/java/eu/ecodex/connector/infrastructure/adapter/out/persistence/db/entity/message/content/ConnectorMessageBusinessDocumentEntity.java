@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorBusinessDocumen
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessDocument;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.ConnectorMessageAttachmentEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -79,7 +80,7 @@ public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     )
     private ConnectorMessageBusinessContentEntity businessContent;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, optional = false)
     @JoinColumn(
         name = "CONTENT_ATTACHMENT_ID",
         nullable = false,
@@ -87,7 +88,7 @@ public class ConnectorMessageBusinessDocumentEntity extends BaseEntity {
     )
     private ConnectorMessageAttachmentEntity content;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(
         name = "DETACHED_SIGNATURE_ATTACHMENT_ID",
         foreignKey = @ForeignKey(name = "FK_CM_BD_DS_ATTACHMENT")

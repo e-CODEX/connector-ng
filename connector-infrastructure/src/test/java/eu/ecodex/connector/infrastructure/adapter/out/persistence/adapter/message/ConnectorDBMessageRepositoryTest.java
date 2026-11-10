@@ -617,4 +617,126 @@ public class ConnectorDBMessageRepositoryTest extends AbstractRepositoryTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("delete by identifier")
+    class DeleteByIdentifier {
+        private static final String OTHER_MESSAGE_ID =
+            "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu";
+
+        private int countMessages(String identifier) {
+            return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_messages WHERE identifier = ?",
+                Integer.class,
+                identifier
+            );
+        }
+
+        private int countAllMessages() {
+            return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_messages",
+                Integer.class
+            );
+        }
+
+        private int countRowsOfMessage(String table, String identifier) {
+            return jdbcTemplate.queryForObject(
+                """
+                    SELECT COUNT(*) FROM %s t
+                      JOIN connector_messages m ON t.message_id = m.id
+                     WHERE m.identifier = ?
+                    """.formatted(table),
+                Integer.class,
+                identifier
+            );
+        }
+
+        private void deleteAndFlush(String identifier) {
+            repository.deleteByIdentifier(identifier);
+            entityManager.flush();
+        }
+
+        @Test
+        @WithMessageData
+        void should_delete_the_message() {
+            assertThat(countMessages(MESSAGE_ID)).isEqualTo(1);
+
+            deleteAndFlush(MESSAGE_ID);
+
+            assertThat(countMessages(MESSAGE_ID)).isZero();
+            assertThat(repository.findByIdentifier(MESSAGE_ID)).isNull();
+        }
+
+        @Test
+        @WithMessageData
+        void should_delete_the_as4_properties_of_the_message() {
+            assertThat(countRowsOfMessage("connector_message_as4_properties", MESSAGE_ID))
+                .isEqualTo(1);
+
+            deleteAndFlush(MESSAGE_ID);
+
+            var remaining = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_message_as4_properties",
+                Integer.class
+            );
+            assertThat(remaining).isEqualTo(3);
+        }
+
+        @Test
+        @WithMessageData
+        void should_delete_the_business_content_of_the_message() {
+            var before = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_message_business_contents",
+                Integer.class
+            );
+
+            repository.deleteByIdentifier(MESSAGE_ID);
+
+            var after = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_message_business_contents",
+                Integer.class
+            );
+            assertThat(after).isEqualTo(before - 1);
+        }
+
+        @Test
+        @WithMessageData
+        void should_not_delete_the_other_messages() {
+            var before = countAllMessages();
+
+            deleteAndFlush(MESSAGE_ID);
+
+            assertThat(countAllMessages()).isEqualTo(before - 1);
+            assertThat(repository.findByIdentifier(OTHER_MESSAGE_ID)).isNotNull();
+        }
+
+        @Test
+        @WithMessageData
+        void should_be_idempotent_when_called_twice() {
+            repository.deleteByIdentifier(MESSAGE_ID);
+
+            assertThatCode(() -> repository.deleteByIdentifier(MESSAGE_ID))
+                .doesNotThrowAnyException();
+            assertThat(countMessages(MESSAGE_ID)).isZero();
+        }
+
+        @Test
+        @WithMessageData
+        void should_do_nothing_when_the_message_does_not_exist() {
+            var before = countAllMessages();
+
+            assertThatCode(() -> repository.deleteByIdentifier("unknown@connector.ecodex.eu"))
+                .doesNotThrowAnyException();
+
+            assertThat(countAllMessages()).isEqualTo(before);
+        }
+
+        @Test
+        void should_fail_if_the_message_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.deleteByIdentifier(null)
+            );
+        }
+    }
 }

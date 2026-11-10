@@ -215,4 +215,17 @@ public interface ConnectorMessageRepository {
      * @return the updated {@link ConnectorBusinessMessage}
      */
     ConnectorBusinessMessage setDeliveredToLinkPartnerAt(@Nonnull String identifier);
+
+    /**
+     * Permanently deletes the message identified by the given identifier.
+     *
+     * <p>Unlike {@link #setAsDeleted}, which only flags the message as deleted, this physically
+     * removes the message row. Nothing happens if no message matches. The records that depend on
+     * the message (business content, AS4 properties, attachments, evidences, errors and transport
+     * steps) must be removed first, or by a cascade, otherwise the deletion fails with a foreign
+     * key violation.
+     *
+     * @param identifier the unique identifier of the message to delete (must not be null)
+     */
+    void deleteByIdentifier(@Nonnull String identifier);
 }

@@ -23,11 +23,13 @@ import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.message.content.ConnectorMessageBusinessDocumentJpaRepository;
 import lombok.NonNull;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * RDBMS implementation of {@link ConnectorMessageBusinessContentRepository}.
  */
 @Component
+@Transactional(readOnly = true)
 @SuppressWarnings("checkstyle:LineLength")
 public class ConnectorDBMessageBusinessContentRepository implements
     ConnectorMessageBusinessContentRepository {
@@ -89,6 +91,7 @@ public class ConnectorDBMessageBusinessContentRepository implements
     }
 
     @Override
+    @Transactional
     public ConnectorMessageBusinessContent save(
         @NonNull ConnectorMessageBusinessContent businessContent,
         @NonNull String messageIdentifier) {
@@ -107,6 +110,7 @@ public class ConnectorDBMessageBusinessContentRepository implements
     }
 
     @Override
+    @Transactional
     public ConnectorMessageBusinessContent assignBusinessDocument(
         @NonNull String uuid,
         @NonNull ConnectorMessageBusinessDocument document) {
@@ -118,6 +122,13 @@ public class ConnectorDBMessageBusinessContentRepository implements
         content.setBusinessDocument(savedBusinessDocument);
 
         return toDomain(content);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByMessageIdentifier(@NonNull String messageIdentifier) {
+        this.businessDocumentJpaRepository.deleteByMessageIdentifier(messageIdentifier);
+        this.businessContentJpaRepository.deleteByMessageIdentifier(messageIdentifier);
     }
 
     private ConnectorMessageBusinessContentEntity toEntity(

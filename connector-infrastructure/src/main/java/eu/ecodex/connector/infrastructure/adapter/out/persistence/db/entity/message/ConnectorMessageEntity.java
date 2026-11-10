@@ -122,11 +122,11 @@ public class ConnectorMessageEntity extends BaseEntity {
     private ConnectorBusinessDomainEntity businessDomain;
 
     @Setter
-    @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "message", orphanRemoval = true)
     private ConnectorMessageBusinessContentEntity businessContent;
 
     @Setter
-    @OneToOne(mappedBy = "message", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "message", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private ConnectorMessageAS4PropertiesEntity as4Properties;
 
     @Builder.Default

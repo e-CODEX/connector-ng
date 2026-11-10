@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter;
 
 import eu.ecodex.connector.RepositoryContextConfiguration;
 import eu.ecodex.connector.WithUploadTempDirectory;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,4 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractRepositoryTest {
     @Autowired
     protected JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    protected EntityManager entityManager;
 }

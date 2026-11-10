@@ -14,6 +14,7 @@ import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusiness
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.BaseEntity;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.ConnectorMessageAttachmentEntity;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.ConnectorMessageEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -59,7 +60,7 @@ public class ConnectorMessageBusinessContentEntity extends BaseEntity {
     @Column(name = "UUID", unique = true, nullable = false, updatable = false)
     private String uuid;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, optional = false)
     @JoinColumn(
         name = "XML_CONTENT_ATTACHMENT_ID",
         nullable = false,
@@ -74,6 +75,6 @@ public class ConnectorMessageBusinessContentEntity extends BaseEntity {
     private ConnectorMessageEntity message;
 
     @Setter
-    @OneToOne(mappedBy = "businessContent")
+    @OneToOne(mappedBy = "businessContent", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private ConnectorMessageBusinessDocumentEntity businessDocument;
 }

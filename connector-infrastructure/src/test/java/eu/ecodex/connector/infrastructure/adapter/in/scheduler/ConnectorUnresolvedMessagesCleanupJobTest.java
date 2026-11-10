@@ -18,7 +18,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessagesAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessages;
 import eu.ecodex.connector.infrastructure.config.property.deletion.ConnectorDeletionProperties;
 import java.time.Clock;
 import java.time.Duration;
@@ -41,7 +41,7 @@ class ConnectorUnresolvedMessagesCleanupJobTest {
     private static final Instant NOW = Instant.parse("2026-10-29T19:00:00Z");
 
     @Mock
-    private ConnectorCleanupUnresolvedMessagesAttachments cleanupUnresolvedMessagesAttachments;
+    private ConnectorCleanupUnresolvedMessages cleanupUnresolvedMessagesAttachments;
 
     private ConnectorDeletionProperties properties;
     private ConnectorUnresolvedMessagesCleanupJob job;

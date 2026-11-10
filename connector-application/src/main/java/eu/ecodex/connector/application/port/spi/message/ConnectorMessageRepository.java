@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.port.spi.message;
 
-import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessagesAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessages;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
@@ -112,7 +112,7 @@ public interface ConnectorMessageRepository {
      *
      * <p>A message is unresolved when it has not reached a final state, that is, it is still
      * waiting for a transport or processing outcome (for example an acknowledgement or an
-     * evidence). It is used by {@link ConnectorCleanupUnresolvedMessagesAttachments}.
+     * evidence). It is used by {@link ConnectorCleanupUnresolvedMessages}.
      *
      * @param threshold the instant before which unresolved messages are returned; messages created
      *                  at or after this instant are excluded (must not be null)

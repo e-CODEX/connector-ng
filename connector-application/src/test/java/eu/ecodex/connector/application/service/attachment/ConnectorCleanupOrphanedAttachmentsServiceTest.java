@@ -43,35 +43,90 @@ public class ConnectorCleanupOrphanedAttachmentsServiceTest {
     @InjectMocks
     private ConnectorCleanupOrphanedAttachmentsService service;
 
-    @SuppressWarnings("DataFlowIssue")
     @Nested
-    @DisplayName("execute")
-    class Execute {
+    @DisplayName("when there are no orphans")
+    class NoOrphans {
         @Test
-        void should_not_call_the_deleter_when_there_are_no_orphans() {
+        void should_look_up_the_orphans_with_the_given_threshold() {
+            when(attachmentRepository.findAllOrphaned(THRESHOLD)).thenReturn(List.of());
+
+            service.execute(THRESHOLD);
+
+            verify(attachmentRepository).findAllOrphaned(THRESHOLD);
+        }
+
+        @Test
+        void should_not_call_the_deleter() {
             when(attachmentRepository.findAllOrphaned(THRESHOLD)).thenReturn(List.of());
 
             service.execute(THRESHOLD);
 
             verifyNoInteractions(filesDeleter);
         }
+    }
 
+    @Nested
+    @DisplayName("when there are orphans")
+    class WithOrphans {
         @Test
-        void should_delegate_the_orphans_to_the_deleter() {
-            var orphans = List.of(mock(ConnectorMessageAttachment.class));
+        void should_purge_the_orphans_with_the_deleter() {
+            var orphans = List.of(
+                mock(ConnectorMessageAttachment.class),
+                mock(ConnectorMessageAttachment.class)
+            );
             when(attachmentRepository.findAllOrphaned(THRESHOLD)).thenReturn(orphans);
-            when(filesDeleter.delete(orphans))
-                .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 0));
+            when(filesDeleter.purge(orphans))
+                .thenReturn(new ConnectorAttachmentFilesDeleter.Result(2, 0));
 
             service.execute(THRESHOLD);
 
-            verify(filesDeleter).delete(orphans);
+            verify(filesDeleter).purge(orphans);
         }
 
+        @Test
+        void should_complete_when_some_attachments_could_not_be_deleted() {
+            var orphans = List.of(
+                mock(ConnectorMessageAttachment.class),
+                mock(ConnectorMessageAttachment.class)
+            );
+            when(attachmentRepository.findAllOrphaned(THRESHOLD)).thenReturn(orphans);
+            when(filesDeleter.purge(orphans))
+                .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 1));
+
+            service.execute(THRESHOLD);
+
+            verify(filesDeleter).purge(orphans);
+        }
+
+        @Test
+        void should_propagate_the_failure_of_the_deleter() {
+            var orphans = List.of(mock(ConnectorMessageAttachment.class));
+            when(attachmentRepository.findAllOrphaned(THRESHOLD)).thenReturn(orphans);
+            when(filesDeleter.purge(orphans))
+                .thenThrow(new IllegalStateException("storage unavailable"));
+
+            assertThatThrownBy(() -> service.execute(THRESHOLD))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("storage unavailable");
+        }
+    }
+
+    @Nested
+    @SuppressWarnings("DataFlowIssue")
+    @DisplayName("when the input is invalid")
+    class InvalidInput {
         @Test
         void should_throw_when_the_threshold_is_null() {
             assertThatThrownBy(() -> service.execute(null))
                 .isInstanceOf(NullPointerException.class);
+        }
+
+        @Test
+        void should_not_look_up_nor_delete_anything_when_the_threshold_is_null() {
+            assertThatThrownBy(() -> service.execute(null))
+                .isInstanceOf(NullPointerException.class);
+
+            verifyNoInteractions(attachmentRepository, filesDeleter);
         }
     }
 }

@@ -37,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ConnectorCleanupUnresolvedMessagesAttachmentsService")
-class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
+class ConnectorCleanupUnresolvedMessagesServiceTest {
     private static final Instant THRESHOLD = Instant.parse("2026-10-23T22:00:00Z");
 
     @Mock
@@ -46,7 +46,7 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
     private ConnectorAttachmentFilesDeleter filesDeleter;
 
     @InjectMocks
-    private ConnectorCleanupUnresolvedMessagesAttachmentsService service;
+    private ConnectorCleanupUnresolvedMessagesService service;
 
     private ConnectorBusinessMessage message(String identifier) {
         return ConnectorBusinessMessage

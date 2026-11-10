@@ -20,7 +20,7 @@ import jakarta.annotation.Nonnull;
  * <p>A message is resolved when it has reached a final state, that is, confirmed or rejected (see
  * {@link ConnectorMessageResolvedEvent}). Once resolved, the message will not be processed further,
  * so its attachments are no longer needed in the file storage. See
- * {@link ConnectorCleanupUnresolvedMessagesAttachments} for the cleanup of messages that never get
+ * {@link ConnectorCleanupUnresolvedMessages} for the cleanup of messages that never get
  * resolved.
  */
 public interface ConnectorCleanupResolvedMessageAttachments {

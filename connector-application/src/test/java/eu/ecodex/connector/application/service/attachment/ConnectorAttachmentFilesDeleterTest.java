@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.service.attachment;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -89,6 +89,13 @@ class ConnectorAttachmentFilesDeleterTest {
         }
 
         @Test
+        void should_keep_the_rows_when_marking_them_as_deleted() {
+            deleter.delete(List.of(attachment("id-1")));
+
+            verify(attachmentRepository, never()).deleteAllByIdentifiers(anyList());
+        }
+
+        @Test
         void should_continue_and_mark_only_the_successful_ones_when_one_deletion_fails() {
             lenient().doThrow(new RuntimeException("S3 unavailable"))
                      .when(fileStorageProvider).deleteByIdentifier("id-2");
@@ -115,12 +122,101 @@ class ConnectorAttachmentFilesDeleterTest {
         }
 
         @Test
+        void should_propagate_the_failure_when_marking_the_attachments_as_deleted_fails() {
+            doThrow(new IllegalStateException("database error"))
+                .when(attachmentRepository).markAsDeleted(anyList(), any());
+
+            var attachments = List.of(attachment("id-1"));
+
+            assertThatThrownBy(() -> deleter.delete(attachments))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("database error");
+        }
+
+        @Test
         void should_throw_when_the_attachments_are_null() {
             assertThatThrownBy(() -> deleter.delete(null))
                 .isInstanceOf(NullPointerException.class);
         }
     }
 
+    @Nested
+    @SuppressWarnings("DataFlowIssue")
+    @DisplayName("purge")
+    class Purge {
+        @Test
+        void should_do_nothing_when_there_are_no_attachments() {
+            var result = deleter.purge(List.of());
+
+            assertThat(result).isEqualTo(ConnectorAttachmentFilesDeleter.Result.NONE);
+            verifyNoInteractions(fileStorageProvider, attachmentRepository);
+        }
+
+        @Test
+        void should_delete_every_file_and_remove_their_rows() {
+            var result = deleter.purge(List.of(attachment("id-1"), attachment("id-2")));
+
+            verify(fileStorageProvider).deleteByIdentifier("id-1");
+            verify(fileStorageProvider).deleteByIdentifier("id-2");
+            verify(attachmentRepository).deleteAllByIdentifiers(List.of("id-1", "id-2"));
+            assertThat(result.deleted()).isEqualTo(2);
+            assertThat(result.failed()).isZero();
+        }
+
+        @Test
+        void should_not_use_the_soft_delete() {
+            deleter.purge(List.of(attachment("id-1")));
+
+            verify(attachmentRepository, never()).markAsDeleted(anyList(), any());
+        }
+
+        @Test
+        void should_continue_and_remove_only_the_rows_of_the_deleted_files_when_one_fails() {
+            lenient().doThrow(new RuntimeException("S3 unavailable"))
+                     .when(fileStorageProvider).deleteByIdentifier("id-2");
+
+            var result = deleter.purge(
+                List.of(attachment("id-1"), attachment("id-2"), attachment("id-3")));
+
+            verify(fileStorageProvider).deleteByIdentifier("id-3");
+            verify(attachmentRepository).deleteAllByIdentifiers(List.of("id-1", "id-3"));
+            assertThat(result.deleted()).isEqualTo(2);
+            assertThat(result.failed()).isEqualTo(1);
+        }
+
+        @Test
+        void should_not_remove_any_row_when_all_deletions_fail() {
+            doThrow(new RuntimeException("S3 unavailable"))
+                .when(fileStorageProvider).deleteByIdentifier(anyString());
+
+            var result = deleter.purge(List.of(attachment("id-1"), attachment("id-2")));
+
+            verify(attachmentRepository, never()).deleteAllByIdentifiers(anyList());
+            assertThat(result.deleted()).isZero();
+            assertThat(result.failed()).isEqualTo(2);
+        }
+
+        @Test
+        void should_propagate_the_failure_when_removing_the_rows_fails() {
+            doThrow(new IllegalStateException("database error"))
+                .when(attachmentRepository).deleteAllByIdentifiers(anyList());
+            var attachments = List.of(attachment("id-1"));
+
+            assertThatThrownBy(() -> deleter.purge(attachments))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("database error");
+
+            verify(fileStorageProvider).deleteByIdentifier("id-1");
+        }
+
+        @Test
+        void should_throw_when_the_attachments_are_null() {
+            assertThatThrownBy(() -> deleter.purge(null))
+                .isInstanceOf(NullPointerException.class);
+        }
+    }
+
+    @SuppressWarnings("DataFlowIssue")
     @Nested
     @DisplayName("delete active attachments of a message")
     class DeleteActiveAttachmentsOf {
@@ -145,6 +241,34 @@ class ConnectorAttachmentFilesDeleterTest {
 
             assertThat(result).isEqualTo(ConnectorAttachmentFilesDeleter.Result.NONE);
             verifyNoInteractions(fileStorageProvider);
+        }
+
+        @Test
+        void should_throw_when_the_message_identifier_is_null() {
+            assertThatThrownBy(() -> deleter.deleteActiveAttachmentsOf(null))
+                .isInstanceOf(NullPointerException.class);
+        }
+    }
+
+    @Nested
+    @DisplayName("result")
+    class ResultTest {
+        @Test
+        void should_add_the_deleted_and_failed_counts() {
+            var first = new ConnectorAttachmentFilesDeleter.Result(2, 1);
+            var second = new ConnectorAttachmentFilesDeleter.Result(3, 4);
+
+            var sum = first.plus(second);
+
+            assertThat(sum).isEqualTo(new ConnectorAttachmentFilesDeleter.Result(5, 5));
+        }
+
+        @Test
+        void should_keep_the_result_unchanged_when_adding_none() {
+            var result = new ConnectorAttachmentFilesDeleter.Result(2, 1);
+
+            assertThat(result.plus(ConnectorAttachmentFilesDeleter.Result.NONE))
+                .isEqualTo(result);
         }
     }
 }

@@ -16,7 +16,6 @@ import java.time.Instant;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Default implementation of {@link ConnectorCleanupOrphanedAttachments}.
@@ -27,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Service
-@Transactional
 public class ConnectorCleanupOrphanedAttachmentsService implements
     ConnectorCleanupOrphanedAttachments {
     private final ConnectorMessageAttachmentRepository attachmentRepository;
@@ -57,9 +55,9 @@ public class ConnectorCleanupOrphanedAttachmentsService implements
             return;
         }
 
-        log.info("{} orphaned attachments to delete", orphaned.size());
+        log.info("{} orphaned attachments older than {} to delete", orphaned.size(), threshold);
 
-        var result = filesDeleter.delete(orphaned);
+        var result = filesDeleter.purge(orphaned);
 
         log.info(
             "Orphaned attachments cleanup done: [{}] deleted, [{}] failed",

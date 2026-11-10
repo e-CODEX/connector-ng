@@ -55,9 +55,13 @@ public interface ConnectorMessageAttachmentJpaRepository extends
             AND cma.deletedAt IS NULL
         """
     )
-    int markAsDeleted(
+    void markAsDeleted(
         @Param("identifiers") List<String> identifiers,
         @Param("deletedAt") Instant deletedAt);
 
     boolean existsByIdentifier(@NonNull String identifier);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("DELETE FROM ConnectorMessageAttachmentEntity a WHERE a.identifier IN (:identifiers)")
+    void deleteAllByIdentifiers(@Param("identifiers") List<String> identifiers);
 }

@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.application.service.message;
 
-import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessagesAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessages;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
 import java.time.Instant;
@@ -19,12 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Default implementation of {@link ConnectorCleanupUnresolvedMessagesAttachments}.
+ * Default implementation of {@link ConnectorCleanupUnresolvedMessages}.
  */
 @Slf4j
 @Service
-public class ConnectorCleanupUnresolvedMessagesAttachmentsService
-    implements ConnectorCleanupUnresolvedMessagesAttachments {
+public class ConnectorCleanupUnresolvedMessagesService
+    implements ConnectorCleanupUnresolvedMessages {
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorAttachmentFilesDeleter filesDeleter;
 
@@ -36,7 +36,7 @@ public class ConnectorCleanupUnresolvedMessagesAttachmentsService
      * @param filesDeleter      the component that deletes the content of the attachments from the
      *                          file storage (must not be null)
      */
-    public ConnectorCleanupUnresolvedMessagesAttachmentsService(
+    public ConnectorCleanupUnresolvedMessagesService(
         ConnectorMessageRepository messageRepository,
         ConnectorAttachmentFilesDeleter filesDeleter) {
         this.messageRepository = messageRepository;

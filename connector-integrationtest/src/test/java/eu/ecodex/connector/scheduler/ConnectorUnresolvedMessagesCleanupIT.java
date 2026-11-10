@@ -87,7 +87,7 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
     }
 
     /** Counts the rows of a child table (it must have a message_id column) of a message. */
-    private int childRowsOf(String table, String messageIdentifier) {
+    private Integer childRowsOf(String table, String messageIdentifier) {
         return jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM " + table + " c JOIN connector_messages m "
                 + "ON c.message_id = m.id WHERE m.identifier = ?",
@@ -100,7 +100,7 @@ public class ConnectorUnresolvedMessagesCleanupIT extends AbstractSchedulerTest 
         return childRowsOf("connector_message_attachments", messageIdentifier);
     }
 
-    private int deletedAttachmentsOf(String messageIdentifier) {
+    private Integer deletedAttachmentsOf(String messageIdentifier) {
         return jdbcTemplate.queryForObject(
             """
                 SELECT COUNT(*) FROM connector_message_attachments a

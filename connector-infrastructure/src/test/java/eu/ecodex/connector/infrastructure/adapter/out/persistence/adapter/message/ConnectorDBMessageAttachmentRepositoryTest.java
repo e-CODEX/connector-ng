@@ -416,4 +416,121 @@ public class ConnectorDBMessageAttachmentRepositoryTest extends AbstractReposito
             );
         }
     }
+
+    @Nested
+    @DisplayName("delete all by identifiers")
+    class DeleteAllByIdentifiers {
+        private static final String IDENTIFIER_1 =
+            "d98a621a-4d14-4cfb-be00-0feae9f9b277_fake_file";
+        private static final String IDENTIFIER_2 =
+            "6aeef356-d580-4b94-a569-250435ac3ec5_fake_file";
+        private static final String IDENTIFIER_3 =
+            "c12f879b-3c9a-4d26-b36c-b6d67a84f0ed_test_attachment";
+        private static final String ALREADY_DELETED_IDENTIFIER =
+            "f07d1bfd-685a-4fee-b70d-a582cd0711c7_test_attachment";
+
+        private int countRows(String identifier) {
+            return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_message_attachments WHERE identifier = ?",
+                Integer.class,
+                identifier
+            );
+        }
+
+        private int countAllRows() {
+            return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM connector_message_attachments",
+                Integer.class
+            );
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_remove_the_rows_of_the_given_attachments_only() {
+            repository.deleteAllByIdentifiers(List.of(IDENTIFIER_1, IDENTIFIER_2));
+
+            assertThat(countRows(IDENTIFIER_1)).isZero();
+            assertThat(countRows(IDENTIFIER_2)).isZero();
+            assertThat(countRows(IDENTIFIER_3)).isEqualTo(1);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_remove_the_rows_instead_of_marking_them_as_deleted() {
+            var before = countAllRows();
+
+            repository.deleteAllByIdentifiers(List.of(IDENTIFIER_1));
+
+            assertThat(countAllRows()).isEqualTo(before - 1);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_remove_an_attachment_that_is_already_marked_as_deleted() {
+            assertThat(countRows(ALREADY_DELETED_IDENTIFIER)).isEqualTo(1);
+
+            repository.deleteAllByIdentifiers(List.of(ALREADY_DELETED_IDENTIFIER));
+
+            assertThat(countRows(ALREADY_DELETED_IDENTIFIER)).isZero();
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_ignore_unknown_identifiers() {
+            var before = countAllRows();
+
+            repository.deleteAllByIdentifiers(List.of(IDENTIFIER_1, "unknown_identifier"));
+
+            assertThat(countRows(IDENTIFIER_1)).isZero();
+            assertThat(countAllRows()).isEqualTo(before - 1);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_do_nothing_when_the_list_is_empty() {
+            var before = countAllRows();
+
+            repository.deleteAllByIdentifiers(List.of());
+
+            assertThat(countAllRows()).isEqualTo(before);
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_be_idempotent_when_called_twice() {
+            repository.deleteAllByIdentifiers(List.of(IDENTIFIER_1));
+
+            assertThatCode(() -> repository.deleteAllByIdentifiers(List.of(IDENTIFIER_1)))
+                .doesNotThrowAnyException();
+            assertThat(countRows(IDENTIFIER_1)).isZero();
+        }
+
+        @Test
+        @WithMessageAndAttachmentData
+        void should_process_more_identifiers_than_the_batch_size() {
+            var identifiers = new ArrayList<String>();
+
+            identifiers.add(IDENTIFIER_1);
+
+            for (int i = 0; i < 2_500; i++) {
+                identifiers.add("unknown_identifier_" + i);
+            }
+
+            identifiers.add(IDENTIFIER_3);
+
+            repository.deleteAllByIdentifiers(identifiers);
+
+            assertThat(countRows(IDENTIFIER_1)).isZero();
+            assertThat(countRows(IDENTIFIER_3)).isZero();
+            assertThat(countRows(IDENTIFIER_2)).isEqualTo(1);
+        }
+
+        @Test
+        void should_throw_when_the_identifiers_are_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.deleteAllByIdentifiers(null)
+            );
+        }
+    }
 }

@@ -12,12 +12,16 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.pmode
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import eu.ecodex.connector.ActionTestFixtures;
 import eu.ecodex.connector.BusinessDomainIdentifierTestFixtures;
 import eu.ecodex.connector.application.port.spi.pmode.ConnectorProcessingModeActionRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
+import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeAction;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.AbstractRepositoryTest;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.pmode.ConnectorProcessingModeActionEntity;
+import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.pmode.ConnectorProcessingModeEntity;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -74,6 +78,26 @@ public class ConnectorDBProcessingModeActionRepositoryTest extends AbstractRepos
 
             assertThat(savedAction).isNotNull();
             assertThat(savedAction).hasSize(1);
+        }
+
+        @Test
+        @WithProcessingModeData
+        void should_persist_the_action_name() {
+            var action = ActionTestFixtures.createAction();
+
+            var savedActions = repository.saveAll(List.of(action), DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(savedActions)
+                .extracting(ConnectorProcessingModeAction::name)
+                .containsExactly(action.name());
+        }
+
+        @Test
+        @WithProcessingModeData
+        void should_return_an_empty_list_when_there_are_no_actions_to_save() {
+            var savedActions = repository.saveAll(List.of(), DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(savedActions).isEmpty();
         }
 
         @Test
@@ -161,6 +185,76 @@ public class ConnectorDBProcessingModeActionRepositoryTest extends AbstractRepos
 
             assertThat(actions).isNotNull();
             assertThat(actions).hasSize(31);
+        }
+
+        @Test
+        @WithProcessingModeData
+        void should_return_an_empty_list_when_there_are_no_actions() {
+            var actions = repository.findAllByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN);
+
+            assertThat(actions).isEmpty();
+        }
+
+        @Test
+        @WithActionData
+        void should_return_the_actions_sorted_by_name_ascending() {
+            var names = repository.findAllByBusinessDomainIdentifier(DEFAULT_BUSINESS_DOMAIN)
+                                  .stream()
+                                  .map(ConnectorProcessingModeAction::name)
+                                  .toList();
+
+            assertThat(names.getFirst()).isEqualTo("BD-009001-ChangeAssistance");
+            assertThat(names).containsSubsequence(
+                "BD-009001-ChangeAssistance",
+                "BD-009001-IssueAssistance",
+                "BD-009001-TakeMeasure"
+            );
+        }
+
+        @Test
+        void should_fail_when_the_business_domain_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findAllByBusinessDomainIdentifier(null)
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("to domain")
+    class ToDomain {
+        @Test
+        void should_return_null_when_the_entity_is_null() {
+            assertThat(ConnectorDBProcessingModeActionRepository.toDomain(null)).isNull();
+        }
+
+        @Test
+        void should_map_the_name_of_the_entity() {
+            var entity = ConnectorProcessingModeActionEntity
+                .builder()
+                .name("Test_Form")
+                .build();
+
+            var action = ConnectorDBProcessingModeActionRepository.toDomain(entity);
+
+            assertThat(action).isNotNull();
+            assertThat(action.name()).isEqualTo("Test_Form");
+        }
+    }
+
+    @Nested
+    @DisplayName("to entity")
+    class ToEntity {
+        @Test
+        void should_map_the_name_and_the_processing_mode() {
+            var processingMode = mock(ConnectorProcessingModeEntity.class);
+            var action = ActionTestFixtures.createAction();
+
+            var entity =
+                ConnectorDBProcessingModeActionRepository.toEntity(action, processingMode);
+
+            assertThat(entity.getName()).isEqualTo(action.name());
+            assertThat(entity.getProcessingMode()).isSameAs(processingMode);
         }
     }
 }

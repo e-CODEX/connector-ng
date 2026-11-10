@@ -20,6 +20,7 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.Connec
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorMessageDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.transport.ConnectorMessageTransportStepDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.message.c2ctest.ConnectorTestMessageRequest;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,6 +51,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 )
 @RequestMapping("/api/v1/admin/messages")
 public interface ConnectorMessageAdminApi {
+    @Hidden
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = "/outbound/test", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Submit a test message from this connector to another connector")

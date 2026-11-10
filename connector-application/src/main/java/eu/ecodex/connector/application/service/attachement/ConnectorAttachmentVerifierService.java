@@ -10,10 +10,12 @@
 
 package eu.ecodex.connector.application.service.attachement;
 
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorAttachmentVerifier;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
+import java.util.HashSet;
 import java.util.List;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -32,11 +34,19 @@ public class ConnectorAttachmentVerifierService implements ConnectorAttachmentVe
 
     @Override
     public void execute(@NonNull List<ConnectorMessageAttachment> attachments) {
+        var seen = new HashSet<>();
         for (var attachment : attachments) {
-            var exists = this.attachmentRepository.existsByIdentifier(attachment.identifier());
+            var identifier = attachment.identifier();
+
+            if (!seen.add(identifier)) {
+                throw new ConnectorMessageAttachmentException(
+                    "Duplicate attachment identifier found: [%s] ".formatted(identifier));
+            }
+
+            var exists = this.attachmentRepository.existsByIdentifier(identifier);
             if (!exists) {
                 throw new ConnectorMessageAttachmentNotFoundException(
-                    "Attachment not found by identifier " + attachment.identifier());
+                    "Attachment not found by identifier: [%s] ".formatted(identifier));
             }
         }
     }

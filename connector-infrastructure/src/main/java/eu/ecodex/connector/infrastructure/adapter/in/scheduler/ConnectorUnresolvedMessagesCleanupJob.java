@@ -10,7 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.scheduler;
 
-import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessagesAttachments;
+import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessages;
 import eu.ecodex.connector.infrastructure.config.property.deletion.ConnectorDeletionProperties;
 import java.time.Clock;
 import java.time.Instant;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
  * Scheduled job that cleans up the attachments of unresolved messages.
  *
  * <p>On each run, the job computes a threshold instant (now minus the configured unresolved
- * messages threshold) and delegates to {@link ConnectorCleanupUnresolvedMessagesAttachments}, which
+ * messages threshold) and delegates to {@link ConnectorCleanupUnresolvedMessages}, which
  * removes the attachments of the messages that are still unresolved at that point.
  *
  * <p>The schedule is configured with the property
@@ -32,7 +32,7 @@ import org.springframework.stereotype.Component;
 public class ConnectorUnresolvedMessagesCleanupJob {
     private final ConnectorDeletionProperties properties;
     private final Clock clock;
-    private final ConnectorCleanupUnresolvedMessagesAttachments
+    private final ConnectorCleanupUnresolvedMessages
         cleanupUnresolvedMessagesAttachments;
 
     /**
@@ -48,7 +48,7 @@ public class ConnectorUnresolvedMessagesCleanupJob {
     public ConnectorUnresolvedMessagesCleanupJob(
         ConnectorDeletionProperties properties,
         Clock clock,
-        ConnectorCleanupUnresolvedMessagesAttachments cleanupUnresolvedMessagesAttachments) {
+        ConnectorCleanupUnresolvedMessages cleanupUnresolvedMessagesAttachments) {
         this.properties = properties;
         this.clock = clock;
         this.cleanupUnresolvedMessagesAttachments = cleanupUnresolvedMessagesAttachments;

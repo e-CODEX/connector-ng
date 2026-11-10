@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.service.attachement;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.service.message.ConnectorCleanupResolvedMessageAttachmentsService;
-import eu.ecodex.connector.application.service.message.ConnectorCleanupUnresolvedMessagesAttachmentsService;
+import eu.ecodex.connector.application.service.message.ConnectorCleanupUnresolvedMessagesService;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
  *
  * <p>This component holds the deletion logic shared by the attachment cleanups (see
  * {@link ConnectorCleanupOrphanedAttachmentsService},
- * {@link ConnectorCleanupUnresolvedMessagesAttachmentsService} and
+ * {@link ConnectorCleanupUnresolvedMessagesService} and
  * {@link ConnectorCleanupResolvedMessageAttachmentsService}). For each attachment, the content is
  * removed from the file storage (see {@link ConnectorFileStorageProvider#deleteByIdentifier}), then
  * the attachments whose content was deleted are marked as deleted in the

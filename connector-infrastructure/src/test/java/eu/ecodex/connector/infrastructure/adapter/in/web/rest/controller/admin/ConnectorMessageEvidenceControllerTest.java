@@ -8,7 +8,7 @@
  * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
  */
 
-package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller;
+package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -21,7 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import eu.ecodex.connector.EvidenceTestFixtures;
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.port.api.evidence.ConnectorRetrieveEvidence;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.evidence.ConnectorEvidenceController;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.evidence.ConnectorEvidenceAdminController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +31,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-@WebMvcTest(ConnectorEvidenceController.class)
+@WebMvcTest(ConnectorEvidenceAdminController.class)
 
 @DisplayName("ConnectorMessageEvidenceController")
 public class ConnectorMessageEvidenceControllerTest extends AbstractWebMvcTest {
-    private static final String URL_DOWNLOAD = "/api/v1/evidences/%s/download";
+    private static final String URL_DOWNLOAD = "/api/v1/admin/evidences/%s/download";
     private static final String EVIDENCE_UUID = "12345678-1234-1234-1234-123456789012";
 
     @MockitoBean

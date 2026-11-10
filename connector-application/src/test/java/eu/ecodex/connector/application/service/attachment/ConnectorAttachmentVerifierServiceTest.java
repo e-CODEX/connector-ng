@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentException;
 import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAttachmentNotFoundException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
 import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentVerifierService;
@@ -87,6 +88,29 @@ class ConnectorAttachmentVerifierServiceTest {
         when(attachmentRepository.existsByIdentifier(anyString())).thenReturn(false);
         // When
         assertThrows(ConnectorMessageAttachmentNotFoundException.class,
+            () -> attachmentVerifierService.execute(attachments));
+
+        // Then
+        verify(attachmentRepository).existsByIdentifier("identifier");
+        verifyNoMoreInteractions(attachmentRepository);
+    }
+
+    @Test
+    void should_failed_when_duplicate_attachment_identifier() {
+        // Given
+        var attachment = ConnectorMessageAttachment.builder()
+            .identifier("identifier")
+            .build();
+        var attachment2 = ConnectorMessageAttachment.builder()
+            .identifier("identifier")
+            .build();
+        var attachments = List.of(
+            attachment, attachment2
+        );
+
+        when(attachmentRepository.existsByIdentifier(anyString())).thenReturn(true);
+        // When
+        assertThrows(ConnectorMessageAttachmentException.class,
             () -> attachmentVerifierService.execute(attachments));
 
         // Then

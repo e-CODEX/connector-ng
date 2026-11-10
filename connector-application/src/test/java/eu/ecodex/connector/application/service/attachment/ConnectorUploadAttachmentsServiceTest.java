@@ -21,7 +21,6 @@ import eu.ecodex.connector.application.exception.attachment.ConnectorMessageAtta
 import eu.ecodex.connector.application.port.api.attachment.FileUploadCommand;
 import eu.ecodex.connector.application.port.spi.ConnectorFileStorageProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorUploadAttachmentsService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

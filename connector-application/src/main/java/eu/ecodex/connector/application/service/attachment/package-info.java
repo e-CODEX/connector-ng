@@ -16,4 +16,4 @@
  * message attachments, such as registering, retrieving and validating them, by delegating business
  * rules to the domain model and storage or other technical concerns to outbound ports.
  */
-package eu.ecodex.connector.application.service.attachement;
+package eu.ecodex.connector.application.service.attachment;

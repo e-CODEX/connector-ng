@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.attachment.ConnectorAttachmentCleanupException;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
+import eu.ecodex.connector.application.service.attachment.ConnectorAttachmentFilesDeleter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

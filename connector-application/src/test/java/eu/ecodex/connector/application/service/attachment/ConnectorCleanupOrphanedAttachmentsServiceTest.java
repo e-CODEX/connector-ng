@@ -17,8 +17,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAttachmentRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
-import eu.ecodex.connector.application.service.attachement.ConnectorCleanupOrphanedAttachmentsService;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import java.time.Instant;
 import java.util.List;

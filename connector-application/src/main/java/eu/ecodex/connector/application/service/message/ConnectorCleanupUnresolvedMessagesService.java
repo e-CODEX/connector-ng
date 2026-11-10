@@ -12,7 +12,7 @@ package eu.ecodex.connector.application.service.message;
 
 import eu.ecodex.connector.application.port.api.message.ConnectorCleanupUnresolvedMessages;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
-import eu.ecodex.connector.application.service.attachement.ConnectorAttachmentFilesDeleter;
+import eu.ecodex.connector.application.service.attachment.ConnectorAttachmentFilesDeleter;
 import java.time.Instant;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;

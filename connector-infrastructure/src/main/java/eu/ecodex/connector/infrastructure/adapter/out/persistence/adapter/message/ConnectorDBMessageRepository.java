@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.messa
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageAS4PropertiesRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageBusinessContentRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
@@ -59,7 +60,9 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
     private final ConnectorBusinessDomainJpaRepository businessDomainJpaRepository;
     private final ConnectorMessageAS4PropertiesRepository as4PropertiesRepository;
     private final ConnectorMessageBusinessContentRepository messageBusinessContentRepository;
+    private final ConnectorMessageTransportStepRepository transportStepRepository;
     private final PaginationMapper paginationMapper;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -75,6 +78,8 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
      * @param as4PropertiesRepository          JPA repository responsible for managing
      *                                         {@code ConnectorMessageAS4Properties} entities.
      * @param messageBusinessContentRepository JPA repository responsible for managing
+     * @param transportStepRepository          the repository used to read and delete the transport
+     *                                         steps of a message (must not be nul
      * @param paginationMapper                 the utility for mapping between page requests and
      *                                         results
      */
@@ -84,12 +89,14 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
         ConnectorMessageAS4PropertiesJpaRepository as4PropertiesJpaRepository,
         ConnectorMessageAS4PropertiesRepository as4PropertiesRepository,
         ConnectorMessageBusinessContentRepository messageBusinessContentRepository,
+        ConnectorMessageTransportStepRepository transportStepRepository,
         PaginationMapper paginationMapper) {
         this.messageJpaRepository = messageJpaRepository;
         this.as4PropertiesJpaRepository = as4PropertiesJpaRepository;
         this.businessDomainJpaRepository = businessDomainJpaRepository;
         this.as4PropertiesRepository = as4PropertiesRepository;
         this.messageBusinessContentRepository = messageBusinessContentRepository;
+        this.transportStepRepository = transportStepRepository;
         this.paginationMapper = paginationMapper;
     }
 
@@ -345,6 +352,15 @@ public class ConnectorDBMessageRepository implements ConnectorMessageRepository 
         var updatedMessage = this.messageJpaRepository.save(foundMessage);
 
         return toDomain(updatedMessage);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByIdentifier(@NonNull String identifier) {
+        this.transportStepRepository.deleteByTransportedMessageIdentifier(identifier);
+        this.messageBusinessContentRepository.deleteByMessageIdentifier(identifier);
+        this.as4PropertiesJpaRepository.deleteByMessageIdentifier(identifier);
+        this.messageJpaRepository.deleteByIdentifier(identifier);
     }
 
     private ConnectorMessageEntity toEntity(ConnectorBusinessMessage message) {

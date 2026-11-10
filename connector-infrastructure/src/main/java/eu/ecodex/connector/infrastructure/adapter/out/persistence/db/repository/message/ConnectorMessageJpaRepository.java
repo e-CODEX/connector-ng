@@ -62,4 +62,6 @@ public interface ConnectorMessageJpaRepository extends
     )
     void markAsDeleted(@Param("identifier") String identifier,
                       @Param("deletedAt") Instant deletedAt);
+
+    void deleteByIdentifier(String identifier);
 }

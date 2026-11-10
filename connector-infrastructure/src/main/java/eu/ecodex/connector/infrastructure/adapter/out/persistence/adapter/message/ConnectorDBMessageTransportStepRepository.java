@@ -37,12 +37,14 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * RDBMS implementation of {@link ConnectorMessageTransportStepRepository}.
  */
 @Slf4j
 @Component
+@Transactional(readOnly = true)
 public class ConnectorDBMessageTransportStepRepository
     implements ConnectorMessageTransportStepRepository {
     private final ConnectorMessageTransportStepJpaRepository transportStepJpaRepository;
@@ -75,6 +77,7 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
+    @Transactional
     public ConnectorMessageTransportStep save(
         @NonNull ConnectorMessageTransportStep transportStep) {
         try {
@@ -95,6 +98,7 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
+    @Transactional
     public ConnectorMessageTransportStep update(
         @NonNull String identifier,
         @NonNull ConnectorMessageTransportStep transportStep) {
@@ -119,6 +123,7 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
+    @Transactional
     public void updateStatus(
         @NonNull List<String> identifiers,
         @NonNull ConnectorMessageTransportStatus status) {
@@ -167,6 +172,12 @@ public class ConnectorDBMessageTransportStepRepository
                                                        .map(this::toDomain);
 
         return paginationMapper.toPageResult(transportSteps);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByTransportedMessageIdentifier(@NonNull String messageIdentifier) {
+        transportStepJpaRepository.deleteByTransportedMessageIdentifier(messageIdentifier);
     }
 
     private ConnectorMessageTransportStep toDomain(ConnectorMessageTransportStepEntity entity) {

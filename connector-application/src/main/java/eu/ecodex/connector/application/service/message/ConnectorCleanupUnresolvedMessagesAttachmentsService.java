@@ -31,10 +31,10 @@ public class ConnectorCleanupUnresolvedMessagesAttachmentsService
     /**
      * Creates the service.
      *
-     * @param messageRepository the repository used to find the unresolved messages and to mark them
-     *                          as deleted (must not be null)
+     * @param messageRepository the repository used to find and delete the unresolved messages (must
+     *                          not be null)
      * @param filesDeleter      the component that deletes the content of the attachments from the
-     *                          file storage and marks them as deleted (must not be null)
+     *                          file storage (must not be null)
      */
     public ConnectorCleanupUnresolvedMessagesAttachmentsService(
         ConnectorMessageRepository messageRepository,
@@ -55,28 +55,35 @@ public class ConnectorCleanupUnresolvedMessagesAttachmentsService
             unresolvedMessages.size(), threshold
         );
 
-        var total = ConnectorAttachmentFilesDeleter.Result.NONE;
+        var filesTotal = ConnectorAttachmentFilesDeleter.Result.NONE;
+        var messagesDeleted = 0;
+        var messagesFailed = 0;
 
         for (var message : unresolvedMessages) {
+            var identifier = message.identifier();
             try {
-                var result = filesDeleter.deleteActiveAttachmentsOf(message.identifier());
-                total = total.plus(result);
+                var result = filesDeleter.deleteActiveAttachmentsOf(identifier);
+                filesTotal = filesTotal.plus(result);
 
-                if (result.failed() == 0) {
-                    messageRepository.setAsDeleted(message.identifier());
+                if (result.failed() > 0) {
+                    // keep the message and its attachment rows so the next run retries the files
+                    messagesFailed++;
+                    continue;
                 }
+
+                messageRepository.deleteByIdentifier(identifier);
+                messagesDeleted++;
             } catch (RuntimeException e) {
                 // e.g. database error: do not abort the other messages, retried at next run
-                log.warn(
-                    "Could not clean up the attachments of unresolved message [{}]",
-                    message.identifier(), e
-                );
+                messagesFailed++;
+                log.warn("Could not delete unresolved message [{}]", identifier, e);
             }
         }
 
         log.info(
-            "Unresolved messages attachments cleanup done: [{}] deleted, [{}] failed",
-            total.deleted(), total.failed()
+            "Unresolved messages cleanup done: [{}] messages deleted, [{}] failed; "
+                + "files: [{}] deleted, [{}] failed",
+            messagesDeleted, messagesFailed, filesTotal.deleted(), filesTotal.failed()
         );
     }
 }

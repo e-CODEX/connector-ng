@@ -14,6 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -74,20 +75,20 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
             }
 
             @Test
-            void should_not_mark_any_message_as_deleted() {
+            void should_not_delete_any_message() {
                 when(messageRepository.findAllUnresolved(THRESHOLD)).thenReturn(List.of());
 
                 service.execute(THRESHOLD);
 
-                verify(messageRepository, never()).setAsDeleted(anyString());
+                verify(messageRepository, never()).deleteByIdentifier(anyString());
             }
         }
 
         @Nested
-        @DisplayName("when all deletions succeed")
-        class WhenAllDeletionsSucceed {
+        @DisplayName("when all file deletions succeed")
+        class WhenAllFileDeletionsSucceed {
             @Test
-            void should_clean_up_the_attachments_of_every_unresolved_message() {
+            void should_delete_the_files_of_every_unresolved_message() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1"), message("msg-2")));
                 when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
@@ -100,7 +101,7 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
             }
 
             @Test
-            void should_mark_every_message_as_deleted() {
+            void should_delete_every_message() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1"), message("msg-2")));
                 when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
@@ -108,12 +109,12 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
 
                 service.execute(THRESHOLD);
 
-                verify(messageRepository).setAsDeleted("msg-1");
-                verify(messageRepository).setAsDeleted("msg-2");
+                verify(messageRepository).deleteByIdentifier("msg-1");
+                verify(messageRepository).deleteByIdentifier("msg-2");
             }
 
             @Test
-            void should_mark_the_message_as_deleted_when_it_has_no_active_attachment() {
+            void should_delete_the_message_when_it_has_no_active_attachment() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1")));
                 when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
@@ -121,7 +122,21 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
 
                 service.execute(THRESHOLD);
 
-                verify(messageRepository).setAsDeleted("msg-1");
+                verify(messageRepository).deleteByIdentifier("msg-1");
+            }
+
+            @Test
+            void should_delete_the_files_before_the_message() {
+                when(messageRepository.findAllUnresolved(THRESHOLD))
+                    .thenReturn(List.of(message("msg-1")));
+                when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
+                    .thenReturn(new ConnectorAttachmentFilesDeleter.Result(1, 0));
+
+                service.execute(THRESHOLD);
+
+                var orders = inOrder(filesDeleter, messageRepository);
+                orders.verify(filesDeleter).deleteActiveAttachmentsOf("msg-1");
+                orders.verify(messageRepository).deleteByIdentifier("msg-1");
             }
         }
 
@@ -129,7 +144,7 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
         @DisplayName("when a file deletion fails")
         class WhenAFileDeletionFails {
             @Test
-            void should_not_mark_the_message_as_deleted() {
+            void should_not_delete_the_message_so_that_the_files_are_retried() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1")));
                 when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
@@ -137,11 +152,11 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
 
                 service.execute(THRESHOLD);
 
-                verify(messageRepository, never()).setAsDeleted(anyString());
+                verify(messageRepository, never()).deleteByIdentifier(anyString());
             }
 
             @Test
-            void should_still_mark_the_other_messages_as_deleted() {
+            void should_still_delete_the_other_messages() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1"), message("msg-2")));
                 when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
@@ -151,8 +166,8 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
 
                 service.execute(THRESHOLD);
 
-                verify(messageRepository, never()).setAsDeleted("msg-1");
-                verify(messageRepository).setAsDeleted("msg-2");
+                verify(messageRepository, never()).deleteByIdentifier("msg-1");
+                verify(messageRepository).deleteByIdentifier("msg-2");
             }
         }
 
@@ -160,7 +175,7 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
         @DisplayName("when the cleanup of one message throws")
         class WhenTheCleanupOfOneMessageThrows {
             @Test
-            void should_continue_with_the_next_message_when_the_deleter_throws() {
+            void should_continue_with_the_next_message_when_the_files_deleter_throws() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1"), message("msg-2"), message("msg-3")));
                 when(filesDeleter.deleteActiveAttachmentsOf("msg-1"))
@@ -172,23 +187,22 @@ class ConnectorCleanupUnresolvedMessagesAttachmentsServiceTest {
 
                 assertThatCode(() -> service.execute(THRESHOLD)).doesNotThrowAnyException();
 
-                verify(filesDeleter).deleteActiveAttachmentsOf("msg-3");
-                verify(messageRepository, never()).setAsDeleted("msg-2");
-                verify(messageRepository).setAsDeleted("msg-3");
+                verify(messageRepository, never()).deleteByIdentifier("msg-2");
+                verify(messageRepository).deleteByIdentifier("msg-3");
             }
 
             @Test
-            void should_continue_with_the_next_message_when_marking_one_as_deleted_fails() {
+            void should_continue_with_the_next_message_when_deleting_one_message_fails() {
                 when(messageRepository.findAllUnresolved(THRESHOLD))
                     .thenReturn(List.of(message("msg-1"), message("msg-2")));
                 when(filesDeleter.deleteActiveAttachmentsOf(anyString()))
                     .thenReturn(ConnectorAttachmentFilesDeleter.Result.NONE);
                 doThrow(new RuntimeException("database error"))
-                    .when(messageRepository).setAsDeleted("msg-1");
+                    .when(messageRepository).deleteByIdentifier("msg-1");
 
                 assertThatCode(() -> service.execute(THRESHOLD)).doesNotThrowAnyException();
 
-                verify(messageRepository).setAsDeleted("msg-2");
+                verify(messageRepository).deleteByIdentifier("msg-2");
             }
         }
 

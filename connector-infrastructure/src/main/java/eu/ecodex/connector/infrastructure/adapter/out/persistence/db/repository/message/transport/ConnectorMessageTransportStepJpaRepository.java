@@ -71,4 +71,6 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     List<ConnectorMessageTransportStepEntity> findAllByStatusAndLinkPartnerNameOrderByCreatedAtAsc(
         ConnectorMessageTransportStatus status, String linkPartnerName
     );
+
+    void deleteByTransportedMessageIdentifier(String messageIdentifier);
 }

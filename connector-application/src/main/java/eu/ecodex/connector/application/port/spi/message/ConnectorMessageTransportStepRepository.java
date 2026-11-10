@@ -120,4 +120,16 @@ public interface ConnectorMessageTransportStepRepository {
      */
     ConnectorPageResult<ConnectorMessageTransportStep> findAll(
         @Nonnull ConnectorTransportStepsListFilter filter);
+
+    /**
+     * Deletes all the transport steps of the message identified by the given identifier.
+     *
+     * <p>The transport steps are physically removed, not flagged as deleted. The message itself
+     * is not affected, and nothing happens if the message has no transport step. This is part of
+     * permanently deleting a message (see {@link ConnectorMessageRepository#deleteByIdentifier}).
+     *
+     * @param messageIdentifier the unique identifier of the transported business message whose
+     *                          transport steps are deleted (must not be null)
+     */
+    void deleteByTransportedMessageIdentifier(@Nonnull String messageIdentifier);
 }

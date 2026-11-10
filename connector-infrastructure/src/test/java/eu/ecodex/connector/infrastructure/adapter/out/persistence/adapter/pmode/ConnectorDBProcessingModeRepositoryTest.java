@@ -30,7 +30,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SuppressWarnings({"checkstyle:MissingJavadocType", "checkstyle:LineLength", "DataFlowIssue"})
 @DisplayName("ConnectorProcessingModeRepository")
-public class ConnectorProcessingModeRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBProcessingModeRepositoryTest extends AbstractRepositoryTest {
     private static final String PROCESSING_MODE_UUID = "4f10aed9-2e5f-4780-87f7-5fe1070d5ccf";
     private static final ConnectorBusinessDomainIdentifier DEFAULT_BUSINESS_DOMAIN =
         BusinessDomainIdentifierTestFixtures.createDefaultBusinessDomainIdentifier();

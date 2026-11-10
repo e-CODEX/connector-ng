@@ -25,7 +25,7 @@ import org.springframework.test.context.jdbc.Sql;
 @SuppressWarnings("DataFlowIssue")
 
 @DisplayName("ConnectorMessageErrorRepository")
-public class ConnectorMessageErrorRepositoryTest extends AbstractRepositoryTest {
+public class ConnectorDBMessageErrorRepositoryTest extends AbstractRepositoryTest {
     private static final String MESSAGE_ID =
         "7a169fa8-1f0d-4a2c-aade-796b0b02fe58@connector.ecodex.eu";
 

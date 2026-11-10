@@ -174,7 +174,7 @@ arbitrary placeholder value required by the S3 client.
 | `connector.file.storage.s3.endpoint`
 | _(none)_
 | *Yes (if S3 enabled)*
-| S3 endpoint URL. Required for non-AWS providers (MinIO, OVH Object Storage, etc.)
+| S3 endpoint URL. Required for non-AWS providers (MinIO, Silo, OVH Object Storage, etc.)
 or when targeting a specific regional/VPC endpoint.
 
 |===

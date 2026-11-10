@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.EvidenceMessageTestFixtures;
+import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageProcessingConfigurationProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
@@ -146,7 +147,10 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
         @Test
         void should_return_the_step_returned_by_the_repository() {
-            var saved = ConnectorMessageTransportStep.builder().identifier("saved-step").build();
+            var saved = TransportStepFixtures.createTransportStepWithBusinessMessage()
+                .toBuilder()
+                .transportedMessage(message())
+                .build();
             when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
             when(transportStepRepository.save(any())).thenReturn(saved);
 

@@ -19,7 +19,8 @@ All notable changes to this project will be documented in this file.
 - ***Public endpoints*** — require no authentication.
 - **Message** — Support Connector-to-Connector test message.
 - **Orphaned Attachments Cleanup** — Support automatic deletion of `orphaned attachment` files.
-- **Unresolved Messages Cleanup** — Support automatic deletion of attachment files of `unresolved messages`.
+- **Unresolved Messages Cleanup** — Support automatic purge of `unresolved messages`: their attachment files are deleted from the storage, then the messages and their attachments are permanently removed.
+- - **Resolved Messages Cleanup** — Support automatic deletion of attachment files when a message is `confirmed` or `rejected`.
 - **S3 Bucket Auto-Creation** — Support automatic creation of the S3 bucket at startup via `connector.s3.auto-create-bucket` (enabled by default).
 
 #### Fixes
@@ -29,6 +30,7 @@ All notable changes to this project will be documented in this file.
 - **Stream Management** — Fixed improper stream closure that could lead to resource leaks.
 - **Message** — Inbound message payload parsing.
 - **Message** — Restore backward compatibility between the 7.x and 4.x/6.x series.
+- **Message** — Fix an issue that sometimes prevented the `business content` from being submitted to the backend via `SOAP`.
 
 ### Technical
 
@@ -56,3 +58,4 @@ All notable changes to this project will be documented in this file.
 
 - **Docker-friendly deployment** — The new connector is designed to run smoothly in containerized environments.
 - **Shared JMS broker** — The connector now shares the same JMS broker as the gateway.
+- **Dependency Updates** — Bump libraries to their latest versions.

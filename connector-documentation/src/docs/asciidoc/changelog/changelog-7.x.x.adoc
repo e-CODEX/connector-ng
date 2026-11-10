@@ -15,9 +15,9 @@ endif::header[]
 * *Message* -- Missing security validation for incoming business message containers.
 * *Administration* -- REST API endpoints to support the administration portal.
 * *Authentication enabled*  --  REST API endpoints require a valid JWT bearer token unless explicitly listed public endpoints.
-** *An admin account is created by default* -- Check the deployment properties for its credentials.
-** *Admin-only endpoints* -- `/api/v1/admin/users/**` requires the caller to hold the `ADMIN` role, in addition to being authenticated.
-** *Public endpoints* -- require no authentication.
+* *An admin account is created by default* -- Check the deployment properties for its credentials.
+* *Admin-only endpoints* -- `/api/v1/admin/users/**` requires the caller to hold the `ADMIN` role, in addition to being authenticated.
+* *Public endpoints* -- require no authentication.
 * *Message* -- Support Connector-to-Connector test message.
 * *Orphaned Attachments Cleanup* -- Support automatic deletion of `orphaned attachment` files.
 * *Unresolved Messages Cleanup* -- Support automatic purge of `unresolved messages`: their attachment files are deleted from the storage, then the messages and their attachments are permanently removed from the database.

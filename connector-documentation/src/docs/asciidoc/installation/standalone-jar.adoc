@@ -19,7 +19,7 @@ Use this installation option when hosting the connector natively outside any con
 | Java (JRE) | 21 or later | Only the runtime environment is needed, not the full JDK distribution
 | Database | MySQL 8, MariaDB | An empty database schema and a dedicated user role are required
 | Apache ActiveMQ Classic | 6.x | Required for message queuing workflows with the e-CODEX Gateway
-| Amazon S3 or MinIO File storage |  | Required to store message attachments
+| Amazon S3 or MinIO / Silo File storage |  | Required to store message attachments
 |===
 
 To check your target server Java version:

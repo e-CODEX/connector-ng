@@ -21,6 +21,7 @@ The following S3-compatible providers are supported:
 
 * Amazon S3
 * MinIO
+* Silo
 * Other S3-compatible object storage services
 
 == Temporary File Storage Configuration
@@ -120,7 +121,7 @@ the connector, otherwise the connector cannot store any data.
 
 | `connector.file.storage.s3.endpoint`
 | S3 endpoint URL. Must be an absolute `http` or `https` URL including a host and, if needed, a port.
-Required for non-AWS providers (MinIO, OVH Object Storage, etc.) or when targeting a specific
+Required for non-AWS providers (MinIO, Silo, OVH Object Storage, etc.) or when targeting a specific
 regional/VPC endpoint. When omitted, the standard AWS endpoint for the configured region is used.
 | Yes
 | `https://s3.eu-west-1.amazonaws.com`

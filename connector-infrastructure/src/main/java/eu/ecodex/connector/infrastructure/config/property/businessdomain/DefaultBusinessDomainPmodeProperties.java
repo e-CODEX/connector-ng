@@ -14,14 +14,12 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * Default business domain P-Mode properties.
  */
 @Getter
 @Setter
-@Validated
 public class DefaultBusinessDomainPmodeProperties {
     @Valid
     @NotBlank

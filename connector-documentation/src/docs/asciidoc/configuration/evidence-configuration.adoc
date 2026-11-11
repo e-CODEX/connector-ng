@@ -9,6 +9,9 @@ Generated evidences are electronically signed (XAdES) and include mandatory issu
 
 Configuration is provided via `application.properties` under the `connector.evidences.*` prefix.
 
+NOTE: The configuration is validated at startup. A missing or blank mandatory value stops the
+connector with an error naming the offending property.
+
 == Signature configuration
 
 Properties under `connector.evidences.signature.*` control how REM evidence XML is signed.
@@ -18,20 +21,26 @@ Properties under `connector.evidences.signature.*` control how REM evidence XML 
 |===
 | Property | Description | Optional | Example
 
-| `connector.evidences.signature.payload-digest-algorithm`
+| `connector.evidences.signature.digest-algorithm`
 | Digest algorithm used when hashing the business payload referenced by the evidence.
-| No
-| `SHA256`
+| Yes
+| `SHA256`. By default, set to *SHA256*
+
+| `connector.evidences.signature.encryption-algorithm`
+| Encryption algorithm of the signing key.
+| Yes
+| `RSA`. By default, set to *RSA*
 
 | `connector.evidences.signature.keystore.path`
-| Classpath or filesystem path to the keystore holding the signing private key.
+| Classpath or filesystem location of the keystore holding the signing private key.
+Use the `file:` or `classpath:` prefix.
 | No
-| `classpath:keystores/connector-keystore.jks`
+| `file:./config/keystores/connector-keystore.jks`
 
 | `connector.evidences.signature.keystore.password`
 | Password for the keystore.
 | No
-| *(secret)*
+| `${EVIDENCES_KEYSTORE_PASSWORD}`
 
 | `connector.evidences.signature.keystore.type`
 | Keystore type (for example `JKS` or `PKCS12`).
@@ -46,24 +55,24 @@ Properties under `connector.evidences.signature.*` control how REM evidence XML 
 | `connector.evidences.signature.private-key.password`
 | Password to unlock the private key entry.
 | No
-| *(secret)*
-
+| `${EVIDENCES_KEY_PASSWORD}`
 |===
 
 .Configuration Example
 [source,properties]
 ----
-connector.evidences.signature.keystore.path=classpath:keystores/connector-keystore.jks
-connector.evidences.signature.keystore.password=12345
+connector.evidences.signature.keystore.path=file:./config/keystores/connector-keystore.jks
+connector.evidences.signature.keystore.password=${EVIDENCES_KEYSTORE_PASSWORD}
 connector.evidences.signature.keystore.type=JKS
 connector.evidences.signature.private-key.alias=connector_blue
-connector.evidences.signature.private-key.password=12345
+connector.evidences.signature.private-key.password=${EVIDENCES_KEY_PASSWORD}
 connector.evidences.signature.digest-algorithm=SHA256
 ----
 
 == Issuer configuration
 
 Properties under `connector.evidences.issuer.*` are embedded into generated REM evidences.
+All of them are mandatory and must not be blank.
 
 .Issuer Configuration Properties
 [cols="35,40,10,15"]
@@ -99,7 +108,6 @@ Properties under `connector.evidences.issuer.*` are embedded into generated REM 
 | AS4 endpoint address of the evidence issuer gateway.
 | No
 | `mailto:gateway@connector.example`
-
 |===
 
 .Configuration Example
@@ -126,9 +134,18 @@ connector.evidences.issuer.postal-address.country=EU
 | Yes
 | `true`
 
+| `connector.message-processing.auto-trigger-delivery-evidences`
+| When `true`, delivery evidences are triggered automatically by the connector.
+| Yes
+| `false`
+
 | `connector.queues.outbound-evidence-trigger-queue`
-| JMS queue for outbound evidence triggers messages received from the backend.
+| JMS queue for outbound evidence trigger messages received from the backend.
 | Yes
 | By default, set to `connector.queues.outbound-evidence-trigger-queue`
 
+| `connector.queues.inbound-evidence-trigger-queue`
+| JMS queue for inbound evidence trigger messages.
+| Yes
+| By default, set to `connector.queues.inbound-evidence-trigger-queue`
 |===

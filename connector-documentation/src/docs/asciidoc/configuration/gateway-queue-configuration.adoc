@@ -17,10 +17,11 @@ The gateway queues handle:
 
 * Outbound message submission
 * Gateway response handling
-* Inbound message reception
 
 == Basic configuration
 Configuration is provided via `application.properties` under the `connector.queues.*` prefix.
+All properties are optional: when a property is not set, its default value is used.
+Queue names must not be blank.
 
 .Gateway Queue Configuration Properties
 [cols="35,40,10,15"]
@@ -36,12 +37,6 @@ Configuration is provided via `application.properties` under the `connector.queu
 | JMS queue on which the connector receives submission acknowledgements/replies from the gateway (e.g., confirmation that a submitted message was accepted or rejected by Domibus). Maps to Domibus's standard backend "reply" queue.
 | Yes
 | By default, set to `domibus.backend.jms.replyQueue`
-
-| `connector.queues.gateway-reception-queue`
-| JMS queue on which the connector receives inbound messages delivered by the gateway after they arrive over AS4 from a remote party. Maps to Domibus's standard backend "out" queue.
-| Yes
-| By default, set to `domibus.backend.jms.outQueue`
-
 |===
 
 .Configuration Example

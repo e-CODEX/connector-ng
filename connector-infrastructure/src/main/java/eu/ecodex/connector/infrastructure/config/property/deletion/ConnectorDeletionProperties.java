@@ -32,5 +32,5 @@ public class ConnectorDeletionProperties {
 
     @Valid
     @NestedConfigurationProperty
-    private DeletionRule unresolvedMessages = new DeletionRule(Duration.ofDays(7), "0 0 3 * * *");
+    private DeletionRule unresolvedMessages = new DeletionRule(Duration.ofDays(7), "0 10 0 * * *");
 }

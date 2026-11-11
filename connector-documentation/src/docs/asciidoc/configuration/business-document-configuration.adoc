@@ -9,6 +9,10 @@ This configuration defines the settings used for business document validation, s
 == Basic configuration
 Configuration is provided via `application.properties` under the `connector.business-document.*` prefix.
 
+NOTE: The configuration is validated at startup. A missing or blank mandatory value, a
+`default-advanced-system-type` that is not one of the allowed types, or a validation policy file
+that does not exist stops the connector with an error naming the offending property.
+
 .Business Document Configuration Properties
 [cols="35,40,10,15"]
 |===
@@ -25,7 +29,10 @@ Configuration is provided via `application.properties` under the `connector.busi
 | `BL`
 
 | `connector.business-document.default-advanced-system-type`
-| Default type of "advanced" electronic system used to qualify the document/transaction. *AUTHENTICATION_BASED* is also applicable.
+| Default type of "advanced" electronic system used to qualify the document/transaction.
+Values: `SIGNATURE_BASED` (determined by the digital signature of the business document) or
+`AUTHENTICATION_BASED` (determined by the authentication context of the message exchange).
+Must be one of the `allowed-advanced-system-types`.
 | No
 | `SIGNATURE_BASED`
 
@@ -35,26 +42,73 @@ Configuration is provided via `application.properties` under the `connector.busi
 | `file:./config/keystores/connector-truststore.jks`
 
 | `connector.business-document.signature.validation.truststore.password`
-|Password protecting the truststore.
+| Password protecting the truststore.
 | No
-| `*secret*`
+| `${BUSINESS_DOCUMENT_TRUSTSTORE_PASSWORD}`
 
 | `connector.business-document.signature.validation.truststore.type`
 | Truststore format
 | Yes
-| By default, set to `*JKS*`
+| By default, set to *JKS*
 
 | `connector.business-document.signature.validation.constraints-xml`
-| The same ETSI / eCodex validation policy file (102853) used here to constrain which signature/digest algorithms and certificate
-qualities are accepted when validating business document signatures.
-| No
-| By default, set to `*classpath:/102853/constraint.xml*`
+| The ETSI / eCodex validation policy file (102853) that constrains which signature/digest algorithms and certificate
+qualities are accepted when validating business document signatures. It is the same default policy as the one used for container validation.
+Accepts a `classpath:` or `file:` location. The file must exist, otherwise the startup fails.
+| Yes
+| By default, set to *classpath:/102853/constraint.xml*
 
 | `connector.business-document.authentication-validation.identity-provider`
 | Identity provider used to validate authentication claims attached to the business document.
-| No
+The `authentication-validation` block is optional, but `identity-provider` is required when the block is present.
+| Yes
 | `ERV`
+|===
 
+=== Certificate verification options
+
+The `connector.business-document.signature.validation.*` block also accepts the certificate
+verification options below. They are the same as for the container signature validation.
+
+.Certificate Verification Options
+[cols="35,40,10,15"]
+|===
+| Property suffix | Description | Optional | Example
+
+| `ocsp-enabled`
+| Whether OCSP is queried when verifying certificates.
+| Yes
+| By default, set to *true*
+
+| `crl-enabled`
+| Whether CRLs are queried when verifying certificates.
+| Yes
+| By default, set to *true*
+
+| `aia-enabled`
+| Whether the Authority Information Access extension is used to find issuer certificates.
+| Yes
+| By default, set to *true*
+
+| `truststore-enabled`
+| Whether the configured truststore is used. If `true`, the `truststore.*` block must be configured.
+| Yes
+| By default, set to *true*
+
+| `ignore-store-enabled`
+| Whether the configured ignore store is used. If `true`, the `ignore-store.*` block must be configured.
+| Yes
+| By default, set to *false*
+
+| `ignore-store.path` / `.password` / `.type`
+| Store with certificates to ignore during validation. `path` and `password` are required when the block is present, `type` defaults to `JKS`.
+| Yes
+| `file:./config/keystores/connector-ignore.jks`
+
+| `trusted-list-source`
+| Name of a trust source configured under `connector.dss.trust-list-sources.*`, used as trusted list source for validation.
+| Yes
+| `eu`
 |===
 
 .Configuration Example
@@ -64,7 +118,7 @@ connector.business-document.service-provider=TestProvider
 connector.business-document.country=BL
 connector.business-document.default-advanced-system-type=SIGNATURE_BASED
 connector.business-document.signature.validation.truststore.path=file:./config/keystores/connector-truststore.jks
-connector.business-document.signature.validation.truststore.password=12345
+connector.business-document.signature.validation.truststore.password=${BUSINESS_DOCUMENT_TRUSTSTORE_PASSWORD}
 connector.business-document.signature.validation.truststore.type=JKS
 connector.business-document.signature.validation.constraints-xml=classpath:/102853/constraint.xml
 connector.business-document.authentication-validation.identity-provider=ERV

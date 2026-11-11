@@ -18,25 +18,34 @@ Configuration is provided via `application.properties` under the `connector.rout
 
 | `connector.routing.enabled`
 | Master switch for message routing logic. When false, routing rules below are ignored and messages may fall back to a single static destination
-| No
-| `true/false`
+| Yes
+| `true/false`. By default, set to *false*
 
-| `connector.routing.backend-rules[*index*].link-name`
+| `connector.routing.default-backend-name`
+| Name of the backend link partner that receives the messages for which no routing rule matches.
+Required when `connector.routing.enabled` is `true`. Must match a declared backend link partner name.
+| Yes (No if routing is enabled)
+| `backend_alice`
+
+| `connector.routing.backend-rules[n].link-name`
 | Routing name (must match a declared backend link partner name).
 | No
 | `backend_alice`
 
-| `connector.routing.backend-rules[*index*].description`
-| Routing description.
+| `connector.routing.backend-rules[n].description`
+| Free-text description of the rule.
 | Yes
-| `backend_alice`
+| `Test service goes to Alice`
 
-| `connector.routing.backend-rules[*index*].match-clause`
-| Expression used to evaluate the message
+| `connector.routing.backend-rules[n].match-clause`
+| Expression used to evaluate the message. See <<routing-pattern>> for the syntax. Attribute values are case-sensitive.
 | No
 | `equals(ServiceName, 'Test')`
-
 |===
+
+NOTE: The configuration is validated at startup. If routing is enabled, a missing
+`default-backend-name`, or a rule without `link-name` or `match-clause`, stops the connector
+with an error naming the offending property.
 
 .Configuration Example
 [source,properties]
@@ -44,14 +53,20 @@ Configuration is provided via `application.properties` under the `connector.rout
 connector.routing.enabled=true
 connector.routing.default-backend-name=backend_alice
 connector.routing.backend-rules[0].link-name=backend_alice
-# Will match if the serviceName equals 'Test'
+# Will match if the ServiceName equals 'Test'
 connector.routing.backend-rules[0].match-clause=equals(ServiceName, 'Test')
 connector.routing.backend-rules[1].link-name=backend_abc
-# Will match if the serviceName equals 'abc' or the serviceType equals 'type2' (case-sensitive!)
+# Will match if the ServiceName equals 'abc' or the ServiceType equals 'type2' (case-sensitive!)
 connector.routing.backend-rules[1].match-clause=|(equals(ServiceName, 'abc'),equals(ServiceType, 'type2'))
+connector.routing.backend-rules[2].link-name=backend_xyz
+# Will match if the Action starts with 'Order' and the ServiceName is not 'Test'
+connector.routing.backend-rules[2].match-clause=&(startswith(Action, 'Order'),not(equals(ServiceName, 'Test')))
 ----
 
-.Routing Pattern Example
+[[routing-pattern]]
+== Routing pattern
+
+.Routing Pattern
 [source]
 ----
 <ROUTING_RULE_PATTERN> ::= <BOOLEAN_EXPRESSION> | <COMPARE_EXPRESSION> | <NOT_EXPRESSION>
@@ -62,6 +77,7 @@ connector.routing.backend-rules[1].match-clause=|(equals(ServiceName, 'abc'),equ
 <AS4_TYPE> ::= ServiceType | ServiceName | FinalRecipient | Action | FromPartyId | FromPartyRole
 | FromPartyIdType
 <VALUE> ::= <VALUE><LETTER> | <LETTER>
-<LETTER> can be every letter [a-z][A-Z][0-9] other printable characters might work, but
-they untested! ['\|&)( will definitiv not work!]
 ----
+
+NOTE: `<LETTER>` can be every letter or digit (`[a-z][A-Z][0-9]`). Other printable characters might work,
+but they are untested. The characters `'`, `\`, `|`, `&`, `)` and `(` will definitely not work in a value.

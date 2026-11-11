@@ -9,6 +9,9 @@ endif::distributiondir[]
 [[docker-install]]
 = Standalone Deployment — Containerized (Docker)
 
+NOTE: When upgrading from connector 6.x, first read the configuration migration guide.
+Several property names changed, and old names are silently ignored.
+
 == Prerequisites
 
 === Docker Engine and Docker Compose
@@ -32,14 +35,20 @@ The Connector NG is distributed as a Docker image hosted on the e-CODEX reposito
 The Connector NG uses a relational database to store message state and processing history. An empty schema and a dedicated database user must be created before the first start — the Connector NG creates its own tables automatically.
 
 Supported DBMS:
+
 * MySQL 8 or higher
-* MariaDB 10.6 or higher
+* MariaDB 12.3.2 or higher
+* PostgreSQL 17.0
+* Oracle 23
 
 === Message Broker — Apache ActiveMQ Classic
-The Connector NG exchanges messages with the Gateway through a JMS message broker. Apache ActiveMQ Classic **6.x** must be installed, running, and reachable on its TCP port (default: 61616).
+The Connector NG exchanges messages with the Gateway through a JMS message broker. Apache ActiveMQ Classic **6.x** must be installed, running, and reachable on its TCP port (default: 61616) before the connector starts.
+The Gateway and the connector use the same broker (see link:gateway-jms-broker-configuration.adoc[Gateway JMS Broker Configuration]).
 
 === File Storage — S3-Compatible
-Message attachments are stored in an S3-compatible object store. A dedicated bucket must be created and credentials provided to the Connector NG. **MinIO**, **Silo** or any enterprise S3 compatible storage solution is supported.
+Message attachments and other connector files are stored in an S3-compatible object store. **MinIO**, **Silo** or any enterprise S3 compatible storage solution is supported.
+Credentials must be provided to the Connector NG. By default the connector creates the configured bucket at startup, which requires permission to create buckets.
+If you create the bucket yourself, set `connector.file.storage.s3.auto-create-bucket=false`.
 
 === e-CODEX Gateway
 The Connector NG acts as a bridge between your backend and an e-CODEX Gateway. The Gateway must be installed, configured, and network-reachable before the Connector is started.
@@ -75,8 +84,9 @@ For more information about these variables, check the link:../configuration/inde
 ====
 
 Create a file named `.env` in your working directory. This file provides the Connector with the connection details for each external service.
+Never commit it to version control.
 
-..env
+.The .env file
 [source,properties]
 ----
 # Database
@@ -97,14 +107,21 @@ S3_REGION=us-east-1
 S3_BUCKET=attachments
 S3_ENDPOINT=http://<s3-host>:<s3-port>
 
-# Temporary files
-TEMP_DIR_LOCATION=/app/temp
-
 # Message broker (ActiveMQ)
 BROKER_URL=tcp://<activemq-host>:61616
 BROKER_USER=<broker_user>
 BROKER_PASSWORD=<broker_password>
 ----
+
+==== Temporary files directory
+
+The image provides the directory `/app/temp`, owned by the `connector` user with mode `700`, and sets
+`TEMP_DIR_LOCATION` to this path. You do not need to define the variable in the `.env` file.
+
+NOTE: When a volume or host folder is mounted on `/app/temp`, the owner and permissions of the mount
+replace the ones set in the image, and the connector does not start if they do not match.
+With a bind mount, make sure the host folder is owned by the container user (UID `1000` by default) and has mode `700`.
+A Docker named volume (for example `-v connector-temp:/app/temp`) is initialised from the image and needs no preparation.
 
 === Step 3 — Set up the Certificates
 The Connector communicates with both the Gateway and the backend using mutual TLS. Create a `config/keystores/` folder and place the following files inside:
@@ -116,7 +133,9 @@ The Connector communicates with both the Gateway and the backend using mutual TL
 
 NOTE: Feel free to name these files as you want.
 
-Then create `config/application.properties` to reference the keystores and their passwords:
+Then create `config/application.properties` to reference the keystores and their passwords.
+Paths such as `file:./config/keystores/connector-keystore.jks` are resolved inside the container,
+where `./config` is the folder mounted in step 4.
 
 .config/application.properties Sample
 [source,properties]
@@ -125,15 +144,17 @@ include::{distributiondir}/src/main/resources/config/application.properties[]
 ----
 
 === Step 4 — Run the Containerized Connector
-Run the Docker container by mounting your local configurations directory to the application container:
+Run the Docker container by mounting your local configurations directory to the application container.
+If you pulled the snapshot image in step 1, replace the image name with the snapshot one.
 
 [source,bash]
 ----
 docker run -d \
   --name connector-ng \
-  --env-file docker.env \
+  --restart unless-stopped \
+  --env-file .env \
   -p 30000:30000 \
-  -v ./config:/app/config \
+  -v "$(pwd)/config:/app/config" \
   scm.ecodex.eu/docker/connector-ng:latest
 ----
 
@@ -143,6 +164,24 @@ To watch the live log output stream:
 docker logs -f connector-ng
 ----
 
+==== Alternative — Docker Compose
+
+[source,yaml]
+----
+services:
+  connector-ng:
+    image: scm.ecodex.eu/docker/connector-ng:latest
+    container_name: connector-ng
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "30000:30000"
+    volumes:
+      - ./config:/app/config
+----
+
+Start it with `docker compose up -d`.
+
 === Step 5 — Verify Runtime Status
 
 Once running, the following endpoints are available:
@@ -150,5 +189,33 @@ Once running, the following endpoints are available:
 |===
 | Endpoint | URL
 | Root URL | `http://localhost:30000`
+| API Health | `http://localhost:30000/actuator/health`
 | Swagger UI | `http://localhost:30000/swagger-ui/index.html`
+|===
+
+Sign in to the administration UI with the account configured in `connector.admin.*`.
+
+== Troubleshooting startup errors
+
+[cols="2,3", options="header"]
+|===
+| Symptom | Likely cause
+
+| `docker: open .env: no such file or directory`
+| The `.env` file is not in the directory where the command is run.
+
+| The container exits right after start, and the log shows `Binding to target ... failed` with `Reason: must not be blank`
+| A mandatory property is missing or empty, for example a variable that is not defined in the `.env` file.
+
+| `Could not resolve placeholder '...'`
+| A variable used in `application.properties` is not defined in the `.env` file.
+
+| The startup stops with a message about the temporary directory
+| The mount on `/app/temp` has the wrong owner or permissions. See "Temporary files directory".
+
+| Errors about S3 access denied or an unreachable endpoint
+| Wrong credentials or endpoint. If the bucket does not exist, either the credentials need permission to create it, or create it manually and set `auto-create-bucket=false`.
+
+| Connection refused to the broker
+| ActiveMQ is not reachable from the container. Do not use `localhost` as the host: inside the container it refers to the container itself.
 |===

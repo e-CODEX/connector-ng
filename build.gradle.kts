@@ -171,6 +171,7 @@ val jacocoExclusions = listOf(
     "**/org/etsi/uri/**",
     "**/org/w3/**",
     "**/oasis/names/tc/saml/**",
+    "**/eu/spocseu/**",
 )
 
 tasks.register<JacocoReport>("jacocoRootReport") {

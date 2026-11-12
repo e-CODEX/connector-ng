@@ -9,7 +9,7 @@ plugins {
 
 allprojects {
     group = "eu.ecodex.connector"
-    version = "7.1.0-SNAPSHOT"
+    version = "7.1.0"
 
     repositories {
         mavenCentral()

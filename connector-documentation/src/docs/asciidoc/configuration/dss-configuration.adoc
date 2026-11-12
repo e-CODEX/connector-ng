@@ -4,7 +4,11 @@ endif::header[]
 
 = DSS Tools configuration
 
-The connector uses the link:../architecture/dss_tools.html#dss-tools[DSS library]. Which can be configured:
+The connector uses the link:../architecture/dss_tools.html#dss-tools[DSS library], which can be configured as described below.
+
+NOTE: The configuration is validated at startup. A blank mandatory value (for example an empty
+`tl-url`), an invalid cron expression or a non-positive cache expiration stops the connector with
+an error naming the offending property.
 
 == Trusted list configurations
 
@@ -23,15 +27,20 @@ Configuration is provided via `application.properties` under the `connector.dss.
 
 | `connector.dss.cache.location`
 | Local filesystem cache where DSS persists downloaded/parsed Trusted List (TL) and List of Trusted Lists (LOTL) data, so it doesn't have to re-fetch everything on every application restart.
+Use a resource location with the `file:` prefix.
 | Yes
-| `file:./data/tlcache`
+| `file:./data/tlcache`. By default, a `dss-cache` folder in the Java temporary directory.
 
 | `connector.dss.cache.expiration`
 | Max age of the cached trust data before DSS treats it as stale and re-downloads from the sources configured below.
-Format: Spring Boot duration shorthand (e.g., "1d", "12h", "30m").
+Format: Spring Boot duration shorthand (e.g., "1d", "12h", "30m"). Must be positive.
 | Yes
-| `1d`
+| `1d`. By default, set to *1d*
 
+| `connector.dss.cache.refresh-cron`
+| Schedule on which the trusted lists are refreshed, as a Spring cron expression with 6 fields (seconds first).
+| Yes
+| `0 0 */6 * * *`. By default, set to *every 6 hours*
 |===
 
 .Configuration Example
@@ -40,17 +49,19 @@ Format: Spring Boot duration shorthand (e.g., "1d", "12h", "30m").
 # cache configuration
 connector.dss.cache.location=file:./data/tlcache
 connector.dss.cache.expiration=1d
+connector.dss.cache.refresh-cron=0 0 */6 * * *
 ----
 
 ==== Proxy configuration
 For every connection by the dss tools a proxy can be configured. This proxy is used to
 
-* validate crl
-* use ocsp
+* validate CRLs
+* use OCSP
 * download trust lists
 * connect to time stamp servers
 
 Configuration is provided via `application.properties` under the `connector.dss.proxy.*` prefix.
+The proxy is optional. If you configure a proxy, set both its host and its port.
 
 .DSS Proxy Configuration Properties
 [cols="35,40,10,15"]
@@ -76,47 +87,67 @@ Configuration is provided via `application.properties` under the `connector.dss.
 | Port of the HTTPS proxy server.
 | Yes
 | `8080`
-
 |===
 
 .Configuration Example
 [source,properties]
 ----
 # proxy configuration
-# this proxy is used for downloading tls lists, crl updates, ocsp updates
+# this proxy is used for downloading trusted lists, CRL updates, OCSP updates
 connector.dss.proxy.http.host=proxy1.example.com
 connector.dss.proxy.http.port=8080
 connector.dss.proxy.https.host=proxy1.example.com
 connector.dss.proxy.https.port=8080
 ----
 
-=== Example configuration of the EU-LOTL
+=== Trust list sources
 
-This configuration shows how the EU-LOTL is configured. Keep in mind that at this config **list1** is the name of the trust source: `connector.dss.trust-list-sources.**list1**.lotl-sources[*index*]`
-A trust source can contain multiple Lists of Trusted List (LOTL) or trusted lists (TL). The name of the trust source can be used for the business document validation configuration
+In `connector.dss.trust-list-sources.<name>.*`, `<name>` is the name of the trust source (for example `eu`).
+A trust source can contain multiple Lists of Trusted Lists (LOTL, `lotl-sources[<index>]`) and
+trusted lists (TL, `tl-sources[<index>]`).
+
+The name of the trust source can be used in the business document and container signature validation
+configuration, through the `trusted-list-source` property of the `signature.validation` block.
 
 Configuration is provided via `application.properties` under the `connector.dss.trust-list-sources.*` prefix.
 
-.DSS EU-LOTL Configuration Properties
+.DSS Trust List Source Configuration Properties
 [cols="35,40,10,15"]
 |===
 | Property | Description | Optional | Example
 
-| `connector.dss.trust-list-sources.*key*.lotl-sources[*index*].lotl-url`
+| `connector.dss.trust-list-sources.<name>.lotl-sources[<index>].lotl-url`
 | LOTL source: the EU master list that points to each member state's national Trusted List.
+Must not be blank.
 | Yes
-| `https://ec.europa.eu/tools/lotl/eu-lotl.xml`
+| `https://ec.europa.eu/tools/lotl/eu-lotl.xml`. By default, set to the *EU LOTL*.
 
-| `connector.dss.trust-list-sources.*key*.lotl-sources[*index*].signing-certificates-announcement-uri`
+| `connector.dss.trust-list-sources.<name>.lotl-sources[<index>].signing-certificates-announcement-uri`
 | URL of the Official Journal notice announcing the certificates used to verify the LOTL's own signature (the trust anchor for the LOTL).
+Must not be blank.
 | Yes
-| `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG`
+| `https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG`. By default, set to the *EU Official Journal notice*.
 
-| `connector.dss.trust-list-sources.eu.lotl-sources[0].pivot-support`
+| `connector.dss.trust-list-sources.<name>.lotl-sources[<index>].pivot-support`
 | Enables pivot support, so DSS can follow historical LOTL "pivot" versions and keep trust anchors valid as the EU rotates LOTL signing certificates over time.
 | Yes
-| `true`
+| `true`. By default, set to *true*
 
+| `connector.dss.trust-list-sources.<name>.lotl-sources[<index>].signing-certs.*`
+| Optional keystore (`path`, `password`, `type`) holding the certificates used to verify the signature of the LOTL.
+| Yes
+| `file:./config/keystores/lotl-signing.jks`
+
+| `connector.dss.trust-list-sources.<name>.tl-sources[<index>].tl-url`
+| Direct Trusted List (TL) source, for a national trusted list that is not reached through a LOTL.
+Required for every `tl-sources` entry, and must not be blank.
+| No (per entry)
+| `https://www.signatur.rtr.at/currenttl.xml`
+
+| `connector.dss.trust-list-sources.<name>.tl-sources[<index>].signing-certs.*`
+| Optional keystore (`path`, `password`, `type`) holding the certificates used to verify the signature of the TL.
+| Yes
+| `file:./config/keystores/tl-signing.jks`
 |===
 
 .Configuration Example
@@ -125,11 +156,13 @@ Configuration is provided via `application.properties` under the `connector.dss.
 connector.dss.trust-list-sources.eu.lotl-sources[0].lotl-url=https://ec.europa.eu/tools/lotl/eu-lotl.xml
 connector.dss.trust-list-sources.eu.lotl-sources[0].signing-certificates-announcement-uri=https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=uriserv:OJ.C_.2019.276.01.0001.01.ENG
 connector.dss.trust-list-sources.eu.lotl-sources[0].pivot-support=true
+connector.dss.trust-list-sources.eu.tl-sources[0].tl-url=https://www.signatur.rtr.at/currenttl.xml
 ----
 
-WARNING: Currently, the connector only updates the Trusted Lists during startup!
+WARNING: Trusted lists are updated during startup and then on the schedule defined by
+`connector.dss.cache.refresh-cron`.
 
-=== Example configuration of the Time Stamp Servers
+=== Time Stamp Servers
 Configuration is provided via `application.properties` under the `connector.dss.time-stamp-servers.*` prefix.
 
 .DSS Time Stamp Servers Configuration Properties
@@ -137,11 +170,15 @@ Configuration is provided via `application.properties` under the `connector.dss.
 |===
 | Property | Description| Optional | Example
 
-| `connector.dss.time-stamp-servers.*key*.url`
-| The actual TSA endpoint.
-| Yes
+| `connector.dss.time-stamp-servers.<name>.url`
+| The actual TSA endpoint. Required for every configured server.
+| No (per entry)
 | `http://dss.nowina.lu/pki-factory/tsa/good-tsa`
 
+| `connector.dss.time-stamp-servers.<name>.policy-oid`
+| OID of the time stamp policy to request from the TSA, for example `1.2.3.4`.
+| Yes
+| `1.2.3.4`
 |===
 
 .Configuration Example
@@ -161,6 +198,7 @@ NOTE: Currently, timestamping is not used by the connector.
 # Cache configuration
 connector.dss.cache.location=file:./data/tlcache
 connector.dss.cache.expiration=1d
+connector.dss.cache.refresh-cron=0 0 */6 * * *
 
 # Proxy configuration
 connector.dss.proxy.http.host=proxy1.example.com

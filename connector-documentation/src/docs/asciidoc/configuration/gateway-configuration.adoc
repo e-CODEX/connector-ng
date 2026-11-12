@@ -4,20 +4,25 @@ endif::header[]
 
 = Gateway JMS Broker Configuration
 
-By default, the Domibus Gateway embeds an Apache ActiveMQ broker and uses the provided internal broker configuration for JMS messaging. In this new version of the connector, the Domibus Gateway and the connector are configured to use a shared external JMS broker instead of the embedded one. Consequently, the Domibus Gateway must be explicitly configured with the connection parameters of the external broker( URL, credentials, and related JMS settings) to establish connectivity to the shared messaging infrastructure
+By default, the Domibus Gateway embeds an Apache ActiveMQ broker and uses the provided internal broker configuration for JMS messaging. In connector 7.x, the Domibus Gateway and the connector are configured to use a shared external JMS broker instead of the embedded one. Consequently, the Domibus Gateway must be explicitly configured with the connection parameters of the external broker (URL, credentials, and related JMS settings) to establish connectivity to the shared messaging infrastructure.
+
+NOTE: This page describes the configuration of the *Domibus Gateway*. The connector must be configured
+to use the same broker with its own `spring.activemq.*` properties (see <<connector-side>>).
 
 == Basic configuration
-Configuration is provided via `application.properties` under the `activeMQ.*` prefix.
+Configuration is provided in the Domibus configuration file (`domibus.properties`) under the `activeMQ.*` prefix.
 
-.Gateway Queue Configuration Properties
+.Gateway JMS Broker Configuration Properties
 [cols="35,40,10,15"]
 |===
 | Property | Description | Optional | Example
 
 | `activeMQ.broker.host`
 | Hostname (or container/service name) of the ActiveMQ broker the connector/Domibus connects to.
+Use the bare host name only, without a scheme such as `http://`, because the value is inserted into the
+`tcp://` and JMX service URLs below.
 | No
-| `https://external-active-mq-endpoint`
+| `external-active-mq-endpoint`
 
 | `activeMQ.brokerName`
 | Logical name of the JMS broker. Multiple comma-separated names can be defined for a broker network; the count must match the number of JMX service URLs in `activeMQ.JMXURL`. ActiveMQ recommends broker names be unique across the network.
@@ -25,9 +30,10 @@ Configuration is provided via `application.properties` under the `activeMQ.*` pr
 | `activemq-domibus`
 
 | `activeMQ.embedded.configurationFile`
-| Path to the embedded ActiveMQ broker's configuration file (XML). Only used when running an *embedded* broker; should be removed/left empty when connecting to an *external* broker, as is the case here (value is empty, host points to a separate `blue-activemq` service).
+| Path to the embedded ActiveMQ broker's configuration file (XML). Only used when running an *embedded* broker.
+When connecting to an *external* broker, as in this setup, leave the value empty or remove the property.
 | Yes
-| By default, set to `file:///${domibus.config.location}/internal/activemq.xml`
+| By default, set to `file:///${domibus.config.location}/internal/activemq.xml`. Leave empty for an external broker.
 
 | `activeMQ.JMXURL`
 | Service URL(s) for the JMX MBeanServer(s) exposed by the broker, used for monitoring/management. Built from the broker host and JMX connector port; one or more comma-separated URLs, count must match `activeMQ.brokerName`.
@@ -37,34 +43,33 @@ Configuration is provided via `application.properties` under the `activeMQ.*` pr
 | `activeMQ.connectorPort`
 | Port the JMX connector listens on for management connections to the broker.
 | No
-| Set By default to: `1099`
+| By default, set to `1099`
 
 | `activeMQ.transportConnector.uri`
 | Connection URI clients use to connect to the broker over TCP for actual message traffic (as opposed to the JMX management port above).
 | No
-| `tcp://${activeMQ.broker.host}:port`
+| `tcp://${activeMQ.broker.host}:61616`
 
 | `activeMQ.username`
-| Username used to authenticate to the ActiveMQ broker.
+| Username used to authenticate to the ActiveMQ broker. Must be the same account as the connector's `spring.activemq.user`, or an account with access to the same queues.
 | No
-| `*secret*`
+| `${ACTIVEMQ_USERNAME}`
 
 | `activeMQ.password`
 | Password for the broker username above.
 | No
-| `*secret*`
+| `${ACTIVEMQ_PASSWORD}`
 
 | `activeMQ.persistent`
 | Whether message persistence is enabled on the broker (messages survive broker restarts). Disabling improves throughput but risks message loss on restart/crash.
-| No
+| Yes
 | By default, set to `true`
-
 |===
 
 .Configuration Example
 [source,properties]
 ----
-#The host of the JMS broker
+#The host of the JMS broker (host name only, no scheme)
 activeMQ.broker.host=http://blue-activemq
 
 #The name of the JMS broker; one or more names can be defined, comma-separated (must match the number of JMX service URLs,
@@ -87,11 +92,28 @@ activeMQ.connectorPort=1099
 activeMQ.transportConnector.uri=tcp://${activeMQ.broker.host}:61616
 
 #The username that is allowed to connect to the ActiveMQ broker
-activeMQ.username=admin
+activeMQ.username=${ACTIVEMQ_USERNAME}
 
-#THe password of the username defined in the activeMQ.username property
-activeMQ.password=admin
+#The password of the username defined in the activeMQ.username property
+activeMQ.password=${ACTIVEMQ_PASSWORD}
 
 #The persistence enabled flag
 activeMQ.persistent=true
 ----
+
+[[connector-side]]
+== Connector side
+
+The connector connects to the same broker with its own properties:
+
+[source,properties]
+----
+spring.activemq.broker-url=tcp://blue-activemq:61616
+spring.activemq.user=${ACTIVEMQ_USERNAME}
+spring.activemq.password=${ACTIVEMQ_PASSWORD}
+----
+
+The Domibus backend queues (`domibus.backend.jms.inQueue`, `domibus.backend.jms.replyQueue`) are shared
+between the gateway and the connector. Their names are configurable on the connector side with
+`connector.queues.gateway-submission-queue` and `connector.queues.gateway-submission-reply-queue`.
+Keep them identical to the queue names configured in Domibus.

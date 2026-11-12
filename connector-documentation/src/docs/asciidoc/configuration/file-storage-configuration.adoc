@@ -127,10 +127,6 @@ regional/VPC endpoint. When omitted, the standard AWS endpoint for the configure
 | `https://s3.eu-west-1.amazonaws.com`
 |===
 
-WARNING: Never commit S3 credentials to version control.
-Inject `access-key` and
-`secret-key` at runtime via environment variables or a secrets manager.
-
 NOTE: The configuration is validated at startup. A missing mandatory property, an invalid bucket name
 or an endpoint without a scheme (for example `localhost:9000`) stops the connector with an error
 naming the offending property.

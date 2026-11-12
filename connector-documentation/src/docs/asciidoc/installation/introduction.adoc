@@ -5,13 +5,16 @@ endif::header[]
 = Introduction
 
 == Scope and Objective of this document
-This document is a technical guide to install and configure the new e-Codex **Connector**. It can be used as a “go-through” installation guide. Readers should be able to install and configure the new **Connector** in their own environments without previously built know-how about the software.
+This document is a technical guide to install and configure the new e-CODEX **Connector**. It can be used as a step-by-step installation guide. Readers should be able to install and configure the new **Connector** in their own environments without previously built know-how about the software.
 
 A detailed knowledge of your own environment is a precondition.
 
-The structure of this guide is built so that every part can be taken as listed in the document. That means all preconditions for a chapter should be given by the previous chapters.
+The chapters are meant to be read in order: all preconditions for a chapter are given by the previous chapters.
 
 As an Installation Guide, this document does not focus on features and functionalities on the usage of the new **Connector**.
+
+NOTE: If you are upgrading from connector 6.x, first read the configuration migration guide.
+Several configuration properties were renamed or removed, and properties with an old name are silently ignored.
 
 == e-CODEX building blocks
 
@@ -21,11 +24,37 @@ the proper installation of other building blocks is required.
 
 The description of the e-CODEX building blocks and additional information on the e-CODEX system can be found on the link:https://www.ecodex.eu/tech[e-CODEX website].
 
+== Required infrastructure
+
+The **Connector** does not embed its infrastructure. The following components must be installed,
+running and reachable before the first start:
+
+[cols="1,3", options="header"]
+|===
+| Component | Purpose
+
+| Database (MySQL, MariaDB, PostgreSQL or Oracle)
+| Stores message state and processing history. An empty schema and a dedicated user are required.
+The Connector creates its own tables if *spring.jpa.hibernate.ddl-auto* is set to *update* or *create*.
+
+| Apache ActiveMQ Classic
+| External JMS message broker shared with the e-CODEX Gateway. The embedded broker of earlier versions is no longer used.
+
+| S3-compatible object storage (Amazon S3, MinIO, Silo)
+| Stores message attachments and other connector files. S3-compatible storage is the only supported storage backend.
+
+| e-CODEX Gateway
+| The Connector acts as a bridge between your backend and the Gateway.
+|===
+
+The configuration is validated when the Connector starts. A missing or invalid value stops the
+startup with an error naming the offending property.
+
 == Product Distribution
 
-At the moment this documentation is being edited, there is only one main distribution flavor available for installing the new **Connector**, depending on your infrastructure architecture:
+At the moment, the new **Connector** is distributed as a single deployment flavor.
 
-=== 1. Standalone Deployment
+=== Standalone Deployment
 The application runs as an autonomous service with an embedded *Tomcat* web server. It can be deployed in two ways:
 
 * <<docker-install,Containerized – (Docker)>> – **Recommended.** The containerized service can be installed as an image on any suitable hosting platform.

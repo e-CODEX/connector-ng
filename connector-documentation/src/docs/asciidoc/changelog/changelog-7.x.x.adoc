@@ -5,7 +5,7 @@ endif::header[]
 
 = Changelog
 
-== 7.1.0-SNAPSHOT
+== 7.1.0
 
 === Release Notes
 ==== Added
@@ -52,7 +52,6 @@ endif::header[]
 * *Message processing performance* -- Improved overall message processing performance.
 * *S3 storage support* -- Added support for S3-based file storage.
 * *REST/JMS backend integration* -- Laid the foundation for future REST and JMS backend integration.
-
 
 ==== Technical
 

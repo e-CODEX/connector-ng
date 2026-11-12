@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [7.1.0-SNAPSHOT] - 0000-00-00
+## [7.1.0] - 2026-11-12
 
 ### Release Notes
 

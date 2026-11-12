@@ -14,7 +14,7 @@ The defaults shown here are insecure placeholders.
 
 | `connector.auth.security.jwt.secret`
 | Base64-encoded secret used to sign JWT session tokens for the admin UI.
-Minimum 256 bits (32 bytes). Never commit to version control.
+Minimum 256 bits (32 bytes).
 | No
 | `TKfopYnLbi4lCospwYxzWv2Hf4JKv2JepfN7n5lYwcE=`
 Generate with: `openssl rand -base64 32`

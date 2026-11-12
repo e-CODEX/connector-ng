@@ -31,7 +31,7 @@ public class DefaultBusinessDomainProperties {
     @NotBlank
     private String description;
 
-    private boolean enabled = false;
+    private boolean enabled = true;
 
     @Valid
     private DefaultBusinessDomainPmodeProperties pmode;

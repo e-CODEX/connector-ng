@@ -5,12 +5,45 @@ endif::header[]
 = Migrate Configuration From 6.x to 7.x
 
 == Overview
-Brief summary of what changed in the configuration file.
+
+Version 7.x reorganises the configuration file. The changes fall into four groups:
+
+* *Renamed prefixes and segments*: for example `connector.ecodex-container` is now
+`connector.container`, `c2ctests` is now `connector.c2ctests`, and `key-store` / `trust-store`
+are now `keystore` / `truststore`.
+* *Removed features*: the `connector.link.gateway` block and the embedded Artemis broker.
+* *New property groups*: business domains, message processing, file storage (S3),
+security (admin user, JWT, CORS), file deletion, queues and redelivery.
+* *Startup validation*: mandatory values are now checked when the connector starts.
+A missing or invalid value stops the startup with an error naming the offending property,
+instead of failing later at runtime.
+
+WARNING: Old property names that no longer exist in 7.x are *silently ignored*.
+Review every renamed prefix in this guide before starting the connector.
 
 == Step-by-step Migration
 
 NOTE: Across all sections, hyphenated store property segments (`key-store`, `trust-store`)
 have been normalised to their unhyphenated equivalents (`keystore`, `truststore`) in 7.x.
+
+.Value formats used in 7.x
+[cols="25,75"]
+|===
+| Type | Accepted values
+
+| Duration
+| `500ms`, `60s`, `30m`, `6h`, `1d`, ISO-8601 (`PT60S`). A bare number is read as milliseconds.
+
+| Cron expression
+| Spring cron with *6 fields* (seconds first), for example `0 0 3 * * *`.
+
+| Resource location
+| `classpath:/path/file.xml` or `file:/absolute/path` or `file:./relative/path`.
+Always include the prefix.
+
+| URL
+| Absolute `http://` or `https://` URL including the host, for example `http://localhost:9000`.
+|===
 
 === Business Domain Configuration
 
@@ -21,29 +54,42 @@ IMPORTANT: If none of the properties below are set, the connector will automatic
 create a default domain on startup. Set them explicitly if you need to control
 the domain identifier, description, or PMode location.
 
+If you define a domain entry, `identifier`, `description` and all three `pmode` properties
+are required for that entry.
+
 .New Business Domain Configuration Properties (7.x)
 |===
 | Property | Default | Required | Notes
 
 | `connector.business-domains.defaults[0].identifier`
 | `default_business_domain`
-| No
-| Logical name of the default business domain
+| Yes (per entry)
+| Logical name of the business domain
 
 | `connector.business-domains.defaults[0].description`
 | `default business domain`
-| No
+| Yes (per entry)
 | Human-readable description of the domain
 
 | `connector.business-domains.defaults[0].enabled`
 | `true`
 | No
-| Set to `false` to disable this domain at startup
+| Set to `true` to enable this domain at startup
 
-| `connector.business-domains.defaults[0].pmode`
+| `connector.business-domains.defaults[0].pmode.file`
 | _(none)_
-| *No*
-| Path to the PMode file for this domain. Supports `file:` prefix for filesystem paths.
+| Yes (per entry)
+| Path to the PMode file for this domain. Supports `file:` and `classpath:` prefixes.
+
+| `connector.business-domains.defaults[0].pmode.truststore`
+| _(none)_
+| Yes (per entry)
+| Path to the truststore used with the PMode
+
+| `connector.business-domains.defaults[0].pmode.truststore-password`
+| _(none)_
+| Yes (per entry)
+| Password of the PMode truststore. Inject it at runtime.
 |===
 
 .Minimal configuration example (7.x)
@@ -52,7 +98,9 @@ the domain identifier, description, or PMode location.
 connector.business-domains.defaults[0].identifier=default_business_domain
 connector.business-domains.defaults[0].description=default business domain
 connector.business-domains.defaults[0].enabled=true
-connector.business-domains.defaults[0].pmode=file:./config/pmode/pmode-blue.xml
+connector.business-domains.defaults[0].pmode.file=file:./config/pmode/pmode-blue.xml
+connector.business-domains.defaults[0].pmode.truststore=file:./config/keystores/connector-truststore.jks
+connector.business-domains.defaults[0].pmode.truststore-password=${PMODE_TRUSTSTORE_PASSWORD}
 ----
 
 TIP: Additional domains can be configured by incrementing the index:
@@ -73,6 +121,11 @@ in 6.x — these behaviours were either hardcoded or not configurable in previou
 | Whether REM evidences (submission acceptance/rejection, delivery/non-delivery)
 are forwarded to the backend in addition to the gateway side
 
+| `connector.message-processing.auto-trigger-delivery-evidences`
+| `false`
+| No
+| Whether delivery evidences are triggered automatically
+
 | `connector.message-processing.ebms-id-generator-enabled`
 | `true`
 | No
@@ -80,18 +133,18 @@ are forwarded to the backend in addition to the gateway side
 relying on IDs supplied by the backend or gateway
 
 | `connector.message-processing.ebms-id-suffix`
-| _(none)_
+| `connector.ecodex.eu`
 | No
 | Domain suffix appended to generated ebMS message IDs
 (format: `<uuid>@<suffix>`). Only effective when the generator is enabled.
 
 | `connector.message-processing.identifier-suffix`
-| _(none)_
+| `connector.ecodex.eu`
 | No
 | Domain suffix used when generating conversation IDs and other AS4 identifier fields
 
 | `connector.message-processing.transport-id-suffix`
-| _(none)_
+| `connector.ecodex.eu`
 | No
 | Domain suffix used for transport-level identifiers,
 following the same `<value>@<suffix>` convention
@@ -110,9 +163,9 @@ following the same `<value>@<suffix>` convention
 |===
 
 NOTE: The three suffix properties (`ebms-id-suffix`, `identifier-suffix`,
-`transport-id-suffix`) all follow the same `<value>@<suffix>` convention and
-default to `connector.ecodex.eu` in the reference configuration. Set them to
-a domain you control if you need generated IDs to be traceable to your deployment.
+`transport-id-suffix`) all follow the same `<value>@<suffix>` convention. They must not be
+blank. Set them to a domain you control if you need generated IDs to be traceable to your
+deployment.
 
 TIP: If migrating from 6.x where ebMS IDs were supplied externally, set
 `ebms-id-generator-enabled=false` to preserve the previous behaviour until
@@ -122,6 +175,7 @@ you have confirmed your backend and gateway are compatible with connector-genera
 [source,properties]
 ----
 connector.message-processing.send-generated-evidences-to-backend=true
+connector.message-processing.auto-trigger-delivery-evidences=false
 connector.message-processing.ebms-id-generator-enabled=true
 connector.message-processing.ebms-id-suffix=connector.ecodex.eu
 connector.message-processing.identifier-suffix=connector.ecodex.eu
@@ -133,61 +187,71 @@ connector.message-processing.inbound-verification-mode=RELAXED
 === File Storage Configuration
 
 All properties in this section are *new in 7.x*. In 6.x, the connector used local
-filesystem storage only. S3-compatible object storage is now supported as an alternative
-backend.
-
-IMPORTANT: When `connector.file.storage.s3.enable=true`, all five remaining properties
-are effectively required — the connector cannot connect to S3 without credentials,
-region, bucket, and endpoint.
+filesystem storage only. In 7.x, S3-compatible object storage is the only supported
+storage backend. Support for local filesystem storage is planned for a future release.
 
 .New File Storage Properties (7.x)
 |===
 | Property | Default | Required | Notes
 
-| `connector.file.storage.s3.enable`
-| `false`
+| `connector.file.storage.upload-temp-directory`
+| _(none)_
 | Yes
-| Master switch for S3 storage. When `false`, the connector falls back
-to local filesystem storage.
+| Local directory used for temporary files while uploads are processed.
+If you use a placeholder such as `${TEMP_DIR_LOCATION}`, the variable must be defined,
+otherwise the startup fails.
+
+| `connector.file.storage.s3.auto-create-bucket`
+| `true`
+| No
+| Create the bucket at startup when it does not exist. Set it to `false` in production
+and create the bucket yourself.
 
 | `connector.file.storage.s3.access-key`
 | _(none)_
-| *Yes (if S3 enabled)*
-| S3 access key ID.
+| Yes
+| S3 access key ID
 
 | `connector.file.storage.s3.secret-key`
 | _(none)_
-| *Yes (if S3 enabled)*
-| S3 secret access key.
+| Yes
+| S3 secret access key
 
 | `connector.file.storage.s3.region`
 | _(none)_
-| *Yes (if S3 enabled)*
-| AWS region (e.g. `eu-west-1`). For non-AWS providers this may be an
+| Yes
+| AWS region (for example `eu-west-1`). For non-AWS providers this may be an
 arbitrary placeholder value required by the S3 client.
 
 | `connector.file.storage.s3.bucket`
 | _(none)_
-| *Yes (if S3 enabled)*
-| Name of the S3 bucket used to store connector files.
+| Yes
+| Name of the S3 bucket used to store connector files. Must be a valid S3 bucket name:
+3 to 63 characters, lowercase letters, digits, dots and hyphens, starting and ending
+with a letter or digit.
 
 | `connector.file.storage.s3.endpoint`
 | _(none)_
-| *Yes (if S3 enabled)*
+| No
 | S3 endpoint URL. Required for non-AWS providers (MinIO, Silo, OVH Object Storage, etc.)
-or when targeting a specific regional/VPC endpoint.
-
+or when targeting a specific regional/VPC endpoint. When omitted, the standard AWS endpoint
+for the region is used. When set, path-style bucket addressing is used.
 |===
+
+NOTE: With `auto-create-bucket=true`, the connector creates the bucket at startup when it does
+not exist, and the credentials need `s3:ListBucket` and `s3:CreateBucket`. With `false`, the
+bucket must exist before startup, otherwise operations that write files fail.
 
 .Configuration example (7.x)
 [source,properties]
 ----
-connector.file.storage.s3.enable=true
-connector.file.storage.s3.access-key=admin
-connector.file.storage.s3.secret-key=******
+connector.file.storage.upload-temp-directory=${TEMP_DIR_LOCATION}
+connector.file.storage.s3.auto-create-bucket=false
+connector.file.storage.s3.access-key=${S3_ACCESS_KEY}
+connector.file.storage.s3.secret-key=${S3_SECRET_KEY}
 connector.file.storage.s3.region=us-east-1
 connector.file.storage.s3.bucket=attachments
-connector.file.storage.s3.endpoint=http://localhost:port
+connector.file.storage.s3.endpoint=http://localhost:9000
 ----
 
 === DSS (Digital Signature Service) Configuration
@@ -198,7 +262,8 @@ Two property groups have been renamed in 7.x:
 * Proxy properties: `connector.dss.http-proxy` / `connector.dss.https-proxy`
 → `connector.dss.proxy.http` / `connector.dss.proxy.https`
 
-The LOTL/TL sources and timestamp server properties are *unchanged*.
+The LOTL/TL sources and timestamp server properties are *unchanged*, with one addition:
+`policy-oid` is available for timestamp servers.
 
 .DSS Configuration Properties
 |===
@@ -206,11 +271,15 @@ The LOTL/TL sources and timestamp server properties are *unchanged*.
 
 | `connector.dss.tl-cache-location`
 | `connector.dss.cache.location`
-| Renamed — now a dedicated `cache` sub-prefix
+| Renamed — now a dedicated `cache` sub-prefix. Use a resource location (`file:./data/tlcache`).
 
 | `connector.dss.tl-cache-expiration`
 | `connector.dss.cache.expiration`
-| Renamed — now a dedicated `cache` sub-prefix
+| Renamed — now a dedicated `cache` sub-prefix. Duration, must be positive. Default `1d`.
+
+| _(none)_
+| `connector.dss.cache.refresh-cron`
+| *New* — Spring cron for refreshing the trusted lists. Default `0 0 */6 * * *`.
 
 | `connector.dss.http-proxy.host`
 | `connector.dss.proxy.http.host`
@@ -230,11 +299,11 @@ The LOTL/TL sources and timestamp server properties are *unchanged*.
 
 | `connector.dss.trust-list-sources.*`
 | `connector.dss.trust-list-sources.*`
-| No change
+| No change. A blank `lotl-url` or `tl-url` now stops the startup.
 
 | `connector.dss.time-stamp-servers.*`
 | `connector.dss.time-stamp-servers.*`
-| No change
+| No change. `url` is required for each server. Optional `policy-oid` is new.
 |===
 
 NOTE: Proxy configuration is optional. Only set these properties if your environment
@@ -246,6 +315,7 @@ routes outbound DSS traffic (LOTL downloads, CRL and OCSP updates) through a pro
 # Cache
 connector.dss.cache.location=file:./data/tlcache
 connector.dss.cache.expiration=1d
+connector.dss.cache.refresh-cron=0 0 */6 * * *
 
 # Proxy (optional)
 connector.dss.proxy.http.host=proxy1.example.com
@@ -298,8 +368,12 @@ Two property prefixes have been renamed in 7.x:
 | No change
 
 | _(none)_
-| `connector.evidences.signature.payload-digest-algorithm`
+| `connector.evidences.signature.digest-algorithm`
 | *New* — defaults to `SHA256`
+
+| _(none)_
+| `connector.evidences.signature.encryption-algorithm`
+| *New* — defaults to `RSA`
 
 | `connector.evidences.issuer-info.as4-party.name`
 | `connector.evidences.issuer.as4-party.name`
@@ -329,20 +403,23 @@ Two property prefixes have been renamed in 7.x:
 WARNING: Keeping the old `key-store` or `issuer-info` property names in 7.x will result
 in the properties being silently ignored. Ensure all references are updated before startup.
 
+NOTE: The keystore `path` and `password`, the private key `alias` and `password`, and all
+issuer values are required and must not be blank.
+
 .Configuration example (7.x)
 [source,properties]
 ----
 # Keystore
 connector.evidences.signature.keystore.path=file:./config/keystores/connector-keystore.jks
-connector.evidences.signature.keystore.password=12345
+connector.evidences.signature.keystore.password=${EVIDENCES_KEYSTORE_PASSWORD}
 connector.evidences.signature.keystore.type=JKS
 
 # Private key
 connector.evidences.signature.private-key.alias=connector_blue
-connector.evidences.signature.private-key.password=12345
+connector.evidences.signature.private-key.password=${EVIDENCES_KEY_PASSWORD}
 
-# Digest algorithm
-connector.evidences.signature.payload-digest-algorithm=SHA256
+# Algorithms
+connector.evidences.signature.digest-algorithm=SHA256
 
 # Issuer identity
 connector.evidences.issuer.as4-party.name=Connector NG
@@ -388,25 +465,37 @@ Additionally, the validation constraints property has been reorganized under the
 | `connector.container.signature.private-key.password`
 | Renamed (prefix only)
 
+| _(none)_
+| `connector.container.signature.digest-algorithm`
+| *New* — defaults to `SHA256`
+
+| _(none)_
+| `connector.container.signature.encryption-algorithm`
+| *New* — defaults to `RSA`
+
 | `connector.ecodex-container.signature-validation.validation-constraints-xml`
 | `connector.container.signature.validation.constraints-xml`
-| Renamed — prefix and sub-path both changed
+| Renamed — prefix and sub-path both changed. Defaults to `classpath:/102853/constraint.xml`.
+The file must exist, otherwise the startup fails.
 |===
 
 WARNING: The `connector.ecodex-container` prefix is no longer recognized in 7.x.
 All properties under this prefix must be renamed, or they will be silently ignored at startup.
+
+The `signature.validation` block also accepts the certificate verification options listed in
+<<signature-validation-options>>.
 
 .Configuration example (7.x)
 [source,properties]
 ----
 # Keystore
 connector.container.signature.keystore.path=file:./config/keystores/connector-keystore.jks
-connector.container.signature.keystore.password=12345
+connector.container.signature.keystore.password=${CONTAINER_KEYSTORE_PASSWORD}
 connector.container.signature.keystore.type=JKS
 
 # Private key
 connector.container.signature.private-key.alias=connector_blue
-connector.container.signature.private-key.password=12345
+connector.container.signature.private-key.password=${CONTAINER_KEY_PASSWORD}
 
 # Validation
 connector.container.signature.validation.constraints-xml=classpath:/102853/constraint.xml
@@ -427,15 +516,20 @@ Two changes apply to this section in 7.x:
 
 | `connector.business-document-sent.service-provider`
 | `connector.business-document.service-provider`
-| Renamed (prefix only)
+| Renamed (prefix only). Required.
 
 | `connector.business-document-sent.country`
 | `connector.business-document.country`
-| Renamed (prefix only)
+| Renamed (prefix only). Required.
 
 | `connector.business-document-sent.default-advanced-system-type`
 | `connector.business-document.default-advanced-system-type`
-| Renamed (prefix only)
+| Renamed (prefix only). Values: `AUTHENTICATION_BASED`, `SIGNATURE_BASED`.
+Must be one of the allowed types.
+
+| _(none)_
+| `connector.business-document.allowed-advanced-system-types`
+| *New* — defaults to all types. Must not be empty.
 
 | `connector.business-document-sent.signature-validation.trust-store.path`
 | `connector.business-document.signature.validation.truststore.path`
@@ -451,15 +545,18 @@ Two changes apply to this section in 7.x:
 
 | `connector.business-document-sent.signature-validation.validation-constraints-xml`
 | `connector.business-document.signature.validation.constraints-xml`
-| Renamed — prefix and sub-path both changed
+| Renamed — prefix and sub-path both changed. Defaults to `classpath:/102853/constraint.xml`.
 
 | `connector.business-document-sent.authentication-validation.identity-provider`
 | `connector.business-document.authentication-validation.identity-provider`
-| Renamed (prefix only)
+| Renamed (prefix only). If the block is present, `identity-provider` is required.
 |===
 
 WARNING: The `connector.business-document-sent` prefix is no longer recognized in 7.x.
 All properties under this prefix must be renamed, or they will be silently ignored at startup.
+
+The `signature.validation` block also accepts the certificate verification options listed in
+<<signature-validation-options>>.
 
 .Configuration example (7.x)
 [source,properties]
@@ -471,7 +568,7 @@ connector.business-document.default-advanced-system-type=SIGNATURE_BASED
 
 # Truststore
 connector.business-document.signature.validation.truststore.path=file:./config/keystores/connector-truststore.jks
-connector.business-document.signature.validation.truststore.password=12345
+connector.business-document.signature.validation.truststore.password=${BUSINESS_DOCUMENT_TRUSTSTORE_PASSWORD}
 connector.business-document.signature.validation.truststore.type=JKS
 
 # Validation policy
@@ -480,6 +577,49 @@ connector.business-document.signature.validation.constraints-xml=classpath:/1028
 # Authentication
 connector.business-document.authentication-validation.identity-provider=ERV
 ----
+
+[[signature-validation-options]]
+==== Certificate Verification Options
+
+These options are available under both `connector.container.signature.validation.*` and
+`connector.business-document.signature.validation.*`.
+
+.Certificate Verification Options (7.x)
+|===
+| Property suffix | Default | Notes
+
+| `ocsp-enabled`
+| `true`
+| Query OCSP when verifying certificates
+
+| `crl-enabled`
+| `true`
+| Query CRLs when verifying certificates
+
+| `aia-enabled`
+| `true`
+| Use the Authority Information Access extension
+
+| `truststore-enabled`
+| `true`
+| Use the configured `truststore.*` block. If `true`, the truststore must be configured.
+
+| `ignore-store-enabled`
+| `false`
+| Use the configured `ignore-store.*` block. If `true`, the ignore store must be configured.
+
+| `trusted-list-source`
+| _(none)_
+| Source of the trusted list
+
+| `truststore.path` / `.password` / `.type`
+| _(none)_ / _(none)_ / `JKS`
+| Truststore. `path` and `password` are required when the block is present.
+
+| `ignore-store.path` / `.password` / `.type`
+| _(none)_ / _(none)_ / `JKS`
+| Ignore store. `path` and `password` are required when the block is present.
+|===
 
 === Link Partner Configuration
 
@@ -533,7 +673,7 @@ applied across all sections in 7.x.
 
 | `connector.link.backend[0].link-config.config-name`
 | `connector.link.backend[0].link-config.name`
-| Renamed (`config-name` → `name`)
+| Renamed (`config-name` → `name`). Required, and unique across backends.
 
 | `connector.link.backend[0].link-config.link-impl`
 | _(removed)_
@@ -577,15 +717,16 @@ applied across all sections in 7.x.
 
 | `connector.link.backend[0].link-config.properties.cxf-logging-enabled`
 | `connector.link.backend[0].link-config.properties.logging-enabled`
-| `cxf-` prefix dropped
+| `cxf-` prefix dropped. Defaults to `false`.
 
 | `connector.link.backend[0].link-config.properties.ws-policy`
 | `connector.link.backend[0].link-config.properties.ws-policy`
-| No change
+| No change in name. Resource location (`classpath:` or `file:`), defaults to
+`classpath:/policy/backend.policy.xml`. The file must exist, otherwise the startup fails.
 
-| connector.link.backend[0].link-config.properties.publish-address
 | `connector.link.backend[0].link-config.properties.publish-address`
-| No change
+| `connector.link.backend[0].link-config.properties.publish-address`
+| No change in name. Must start with `/`. Defaults to `/backend`.
 |===
 
 WARNING: The `properties.soap` sub-prefix is no longer recognized in 7.x.
@@ -602,15 +743,15 @@ connector.link.backend[0].link-config.properties.logging-enabled=true
 
 # Endpoint keystore
 connector.link.backend[0].link-config.properties.endpoint.keystore.path=file:./config/keystores/backend-keystore.jks
-connector.link.backend[0].link-config.properties.endpoint.keystore.password=12345
+connector.link.backend[0].link-config.properties.endpoint.keystore.password=${BACKEND_KEYSTORE_PASSWORD}
 
 # Endpoint private key
 connector.link.backend[0].link-config.properties.endpoint.private-key.alias=connector_blue
-connector.link.backend[0].link-config.properties.endpoint.private-key.password=12345
+connector.link.backend[0].link-config.properties.endpoint.private-key.password=${BACKEND_KEY_PASSWORD}
 
 # Endpoint truststore
 connector.link.backend[0].link-config.properties.endpoint.truststore.path=file:./config/keystores/backend-truststore.jks
-connector.link.backend[0].link-config.properties.endpoint.truststore.password=12345
+connector.link.backend[0].link-config.properties.endpoint.truststore.password=${BACKEND_TRUSTSTORE_PASSWORD}
 connector.link.backend[0].link-config.properties.endpoint.encrypt-alias=alice
 ----
 
@@ -624,7 +765,8 @@ The link partner configuration is simplified in 7.x.
 
 | `connector.link.backend[0].link-partners[0].link-partner-name`
 | `connector.link.backend[0].link-partners[0].name`
-| Renamed (`link-partner-name` → `name`)
+| Renamed (`link-partner-name` → `name`). Required, and unique across all backends.
+It must match the names used in the message routing configuration.
 
 | `connector.link.backend[0].link-partners[0].description`
 | `connector.link.backend[0].link-partners[0].description`
@@ -636,23 +778,24 @@ The link partner configuration is simplified in 7.x.
 
 | `connector.link.backend[0].link-partners[0].rcv-link-mode`
 | _(removed)_
-| No longer applicable
+| No longer applicable. Remove it; a `receiver-mode` property is *not* read in 7.x either.
 
 | `connector.link.backend[0].link-partners[0].send-link-mode`
 | `connector.link.backend[0].link-partners[0].sender-mode`
-| Renamed and consolidated — see below
+| Renamed. Values: `push` (the connector pushes messages to the backend at `push-address`)
+or `pull` (the backend fetches messages from the connector).
 
 | `connector.link.backend[0].link-partners[0].properties.push-address`
 | `connector.link.backend[0].link-partners[0].properties.push-address`
-| No change
+| No change in name. Required when `sender-mode=push`. Must be an absolute `http(s)` URL.
 
 | `connector.link.backend[0].link-partners[0].properties.encryption-alias`
 | `connector.link.backend[0].link-partners[0].properties.encryption-alias`
-| No change
+| No change. Must match the certificate alias in the truststore.
 
 | `connector.link.backend[0].link-partners[0].properties.certificate-dn`
 | `connector.link.backend[0].link-partners[0].properties.certificate-dn`
-| No change
+| No change. Must match the certificate DN (case is ignored).
 |===
 
 .Configuration example (7.x)
@@ -662,16 +805,18 @@ connector.link.backend[0].link-partners[0].name=backend_alice
 connector.link.backend[0].link-partners[0].description=backend alice
 connector.link.backend[0].link-partners[0].enabled=true
 connector.link.backend[0].link-partners[0].sender-mode=push
-connector.link.backend[0].link-partners[0].properties.push-address=http://localhost:port/services/domibusConnectorDeliveryWebservice
+connector.link.backend[0].link-partners[0].properties.push-address=http://localhost:4000/services/domibusConnectorDeliveryWebservice
 connector.link.backend[0].link-partners[0].properties.encryption-alias=alice
 connector.link.backend[0].link-partners[0].properties.certificate-dn=cn=alice
 ----
 
 === Message Routing
 
-NOTE: Message routing configuration is unchanged from 6.x. No migration action required.
+NOTE: The property names are unchanged from 6.x. Two checks are new in 7.x: when
+`connector.routing.enabled=true`, `default-backend-name` is required, and every rule needs a
+`link-name` and a `match-clause`. Both must reference link partner names defined above.
 
-Configuration Example (7.x)
+.Configuration example (7.x)
 [source,properties]
 ----
 connector.routing.enabled=true
@@ -727,7 +872,267 @@ used and can be archived or deleted after a successful migration.
 .Configuration example (7.x)
 [source,properties]
 ----
-spring.activemq.broker-url=tcp://localhost:port
+spring.activemq.broker-url=tcp://localhost:61616
 spring.activemq.user=admin
-spring.activemq.password=******
+spring.activemq.password=${ACTIVEMQ_PASSWORD}
 ----
+
+==== Redelivery Settings
+
+.New Redelivery Properties (7.x)
+|===
+| Property | Default | Notes
+
+| `connector.activemq.address-settings.max-delivery-attempts`
+| `5`
+| Total number of deliveries before a message goes to the dead letter queue. Minimum `1`.
+
+| `connector.activemq.address-settings.redelivery-delay`
+| `60s`
+| Delay before the first redelivery. Must be positive. A bare number is read as milliseconds.
+
+| `connector.activemq.address-settings.redelivery-multiplier`
+| `2.0`
+| Multiplier applied to the delay on each redelivery. Use `1` for a constant delay.
+Minimum `1.0`.
+|===
+
+==== Queue Names
+
+All queue names are configurable under `connector.queues.*`. They must not be blank.
+Change them only if your broker setup requires it.
+
+.New Queue Properties (7.x)
+|===
+| Property suffix | Default
+
+| `outbound-message-staging-queue`
+| `connector.queues.outbound-message-staging-queue`
+
+| `outbound-message-processing-queue`
+| `connector.queues.outbound-message-processing-queue`
+
+| `outbound-evidence-trigger-queue`
+| `connector.queues.outbound-evidence-trigger-queue`
+
+| `inbound-message-staging-queue`
+| `connector.queues.inbound-message-staging-queue`
+
+| `inbound-message-processing-queue`
+| `connector.queues.inbound-message-processing-queue`
+
+| `inbound-evidence-trigger-queue`
+| `connector.queues.inbound-evidence-trigger-queue`
+
+| `backend-delivery-queue`
+| `connector.queues.backend-delivery-queue`
+
+| `gateway-submission-queue`
+| `domibus.backend.jms.inQueue`
+
+| `gateway-submission-reply-queue`
+| `domibus.backend.jms.replyQueue`
+
+| `resolved-message-cleanup-processing-queue`
+| `connector.queues.resolved-message-cleanup-processing-queue`
+|===
+
+=== Security and Administration Configuration
+
+All properties in this section are *new in 7.x*.
+
+.New Security Properties (7.x)
+|===
+| Property | Default | Required | Notes
+
+| `connector.admin.username`
+| _(none)_
+| Yes
+| Bootstrap administrator user name
+
+| `connector.admin.password`
+| _(none)_
+| Yes
+| Bootstrap administrator password. Inject it at runtime.
+
+| `connector.admin.email`
+| _(none)_
+| Yes
+| Administrator e-mail address, must be a valid address
+
+| `connector.admin.enabled`
+| `true`
+| No
+| Enables the administrator account
+
+| `connector.auth.security.jwt.secret`
+| _(none)_
+| Yes
+| Base64-encoded signing secret, at least 256 bits. Inject it at runtime.
+
+| `connector.auth.security.jwt.issuer`
+| _(none)_
+| Yes
+| Issuer written into the tokens
+
+| `connector.auth.security.jwt.expiration`
+| `1h`
+| No
+| Lifetime of access tokens
+
+| `connector.auth.security.jwt.refresh-token.expiration`
+| _(none)_
+| Yes
+| Lifetime of refresh tokens, for example `30d`
+
+| `connector.auth.security.jwt.refresh-token.cleanup-cron`
+| _(none)_
+| Yes
+| Spring cron (6 fields) for removing expired refresh tokens
+
+| `connector.cors.allowed-origins`
+| `*`
+| No
+| Comma-separated list of allowed origins. In production, list the origins of your admin UI.
+The value `*` cannot be combined with `allow-credentials=true`.
+
+| `connector.cors.allowed-methods`
+| `GET,POST,PUT,PATCH,DELETE,OPTIONS`
+| No
+| Allowed HTTP methods
+
+| `connector.cors.allowed-headers`
+| `*`
+| No
+| Allowed request headers
+
+| `connector.cors.allow-credentials`
+| `true`
+| No
+| Whether credentials are allowed
+
+| `connector.cors.max-age`
+| `3600`
+| No
+| Preflight cache lifetime in seconds
+|===
+
+.Configuration example (7.x)
+[source,properties]
+----
+connector.admin.username=admin
+connector.admin.password=${ADMIN_PASSWORD}
+connector.admin.email=admin@example.com
+connector.admin.enabled=true
+
+connector.auth.security.jwt.secret=${JWT_SECRET}
+connector.auth.security.jwt.expiration=60m
+connector.auth.security.jwt.issuer=connector.ecodex.eu
+connector.auth.security.jwt.refresh-token.expiration=30d
+connector.auth.security.jwt.refresh-token.cleanup-cron=0 0 3 * * *
+
+connector.cors.allowed-origins=http://localhost:3000
+connector.cors.max-age=3600
+----
+
+=== File Deletion Configuration
+
+All properties in this section are *new in 7.x*.
+
+.New File Deletion Properties (7.x)
+|===
+| Property | Default | Notes
+
+| `connector.file-deletion.orphan.threshold`
+| `1d`
+| Age after which attachments with no linked message are deleted. Must be positive.
+
+| `connector.file-deletion.orphan.cron`
+| `0 0 0 * * *`
+| Spring cron for the orphan attachment cleanup
+
+| `connector.file-deletion.unresolved-messages.threshold`
+| `7d`
+| Age after which messages that were neither confirmed nor rejected are cleaned up.
+Must be positive.
+
+| `connector.file-deletion.unresolved-messages.cron`
+| `0 10 0 * * *`
+| Spring cron for the unresolved message cleanup
+|===
+
+.Configuration example (7.x)
+[source,properties]
+----
+# Orphan attachments (no message linked)
+connector.file-deletion.orphan.threshold=1d
+connector.file-deletion.orphan.cron=0 0 0 * * *
+
+# Messages neither confirmed nor rejected
+connector.file-deletion.unresolved-messages.threshold=7d
+connector.file-deletion.unresolved-messages.cron=0 10 0 * * *
+----
+
+=== Connector-to-Connector Test Messages
+
+The connector-to-connector test properties have been renamed in 7.x:
+
+* The prefix `c2ctests` → `connector.c2ctests`
+* `service.serviceType` → `service.type`
+
+Messages received with the configured service and action combination are not forwarded to the
+backend. The connector processes them and answers with evidences.
+
+.Connector-to-Connector Test Properties
+|===
+| Old property (6.x) | New property (7.x) | Notes
+
+| `c2ctests.enabled`
+| `connector.c2ctests.enabled`
+| Renamed (prefix only). Defaults to `true`.
+
+| `c2ctests.action`
+| `connector.c2ctests.action`
+| Renamed (prefix only). Must not be blank.
+
+| `c2ctests.service.name`
+| `connector.c2ctests.service.name`
+| Renamed (prefix only). Must not be blank.
+
+| `c2ctests.service.serviceType`
+| `connector.c2ctests.service.type`
+| Renamed — prefix and `serviceType` → `type`. Must not be blank.
+|===
+
+NOTE: If a property is not set, the connector uses a built-in default. The service and action
+must match the ones used in your PModes.
+
+WARNING: The `c2ctests` prefix is no longer recognized in 7.x.
+All properties under this prefix must be renamed, or they will be silently ignored at startup.
+
+.Configuration example (7.x)
+[source,properties]
+----
+connector.c2ctests.enabled=true
+connector.c2ctests.action=ConTest_Form
+connector.c2ctests.service.name=Connector-TEST
+connector.c2ctests.service.type=urn:e-codex:services:
+----
+
+== Startup Validation
+
+In 7.x the configuration is validated when the connector starts. If a value is missing or
+invalid, the startup stops and the error names the property, for example
+`connector.dss.trust-list-sources[eu].tl-sources[0].tl-url: must not be blank`.
+
+The following are checked:
+
+* Mandatory properties must be present and not blank.
+* Cron expressions must be valid 6-field Spring cron expressions.
+* Durations that represent a threshold or delay must be positive.
+* URLs (S3 endpoint, push address) must be absolute `http(s)` URLs.
+* Resource files (`ws-policy`, `constraints-xml`) must exist.
+* Link configuration names and link partner names must be unique.
+
+NOTE: An empty value (`property=`) counts as *set to blank*, not as unset. Comment the line
+out or remove it to use the default.

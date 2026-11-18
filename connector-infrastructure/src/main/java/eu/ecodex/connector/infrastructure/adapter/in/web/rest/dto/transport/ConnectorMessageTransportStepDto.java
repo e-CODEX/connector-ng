@@ -55,6 +55,7 @@ public record ConnectorMessageTransportStepDto(
     String status,
     Set<ConnectorMessageTransportStepStatusDto> statuses,
     String messageType,
+    boolean isRetryable,
     Instant createdAt,
     Instant updatedAt
 ) {
@@ -78,6 +79,7 @@ public record ConnectorMessageTransportStepDto(
             .status(step.status().name())
             .statuses(toStatuses(step.statuses()))
             .messageType(getTransportedMessageType(step.transportedMessage()))
+            .isRetryable(step.isRetryable())
             .createdAt(step.createdAt())
             .updatedAt(step.updatedAt())
             .build();

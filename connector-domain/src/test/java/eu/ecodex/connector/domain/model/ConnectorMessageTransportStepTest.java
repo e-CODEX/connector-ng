@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -168,6 +169,53 @@ class ConnectorMessageTransportStepTest {
 
             assertThat(step.remoteSystemIdentifier()).isEqualTo(BACKEND_ID);
             assertThat(step.transportedMessageIdentifier()).isEqualTo(MESSAGE_ID);
+        }
+    }
+
+    @Nested
+    @DisplayName("isRetryable")
+    class IsRetryable {
+        @ParameterizedTest
+        @EnumSource(value = ConnectorMessageTransportStatus.class, names = {"FAILED", "READY_FOR_PULL"})
+        void should_be_retryable_when_the_status_is_failed_or_ready_for_pull(
+            ConnectorMessageTransportStatus status) {
+            var step = stepBuilder(messageSentToGateway())
+                .status(status)
+                .build();
+
+            assertThat(step.isRetryable()).isTrue();
+        }
+
+        @ParameterizedTest
+        @EnumSource(value = ConnectorMessageTransportStatus.class,
+            names = {"FAILED", "READY_FOR_PULL"},
+            mode = EnumSource.Mode.EXCLUDE)
+        void should_not_be_retryable_when_the_status_is_neither_failed_nor_ready_for_pull(
+            ConnectorMessageTransportStatus status) {
+            var step = stepBuilder(messageSentToGateway())
+                .status(status)
+                .build();
+
+            assertThat(step.isRetryable()).isFalse();
+        }
+
+        @Test
+        void should_not_be_retryable_when_the_step_is_submitted() {
+            var step = stepBuilder(messageSentToGateway()).build();
+
+            assertThat(step.isRetryable()).isFalse();
+        }
+
+        @Test
+        void should_become_retryable_when_the_step_is_copied_with_a_failed_status() {
+            var submitted = stepBuilder(messageSentToGateway()).build();
+
+            var failed = submitted.toBuilder()
+                                  .status(ConnectorMessageTransportStatus.FAILED)
+                                  .build();
+
+            assertThat(submitted.isRetryable()).isFalse();
+            assertThat(failed.isRetryable()).isTrue();
         }
     }
 

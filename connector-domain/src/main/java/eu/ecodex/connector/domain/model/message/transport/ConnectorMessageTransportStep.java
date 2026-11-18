@@ -76,6 +76,11 @@ public record ConnectorMessageTransportStep(
         }
     }
 
+    public boolean isRetryable() {
+        return status == ConnectorMessageTransportStatus.FAILED
+            || status == ConnectorMessageTransportStatus.READY_FOR_PULL;
+    }
+
     @Override
     @Nonnull
     public String toString() {

@@ -10,7 +10,11 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms;
 
+import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,12 +26,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
     private final ConnectorRetrieveQueuesStats retrieveQueuesStats;
 
-    public ConnectorJmsAdminController(ConnectorRetrieveQueuesStats retrieveQueuesStats) {
+    private final ConnectorListQueueMessages listQueueMessages;
+
+    public ConnectorJmsAdminController(
+        ConnectorRetrieveQueuesStats retrieveQueuesStats,
+        ConnectorListQueueMessages listQueueMessages) {
         this.retrieveQueuesStats = retrieveQueuesStats;
+        this.listQueueMessages = listQueueMessages;
     }
 
     @Override
     public List<ConnectorQueueStats> retrieveQueuesStats() {
         return retrieveQueuesStats.execute();
+    }
+
+    @Override
+    public ConnectorPageResult<ConnectorQueueMessage> listQueueMessages(
+        String queue, boolean dlq, int page, int size) {
+        return listQueueMessages.execute(queue, dlq, ConnectorPageRequest.of(page, size));
     }
 }

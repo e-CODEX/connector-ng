@@ -92,11 +92,16 @@ public class ConnectorConfigurationAdminController implements ConnectorConfigura
             .outboundMessageStagingQueue(queueProperties.outboundMessageStagingQueue())
             .outboundEvidenceTriggerQueue(queueProperties.outboundEvidenceTriggerQueue())
             .outboundMessageProcessingQueue(queueProperties.outboundMessageProcessingQueue())
+            .inboundMessageStagingQueue(queueProperties.inboundMessageStagingQueue())
             .inboundMessageProcessingQueue(queueProperties.inboundMessageProcessingQueue())
             .inboundEvidenceTriggerQueue(queueProperties.inboundEvidenceTriggerQueue())
             .backendDeliveryQueue(queueProperties.backendDeliveryQueue())
             .gatewaySubmissionQueue(queueProperties.gatewaySubmissionQueue())
             .gatewaySubmissionReplyQueue(queueProperties.gatewaySubmissionReplyQueue())
+            .gatewayReceptionQueue(queueProperties.gatewayReceptionQueue())
+            .resolvedMessageCleanupProcessingQueue(
+                queueProperties.resolvedMessageCleanupProcessingQueue()
+            )
             .build();
     }
 

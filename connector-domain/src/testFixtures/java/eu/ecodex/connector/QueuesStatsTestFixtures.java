@@ -11,6 +11,7 @@
 package eu.ecodex.connector;
 
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import eu.ecodex.connector.domain.model.stats.queue.MonitoredQueueCategory;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class QueuesStatsTestFixtures {
@@ -19,7 +20,8 @@ public class QueuesStatsTestFixtures {
             "connector.queues.outbound-message-staging-queue",
             "Staging area for outbound messages awaiting processing",
             0,
-            1
+            1,
+            MonitoredQueueCategory.CONNECTOR
         );
     }
 }

@@ -59,6 +59,10 @@ public record ConnectorQueueProperties(
     String gatewaySubmissionReplyQueue,
 
     @NotBlank
+    @DefaultValue("domibus.backend.jms.outQueue")
+    String gatewayReceptionQueue,
+
+    @NotBlank
     @DefaultValue("connector.queues.resolved-message-cleanup-processing-queue")
     String resolvedMessageCleanupProcessingQueue
 ) {

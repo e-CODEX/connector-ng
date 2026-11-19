@@ -86,6 +86,11 @@ public class ConnectorConfigurationAdminControllerTest extends AbstractIntegrati
                      assertThat(result).isNotNull();
                      assert result != null;
                      assertThat(result.outboundEvidenceTriggerQueue()).isNotNull();
+                     assertThat(result.inboundMessageStagingQueue())
+                         .isEqualTo("connector.queues.inbound-message-staging-queue");
+                     assertThat(result.gatewayReceptionQueue())
+                         .isEqualTo("domibus.backend.jms.outQueue");
+                     assertThat(result.resolvedMessageCleanupProcessingQueue()).isNotBlank();
                  });
     }
 

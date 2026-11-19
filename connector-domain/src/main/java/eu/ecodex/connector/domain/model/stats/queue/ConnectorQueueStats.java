@@ -19,12 +19,15 @@ package eu.ecodex.connector.domain.model.stats.queue;
  * @param pendingCount     The number of messages pending processing in the queue.
  * @param dlqCount         The number of messages in the dead letter queue.
  * @param queueDescription The description of the queue.
+ * @param category         The {@link MonitoredQueueCategory} the queue belongs to, used to group
+ *                         queues for display and statistics.
  */
 public record ConnectorQueueStats(
     String queueName,
     String queueDescription,
     long pendingCount,
-    long dlqCount
+    long dlqCount,
+    MonitoredQueueCategory category
 ) {
     /**
      * Creates a new instance of {@code ConnectorQueueStats} using the specified parameters.
@@ -33,6 +36,8 @@ public record ConnectorQueueStats(
      * @param queueDescription A description of the queue.
      * @param pendingCount     The number of messages pending processing in the queue.
      * @param dlqCount         The number of messages in the dead letter queue.
+     * @param category         The {@link MonitoredQueueCategory} the queue belongs to, used to
+     *                         group queues for display and statistics.
      *
      * @return A new {@code ConnectorQueueStats} instance populated with the provided values.
      */
@@ -40,7 +45,14 @@ public record ConnectorQueueStats(
         String queueName,
         String queueDescription,
         long pendingCount,
-        long dlqCount) {
-        return new ConnectorQueueStats(queueName, queueDescription, pendingCount, dlqCount);
+        long dlqCount,
+        MonitoredQueueCategory category) {
+        return new ConnectorQueueStats(
+            queueName,
+            queueDescription,
+            pendingCount,
+            dlqCount,
+            category
+        );
     }
 }

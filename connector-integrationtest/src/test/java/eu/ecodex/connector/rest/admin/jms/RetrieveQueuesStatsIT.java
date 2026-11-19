@@ -42,7 +42,7 @@ public class RetrieveQueuesStatsIT extends AbstractIntegrationTest {
             .value(result -> {
                 assertThat(result).isNotNull();
                 assert result != null;
-                assertThat(result.size()).isEqualTo(8);
+                assertThat(result.size()).isEqualTo(11);
             });
     }
 }

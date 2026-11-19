@@ -20,10 +20,13 @@ public record ConnectorQueuePropertiesDto(
     String outboundMessageStagingQueue,
     String outboundEvidenceTriggerQueue,
     String outboundMessageProcessingQueue,
+    String inboundMessageStagingQueue,
     String inboundMessageProcessingQueue,
     String inboundEvidenceTriggerQueue,
     String backendDeliveryQueue,
     String gatewaySubmissionQueue,
-    String gatewaySubmissionReplyQueue
+    String gatewaySubmissionReplyQueue,
+    String gatewayReceptionQueue,
+    String resolvedMessageCleanupProcessingQueue
 ) {
 }

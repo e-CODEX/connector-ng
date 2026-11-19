@@ -10,11 +10,14 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
+import static eu.ecodex.connector.TransportStepFixtures.TRANSPORT_STEP_ID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -31,7 +34,6 @@ import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -64,26 +66,26 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
     private ConnectorBusinessMessage message() {
         return BusinessMessageTestFixtures.createInboundMessage().toBuilder()
-                                          .identifier(MESSAGE_ID)
-                                          .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                          .backendName(BACKEND_NAME)
-                                          .gatewayName(GATEWAY_NAME)
-                                          .build();
+            .identifier(MESSAGE_ID)
+            .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .backendName(BACKEND_NAME)
+            .gatewayName(GATEWAY_NAME)
+            .build();
     }
 
     private ConnectorEvidenceMessage evidenceMessage() {
         return EvidenceMessageTestFixtures.createDeliveryEvidenceMessage().toBuilder()
-                                          .identifier(MESSAGE_ID)
-                                          .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                          .backendName(BACKEND_NAME)
-                                          .gatewayName(GATEWAY_NAME)
-                                          .build();
+            .identifier(MESSAGE_ID)
+            .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .backendName(BACKEND_NAME)
+            .gatewayName(GATEWAY_NAME)
+            .build();
     }
 
     private ConnectorMessageProcessingConfiguration configuration() {
         return ConnectorMessageProcessingConfiguration.builder()
-                                                      .transportIdSuffix(TRANSPORT_SUFFIX)
-                                                      .build();
+            .transportIdSuffix(TRANSPORT_SUFFIX)
+            .build();
     }
 
     @Nested
@@ -101,10 +103,34 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
             verify(transportStepRepository).save(
                 argThat(step ->
-                            step.numberOfAttempts() == 1
-                                && step.status() == ConnectorMessageTransportStatus.SUBMITTED
+                    step.numberOfAttempts() == 1
+                        && step.status() == ConnectorMessageTransportStatus.SUBMITTED
                 )
             );
+
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"FAILED", "READY_FOR_PULL"}
+        )
+        void should_update_existing_transport_step_status_and_nb_of_attempts(
+            ConnectorMessageTransportStatus status) {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 0)
+            );
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 1));
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.numberOfAttempts()).isEqualTo(1);
+            assertThat(result.status()).isEqualTo(status);
+
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 1);
+            verify(transportStepRepository, never()).save(any());
         }
 
         @ParameterizedTest
@@ -176,8 +202,8 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         @Test
         void should_use_the_gateway_name_when_the_message_goes_from_the_backend_to_the_gateway() {
             var outbound = message().toBuilder()
-                                    .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                                    .build();
+                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                .build();
             when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
             when(transportStepRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 

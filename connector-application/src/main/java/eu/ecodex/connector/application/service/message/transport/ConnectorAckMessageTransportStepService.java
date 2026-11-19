@@ -42,9 +42,7 @@ import org.springframework.util.StringUtils;
 @Service
 @Transactional
 public class ConnectorAckMessageTransportStepService implements ConnectorAckMessageTransportStep {
-    // TODO exclude FAILED status from this set when retrying is implemented
     private static final Set<ConnectorMessageTransportStatus> TERMINAL_STATUSES = Set.of(
-        ConnectorMessageTransportStatus.FAILED,
         ConnectorMessageTransportStatus.DELIVERED
     );
 

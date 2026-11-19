@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByTransportId;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetryTransportStep;
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
@@ -38,6 +39,7 @@ public class ConnectorMessageTransportStepAdminController
     private final ConnectorRetrieveTransportStepByTransportId
         retrieveTransportStepByTransportId;
     private final ConnectorRetrieveMessage retrieveMessage;
+    private final ConnectorRetryTransportStep retryTransportStep;
 
     /**
      * Creates the controller.
@@ -48,14 +50,16 @@ public class ConnectorMessageTransportStepAdminController
      *                                           transport identifier (must not be null)
      * @param retrieveMessage                    the use case retrieving a business message by its
      *                                           identifier (must not be null)
+     * @param retryTransportStep                 the use case for transport step retrial
      */
     public ConnectorMessageTransportStepAdminController(
         ConnectorListTransportSteps listTransportSteps,
         ConnectorRetrieveTransportStepByTransportId retrieveTransportStepByTransportId,
-        ConnectorRetrieveMessage retrieveMessage) {
+        ConnectorRetrieveMessage retrieveMessage, ConnectorRetryTransportStep retryTransportStep) {
         this.listTransportSteps = listTransportSteps;
         this.retrieveTransportStepByTransportId = retrieveTransportStepByTransportId;
         this.retrieveMessage = retrieveMessage;
+        this.retryTransportStep = retryTransportStep;
     }
 
     @Override
@@ -80,9 +84,9 @@ public class ConnectorMessageTransportStepAdminController
 
         return ConnectorPageResult.of(
             transportSteps.content()
-                          .stream()
-                          .map(ConnectorMessageTransportStepDto::from)
-                          .toList(),
+                .stream()
+                .map(ConnectorMessageTransportStepDto::from)
+                .toList(),
             transportSteps.size(),
             transportSteps.totalElements(),
             transportSteps.totalPages()
@@ -102,6 +106,11 @@ public class ConnectorMessageTransportStepAdminController
                 isDeliveredAt(step)
             );
         }
+    }
+
+    @Override
+    public void retryTransportStep(String identifier) {
+        retryTransportStep.execute(identifier);
     }
 
     private Instant isDeliveredAt(ConnectorMessageTransportStep transportStep) {

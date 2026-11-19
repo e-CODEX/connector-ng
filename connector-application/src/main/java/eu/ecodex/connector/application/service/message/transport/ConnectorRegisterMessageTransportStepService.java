@@ -83,12 +83,18 @@ public class ConnectorRegisterMessageTransportStepService
             );
         }
 
+        var transportStep =
+            transportStepRepository.findByTransportedMessageIdentifier(message.identifier());
+
+        if (transportStep != null && transportStep.isRetryable()) {
+            return recordNewAttempt(message, status, transportStep);
+        }
+
         log.debug(
             "Registering transport step for message [{}] with status [{}]",
             message.identifier(), status
         );
-
-        var transportStep = ConnectorMessageTransportStep
+        transportStep = ConnectorMessageTransportStep
             .builder()
             .identifier(buildIdentifier(message))
             .transportedMessageIdentifier(message.identifier())
@@ -100,6 +106,25 @@ public class ConnectorRegisterMessageTransportStepService
 
         return transportStepRepository.save(transportStep);
     }
+
+    private ConnectorMessageTransportStep recordNewAttempt(
+        @NonNull ConnectorMessage message,
+        @NonNull ConnectorMessageTransportStatus status,
+        ConnectorMessageTransportStep transportStep) {
+        log.debug(
+            "Updating transport step [{}] for message [{}] by incrementing number of attempts",
+            transportStep.identifier(), message.identifier());
+
+        int numberOfAttempts =
+            ALLOWED_STATUSES.contains(status) ? transportStep.numberOfAttempts() + 1 :
+                transportStep.numberOfAttempts();
+
+        return transportStepRepository.update(
+            transportStep.identifier(),
+            status,
+            numberOfAttempts);
+    }
+
 
     private String buildIdentifier(ConnectorMessage message) {
         var config = processingConfigurationProvider.getConfiguration();
@@ -127,10 +152,9 @@ public class ConnectorRegisterMessageTransportStepService
             );
 
             return businessMessage.toBuilder()
-                                  .status(messageStatus)
-                                  .build();
+                .status(messageStatus)
+                .build();
         }
-
         return message;
     }
 }

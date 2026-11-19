@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -17,10 +18,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.QueuesStatsTestFixtures;
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueNotFoundException;
+import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms.ConnectorJmsAdminController;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +44,9 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
 
     @MockitoBean
     private ConnectorRetrieveQueuesStats retrieveQueuesStats;
+
+    @MockitoBean
+    private ConnectorListQueueMessages listQueueMessages;
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,5 +65,70 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
                               .value("Staging area for outbound messages awaiting processing"))
                .andExpect(jsonPath("$[0].pendingCount").value(0))
                .andExpect(jsonPath("$[0].dlqCount").value(1));
+    }
+
+    @Test
+    void should_return_200_with_the_dlq_messages_of_a_queue() throws Exception {
+        var message = new ConnectorQueueMessage(
+            "ID:1", Instant.parse("2026-11-19T10:00:00Z"), null, "MapMessage", true, 6,
+            "Exceeded redelivery policy", Map.of("JMSXDeliveryCount", "6")
+        );
+        when(listQueueMessages.execute(
+            org.mockito.ArgumentMatchers.eq("connector.queues.backend-delivery-queue"),
+            org.mockito.ArgumentMatchers.eq(true), any(ConnectorPageRequest.class)
+        )).thenReturn(ConnectorPageResult.of(List.of(message), 20, 1, 1));
+
+        mockMvc.perform(get("/api/v1/admin/jms/queues/messages")
+                            .param("queue", "connector.queues.backend-delivery-queue")
+                            .param("dlq", "true"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.content[0].messageId").value("ID:1"))
+               .andExpect(jsonPath("$.content[0].messageType").value("MapMessage"))
+               .andExpect(jsonPath("$.content[0].deliveryCount").value(6))
+               .andExpect(jsonPath("$.content[0].failureCause")
+                              .value("Exceeded redelivery policy"))
+               .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void should_return_404_when_the_queue_is_not_monitored() throws Exception {
+        when(listQueueMessages.execute(
+            org.mockito.ArgumentMatchers.eq("unknown"), org.mockito.ArgumentMatchers.eq(true), any(ConnectorPageRequest.class)
+        )).thenThrow(new ConnectorQueueNotFoundException("unknown"));
+
+        mockMvc.perform(get("/api/v1/admin/jms/queues/messages")
+                            .param("queue", "unknown").param("dlq", "true"))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void should_return_200_with_the_pending_messages_of_a_queue() throws Exception {
+        var message = new ConnectorQueueMessage(
+            "ID:2", Instant.parse("2026-11-19T10:00:00Z"), null, "TextMessage", false, 1,
+            null, Map.of()
+        );
+        when(listQueueMessages.execute(
+            org.mockito.ArgumentMatchers.eq("connector.queues.backend-delivery-queue"),
+            org.mockito.ArgumentMatchers.eq(false), any(ConnectorPageRequest.class)
+        )).thenReturn(ConnectorPageResult.of(List.of(message), 20, 1, 1));
+
+        mockMvc.perform(get("/api/v1/admin/jms/queues/messages")
+                            .param("queue", "connector.queues.backend-delivery-queue"))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.content[0].messageId").value("ID:2"))
+               .andExpect(jsonPath("$.content[0].messageType").value("TextMessage"))
+               .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void should_return_404_for_pending_messages_of_a_queue_which_is_not_monitored()
+        throws Exception {
+        when(listQueueMessages.execute(
+            org.mockito.ArgumentMatchers.eq("unknown"),
+            org.mockito.ArgumentMatchers.eq(false), any(ConnectorPageRequest.class)
+        )).thenThrow(new ConnectorQueueNotFoundException("unknown"));
+
+        mockMvc.perform(get("/api/v1/admin/jms/queues/messages").param("queue", "unknown"))
+               .andExpect(status().isNotFound());
     }
 }

@@ -10,6 +10,9 @@
 
 package eu.ecodex.connector.application.port.spi;
 
+import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
 
@@ -25,4 +28,39 @@ public interface ConnectorQueueStatsProvider {
      *     {@code null}, and empty if there are no queues
      */
     List<ConnectorQueueStats> getAllStats();
+
+    /**
+     * Tells whether the given queue is one of the queues monitored by the connector.
+     *
+     * @param queueName the name of the queue
+     *
+     * @return {@code true} if the queue is monitored
+     */
+    boolean isMonitored(String queueName);
+
+    /**
+     * Lists, page by page, the pending messages of a monitored queue, oldest first. Messages are
+     * only browsed, never consumed.
+     *
+     * @param queueName   the name of a monitored queue
+     * @param pageRequest the requested page
+     *
+     * @return the requested page of messages; never {@code null}
+     */
+    ConnectorPageResult<ConnectorQueueMessage> listMessages(
+        String queueName, ConnectorPageRequest pageRequest
+    );
+
+    /**
+     * Lists, page by page, the messages of the dead letter queue of a monitored queue, oldest
+     * first. Messages are only browsed, never consumed.
+     *
+     * @param queueName   the name of a monitored queue
+     * @param pageRequest the requested page
+     *
+     * @return the requested page of DLQ messages; never {@code null}
+     */
+    ConnectorPageResult<ConnectorQueueMessage> listDlqMessages(
+        String queueName, ConnectorPageRequest pageRequest
+    );
 }

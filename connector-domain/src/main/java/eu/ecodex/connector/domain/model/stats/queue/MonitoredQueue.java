@@ -16,6 +16,8 @@ package eu.ecodex.connector.domain.model.stats.queue;
  *
  * @param name        The unique name of the queue being monitored.
  * @param description A description of the queue, detailing its purpose or functionality.
+ * @param category    The {@link MonitoredQueueCategory} the queue belongs to, used to group queues
+ *                    for display and statistics.
  */
-public record MonitoredQueue(String name, String description) {
+public record MonitoredQueue(String name, String description, MonitoredQueueCategory category) {
 }

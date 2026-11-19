@@ -16,6 +16,7 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import eu.ecodex.connector.domain.model.stats.queue.MonitoredQueue;
+import eu.ecodex.connector.domain.model.stats.queue.MonitoredQueueCategory;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorQueueProperties;
 import jakarta.jms.BytesMessage;
 import jakarta.jms.JMSException;
@@ -59,56 +60,107 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
         this.monitoredQueues = List.of(
             new MonitoredQueue(
                 queueProperties.outboundMessageStagingQueue(),
-                "Staging area for outbound messages awaiting processing"
+                "Staging area for outbound messages awaiting processing",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.outboundEvidenceTriggerQueue(),
-                "Triggers REM evidence generation for outbound messages"
+                "Triggers REM evidence generation for outbound messages",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.outboundMessageProcessingQueue(),
-                "Outbound messages being processed toward the gateway"
+                "Outbound messages being processed toward the gateway",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.inboundMessageStagingQueue(),
-                "Staging area for inbound messages awaiting processing"
+                "Staging area for inbound messages awaiting processing",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.inboundMessageProcessingQueue(),
-                "Inbound messages being processed from the gateway"
+                "Inbound messages being processed from the gateway",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.inboundEvidenceTriggerQueue(),
-                "Triggers REM evidence generation for inbound messages"
+                "Triggers REM evidence generation for inbound messages",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.backendDeliveryQueue(),
-                "Messages ready for delivery to the backend"
+                "Messages ready for delivery to the backend",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.resolvedMessageCleanupProcessingQueue(),
-                "Cleanup of the attachments of resolved (confirmed or rejected) messages"
+                "Cleanup of the attachments of resolved (confirmed or rejected) messages",
+                MonitoredQueueCategory.CONNECTOR
             ),
             new MonitoredQueue(
                 queueProperties.gatewaySubmissionQueue(),
-                "Gateway JMS queue receiving the messages submitted by the connector"
+                "Gateway JMS queue receiving the messages submitted by the connector",
+                MonitoredQueueCategory.GATEWAY
             ),
             new MonitoredQueue(
                 queueProperties.gatewaySubmissionReplyQueue(),
-                "Gateway JMS queue carrying the submission replies to the connector"
+                "Gateway JMS queue carrying the submission replies to the connector",
+                MonitoredQueueCategory.GATEWAY
             ),
             new MonitoredQueue(
                 queueProperties.gatewayReceptionQueue(),
-                "Gateway JMS queue delivering the incoming messages to the connector"
+                "Gateway JMS queue delivering the incoming messages to the connector",
+                MonitoredQueueCategory.GATEWAY
             )
         );
+    }
+
+    private static String truncate(String value) {
+        return value.length() <= MAX_PROPERTY_VALUE_LENGTH
+            ? value
+            : value.substring(0, MAX_PROPERTY_VALUE_LENGTH) + "...";
+    }
+
+    private static int parseDeliveryCount(String value) {
+        try {
+            return value == null ? 0 : Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            log.debug("Invalid {} value [{}]", DELIVERY_COUNT_PROPERTY, value);
+            return 0;
+        }
+    }
+
+    private static String messageTypeOf(Message message) {
+        if (message instanceof MapMessage) {
+            return "MapMessage";
+        }
+
+        if (message instanceof TextMessage) {
+            return "TextMessage";
+        }
+
+        if (message instanceof BytesMessage) {
+            return "BytesMessage";
+        }
+
+        if (message instanceof ObjectMessage) {
+            return "ObjectMessage";
+        }
+
+        if (message instanceof StreamMessage) {
+            return "StreamMessage";
+        }
+
+        return "Message";
     }
 
     @Override
     public List<ConnectorQueueStats> getAllStats() {
         return monitoredQueues.stream().map((monitoredQueue -> getStats(
             monitoredQueue.name(),
-            monitoredQueue.description()
+            monitoredQueue.description(),
+            monitoredQueue.category()
         ))).toList();
     }
 
@@ -132,12 +184,16 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
         return n == null ? 0 : n;
     }
 
-    private ConnectorQueueStats getStats(String queue, String queueDescription) {
+    private ConnectorQueueStats getStats(
+        String queue,
+        String queueDescription,
+        MonitoredQueueCategory category) {
         return ConnectorQueueStats.of(
             queue,
             queueDescription,
             count(queue),
-            count(dlqNameOf(queue))
+            count(dlqNameOf(queue)),
+            category
         );
     }
 
@@ -211,44 +267,5 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
             properties.put(key, truncate(String.valueOf(value)));
         }
         return properties;
-    }
-
-    private static String truncate(String value) {
-        return value.length() <= MAX_PROPERTY_VALUE_LENGTH
-            ? value
-            : value.substring(0, MAX_PROPERTY_VALUE_LENGTH) + "...";
-    }
-
-    private static int parseDeliveryCount(String value) {
-        try {
-            return value == null ? 0 : Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            log.debug("Invalid {} value [{}]", DELIVERY_COUNT_PROPERTY, value);
-            return 0;
-        }
-    }
-
-    private static String messageTypeOf(Message message) {
-        if (message instanceof MapMessage) {
-            return "MapMessage";
-        }
-
-        if (message instanceof TextMessage) {
-            return "TextMessage";
-        }
-
-        if (message instanceof BytesMessage) {
-            return "BytesMessage";
-        }
-
-        if (message instanceof ObjectMessage) {
-            return "ObjectMessage";
-        }
-
-        if (message instanceof StreamMessage) {
-            return "StreamMessage";
-        }
-
-        return "Message";
     }
 }

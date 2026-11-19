@@ -17,7 +17,12 @@ ARG APP_FOLDER=/app
 
 WORKDIR ${APP_FOLDER}
 
-RUN groupadd -g ${USER_GID} ${USERNAME} \
+# Upgrade the OS packages of the base image so that every build (and every image refresh, which runs
+# without cache) ships the latest security fixes
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -g ${USER_GID} ${USERNAME} \
     && useradd -u ${USER_UID} -g ${USER_GID} -m ${USERNAME} \
     && mkdir -p data temp transaction-logs \
     && chown -R ${USERNAME}:${USERNAME} ${APP_FOLDER} \

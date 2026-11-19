@@ -61,9 +61,9 @@ public class ConnectorDBMessageTransportStepRepositoryTest extends AbstractRepos
             .status(ConnectorMessageTransportStatus.READY_FOR_PULL)
             .transportedMessage(
                 BusinessMessageTestFixtures.createInboundMessage()
-                                           .toBuilder()
-                                           .identifier(MESSAGE_IDENTIFIER)
-                                           .build()
+                    .toBuilder()
+                    .identifier(MESSAGE_IDENTIFIER)
+                    .build()
             )
             .build();
     }
@@ -369,6 +369,36 @@ public class ConnectorDBMessageTransportStepRepositoryTest extends AbstractRepos
     }
 
     @Nested
+    @DisplayName("find by transported message identifier")
+    class FindByTransportedMessageIdentifier {
+        @Test
+        @WithTransportStepData
+        void should_find_the_transport_step_by_transported_message_identifier() {
+            var found = repository.findByTransportedMessageIdentifier(MESSAGE_IDENTIFIER);
+
+            assertThat(found).isNotNull();
+            assertThat(found.identifier()).isEqualTo(STEP_IDENTIFIER);
+        }
+
+        @Test
+        void should_return_null_when_the_identifier_is_unknown() {
+            var found = repository.findByTransportedMessageIdentifier(
+                "unknown-identifier"
+            );
+
+            assertThat(found).isNull();
+        }
+
+        @Test
+        void should_throw_when_the_identifier_is_null() {
+            assertThrows(
+                NullPointerException.class,
+                () -> repository.findByTransportedMessageIdentifier(null)
+            );
+        }
+    }
+
+    @Nested
     @DisplayName("find pending message ids")
     class FindPendingMessagesIds {
         @Test
@@ -423,9 +453,9 @@ public class ConnectorDBMessageTransportStepRepositoryTest extends AbstractRepos
         void should_return_the_identifiers_of_the_ready_transport_steps() {
             var ids = repository.findReadyToDownloadTransportStepsIds(BACKEND_NAME);
             var expectedIds = repository.findReadyToDownloadTransportSteps(BACKEND_NAME)
-                                        .stream()
-                                        .map(ConnectorMessageTransportStep::identifier)
-                                        .toList();
+                .stream()
+                .map(ConnectorMessageTransportStep::identifier)
+                .toList();
 
             assertThat(ids).isNotNull();
             assertThat(ids).containsExactlyInAnyOrderElementsOf(expectedIds);

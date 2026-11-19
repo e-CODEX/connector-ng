@@ -80,6 +80,16 @@ public interface ConnectorMessageTransportStepRepository {
     ConnectorMessageTransportStep findByIdentifier(@Nonnull String identifier);
 
     /**
+     * Retrieves a transport step by its transported message identifier.
+     *
+     * @param transportedMessageIdentifier the transported message identifier (must not be null)
+     *
+     * @return the matching {@link ConnectorMessageTransportStep}, or {@code null} if none is found
+     */
+    ConnectorMessageTransportStep findByTransportedMessageIdentifier(
+        @Nonnull String transportedMessageIdentifier);
+
+    /**
      * Retrieves the identifiers of the transport steps of the given backend that are ready to be
      * downloaded.
      *

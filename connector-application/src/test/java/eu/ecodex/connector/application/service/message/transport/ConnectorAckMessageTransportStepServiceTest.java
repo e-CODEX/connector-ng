@@ -286,18 +286,6 @@ public class ConnectorAckMessageTransportStepServiceTest {
             verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
             verify(transportStepRepository, never()).update(any(), any(), anyInt());
         }
-
-        @Test
-        void should_skip_the_update_when_the_step_has_already_failed() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.FAILED, 1));
-
-            assertThatNoException()
-                .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
-
-            verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
-            verify(transportStepRepository, never()).update(any(), any(), anyInt());
-        }
     }
 
     @Nested

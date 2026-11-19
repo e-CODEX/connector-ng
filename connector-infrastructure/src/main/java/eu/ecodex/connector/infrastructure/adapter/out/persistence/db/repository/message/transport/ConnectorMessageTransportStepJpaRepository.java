@@ -34,6 +34,10 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     @EntityGraph(attributePaths = {"statuses"})
     ConnectorMessageTransportStepEntity findByIdentifier(String identifier);
 
+    @EntityGraph(attributePaths = {"statuses"})
+    ConnectorMessageTransportStepEntity findByTransportedMessageIdentifier(
+        String transportedMessageIdentifier);
+
     @Query("""
         SELECT mts
         FROM ConnectorMessageTransportStepEntity mts

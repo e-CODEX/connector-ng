@@ -22,6 +22,7 @@ import eu.ecodex.connector.infrastructure.config.property.ConnectorQueueProperti
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
 import jakarta.jms.Session;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -34,6 +35,7 @@ import org.springframework.stereotype.Component;
  * Gateway Implementation of the {@link ConnectorMessageEventPublisher}.
  */
 @Slf4j
+@Transactional
 @Component("connectorJmsGatewayLinkPublisher")
 public class ConnectorJmsGatewayLinkPublisher
     implements ConnectorMessageEventPublisher<ConnectorMessage> {

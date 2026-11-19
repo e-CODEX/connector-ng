@@ -18,41 +18,42 @@ import java.util.HashSet;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "LineLength"})
 public class TransportStepFixtures {
-    private static final String TRANSPORT_STEP_ID = "1c544c2e-7e60-4647-a4b2-c3c89958b2a7@connector.ecodex.eu";
+    public static final String TRANSPORT_STEP_ID =
+        "1c544c2e-7e60-4647-a4b2-c3c89958b2a7@connector.ecodex.eu";
 
     public static ConnectorMessageTransportStep createTransportStepWithEvidenceMessage() {
         var statuses = new HashSet<ConnectorMessageTransportStepStatus>();
         statuses.add(
-                ConnectorMessageTransportStepStatus.builder()
-                                                   .status(ConnectorMessageTransportStatus.SUBMITTED)
-                                                   .createdAt(Instant.now())
-                                                   .build()
+            ConnectorMessageTransportStepStatus.builder()
+                .status(ConnectorMessageTransportStatus.SUBMITTED)
+                .createdAt(Instant.now())
+                .build()
         );
         var message = EvidenceMessageTestFixtures.createSubmissionAcceptanceEvidenceMessage();
         return ConnectorMessageTransportStep
-                .builder()
-                .identifier(TRANSPORT_STEP_ID)
-                .transportedMessageIdentifier(message.identifier())
-                .remoteSystemIdentifier(
-                    message.backendMessageIdentifier()
-                )
-                .numberOfAttempts(0)
-                .status(ConnectorMessageTransportStatus.SUBMITTED)
-                .statuses(statuses)
-                .linkPartnerName("backend_alice")
-                .transportedMessage(message)
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .build();
+            .builder()
+            .identifier(TRANSPORT_STEP_ID)
+            .transportedMessageIdentifier(message.identifier())
+            .remoteSystemIdentifier(
+                message.backendMessageIdentifier()
+            )
+            .numberOfAttempts(0)
+            .status(ConnectorMessageTransportStatus.SUBMITTED)
+            .statuses(statuses)
+            .linkPartnerName("backend_alice")
+            .transportedMessage(message)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
     }
 
     public static ConnectorMessageTransportStep createTransportStepWithBusinessMessage() {
         var statuses = new HashSet<ConnectorMessageTransportStepStatus>();
         statuses.add(
             ConnectorMessageTransportStepStatus.builder()
-                                               .status(ConnectorMessageTransportStatus.SUBMITTED)
-                                               .createdAt(Instant.now())
-                                               .build()
+                .status(ConnectorMessageTransportStatus.SUBMITTED)
+                .createdAt(Instant.now())
+                .build()
         );
         return ConnectorMessageTransportStep
             .builder()
@@ -65,6 +66,35 @@ public class TransportStepFixtures {
             )
             .numberOfAttempts(0)
             .status(ConnectorMessageTransportStatus.SUBMITTED)
+            .statuses(statuses)
+            .linkPartnerName("backend_alice")
+            .transportedMessage(BusinessMessageTestFixtures.createOutboundMessage())
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .build();
+    }
+
+    public static ConnectorMessageTransportStep createTransportStepWithBusinessMessage(
+        ConnectorMessageTransportStatus status,
+        int nbAttempts) {
+        var statuses = new HashSet<ConnectorMessageTransportStepStatus>();
+        statuses.add(
+            ConnectorMessageTransportStepStatus.builder()
+                .status(status)
+                .createdAt(Instant.now())
+                .build()
+        );
+        return ConnectorMessageTransportStep
+            .builder()
+            .identifier(TRANSPORT_STEP_ID)
+            .transportedMessageIdentifier(
+                BusinessMessageTestFixtures.createOutboundMessage().identifier()
+            )
+            .remoteSystemIdentifier(
+                BusinessMessageTestFixtures.createOutboundMessage().backendMessageIdentifier()
+            )
+            .numberOfAttempts(nbAttempts)
+            .status(status)
             .statuses(statuses)
             .linkPartnerName("backend_alice")
             .transportedMessage(BusinessMessageTestFixtures.createOutboundMessage())

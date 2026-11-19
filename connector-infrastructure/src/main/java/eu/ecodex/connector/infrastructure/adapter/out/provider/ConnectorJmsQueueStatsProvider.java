@@ -229,13 +229,26 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
     }
 
     private static String messageTypeOf(Message message) {
-        return switch (message) {
-            case MapMessage ignored -> "MapMessage";
-            case TextMessage ignored -> "TextMessage";
-            case BytesMessage ignored -> "BytesMessage";
-            case ObjectMessage ignored -> "ObjectMessage";
-            case StreamMessage ignored -> "StreamMessage";
-            default -> "Message";
-        };
+        if (message instanceof MapMessage) {
+            return "MapMessage";
+        }
+
+        if (message instanceof TextMessage) {
+            return "TextMessage";
+        }
+
+        if (message instanceof BytesMessage) {
+            return "BytesMessage";
+        }
+
+        if (message instanceof ObjectMessage) {
+            return "ObjectMessage";
+        }
+
+        if (message instanceof StreamMessage) {
+            return "StreamMessage";
+        }
+
+        return "Message";
     }
 }

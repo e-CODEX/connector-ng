@@ -11,6 +11,7 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.queue;
 
 import eu.ecodex.connector.application.exception.queue.ConnectorQueueDlqNotSupportedException;
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageDeleteException;
 import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageNotFoundException;
 import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageReplayException;
 import eu.ecodex.connector.application.exception.queue.ConnectorQueueNotFoundException;
@@ -57,6 +58,14 @@ public class ConnectorQueueExceptionHandler {
     @ExceptionHandler(ConnectorQueueMessageReplayException.class)
     public ErrorResponse handleQueueMessageReplayException(
         ConnectorQueueMessageReplayException exception) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorQueueMessageDeleteException.class)
+    public ErrorResponse handleQueueMessageDeleteException(
+        ConnectorQueueMessageDeleteException exception) {
         return new ErrorResponse(HttpStatus.CONFLICT.value(), exception.getMessage());
     }
 }

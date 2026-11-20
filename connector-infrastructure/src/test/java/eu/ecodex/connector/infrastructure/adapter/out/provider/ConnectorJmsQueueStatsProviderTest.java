@@ -126,12 +126,12 @@ class ConnectorJmsQueueStatsProviderTest {
     }
 
     /**
-     * Replays messages through a private in-memory broker, to check what really ends up in the
+     * Replays and deletes messages through a private in-memory broker, to check what really ends up in the
      * queue and in the dead letter queue.
      */
     @Nested
-    @DisplayName("replaying the dead letter queue messages")
-    class Replay {
+    @DisplayName("replaying and deleting the dead letter queue messages")
+    class DlqMessages {
         private static final String DLQ = "ActiveMQ.DLQ." + QUEUE;
 
         private JmsTemplate brokerTemplate;
@@ -267,6 +267,38 @@ class ConnectorJmsQueueStatsProviderTest {
             assertThat(result.replayed()).containsExactly(ids.getFirst());
             assertThat(brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10)).content())
                 .extracting(m -> m.messageId()).containsExactly(ids.getLast());
+        }
+
+        @Test
+        void should_delete_only_the_requested_message_from_the_dlq() {
+            sendToDlq("one");
+            sendToDlq("two");
+            var ids = brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10))
+                                    .content().stream().map(m -> m.messageId()).toList();
+
+            var deleted = brokerProvider.deleteDlqMessage(QUEUE, ids.getFirst());
+
+            assertThat(deleted).isTrue();
+            assertThat(brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10))
+                                     .content())
+                .extracting(m -> m.messageId()).containsExactly(ids.getLast());
+            // deleting is not replaying: nothing is sent back to the queue
+            assertThat(brokerTemplate.receive(QUEUE)).isNull();
+        }
+
+        @Test
+        void should_report_a_message_which_is_not_in_the_dlq() {
+            assertThat(brokerProvider.deleteDlqMessage(QUEUE, "ID:unknown-1:1:1:1:1")).isFalse();
+        }
+
+        @Test
+        void should_refuse_a_delete_identifier_which_is_not_a_broker_message_id() {
+            sendToDlq("kept");
+
+            assertThat(brokerProvider.deleteDlqMessage(QUEUE, "x' OR JMSMessageID LIKE '%"))
+                .isFalse();
+            assertThat(brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10))
+                                     .content()).hasSize(1);
         }
     }
 }

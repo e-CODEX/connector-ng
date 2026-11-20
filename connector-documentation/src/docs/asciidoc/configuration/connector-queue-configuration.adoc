@@ -100,9 +100,12 @@ and properties only, never the body).
 message. It answers `204` when the message was replayed, `404` when it is not in the DLQ and `409`
 when it could not be replayed.
 * `POST /api/v1/admin/jms/queues/dlq/replay` replays a list of failed messages, up to 100 at once.
+* `DELETE /api/v1/admin/jms/queues/dlq/messages/{messageId}?queue=<queue>` deletes one failed
+message for good, so that it is never processed again. It answers `204` when the message was
+deleted, `404` when it is not in the DLQ and `409` when it could not be deleted.
 
-Both send the failed messages back to their queue, so that they are processed again, and are
-restricted to administrators. The list replay takes the queue and the message identifiers, and
+The replays send the failed messages back to their queue, so that they are processed again, and are
+restricted to administrators, as is the deletion. The list replay takes the queue and the message identifiers, and
 answers with the outcome of each one:
 
 [source,json]
@@ -119,8 +122,9 @@ in the DLQ. A replay is at-least-once: each message is first sent back to its qu
 removed from the DLQ, so if the removal fails the message may be delivered again. Only text and map
 messages, the types used by the connector, can be replayed.
 
-The DLQ of the gateway queues can be listed but never replayed: the connector does not manage how
-the gateway dead-letters its messages, so a replay request on a gateway queue is refused with `400`.
+The DLQ of the gateway queues can be listed but its messages can be neither replayed nor deleted:
+the connector does not manage how the gateway dead-letters its messages, so such a request on a
+gateway queue is refused with `400`.
 
 === Broker configuration
 

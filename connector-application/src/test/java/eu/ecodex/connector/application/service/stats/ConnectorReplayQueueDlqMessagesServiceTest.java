@@ -45,7 +45,7 @@ class ConnectorReplayQueueDlqMessagesServiceTest {
     void should_replay_the_distinct_messages_of_a_connector_queue() {
         var expected = new ConnectorQueueReplayResult(List.of("ID:1"), List.of("ID:2"), List.of());
         when(queueStatsProvider.isMonitored(QUEUE)).thenReturn(true);
-        when(queueStatsProvider.isDlqReplayable(QUEUE)).thenReturn(true);
+        when(queueStatsProvider.isDlqManaged(QUEUE)).thenReturn(true);
         when(queueStatsProvider.replayDlqMessages(QUEUE, List.of("ID:1", "ID:2")))
             .thenReturn(expected);
 
@@ -69,7 +69,7 @@ class ConnectorReplayQueueDlqMessagesServiceTest {
     @Test
     void should_reject_the_replay_on_a_gateway_queue() {
         when(queueStatsProvider.isMonitored("domibus.backend.jms.inQueue")).thenReturn(true);
-        when(queueStatsProvider.isDlqReplayable("domibus.backend.jms.inQueue")).thenReturn(false);
+        when(queueStatsProvider.isDlqManaged("domibus.backend.jms.inQueue")).thenReturn(false);
 
         assertThatThrownBy(() -> service.execute("domibus.backend.jms.inQueue", List.of("ID:1")))
             .isInstanceOf(ConnectorQueueDlqNotSupportedException.class);

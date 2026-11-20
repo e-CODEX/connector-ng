@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms;
 
+import eu.ecodex.connector.application.port.api.stats.ConnectorDeleteQueueDlqMessage;
 import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
 import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessage;
 import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessages;
@@ -36,6 +37,8 @@ public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
 
     private final ConnectorReplayQueueDlqMessage replayQueueDlqMessage;
 
+    private final ConnectorDeleteQueueDlqMessage deleteQueueDlqMessage;
+
     /**
      * Creates the controller.
      *
@@ -43,16 +46,19 @@ public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
      * @param listQueueMessages      the use case listing the messages of a queue or of its DLQ
      * @param replayQueueDlqMessages the use case replaying a list of DLQ messages
      * @param replayQueueDlqMessage  the use case replaying one DLQ message
+     * @param deleteQueueDlqMessage  the use case deleting one DLQ message
      */
     public ConnectorJmsAdminController(
         ConnectorRetrieveQueuesStats retrieveQueuesStats,
         ConnectorListQueueMessages listQueueMessages,
         ConnectorReplayQueueDlqMessages replayQueueDlqMessages,
-        ConnectorReplayQueueDlqMessage replayQueueDlqMessage) {
+        ConnectorReplayQueueDlqMessage replayQueueDlqMessage,
+        ConnectorDeleteQueueDlqMessage deleteQueueDlqMessage) {
         this.retrieveQueuesStats = retrieveQueuesStats;
         this.listQueueMessages = listQueueMessages;
         this.replayQueueDlqMessages = replayQueueDlqMessages;
         this.replayQueueDlqMessage = replayQueueDlqMessage;
+        this.deleteQueueDlqMessage = deleteQueueDlqMessage;
     }
 
     @Override
@@ -75,5 +81,10 @@ public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
     @Override
     public void replayQueueDlqMessage(String messageId, String queue) {
         replayQueueDlqMessage.execute(queue, messageId);
+    }
+
+    @Override
+    public void deleteQueueDlqMessage(String messageId, String queue) {
+        deleteQueueDlqMessage.execute(queue, messageId);
     }
 }

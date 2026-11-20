@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,16 +67,35 @@ public interface ConnectorJmsAdminApi {
         summary = "Replay a failed message",
         description = "Sends the given dead letter queue (DLQ) message of a connector queue back"
             + " to that queue, and removes it from the DLQ. The replay is at-least-once: if"
-            + " removing the message from the DLQ fails, it is delivered again. Restricted to"
-            + " administrators."
+            + " removing the message from the DLQ fails, it is delivered again."
     )
     @ApiResponse(responseCode = "204", description = "The message was replayed")
-    @ApiResponse(responseCode = "400", description = "The DLQ of the queue cannot be replayed")
+    @ApiResponse(responseCode = "400", description = "The DLQ of the queue is not managed")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "The queue or the message is not found")
     @ApiResponse(responseCode = "409", description = "The message could not be replayed")
     void replayQueueDlqMessage(
+        @PathVariable("messageId") String messageId,
+        @RequestParam(name = "queue") String queue
+    );
+
+    @DeleteMapping("/dlq/messages/{messageId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(
+        summary = "Delete a failed message",
+        description = "Deletes the given message from the dead letter queue (DLQ) of a connector"
+            + " queue. The message is discarded for good and is not processed again. Only the"
+            + " DLQ of the queues owned by the connector can be modified, never the one of the"
+            + " gateway queues."
+    )
+    @ApiResponse(responseCode = "204", description = "The message was deleted")
+    @ApiResponse(responseCode = "400", description = "The DLQ of the queue is not managed")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "The queue or the message is not found")
+    @ApiResponse(responseCode = "409", description = "The message could not be deleted")
+    void deleteQueueDlqMessage(
         @PathVariable("messageId") String messageId,
         @RequestParam(name = "queue") String queue
     );
@@ -86,7 +106,7 @@ public interface ConnectorJmsAdminApi {
         description = "Sends the given dead letter queue (DLQ) messages of a connector queue back"
             + " to that queue, and removes them from the DLQ. A message which cannot be replayed"
             + " stays in the DLQ. The replay is at-least-once: if removing a message from the"
-            + " DLQ fails, it is delivered again. Restricted to administrators."
+            + " DLQ fails, it is delivered again."
     )
     @ApiResponse(responseCode = "400", description = "Bad Request")
     @ApiResponse(responseCode = "401", description = "Unauthorized")

@@ -11,19 +11,28 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import eu.ecodex.connector.QueuesStatsTestFixtures;
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueDlqNotSupportedException;
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageNotFoundException;
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageReplayException;
 import eu.ecodex.connector.application.exception.queue.ConnectorQueueNotFoundException;
 import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
+import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessage;
+import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessages;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms.ConnectorJmsAdminController;
 import java.time.Instant;
@@ -47,6 +56,12 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
 
     @MockitoBean
     private ConnectorListQueueMessages listQueueMessages;
+
+    @MockitoBean
+    private ConnectorReplayQueueDlqMessages replayQueueDlqMessages;
+
+    @MockitoBean
+    private ConnectorReplayQueueDlqMessage replayQueueDlqMessage;
 
     @Autowired
     private MockMvc mockMvc;
@@ -130,5 +145,77 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
 
         mockMvc.perform(get("/api/v1/admin/jms/queues/messages").param("queue", "unknown"))
                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void should_replay_the_dlq_messages_of_a_queue() throws Exception {
+        when(replayQueueDlqMessages.execute(
+            "connector.queues.backend-delivery-queue", List.of("ID:1", "ID:2")
+        )).thenReturn(new ConnectorQueueReplayResult(List.of("ID:1"), List.of("ID:2"), List.of()));
+
+        mockMvc.perform(post("/api/v1/admin/jms/queues/dlq/replay")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                {"queue": "connector.queues.backend-delivery-queue",
+                                 "messageIds": ["ID:1", "ID:2"]}
+                                """))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.replayed[0]").value("ID:1"))
+               .andExpect(jsonPath("$.notFound[0]").value("ID:2"))
+               .andExpect(jsonPath("$.failed").isEmpty());
+    }
+
+    @Test
+    void should_return_400_when_no_message_identifier_is_given() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/jms/queues/dlq/replay")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"queue\": \"q\", \"messageIds\": []}"))
+               .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_return_400_when_the_dlq_of_the_queue_is_not_managed() throws Exception {
+        when(replayQueueDlqMessages.execute(
+            org.mockito.ArgumentMatchers.eq("domibus.backend.jms.inQueue"),
+            org.mockito.ArgumentMatchers.anyList()
+        )).thenThrow(new ConnectorQueueDlqNotSupportedException("domibus.backend.jms.inQueue"));
+
+        mockMvc.perform(post("/api/v1/admin/jms/queues/dlq/replay")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                {"queue": "domibus.backend.jms.inQueue", "messageIds": ["ID:1"]}
+                                """))
+               .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void should_replay_one_dlq_message() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/jms/queues/dlq/messages/{id}/replay", "ID:host-1:1:1:1:1")
+                            .param("queue", "connector.queues.backend-delivery-queue"))
+               .andExpect(status().isNoContent());
+
+        verify(replayQueueDlqMessage).execute(
+            "connector.queues.backend-delivery-queue", "ID:host-1:1:1:1:1"
+        );
+    }
+
+    @Test
+    void should_return_404_when_the_message_is_not_in_the_dlq() throws Exception {
+        doThrow(new ConnectorQueueMessageNotFoundException("q", "ID:1"))
+            .when(replayQueueDlqMessage).execute("q", "ID:1");
+
+        mockMvc.perform(post("/api/v1/admin/jms/queues/dlq/messages/{id}/replay", "ID:1")
+                            .param("queue", "q"))
+               .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void should_return_409_when_the_message_could_not_be_replayed() throws Exception {
+        doThrow(new ConnectorQueueMessageReplayException("q", "ID:1"))
+            .when(replayQueueDlqMessage).execute("q", "ID:1");
+
+        mockMvc.perform(post("/api/v1/admin/jms/queues/dlq/messages/{id}/replay", "ID:1")
+                            .param("queue", "q"))
+               .andExpect(status().isConflict());
     }
 }

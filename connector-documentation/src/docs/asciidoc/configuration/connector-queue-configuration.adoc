@@ -85,3 +85,77 @@ connector.queues.inbound-evidence-trigger-queue=connector.queues.inbound-evidenc
 connector.queues.backend-delivery-queue=connector.queues.backend-delivery-queue
 connector.queues.resolved-message-cleanup-processing-queue=connector.queues.resolved-message-cleanup-processing-queue
 ----
+[#_dead_letter_queues]
+== Dead letter queues and replay
+
+When a message still fails after `connector.activemq.address-settings.max-delivery-attempts`
+deliveries, the connector hands it back to the broker, which moves it to a dead letter queue (DLQ).
+The administration API reads the DLQ of each *connector* queue under the name
+`<dlq-prefix><queue name>`, for example `ActiveMQ.DLQ.connector.queues.backend-delivery-queue`:
+
+* `GET /api/v1/admin/jms/queues/stats` gives the number of pending and failed messages per queue.
+* `GET /api/v1/admin/jms/queues/messages?queue=<queue>&dlq=true` lists the failed messages (headers
+and properties only, never the body).
+* `POST /api/v1/admin/jms/queues/dlq/messages/{messageId}/replay?queue=<queue>` replays one failed
+message. It answers `204` when the message was replayed, `404` when it is not in the DLQ and `409`
+when it could not be replayed.
+* `POST /api/v1/admin/jms/queues/dlq/replay` replays a list of failed messages, up to 100 at once.
+
+Both send the failed messages back to their queue, so that they are processed again, and are
+restricted to administrators. The list replay takes the queue and the message identifiers, and
+answers with the outcome of each one:
+
+[source,json]
+----
+{
+  "queue": "connector.queues.backend-delivery-queue",
+  "messageIds": ["ID:host-12345-1:1:1:1:1"]
+}
+----
+
+The response lists the message identifiers which were `replayed`, which were `notFound` in the DLQ
+and which `failed`: one failure does not stop the others. A message which cannot be replayed stays
+in the DLQ. A replay is at-least-once: each message is first sent back to its queue and then
+removed from the DLQ, so if the removal fails the message may be delivered again. Only text and map
+messages, the types used by the connector, can be replayed.
+
+The DLQ of the gateway queues can be listed but never replayed: the connector does not manage how
+the gateway dead-letters its messages, so a replay request on a gateway queue is refused with `400`.
+
+=== Broker configuration
+
+By default, ActiveMQ does *not* create one DLQ per queue: every failed message goes to the single
+shared `ActiveMQ.DLQ` queue. To have a DLQ per connector queue, add this entry to the `policyEntries`
+of the broker configuration (`activemq.xml`):
+
+[source,xml]
+----
+<policyEntry queue="connector.queues.>">
+  <deadLetterStrategy>
+    <individualDeadLetterStrategy queuePrefix="ActiveMQ.DLQ."
+                                  useQueueForQueueMessages="true"
+                                  processExpired="false"/>
+  </deadLetterStrategy>
+</policyEntry>
+----
+
+The entry only matches the queues whose name starts with `connector.queues.`. It can be added next to
+the entries of a broker shared with the gateway: ActiveMQ applies the most specific entry, so the
+gateway queues keep the dead letter strategy they already have (for example the shared `domibus.DLQ`
+of the Domibus configuration). Keep the `connector.queues.` prefix on the connector queue names, or
+adapt the `queue` attribute to the names configured under `connector.queues.*`.
+
+A sample broker configuration is provided in `docker/activemq/conf/activemq.xml` and is mounted by
+the `activemq` service of `docker-compose.yml`.
+
+.Dead letter queue properties
+[cols="40,45,15"]
+|===
+| Property | Description | Default
+
+| `connector.activemq.address-settings.dlq-prefix`
+| Prefix of the per-queue DLQs. It must match the `queuePrefix` of the broker's
+`individualDeadLetterStrategy`. Must not be blank.
+| `ActiveMQ.DLQ.`
+|===
+

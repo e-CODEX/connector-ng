@@ -121,6 +121,8 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)
+    // in-memory broker (vm://) to test the JMS adapters against a real broker
+    testImplementation("org.apache.activemq:activemq-broker")
     mockitoAgent(libs.mockito.core) { isTransitive = false }
 }
 configurations.testRuntimeClasspath {

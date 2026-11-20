@@ -84,4 +84,16 @@ class ConnectorListQueueMessagesServiceTest {
         verify(queueStatsProvider).isMonitored("unknown");
         verifyNoMoreInteractions(queueStatsProvider);
     }
+
+    @Test
+    void should_list_the_dlq_of_a_gateway_queue() {
+        var pageRequest = ConnectorPageRequest.of(0, 20);
+        var expected = ConnectorPageResult.<ConnectorQueueMessage>of(List.of(), 20, 0, 0);
+        when(queueStatsProvider.isMonitored("domibus.backend.jms.inQueue")).thenReturn(true);
+        when(queueStatsProvider.listDlqMessages("domibus.backend.jms.inQueue", pageRequest))
+            .thenReturn(expected);
+
+        assertThat(service.execute("domibus.backend.jms.inQueue", true, pageRequest))
+            .isSameAs(expected);
+    }
 }

@@ -25,7 +25,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @DisplayName("ListQueueMessagesIT REST")
-@SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class ListQueueMessagesIT extends AbstractIntegrationTest {
     private static final String QUEUE = "connector.queues.backend-delivery-queue";
     private static final String PENDING_QUEUE = "connector.queues.inbound-evidence-trigger-queue";
@@ -115,5 +114,16 @@ public class ListQueueMessagesIT extends AbstractIntegrationTest {
         try (var context = connectionFactory.createContext()) {
             context.createProducer().send(context.createQueue(queue), "payload-not-exposed");
         }
+    }
+
+    @Test
+    @Sql({"classpath:sql/user.sql"})
+    void should_list_the_dlq_of_a_gateway_queue() {
+        apiClient.get()
+            .uri("/api/v1/admin/jms/queues/messages?queue=domibus.backend.jms.inQueue&dlq=true")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange()
+            .expectStatus()
+            .isOk();
     }
 }

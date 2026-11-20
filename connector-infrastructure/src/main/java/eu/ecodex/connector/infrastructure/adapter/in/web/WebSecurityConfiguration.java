@@ -82,6 +82,8 @@ public class WebSecurityConfiguration {
                 .hasRole(ConnectorRoleName.ADMIN.name())
                 .requestMatchers(HttpMethod.POST, "/api/v1/admin/jms/queues/dlq/**")
                 .hasRole(ConnectorRoleName.ADMIN.name())
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/jms/queues/dlq/**")
+                .hasRole(ConnectorRoleName.ADMIN.name())
                 // All authenticated users
                 .requestMatchers("/api/v1/admin/**", "/api/v1/auth/me")
                 .authenticated()

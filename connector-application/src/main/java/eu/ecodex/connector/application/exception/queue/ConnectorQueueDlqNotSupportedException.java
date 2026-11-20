@@ -11,8 +11,8 @@
 package eu.ecodex.connector.application.exception.queue;
 
 /**
- * Thrown when the dead letter queue of a queue cannot be replayed by the connector, as for the
- * queues owned by the gateway.
+ * Thrown when the dead letter queue of a queue is not managed by the connector, as for the queues
+ * owned by the gateway: it can be listed but its messages can be neither replayed nor deleted.
  */
 public class ConnectorQueueDlqNotSupportedException extends RuntimeException {
     /**
@@ -22,7 +22,7 @@ public class ConnectorQueueDlqNotSupportedException extends RuntimeException {
      */
     public ConnectorQueueDlqNotSupportedException(String queueName) {
         super(
-            "The dead letter queue of [%s] cannot be replayed by the connector".formatted(queueName)
+            "The dead letter queue of [%s] is not managed by the connector".formatted(queueName)
         );
     }
 }

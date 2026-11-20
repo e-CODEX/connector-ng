@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.out.provider;
 
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageDeleteException;
 import eu.ecodex.connector.application.port.spi.ConnectorQueueStatsProvider;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
@@ -271,17 +272,21 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
                 var messages = browser.getEnumeration();
                 while (messages.hasMoreElements()) {
                     var message = (Message) messages.nextElement();
+
                     if (message == null) {
                         // the broker may return null when a message expires or is consumed
                         // while browsing
                         continue;
                     }
+
                     if (total >= offset && content.size() < size) {
                         content.add(toQueueMessage(message));
                     }
+
                     total++;
                 }
                 var totalPages = (int) ((total + size - 1) / size);
+
                 return ConnectorPageResult.of(content, size, total, totalPages);
             }
         );
@@ -306,16 +311,18 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
 
     private Map<String, String> readProperties(Message message) throws JMSException {
         var properties = new LinkedHashMap<String, String>();
+
         for (var name : Collections.list(message.getPropertyNames())) {
             var key = String.valueOf(name);
             var value = message.getObjectProperty(key);
             properties.put(key, truncate(String.valueOf(value)));
         }
+
         return properties;
     }
 
     @Override
-    public boolean isDlqReplayable(String queueName) {
+    public boolean isDlqManaged(String queueName) {
         return monitoredQueues.stream().anyMatch(
             queue -> queue.name().equals(queueName)
                 && queue.category() == MonitoredQueueCategory.CONNECTOR
@@ -359,6 +366,41 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
         return new ConnectorQueueReplayResult(replayed, notFound, failed);
     }
 
+    @Override
+    public boolean deleteDlqMessage(String queueName, String messageId) {
+        // the identifier ends up in a JMS selector: only accept the broker's id syntax
+        if (messageId == null || !MESSAGE_ID_PATTERN.matcher(messageId).matches()) {
+            return false;
+        }
+
+        try {
+            var deleted = removeFromDlq(dlqNameOf(queueName), messageId);
+            log.info(
+                "Deleted={} the message [{}] of the DLQ of [{}]", deleted, messageId, queueName
+            );
+            return deleted;
+        } catch (RuntimeException e) {
+            throw new ConnectorQueueMessageDeleteException(queueName, messageId, e);
+        }
+    }
+
+    /**
+     * Consumes the message from the DLQ, which acknowledges it and removes it from the broker. The
+     * connection must be started to receive.
+     */
+    private boolean removeFromDlq(String dlq, String messageId) {
+        var removed = jmsTemplate.execute(
+            (Session session) -> {
+                try (var consumer = session.createConsumer(
+                    session.createQueue(dlq), "JMSMessageID = '" + messageId + "'")) {
+                    return consumer.receive(REMOVE_TIMEOUT_MILLIS) != null;
+                }
+            }, true
+        );
+
+        return Boolean.TRUE.equals(removed);
+    }
+
     /**
      * Sends a copy of the DLQ message back to its queue, then removes it from the DLQ. The copy is
      * sent first so that a failure never loses the message: the worst case is a duplicate left in
@@ -385,14 +427,8 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
 
         jmsTemplate.send(queueName, copy::toJmsMessage);
 
-        // consume the original, which acknowledges it; the connection must be started to receive
-        jmsTemplate.execute(
-            (Session session) -> {
-                try (var consumer = session.createConsumer(session.createQueue(dlq), selector)) {
-                    return consumer.receive(REMOVE_TIMEOUT_MILLIS);
-                }
-            }, true
-        );
+        // remove the original
+        removeFromDlq(dlq, messageId);
 
         return true;
     }

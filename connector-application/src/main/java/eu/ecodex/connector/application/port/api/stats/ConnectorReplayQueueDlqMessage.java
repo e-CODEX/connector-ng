@@ -26,7 +26,7 @@ public interface ConnectorReplayQueueDlqMessage {
      * @throws eu.ecodex.connector.application.exception.queue.ConnectorQueueNotFoundException if
      *     the queue is not monitored by the connector
      * @throws eu.ecodex.connector.application.exception.queue
-     *     .ConnectorQueueDlqNotSupportedException if the DLQ of the queue cannot be replayed by the
+     *     .ConnectorQueueDlqNotSupportedException if the DLQ of the queue is not managed by the
      *     connector
      * @throws eu.ecodex.connector.application.exception.queue
      *     .ConnectorQueueMessageNotFoundException if the message is not in the DLQ

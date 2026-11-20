@@ -34,7 +34,7 @@ public class ConnectorReplayQueueDlqMessagesService implements ConnectorReplayQu
         if (!queueStatsProvider.isMonitored(queueName)) {
             throw new ConnectorQueueNotFoundException(queueName);
         }
-        if (!queueStatsProvider.isDlqReplayable(queueName)) {
+        if (!queueStatsProvider.isDlqManaged(queueName)) {
             throw new ConnectorQueueDlqNotSupportedException(queueName);
         }
 

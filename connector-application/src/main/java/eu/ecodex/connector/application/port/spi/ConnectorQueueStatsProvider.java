@@ -40,15 +40,15 @@ public interface ConnectorQueueStatsProvider {
     boolean isMonitored(String queueName);
 
     /**
-     * Tells whether the dead letter queue of the given queue can be replayed, which is the case
-     * for the queues owned by the connector but not for the gateway queues, whose dead letter queue
-     * can only be listed.
+     * Tells whether the dead letter queue of the given queue is managed by the connector, which is
+     * the case for the queues it owns but not for the gateway queues, whose dead letter queue can
+     * only be listed: its messages can neither be replayed nor deleted.
      *
      * @param queueName the name of a monitored queue
      *
-     * @return {@code true} if the messages of the dead letter queue can be replayed
+     * @return {@code true} if the messages of the dead letter queue can be replayed and deleted
      */
-    boolean isDlqReplayable(String queueName);
+    boolean isDlqManaged(String queueName);
 
     /**
      * Replays messages of the dead letter queue of a monitored queue: each message is sent back to
@@ -61,6 +61,20 @@ public interface ConnectorQueueStatsProvider {
      * @return the outcome for each identifier; never {@code null}
      */
     ConnectorQueueReplayResult replayDlqMessages(String queueName, List<String> messageIds);
+
+    /**
+     * Deletes a message of the dead letter queue of a monitored queue.
+     *
+     * @param queueName the name of a monitored queue
+     * @param messageId the JMS identifier of the message to delete
+     *
+     * @return {@code true} if the message was deleted, {@code false} if it is not in the dead
+     *     letter queue
+     *
+     * @throws eu.ecodex.connector.application.exception.queue
+     *     .ConnectorQueueMessageDeleteException if the message could not be deleted
+     */
+    boolean deleteDlqMessage(String queueName, String messageId);
 
     /**
      * Lists, page by page, the pending messages of a monitored queue, oldest first. Messages are

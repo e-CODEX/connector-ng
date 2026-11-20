@@ -10,6 +10,8 @@
 
 package eu.ecodex.connector.application.port.api.stats;
 
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueDlqNotSupportedException;
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueNotFoundException;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import java.util.List;
 
@@ -26,11 +28,10 @@ public interface ConnectorReplayQueueDlqMessages {
      *
      * @return the identifiers which were replayed, not found or failed; never {@code null}
      *
-     * @throws eu.ecodex.connector.application.exception.queue.ConnectorQueueNotFoundException if
-     *     the queue is not monitored by the connector
-     * @throws eu.ecodex.connector.application.exception.queue
-     *     .ConnectorQueueDlqNotSupportedException if the DLQ of the queue cannot be replayed by the
-     *     connector
+     * @throws ConnectorQueueNotFoundException        if the queue is not monitored by the
+     *                                                connector
+     * @throws ConnectorQueueDlqNotSupportedException if the DLQ of the queue is not managed by the
+     *                                                connector
      */
     ConnectorQueueReplayResult execute(String queueName, List<String> messageIds);
 }

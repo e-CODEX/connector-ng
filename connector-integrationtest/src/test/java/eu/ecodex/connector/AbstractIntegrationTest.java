@@ -97,6 +97,7 @@ public abstract class AbstractIntegrationTest {
     ConnectorJmsOutboundMessagePipelineListener outboundMessagePipelineListener;
     @MockitoBean
     ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
+
     @Autowired
     protected JdbcTemplate jdbcTemplate;
     @Autowired

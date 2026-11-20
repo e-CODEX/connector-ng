@@ -53,6 +53,7 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
     private static final String DELIVERY_COUNT_PROPERTY = "JMSXDeliveryCount";
     private static final String DLQ_FAILURE_CAUSE_PROPERTY = "dlqDeliveryFailureCause";
     private static final int MAX_PROPERTY_VALUE_LENGTH = 500;
+    private static final List<String> TRUSTED_PACKAGES = List.of("eu.ecodex.connector");
 
     private final JmsTemplate jmsTemplate;
     private final List<MonitoredQueue> monitoredQueues;
@@ -149,10 +150,14 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
 
     private static JmsTemplate plainJmsTemplate(ActiveMQConnectionDetails connectionDetails) {
         var factory = new ActiveMQConnectionFactory(connectionDetails.getBrokerUrl());
+        factory.setTrustedPackages(TRUSTED_PACKAGES);
+        factory.setTrustAllPackages(false);
+
         if (connectionDetails.getUser() != null) {
             factory.setUserName(connectionDetails.getUser());
             factory.setPassword(connectionDetails.getPassword());
         }
+
         return new JmsTemplate(factory);
     }
 

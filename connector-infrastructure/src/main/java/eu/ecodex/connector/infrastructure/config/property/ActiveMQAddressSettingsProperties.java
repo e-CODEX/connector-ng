@@ -13,6 +13,7 @@ package eu.ecodex.connector.infrastructure.config.property;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,7 +36,11 @@ public record ActiveMQAddressSettingsProperties(
 
     @DecimalMin("1.0")
     @DefaultValue("2.0")
-    double redeliveryMultiplier
+    double redeliveryMultiplier,
+
+    @NotBlank
+    @DefaultValue("ActiveMQ.DLQ.")
+    String dlqPrefix
 ) {
     @AssertTrue(message = "redelivery-delay must be positive")
     public boolean isRedeliveryDelayPositive() {

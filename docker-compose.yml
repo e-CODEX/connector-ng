@@ -48,6 +48,8 @@ services:
             ecodex:
         volumes:
             - activemq-data:/var/lib/activemq/data
+            # one dead letter queue per queue (ActiveMQ.DLQ.<queue>), expected by the connector
+            - ./docker/activemq/conf/activemq.xml:/opt/apache-activemq/conf/activemq.xml:ro
     gateway-db:
         container_name: gateway_db_mysql
         # can be replaced with the appropriate database image. e.g. postgres

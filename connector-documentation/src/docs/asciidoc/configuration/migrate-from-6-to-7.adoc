@@ -895,6 +895,11 @@ spring.activemq.password=${ACTIVEMQ_PASSWORD}
 | `2.0`
 | Multiplier applied to the delay on each redelivery. Use `1` for a constant delay.
 Minimum `1.0`.
+
+| `connector.activemq.address-settings.dlq-prefix`
+| `ActiveMQ.DLQ.`
+| Prefix of the per-queue dead letter queues on the broker. See
+xref:connector-queue-configuration.adoc#_dead_letter_queues[Dead letter queues].
 |===
 
 ==== Queue Names

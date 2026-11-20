@@ -59,13 +59,14 @@ public class ActiveMQConfig {
         ActiveMQAddressSettingsProperties settingsProperties) {
         var delayMillis = settingsProperties.redeliveryDelay().toMillis();
         var attempts = settingsProperties.maxDeliveryAttempts();
+        var redeliveryMultiplier = settingsProperties.redeliveryMultiplier();
 
         var policy = new RedeliveryPolicy();
-        policy.setMaximumRedeliveries(attempts - 1);
+        policy.setMaximumRedeliveries(attempts);
         policy.setInitialRedeliveryDelay(delayMillis);
         policy.setRedeliveryDelay(delayMillis);
-        policy.setBackOffMultiplier(settingsProperties.redeliveryMultiplier());
-        policy.setUseExponentialBackOff(settingsProperties.redeliveryMultiplier() > 1.0);
+        policy.setBackOffMultiplier(redeliveryMultiplier);
+        policy.setUseExponentialBackOff(redeliveryMultiplier > 1.0);
 
         return policy;
     }

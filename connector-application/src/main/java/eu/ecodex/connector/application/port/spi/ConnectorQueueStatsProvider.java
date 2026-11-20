@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.port.spi;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
 
@@ -37,6 +38,29 @@ public interface ConnectorQueueStatsProvider {
      * @return {@code true} if the queue is monitored
      */
     boolean isMonitored(String queueName);
+
+    /**
+     * Tells whether the dead letter queue of the given queue can be replayed, which is the case
+     * for the queues owned by the connector but not for the gateway queues, whose dead letter queue
+     * can only be listed.
+     *
+     * @param queueName the name of a monitored queue
+     *
+     * @return {@code true} if the messages of the dead letter queue can be replayed
+     */
+    boolean isDlqReplayable(String queueName);
+
+    /**
+     * Replays messages of the dead letter queue of a monitored queue: each message is sent back to
+     * the queue, then removed from the dead letter queue. A failure leaves the message in the dead
+     * letter queue; a failure while removing it may leave a duplicate there (at-least-once).
+     *
+     * @param queueName  the name of a monitored queue
+     * @param messageIds the JMS identifiers of the messages to replay
+     *
+     * @return the outcome for each identifier; never {@code null}
+     */
+    ConnectorQueueReplayResult replayDlqMessages(String queueName, List<String> messageIds);
 
     /**
      * Lists, page by page, the pending messages of a monitored queue, oldest first. Messages are

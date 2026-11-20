@@ -12,14 +12,22 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.queue.ConnectorReplayQueueDlqMessagesRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Interface defining the administrative API for managing JMS queues within the connector system.
@@ -50,5 +58,41 @@ public interface ConnectorJmsAdminApi {
         @RequestParam(name = "dlq", defaultValue = "false") boolean dlq,
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "20") int size
+    );
+
+    @PostMapping("/dlq/messages/{messageId}/replay")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(
+        summary = "Replay a failed message",
+        description = "Sends the given dead letter queue (DLQ) message of a connector queue back"
+            + " to that queue, and removes it from the DLQ. The replay is at-least-once: if"
+            + " removing the message from the DLQ fails, it is delivered again. Restricted to"
+            + " administrators."
+    )
+    @ApiResponse(responseCode = "204", description = "The message was replayed")
+    @ApiResponse(responseCode = "400", description = "The DLQ of the queue cannot be replayed")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "The queue or the message is not found")
+    @ApiResponse(responseCode = "409", description = "The message could not be replayed")
+    void replayQueueDlqMessage(
+        @PathVariable("messageId") String messageId,
+        @RequestParam(name = "queue") String queue
+    );
+
+    @PostMapping("/dlq/replay")
+    @Operation(
+        summary = "Replay a list of failed messages",
+        description = "Sends the given dead letter queue (DLQ) messages of a connector queue back"
+            + " to that queue, and removes them from the DLQ. A message which cannot be replayed"
+            + " stays in the DLQ. The replay is at-least-once: if removing a message from the"
+            + " DLQ fails, it is delivered again. Restricted to administrators."
+    )
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "The queue is not monitored")
+    ConnectorQueueReplayResult replayQueueDlqMessages(
+        @Valid @RequestBody ConnectorReplayQueueDlqMessagesRequest request
     );
 }

@@ -130,7 +130,7 @@ Once done, run the following command:
 docker-compose up -d
 ```
 Once containers are up and running, you can access:
-* the application swagger doc at: http://localhost:30000/swagger-ui/index.html (basic authentication with `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`).
+* the application swagger doc at: http://localhost:30000/swagger-ui/index.html (basic authentication with `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`, also required for `/actuator/**`).
 * the application APIs at http://localhost:30000.
 * the application database at http://localhost:40000.
 * the MiniIO admin console at http://localhost:9001 (```username```: admin, ```password```: admin123).

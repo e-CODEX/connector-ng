@@ -63,13 +63,13 @@ the database.
 | `admin@example.com`
 
 | `connector.basic.username`
-| Username of the HTTP Basic credentials protecting the Swagger UI and the `/v3/api-docs` endpoints.
+| Username of the HTTP Basic credentials protecting the Swagger UI, the `/v3/api-docs` endpoints and the `/actuator` endpoints.
 Independent from the admin account and from the JWT authentication of the REST API.
 | No
 | `${BASIC_AUTH_USER}`
 
 | `connector.basic.password`
-| Password of the HTTP Basic credentials protecting the Swagger UI and the `/v3/api-docs` endpoints.
+| Password of the HTTP Basic credentials protecting the Swagger UI, the `/v3/api-docs` endpoints and the `/actuator` endpoints.
 | No
 | `${BASIC_AUTH_PASSWORD}`
 |===

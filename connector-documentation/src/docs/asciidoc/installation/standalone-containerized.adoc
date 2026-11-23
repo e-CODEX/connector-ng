@@ -100,6 +100,10 @@ DB_DIALECT=org.hibernate.dialect.MySQLDialect
 JWT_SECRET_KEY=<jwt_secret_key>
 ADMIN_PASSWORD=<admin_password>
 
+# Swagger UI basic authentication
+BASIC_AUTH_USER=<basic_auth_user>
+BASIC_AUTH_PASSWORD=<basic_auth_password>
+
 # File storage (S3 / MinIO / Silo)
 S3_ACCESS_KEY=<access_key>
 S3_SECRET_KEY=<secret_key>
@@ -192,6 +196,8 @@ Once running, the following endpoints are available:
 | API Health | `http://localhost:30000/actuator/health`
 | Swagger UI | `http://localhost:30000/swagger-ui/index.html`
 |===
+
+The Swagger UI and the `/v3/api-docs` endpoints are protected with HTTP Basic authentication. Sign in with the `connector.basic.username` and `connector.basic.password` credentials (`BASIC_AUTH_USER` and `BASIC_AUTH_PASSWORD`).
 
 Sign in to the administration UI with the account configured in `connector.admin.*`.
 

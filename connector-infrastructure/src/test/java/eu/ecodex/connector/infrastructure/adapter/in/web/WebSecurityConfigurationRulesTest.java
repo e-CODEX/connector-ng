@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.adapter.in.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,11 +21,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import eu.ecodex.connector.infrastructure.adapter.out.auth.accesstoken.ConnectorJwtAuthenticationFilter;
 import eu.ecodex.connector.infrastructure.adapter.out.auth.accesstoken.ConnectorJwtParser;
+import eu.ecodex.connector.infrastructure.config.property.ConnectorBasicAuthProperties;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.FilterChainProxy;
@@ -41,8 +46,12 @@ import org.springframework.web.cors.CorsConfigurationSource;
     WebSecurityConfiguration.class,
     ConnectorJwtAuthenticationFilter.class,
     WebSecurityConfigurationRulesTest.ProbeController.class,
+    WebSecurityConfigurationRulesTest.BasicAuthTestConfiguration.class,
 })
 class WebSecurityConfigurationRulesTest {
+    private static final String BASIC_AUTH_USER = "swagger";
+    private static final String BASIC_AUTH_PASSWORD = "swagger-secret";
+
     @Autowired
     MockMvc mockMvc;
     @Autowired
@@ -50,48 +59,87 @@ class WebSecurityConfigurationRulesTest {
 
     @MockitoBean
     ConnectorJwtParser jwtParser;
-    @MockitoBean
+    @MockitoBean("inMemoryUserDetailsManager")
     UserDetailsService userDetailsService;
     @MockitoBean
     CorsConfigurationSource corsConfigurationSource;
 
-    @ParameterizedTest
-    @CsvSource({
-        "GET,  /api/v1/admin/probe,              USER,  200",
-        "GET,  /api/v1/admin/users/probe,        USER,  403",
-        "GET,  /api/v1/admin/users/probe,        ADMIN, 200",
-        "GET,  /api/v1/admin/business-domains,   USER,  200",
-        "POST, /api/v1/admin/business-domains,   USER,  403",
-        "POST, /api/v1/admin/business-domains,   ADMIN, 200"
-    })
-    void user_role_access_matrix(String method, String path, String role, int expected) throws Exception {
-        mockMvc.perform(request(HttpMethod.valueOf(method), path).with(user("test").roles(role)))
-            .andExpect(status().is(expected));
+    @Nested
+    class ApiChain {
+        @ParameterizedTest
+        @CsvSource({
+            "GET,  /api/v1/admin/probe,              USER,  200",
+            "GET,  /api/v1/admin/users/probe,        USER,  403",
+            "GET,  /api/v1/admin/users/probe,        ADMIN, 200",
+            "GET,  /api/v1/admin/business-domains,   USER,  200",
+            "POST, /api/v1/admin/business-domains,   USER,  403",
+            "POST, /api/v1/admin/business-domains,   ADMIN, 200"
+        })
+        void should_apply_role_access_matrix(
+            String method, String path, String role, int expected) throws Exception {
+            mockMvc.perform(request(HttpMethod.valueOf(method), path).with(user("test").roles(role)))
+                   .andExpect(status().is(expected));
+        }
+
+        @Test
+        void should_register_jwt_filter_in_api_chain() {
+            assertThat(filterChainProxy.getFilters("/api/v1/probe"))
+                .anyMatch(ConnectorJwtAuthenticationFilter.class::isInstance);
+        }
+
+        @Test
+        void should_return_unauthorized_when_caller_is_anonymous() throws Exception {
+            mockMvc.perform(get("/api/v1/probe").with(anonymous()))
+                   .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void should_allow_anonymous_login() throws Exception {
+            mockMvc.perform(post("/api/v1/auth/login"))
+                   .andExpect(status().isOk());
+        }
+
+        @Test
+        void should_allow_anonymous_refresh() throws Exception {
+            mockMvc.perform(post("/api/v1/auth/refresh"))
+                   .andExpect(status().isOk());
+        }
     }
 
-    @Test
-    void security_chain_is_active() {
-        assertThat(filterChainProxy.getFilterChains()).isNotEmpty();
-        assertThat(filterChainProxy.getFilterChains().getFirst().getFilters())
-            .anyMatch(f -> f instanceof ConnectorJwtAuthenticationFilter);
+    @Nested
+    class SwaggerChain {
+        @Test
+        void should_not_register_jwt_filter_in_swagger_chain() {
+            assertThat(filterChainProxy.getFilters("/swagger-ui/index.html"))
+                .noneMatch(ConnectorJwtAuthenticationFilter.class::isInstance);
+        }
+
+        @Test
+        void should_return_unauthorized_when_no_basic_credentials() throws Exception {
+            mockMvc.perform(get("/swagger-ui/index.html"))
+                   .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void should_return_unauthorized_when_password_is_wrong() throws Exception {
+            mockMvc.perform(get("/v3/api-docs").with(httpBasic(BASIC_AUTH_USER, "wrong")))
+                   .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        void should_let_request_through_when_basic_credentials_are_valid() throws Exception {
+            mockMvc.perform(get("/v3/api-docs").with(httpBasic(BASIC_AUTH_USER, BASIC_AUTH_PASSWORD)))
+                   .andExpect(result -> assertThat(result.getResponse().getStatus())
+                       .isNotIn(401, 403));
+        }
     }
 
-    @Test
-    void anonymous_caller_gets_unauthorized() throws Exception {
-        mockMvc.perform(get("/api/v1/probe").with(anonymous()))
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void login_is_public() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/login"))
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    void refresh_is_public() throws Exception {
-        mockMvc.perform(post("/api/v1/auth/refresh"))
-            .andExpect(status().isOk());
+    @TestConfiguration
+    static class BasicAuthTestConfiguration {
+        @Bean
+        ConnectorBasicAuthProperties connectorBasicAuthProperties() {
+            return new ConnectorBasicAuthProperties(BASIC_AUTH_USER, BASIC_AUTH_PASSWORD);
+        }
     }
 
     @RestController

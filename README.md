@@ -41,6 +41,10 @@ DB_DIALECT=org.hibernate.dialect.MySQLDialect
 #JWT authentication
 JWT_SECRET_KEY=<jwt_key>
 
+# Swagger UI basic authentication
+BASIC_AUTH_USER=<basic_auth_user>
+BASIC_AUTH_PASSWORD=<basic_auth_password>
+
 # S3
 S3_ACCESS_KEY=admin
 S3_SECRET_KEY=admin123
@@ -126,7 +130,7 @@ Once done, run the following command:
 docker-compose up -d
 ```
 Once containers are up and running, you can access:
-* the application swagger doc at: http://localhost:30000/swagger-ui/index.html.
+* the application swagger doc at: http://localhost:30000/swagger-ui/index.html (basic authentication with `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD`).
 * the application APIs at http://localhost:30000.
 * the application database at http://localhost:40000.
 * the MiniIO admin console at http://localhost:9001 (```username```: admin, ```password```: admin123).

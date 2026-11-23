@@ -4,7 +4,7 @@
 The connector ships with a built-in web administration interface secured by JWT-based session management.
 These properties configure the JWT token lifecycle and the default admin account used to log in to the admin UI.
 
-IMPORTANT: Change `connector.admin.password` and `connector.auth.security.jwt.secret`
+IMPORTANT: Change `connector.admin.password`, `connector.auth.security.jwt.secret` and `connector.basic.password`
 before deploying to any non-development environment.
 The defaults shown here are insecure placeholders.
 
@@ -61,6 +61,17 @@ the database.
 | Email address associated with the built-in admin account.
 | No
 | `admin@example.com`
+
+| `connector.basic.username`
+| Username of the HTTP Basic credentials protecting the Swagger UI and the `/v3/api-docs` endpoints.
+Independent from the admin account and from the JWT authentication of the REST API.
+| No
+| `${BASIC_AUTH_USER}`
+
+| `connector.basic.password`
+| Password of the HTTP Basic credentials protecting the Swagger UI and the `/v3/api-docs` endpoints.
+| No
+| `${BASIC_AUTH_PASSWORD}`
 |===
 
 NOTE: Expired refresh tokens accumulate in the database over time.
@@ -81,4 +92,8 @@ connector.admin.username=admin
 connector.admin.password=${ADMIN_PASSWORD}
 connector.admin.enabled=true
 connector.admin.email=admin@example.com
+
+# Basic authentication protecting the Swagger UI and the /v3/api-docs endpoints
+connector.basic.username=${BASIC_AUTH_USER}
+connector.basic.password=${BASIC_AUTH_PASSWORD}
 ----

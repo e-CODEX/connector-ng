@@ -12,11 +12,13 @@ package eu.ecodex.connector.infrastructure.adapter.in.web;
 
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.infrastructure.adapter.out.auth.accesstoken.ConnectorJwtAuthenticationFilter;
+import eu.ecodex.connector.infrastructure.config.property.ConnectorBasicAuthProperties;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorCorsProperties;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -26,8 +28,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -55,6 +59,46 @@ public class WebSecurityConfiguration {
     }
 
     /**
+     * Protects the Swagger UI and the OpenAPI documents with HTTP Basic authentication.
+     *
+     * <p>This chain only matches the documentation paths and uses its own in-memory user, so it is
+     * independent of the JWT authentication of the REST API.
+     *
+     * @param http                the {@code HttpSecurity} object used to configure the security
+     *                            settings
+     * @param passwordEncoder     the encoder used to hash the configured password
+     * @param basicAuthProperties the Basic authentication credentials
+     *
+     * @return the {@code SecurityFilterChain} protecting the API documentation
+     */
+    @Bean
+    @Order(1)
+    public SecurityFilterChain swaggerFilterChain(
+        HttpSecurity http,
+        PasswordEncoder passwordEncoder,
+        ConnectorBasicAuthProperties basicAuthProperties) {
+        var user = User.withUsername(basicAuthProperties.username())
+                       .password(passwordEncoder.encode(basicAuthProperties.password()))
+                       .roles("SWAGGER")
+                       .build();
+
+        return http
+            .securityMatcher(
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/v3/api-docs/**",
+                "/swagger-resources/**"
+            )
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(session ->
+                                   session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .userDetailsService(new InMemoryUserDetailsManager(user))
+            .authorizeHttpRequests(request -> request.anyRequest().hasRole("SWAGGER"))
+            .httpBasic(Customizer.withDefaults())
+            .build();
+    }
+
+    /**
      * Configures the security filter chain for the application by defining HTTP security rules.
      *
      * @param http the {@code HttpSecurity} object used to configure the security settings
@@ -63,64 +107,77 @@ public class WebSecurityConfiguration {
      *     chain
      */
     @Bean
+    @Order(2)
     public SecurityFilterChain filterChain(HttpSecurity http) {
         return http.csrf(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .cors(Customizer.withDefaults())
-            .authorizeHttpRequests(request -> request
-                // Allow internal ERROR (400, 404, 405, 415 ,500) dispatch (forward to /error)
-                // without authentication. Without this, Spring Security 6+ also applies
-                // authorization to that dispatch. As it has no user the request is rejected with
-                // 403
-                .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                // Specific admin-only
-                .requestMatchers("/api/v1/admin/users/**")
-                .hasRole(ConnectorRoleName.ADMIN.name())
-                .requestMatchers(HttpMethod.POST, "/api/v1/admin/business-domains")
-                .hasRole(ConnectorRoleName.ADMIN.name())
-                .requestMatchers(HttpMethod.POST, "/api/v1/admin/processing-modes")
-                .hasRole(ConnectorRoleName.ADMIN.name())
-                // All authenticated users
-                .requestMatchers("/api/v1/admin/**", "/api/v1/auth/me")
-                .authenticated()
-                .requestMatchers(
-                    "/api/v1/attachments/upload",
-                    "/api/v1/messages/outbound",
-                    "/api/v1/messages/evidence-trigger",
-                    "/api/v1/evidences/{uuid}/download",
-                    "/api/v1/services",
-                    "/api/v1/processing-modes/{identifier}/services",
-                    "/api/v1/processing-modes/{identifier}/actions",
-                    "/api/v1/processing-modes/{identifier}/parties",
-                    "/api/v1/link-partners",
-                    "/api/v1/auth/login",
-                    "/api/v1/auth/refresh",
-                    // SOAP
-                    "/services/backend",
-                    // actuator
-                    "/actuator/**",
-                    // swagger ui
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/swagger-resources/**"
-                )
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(exceptionHandling -> exceptionHandling
-                .authenticationEntryPoint((req, resp, ex)
-                    -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
-                .accessDeniedHandler((req, resp, ex)
-                    -> resp.sendError(HttpServletResponse.SC_FORBIDDEN)))
-            .build();
+                   .httpBasic(AbstractHttpConfigurer::disable)
+                   .cors(Customizer.withDefaults())
+                   .authorizeHttpRequests(request -> request
+                       // Allow internal ERROR (400, 404, 405, 415 ,500) dispatch
+                       // (forward to /error) without authentication. Without this, Spring
+                       // Security 6+ also applies authorization to that dispatch.
+                       // As it has no user the request is rejected with 403
+                       .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+                       // Specific admin-only
+                       .requestMatchers("/api/v1/admin/users/**")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
+                       .requestMatchers(HttpMethod.POST, "/api/v1/admin/business-domains")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
+                       .requestMatchers(HttpMethod.POST, "/api/v1/admin/processing-modes")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
+                       // All authenticated users
+                       .requestMatchers("/api/v1/admin/**", "/api/v1/auth/me")
+                       .authenticated()
+                       .requestMatchers(
+                           "/api/v1/attachments/upload",
+                           "/api/v1/messages/outbound",
+                           "/api/v1/messages/evidence-trigger",
+                           "/api/v1/evidences/{uuid}/download",
+                           "/api/v1/services",
+                           "/api/v1/processing-modes/{identifier}/services",
+                           "/api/v1/processing-modes/{identifier}/actions",
+                           "/api/v1/processing-modes/{identifier}/parties",
+                           "/api/v1/link-partners",
+                           "/api/v1/auth/login",
+                           "/api/v1/auth/refresh",
+                           // SOAP
+                           "/services/backend",
+                           // actuator
+                           "/actuator/**"
+                       )
+                       .permitAll()
+                       .anyRequest()
+                       .authenticated()
+                   )
+                   .addFilterBefore(
+                       jwtAuthenticationFilter,
+                       UsernamePasswordAuthenticationFilter.class
+                   )
+                   .sessionManagement(session -> session.sessionCreationPolicy(
+                       SessionCreationPolicy.STATELESS))
+                   .exceptionHandling(exceptionHandling -> exceptionHandling
+                       .authenticationEntryPoint((req, resp, ex) -> resp.sendError(
+                           HttpServletResponse.SC_UNAUTHORIZED))
+                       .accessDeniedHandler((req, resp, ex) -> resp.sendError(
+                           HttpServletResponse.SC_FORBIDDEN)))
+                   .build();
     }
 
+    /**
+     * Creates the CORS configuration source applied to all endpoints of the connector.
+     *
+     * <p>The configuration is built from {@link ConnectorCorsProperties} (allowed origins,
+     * methods, headers, credentials and pre-flight cache duration) and registered for every path
+     * ({@code /**}). Spring Security picks up this bean automatically when CORS is enabled on the
+     * {@code HttpSecurity} filter chain.
+     *
+     * @param corsProperties the externalized CORS settings
+     *
+     * @return the {@link CorsConfigurationSource} used to resolve the CORS configuration of each
+     *     request
+     */
     @Bean
-    CorsConfigurationSource corsConfigurationSource(ConnectorCorsProperties corsProperties) {
+    public CorsConfigurationSource corsConfigurationSource(ConnectorCorsProperties corsProperties) {
         var configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(corsProperties.allowedOrigins());
         configuration.setAllowedMethods(corsProperties.allowedMethods());
@@ -135,12 +192,12 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
         return configuration.getAuthenticationManager();
     }
 }

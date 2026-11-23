@@ -65,7 +65,9 @@ public class WebSecurityConfiguration {
      * authentication.
      *
      * <p>This chain only matches the documentation and actuator paths and uses its own in-memory
-     * user, so it is independent of the JWT authentication of the REST API.
+     * user, so it is independent of the JWT authentication of the REST API. CORS is enabled on it
+     * so that a browser application can call the actuator: the CORS configuration source only
+     * covers the actuator, not the documentation.
      *
      * @param http                the {@code HttpSecurity} object used to configure the security
      *                            settings
@@ -94,6 +96,8 @@ public class WebSecurityConfiguration {
                 "/actuator/**"
             )
             .csrf(AbstractHttpConfigurer::disable)
+            // answers the pre-flight requests of the actuator before the authentication
+            .cors(Customizer.withDefaults())
             .sessionManagement(session ->
                                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .userDetailsService(new InMemoryUserDetailsManager(user))
@@ -166,11 +170,14 @@ public class WebSecurityConfiguration {
     }
 
     /**
-     * Creates the CORS configuration source applied to all endpoints of the connector.
+     * Creates the CORS configuration source applied to the REST API and to the actuator of the
+     * connector.
      *
      * <p>The configuration is built from {@link ConnectorCorsProperties} (allowed origins,
-     * methods, headers, credentials and pre-flight cache duration) and registered for every path
-     * ({@code /**}). Spring Security picks up this bean automatically when CORS is enabled on the
+     * methods, headers, credentials and pre-flight cache duration) and registered for the REST API
+     * ({@code /api/**}) and the actuator ({@code /actuator/**}) only: the Swagger documentation
+     * and the SOAP services are not meant to be called from a browser application of another
+     * origin. Spring Security picks up this bean automatically when CORS is enabled on the
      * {@code HttpSecurity} filter chain.
      *
      * @param corsProperties the externalized CORS settings
@@ -188,7 +195,8 @@ public class WebSecurityConfiguration {
         configuration.setMaxAge(corsProperties.maxAge());
 
         var source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/actuator/**", configuration);
 
         return source;
     }

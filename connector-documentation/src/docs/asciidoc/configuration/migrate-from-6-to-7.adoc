@@ -996,10 +996,11 @@ All properties in this section are *new in 7.x*.
 | Spring cron (6 fields) for removing expired refresh tokens
 
 | `connector.cors.allowed-origins`
-| `*`
+| _(none)_
 | No
-| Comma-separated list of allowed origins. In production, list the origins of your admin UI.
-The value `*` cannot be combined with `allow-credentials=true`.
+| Comma-separated list of allowed origins. By default, no origin is allowed: list the origins of
+your admin UI. The value `*` cannot be combined with `allow-credentials=true`. CORS applies to the
+REST API (`/api/**`) and the actuator (`/actuator/**`) only.
 
 | `connector.cors.allowed-methods`
 | `GET,POST,PUT,PATCH,DELETE,OPTIONS`
@@ -1007,14 +1008,15 @@ The value `*` cannot be combined with `allow-credentials=true`.
 | Allowed HTTP methods
 
 | `connector.cors.allowed-headers`
-| `*`
+| `Authorization,Content-Type,Accept`
 | No
 | Allowed request headers
 
 | `connector.cors.allow-credentials`
-| `true`
+| `false`
 | No
-| Whether credentials are allowed
+| Whether credentials such as cookies are allowed. The REST API uses bearer tokens, which do not
+need it
 
 | `connector.cors.max-age`
 | `3600`

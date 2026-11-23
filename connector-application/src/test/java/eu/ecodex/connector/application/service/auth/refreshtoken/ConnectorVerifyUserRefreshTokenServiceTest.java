@@ -53,7 +53,7 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
         var token = ConnectorRefreshTokenGenerator.generate();
         var userId = "uuid";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
-        var user = ConnectorUser.builder().uuid(userId).build();
+        var user = ConnectorUser.builder().uuid(userId).enabled(true).build();
         var duration = Duration.ofDays(3);
         var expectedRefreshToken = ConnectorRefreshToken.builder()
             .token(token)
@@ -71,6 +71,30 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
             () -> verifyUserTokenService.execute(token));
 
         // Then
+        verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
+    }
+
+    @Test
+    void verify_should_throw_exception_when_the_user_is_disabled() {
+        // Given
+        var token = ConnectorRefreshTokenGenerator.generate();
+        var loginTime = Instant.parse("2026-08-21T10:00:00Z");
+        var user = ConnectorUser.builder().uuid("uuid").enabled(false).build();
+        var refreshToken = ConnectorRefreshToken.builder()
+            .token(token)
+            .revoked(false)
+            .user(user)
+            .expiresAt(loginTime.plus(Duration.ofDays(3)))
+            .build();
+
+        when(refreshTokenRepository.findByTokenHashed(any()))
+            .thenReturn(Optional.of(refreshToken));
+
+        // When
+        // Then
+        assertThrows(ConnectorUserBadCredentialsException.class,
+            () -> verifyUserTokenService.execute(token));
+
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
     }
 
@@ -97,7 +121,7 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
         var token = ConnectorRefreshTokenGenerator.generate();
         var userId = "uuid";
         var loginTime = Instant.parse("2026-08-21T10:00:00Z");
-        var user = ConnectorUser.builder().uuid(userId).build();
+        var user = ConnectorUser.builder().uuid(userId).enabled(true).build();
         var duration = Duration.ofDays(3);
         var expectedRefreshToken = ConnectorRefreshToken.builder()
             .token(token)

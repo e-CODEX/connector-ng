@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -23,7 +24,11 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
+import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import java.time.Clock;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +43,10 @@ class ConnectorEditUserServiceTest {
     private ConnectorVerifyUniqueUserEmailService verifyUniqueUser;
     @Mock
     private ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier;
+    @Mock
+    private ConnectorRefreshTokenRepository refreshTokenRepository;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private ConnectorEditUserService service;
@@ -153,7 +162,43 @@ class ConnectorEditUserServiceTest {
         assertNoMoreInteractions();
     }
 
+    @Test
+    void edit_should_revoke_the_refresh_tokens_when_the_user_is_disabled() {
+        // Given
+        var existing = ConnectorUser.builder().uuid("uuid").enabled(true).build();
+        var now = Instant.parse("2026-11-23T10:00:00Z");
+        when(retrieveUserByIdentifier.execute("uuid")).thenReturn(existing);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(clock.instant()).thenReturn(now);
+
+        // When
+        var saved = service.execute(
+            "uuid", ConnectorEditUserCommand.builder().enabled(false).build()
+        );
+
+        // Then
+        assertThat(saved.enabled()).isFalse();
+        verify(refreshTokenRepository).revokeByUserUuid("uuid", now);
+    }
+
+    @Test
+    void edit_should_not_revoke_the_refresh_tokens_when_the_user_stays_enabled() {
+        // Given
+        var existing = ConnectorUser.builder().uuid("uuid").enabled(true).build();
+        when(retrieveUserByIdentifier.execute("uuid")).thenReturn(existing);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        service.execute("uuid", ConnectorEditUserCommand.builder().enabled(true).build());
+        service.execute("uuid", ConnectorEditUserCommand.builder().email("a@b.eu").build());
+
+        // Then
+        verify(refreshTokenRepository, never()).revokeByUserUuid(any(), any());
+    }
+
     private void assertNoMoreInteractions() {
-        verifyNoMoreInteractions(repository, retrieveUserByIdentifier, verifyUniqueUser);
+        verifyNoMoreInteractions(
+            repository, retrieveUserByIdentifier, verifyUniqueUser, refreshTokenRepository
+        );
     }
 }

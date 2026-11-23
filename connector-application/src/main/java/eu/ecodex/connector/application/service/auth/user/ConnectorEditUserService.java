@@ -14,8 +14,10 @@ import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUser;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByIdentifier;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorVerifyUniqueUserEmail;
+import eu.ecodex.connector.application.port.spi.auth.refreshtoken.ConnectorRefreshTokenRepository;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
+import java.time.Clock;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,6 +45,8 @@ public class ConnectorEditUserService implements ConnectorEditUser {
     private final ConnectorUserRepository repository;
     private final ConnectorVerifyUniqueUserEmail verifierUniqueUserEmail;
     private final ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
+    private final ConnectorRefreshTokenRepository refreshTokenRepository;
+    private final Clock clock;
 
     /**
      * Constructs an instance of {@code ConnectorPatchUserService} with the required dependencies.
@@ -52,14 +56,21 @@ public class ConnectorEditUserService implements ConnectorEditUser {
      * @param verifierUniqueUserEmail  the service to verify user email uniqueness; must not be null
      * @param retrieveUserByIdentifier the service to retrieve a user by its unique identifier; must
      *                                 not be null
+     * @param refreshTokenRepository   the repository of the refresh tokens, revoked when a user is
+     *                                 disabled; must not be null
+     * @param clock                    the clock giving the revocation time; must not be null
      */
     public ConnectorEditUserService(
         ConnectorUserRepository repository,
         ConnectorVerifyUniqueUserEmail verifierUniqueUserEmail,
-        ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier) {
+        ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier,
+        ConnectorRefreshTokenRepository refreshTokenRepository,
+        Clock clock) {
         this.repository = repository;
         this.verifierUniqueUserEmail = verifierUniqueUserEmail;
         this.retrieveUserByIdentifier = retrieveUserByIdentifier;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.clock = clock;
     }
 
     /**
@@ -93,6 +104,14 @@ public class ConnectorEditUserService implements ConnectorEditUser {
         if (user.mustChangePassword() != null) {
             userBuilder.mustChangePassword(user.mustChangePassword());
         }
-        return repository.save(userBuilder.build());
+        var saved = repository.save(userBuilder.build());
+
+        // a disabled user must not be able to get new access tokens from a refresh token
+        if (Boolean.FALSE.equals(user.enabled())) {
+            refreshTokenRepository.revokeByUserUuid(saved.uuid(), clock.instant());
+            log.info("User {} disabled, its refresh tokens were revoked", saved.uuid());
+        }
+
+        return saved;
     }
 }

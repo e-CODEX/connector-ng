@@ -13,12 +13,19 @@ package eu.ecodex.connector.infrastructure.config.property.auth;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.Duration;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 /**
  * Refresh token configuration properties.
+ *
+ * @param expiration  how long a refresh token remains valid
+ * @param cleanupCron cron expression controlling when expired refresh tokens are purged
+ * @param reuseGrace  how long after its replacement a revoked refresh token may still be
+ *                    presented without being considered as stolen
  */
 public record ConnectorRefreshTokenProperties(
     @NotNull Duration expiration,
-    @NotBlank String cleanupCron
+    @NotBlank String cleanupCron,
+    @NotNull @DefaultValue("10s") Duration reuseGrace
 ) {
 }

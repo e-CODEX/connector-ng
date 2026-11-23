@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [7.2.0-SNAPSHOT] - [0000-00-00]
+
+### Release Notes
+
+#### Added
+- **Transport steps** — Message transport steps now report whether they are retryable.
+- **JMS queues** — Pending and dead-letter messages can now be listed for each JMS queue.
+- **JMS message details** — The details of the messages held in a JMS queue can now be retrieved.
+- **DLQ replay** — Messages in a JMS dead-letter queue can be replayed to their original destination.
+- **DLQ message deletion** — Messages in a JMS dead-letter queue can be deleted.
+
+#### Fixes
+- **JMS queues** — Fix how dead-letter messages are counted in the connector's JMS queue statistics.
+
+#### Technical
+- **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.
+- **Swagger documentation** — Fix a bug that prevented the success response body from being displayed.
+
 ## [7.1.0] - 2026-11-12
 
 ### Release Notes

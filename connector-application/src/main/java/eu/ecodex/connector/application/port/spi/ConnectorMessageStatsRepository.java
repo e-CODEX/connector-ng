@@ -11,8 +11,8 @@
 package eu.ecodex.connector.application.port.spi;
 
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReport;
 import jakarta.annotation.Nonnull;
 import java.util.List;
 

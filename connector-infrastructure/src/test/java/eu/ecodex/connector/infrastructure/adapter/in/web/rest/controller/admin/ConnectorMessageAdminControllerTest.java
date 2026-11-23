@@ -35,20 +35,20 @@ import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoun
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessageReport;
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundC2CTestMessage;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
-import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
-import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByMessageIdentifier;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
 import eu.ecodex.connector.domain.model.businessdomain.ConnectorBusinessDomainIdentifier;
 import eu.ecodex.connector.domain.model.message.attachment.ConnectorMessageAttachment;
 import eu.ecodex.connector.domain.model.message.content.ConnectorMessageBusinessContent;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.message.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
 import eu.ecodex.connector.domain.model.pmode.ConnectorProcessingModeParty;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.message.ConnectorMessageAdminController;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.parser.ConnectorRestOutboundMessageParser;
@@ -476,4 +476,3 @@ public class ConnectorMessageAdminControllerTest extends AbstractWebMvcTest {
         }
     }
 }
-

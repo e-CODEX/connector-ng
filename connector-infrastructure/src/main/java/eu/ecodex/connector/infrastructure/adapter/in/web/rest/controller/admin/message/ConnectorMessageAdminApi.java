@@ -11,10 +11,10 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.message;
 
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.message.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorMessageDto;

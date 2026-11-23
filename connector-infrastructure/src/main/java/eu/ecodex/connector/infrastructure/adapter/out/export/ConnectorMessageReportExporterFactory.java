@@ -11,7 +11,7 @@
 package eu.ecodex.connector.infrastructure.adapter.out.export;
 
 import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReportExportFormat;
 import org.springframework.stereotype.Component;
 
 /**

@@ -12,9 +12,9 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.adapter.stats
 
 import eu.ecodex.connector.application.port.spi.ConnectorMessageStatsRepository;
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStatsItem;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReport;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStatsItem;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReport;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository.stats.ConnectorMessageStatsJpaRepository;
 import java.util.List;
 import lombok.NonNull;

@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStatsItem;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStatsItem;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class MessageStatsTestFixtures {

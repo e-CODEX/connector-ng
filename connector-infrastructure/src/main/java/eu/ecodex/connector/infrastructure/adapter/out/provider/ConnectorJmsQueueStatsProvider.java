@@ -15,6 +15,8 @@ import eu.ecodex.connector.application.port.spi.ConnectorQueueStatsProvider;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import eu.ecodex.connector.domain.model.stats.queue.MonitoredQueue;
@@ -31,10 +33,12 @@ import jakarta.jms.StreamMessage;
 import jakarta.jms.TextMessage;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -42,6 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.activemq.autoconfigure.ActiveMQConnectionDetails;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Default implementation of {@link ConnectorQueueStatsProvider}.
@@ -54,6 +60,8 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
     private static final String DELIVERY_COUNT_PROPERTY = "JMSXDeliveryCount";
     private static final String DLQ_FAILURE_CAUSE_PROPERTY = "dlqDeliveryFailureCause";
     private static final int MAX_PROPERTY_VALUE_LENGTH = 500;
+    private static final int MAX_BODY_LENGTH = 65_536;
+    private static final JsonMapper JSON = JsonMapper.builder().build();
     private static final List<String> TRUSTED_PACKAGES = List.of("eu.ecodex.connector");
 
     private final JmsTemplate jmsTemplate;
@@ -177,28 +185,15 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
         }
     }
 
-    private static String messageTypeOf(Message message) {
-        if (message instanceof MapMessage) {
-            return "MapMessage";
-        }
-
-        if (message instanceof TextMessage) {
-            return "TextMessage";
-        }
-
-        if (message instanceof BytesMessage) {
-            return "BytesMessage";
-        }
-
-        if (message instanceof ObjectMessage) {
-            return "ObjectMessage";
-        }
-
-        if (message instanceof StreamMessage) {
-            return "StreamMessage";
-        }
-
-        return "Message";
+    private static ConnectorQueueMessageType messageTypeOf(Message message) {
+        return switch (message) {
+            case MapMessage ignored -> ConnectorQueueMessageType.MAP;
+            case TextMessage ignored -> ConnectorQueueMessageType.TEXT;
+            case BytesMessage ignored -> ConnectorQueueMessageType.BYTES;
+            case ObjectMessage ignored -> ConnectorQueueMessageType.OBJECT;
+            case StreamMessage ignored -> ConnectorQueueMessageType.STREAM;
+            default -> ConnectorQueueMessageType.UNKNOWN;
+        };
     }
 
     @Override
@@ -364,6 +359,84 @@ public class ConnectorJmsQueueStatsProvider implements ConnectorQueueStatsProvid
         );
 
         return new ConnectorQueueReplayResult(replayed, notFound, failed);
+    }
+
+    @Override
+    public Optional<ConnectorQueueMessageContent> findMessageContent(
+        String queueName, String messageId, boolean dlq) {
+        // the identifier ends up in a JMS selector: only accept the broker's id syntax
+        if (messageId == null || !MESSAGE_ID_PATTERN.matcher(messageId).matches()) {
+            return Optional.empty();
+        }
+
+        var destination = dlq ? dlqNameOf(queueName) : queueName;
+        var content = jmsTemplate.browseSelected(
+            destination, "JMSMessageID = '" + messageId + "'", (session, browser) -> {
+                var messages = browser.getEnumeration();
+                while (messages.hasMoreElements()) {
+                    if (messages.nextElement() instanceof Message message) {
+                        return toMessageContent(message);
+                    }
+                }
+                return null;
+            }
+        );
+
+        return Optional.ofNullable(content);
+    }
+
+    private ConnectorQueueMessageContent toMessageContent(Message message) throws JMSException {
+        var truncated = false;
+        String text = null;
+        Map<String, Object> payload = null;
+
+        if (message instanceof TextMessage textMessage) {
+            text = textMessage.getText();
+            if (text != null && text.length() > MAX_BODY_LENGTH) {
+                text = text.substring(0, MAX_BODY_LENGTH);
+                truncated = true;
+            } else {
+                // the connector queues hold the JSON of a ConnectorPublishable
+                payload = parseJsonObject(text);
+                if (payload != null) {
+                    text = null;
+                }
+            }
+        } else if (message instanceof MapMessage mapMessage) {
+            payload = new LinkedHashMap<>();
+            var remaining = MAX_BODY_LENGTH;
+            for (var name : Collections.list(mapMessage.getMapNames())) {
+                var key = String.valueOf(name);
+                var value = mapMessage.getObject(key);
+                if (value instanceof byte[] bytes) {
+                    value = Base64.getEncoder().encodeToString(bytes);
+                }
+                if (value instanceof String string) {
+                    if (string.length() > remaining) {
+                        string = string.substring(0, remaining);
+                        truncated = true;
+                    }
+                    remaining -= string.length();
+                    value = string;
+                }
+                payload.put(key, value);
+            }
+        }
+
+        return new ConnectorQueueMessageContent(toQueueMessage(message), payload, text, truncated);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> parseJsonObject(String text) {
+        if (text == null || !text.stripLeading().startsWith("{")) {
+            return null;
+        }
+
+        try {
+            return JSON.readValue(text, Map.class);
+        } catch (JacksonException e) {
+            return null;
+        }
     }
 
     @Override

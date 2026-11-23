@@ -33,10 +33,13 @@ import eu.ecodex.connector.application.port.api.stats.ConnectorDeleteQueueDlqMes
 import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
 import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessage;
 import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessages;
+import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueueMessageContent;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms.ConnectorJmsAdminController;
@@ -61,6 +64,9 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
     private ConnectorRetrieveQueuesStats retrieveQueuesStats;
     @MockitoBean
     private ConnectorListQueueMessages listQueueMessages;
+    @MockitoBean
+    private ConnectorRetrieveQueueMessageContent retrieveQueueMessageContent;
+
     @MockitoBean
     private ConnectorReplayQueueDlqMessages replayQueueDlqMessages;
     @MockitoBean
@@ -97,7 +103,7 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_200_with_the_dlq_messages_of_a_queue() throws Exception {
             var message = new ConnectorQueueMessage(
-                "ID:1", Instant.parse("2026-11-19T10:00:00Z"), null, "MapMessage", true, 6,
+                "ID:1", Instant.parse("2026-11-19T10:00:00Z"), null, ConnectorQueueMessageType.MAP, true, 6,
                 "Exceeded redelivery policy", Map.of("JMSXDeliveryCount", "6")
             );
             when(listQueueMessages.execute(
@@ -110,7 +116,7 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
                                 .param("dlq", "true"))
                    .andExpect(status().isOk())
                    .andExpect(jsonPath("$.content[0].messageId").value("ID:1"))
-                   .andExpect(jsonPath("$.content[0].messageType").value("MapMessage"))
+                   .andExpect(jsonPath("$.content[0].messageType").value("MAP"))
                    .andExpect(jsonPath("$.content[0].deliveryCount").value(6))
                    .andExpect(jsonPath("$.content[0].failureCause")
                                   .value("Exceeded redelivery policy"))
@@ -131,7 +137,7 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
         @Test
         void should_return_200_with_the_pending_messages_of_a_queue() throws Exception {
             var message = new ConnectorQueueMessage(
-                "ID:2", Instant.parse("2026-11-19T10:00:00Z"), null, "TextMessage", false, 1,
+                "ID:2", Instant.parse("2026-11-19T10:00:00Z"), null, ConnectorQueueMessageType.TEXT, false, 1,
                 null, Map.of()
             );
             when(listQueueMessages.execute(
@@ -143,7 +149,7 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
                                 .param("queue", "connector.queues.backend-delivery-queue"))
                    .andExpect(status().isOk())
                    .andExpect(jsonPath("$.content[0].messageId").value("ID:2"))
-                   .andExpect(jsonPath("$.content[0].messageType").value("TextMessage"))
+                   .andExpect(jsonPath("$.content[0].messageType").value("TEXT"))
                    .andExpect(jsonPath("$.totalElements").value(1));
         }
 
@@ -156,6 +162,66 @@ public class ConnectorJmsAdminControllerTest extends AbstractWebMvcTest {
             )).thenThrow(new ConnectorQueueNotFoundException("unknown"));
 
             mockMvc.perform(get("/api/v1/admin/jms/queues/messages").param("queue", "unknown"))
+                   .andExpect(status().isNotFound());
+        }
+    }
+
+    @Nested
+    @DisplayName("reading one message with its body")
+    class ReadMessage {
+        @Test
+        void should_return_200_with_the_body_of_a_dlq_message() throws Exception {
+            var message = new ConnectorQueueMessage(
+                "ID:1", Instant.parse("2026-11-19T10:00:00Z"), null, ConnectorQueueMessageType.TEXT, true, 6,
+                "Exceeded redelivery policy", Map.of()
+            );
+            when(retrieveQueueMessageContent.execute("connector.queues.backend-delivery-queue",
+                "ID:1", true))
+                .thenReturn(new ConnectorQueueMessageContent(message, Map.of("a", 1), null, false));
+
+            mockMvc.perform(get("/api/v1/admin/jms/queues/messages/{id}", "ID:1")
+                                .param("queue", "connector.queues.backend-delivery-queue")
+                                .param("dlq", "true"))
+                   .andExpect(status().isOk())
+                   .andExpect(jsonPath("$.message.messageId").value("ID:1"))
+                   .andExpect(jsonPath("$.message.failureCause")
+                                  .value("Exceeded redelivery policy"))
+                   .andExpect(jsonPath("$.payload.a").value(1))
+                   .andExpect(jsonPath("$.text").doesNotExist())
+                   .andExpect(jsonPath("$.truncated").value(false));
+        }
+
+        @Test
+        void should_look_in_the_queue_itself_by_default() throws Exception {
+            var message = new ConnectorQueueMessage(
+                "ID:2", null, null, ConnectorQueueMessageType.MAP, false, 0, null, Map.of()
+            );
+            when(retrieveQueueMessageContent.execute("q", "ID:2", false))
+                .thenReturn(new ConnectorQueueMessageContent(message, Map.of("k", "v"), null, false));
+
+            mockMvc.perform(get("/api/v1/admin/jms/queues/messages/{id}", "ID:2")
+                                .param("queue", "q"))
+                   .andExpect(status().isOk())
+                   .andExpect(jsonPath("$.payload.k").value("v"));
+        }
+
+        @Test
+        void should_return_404_when_the_message_is_not_found() throws Exception {
+            when(retrieveQueueMessageContent.execute("q", "ID:1", true))
+                .thenThrow(new ConnectorQueueMessageNotFoundException("q", "ID:1"));
+
+            mockMvc.perform(get("/api/v1/admin/jms/queues/messages/{id}", "ID:1")
+                                .param("queue", "q").param("dlq", "true"))
+                   .andExpect(status().isNotFound());
+        }
+
+        @Test
+        void should_return_404_when_the_queue_is_not_monitored() throws Exception {
+            when(retrieveQueueMessageContent.execute("unknown", "ID:1", false))
+                .thenThrow(new ConnectorQueueNotFoundException("unknown"));
+
+            mockMvc.perform(get("/api/v1/admin/jms/queues/messages/{id}", "ID:1")
+                                .param("queue", "unknown"))
                    .andExpect(status().isNotFound());
         }
     }

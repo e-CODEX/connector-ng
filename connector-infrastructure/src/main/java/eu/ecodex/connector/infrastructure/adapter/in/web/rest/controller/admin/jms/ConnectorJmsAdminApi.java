@@ -12,6 +12,7 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.queue.ConnectorReplayQueueDlqMessagesRequest;
@@ -59,6 +60,24 @@ public interface ConnectorJmsAdminApi {
         @RequestParam(name = "dlq", defaultValue = "false") boolean dlq,
         @RequestParam(name = "page", defaultValue = "0") int page,
         @RequestParam(name = "size", defaultValue = "20") int size
+    );
+
+    @GetMapping("/messages/{messageId}")
+    @Operation(
+        summary = "Read a message with its body",
+        description = "Browses, without consuming it, one message of a monitored queue, or of its"
+            + " dead letter queue (DLQ) when `dlq` is true, and returns it with its body. The"
+            + " JSON of a connector message and the entries of a map message are returned as a"
+            + " `payload` map, any other text as `text`; a body larger than 64 KB is cut, and the"
+            + " other message types have no body. The body may hold business data."
+    )
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "The queue or the message is not found")
+    ConnectorQueueMessageContent retrieveQueueMessageContent(
+        @PathVariable("messageId") String messageId,
+        @RequestParam(name = "queue") String queue,
+        @RequestParam(name = "dlq", defaultValue = "false") boolean dlq
     );
 
     @PostMapping("/dlq/messages/{messageId}/replay")

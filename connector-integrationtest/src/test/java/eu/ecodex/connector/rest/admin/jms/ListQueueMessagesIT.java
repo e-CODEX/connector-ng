@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
 import jakarta.jms.ConnectionFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,7 +54,8 @@ public class ListQueueMessagesIT extends AbstractIntegrationTest {
                 assertThat(result).isNotNull();
                 assertThat(result.totalElements()).isGreaterThanOrEqualTo(1);
                 assertThat(result.content()).isNotEmpty();
-                assertThat(result.content().getFirst().messageType()).isEqualTo("TextMessage");
+                assertThat(result.content().getFirst().messageType())
+                    .isEqualTo(ConnectorQueueMessageType.TEXT);
             });
     }
 
@@ -94,7 +96,8 @@ public class ListQueueMessagesIT extends AbstractIntegrationTest {
             .value(result -> {
                 assertThat(result).isNotNull();
                 assertThat(result.totalElements()).isGreaterThanOrEqualTo(1);
-                assertThat(result.content().getFirst().messageType()).isEqualTo("TextMessage");
+                assertThat(result.content().getFirst().messageType())
+                    .isEqualTo(ConnectorQueueMessageType.TEXT);
                 assertThat(result.content().getFirst().failureCause()).isNull();
             });
     }

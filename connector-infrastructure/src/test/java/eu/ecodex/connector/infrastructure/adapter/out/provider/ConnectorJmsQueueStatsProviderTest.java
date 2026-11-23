@@ -19,6 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
 import eu.ecodex.connector.infrastructure.config.property.ActiveMQAddressSettingsProperties;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorQueueProperties;
 import jakarta.jms.Connection;
@@ -31,6 +32,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -130,8 +132,8 @@ class ConnectorJmsQueueStatsProviderTest {
      * queue and in the dead letter queue.
      */
     @Nested
-    @DisplayName("replaying and deleting the dead letter queue messages")
-    class DlqMessages {
+    @DisplayName("reading, replaying and deleting the messages")
+    class Messages {
         private static final String DLQ = "ActiveMQ.DLQ." + QUEUE;
 
         private JmsTemplate brokerTemplate;
@@ -299,6 +301,103 @@ class ConnectorJmsQueueStatsProviderTest {
                 .isFalse();
             assertThat(brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10))
                                      .content()).hasSize(1);
+        }
+
+        @Test
+        void should_read_the_json_of_a_connector_message_as_a_map() {
+            sendToDlq("{\"payload\":1,\"nested\":{\"a\":[1,2]},\"none\":null}");
+            var messageId = dlqMessageId();
+
+            var content = brokerProvider.findMessageContent(QUEUE, messageId, true).orElseThrow();
+
+            assertThat(content.payload()).containsEntry("payload", 1)
+                                         .containsEntry("nested", Map.of("a", List.of(1, 2)))
+                                         .containsEntry("none", null);
+            assertThat(content.text()).isNull();
+            assertThat(content.truncated()).isFalse();
+            assertThat(content.message().messageId()).isEqualTo(messageId);
+            assertThat(content.message().failureCause()).isEqualTo("java.lang.Throwable: boom");
+            // reading is not consuming
+            assertThat(brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10))
+                                     .content()).hasSize(1);
+        }
+
+        @Test
+        void should_read_a_text_which_is_not_a_json_object_as_text() {
+            sendToDlq("hello");
+            sendToDlq("[1,2]");
+            sendToDlq("{broken");
+            var ids = brokerProvider.listDlqMessages(QUEUE, ConnectorPageRequest.of(0, 10))
+                                    .content().stream().map(m -> m.messageId()).toList();
+
+            assertThat(ids).hasSize(3).allSatisfy(id -> {
+                var content = brokerProvider.findMessageContent(QUEUE, id, true).orElseThrow();
+                assertThat(content.payload()).isNull();
+                assertThat(content.text()).isNotNull();
+            });
+        }
+
+        @Test
+        void should_read_the_entries_of_a_map_message() {
+            brokerTemplate.send(DLQ, (Session session) -> {
+                MapMessage message = session.createMapMessage();
+                message.setString("name", "value");
+                message.setInt("count", 3);
+                return message;
+            });
+            var messageId = dlqMessageId();
+
+            var content = brokerProvider.findMessageContent(QUEUE, messageId, true).orElseThrow();
+
+            assertThat(content.text()).isNull();
+            assertThat(content.payload()).containsEntry("name", "value").containsEntry("count", 3);
+        }
+
+        @Test
+        void should_read_a_pending_message_of_the_queue_itself() {
+            brokerTemplate.send(QUEUE, session -> session.createTextMessage("pending"));
+            var messageId = brokerProvider.listMessages(QUEUE, ConnectorPageRequest.of(0, 10))
+                                          .content().getFirst().messageId();
+
+            var content = brokerProvider.findMessageContent(QUEUE, messageId, false)
+                                        .orElseThrow();
+
+            assertThat(content.text()).isEqualTo("pending");
+            assertThat(content.payload()).isNull();
+            assertThat(brokerProvider.findMessageContent(QUEUE, messageId, true)).isEmpty();
+        }
+
+        @Test
+        void should_cut_a_body_which_is_too_large() {
+            sendToDlq("x".repeat(70_000));
+            var messageId = dlqMessageId();
+
+            var content = brokerProvider.findMessageContent(QUEUE, messageId, true).orElseThrow();
+
+            assertThat(content.text()).hasSize(65_536);
+            assertThat(content.truncated()).isTrue();
+        }
+
+        @Test
+        void should_return_no_body_for_a_message_which_is_neither_text_nor_map() {
+            brokerTemplate.send(DLQ, session -> session.createBytesMessage());
+            var messageId = dlqMessageId();
+
+            var content = brokerProvider.findMessageContent(QUEUE, messageId, true).orElseThrow();
+
+            assertThat(content.text()).isNull();
+            assertThat(content.payload()).isNull();
+            assertThat(content.message().messageType()).isEqualTo(ConnectorQueueMessageType.BYTES);
+        }
+
+        @Test
+        void should_find_nothing_for_an_unknown_or_malformed_identifier() {
+            sendToDlq("kept");
+
+            assertThat(brokerProvider.findMessageContent(QUEUE, "ID:unknown-1:1:1:1:1", true))
+                .isEmpty();
+            assertThat(brokerProvider.findMessageContent(QUEUE, "x' OR JMSMessageID LIKE '%", true))
+                .isEmpty();
         }
     }
 }

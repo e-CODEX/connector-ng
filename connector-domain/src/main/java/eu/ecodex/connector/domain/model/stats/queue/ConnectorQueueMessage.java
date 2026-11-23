@@ -16,13 +16,13 @@ import java.util.Map;
 /**
  * Describes a message held in a monitored queue or in its dead letter queue (DLQ).
  *
- * <p>Only the headers and the properties of the message are exposed, never its body, as the body
- * may carry business payloads.
+ * <p>Only the headers and the properties of the message are exposed, not its body, as the body may
+ * carry business payloads: see {@link ConnectorQueueMessageContent} to read it.
  *
  * @param messageId     the JMS message identifier.
  * @param timestamp     the time the message was originally sent to the queue; may be {@code null}.
  * @param correlationId the JMS correlation identifier; may be {@code null}.
- * @param messageType   the JMS message type (e.g. {@code MapMessage}, {@code TextMessage}).
+ * @param messageType   the JMS message type.
  * @param redelivered   whether the message was redelivered at least once.
  * @param deliveryCount the number of delivery attempts, if known, otherwise {@code 0}.
  * @param failureCause  the reason why the broker moved the message to the DLQ; {@code null} for
@@ -33,7 +33,7 @@ public record ConnectorQueueMessage(
     String messageId,
     Instant timestamp,
     String correlationId,
-    String messageType,
+    ConnectorQueueMessageType messageType,
     boolean redelivered,
     int deliveryCount,
     String failureCause,

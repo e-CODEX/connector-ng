@@ -22,6 +22,7 @@ import eu.ecodex.connector.application.port.spi.ConnectorQueueStatsProvider;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ class ConnectorListQueueMessagesServiceTest {
     void should_list_the_dlq_messages_of_a_monitored_queue() {
         var pageRequest = ConnectorPageRequest.of(0, 20);
         var message = new ConnectorQueueMessage(
-            "ID:1", Instant.parse("2026-11-19T10:00:00Z"), null, "MapMessage", true, 6,
+            "ID:1", Instant.parse("2026-11-19T10:00:00Z"), null, ConnectorQueueMessageType.MAP, true, 6,
             "Exceeded redelivery policy", Map.of("JMSXDeliveryCount", "6")
         );
         var expected = ConnectorPageResult.of(List.of(message), 20, 1, 1);

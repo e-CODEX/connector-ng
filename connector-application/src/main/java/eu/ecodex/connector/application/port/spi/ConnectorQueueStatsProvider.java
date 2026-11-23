@@ -10,12 +10,15 @@
 
 package eu.ecodex.connector.application.port.spi;
 
+import eu.ecodex.connector.application.exception.queue.ConnectorQueueMessageDeleteException;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Provider (port) giving access to the statistics of the connector's JMS queues.
@@ -63,6 +66,21 @@ public interface ConnectorQueueStatsProvider {
     ConnectorQueueReplayResult replayDlqMessages(String queueName, List<String> messageIds);
 
     /**
+     * Reads one message of a monitored queue, or of its dead letter queue, with its body. The
+     * message is only browsed, never consumed.
+     *
+     * @param queueName the name of a monitored queue
+     * @param messageId the JMS identifier of the message
+     * @param dlq       {@code true} to look in the dead letter queue, {@code false} to look in the
+     *                  queue itself
+     *
+     * @return the message, or empty if it is not there
+     */
+    Optional<ConnectorQueueMessageContent> findMessageContent(
+        String queueName, String messageId, boolean dlq
+    );
+
+    /**
      * Deletes a message of the dead letter queue of a monitored queue.
      *
      * @param queueName the name of a monitored queue
@@ -71,8 +89,7 @@ public interface ConnectorQueueStatsProvider {
      * @return {@code true} if the message was deleted, {@code false} if it is not in the dead
      *     letter queue
      *
-     * @throws eu.ecodex.connector.application.exception.queue
-     *     .ConnectorQueueMessageDeleteException if the message could not be deleted
+     * @throws ConnectorQueueMessageDeleteException if the message could not be deleted
      */
     boolean deleteDlqMessage(String queueName, String messageId);
 

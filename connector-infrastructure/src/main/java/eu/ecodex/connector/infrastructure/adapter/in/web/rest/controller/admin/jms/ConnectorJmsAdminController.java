@@ -14,10 +14,12 @@ import eu.ecodex.connector.application.port.api.stats.ConnectorDeleteQueueDlqMes
 import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
 import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessage;
 import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessages;
+import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueueMessageContent;
 import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
 import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.queue.ConnectorReplayQueueDlqMessagesRequest;
@@ -30,32 +32,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
     private final ConnectorRetrieveQueuesStats retrieveQueuesStats;
-
     private final ConnectorListQueueMessages listQueueMessages;
-
+    private final ConnectorRetrieveQueueMessageContent retrieveQueueMessageContent;
     private final ConnectorReplayQueueDlqMessages replayQueueDlqMessages;
-
     private final ConnectorReplayQueueDlqMessage replayQueueDlqMessage;
-
     private final ConnectorDeleteQueueDlqMessage deleteQueueDlqMessage;
 
     /**
      * Creates the controller.
      *
-     * @param retrieveQueuesStats    the use case retrieving the queues statistics
-     * @param listQueueMessages      the use case listing the messages of a queue or of its DLQ
-     * @param replayQueueDlqMessages the use case replaying a list of DLQ messages
-     * @param replayQueueDlqMessage  the use case replaying one DLQ message
-     * @param deleteQueueDlqMessage  the use case deleting one DLQ message
+     * @param retrieveQueuesStats         the use case retrieving the queues statistics
+     * @param listQueueMessages           the use case listing the messages of a queue or of its
+     *                                    DLQ
+     * @param retrieveQueueMessageContent the use case reading one message with its body
+     * @param replayQueueDlqMessages      the use case replaying a list of DLQ messages
+     * @param replayQueueDlqMessage       the use case replaying one DLQ message
+     * @param deleteQueueDlqMessage       the use case deleting one DLQ message
      */
     public ConnectorJmsAdminController(
         ConnectorRetrieveQueuesStats retrieveQueuesStats,
         ConnectorListQueueMessages listQueueMessages,
+        ConnectorRetrieveQueueMessageContent retrieveQueueMessageContent,
         ConnectorReplayQueueDlqMessages replayQueueDlqMessages,
         ConnectorReplayQueueDlqMessage replayQueueDlqMessage,
         ConnectorDeleteQueueDlqMessage deleteQueueDlqMessage) {
         this.retrieveQueuesStats = retrieveQueuesStats;
         this.listQueueMessages = listQueueMessages;
+        this.retrieveQueueMessageContent = retrieveQueueMessageContent;
         this.replayQueueDlqMessages = replayQueueDlqMessages;
         this.replayQueueDlqMessage = replayQueueDlqMessage;
         this.deleteQueueDlqMessage = deleteQueueDlqMessage;
@@ -70,6 +73,12 @@ public class ConnectorJmsAdminController implements ConnectorJmsAdminApi {
     public ConnectorPageResult<ConnectorQueueMessage> listQueueMessages(
         String queue, boolean dlq, int page, int size) {
         return listQueueMessages.execute(queue, dlq, ConnectorPageRequest.of(page, size));
+    }
+
+    @Override
+    public ConnectorQueueMessageContent retrieveQueueMessageContent(
+        String messageId, String queue, boolean dlq) {
+        return retrieveQueueMessageContent.execute(queue, messageId, dlq);
     }
 
     @Override

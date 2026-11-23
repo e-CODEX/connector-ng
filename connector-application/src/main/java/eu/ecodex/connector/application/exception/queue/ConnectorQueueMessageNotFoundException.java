@@ -13,7 +13,7 @@ package eu.ecodex.connector.application.exception.queue;
 import eu.ecodex.connector.application.exception.NotFoundException;
 
 /**
- * Thrown when a message is not in the dead letter queue of a queue.
+ * Thrown when a message is not in a queue, or in its dead letter queue.
  */
 public class ConnectorQueueMessageNotFoundException extends NotFoundException {
     /**
@@ -23,8 +23,21 @@ public class ConnectorQueueMessageNotFoundException extends NotFoundException {
      * @param messageId the JMS identifier of the message
      */
     public ConnectorQueueMessageNotFoundException(String queueName, String messageId) {
-        super(
-            "Message [%s] is not in the dead letter queue of [%s]".formatted(messageId, queueName)
-        );
+        this(queueName, messageId, true);
+    }
+
+    /**
+     * Creates the exception for the given queue, message identifier and place.
+     *
+     * @param queueName the name of the queue
+     * @param messageId the JMS identifier of the message
+     * @param dlq       {@code true} if the message was looked for in the dead letter queue,
+     *                  {@code false} if it was looked for in the queue itself
+     */
+    public ConnectorQueueMessageNotFoundException(
+        String queueName, String messageId, boolean dlq) {
+        super("Message [%s] is not in the %s of [%s]".formatted(
+            messageId, dlq ? "dead letter queue" : "queue", queueName
+        ));
     }
 }

@@ -12,22 +12,22 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.
 
 import eu.ecodex.connector.application.port.api.message.ConnectorListMessages;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessageReport;
+import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorSendOutboundC2CTestMessage;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageAS4PropertiesCommand;
 import eu.ecodex.connector.application.port.api.message.c2ctest.ConnectorTestBusinessMessageCommand;
-import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageReport;
-import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveMessageStats;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByMessageIdentifier;
 import eu.ecodex.connector.domain.model.filter.ConnectorDateRangeFilter;
 import eu.ecodex.connector.domain.model.filter.ConnectorMessagesListFilter;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.message.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.domain.model.pmode.ConnectorPartyRoleType;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorOutboundMessageDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorMessageDetailDto;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.message.ConnectorMessageDto;

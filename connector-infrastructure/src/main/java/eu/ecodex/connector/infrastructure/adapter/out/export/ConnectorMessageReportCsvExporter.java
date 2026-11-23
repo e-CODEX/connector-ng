@@ -12,8 +12,8 @@ package eu.ecodex.connector.infrastructure.adapter.out.export;
 
 import com.opencsv.CSVWriter;
 import eu.ecodex.connector.application.port.spi.ConnectorMessageReportExporter;
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.message.stats.report.summary.ConnectorMessageReportSummary;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;

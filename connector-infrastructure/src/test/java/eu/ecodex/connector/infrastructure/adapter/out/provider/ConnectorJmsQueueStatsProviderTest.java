@@ -19,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessageType;
 import eu.ecodex.connector.infrastructure.config.property.ActiveMQAddressSettingsProperties;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorQueueProperties;
 import jakarta.jms.Connection;
@@ -84,7 +84,7 @@ class ConnectorJmsQueueStatsProviderTest {
             when(message.getPropertyNames()).thenReturn(Collections.emptyEnumeration());
             browsing(Arrays.asList(null, message, null));
 
-            var provider = new ConnectorJmsQueueStatsProvider(
+            var provider = new ConnectorJmsQueueManagementProvider(
                 jmsTemplate, queueProperties(), addressSettings("ActiveMQ.DLQ.")
             );
             var result = provider.listMessages(QUEUE, ConnectorPageRequest.of(0, 10));
@@ -97,7 +97,7 @@ class ConnectorJmsQueueStatsProviderTest {
         @Test
         void should_browse_the_dlq_named_after_the_configured_prefix() throws Exception {
             browsing(List.of());
-            var provider = new ConnectorJmsQueueStatsProvider(
+            var provider = new ConnectorJmsQueueManagementProvider(
                 jmsTemplate, queueProperties(), addressSettings("custom.DLQ.")
             );
 
@@ -114,7 +114,7 @@ class ConnectorJmsQueueStatsProviderTest {
     class MonitoredQueues {
         @Test
         void should_monitor_every_queue_from_the_configuration() throws Exception {
-            var provider = new ConnectorJmsQueueStatsProvider(
+            var provider = new ConnectorJmsQueueManagementProvider(
                 jmsTemplate, queueProperties(), addressSettings("ActiveMQ.DLQ.")
             );
 
@@ -137,7 +137,7 @@ class ConnectorJmsQueueStatsProviderTest {
         private static final String DLQ = "ActiveMQ.DLQ." + QUEUE;
 
         private JmsTemplate brokerTemplate;
-        private ConnectorJmsQueueStatsProvider brokerProvider;
+        private ConnectorJmsQueueManagementProvider brokerProvider;
         private Connection keepAliveConnection;
 
         @BeforeEach
@@ -150,7 +150,7 @@ class ConnectorJmsQueueStatsProviderTest {
             keepAliveConnection.start();
             brokerTemplate = new JmsTemplate(brokerConnectionFactory);
             brokerTemplate.setReceiveTimeout(1_000);
-            brokerProvider = new ConnectorJmsQueueStatsProvider(
+            brokerProvider = new ConnectorJmsQueueManagementProvider(
                 brokerTemplate,
                 queueProperties(),
                 addressSettings("ActiveMQ.DLQ.")

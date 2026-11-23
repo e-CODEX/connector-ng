@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.admin.message;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.stats.ConnectorMessageStats;
+import eu.ecodex.connector.domain.model.message.stats.ConnectorMessageStats;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

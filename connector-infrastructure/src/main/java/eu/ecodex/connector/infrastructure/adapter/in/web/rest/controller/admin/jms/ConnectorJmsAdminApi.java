@@ -11,10 +11,10 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms;
 
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessageContent;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueReplayResult;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueStats;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.queue.ConnectorReplayQueueDlqMessagesRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

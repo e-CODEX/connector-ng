@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector.application.port.spi;
 
-import eu.ecodex.connector.domain.model.stats.report.ConnectorMessageReportExportFormat;
-import eu.ecodex.connector.domain.model.stats.report.summary.ConnectorMessageReportSummary;
+import eu.ecodex.connector.domain.model.message.stats.report.ConnectorMessageReportExportFormat;
+import eu.ecodex.connector.domain.model.message.stats.report.summary.ConnectorMessageReportSummary;
 import jakarta.annotation.Nonnull;
 
 /**

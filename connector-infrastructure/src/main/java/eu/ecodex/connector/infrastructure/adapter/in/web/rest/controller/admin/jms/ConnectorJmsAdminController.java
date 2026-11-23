@@ -10,18 +10,18 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.jms;
 
-import eu.ecodex.connector.application.port.api.stats.ConnectorDeleteQueueDlqMessage;
-import eu.ecodex.connector.application.port.api.stats.ConnectorListQueueMessages;
-import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessage;
-import eu.ecodex.connector.application.port.api.stats.ConnectorReplayQueueDlqMessages;
-import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueueMessageContent;
-import eu.ecodex.connector.application.port.api.stats.ConnectorRetrieveQueuesStats;
+import eu.ecodex.connector.application.port.api.queue.ConnectorDeleteQueueDlqMessage;
+import eu.ecodex.connector.application.port.api.queue.ConnectorListQueueMessages;
+import eu.ecodex.connector.application.port.api.queue.ConnectorReplayQueueDlqMessage;
+import eu.ecodex.connector.application.port.api.queue.ConnectorReplayQueueDlqMessages;
+import eu.ecodex.connector.application.port.api.queue.ConnectorRetrieveQueueMessageContent;
+import eu.ecodex.connector.application.port.api.queue.ConnectorRetrieveQueuesStats;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageContent;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueReplayResult;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessageContent;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueReplayResult;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueStats;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.queue.ConnectorReplayQueueDlqMessagesRequest;
 import java.util.List;
 import org.springframework.web.bind.annotation.RestController;

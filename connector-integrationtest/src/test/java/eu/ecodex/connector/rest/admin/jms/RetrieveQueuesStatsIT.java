@@ -13,7 +13,7 @@ package eu.ecodex.connector.rest.admin.jms;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueStats;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

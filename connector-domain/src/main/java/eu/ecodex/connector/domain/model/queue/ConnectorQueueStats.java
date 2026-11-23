@@ -1,0 +1,58 @@
+/*
+ * Copyright 2026 European Union Agency for the Operational Management of Large-Scale IT Systems
+ * in the Area of Freedom, Security and Justice (eu-LISA)
+ *
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by the
+ * European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy at: https://joinup.ec.europa.eu/software/page/eupl
+ */
+
+package eu.ecodex.connector.domain.model.queue;
+
+/**
+ * Represents statistical information about a connector queue. This record holds the name of the
+ * queue and its associated metrics, including the count of pending messages and messages in the
+ * dead letter queue.
+ *
+ * @param queueName        The name of the queue.
+ * @param pendingCount     The number of messages pending processing in the queue.
+ * @param dlqCount         The number of messages in the dead letter queue.
+ * @param queueDescription The description of the queue.
+ * @param category         The {@link MonitoredQueueCategory} the queue belongs to, used to group
+ *                         queues for display and statistics.
+ */
+public record ConnectorQueueStats(
+    String queueName,
+    String queueDescription,
+    long pendingCount,
+    long dlqCount,
+    MonitoredQueueCategory category
+) {
+    /**
+     * Creates a new instance of {@code ConnectorQueueStats} using the specified parameters.
+     *
+     * @param queueName        The name of the queue.
+     * @param queueDescription A description of the queue.
+     * @param pendingCount     The number of messages pending processing in the queue.
+     * @param dlqCount         The number of messages in the dead letter queue.
+     * @param category         The {@link MonitoredQueueCategory} the queue belongs to, used to
+     *                         group queues for display and statistics.
+     *
+     * @return A new {@code ConnectorQueueStats} instance populated with the provided values.
+     */
+    public static ConnectorQueueStats of(
+        String queueName,
+        String queueDescription,
+        long pendingCount,
+        long dlqCount,
+        MonitoredQueueCategory category) {
+        return new ConnectorQueueStats(
+            queueName,
+            queueDescription,
+            pendingCount,
+            dlqCount,
+            category
+        );
+    }
+}

@@ -10,8 +10,8 @@
 
 package eu.ecodex.connector;
 
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueStats;
-import eu.ecodex.connector.domain.model.stats.queue.MonitoredQueueCategory;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueStats;
+import eu.ecodex.connector.domain.model.queue.MonitoredQueueCategory;
 
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod"})
 public class QueuesStatsTestFixtures {

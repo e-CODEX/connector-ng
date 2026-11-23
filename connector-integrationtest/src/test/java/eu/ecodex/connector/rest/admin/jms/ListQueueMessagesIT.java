@@ -14,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessage;
-import eu.ecodex.connector.domain.model.stats.queue.ConnectorQueueMessageType;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessage;
+import eu.ecodex.connector.domain.model.queue.ConnectorQueueMessageType;
 import jakarta.jms.ConnectionFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

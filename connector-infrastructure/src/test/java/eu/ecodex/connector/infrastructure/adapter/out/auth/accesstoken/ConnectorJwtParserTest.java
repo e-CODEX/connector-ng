@@ -122,6 +122,20 @@ class ConnectorJwtParserTest {
     }
 
     @Test
+    void isValidToken_should_return_false_when_the_user_is_disabled_after_the_token_was_issued() {
+        // Given
+        initializeJwtParser(jwtProperties);
+        var token = jwtGenerator.generateAccessToken(userDetails);
+        var disabledUser = ConnectorUserDetails.builder().connectorUser(
+            userDetails.connectorUser().toBuilder().enabled(false).build()
+        ).build();
+
+        // When
+        // Then
+        assertThat(jwtParser.isValidToken(token, disabledUser)).isFalse();
+    }
+
+    @Test
     void isValidToken_should_return_false_when_token_is_tampered() {
         // Given
         initializeJwtParser(jwtProperties);

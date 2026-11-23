@@ -102,20 +102,23 @@ public class ConnectorJwtParser {
     }
 
     /**
-     * Validates the given JWT token by checking if it matches the username of the specified user
-     * and ensures the token has not expired.
+     * Validates the given JWT token by checking if it matches the username of the specified user,
+     * that the token has not expired and that the user is still allowed to authenticate: a token
+     * issued before the user was disabled or locked is no longer accepted.
      *
      * @param token the JWT token to validate.
      * @param user  the {@code UserDetails} object representing the authenticated user whose details
      *              are compared against the token's payload.
      *
-     * @return {@code true} if the token is valid, matches the user's username and is not expired;
-     *     {@code false} otherwise.
+     * @return {@code true} if the token is valid, matches the user's username, is not expired and
+     *     the user is enabled and not locked; {@code false} otherwise.
      */
     public boolean isValidToken(@NonNull String token, @NonNull UserDetails user) {
         try {
             var claims = parse(token).getPayload();
-            return claims.getSubject().equals(user.getUsername());
+            return claims.getSubject().equals(user.getUsername())
+                && user.isEnabled()
+                && user.isAccountNonLocked();
         } catch (JwtException e) {
             return false;
         }

@@ -62,6 +62,11 @@ public class ConnectorVerifyUserRefreshTokenService implements ConnectorVerifyUs
             throw new ConnectorUserBadCredentialsException("Invalid refresh token");
         }
 
+        // a disabled user must not get new tokens, whatever the state of its refresh token
+        if (!foundToken.user().enabled()) {
+            throw new ConnectorUserBadCredentialsException("Invalid refresh token");
+        }
+
         if (foundToken.revoked()) {
             throw new ConnectorUserBadCredentialsException("Refresh token revoked");
         }

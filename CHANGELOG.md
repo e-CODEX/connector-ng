@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 
 #### Fixes
 - **JMS queues** — Fix how dead-letter messages are counted in the connector's JMS queue statistics.
+- **Authentication** — A disabled user can no longer use its access token or refresh it, and its refresh tokens are revoked when it is disabled.
 
 #### Technical
 - **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.

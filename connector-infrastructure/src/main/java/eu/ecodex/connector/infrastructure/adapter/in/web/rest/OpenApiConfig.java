@@ -15,17 +15,30 @@ import io.swagger.v3.core.converter.AnnotatedType;
 import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.BinarySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.method.HandlerMethod;
 
 /**
  * OpenApiConfig class for configuring the OpenAPI documentation.
@@ -36,6 +49,8 @@ public class OpenApiConfig {
     private static final String ERROR_RESPONSE = "ErrorResponse";
     private static final String ERROR_RESPONSE_SCHEMA =
         "#/components/schemas/" + ERROR_RESPONSE;
+    private static final String BEARER_AUTH = "bearerAuth";
+    private final Map<String, Schema<?>> successSchemas = new ConcurrentHashMap<>();
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -43,32 +58,50 @@ public class OpenApiConfig {
             .info(new Info()
                       .title("e-CODEX Connector")
                       .version("1.0.0")
-                      .description("Open API documentation for e-CODEX Connector."));
+                      .description("Open API documentation for e-CODEX Connector."))
+            .components(new Components().addSecuritySchemes(
+                BEARER_AUTH,
+                new SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP)
+                    .scheme("bearer")
+                    .bearerFormat("JWT")
+            ));
     }
 
     @Bean
-    public GroupedOpenApi publicApi(OpenApiCustomizer injectErrorResponseSchema) {
+    public GroupedOpenApi publicApi(
+        OpenApiCustomizer injectErrorResponseSchema,
+        OperationCustomizer globalResponseCustomizer) {
         return GroupedOpenApi.builder()
                              .group("public")
                              .pathsToMatch("/api/**")
                              .pathsToExclude("/api/v?/admin/**")
                              .addOpenApiCustomizer(injectErrorResponseSchema)
+                             .addOperationCustomizer(globalResponseCustomizer)
                              .build();
     }
 
     @Bean
-    public GroupedOpenApi adminApi(OpenApiCustomizer injectErrorResponseSchema) {
+    public GroupedOpenApi adminApi(
+        OpenApiCustomizer injectErrorResponseSchema,
+        OperationCustomizer globalResponseCustomizer) {
         return GroupedOpenApi.builder()
                              .group("admin")
                              .pathsToMatch("/api/v?/admin/**")
                              .addOpenApiCustomizer(injectErrorResponseSchema)
+                             .addOperationCustomizer(globalResponseCustomizer)
+                             .addOpenApiCustomizer(
+                                 openApi ->
+                                     openApi.addSecurityItem(new SecurityRequirement().addList(
+                                         BEARER_AUTH)))
                              .build();
     }
 
     @Bean
     public OperationCustomizer globalResponseCustomizer() {
         return (operation, handlerMethod) -> {
-            // Only 500 here: it has no @ApiResponse annotation to conflict with
+            addSuccessResponse(operation, handlerMethod);
+            // 500 has no @ApiResponse annotation to conflict with
             addErrorResponse(operation.getResponses());
             return operation;
         };
@@ -98,6 +131,56 @@ public class OpenApiConfig {
         };
     }
 
+    private void addSuccessResponse(Operation operation, HandlerMethod handlerMethod) {
+        if (operation.getResponses() == null) {
+            operation.setResponses(new ApiResponses());
+        }
+        var responses = operation.getResponses();
+        if (responses.keySet().stream().anyMatch(code -> code.startsWith("2"))) {
+            return;
+        }
+
+        var returnType = ResolvableType.forMethodReturnType(handlerMethod.getMethod());
+        if (ResponseEntity.class.isAssignableFrom(returnType.toClass())) {
+            returnType = returnType.getGeneric(0);
+        }
+        var rawType = returnType.toClass();
+        var isVoid = rawType == void.class || rawType == Void.class;
+
+        var status = resolveSuccessStatus(handlerMethod, isVoid);
+
+        var response = new ApiResponse().description(status.getReasonPhrase());
+        if (!isVoid) {
+            var schema = resolveSuccessSchema(returnType.getType(), rawType);
+            response.content(new Content().addMediaType("*/*", new MediaType().schema(schema)));
+        }
+        responses.addApiResponse(String.valueOf(status.value()), response);
+    }
+
+    private HttpStatus resolveSuccessStatus(HandlerMethod handlerMethod, boolean isVoid) {
+        var responseStatus = handlerMethod.getMethodAnnotation(ResponseStatus.class);
+        if (responseStatus != null) {
+            return responseStatus.code();
+        }
+        return isVoid ? HttpStatus.NO_CONTENT : HttpStatus.OK;
+    }
+
+    private Schema<?> resolveSuccessSchema(Type type, Class<?> rawType) {
+        if (Resource.class.isAssignableFrom(rawType) || rawType == byte[].class) {
+            return new BinarySchema();
+        }
+
+        var resolved = ModelConverters.getInstance()
+                                      .resolveAsResolvedSchema(
+                                          new AnnotatedType(type).resolveAsRef(true)
+                                      );
+        if (resolved.referencedSchemas != null) {
+            resolved.referencedSchemas.forEach(successSchemas::putIfAbsent);
+        }
+
+        return resolved.schema;
+    }
+
     private void registerErrorSchemas(OpenAPI openApi) {
         var resolved = ModelConverters.getInstance()
                                       .resolveAsResolvedSchema(
@@ -109,6 +192,11 @@ public class OpenApiConfig {
         }
         var components = openApi.getComponents();
 
+        successSchemas.forEach((name, schema) -> {
+            if (components.getSchemas() == null || !components.getSchemas().containsKey(name)) {
+                components.addSchemas(name, schema);
+            }
+        });
         components.addSchemas(ERROR_RESPONSE, resolved.schema);
         if (resolved.referencedSchemas != null) {
             resolved.referencedSchemas.forEach(components::addSchemas);

@@ -103,7 +103,7 @@ through environment variables or a secrets manager instead of writing them in th
 | JWT
 | `connector.auth.security.jwt.secret`, `issuer`, `refresh-token.expiration`, `refresh-token.cleanup-cron`
 
-| Swagger UI
+| Swagger UI and actuator
 | `connector.basic.username`, `password`
 
 | Keystores
@@ -157,7 +157,7 @@ Once running, the following endpoints are available:
 | Swagger UI | `http://localhost:30000/swagger-ui/index.html`
 |===
 
-The Swagger UI and the `/v3/api-docs` endpoints are protected with HTTP Basic authentication. Sign in with the `connector.basic.username` and `connector.basic.password` credentials.
+The Swagger UI, the `/v3/api-docs` endpoints and the `/actuator` endpoints are protected with HTTP Basic authentication. Sign in with the `connector.basic.username` and `connector.basic.password` credentials.
 
 Sign in to the administration UI with the account configured in `connector.admin.*`.
 

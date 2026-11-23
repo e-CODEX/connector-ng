@@ -52,6 +52,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class WebSecurityConfiguration {
+    private static final String BASIC_AUTH_ROLE = "BASIC_AUTH";
+
     private final ConnectorJwtAuthenticationFilter jwtAuthenticationFilter;
 
     public WebSecurityConfiguration(ConnectorJwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -59,27 +61,28 @@ public class WebSecurityConfiguration {
     }
 
     /**
-     * Protects the Swagger UI and the OpenAPI documents with HTTP Basic authentication.
+     * Protects the Swagger UI, the OpenAPI documents and the actuator endpoints with HTTP Basic
+     * authentication.
      *
-     * <p>This chain only matches the documentation paths and uses its own in-memory user, so it is
-     * independent of the JWT authentication of the REST API.
+     * <p>This chain only matches the documentation and actuator paths and uses its own in-memory
+     * user, so it is independent of the JWT authentication of the REST API.
      *
      * @param http                the {@code HttpSecurity} object used to configure the security
      *                            settings
      * @param passwordEncoder     the encoder used to hash the configured password
      * @param basicAuthProperties the Basic authentication credentials
      *
-     * @return the {@code SecurityFilterChain} protecting the API documentation
+     * @return the {@code SecurityFilterChain} protecting the API documentation and the actuator
      */
     @Bean
     @Order(1)
-    public SecurityFilterChain swaggerFilterChain(
+    public SecurityFilterChain basicAuthFilterChain(
         HttpSecurity http,
         PasswordEncoder passwordEncoder,
         ConnectorBasicAuthProperties basicAuthProperties) {
         var user = User.withUsername(basicAuthProperties.username())
                        .password(passwordEncoder.encode(basicAuthProperties.password()))
-                       .roles("SWAGGER")
+                       .roles(BASIC_AUTH_ROLE)
                        .build();
 
         return http
@@ -87,13 +90,14 @@ public class WebSecurityConfiguration {
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/v3/api-docs/**",
-                "/swagger-resources/**"
+                "/swagger-resources/**",
+                "/actuator/**"
             )
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session ->
                                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .userDetailsService(new InMemoryUserDetailsManager(user))
-            .authorizeHttpRequests(request -> request.anyRequest().hasRole("SWAGGER"))
+            .authorizeHttpRequests(request -> request.anyRequest().hasRole(BASIC_AUTH_ROLE))
             .httpBasic(Customizer.withDefaults())
             .build();
     }
@@ -141,9 +145,7 @@ public class WebSecurityConfiguration {
                            "/api/v1/auth/login",
                            "/api/v1/auth/refresh",
                            // SOAP
-                           "/services/backend",
-                           // actuator
-                           "/actuator/**"
+                           "/services/backend"
                        )
                        .permitAll()
                        .anyRequest()

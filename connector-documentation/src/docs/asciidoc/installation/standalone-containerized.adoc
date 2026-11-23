@@ -197,7 +197,7 @@ Once running, the following endpoints are available:
 | Swagger UI | `http://localhost:30000/swagger-ui/index.html`
 |===
 
-The Swagger UI and the `/v3/api-docs` endpoints are protected with HTTP Basic authentication. Sign in with the `connector.basic.username` and `connector.basic.password` credentials (`BASIC_AUTH_USER` and `BASIC_AUTH_PASSWORD`).
+The Swagger UI, the `/v3/api-docs` endpoints and the `/actuator` endpoints are protected with HTTP Basic authentication. Sign in with the `connector.basic.username` and `connector.basic.password` credentials (`BASIC_AUTH_USER` and `BASIC_AUTH_PASSWORD`).
 
 Sign in to the administration UI with the account configured in `connector.admin.*`.
 

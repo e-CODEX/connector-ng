@@ -47,9 +47,9 @@ import org.springframework.jms.core.BrowserCallback;
 import org.springframework.jms.core.JmsTemplate;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ConnectorJmsQueueStatsProvider")
+@DisplayName("ConnectorJmsQueueManagementProvider")
 @SuppressWarnings({"MissingJavadocType", "MissingJavadocMethod", "unchecked"})
-class ConnectorJmsQueueStatsProviderTest {
+class ConnectorJmsQueueManagementProviderTest {
     private static final String QUEUE = "connector.queues.backend-delivery-queue";
 
     @Mock

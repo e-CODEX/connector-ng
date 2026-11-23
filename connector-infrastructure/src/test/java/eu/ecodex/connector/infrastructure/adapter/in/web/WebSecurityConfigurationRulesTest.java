@@ -49,8 +49,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
     WebSecurityConfigurationRulesTest.BasicAuthTestConfiguration.class,
 })
 class WebSecurityConfigurationRulesTest {
-    private static final String SWAGGER_USER = "swagger";
-    private static final String SWAGGER_PASSWORD = "swagger-secret";
+    private static final String BASIC_AUTH_USER = "swagger";
+    private static final String BASIC_AUTH_PASSWORD = "swagger-secret";
 
     @Autowired
     MockMvc mockMvc;
@@ -84,7 +84,7 @@ class WebSecurityConfigurationRulesTest {
         @Test
         void should_register_jwt_filter_in_api_chain() {
             assertThat(filterChainProxy.getFilters("/api/v1/probe"))
-                .anyMatch(f -> f instanceof ConnectorJwtAuthenticationFilter);
+                .anyMatch(ConnectorJwtAuthenticationFilter.class::isInstance);
         }
 
         @Test
@@ -122,13 +122,13 @@ class WebSecurityConfigurationRulesTest {
 
         @Test
         void should_return_unauthorized_when_password_is_wrong() throws Exception {
-            mockMvc.perform(get("/v3/api-docs").with(httpBasic(SWAGGER_USER, "wrong")))
+            mockMvc.perform(get("/v3/api-docs").with(httpBasic(BASIC_AUTH_USER, "wrong")))
                    .andExpect(status().isUnauthorized());
         }
 
         @Test
         void should_let_request_through_when_basic_credentials_are_valid() throws Exception {
-            mockMvc.perform(get("/v3/api-docs").with(httpBasic(SWAGGER_USER, SWAGGER_PASSWORD)))
+            mockMvc.perform(get("/v3/api-docs").with(httpBasic(BASIC_AUTH_USER, BASIC_AUTH_PASSWORD)))
                    .andExpect(result -> assertThat(result.getResponse().getStatus())
                        .isNotIn(401, 403));
         }
@@ -138,7 +138,7 @@ class WebSecurityConfigurationRulesTest {
     static class BasicAuthTestConfiguration {
         @Bean
         ConnectorBasicAuthProperties connectorBasicAuthProperties() {
-            return new ConnectorBasicAuthProperties(SWAGGER_USER, SWAGGER_PASSWORD);
+            return new ConnectorBasicAuthProperties(BASIC_AUTH_USER, BASIC_AUTH_PASSWORD);
         }
     }
 

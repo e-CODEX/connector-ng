@@ -66,12 +66,12 @@ the database.
 | Username of the HTTP Basic credentials protecting the Swagger UI and the `/v3/api-docs` endpoints.
 Independent from the admin account and from the JWT authentication of the REST API.
 | No
-| `${SWAGGER_USER}`
+| `${BASIC_AUTH_USER}`
 
 | `connector.basic.password`
 | Password of the HTTP Basic credentials protecting the Swagger UI and the `/v3/api-docs` endpoints.
 | No
-| `${SWAGGER_PASSWORD}`
+| `${BASIC_AUTH_PASSWORD}`
 |===
 
 NOTE: Expired refresh tokens accumulate in the database over time.
@@ -94,6 +94,6 @@ connector.admin.enabled=true
 connector.admin.email=admin@example.com
 
 # Basic authentication protecting the Swagger UI and the /v3/api-docs endpoints
-connector.basic.username=${SWAGGER_USER}
-connector.basic.password=${SWAGGER_PASSWORD}
+connector.basic.username=${BASIC_AUTH_USER}
+connector.basic.password=${BASIC_AUTH_PASSWORD}
 ----

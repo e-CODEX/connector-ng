@@ -40,7 +40,6 @@ class ConnectorJwtAuthenticationProviderTest {
     ConnectorJwtParser tokenParser;
     @Mock
     ConnectorJwtGenerator tokenGenerator;
-
     @Mock
     ConnectorJwtProperties jwtProperties;
 
@@ -85,7 +84,8 @@ class ConnectorJwtAuthenticationProviderTest {
     void refreshTokenExpires_should_return_refresh_token_duration() {
         // Given
         var expiration = Duration.ofDays(2);
-        var props = new ConnectorRefreshTokenProperties(expiration, StringUtils.EMPTY);
+        var props = new ConnectorRefreshTokenProperties(
+            expiration, StringUtils.EMPTY, Duration.ofSeconds(10));
 
         when(jwtProperties.getRefreshToken()).thenReturn(props);
 
@@ -169,7 +169,7 @@ class ConnectorJwtAuthenticationProviderTest {
         // Given
         var cron = "0 0 3 * * *";
         var expiration = Duration.ofDays(2);
-        var props = new ConnectorRefreshTokenProperties(expiration, cron);
+        var props = new ConnectorRefreshTokenProperties(expiration, cron, Duration.ofSeconds(10));
 
         when(jwtProperties.getRefreshToken()).thenReturn(props);
 

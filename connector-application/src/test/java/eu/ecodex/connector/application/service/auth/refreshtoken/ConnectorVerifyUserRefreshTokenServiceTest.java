@@ -13,6 +13,7 @@ package eu.ecodex.connector.application.service.auth.refreshtoken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -36,16 +37,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class ConnectorVerifyUserRefreshTokenServiceTest {
     @Mock
     private ConnectorRefreshTokenRepository refreshTokenRepository;
-
     @Mock
     private ConnectorAuthenticationTokenProvider authenticationTokenProvider;
-
     @Mock
     private Clock clock;
 
     @InjectMocks
     private ConnectorVerifyUserRefreshTokenService verifyUserTokenService;
-
 
     @Test
     void verify_should_throw_exception_when_refresh_token_is_expired() {
@@ -96,6 +94,77 @@ class ConnectorVerifyUserRefreshTokenServiceTest {
             () -> verifyUserTokenService.execute(token));
 
         verifyNoMoreInteractions(refreshTokenRepository, authenticationTokenProvider, clock);
+    }
+
+    @Test
+    void verify_should_only_refuse_a_revoked_token_presented_within_the_grace_period() {
+        // Given
+        var token = ConnectorRefreshTokenGenerator.generate();
+        var now = Instant.parse("2026-11-23T10:00:10Z");
+        var refreshToken = revokedToken(token, now.minusSeconds(5));
+
+        when(clock.instant()).thenReturn(now);
+        when(authenticationTokenProvider.getRefreshTokenReuseGrace())
+            .thenReturn(Duration.ofSeconds(10));
+        when(refreshTokenRepository.findByTokenHashed(any()))
+            .thenReturn(Optional.of(refreshToken));
+
+        // When
+        // Then
+        assertThrows(ConnectorUserBadCredentialsException.class,
+            () -> verifyUserTokenService.execute(token));
+
+        verify(refreshTokenRepository, never()).revokeByUserUuid(any(), any());
+    }
+
+    @Test
+    void verify_should_revoke_every_token_when_a_revoked_token_is_presented_again_later() {
+        // Given
+        var token = ConnectorRefreshTokenGenerator.generate();
+        var now = Instant.parse("2026-11-23T10:00:11Z");
+        var refreshToken = revokedToken(token, now.minusSeconds(60));
+
+        when(clock.instant()).thenReturn(now);
+        when(authenticationTokenProvider.getRefreshTokenReuseGrace())
+            .thenReturn(Duration.ofSeconds(10));
+        when(refreshTokenRepository.findByTokenHashed(any()))
+            .thenReturn(Optional.of(refreshToken));
+
+        // When
+        // Then
+        assertThrows(ConnectorUserBadCredentialsException.class,
+            () -> verifyUserTokenService.execute(token));
+
+        verify(refreshTokenRepository).revokeByUserUuid("uuid", now);
+    }
+
+    @Test
+    void verify_should_revoke_every_token_when_a_revoked_token_has_no_revocation_date() {
+        // Given
+        var token = ConnectorRefreshTokenGenerator.generate();
+        var now = Instant.parse("2026-11-23T10:00:11Z");
+        var refreshToken = revokedToken(token, null);
+
+        when(clock.instant()).thenReturn(now);
+        when(refreshTokenRepository.findByTokenHashed(any()))
+            .thenReturn(Optional.of(refreshToken));
+
+        // When
+        // Then
+        assertThrows(ConnectorUserBadCredentialsException.class,
+            () -> verifyUserTokenService.execute(token));
+
+        verify(refreshTokenRepository).revokeByUserUuid("uuid", now);
+    }
+
+    private static ConnectorRefreshToken revokedToken(String token, Instant revokedAt) {
+        return ConnectorRefreshToken.builder()
+            .token(token)
+            .revoked(true)
+            .revokedAt(revokedAt)
+            .user(ConnectorUser.builder().uuid("uuid").enabled(true).build())
+            .expiresAt(Instant.parse("2026-12-23T10:00:00Z"))
+            .build();
     }
 
     @Test

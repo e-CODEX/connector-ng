@@ -23,8 +23,7 @@ import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for {@link ConnectorJwtGenerator}.
- * This class contains tests for the JwtGenerator class.
+ * Tests for {@link ConnectorJwtGenerator}. This class contains tests for the JwtGenerator class.
  */
 class ConnectorJwtGeneratorTest {
     private static final String CLEANUP_CRON = "0 0 3 * * *";
@@ -34,12 +33,20 @@ class ConnectorJwtGeneratorTest {
     private static final String SECRET_STRING =
         "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcd";
     private final ConnectorRefreshTokenProperties refreshTokenProps =
-        new ConnectorRefreshTokenProperties(REFRESH_TOKEN_EXPIRATION, CLEANUP_CRON);
+        new ConnectorRefreshTokenProperties(
+            REFRESH_TOKEN_EXPIRATION,
+            CLEANUP_CRON,
+            Duration.ofSeconds(10)
+        );
     private final ConnectorUserDetails userDetails = ConnectorUserTestFixtures.createUserDetails();
 
     private final ConnectorJwtProperties jwtProperties =
-        new ConnectorJwtProperties(SECRET_STRING, Duration.ofMillis(ACCESS_TOKEN_EXPIRATION_MS),
-            "", refreshTokenProps);
+        new ConnectorJwtProperties(
+            SECRET_STRING,
+            Duration.ofMillis(ACCESS_TOKEN_EXPIRATION_MS),
+            "",
+            refreshTokenProps
+        );
 
     @Test
     void generateToken_should_generate_valid_token() {

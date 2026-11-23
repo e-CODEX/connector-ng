@@ -41,11 +41,22 @@ import org.springframework.util.StringUtils;
 @Service
 public class ConnectorVerifyUserRefreshTokenService implements ConnectorVerifyUserRefreshToken {
     private final ConnectorRefreshTokenRepository repository;
+    private final ConnectorAuthenticationTokenProvider authenticationTokenProvider;
     private final Clock clock;
 
+    /**
+     * Creates the service.
+     *
+     * @param repository                  the repository of the refresh tokens
+     * @param authenticationTokenProvider the provider of the authentication tokens settings
+     * @param clock                       the clock giving the current time
+     */
     public ConnectorVerifyUserRefreshTokenService(
-        ConnectorRefreshTokenRepository repository, Clock clock) {
+        ConnectorRefreshTokenRepository repository,
+        ConnectorAuthenticationTokenProvider authenticationTokenProvider,
+        Clock clock) {
         this.repository = repository;
+        this.authenticationTokenProvider = authenticationTokenProvider;
         this.clock = clock;
     }
 
@@ -68,6 +79,7 @@ public class ConnectorVerifyUserRefreshTokenService implements ConnectorVerifyUs
         }
 
         if (foundToken.revoked()) {
+            revokeAllWhenReused(foundToken);
             throw new ConnectorUserBadCredentialsException("Refresh token revoked");
         }
 
@@ -75,5 +87,27 @@ public class ConnectorVerifyUserRefreshTokenService implements ConnectorVerifyUs
             throw new ConnectorUserBadCredentialsException("Refresh token expired");
         }
         return foundToken;
+    }
+
+    /**
+     * A refresh token is revoked as soon as it is replaced, so presenting it again later means that
+     * a copy of it exists: it may have been stolen. Every session of the user is then ended, which
+     * also ends the one of the thief. A token presented again right after its replacement is only
+     * refused, as a client may legitimately retry after a lost response.
+     */
+    private void revokeAllWhenReused(ConnectorRefreshToken revokedToken) {
+        var now = clock.instant();
+        var revokedAt = revokedToken.revokedAt();
+        var graceEnd = revokedAt == null
+            ? null : revokedAt.plus(authenticationTokenProvider.getRefreshTokenReuseGrace());
+
+        if (graceEnd != null && !now.isAfter(graceEnd)) {
+            return;
+        }
+
+        var userUuid = revokedToken.user().uuid();
+        repository.revokeByUserUuid(userUuid, now);
+        log.warn("A revoked refresh token of the user {} was presented again: "
+            + "all its refresh tokens were revoked", userUuid);
     }
 }

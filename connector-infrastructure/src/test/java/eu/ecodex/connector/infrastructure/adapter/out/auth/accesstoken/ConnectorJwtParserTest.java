@@ -34,7 +34,11 @@ class ConnectorJwtParserTest {
     private static final String ISSUER = "connector.ecodex.eu";
 
     private final ConnectorRefreshTokenProperties refreshTokenProps =
-        new ConnectorRefreshTokenProperties(Duration.ofDays(3), "0 0 3 * * *");
+        new ConnectorRefreshTokenProperties(
+            Duration.ofDays(3),
+            "0 0 3 * * *",
+            Duration.ofSeconds(10)
+        );
     private final ConnectorUserDetails userDetails = ConnectorUserTestFixtures.createUserDetails();
 
     private final ConnectorJwtProperties jwtProperties =

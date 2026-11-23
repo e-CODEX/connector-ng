@@ -77,6 +77,11 @@ public class ConnectorJwtAuthenticationProvider implements ConnectorAuthenticati
     }
 
     @Override
+    public Duration getRefreshTokenReuseGrace() {
+        return jwtProperties.getRefreshToken().reuseGrace();
+    }
+
+    @Override
     public boolean isAccessTokenExpired(@NonNull String token) {
         return jwtParser.isExpired(token);
     }

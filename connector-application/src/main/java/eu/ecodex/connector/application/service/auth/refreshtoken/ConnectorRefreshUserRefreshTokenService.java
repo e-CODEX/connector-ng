@@ -20,7 +20,6 @@ import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -117,7 +116,7 @@ public class ConnectorRefreshUserRefreshTokenService implements ConnectorRefresh
     private ConnectorRefreshToken rotateRefreshToken(@NonNull ConnectorUser user) {
         var revoked = repository.findByUserUuidAndRevoked(user.uuid(), Boolean.FALSE);
         if (!revoked.isEmpty()) {
-            repository.revokeByUserUuid(user.uuid(), Instant.now());
+            repository.revokeByUserUuid(user.uuid(), clock.instant());
         }
         return issueUserRefreshToken.execute(user);
     }

@@ -191,9 +191,9 @@ class ConnectorRefreshUserRefreshTokenServiceTest {
         verify(authenticationTokenProvider).generateAccessToken(user);
         verify(authenticationTokenProvider).getAccessTokenExpirationDate(newAccessToken);
         verify(refreshTokenRepository).findByUserUuidAndRevoked(userId, false);
-        verify(refreshTokenRepository).revokeByUserUuid(eq(userId), any(Instant.class));
+        verify(refreshTokenRepository).revokeByUserUuid(userId, loginTime);
         verify(issueUserRefreshToken).execute(user);
-        verify(clock, times(2)).instant();
+        verify(clock, times(3)).instant();
         assertNoMoreAssertions();
     }
 

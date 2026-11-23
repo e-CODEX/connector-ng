@@ -36,6 +36,14 @@ renew a session without re-login.
 | No
 | `30d`
 
+| `connector.auth.security.jwt.refresh-token.reuse-grace`
+| How long after its replacement a refresh token may still be presented
+without being considered as stolen, for example when a client retries after a
+lost response. Presenting a replaced refresh token again after this period
+revokes all the refresh tokens of the user.
+| No
+| `10s`
+
 | `connector.auth.security.jwt.refresh-token.cleanup-cron`
 | Cron expression controlling when expired refresh tokens are purged from
 the database.
@@ -85,6 +93,7 @@ connector.auth.security.jwt.secret=${JWT_SECRET_KEY}
 connector.auth.security.jwt.expiration=60m
 connector.auth.security.jwt.issuer=connector.ecodex.eu
 connector.auth.security.jwt.refresh-token.expiration=30d
+connector.auth.security.jwt.refresh-token.reuse-grace=10s
 connector.auth.security.jwt.refresh-token.cleanup-cron=0 0 3 * * *
 
 # Built-in admin account

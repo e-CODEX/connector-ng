@@ -50,6 +50,15 @@ public interface ConnectorAuthenticationTokenProvider {
     Duration getRefreshTokenExpiresIn();
 
     /**
+     * Retrieves how long after its replacement a revoked refresh token may still be presented
+     * without being considered as stolen. A client may legitimately present the same refresh token
+     * twice within a short time, for example when it retries after a lost response.
+     *
+     * @return the grace period granted to a revoked refresh token.
+     */
+    Duration getRefreshTokenReuseGrace();
+
+    /**
      * Checks if the given JWT token has expired.
      *
      * @param token accessToken to check

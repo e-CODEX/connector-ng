@@ -25,6 +25,7 @@ import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.pmode.Connecto
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception.ConnectorBadRequestException;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.pmode.ConnectorProcessingModeCreationRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.pmode.ConnectorProcessingModeTruststoreRequest;
+import eu.ecodex.connector.infrastructure.helper.ConnectorDownloadHeaders;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -111,7 +112,7 @@ public class ConnectorProcessingModeAdminController implements ConnectorProcessi
                              .contentLength(content.length)
                              .header(
                                  HttpHeaders.CONTENT_DISPOSITION,
-                                 "attachment; filename=%s".formatted(filename)
+                                 ConnectorDownloadHeaders.attachment(filename)
                              )
                              .body(content);
     }

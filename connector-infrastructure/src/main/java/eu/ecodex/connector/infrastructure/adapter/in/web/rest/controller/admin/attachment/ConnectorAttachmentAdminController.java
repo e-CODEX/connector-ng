@@ -21,10 +21,10 @@ import eu.ecodex.connector.domain.model.paging.ConnectorPageRequest;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.domain.model.paging.SortDirection;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.dto.ConnectorAttachmentDto;
+import eu.ecodex.connector.infrastructure.helper.ConnectorDownloadHeaders;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,13 +88,13 @@ public class ConnectorAttachmentAdminController implements ConnectorAttachmentAd
         var attachment = retrieveAttachment.execute(identifier);
         var document = downloadAttachment.execute(identifier);
         return ResponseEntity.ok()
-                             .contentType(MediaType.parseMediaType(
+                             .contentType(ConnectorDownloadHeaders.mediaType(
                                  attachment.contentType()
                              ))
                              .contentLength(document.length)
                              .header(
                                  HttpHeaders.CONTENT_DISPOSITION,
-                                 "attachment; filename=%s".formatted(attachment.name())
+                                 ConnectorDownloadHeaders.attachment(attachment.name())
                              )
                              .body(document);
     }

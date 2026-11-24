@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -95,6 +96,26 @@ public class ConnectorAttachmentAdminControllerTest extends AbstractWebMvcTest {
                        get("/api/v1/admin/attachments/%s/download".formatted(IDENTIFIER))
                            .contentType(MediaType.APPLICATION_JSON))
                    .andExpect(status().isOk());
+        }
+
+        @Test
+        void should_quote_the_filename_and_fall_back_when_the_content_type_is_invalid()
+            throws Exception {
+            var attachment = MessageAttachmentTestFixtures.createAttachment().toBuilder()
+                .name("report; filename=evil.exe")
+                .contentType("not a media type")
+                .build();
+            when(retrieveAttachment.execute(any())).thenReturn(attachment);
+            when(downloadAttachment.execute(any())).thenReturn(new byte[1]);
+
+            mockMvc.perform(get("/api/v1/admin/attachments/%s/download".formatted(IDENTIFIER)))
+                   .andExpect(status().isOk())
+                   .andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
+                   .andExpect(header().string(
+                       "Content-Disposition",
+                       org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString(
+                           "filename=evil.exe;"))
+                   ));
         }
 
         @Test

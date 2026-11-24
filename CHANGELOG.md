@@ -16,8 +16,9 @@ All notable changes to this project will be documented in this file.
 #### Fixes
 - **JMS queues** — Fix how dead-letter messages are counted in the connector's JMS queue statistics.
 - **Authentication** — A disabled user can no longer use its access token or refresh it, and its refresh tokens are revoked when it is disabled.
-- **CORS** — No origin is allowed by default: list the origin of the administration UI in `connector.cors.allowed-origins`. Credentials are off by default, the allowed request headers default to `Authorization`, `Content-Type` and `Accept`, and CORS applies to the REST API (`/api/**`) and the actuator (`/actuator/**`) only.
+- **Authentication** — Changing a password revokes all the refresh tokens of the user, so a refresh token which leaked before the change can no longer be used.
 - **Authentication** — A replaced refresh token that is presented again revokes all the refresh tokens of its user, as it may have been stolen. A client retrying right after the replacement is only refused: the grace period is set by `connector.auth.security.jwt.refresh-token.reuse-grace` (`10s` by default).
+- **CORS** — No origin is allowed by default: list the origin of the administration UI in `connector.cors.allowed-origins`. Credentials are off by default, the allowed request headers default to `Authorization`, `Content-Type` and `Accept`, and CORS applies to the REST API (`/api/**`) and the actuator (`/actuator/**`) only.
 
 #### Technical
 - **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.

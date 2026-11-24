@@ -16,6 +16,7 @@ import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorLoginRequest;
+import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorRefreshTokenRequest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorUpdateUserPasswordRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,6 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
 
     @Autowired
     private RestTestClient apiClient;
-
     @Autowired
     private ConnectorUserRepository userRepository;
 
@@ -290,5 +290,14 @@ class ConnectorUpdateUserPasswordIT extends AbstractIntegrationTest {
         assertThat(before).isNotEqualTo(after);
         assertThat(after).isNotEmpty();
         assertThat(after.get().mustChangePassword()).isFalse();
+
+        // the refresh token issued before the password change no longer works
+        apiClient.post()
+            .uri("/api/v1/auth/refresh")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(ConnectorRefreshTokenRequest.builder().refreshToken(refreshToken).build())
+            .exchange()
+            .expectStatus()
+            .isUnauthorized();
     }
 }

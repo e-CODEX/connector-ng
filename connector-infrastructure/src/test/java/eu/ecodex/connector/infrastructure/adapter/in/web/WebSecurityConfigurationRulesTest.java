@@ -36,6 +36,7 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,7 +74,14 @@ class WebSecurityConfigurationRulesTest {
             "GET,  /api/v1/admin/users/probe,        ADMIN, 200",
             "GET,  /api/v1/admin/business-domains,   USER,  200",
             "POST, /api/v1/admin/business-domains,   USER,  403",
-            "POST, /api/v1/admin/business-domains,   ADMIN, 200"
+            "POST, /api/v1/admin/business-domains,   ADMIN, 200",
+            "GET,  /api/v1/admin/jms/queues/stats,   USER,  200",
+            "POST, /api/v1/admin/jms/queues/dlq/replay,                  USER,  403",
+            "POST, /api/v1/admin/jms/queues/dlq/replay,                  ADMIN, 200",
+            "POST, /api/v1/admin/jms/queues/dlq/messages/ID-1/replay,    USER,  403",
+            "POST, /api/v1/admin/jms/queues/dlq/messages/ID-1/replay,    ADMIN, 200",
+            "DELETE, /api/v1/admin/jms/queues/dlq/messages/ID-1,         USER,  403",
+            "DELETE, /api/v1/admin/jms/queues/dlq/messages/ID-1,         ADMIN, 200"
         })
         void should_apply_role_access_matrix(
             String method, String path, String role, int expected) throws Exception {
@@ -166,6 +174,24 @@ class WebSecurityConfigurationRulesTest {
 
         @PostMapping("/api/v1/admin/business-domains")
         String postBusinessDomains() {
+            return "ok";
+        }
+
+        @GetMapping("/api/v1/admin/jms/queues/stats")
+        String queuesStats() {
+            return "ok";
+        }
+
+        @PostMapping({
+            "/api/v1/admin/jms/queues/dlq/replay",
+            "/api/v1/admin/jms/queues/dlq/messages/{id}/replay"
+        })
+        String replay() {
+            return "ok";
+        }
+
+        @DeleteMapping("/api/v1/admin/jms/queues/dlq/messages/{id}")
+        String deleteDlqMessage() {
             return "ok";
         }
 

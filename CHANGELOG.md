@@ -10,8 +10,8 @@ All notable changes to this project will be documented in this file.
 - **Transport steps** — Message transport steps now report whether they are retryable.
 - **JMS queues** — Pending and dead-letter messages can now be listed for each JMS queue.
 - **JMS message details** — The details of the messages held in a JMS queue can now be retrieved.
-- **DLQ replay** — Messages in a JMS dead-letter queue can be replayed to their original destination.
-- **DLQ message deletion** — Messages in a JMS dead-letter queue can be deleted.
+- **DLQ replay** — Messages in a JMS dead-letter queue can be replayed to their original destination (`ADMIN` role only).
+- **DLQ message deletion** — Messages in a JMS dead-letter queue can be deleted (`ADMIN` role only).
 
 #### Fixes
 - **JMS queues** — Fix how dead-letter messages are counted in the connector's JMS queue statistics.

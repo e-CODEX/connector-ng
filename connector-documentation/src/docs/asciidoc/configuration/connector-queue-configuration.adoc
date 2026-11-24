@@ -101,7 +101,7 @@ its body (`dlq=false`, the default, reads a pending message). The connector queu
 the connector messages, returned as a `payload` map, as are the entries of a map message sent by the
 gateway; any other text is returned as `text`, and the other message types have no body. A body
 larger than 64 KB is cut, returned as `text`, and flagged `truncated`. The message is only browsed,
-never consumed. As the body may hold business data, it is restricted to administrators.
+never consumed.
 * `POST /api/v1/admin/jms/queues/dlq/messages/{messageId}/replay?queue=<queue>` replays one failed
 message. It answers `204` when the message was replayed, `404` when it is not in the DLQ and `409`
 when it could not be replayed.

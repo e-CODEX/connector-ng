@@ -133,6 +133,11 @@ public class WebSecurityConfiguration {
                        .hasRole(ConnectorRoleName.ADMIN.name())
                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/processing-modes")
                        .hasRole(ConnectorRoleName.ADMIN.name())
+                       // replaying and deleting the failed messages of the JMS queues
+                       .requestMatchers(HttpMethod.POST, "/api/v1/admin/jms/queues/dlq/**")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
+                       .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/jms/queues/dlq/**")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
                        // All authenticated users
                        .requestMatchers("/api/v1/admin/**", "/api/v1/auth/me")
                        .authenticated()

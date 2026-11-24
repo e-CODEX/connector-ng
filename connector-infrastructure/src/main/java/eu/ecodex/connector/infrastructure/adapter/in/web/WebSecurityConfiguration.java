@@ -133,6 +133,9 @@ public class WebSecurityConfiguration {
                        .hasRole(ConnectorRoleName.ADMIN.name())
                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/processing-modes")
                        .hasRole(ConnectorRoleName.ADMIN.name())
+                       // an evidence is a signed document of the exchanged messages
+                       .requestMatchers(HttpMethod.GET, "/api/v1/admin/evidences/{uuid}/download")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
                        // replaying and deleting the failed messages of the JMS queues
                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/jms/queues/dlq/**")
                        .hasRole(ConnectorRoleName.ADMIN.name())
@@ -145,7 +148,6 @@ public class WebSecurityConfiguration {
                            "/api/v1/attachments/upload",
                            "/api/v1/messages/outbound",
                            "/api/v1/messages/evidence-trigger",
-                           "/api/v1/evidences/{uuid}/download",
                            "/api/v1/services",
                            "/api/v1/processing-modes/{identifier}/services",
                            "/api/v1/processing-modes/{identifier}/actions",

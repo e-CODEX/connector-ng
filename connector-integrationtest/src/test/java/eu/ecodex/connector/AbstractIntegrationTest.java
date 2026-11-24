@@ -52,13 +52,12 @@ import org.testcontainers.utility.DockerImageName;
 @AutoConfigureRestTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractIntegrationTest {
-    private static final DockerImageName MINIO_IMAGE =
-        DockerImageName.parse("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
-            .asCompatibleSubstituteFor("minio/minio");
-    private static final DockerImageName MYSQL_IMAGE = DockerImageName.parse("mysql:8.0.33");
-
     public static final MinIOContainer minio;
     public static final MySQLContainer mysql;
+    private static final DockerImageName MINIO_IMAGE =
+        DockerImageName.parse("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
+                       .asCompatibleSubstituteFor("minio/minio");
+    private static final DockerImageName MYSQL_IMAGE = DockerImageName.parse("mysql:8.0.33");
     private static final MinioClient minioClient;
 
     static {
@@ -76,15 +75,19 @@ public abstract class AbstractIntegrationTest {
 
         try {
             minioClient = MinioClient.builder()
-                .endpoint(minio.getS3URL())
-                .credentials(minio.getUserName(), minio.getPassword())
-                .build();
+                                     .endpoint(minio.getS3URL())
+                                     .credentials(minio.getUserName(), minio.getPassword())
+                                     .build();
             createBucketIfNotExists();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize MinIO client", e);
         }
     }
 
+    @Autowired
+    protected JdbcTemplate jdbcTemplate;
+    @Autowired
+    protected ConnectorJwtGenerator jwtTokenService;
     @MockitoBean
     ConnectorJmsBackendMessageDeliveryListener backendMessageDeliveryListener;
     @MockitoBean
@@ -97,11 +100,6 @@ public abstract class AbstractIntegrationTest {
     ConnectorJmsOutboundMessagePipelineListener outboundMessagePipelineListener;
     @MockitoBean
     ConnectorJmsOutboundMessageStagingListener outboundMessageStagingListener;
-
-    @Autowired
-    protected JdbcTemplate jdbcTemplate;
-    @Autowired
-    protected ConnectorJwtGenerator jwtTokenService;
 
     @DynamicPropertySource
     static void registerPropertiesMain(DynamicPropertyRegistry registry) {
@@ -183,8 +181,21 @@ public abstract class AbstractIntegrationTest {
 
     protected String generateDefaultAdminToken() {
         var user = new ConnectorUserDetails(ConnectorUser.defaultAdminUser().toBuilder()
-            .uuid(UUID.randomUUID().toString())
-            .build());
+                                                         .uuid(UUID.randomUUID().toString())
+                                                         .build());
+        return jwtTokenService.generateAccessToken(user);
+    }
+
+    protected String generateDefaultSimpleUserToken() {
+        var connectorUser = ConnectorUser.builder()
+                                         .uuid("1b49c4a1-b79f-4a33-b968-c71d611965fe")
+                                         .username("test-user-it")
+                                         .email("user-it@email.com")
+                                         .password("encoded")
+                                         .enabled(true)
+                                         .mustChangePassword(false)
+                                         .build();
+        var user = new ConnectorUserDetails(connectorUser);
         return jwtTokenService.generateAccessToken(user);
     }
 }

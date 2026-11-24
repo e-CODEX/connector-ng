@@ -81,7 +81,9 @@ class WebSecurityConfigurationRulesTest {
             "POST, /api/v1/admin/jms/queues/dlq/messages/ID-1/replay,    USER,  403",
             "POST, /api/v1/admin/jms/queues/dlq/messages/ID-1/replay,    ADMIN, 200",
             "DELETE, /api/v1/admin/jms/queues/dlq/messages/ID-1,         USER,  403",
-            "DELETE, /api/v1/admin/jms/queues/dlq/messages/ID-1,         ADMIN, 200"
+            "DELETE, /api/v1/admin/jms/queues/dlq/messages/ID-1,         ADMIN, 200",
+            "GET,  /api/v1/admin/evidences/uuid-1/download,              USER,  403",
+            "GET,  /api/v1/admin/evidences/uuid-1/download,              ADMIN, 200"
         })
         void should_apply_role_access_matrix(
             String method, String path, String role, int expected) throws Exception {
@@ -187,6 +189,11 @@ class WebSecurityConfigurationRulesTest {
             "/api/v1/admin/jms/queues/dlq/messages/{id}/replay"
         })
         String replay() {
+            return "ok";
+        }
+
+        @GetMapping("/api/v1/admin/evidences/{uuid}/download")
+        String downloadEvidence() {
             return "ok";
         }
 

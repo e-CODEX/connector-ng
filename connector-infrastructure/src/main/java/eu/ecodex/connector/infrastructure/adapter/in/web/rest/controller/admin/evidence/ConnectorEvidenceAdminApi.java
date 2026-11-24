@@ -32,7 +32,12 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public interface ConnectorEvidenceAdminApi {
     @ResponseStatus(HttpStatus.CREATED)
     @GetMapping(value = "/{uuid}/download")
-    @Operation(summary = "Download a message evidence by its uuid")
+    @Operation(
+        summary = "Download a message evidence by its uuid",
+        description = "Restricted to administrators."
+    )
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Not Found")
     ResponseEntity<byte[]> downloadEvidence(@PathVariable String uuid) throws IOException;
 }

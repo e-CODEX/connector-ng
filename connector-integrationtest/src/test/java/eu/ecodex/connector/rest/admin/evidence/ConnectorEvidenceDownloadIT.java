@@ -27,8 +27,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
     statements = "DELETE FROM connector_business_domains WHERE id > 0",
     executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS
 )
-public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
-    private static final String URL = "/api/v1/admin/evidences/%s/download";
+public class ConnectorEvidenceDownloadIT extends AbstractIntegrationTest {
+    private static final String URL = "/api/v1/admin/evidences/{uuid}/download";
     @Autowired
     private RestTestClient apiClient;
 
@@ -49,15 +49,10 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
         "classpath:sql/evidence.sql",
         "classpath:sql/user.sql"
     })
-    void should_export_connector_messages_report() {
+    void should_let_an_admin_reach_the_evidence_download() {
         byte[] body = apiClient.get()
-                               .uri(uriBuilder -> uriBuilder
-                                   .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                                   .build())
-                               .header(
-                                   HttpHeaders.AUTHORIZATION,
-                                   "Bearer " + generateDefaultAdminToken()
-                               )
+                               .uri(URL, "f6cb9e83-4283-4255-8bbf-9cb0920fc1ef")
+                               .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
                                .exchange()
                                .expectStatus().isOk()
                                .expectHeader().contentType(MediaType.APPLICATION_XML)
@@ -69,16 +64,32 @@ public class ConnectorRetrieveEvidenceIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql({
-        "classpath:sql/user.sql"
-    })
+    @Sql({"classpath:sql/user.sql"})
     void should_return_404_when_evidence_does_not_exist() {
         apiClient.get()
-                 .uri(uriBuilder -> uriBuilder
-                     .path(URL.formatted("f6cb9e83-4283-4255-8bbf-9cb0920fc1ef"))
-                     .build())
+                 .uri(URL, "f6cb9e83-4283-4255-8bbf-9cb0920fc1ef")
                  .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
                  .exchange()
                  .expectStatus().isNotFound();
+    }
+
+    @Test
+    @Sql({"classpath:sql/user.sql"})
+    void should_forbid_a_user_without_the_admin_role_to_download_an_evidence() {
+        apiClient.get()
+                 .uri(URL, "unknown-evidence")
+                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultSimpleUserToken())
+                 .exchange()
+                 .expectStatus()
+                 .isForbidden();
+    }
+
+    @Test
+    void should_reject_an_unauthenticated_evidence_download() {
+        apiClient.get()
+                 .uri(URL, "unknown-evidence")
+                 .exchange()
+                 .expectStatus()
+                 .isUnauthorized();
     }
 }

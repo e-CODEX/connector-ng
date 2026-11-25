@@ -69,13 +69,13 @@ class WebSecurityConfigurationRulesTest {
     class ApiChain {
         @ParameterizedTest
         @CsvSource({
-            "GET,  /api/v1/admin/probe,              USER,  200",
+            "GET,  /api/v1/admin/probe,              USER,  403",
             "GET,  /api/v1/admin/users/probe,        USER,  403",
             "GET,  /api/v1/admin/users/probe,        ADMIN, 200",
             "GET,  /api/v1/admin/business-domains,   USER,  200",
             "POST, /api/v1/admin/business-domains,   USER,  403",
             "POST, /api/v1/admin/business-domains,   ADMIN, 200",
-            "GET,  /api/v1/admin/jms/queues/stats,   USER,  200",
+            "GET,  /api/v1/admin/jms/queues/stats,   USER,  403",
             "POST, /api/v1/admin/jms/queues/dlq/replay,                  USER,  403",
             "POST, /api/v1/admin/jms/queues/dlq/replay,                  ADMIN, 200",
             "POST, /api/v1/admin/jms/queues/dlq/messages/ID-1/replay,    USER,  403",

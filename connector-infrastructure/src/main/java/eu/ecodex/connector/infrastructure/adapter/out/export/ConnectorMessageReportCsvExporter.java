@@ -18,14 +18,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Objects;
 import lombok.NonNull;
 
 /**
  * Exports the connector message report as CSV.
  */
 public class ConnectorMessageReportCsvExporter implements ConnectorMessageReportExporter {
+    private static final String FORMULA_PREFIXES = "=+-@\t\r";
+
     private static final String[] HEADERS = {
         "Year",
         "Month",
@@ -56,15 +56,15 @@ public class ConnectorMessageReportCsvExporter implements ConnectorMessageReport
             for (var year : summary.years()) {
                 for (var month : year.months()) {
                     for (var report : month.reports()) {
-                        writer.writeNext(row(
-                            year.year(),
-                            month.label(),
-                            report.party(),
-                            report.service(),
-                            report.inbound(),
-                            report.outbound(),
-                            report.total()
-                        ));
+                        writer.writeNext(new String[]{
+                            String.valueOf(year.year()),
+                            neutralize(month.label()),
+                            neutralize(report.party()),
+                            neutralize(report.service()),
+                            String.valueOf(report.inbound()),
+                            String.valueOf(report.outbound()),
+                            String.valueOf(report.total())
+                        });
                     }
                 }
             }
@@ -76,9 +76,17 @@ public class ConnectorMessageReportCsvExporter implements ConnectorMessageReport
         return out.toByteArray();
     }
 
-    private String[] row(Object... cells) {
-        return Arrays.stream(cells)
-                     .map(cell -> Objects.toString(cell, ""))
-                     .toArray(String[]::new);
+    /**
+     * Prevents a text cell from being run as a formula when the file is opened in a spreadsheet: a
+     * value starting with one of the characters spreadsheets treat as the start of a formula is
+     * prefixed with a single quote, which makes them read it as text. The party and service names
+     * come from the exchanged messages, so they are not trusted.
+     */
+    private String neutralize(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+
+        return FORMULA_PREFIXES.indexOf(value.charAt(0)) >= 0 ? "'" + value : value;
     }
 }

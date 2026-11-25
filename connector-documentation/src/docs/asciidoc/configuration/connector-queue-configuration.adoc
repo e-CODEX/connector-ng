@@ -110,6 +110,16 @@ when it could not be replayed.
 message for good, so that it is never processed again. It answers `204` when the message was
 deleted, `404` when it is not in the DLQ and `409` when it could not be deleted.
 
+Listing and reading the messages are restricted to administrators too, as the messages carry
+business data; the statistics stay open to every authenticated user.
+
+The reads are bounded so that a large queue cannot overload the connector or the broker: a queue is
+scanned up to 10,000 messages, so the counts and totals do not go beyond that number, and the
+queue statistics are reused for 5 seconds. The body of a message larger than 1 MB is not read:
+the message is returned with `truncated` set and without `payload` or `text`. A message larger
+than 10 MB is not replayed and is reported as `failed`. The connector uses a single connection to the
+broker for these operations.
+
 The replays send the failed messages back to their queue, so that they are processed again, and are
 restricted to administrators, as is the deletion. The list replay takes the queue and the message identifiers, and
 answers with the outcome of each one:

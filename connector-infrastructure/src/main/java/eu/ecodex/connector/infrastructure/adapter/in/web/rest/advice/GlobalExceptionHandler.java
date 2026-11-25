@@ -87,6 +87,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(ConnectorInternalServerException.class)
     public ErrorResponse handleInternalServerException(ConnectorInternalServerException exception) {
+        log.error("Internal server error: [{}]", exception.getMessage(), exception);
+
         return new ErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR.value(), exception.getMessage()
         );

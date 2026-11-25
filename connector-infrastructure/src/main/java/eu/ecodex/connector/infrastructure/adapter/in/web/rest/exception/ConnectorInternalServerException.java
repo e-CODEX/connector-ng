@@ -19,9 +19,13 @@ package eu.ecodex.connector.infrastructure.adapter.in.web.rest.exception;
  *
  * <p>The exception extends {@link RuntimeException}, making it suitable for scenarios where
  * unchecked errors need to be represented.
+ *
+ * <p>The message is returned to the client, so it must be a fixed text written for that purpose
+ * and never the message of an underlying exception, which can disclose paths or internals. The
+ * underlying exception is given as the cause, which is logged and not returned.
  */
 public class ConnectorInternalServerException extends RuntimeException {
-    public ConnectorInternalServerException(String message) {
-        super(message);
+    public ConnectorInternalServerException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

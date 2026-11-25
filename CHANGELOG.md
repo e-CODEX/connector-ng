@@ -24,6 +24,7 @@ All notable changes to this project will be documented in this file.
 - **Downloads** — The attachment and processing mode downloads build a well-formed `Content-Disposition` header from the file name, and an attachment with a missing or malformed content type is served as `application/octet-stream` instead of failing.
 - **Statistics** — The CSV export of the message report no longer lets a party or service name starting with `=`, `+`, `-` or `@` run as a formula when the file is opened in a spreadsheet.
 - **Logging** — A value containing line breaks, such as a username or an identifier sent by a client, can no longer forge log lines: the line breaks are written as `\r` and `\n` in the log message.
+- **Error responses** — An unexpected error while receiving an attachment or a SOAP submission no longer returns the internal exception message (which can contain file paths or database details) to the client: the REST API answers with a fixed message and the SOAP `resultMessage` is generic, except for the messages of the connector's own errors, such as an unknown service. The cause is written to the connector log.
 
 #### Technical
 - **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.

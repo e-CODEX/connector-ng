@@ -65,7 +65,8 @@ public class ConnectorAttachmentController implements ConnectorAttachmentApi {
                              "Uploaded attachment"
                          );
                      } catch (IOException e) {
-                         throw new ConnectorInternalServerException(e.getMessage());
+                         throw new ConnectorInternalServerException(
+                             "Unable to store the uploaded attachment", e);
                      }
                  }
             ).toList();

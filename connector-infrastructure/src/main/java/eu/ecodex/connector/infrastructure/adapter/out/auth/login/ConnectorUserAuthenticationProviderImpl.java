@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.adapter.out.auth.login;
 
-import eu.ecodex.connector.application.exception.user.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRegisterUserRefreshToken;
 import eu.ecodex.connector.application.port.api.auth.refreshtoken.ConnectorRevokeUserRefreshToken;
@@ -22,7 +21,6 @@ import eu.ecodex.connector.infrastructure.adapter.out.auth.identity.ConnectorUse
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
@@ -48,6 +46,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConnectorUserAuthenticationProviderImpl
     implements ConnectorUserAuthenticationProvider {
+    private static final int MAX_LOGGED_LENGTH = 100;
+
     private final AuthenticationManager authenticationManager;
     private final ConnectorAuthenticationTokenProvider authenticationTokenProvider;
     private final ConnectorRegisterUserRefreshToken registerUserRefreshToken;
@@ -110,17 +110,29 @@ public class ConnectorUserAuthenticationProviderImpl
                                                .toSeconds())
                 .mustChangePassword(authenticatedUser.mustChangePassword())
                 .build();
-        } catch (DisabledException exception) {
-            log.error("User {} account is disabled", username);
-            throw new ConnectorUserAccountInactiveException(
-                "Your account is inactive. Please contact support.");
         } catch (AuthenticationException e) {
-            log.error("User {} invalid username or password", username);
+            // the response is the same whatever the reason (unknown user, wrong password, disabled
+            // or locked account), so that it does not tell which accounts exist; the reason is
+            // only logged
+            log.warn(
+                "Login refused for user [{}]: {}", sanitize(username), e.getClass().getSimpleName()
+            );
             throw new ConnectorUserBadCredentialsException("Invalid username or password");
         } catch (RuntimeException e) {
-            log.error("Error occurs when login user {}, cause {}", username, e.getMessage());
+            log.error(
+                "Error occurs when login user [{}], cause {}", sanitize(username), e.getMessage()
+            );
+
             throw new RuntimeException(e);
         }
+    }
+
+    private String sanitize(String value) {
+        var cleaned = value.replaceAll("\\p{Cntrl}", "_");
+
+        return cleaned.length() > MAX_LOGGED_LENGTH
+            ? cleaned.substring(0, MAX_LOGGED_LENGTH) + "..."
+            : cleaned;
     }
 
     @Override

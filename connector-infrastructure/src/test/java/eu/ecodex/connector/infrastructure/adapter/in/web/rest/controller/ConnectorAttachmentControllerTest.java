@@ -10,7 +10,9 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -24,6 +26,7 @@ import eu.ecodex.connector.MessageAttachmentTestFixtures;
 import eu.ecodex.connector.application.port.api.attachment.ConnectorUploadAttachments;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.attachment.ConnectorAttachmentController;
 import eu.ecodex.connector.infrastructure.helper.ConnectorTempFilesHelper;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -63,6 +66,19 @@ public class ConnectorAttachmentControllerTest extends AbstractWebMvcTest {
                .andExpect(status().isCreated())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void should_not_disclose_the_cause_when_the_upload_fails() throws Exception {
+        when(tempFilesHelper.create(anyString(), anyString()))
+            .thenThrow(new IOException("No space left on /srv/connector/upload/tmp-123.pdf"));
+
+        mockMvc.perform(multipart(HttpMethod.POST, URL)
+                            .file(getAttachment("raw/fake_file.pdf", "fake_file.pdf"))
+                            .contentType(MediaType.MULTIPART_FORM_DATA))
+               .andExpect(status().isInternalServerError())
+               .andExpect(jsonPath("$.message").value("Unable to store the uploaded attachment"))
+               .andExpect(content().string(not(containsString("/srv/connector"))));
     }
 
     private MockMultipartFile getAttachment(String resourcePath, String filename) {

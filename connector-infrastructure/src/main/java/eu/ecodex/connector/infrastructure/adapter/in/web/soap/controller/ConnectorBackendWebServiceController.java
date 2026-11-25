@@ -69,6 +69,10 @@ import org.springframework.util.StringUtils;
 @MTOM
 @Component
 public class ConnectorBackendWebServiceController implements DomibusConnectorBackendWebService {
+    private static final String APPLICATION_EXCEPTION_PACKAGE =
+        "eu.ecodex.connector.application.exception";
+    private static final String GENERIC_FAILURE_MESSAGE = "The message could not be processed";
+
     private final ConnectorOutboundBusinessMessageReceiver businessMessageReceiver;
     private final ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageProcessor;
     private final ConnectorListPendingTransportStepsIds listPendingMessageIds;
@@ -291,10 +295,19 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
             log.error("Error submitting message to the connector via SOAP endpoint", e);
             answer.setResult(false);
             answer.setMessageId(submitMessageRequest.getMessageDetails().getBackendMessageId());
-            answer.setResultMessage(e.getMessage());
+            answer.setResultMessage(resultMessageOf(e));
         }
 
         return answer;
+    }
+
+    static String resultMessageOf(Exception exception) {
+        var type = exception.getClass();
+        var application = type.getPackageName().startsWith(APPLICATION_EXCEPTION_PACKAGE);
+
+        return application && exception.getMessage() != null
+            ? exception.getMessage()
+            : GENERIC_FAILURE_MESSAGE;
     }
 
     private List<String> persistAttachments(
@@ -369,7 +382,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 .description("Registered business document")
                 .build();
         } catch (Exception e) {
-            throw new ConnectorInternalServerException(e.getMessage());
+            throw new ConnectorInternalServerException("Unable to read the business document", e);
         }
     }
 
@@ -395,7 +408,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 .description("Business document detached signature")
                 .build();
         } catch (Exception e) {
-            throw new ConnectorInternalServerException(e.getMessage());
+            throw new ConnectorInternalServerException(
+                "Unable to read the business document detached signature", e);
         }
     }
 
@@ -419,7 +433,7 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                 .description("Registered business content")
                 .build();
         } catch (Exception e) {
-            throw new ConnectorInternalServerException(e.getMessage());
+            throw new ConnectorInternalServerException("Unable to read the business content", e);
         }
     }
 
@@ -441,7 +455,8 @@ public class ConnectorBackendWebServiceController implements DomibusConnectorBac
                              .description("Registered attachment")
                              .build();
                      } catch (Exception e) {
-                         throw new ConnectorInternalServerException(e.getMessage());
+                         throw new ConnectorInternalServerException(
+                             "Unable to read the attachment", e);
                      }
                  }
             )

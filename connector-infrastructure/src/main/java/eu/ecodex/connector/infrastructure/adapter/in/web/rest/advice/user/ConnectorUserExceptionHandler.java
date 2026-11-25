@@ -10,7 +10,6 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.user;
 
-import eu.ecodex.connector.application.exception.user.ConnectorUserAccountInactiveException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserIdentifierMismatchException;
@@ -48,14 +47,6 @@ public class ConnectorUserExceptionHandler {
     @ExceptionHandler(ConnectorUserInvalidPasswordException.class)
     public ErrorResponse handleUserPasswordException(ConnectorUserInvalidPasswordException e) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage());
-    }
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(ConnectorUserAccountInactiveException.class)
-    public ErrorResponse handleDisabledUserAccount(
-        ConnectorUserAccountInactiveException exception) {
-        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
     }
 
     @ResponseBody

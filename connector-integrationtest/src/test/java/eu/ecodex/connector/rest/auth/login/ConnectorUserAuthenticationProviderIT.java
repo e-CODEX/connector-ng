@@ -145,4 +145,35 @@ class ConnectorUserAuthenticationProviderIT extends AbstractIntegrationTest {
             .expectStatus()
             .isUnauthorized();
     }
+
+    @Test
+    @Sql("classpath:sql/user.sql")
+    void login_should_not_tell_a_disabled_account_from_an_unknown_one() {
+        var username = "test-user-it";
+        var user = userRepository.findByUsername(username).orElseThrow();
+        userRepository.save(user.toBuilder().enabled(false).build());
+
+        var disabledRightPassword = loginError(username, "password");
+        var disabledWrongPassword = loginError(username, "wrong-password");
+        var unknown = loginError("unknown-user", "password");
+
+        assertThat(disabledRightPassword).isEqualTo(unknown);
+        assertThat(disabledWrongPassword).isEqualTo(unknown);
+    }
+
+    private String loginError(String username, String password) {
+        var body = apiClient.post()
+            .uri(PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(ConnectorLoginRequest.builder().username(username).password(password).build())
+            .exchange()
+            .expectStatus()
+            .isUnauthorized()
+            .returnResult(String.class)
+            .getResponseBody();
+
+        assertThat(body).isNotBlank();
+
+        return body;
+    }
 }

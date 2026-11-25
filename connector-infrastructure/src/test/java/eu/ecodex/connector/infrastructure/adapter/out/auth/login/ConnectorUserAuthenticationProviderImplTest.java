@@ -32,6 +32,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
@@ -128,6 +129,20 @@ class ConnectorUserAuthenticationProviderImplTest {
         assertThat(authCaptorValue.getPrincipal()).isEqualTo(username);
         assertThat(authCaptorValue.getCredentials()).isEqualTo(password);
 
+        verifyNoMoreInteractions(authenticationTokenProvider, registerUserRefreshTokenService);
+    }
+
+    @Test
+    void login_should_give_the_generic_error_when_the_account_is_disabled() {
+        when(authenticationManager.authenticate(any())).thenThrow(
+            new DisabledException("User is disabled"));
+
+        var exception = assertThrows(
+            ConnectorUserBadCredentialsException.class,
+            () -> service.login("test\nforged line", "password")
+        );
+
+        assertThat(exception).hasMessage("Invalid username or password");
         verifyNoMoreInteractions(authenticationTokenProvider, registerUserRefreshTokenService);
     }
 }

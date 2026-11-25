@@ -10,11 +10,7 @@
 
 package eu.ecodex.connector.rest.admin.jms;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import eu.ecodex.connector.AbstractIntegrationTest;
-import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
-import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorLoginRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +36,7 @@ public class QueueManagementAccessIT extends AbstractIntegrationTest {
     @Test
     @Sql({"classpath:sql/user.sql"})
     void should_forbid_a_user_without_the_admin_role_to_replay_or_delete_a_message() {
-        var token = "Bearer " + loginAsSimpleUser();
+        var token = "Bearer " + generateDefaultSimpleUserToken();
 
         apiClient.post()
             .uri("/api/v1/admin/jms/queues/dlq/messages/{id}/replay?queue={queue}",
@@ -69,27 +65,32 @@ public class QueueManagementAccessIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void should_still_let_a_user_without_the_admin_role_read_the_queues() {
+    void should_forbid_a_user_without_the_admin_role_to_read_the_messages() {
+        var token = "Bearer " + generateDefaultSimpleUserToken();
+
+        apiClient.get()
+            .uri("/api/v1/admin/jms/queues/messages?queue={queue}", QUEUE)
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+
+        apiClient.get()
+            .uri("/api/v1/admin/jms/queues/messages/{id}?queue={queue}", "ID:1", QUEUE)
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .exchange()
+            .expectStatus()
+            .isForbidden();
+    }
+
+    @Test
+    @Sql({"classpath:sql/user.sql"})
+    void should_still_let_a_user_without_the_admin_role_read_the_queue_statistics() {
         apiClient.get()
             .uri("/api/v1/admin/jms/queues/stats")
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + loginAsSimpleUser())
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultSimpleUserToken())
             .exchange()
             .expectStatus()
             .isOk();
-    }
-
-    private String loginAsSimpleUser() {
-        var login = apiClient.post()
-            .uri("/api/v1/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(ConnectorLoginRequest.builder()
-                                       .username("test-user-it").password("password").build())
-            .exchange()
-            .expectStatus()
-            .isOk()
-            .returnResult(ConnectorUserAuthenticationResult.class)
-            .getResponseBody();
-        assertThat(login).isNotNull();
-        return login.accessToken();
     }
 }

@@ -14,7 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,7 @@ import jakarta.jms.QueueBrowser;
 import jakarta.jms.Session;
 import jakarta.jms.TextMessage;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -106,6 +109,55 @@ class ConnectorJmsQueueManagementProviderTest {
 
             verify(jmsTemplate).browse(eq("custom.DLQ." + QUEUE), any(BrowserCallback.class));
             verify(jmsTemplate).browse(eq(QUEUE), any(BrowserCallback.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("bounding the browsing")
+    class Bounds {
+        private ConnectorJmsQueueManagementProvider provider(
+            ConnectorJmsQueueManagementProvider.Limits limits) {
+            return new ConnectorJmsQueueManagementProvider(
+                jmsTemplate, queueProperties(), addressSettings("ActiveMQ.DLQ."), limits
+            );
+        }
+
+        private Message message(String id) throws Exception {
+            var message = mock(Message.class);
+            // the messages after the page are counted, not read
+            lenient().when(message.getJMSMessageID()).thenReturn(id);
+            lenient().when(message.getPropertyNames()).thenReturn(Collections.emptyEnumeration());
+            return message;
+        }
+
+        @Test
+        void should_stop_scanning_a_queue_at_the_limit() throws Exception {
+            var elements = new ArrayList<Message>();
+            for (var i = 0; i < 10; i++) {
+                elements.add(message("ID:" + i));
+            }
+            browsing(elements);
+
+            var result = provider(new ConnectorJmsQueueManagementProvider.Limits(
+                4, 1024, 1024, Duration.ZERO
+            )).listMessages(QUEUE, ConnectorPageRequest.of(0, 3));
+
+            assertThat(result.totalElements()).isEqualTo(4);
+            assertThat(result.content()).hasSize(3);
+        }
+
+        @Test
+        void should_reuse_the_statistics_within_the_cache_time() throws Exception {
+            browsing(List.of());
+            var provider = provider(new ConnectorJmsQueueManagementProvider.Limits(
+                10, 1024, 1024, Duration.ofMinutes(1)
+            ));
+
+            provider.getAllQueueStats();
+            provider.getAllQueueStats();
+
+            // two counts (queue and DLQ) for each of the 11 monitored queues, read only once
+            verify(jmsTemplate, times(22)).browse(anyString(), any(BrowserCallback.class));
         }
     }
 
@@ -388,6 +440,61 @@ class ConnectorJmsQueueManagementProviderTest {
             assertThat(content.text()).isNull();
             assertThat(content.payload()).isNull();
             assertThat(content.message().messageType()).isEqualTo(ConnectorQueueMessageType.BYTES);
+        }
+
+        private ConnectorJmsQueueManagementProvider limitedProvider(int decode, int replay) {
+            return new ConnectorJmsQueueManagementProvider(
+                brokerTemplate,
+                queueProperties(),
+                addressSettings("ActiveMQ.DLQ."),
+                new ConnectorJmsQueueManagementProvider.Limits(
+                    100, decode, replay, Duration.ZERO
+                )
+            );
+        }
+
+        @Test
+        void should_not_decode_a_body_larger_than_the_decode_limit() {
+            sendToDlq("x".repeat(5_000));
+            var messageId = dlqMessageId();
+
+            var content = limitedProvider(1_000, 1_000_000)
+                .findMessageContent(QUEUE, messageId, true).orElseThrow();
+
+            assertThat(content.text()).isNull();
+            assertThat(content.payload()).isNull();
+            assertThat(content.truncated()).isTrue();
+            assertThat(content.message().messageId()).isEqualTo(messageId);
+        }
+
+        @Test
+        void should_keep_a_large_byte_array_of_a_map_message_within_the_body_limit() {
+            brokerTemplate.send(DLQ, session -> {
+                var message = session.createMapMessage();
+                message.setBytes("document", new byte[200_000]);
+                return message;
+            });
+            var messageId = dlqMessageId();
+
+            var content = brokerProvider.findMessageContent(QUEUE, messageId, true).orElseThrow();
+
+            assertThat(content.truncated()).isTrue();
+            assertThat(((String) content.payload().get("document")).length())
+                .isLessThanOrEqualTo(65_536);
+        }
+
+        @Test
+        void should_not_replay_a_message_larger_than_the_replay_limit() {
+            sendToDlq("x".repeat(5_000));
+            var messageId = dlqMessageId();
+
+            var result = limitedProvider(1_000_000, 1_000)
+                .replayDlqMessages(QUEUE, List.of(messageId));
+
+            assertThat(result.failed()).containsExactly(messageId);
+            assertThat(result.replayed()).isEmpty();
+            // the message stays in the DLQ
+            assertThat(dlqMessageId()).isEqualTo(messageId);
         }
 
         @Test

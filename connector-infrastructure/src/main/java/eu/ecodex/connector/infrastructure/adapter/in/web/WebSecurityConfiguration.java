@@ -136,6 +136,10 @@ public class WebSecurityConfiguration {
                        // an evidence is a signed document of the exchanged messages
                        .requestMatchers(HttpMethod.GET, "/api/v1/admin/evidences/{uuid}/download")
                        .hasRole(ConnectorRoleName.ADMIN.name())
+                       // the messages of the JMS queues carry business data
+                       .requestMatchers(HttpMethod.GET, "/api/v1/admin/jms/queues/messages",
+                                        "/api/v1/admin/jms/queues/messages/**")
+                       .hasRole(ConnectorRoleName.ADMIN.name())
                        // replaying and deleting the failed messages of the JMS queues
                        .requestMatchers(HttpMethod.POST, "/api/v1/admin/jms/queues/dlq/**")
                        .hasRole(ConnectorRoleName.ADMIN.name())

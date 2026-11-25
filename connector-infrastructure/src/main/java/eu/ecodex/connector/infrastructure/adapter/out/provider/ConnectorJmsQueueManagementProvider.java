@@ -23,6 +23,7 @@ import eu.ecodex.connector.domain.model.queue.MonitoredQueue;
 import eu.ecodex.connector.domain.model.queue.MonitoredQueueCategory;
 import eu.ecodex.connector.infrastructure.config.property.ActiveMQAddressSettingsProperties;
 import eu.ecodex.connector.infrastructure.config.property.ConnectorQueueProperties;
+import jakarta.annotation.PreDestroy;
 import jakarta.jms.BytesMessage;
 import jakarta.jms.JMSException;
 import jakarta.jms.MapMessage;
@@ -31,8 +32,10 @@ import jakarta.jms.ObjectMessage;
 import jakarta.jms.Session;
 import jakarta.jms.StreamMessage;
 import jakarta.jms.TextMessage;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -42,8 +45,10 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.activemq.command.ActiveMQMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.activemq.autoconfigure.ActiveMQConnectionDetails;
+import org.springframework.jms.connection.CachingConnectionFactory;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
@@ -67,6 +72,24 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
     private final JmsTemplate jmsTemplate;
     private final List<MonitoredQueue> monitoredQueues;
     private final String dlqPrefix;
+    private final Limits limits;
+    private final Object statsLock = new Object();
+    private List<ConnectorQueueStats> cachedStats;
+    private long cachedStatsAtNanos;
+
+    /**
+     * Bounds on what a single request can make the connector read from the broker.
+     *
+     * @param maxBrowsed     the most messages scanned when counting or listing a queue
+     * @param maxDecodeSize  the largest message body, in bytes, which is decoded to be shown
+     * @param maxReplaySize  the largest message body, in bytes, which is replayed
+     * @param statsCacheTime how long the queue statistics are reused
+     */
+    record Limits(int maxBrowsed, int maxDecodeSize, int maxReplaySize, Duration statsCacheTime) {
+        static final Limits DEFAULT = new Limits(
+            10_000, 1_048_576, 10_485_760, Duration.ofSeconds(5)
+        );
+    }
 
     /**
      * Creates the provider for the queues named in the connector configuration. It uses its own
@@ -82,7 +105,9 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
         ActiveMQConnectionDetails connectionDetails,
         ConnectorQueueProperties queueProperties,
         ActiveMQAddressSettingsProperties addressSettings) {
-        this(plainJmsTemplate(connectionDetails), queueProperties, addressSettings);
+        this(
+            plainJmsTemplate(connectionDetails), queueProperties, addressSettings, Limits.DEFAULT
+        );
     }
 
     /**
@@ -96,7 +121,16 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
         JmsTemplate jmsTemplate,
         ConnectorQueueProperties queueProperties,
         ActiveMQAddressSettingsProperties addressSettings) {
+        this(jmsTemplate, queueProperties, addressSettings, Limits.DEFAULT);
+    }
+
+    ConnectorJmsQueueManagementProvider(
+        JmsTemplate jmsTemplate,
+        ConnectorQueueProperties queueProperties,
+        ActiveMQAddressSettingsProperties addressSettings,
+        Limits limits) {
         this.jmsTemplate = jmsTemplate;
+        this.limits = limits;
         this.dlqPrefix = addressSettings.dlqPrefix();
         this.monitoredQueues = List.of(
             new MonitoredQueue(
@@ -167,7 +201,28 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
             factory.setPassword(connectionDetails.getPassword());
         }
 
-        return new JmsTemplate(factory);
+        // one shared connection instead of a new one for every browse, send or receive
+        var caching = new CachingConnectionFactory(factory);
+        caching.setSessionCacheSize(3);
+        caching.setCacheConsumers(false);
+        caching.setReconnectOnException(true);
+
+        return new JmsTemplate(caching);
+    }
+
+    /**
+     * Closes the shared broker connection.
+     */
+    @PreDestroy
+    void close() {
+        if (jmsTemplate.getConnectionFactory() instanceof CachingConnectionFactory caching) {
+            caching.destroy();
+        }
+    }
+
+    private static long sizeOf(Message message) {
+        // the size of the message as received, known without decoding the body
+        return message instanceof ActiveMQMessage activeMqMessage ? activeMqMessage.getSize() : -1;
     }
 
     private static String truncate(String value) {
@@ -198,11 +253,21 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
 
     @Override
     public List<ConnectorQueueStats> getAllQueueStats() {
-        return monitoredQueues.stream().map((monitoredQueue -> getStats(
-            monitoredQueue.name(),
-            monitoredQueue.description(),
-            monitoredQueue.category()
-        ))).toList();
+        // browsing every queue is costly: concurrent and repeated calls share one result
+        synchronized (statsLock) {
+            var now = System.nanoTime();
+            if (cachedStats == null
+                || now - cachedStatsAtNanos > limits.statsCacheTime().toNanos()) {
+                cachedStats = monitoredQueues.stream().map((monitoredQueue -> getStats(
+                    monitoredQueue.name(),
+                    monitoredQueue.description(),
+                    monitoredQueue.category()
+                ))).toList();
+                cachedStatsAtNanos = System.nanoTime();
+            }
+
+            return cachedStats;
+        }
     }
 
     private String dlqNameOf(String queue) {
@@ -214,7 +279,7 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
             queue, (session, browser) -> {
                 long i = 0;
                 var e = browser.getEnumeration();
-                while (e.hasMoreElements()) {
+                while (e.hasMoreElements() && i < limits.maxBrowsed()) {
                     if (e.nextElement() != null) {
                         i++;
                     }
@@ -265,7 +330,7 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
                 var content = new ArrayList<ConnectorQueueMessage>(size);
                 long total = 0;
                 var messages = browser.getEnumeration();
-                while (messages.hasMoreElements()) {
+                while (messages.hasMoreElements() && total < limits.maxBrowsed()) {
                     var message = (Message) messages.nextElement();
 
                     if (message == null) {
@@ -390,6 +455,11 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
         String text = null;
         Map<String, Object> payload = null;
 
+        if (sizeOf(message) > limits.maxDecodeSize()) {
+            // the body is not read: it is too large to be decoded and shown
+            return new ConnectorQueueMessageContent(toQueueMessage(message), null, null, true);
+        }
+
         if (message instanceof TextMessage textMessage) {
             text = textMessage.getText();
             if (text != null && text.length() > MAX_BODY_LENGTH) {
@@ -409,7 +479,15 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
                 var key = String.valueOf(name);
                 var value = mapMessage.getObject(key);
                 if (value instanceof byte[] bytes) {
-                    value = Base64.getEncoder().encodeToString(bytes);
+                    // base64 turns 3 bytes into 4 characters: only encode what fits
+                    var allowed = Math.max(remaining, 0) / 4 * 3;
+                    if (bytes.length > allowed) {
+                        bytes = Arrays.copyOf(bytes, allowed);
+                        truncated = true;
+                    }
+                    var encoded = Base64.getEncoder().encodeToString(bytes);
+                    remaining -= encoded.length();
+                    value = encoded;
                 }
                 if (value instanceof String string) {
                     if (string.length() > remaining) {
@@ -488,6 +566,11 @@ public class ConnectorJmsQueueManagementProvider implements ConnectorQueueManage
                 var messages = browser.getEnumeration();
                 while (messages.hasMoreElements()) {
                     if (messages.nextElement() instanceof Message message) {
+                        if (sizeOf(message) > limits.maxReplaySize()) {
+                            throw new IllegalStateException(
+                                "Message [%s] is too large to be replayed".formatted(messageId)
+                            );
+                        }
                         return ReplayableMessage.from(message);
                     }
                 }

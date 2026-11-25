@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file.
 #### Technical
 - **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.
 - **Swagger documentation** — Fix a bug that prevented the success response body from being displayed.
+- **MySQL driver** — The MySQL JDBC driver is now `com.mysql:mysql-connector-j` 9.7.0, replacing the relocated and no longer updated `mysql:mysql-connector-java` 8.0.33. The driver class names do not change. If you copy your own driver into `lib/`, remove the old `mysql-connector-java-*.jar`.
 
 ## [7.1.0] - 2026-11-12
 

@@ -25,7 +25,7 @@ spring-doc = "3.2.0"
 s3 = "2.59.2"
 # dbms
 h2 = "2.5.252"
-mysql = "8.0.33"
+mysql = "26.10.0"
 mariadb = "4.0.0"
 postgresql = "42.7.14"
 oracle = "23.26.4.0.0"
@@ -78,7 +78,7 @@ spring-doc = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", ver
 s3 = { module = "software.amazon.awssdk:s3", version.ref = "s3"}
 # dbms
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
-mysql = { module = "mysql:mysql-connector-java", version.ref = "mysql" }
+mysql = { module = "com.mysql:mysql-connector-j", version.ref = "mysql" }
 mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mariadb" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
 oracle = { module = "com.oracle.database.jdbc:ojdbc11", version.ref = "oracle" }

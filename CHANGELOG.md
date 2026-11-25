@@ -7,7 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Release Notes
 
 #### Added
-- **Transport steps** — Message transport steps now report whether they are retryable.
+- **Transport steps**
+  - Transport steps now expose a `retryable` flag that tells whether a manual retry is currently possible.
+  - New endpoint `POST /api/admin/transport-steps/{identifier}/retry` retries the submission of a transport step to the link partner. It is only accepted for a retryable step.
 - **JMS queues** — Pending and dead-letter messages can now be listed for each JMS queue.
 - **JMS message details** — The details of the messages held in a JMS queue can now be retrieved.
 - **DLQ replay** — Messages in a JMS dead-letter queue can be replayed to their original destination (`ADMIN` role only).

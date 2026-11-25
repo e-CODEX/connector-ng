@@ -85,6 +85,16 @@ Independent from the admin account and from the JWT authentication of the REST A
 NOTE: Expired refresh tokens accumulate in the database over time.
 The cleanup cron runs at 03:00 by default.
 
+== Roles and access
+
+The administration API (`/api/v1/admin/**`) is restricted to the `ADMIN` role. The other roles
+(`USER`) can only read the message statistics (`GET /api/v1/admin/messages/stats`), the message
+reports (`GET /api/v1/admin/messages/reports`) and the list of the business domains
+(`GET /api/v1/admin/business-domains`) and manage their own account. This covers the user
+and role management, the processing modes and their truststores, the attachments and evidences
+downloads, the configuration views, the message details and exports, the transport steps, the
+business domains, the test message and the JMS queues.
+
 .Configuration example (7.x)
 [source,properties]
 ----

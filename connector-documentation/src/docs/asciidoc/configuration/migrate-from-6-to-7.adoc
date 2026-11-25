@@ -1042,6 +1042,13 @@ connector.cors.allowed-origins=http://localhost:3000
 connector.cors.max-age=3600
 ----
 
+.Access to the administration API
+NOTE: The whole administration API (`/api/v1/admin/**`) is restricted to users with the `ADMIN` role.
+Users with another role can only read the message statistics (`GET /api/v1/admin/messages/stats`),
+the message reports (`GET /api/v1/admin/messages/reports`) and the list of the business domains
+(`GET /api/v1/admin/business-domains`), and call their own account endpoints. An account of another role that calls any other administration endpoint now gets `403`:
+give it the `ADMIN` role if it must keep this access.
+
 === File Deletion Configuration
 
 All properties in this section are *new in 7.x*.

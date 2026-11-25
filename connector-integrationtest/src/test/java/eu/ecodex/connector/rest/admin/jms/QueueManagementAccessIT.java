@@ -85,12 +85,12 @@ public class QueueManagementAccessIT extends AbstractIntegrationTest {
 
     @Test
     @Sql({"classpath:sql/user.sql"})
-    void should_still_let_a_user_without_the_admin_role_read_the_queue_statistics() {
+    void should_forbid_a_user_without_the_admin_role_to_read_the_queue_statistics() {
         apiClient.get()
             .uri("/api/v1/admin/jms/queues/stats")
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultSimpleUserToken())
             .exchange()
             .expectStatus()
-            .isOk();
+            .isForbidden();
     }
 }

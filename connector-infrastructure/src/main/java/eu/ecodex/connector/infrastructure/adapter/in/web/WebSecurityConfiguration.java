@@ -126,27 +126,21 @@ public class WebSecurityConfiguration {
                        // Security 6+ also applies authorization to that dispatch.
                        // As it has no user the request is rejected with 403
                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
-                       // Specific admin-only
-                       .requestMatchers("/api/v1/admin/users/**")
-                       .hasRole(ConnectorRoleName.ADMIN.name())
-                       .requestMatchers(HttpMethod.POST, "/api/v1/admin/business-domains")
-                       .hasRole(ConnectorRoleName.ADMIN.name())
-                       .requestMatchers(HttpMethod.POST, "/api/v1/admin/processing-modes")
-                       .hasRole(ConnectorRoleName.ADMIN.name())
-                       // an evidence is a signed document of the exchanged messages
-                       .requestMatchers(HttpMethod.GET, "/api/v1/admin/evidences/{uuid}/download")
-                       .hasRole(ConnectorRoleName.ADMIN.name())
-                       // the messages of the JMS queues carry business data
-                       .requestMatchers(HttpMethod.GET, "/api/v1/admin/jms/queues/messages",
-                                        "/api/v1/admin/jms/queues/messages/**")
-                       .hasRole(ConnectorRoleName.ADMIN.name())
-                       // replaying and deleting the failed messages of the JMS queues
-                       .requestMatchers(HttpMethod.POST, "/api/v1/admin/jms/queues/dlq/**")
-                       .hasRole(ConnectorRoleName.ADMIN.name())
-                       .requestMatchers(HttpMethod.DELETE, "/api/v1/admin/jms/queues/dlq/**")
+                       // the message statistics and reports and the list of the business domains
+                       // are also open to the other roles
+                       .requestMatchers(
+                           HttpMethod.GET,
+                           "/api/v1/admin/messages/stats",
+                           "/api/v1/admin/messages/reports",
+                           "/api/v1/admin/business-domains"
+                       )
+                       .authenticated()
+                       // the administration API is for administrators: an endpoint under this
+                       // path is closed to the other roles unless it is opened above
+                       .requestMatchers("/api/v1/admin/**")
                        .hasRole(ConnectorRoleName.ADMIN.name())
                        // All authenticated users
-                       .requestMatchers("/api/v1/admin/**", "/api/v1/auth/me")
+                       .requestMatchers("/api/v1/auth/me")
                        .authenticated()
                        .requestMatchers(
                            "/api/v1/attachments/upload",
@@ -186,9 +180,9 @@ public class WebSecurityConfiguration {
      *
      * <p>The configuration is built from {@link ConnectorCorsProperties} (allowed origins,
      * methods, headers, credentials and pre-flight cache duration) and registered for the REST API
-     * ({@code /api/**}) and the actuator ({@code /actuator/**}) only: the Swagger documentation
-     * and the SOAP services are not meant to be called from a browser application of another
-     * origin. Spring Security picks up this bean automatically when CORS is enabled on the
+     * ({@code /api/**}) and the actuator ({@code /actuator/**}) only: the Swagger documentation and
+     * the SOAP services are not meant to be called from a browser application of another origin.
+     * Spring Security picks up this bean automatically when CORS is enabled on the
      * {@code HttpSecurity} filter chain.
      *
      * @param corsProperties the externalized CORS settings

@@ -13,7 +13,7 @@
         <!-- Console Appender -->
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout
-                    pattern="%style{%d{yyyy-MM-dd HH:mm:ss}}{cyan} %highlight{%-5level}{FATAL=bg_red,ERROR=red,WARN=yellow,INFO=green,DEBUG=blue,TRACE=cyan} %style{[%t]}{yellow} %style{[%X{traceId:-}]}{blue} %style{%c{1}}{magenta} - %msg%n"/>
+                    pattern="%style{%d{yyyy-MM-dd HH:mm:ss}}{cyan} %highlight{%-5level}{FATAL=bg_red,ERROR=red,WARN=yellow,INFO=green,DEBUG=blue,TRACE=cyan} %style{[%t]}{yellow} %style{[%X{traceId:-}]}{blue} %style{%c{1}}{magenta} - %enc{%msg}{CRLF}%n"/>
         </Console>
     </Appenders>
     <Loggers>

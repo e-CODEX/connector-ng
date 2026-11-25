@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - **Evidences** — Downloading an evidence is restricted to users with the `ADMIN` role. The unused public `/api/v1/evidences/{uuid}/download` path is no longer open.
 - **Downloads** — The attachment and processing mode downloads build a well-formed `Content-Disposition` header from the file name, and an attachment with a missing or malformed content type is served as `application/octet-stream` instead of failing.
 - **Statistics** — The CSV export of the message report no longer lets a party or service name starting with `=`, `+`, `-` or `@` run as a formula when the file is opened in a spreadsheet.
+- **Logging** — A value containing line breaks, such as a username or an identifier sent by a client, can no longer forge log lines: the line breaks are written as `\r` and `\n` in the log message.
 
 #### Technical
 - **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.

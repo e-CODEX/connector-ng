@@ -111,3 +111,7 @@ recreate the database from scratch instead of upgrading it:
 
 WARNING: Recreating the database deletes all data of the previous installation. Back up anything
 you need to keep before you drop the schema.
+
+NOTE: The MySQL driver shipped in the `lib` directory is `mysql-connector-j` (`com.mysql:mysql-connector-j`),
+which replaces the relocated `mysql-connector-java`. If you copy your own MySQL driver into `lib`, remove
+any old `mysql-connector-java-*.jar` so that only one driver is on the classpath.

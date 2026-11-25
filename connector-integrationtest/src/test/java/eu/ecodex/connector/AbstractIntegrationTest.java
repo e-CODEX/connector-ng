@@ -57,7 +57,7 @@ public abstract class AbstractIntegrationTest {
     private static final DockerImageName MINIO_IMAGE =
         DockerImageName.parse("pgsty/minio:RELEASE.2026-08-04T00-00-00Z")
                        .asCompatibleSubstituteFor("minio/minio");
-    private static final DockerImageName MYSQL_IMAGE = DockerImageName.parse("mysql:8.0.33");
+    private static final DockerImageName MYSQL_IMAGE = DockerImageName.parse("mysql:8.4.9");
     private static final MinioClient minioClient;
 
     static {

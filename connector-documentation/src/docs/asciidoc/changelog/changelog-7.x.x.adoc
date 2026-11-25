@@ -23,6 +23,7 @@ endif::header[]
 * *CORS* -- No origin is allowed by default: list the origin of the administration UI in `connector.cors.allowed-origins`. Credentials are off by default, the allowed request headers default to `Authorization`, `Content-Type` and `Accept`, and CORS applies to the REST API (`/api/**`) and the actuator (`/actuator/**`) only.
 * *Evidences* -- Downloading an evidence is restricted to users with the `ADMIN` role. The unused public `/api/v1/evidences/{uuid}/download` path is no longer open.
 * *Downloads* -- The attachment and processing mode downloads build a well-formed `Content-Disposition` header from the file name, and an attachment with a missing or malformed content type is served as `application/octet-stream` instead of failing.
+* *Statistics* -- The CSV export of the message report no longer lets a party or service name starting with `=`, `+`, `-` or `@` run as a formula when the file is opened in a spreadsheet.
 
 ==== Technical
 * *API security* -- Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.

@@ -10,17 +10,16 @@
 
 package eu.ecodex.connector.application.exception.message;
 
-import eu.ecodex.connector.application.exception.NotFoundException;
-
 /**
- * Exception thrown when a specific transport step in a connector message cannot be found.
- *
- * <p>This is a specialized form of {@link NotFoundException}, used to indicate
- * that the requested transport step associated with a connector message is missing or cannot be
- * located within the context of the connector's operations.
+ * Exception thrown when a transport step cannot be retried, either because its current status does
+ * not allow a retry or because the submission of the transported message failed.
  */
-public class ConnectorMessageTransportStepRetryException extends NotFoundException {
+public class ConnectorMessageTransportStepRetryException extends RuntimeException {
     public ConnectorMessageTransportStepRetryException(String message) {
         super(message);
+    }
+
+    public ConnectorMessageTransportStepRetryException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

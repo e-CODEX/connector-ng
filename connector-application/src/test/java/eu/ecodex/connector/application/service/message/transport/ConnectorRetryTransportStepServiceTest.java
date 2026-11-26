@@ -10,9 +10,9 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -25,11 +25,13 @@ import eu.ecodex.connector.application.exception.message.ConnectorMessageTranspo
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepRetryException;
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
+import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -39,18 +41,21 @@ class ConnectorRetryTransportStepServiceTest {
     private static final String TRANSPORT_ID = "6e3320bb-6724-4387-822c-a2914dba559a";
 
     @Mock
-    private ConnectorMessageTransportStepRepository transportStepRepository;
-    @Mock
     private ConnectorLinkSubmitter linkSubmitter;
+    @Mock
+    private ConnectorMessageTransportStepRepository transportStepRepository;
 
     @InjectMocks
     private ConnectorRetryTransportStepService retryTransportStepService;
 
-    @Test
-    void retry_should_submit_transported_message() {
+    @ParameterizedTest
+    @EnumSource(
+        value = ConnectorMessageTransportStatus.class,
+        names = {"FAILED", "READY_FOR_PULL"}
+    )
+    void retry_should_submit_transported_message(ConnectorMessageTransportStatus status) {
         // Given
-        var step = TransportStepFixtures.createTransportStepWithBusinessMessage(
-            ConnectorMessageTransportStatus.FAILED, 0);
+        var step = TransportStepFixtures.createTransportStepWithBusinessMessage(status, 0);
         when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
         doNothing().when(linkSubmitter).submit(any());
 
@@ -58,41 +63,105 @@ class ConnectorRetryTransportStepServiceTest {
         retryTransportStepService.execute(TRANSPORT_ID);
 
         // Then
-        var messageCaptor = ArgumentCaptor.forClass(ConnectorMessage.class);
-        verify(linkSubmitter).submit(messageCaptor.capture());
-        assertThat(messageCaptor.getValue()).isNotNull();
+        verify(linkSubmitter).submit(same(step.transportedMessage()));
         verify(transportStepRepository).findByIdentifier(TRANSPORT_ID);
         verifyNoMoreInteractions(transportStepRepository, linkSubmitter);
     }
 
     @Test
-    void retry_should_throw_retry_exception_when_not_retriable() {
+    void retry_should_submit_an_evidence_message() {
         // Given
-        var step = TransportStepFixtures.createTransportStepWithBusinessMessage();
+        var step = TransportStepFixtures.createTransportStepWithEvidenceMessage().toBuilder()
+            .status(ConnectorMessageTransportStatus.FAILED)
+            .build();
+        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+
+        // When
+        retryTransportStepService.execute(TRANSPORT_ID);
+
+        // Then
+        verify(linkSubmitter).submit(same(step.transportedMessage()));
+        verifyNoMoreInteractions(linkSubmitter);
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = ConnectorMessageTransportStatus.class,
+        names = {"FAILED", "READY_FOR_PULL"}
+    )
+    void retry_should_submit_a_message_going_from_the_gateway_to_the_backend(
+        ConnectorMessageTransportStatus status) {
+        // Given
+        var base = TransportStepFixtures.createTransportStepWithBusinessMessage(status, 1);
+        var inbound = ((ConnectorBusinessMessage) base.transportedMessage()).toBuilder()
+            .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .build();
+        var step = base.toBuilder().transportedMessage(inbound).build();
+        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+
+        // When
+        retryTransportStepService.execute(TRANSPORT_ID);
+
+        // Then
+        verify(linkSubmitter).submit(same(inbound));
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = ConnectorMessageTransportStatus.class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = {"FAILED", "READY_FOR_PULL"}
+    )
+    void retry_should_throw_retry_exception_when_not_retriable(
+        ConnectorMessageTransportStatus status) {
+        // Given
+        var step = TransportStepFixtures.createTransportStepWithBusinessMessage(status, 1);
         when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
 
         // When
         // Then
-        assertThrows(ConnectorMessageTransportStepRetryException.class, () ->
-            retryTransportStepService.execute(TRANSPORT_ID));
+        assertThatThrownBy(() -> retryTransportStepService.execute(TRANSPORT_ID))
+            .isInstanceOf(ConnectorMessageTransportStepRetryException.class)
+            .hasMessageContaining(TRANSPORT_ID)
+            .hasMessageContaining(status.name())
+            .hasMessageContaining("not retryable");
 
         verifyNoInteractions(linkSubmitter);
     }
 
     @Test
-    void retry_should_throw_retry_exception_when_any_exception_occurred() {
+    void retry_should_throw_retry_exception_with_the_cause_when_any_exception_occurred() {
+        // Given
+        var step = TransportStepFixtures.createTransportStepWithBusinessMessage(
+            ConnectorMessageTransportStatus.FAILED, 0);
+        var failure = new IllegalArgumentException("gateway unreachable");
+        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        doThrow(failure).when(linkSubmitter).submit(any());
+
+        // When
+        // Then
+        assertThatThrownBy(() -> retryTransportStepService.execute(TRANSPORT_ID))
+            .isInstanceOf(ConnectorMessageTransportStepRetryException.class)
+            .hasMessageContaining(TRANSPORT_ID)
+            .hasCause(failure);
+
+        verifyNoMoreInteractions(transportStepRepository, linkSubmitter);
+    }
+
+    @Test
+    void retry_should_not_leak_the_failure_reason_in_the_exception_message() {
         // Given
         var step = TransportStepFixtures.createTransportStepWithBusinessMessage(
             ConnectorMessageTransportStatus.FAILED, 0);
         when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
-        doThrow(IllegalArgumentException.class).when(linkSubmitter).submit(any());
+        doThrow(new IllegalStateException("jdbc:mysql://internal-host/db")).when(linkSubmitter)
+            .submit(any());
 
         // When
         // Then
-        assertThrows(ConnectorMessageTransportStepRetryException.class, () ->
-            retryTransportStepService.execute(TRANSPORT_ID));
-
-        verifyNoMoreInteractions(transportStepRepository, linkSubmitter);
+        assertThatThrownBy(() -> retryTransportStepService.execute(TRANSPORT_ID))
+            .isInstanceOf(ConnectorMessageTransportStepRetryException.class)
+            .hasMessageNotContaining("internal-host");
     }
 
     @Test
@@ -102,9 +171,20 @@ class ConnectorRetryTransportStepServiceTest {
 
         // When
         // Then
-        assertThrows(ConnectorMessageTransportStepNotFoundException.class, () ->
-            retryTransportStepService.execute(TRANSPORT_ID));
+        assertThatThrownBy(() -> retryTransportStepService.execute(TRANSPORT_ID))
+            .isInstanceOf(ConnectorMessageTransportStepNotFoundException.class)
+            .hasMessageContaining(TRANSPORT_ID);
 
         verifyNoInteractions(linkSubmitter);
+    }
+
+    @Test
+    void retry_should_fail_when_the_identifier_is_null() {
+        // When
+        // Then
+        assertThatThrownBy(() -> retryTransportStepService.execute(null))
+            .isInstanceOf(NullPointerException.class);
+
+        verifyNoInteractions(transportStepRepository, linkSubmitter);
     }
 }

@@ -17,7 +17,6 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTranspor
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import java.util.EnumSet;
@@ -104,7 +103,7 @@ public class ConnectorRegisterMessageTransportStepService
             "Registering transport step for message [{}] with status [{}]",
             message.identifier(), status
         );
-        var linkPartnerName = resolveLinkPartnerName(message);
+        var linkPartnerName = message.linkPartnerName();
 
         updateMessageStatus(message, status);
 
@@ -149,12 +148,6 @@ public class ConnectorRegisterMessageTransportStepService
             config.transportIdSuffix(),
             linkPartnerName
         );
-    }
-
-    private String resolveLinkPartnerName(ConnectorMessage message) {
-        return message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
-            ? message.gatewayName()
-            : message.backendName();
     }
 
     private void updateMessageStatus(

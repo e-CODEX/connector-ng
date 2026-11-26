@@ -15,8 +15,6 @@ import eu.ecodex.connector.application.exception.message.ConnectorMessageTranspo
 import eu.ecodex.connector.application.port.api.link.ConnectorLinkSubmitter;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetryTransportStep;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
-import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,19 +27,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ConnectorRetryTransportStepService implements ConnectorRetryTransportStep {
-    private final ConnectorMessageTransportStepRepository transportStepRepository;
     private final ConnectorLinkSubmitter linkSubmitter;
+    private final ConnectorMessageTransportStepRepository transportStepRepository;
 
     /**
      * Create a service used to submit a transport step retry.
      *
-     * @param transportStepRepository the repository that handle transport step persistence
      * @param linkSubmitter           the service used to submit a message
+     * @param transportStepRepository the repository that handle transport step persistence
      */
     public ConnectorRetryTransportStepService(
         ConnectorLinkSubmitter linkSubmitter,
-        ConnectorMessageTransportStepRepository transportStepRepository
-    ) {
+        ConnectorMessageTransportStepRepository transportStepRepository) {
         this.linkSubmitter = linkSubmitter;
         this.transportStepRepository = transportStepRepository;
     }
@@ -65,29 +62,24 @@ public class ConnectorRetryTransportStepService implements ConnectorRetryTranspo
 
         // get transported message
         var transportedMessage = step.transportedMessage();
+        log.info(
+            "Retry transport step [{}] message submission to [{}]",
+            transportIdentifier, step.linkPartnerName()
+        );
+
         try {
-            var linkPartnerName = resolveLinkPartnerName(transportedMessage);
-
-            log.info("Retry transport step [{}] message submission to [{}],", linkPartnerName,
-                transportIdentifier);
-
             // retry should submit message to the gateway or backend
             this.linkSubmitter.submit(transportedMessage);
 
-            log.info("Transport step message with id: [{}] successfully submitted back to the "
-                + "delivery queue", transportedMessage.identifier());
-
+            log.info(
+                "Transport step message with id: [{}] successfully submitted back to the "
+                    + "delivery queue", transportedMessage.identifier()
+            );
         } catch (Exception e) {
             log.error("Retry mechanism failed for transport step id: [{}]", transportIdentifier, e);
             var reason = "Retry mechanism failed for transport step id: [%s]";
             throw new ConnectorMessageTransportStepRetryException(
-                reason.formatted(transportIdentifier));
+                reason.formatted(transportIdentifier), e);
         }
-    }
-
-    private String resolveLinkPartnerName(ConnectorMessage message) {
-        return message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
-            ? message.gatewayName()
-            : message.backendName();
     }
 }

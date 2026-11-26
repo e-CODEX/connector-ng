@@ -13,6 +13,7 @@ package eu.ecodex.connector.persistence;
 import static eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus.DELIVERED;
 import static eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus.READY_FOR_PULL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
@@ -22,6 +23,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -94,18 +96,22 @@ public class ConnectorTransportStepLockIT extends AbstractIntegrationTest {
             var first = executor.submit(() -> transaction.execute(status -> {
                 lookup.apply(identifier);
                 locked.countDown();
-                await(release);
+                awaitLatch(release);
                 transportStepRepository.update(
                     TRANSPORT_IDENTIFIER, DELIVERED, step.numberOfAttempts());
                 return null;
             }));
-            assertThat(locked.await(30, TimeUnit.SECONDS)).isTrue();
+            // the second one asks for the same step once the first one holds it
+            var second = executor.submit(() -> {
+                awaitLatch(locked);
+                return transaction.execute(status -> lookup.apply(identifier).status());
+            });
 
-            var second = executor.submit(() -> transaction.execute(
-                status -> lookup.apply(identifier).status()));
-
-            Thread.sleep(1_000);
-            assertThat(second.isDone()).as("the second reader waits for the lock").isFalse();
+            // it keeps waiting for the lock for a whole second
+            await("the second reader waits for the lock")
+                .during(Duration.ofSeconds(1))
+                .atMost(Duration.ofSeconds(5))
+                .until(() -> !second.isDone());
 
             release.countDown();
             first.get(30, TimeUnit.SECONDS);
@@ -116,7 +122,7 @@ public class ConnectorTransportStepLockIT extends AbstractIntegrationTest {
         }
     }
 
-    private static void await(CountDownLatch latch) {
+    private static void awaitLatch(CountDownLatch latch) {
         try {
             assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
         } catch (InterruptedException e) {

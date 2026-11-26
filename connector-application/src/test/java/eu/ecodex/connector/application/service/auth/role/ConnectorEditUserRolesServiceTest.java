@@ -14,15 +14,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import eu.ecodex.connector.application.exception.role.ConnectorRoleNotFoundException;
+import eu.ecodex.connector.application.exception.user.ConnectorLastAdministratorException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoleByName;
 import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRolesByNames;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.application.service.auth.user.ConnectorAdminSafeguard;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
@@ -45,6 +50,9 @@ class ConnectorEditUserRolesServiceTest {
 
     @Mock
     private ConnectorUserRepository userRepository;
+
+    @Mock
+    private ConnectorAdminSafeguard adminSafeguard;
 
     @InjectMocks
     private ConnectorEditUserRolesService editUserRolesService;
@@ -170,9 +178,55 @@ class ConnectorEditUserRolesServiceTest {
         assertThat(actual.roles()).usingRecursiveComparison().isEqualTo(Set.of(roleUser));
         verify(userRepository).findByUuid(userId);
         verify(retrieveRolesByNames).execute(requestedNames);
+        verify(adminSafeguard).assertAnotherAdministratorRemains(user);
         verify(userRepository).save(expected);
 
         assertNoMoreInteractions();
+    }
+
+    @Test
+    void edit_user_roles_should_not_remove_the_admin_role_of_the_last_administrator() {
+        // Given
+        var userId = "uuid";
+        var roleUser = ConnectorRole.builder().name("ROLE_USER").build();
+        var roleAdmin = ConnectorRole.builder().name("ROLE_ADMIN").build();
+        var user = ConnectorUser.builder()
+            .uuid(userId)
+            .roles(new HashSet<>(Collections.singleton(roleAdmin)))
+            .build();
+        when(userRepository.findByUuid(userId)).thenReturn(Optional.of(user));
+        when(retrieveRolesByNames.execute(anySet())).thenReturn(Set.of(roleUser));
+        doThrow(new ConnectorLastAdministratorException("last"))
+            .when(adminSafeguard).assertAnotherAdministratorRemains(user);
+
+        // When
+        var requestedNames = Set.of("ROLE_USER");
+        assertThrows(ConnectorLastAdministratorException.class,
+            () -> editUserRolesService.execute(userId, requestedNames));
+
+        // Then
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void edit_user_roles_should_not_check_the_safeguard_when_the_admin_role_is_kept() {
+        // Given
+        var userId = "uuid";
+        var roleUser = ConnectorRole.builder().name("ROLE_USER").build();
+        var roleAdmin = ConnectorRole.builder().name("ROLE_ADMIN").build();
+        var user = ConnectorUser.builder()
+            .uuid(userId)
+            .roles(new HashSet<>(Collections.singleton(roleAdmin)))
+            .build();
+        when(userRepository.findByUuid(userId)).thenReturn(Optional.of(user));
+        when(retrieveRolesByNames.execute(anySet())).thenReturn(Set.of(roleUser, roleAdmin));
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        editUserRolesService.execute(userId, Set.of("ROLE_USER", "ROLE_ADMIN"));
+
+        // Then
+        verifyNoInteractions(adminSafeguard);
     }
 
     @Test

@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.user;
 
+import eu.ecodex.connector.application.exception.user.ConnectorLastAdministratorException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserBadCredentialsException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserIdentifierMismatchException;
@@ -75,6 +76,13 @@ public class ConnectorUserExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(ConnectorUserIdentifierMismatchException.class)
     public ErrorResponse handleUserException(ConnectorUserIdentifierMismatchException e) {
+        return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorLastAdministratorException.class)
+    public ErrorResponse handleLastAdministrator(ConnectorLastAdministratorException e) {
         return new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage());
     }
 }

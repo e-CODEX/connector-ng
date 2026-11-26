@@ -96,6 +96,17 @@ public interface ConnectorUserRepository {
      */
     void deleteByUuid(@Nonnull String identifier);
 
+    /**
+     * Finds the enabled users holding the given role and locks them until the end of the
+     * transaction, so that concurrent changes to these users wait for it. It must be called within
+     * a transaction.
+     *
+     * @param roleName the name of the role, e.g. {@code ROLE_ADMIN}; must not be null
+     *
+     * @return the enabled users which hold the role
+     */
+    List<ConnectorUser> findEnabledByRoleNameForUpdate(@Nonnull String roleName);
+
 
     /**
      * Checks if a {@code ConnectorUser} entity exists with the given UUID.

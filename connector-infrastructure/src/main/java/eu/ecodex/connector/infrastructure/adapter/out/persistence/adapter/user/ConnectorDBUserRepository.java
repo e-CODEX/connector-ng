@@ -109,6 +109,15 @@ public class ConnectorDBUserRepository implements ConnectorUserRepository {
     }
 
     @Override
+    @Transactional
+    public List<ConnectorUser> findEnabledByRoleNameForUpdate(@NonNull String roleName) {
+        return jpaRepository.findEnabledByRoleNameForUpdate(roleName)
+            .stream()
+            .map(ConnectorUserMapper::toDomain)
+            .toList();
+    }
+
+    @Override
     public boolean existsByUuid(@NonNull String uuid) {
         return jpaRepository.existsByUuid(uuid);
     }

@@ -12,10 +12,14 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository
 
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.user.ConnectorUserEntity;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -135,11 +139,22 @@ public interface ConnectorUserJpaRepository extends JpaRepository<ConnectorUserE
     boolean existsByEmailAndUuidNot(@Nonnull String email, @Nonnull String uuid);
 
     /**
-     * checks if users has role identifier in parameter.
+     * Finds the enabled users holding a role and locks their rows until the end of the
+     * transaction. There is deliberately no entity graph and no {@code DISTINCT}, which some
+     * databases, PostgreSQL among them, refuse with {@code FOR UPDATE}. A user holds a role only
+     * once, so the rows are unique anyway.
      *
-     * @param uuid role uuid to check
+     * @param roleName the name of the role
      *
-     * @return true if users exists and false else
+     * @return the enabled users holding the role
      */
-    boolean existsByRolesUuid(@Nonnull String uuid);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT u
+        FROM ConnectorUserEntity u
+        JOIN u.roles r
+        WHERE u.enabled = true
+            AND r.name = :roleName
+        """)
+    List<ConnectorUserEntity> findEnabledByRoleNameForUpdate(@Param("roleName") String roleName);
 }

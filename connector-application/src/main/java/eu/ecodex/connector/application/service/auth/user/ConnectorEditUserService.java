@@ -21,6 +21,7 @@ import java.time.Clock;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,11 +42,13 @@ import org.springframework.util.StringUtils;
  */
 @Slf4j
 @Component
+@Transactional
 public class ConnectorEditUserService implements ConnectorEditUser {
     private final ConnectorUserRepository repository;
     private final ConnectorVerifyUniqueUserEmail verifierUniqueUserEmail;
     private final ConnectorRetrieveUserByIdentifier retrieveUserByIdentifier;
     private final ConnectorRefreshTokenRepository refreshTokenRepository;
+    private final ConnectorAdminSafeguard adminSafeguard;
     private final Clock clock;
 
     /**
@@ -58,6 +61,8 @@ public class ConnectorEditUserService implements ConnectorEditUser {
      *                                 not be null
      * @param refreshTokenRepository   the repository of the refresh tokens, revoked when a user is
      *                                 disabled; must not be null
+     * @param adminSafeguard           the check that an enabled administrator remains; must not be
+     *                                 null
      * @param clock                    the clock giving the revocation time; must not be null
      */
     public ConnectorEditUserService(
@@ -65,11 +70,13 @@ public class ConnectorEditUserService implements ConnectorEditUser {
         ConnectorVerifyUniqueUserEmail verifierUniqueUserEmail,
         ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier,
         ConnectorRefreshTokenRepository refreshTokenRepository,
+        ConnectorAdminSafeguard adminSafeguard,
         Clock clock) {
         this.repository = repository;
         this.verifierUniqueUserEmail = verifierUniqueUserEmail;
         this.retrieveUserByIdentifier = retrieveUserByIdentifier;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.adminSafeguard = adminSafeguard;
         this.clock = clock;
     }
 
@@ -98,6 +105,9 @@ public class ConnectorEditUserService implements ConnectorEditUser {
         }
 
         if (user.enabled() != null) {
+            if (!user.enabled()) {
+                adminSafeguard.assertAnotherAdministratorRemains(existingUser);
+            }
             userBuilder.enabled(user.enabled());
         }
 

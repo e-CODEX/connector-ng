@@ -10,6 +10,7 @@
 
 package eu.ecodex.connector.infrastructure.adapter.out.auth.identity;
 
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRetrieveUserByUsername;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
 import lombok.NonNull;
@@ -41,7 +42,11 @@ public class ConnectorUserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public @NonNull ConnectorUserDetails loadUserByUsername(@NonNull String username) {
-        var connectorUser = retrieveUserByUsername.execute(username);
-        return new ConnectorUserDetails(connectorUser);
+        try {
+            var connectorUser = retrieveUserByUsername.execute(username);
+            return new ConnectorUserDetails(connectorUser);
+        } catch (ConnectorUserNotFoundException e) {
+            throw new UsernameNotFoundException("Unknown user", e);
+        }
     }
 }

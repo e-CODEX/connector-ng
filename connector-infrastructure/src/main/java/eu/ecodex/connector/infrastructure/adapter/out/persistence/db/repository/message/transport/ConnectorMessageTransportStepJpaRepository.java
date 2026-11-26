@@ -80,6 +80,22 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     ConnectorMessageTransportStepEntity findByTransportOrMessageOrRemoteSystemIdentifier(
         @Param("identifier") String identifier);
 
+    /**
+     * Finds a transport step like {@link #findByTransportOrMessageOrRemoteSystemIdentifier} and
+     * locks its row until the end of the transaction. It has no entity graph on purpose.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT mts
+        FROM ConnectorMessageTransportStepEntity mts
+        WHERE mts.identifier = :identifier
+            OR mts.transportedMessageIdentifier = :identifier
+            OR mts.remoteSystemIdentifier = :identifier
+        """
+    )
+    ConnectorMessageTransportStepEntity findByTransportOrMessageOrRemoteSystemIdentifierForUpdate(
+        @Param("identifier") String identifier);
+
     @Query("""
         SELECT DISTINCT mts.identifier
         FROM ConnectorMessageTransportStepEntity mts

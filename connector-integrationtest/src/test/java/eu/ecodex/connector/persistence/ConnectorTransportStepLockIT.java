@@ -17,9 +17,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import eu.ecodex.connector.AbstractIntegrationTest;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
+import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +54,79 @@ public class ConnectorTransportStepLockIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @WithReferenceData
+    void should_make_a_second_reader_wait_when_the_step_is_read_by_its_message() throws Exception {
+        var step = transportStepRepository.findByIdentifier(TRANSPORT_IDENTIFIER);
+
+        assertThat(secondReaderWaitsForTheFirstOne(
+            transportStepRepository::findByTransportedMessageIdentifierForUpdate,
+            step.transportedMessageIdentifier(), step
+        )).isEqualTo(DELIVERED);
+    }
+
+    @Test
+    @WithReferenceData
+    void should_make_a_second_reader_wait_when_the_step_is_read_by_any_of_its_identifiers()
+        throws Exception {
+        var step = transportStepRepository.findByIdentifier(TRANSPORT_IDENTIFIER);
+
+        assertThat(secondReaderWaitsForTheFirstOne(
+            transportStepRepository::findByStepOrMessageOrRemoteSystemIdentifierForUpdate,
+            step.remoteSystemIdentifier(), step
+        )).isEqualTo(DELIVERED);
+    }
+
+    /**
+     * A first transaction locks the step with the given lookup and delivers the message, while a
+     * second one asks for the same step. It must wait, and then see what the first one committed.
+     */
+    private ConnectorMessageTransportStatus secondReaderWaitsForTheFirstOne(
+        Function<String, ConnectorMessageTransportStep> lookup,
+        String identifier,
+        ConnectorMessageTransportStep step) throws Exception {
+        assertThat(step.status()).isEqualTo(READY_FOR_PULL);
+        var transaction = new TransactionTemplate(transactionManager);
+        var locked = new CountDownLatch(1);
+        var release = new CountDownLatch(1);
+        var executor = Executors.newFixedThreadPool(2);
+
+        try {
+            var first = executor.submit(() -> transaction.execute(status -> {
+                lookup.apply(identifier);
+                locked.countDown();
+                await(release);
+                transportStepRepository.update(
+                    TRANSPORT_IDENTIFIER, DELIVERED, step.numberOfAttempts());
+                return null;
+            }));
+            assertThat(locked.await(30, TimeUnit.SECONDS)).isTrue();
+
+            var second = executor.submit(() -> transaction.execute(
+                status -> lookup.apply(identifier).status()));
+
+            Thread.sleep(1_000);
+            assertThat(second.isDone()).as("the second reader waits for the lock").isFalse();
+
+            release.countDown();
+            first.get(30, TimeUnit.SECONDS);
+            return second.get(30, TimeUnit.SECONDS);
+        } finally {
+            release.countDown();
+            executor.shutdownNow();
+        }
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     @Sql({
         "classpath:sql/business-domain.sql",
         "classpath:sql/processing-mode.sql",
@@ -62,57 +141,6 @@ public class ConnectorTransportStepLockIT extends AbstractIntegrationTest {
         "classpath:sql/message-transport-step.sql",
         "classpath:sql/message-transport-step-statuses.sql",
     })
-    void should_make_a_second_reader_wait_and_see_the_status_the_first_one_committed()
-        throws Exception {
-        // Given
-        var step = transportStepRepository.findByIdentifier(TRANSPORT_IDENTIFIER);
-        assertThat(step.status()).isEqualTo(READY_FOR_PULL);
-        var messageIdentifier = step.transportedMessageIdentifier();
-        var transaction = new TransactionTemplate(transactionManager);
-        var locked = new CountDownLatch(1);
-        var release = new CountDownLatch(1);
-        var executor = Executors.newFixedThreadPool(2);
-
-        try {
-            // When: a first transaction locks the step and delivers the message
-            var first = executor.submit(() -> transaction.execute(status -> {
-                transportStepRepository
-                    .findByTransportedMessageIdentifierForUpdate(messageIdentifier);
-                locked.countDown();
-                await(release);
-                transportStepRepository.update(
-                    TRANSPORT_IDENTIFIER, DELIVERED, step.numberOfAttempts());
-                return null;
-            }));
-            assertThat(locked.await(30, TimeUnit.SECONDS)).isTrue();
-
-            // and a second one asks for the same step meanwhile
-            var second = executor.submit(() -> transaction.execute(status ->
-                transportStepRepository
-                    .findByTransportedMessageIdentifierForUpdate(messageIdentifier)
-                    .status()));
-
-            // Then: it waits for the first one
-            Thread.sleep(1_000);
-            assertThat(second.isDone()).as("the second reader waits for the lock").isFalse();
-
-            // and, once the first one has committed, sees what it committed
-            release.countDown();
-            first.get(30, TimeUnit.SECONDS);
-            assertThat(second.get(30, TimeUnit.SECONDS))
-                .isEqualTo(ConnectorMessageTransportStatus.DELIVERED);
-        } finally {
-            release.countDown();
-            executor.shutdownNow();
-        }
-    }
-
-    private static void await(CountDownLatch latch) {
-        try {
-            assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException(e);
-        }
+    private @interface WithReferenceData {
     }
 }

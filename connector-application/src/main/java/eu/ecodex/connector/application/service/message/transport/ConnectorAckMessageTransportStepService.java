@@ -92,6 +92,14 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
             return;
         }
 
+        if (existingStep.status() == command.status()) {
+            log.info(
+                "Message [{}] is already in transport status [{}]: the answer is ignored",
+                stepOrMessageOrRemoteSystemIdentifier, existingStep.status()
+            );
+            return;
+        }
+
         updateTransportStep(existingStep, command);
         handlePostUpdate(existingStep, command);
     }
@@ -111,10 +119,19 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
             throw new IllegalArgumentException(
                 "Status READY_FOR_PULL cannot be applied to an existing transport step");
         }
+
+        if (command.status() == ConnectorMessageTransportStatus.SUBMITTED) {
+            throw new IllegalArgumentException(
+                "Status SUBMITTED cannot be answered by a link partner: it is set when the "
+                    + "message is submitted");
+        }
     }
 
     private ConnectorMessageTransportStep findStepOrThrow(String identifier) {
-        var step = transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(identifier);
+        // The step stays locked until the end of the transaction, so that the answer is applied to
+        // what a concurrent retry or delivery has left, and not to what it was before.
+        var step = transportStepRepository
+            .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(identifier);
 
         if (step == null) {
             throw new ConnectorMessageTransportStepNotFoundException(
@@ -157,7 +174,8 @@ public class ConnectorAckMessageTransportStepService implements ConnectorAckMess
             case DELIVERED ->
                 handleDelivered(transportedMessage, command.remoteMessageIdentifier());
             case FAILED -> handleFailed(existingStep, command.errors());
-            default -> log.debug("No action required for transport status [{}]", command.status());
+            default -> throw new IllegalStateException(
+                "Unexpected transport status [%s]".formatted(command.status()));
         }
     }
 

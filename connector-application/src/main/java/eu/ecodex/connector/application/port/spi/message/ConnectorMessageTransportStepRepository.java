@@ -88,6 +88,22 @@ public interface ConnectorMessageTransportStepRepository {
         @Nonnull ConnectorMessageTransportStatus status);
 
     /**
+     * Retrieves a transport step like {@link #findByStepOrMessageOrRemoteSystemIdentifier(String)}
+     * and locks it until the end of the current transaction, so that no other transaction can lock
+     * or change it meanwhile.
+     *
+     * <p>It must be called inside a transaction. A concurrent caller waits for the lock and then
+     * sees the state committed by the first one.
+     *
+     * @param identifier the transport step identifier, the message identifier or the remote system
+     *                   identifier (must not be null)
+     *
+     * @return the locked {@link ConnectorMessageTransportStep}, or {@code null} if none is found
+     */
+    ConnectorMessageTransportStep findByStepOrMessageOrRemoteSystemIdentifierForUpdate(
+        @Nonnull String identifier);
+
+    /**
      * Retrieves a transport step by its own identifier, by the identifier of its message, or by a
      * remote system identifier (backend ID or ebMS ID).
      *

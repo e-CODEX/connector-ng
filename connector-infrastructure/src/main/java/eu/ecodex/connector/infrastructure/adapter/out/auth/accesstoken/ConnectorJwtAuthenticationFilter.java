@@ -21,6 +21,7 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -104,10 +105,11 @@ public class ConnectorJwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                 }
             }
-        } catch (JwtException | IllegalArgumentException ex) {
+        } catch (JwtException | IllegalArgumentException | AuthenticationException ex) {
             SecurityContextHolder.clearContext();
-            log.error("Could not authenticate JWT token, {}", ex.getMessage());
+            log.warn("Could not authenticate JWT token: [{}]", ex.getClass().getSimpleName());
         }
+
         filterChain.doFilter(request, response);
     }
 }

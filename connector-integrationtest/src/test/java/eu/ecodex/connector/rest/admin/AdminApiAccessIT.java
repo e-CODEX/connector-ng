@@ -78,6 +78,16 @@ public class AdminApiAccessIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void should_answer_401_when_the_user_of_the_token_does_not_exist() {
+        // the token is valid, but its user is not in the database (e.g. deleted since)
+        apiClient.get()
+            .uri("/api/v1/admin/messages/stats")
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultSimpleUserToken())
+            .exchange()
+            .expectStatus().isUnauthorized();
+    }
+
+    @Test
     @Sql({"classpath:sql/user.sql"})
     void should_let_an_administrator_reach_every_admin_endpoint() {
         var token = "Bearer " + generateDefaultAdminToken();

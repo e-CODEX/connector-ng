@@ -33,12 +33,12 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorJwtAuthenticationFilterTest {
     @Mock
     ConnectorJwtParser jwtTokenParser;
-
     @Mock
     UserDetailsService userDetailsService;
 
@@ -63,7 +63,7 @@ class ConnectorJwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_without_AuthorizationHeader_continuesChainWithoutAuthenticating()
+    void should_continue_the_chain_without_authenticating_when_there_is_no_authorization_header()
         throws Exception {
         // Given
         // When
@@ -77,7 +77,7 @@ class ConnectorJwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_withNonBearerHeader_continuesChainWithoutAuthenticating()
+    void should_continue_the_chain_without_authenticating_when_the_header_is_not_a_bearer()
         throws Exception {
         // Given
         var token = "basic-token";
@@ -94,7 +94,7 @@ class ConnectorJwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_withInvalidToken_doesNotSetAuthentication() throws Exception {
+    void should_not_authenticate_when_the_token_is_invalid() throws Exception {
         // Given
         var token = "expired-or-tampered-token";
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
@@ -115,7 +115,7 @@ class ConnectorJwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_withMalformedToken_clearsContextAndContinuesChain() throws Exception {
+    void should_clear_the_context_and_continue_when_the_token_is_malformed() throws Exception {
         // Given
         var token = "not-a-real-jwt";
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
@@ -135,7 +135,25 @@ class ConnectorJwtAuthenticationFilterTest {
 
 
     @Test
-    void doFilterInternal_with_validToken_setsAuthentication() throws Exception {
+    void should_clear_the_context_and_continue_when_the_user_of_the_token_is_unknown()
+        throws Exception {
+        // Given
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer a-token");
+
+        when(jwtTokenParser.extractUsername(any())).thenReturn("deleted-user");
+        when(userDetailsService.loadUserByUsername("deleted-user"))
+            .thenThrow(new UsernameNotFoundException("Unknown user"));
+
+        // When
+        filter.doFilterInternal(request, response, filterChain);
+
+        // Then
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+        assertThat(filterChain.getRequest()).isEqualTo(request);
+    }
+
+    @Test
+    void should_authenticate_when_the_token_is_valid() throws Exception {
         // Given
         var token = "valid-token";
         request.addHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);

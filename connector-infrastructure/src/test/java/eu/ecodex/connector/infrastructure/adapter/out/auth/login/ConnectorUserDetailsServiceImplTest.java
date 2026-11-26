@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class ConnectorUserDetailsServiceImplTest {
@@ -36,7 +37,7 @@ class ConnectorUserDetailsServiceImplTest {
     ConnectorUserDetailsServiceImpl service;
 
     @Test
-    void loadUserByUsername_should_return_user_details() {
+    void should_return_the_user_details_of_the_user() {
         // Given
         var username = "test";
         var userDetails = ConnectorUserTestFixtures.createUserDetails();
@@ -54,7 +55,7 @@ class ConnectorUserDetailsServiceImplTest {
     }
 
     @Test
-    void loadUserByUsername_should_throw_exception_when_user_not_found() {
+    void should_throw_username_not_found_when_the_user_does_not_exist() {
         // Given
         var username = "test";
 
@@ -63,7 +64,7 @@ class ConnectorUserDetailsServiceImplTest {
 
         // When
         assertThrows(
-            ConnectorUserNotFoundException.class,
+            UsernameNotFoundException.class,
             () -> service.loadUserByUsername(username)
         );
 

@@ -20,6 +20,7 @@ import eu.ecodex.connector.domain.model.message.ConnectorMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
 import lombok.NonNull;
@@ -37,7 +38,7 @@ public class ConnectorRegisterMessageTransportStepService
     implements ConnectorRegisterMessageTransportStep {
     private static final String TRANSPORT_ID_FORMAT = "%s@%s_%s";
 
-    private static final Set<ConnectorMessageTransportStatus> ALLOWED_STATUSES = Set.of(
+    private static final Set<ConnectorMessageTransportStatus> ALLOWED_STATUSES = EnumSet.of(
         ConnectorMessageTransportStatus.SUBMITTED,
         ConnectorMessageTransportStatus.DELIVERED,
         ConnectorMessageTransportStatus.FAILED,
@@ -72,16 +73,7 @@ public class ConnectorRegisterMessageTransportStepService
     public ConnectorMessageTransportStep execute(
         @NonNull ConnectorMessage message,
         @NonNull ConnectorMessageTransportStatus status) {
-
-        if (message.identifier() == null) {
-            throw new IllegalArgumentException("Message identifier must not be null");
-        }
-
-        if (!ALLOWED_STATUSES.contains(status)) {
-            throw new IllegalArgumentException(
-                "Status must be one of [%s]".formatted(ALLOWED_STATUSES)
-            );
-        }
+        validate(message, status);
 
         var transportStep =
             transportStepRepository.findByTransportedMessageIdentifier(message.identifier());
@@ -90,48 +82,72 @@ public class ConnectorRegisterMessageTransportStepService
             return recordNewAttempt(message, status, transportStep);
         }
 
+        return createTransportStep(message, status);
+    }
+
+    private void validate(ConnectorMessage message, ConnectorMessageTransportStatus status) {
+        if (message.identifier() == null) {
+            throw new IllegalArgumentException("Message identifier must not be null");
+        }
+
+        if (!ALLOWED_STATUSES.contains(status)) {
+            throw new IllegalArgumentException(
+                "Status must be one of %s".formatted(ALLOWED_STATUSES)
+            );
+        }
+    }
+
+    private ConnectorMessageTransportStep createTransportStep(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status) {
         log.debug(
             "Registering transport step for message [{}] with status [{}]",
             message.identifier(), status
         );
-        transportStep = ConnectorMessageTransportStep
+        var linkPartnerName = resolveLinkPartnerName(message);
+
+        updateMessageStatus(message, status);
+
+        var transportStep = ConnectorMessageTransportStep
             .builder()
-            .identifier(buildIdentifier(message))
+            .identifier(buildIdentifier(linkPartnerName))
             .transportedMessageIdentifier(message.identifier())
-            .transportedMessage(updateMessageStatus(message, status))
+            .transportedMessage(withTransportStatus(message, status))
             .status(status)
-            .numberOfAttempts(ALLOWED_STATUSES.contains(status) ? 1 : 0)
-            .linkPartnerName(resolveLinkPartnerName(message))
+            .numberOfAttempts(1)
+            .linkPartnerName(linkPartnerName)
             .build();
 
         return transportStepRepository.save(transportStep);
     }
 
     private ConnectorMessageTransportStep recordNewAttempt(
-        @NonNull ConnectorMessage message,
-        @NonNull ConnectorMessageTransportStatus status,
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status,
         ConnectorMessageTransportStep transportStep) {
         log.debug(
             "Updating transport step [{}] for message [{}] by incrementing number of attempts",
-            transportStep.identifier(), message.identifier());
+            transportStep.identifier(), message.identifier()
+        );
 
-        int numberOfAttempts =
-            ALLOWED_STATUSES.contains(status) ? transportStep.numberOfAttempts() + 1 :
-                transportStep.numberOfAttempts();
-
-        return transportStepRepository.update(
+        var updated = transportStepRepository.update(
             transportStep.identifier(),
-            transportStep.status(),
-            numberOfAttempts);
+            status,
+            transportStep.numberOfAttempts() + 1
+        );
+
+        // keep the business message in line with its transport step, as for a new step
+        updateMessageStatus(message, status);
+
+        return updated;
     }
 
-
-    private String buildIdentifier(ConnectorMessage message) {
+    private String buildIdentifier(String linkPartnerName) {
         var config = processingConfigurationProvider.getConfiguration();
         return TRANSPORT_ID_FORMAT.formatted(
             UUID.randomUUID(),
             config.transportIdSuffix(),
-            resolveLinkPartnerName(message)
+            linkPartnerName
         );
     }
 
@@ -141,18 +157,24 @@ public class ConnectorRegisterMessageTransportStepService
             : message.backendName();
     }
 
-    private ConnectorMessage updateMessageStatus(
+    private void updateMessageStatus(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status) {
+        if (message instanceof ConnectorBusinessMessage) {
+            messageRepository.updateStatus(
+                message.identifier(),
+                ConnectorBusinessMessageStatus.fromTransportStep(status.name())
+            );
+        }
+    }
+
+    private ConnectorMessage withTransportStatus(
         ConnectorMessage message,
         ConnectorMessageTransportStatus status) {
         if (message instanceof ConnectorBusinessMessage businessMessage) {
-            var messageStatus = ConnectorBusinessMessageStatus.fromTransportStep(status.name());
-            messageRepository.updateStatus(
-                businessMessage.identifier(),
-                messageStatus
-            );
-
-            return businessMessage.toBuilder()
-                .status(messageStatus)
+            return businessMessage
+                .toBuilder()
+                .status(ConnectorBusinessMessageStatus.fromTransportStep(status.name()))
                 .build();
         }
         return message;

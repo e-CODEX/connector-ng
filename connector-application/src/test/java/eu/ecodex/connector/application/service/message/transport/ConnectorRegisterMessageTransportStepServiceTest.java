@@ -138,6 +138,42 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
             value = ConnectorMessageTransportStatus.class,
             names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
         )
+        void should_update_the_business_message_status_when_a_new_attempt_is_recorded(
+            ConnectorMessageTransportStatus status) {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(
+                    ConnectorMessageTransportStatus.FAILED, 2)
+            );
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 3));
+
+            service.execute(message(), status);
+
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 3);
+            verify(messageRepository).updateStatus(
+                MESSAGE_ID, ConnectorBusinessMessageStatus.fromTransportStep(status.name()));
+        }
+
+        @Test
+        void should_not_update_any_message_status_for_an_evidence_message_attempt() {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(
+                    ConnectorMessageTransportStatus.FAILED, 0)
+            );
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(
+                    ConnectorMessageTransportStatus.SUBMITTED, 1));
+
+            service.execute(evidenceMessage(), ConnectorMessageTransportStatus.SUBMITTED);
+
+            verifyNoInteractions(messageRepository);
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
         void should_register_the_transport_step_for_every_allowed_status(
             ConnectorMessageTransportStatus status) {
             when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());

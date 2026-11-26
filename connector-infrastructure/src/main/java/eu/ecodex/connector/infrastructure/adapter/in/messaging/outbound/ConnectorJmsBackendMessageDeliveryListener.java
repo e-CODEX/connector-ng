@@ -16,6 +16,7 @@ import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessa
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
@@ -47,6 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConnectorJmsBackendMessageDeliveryListener
     implements ConnectorEventHandler<ConnectorMessage> {
     private final ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    private final ConnectorMessageTransportStepRepository transportStepRepository;
     private final ConnectorMessageRepository messageRepository;
     private final ConnectorMessageEvidenceRepository messageEvidenceRepository;
     private final ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient;
@@ -63,6 +65,8 @@ public class ConnectorJmsBackendMessageDeliveryListener
      * @param registerMessageTransportStep    Represents the transport step responsible for
      *                                        processing and executing message delivery within the
      *                                        connector registration process.
+     * @param transportStepRepository         Repository used to lock the transport step of the
+     *                                        message while it is delivered.
      * @param messageRepository               Repository for handling the persistence and retrieval
      *                                        of connector messages.
      * @param messageEvidenceRepository       Repository for handling the persistence and retrieval
@@ -76,6 +80,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
      */
     public ConnectorJmsBackendMessageDeliveryListener(
         ConnectorRegisterMessageTransportStep registerMessageTransportStep,
+        ConnectorMessageTransportStepRepository transportStepRepository,
         ConnectorMessageRepository messageRepository,
         ConnectorMessageEvidenceRepository messageEvidenceRepository,
         ConnectorBackendDeliveryServiceClient backendDeliveryServiceClient,
@@ -83,6 +88,7 @@ public class ConnectorJmsBackendMessageDeliveryListener
         LegacyMessageHelper legacyMessageHelper,
         ConnectorOutboundEvidenceMessageReceiver outboundEvidenceMessageReceiver) {
         this.registerMessageTransportStep = registerMessageTransportStep;
+        this.transportStepRepository = transportStepRepository;
         this.messageRepository = messageRepository;
         this.messageEvidenceRepository = messageEvidenceRepository;
         this.backendDeliveryServiceClient = backendDeliveryServiceClient;
@@ -142,6 +148,11 @@ public class ConnectorJmsBackendMessageDeliveryListener
 
     private void submitToBackend(@NonNull ConnectorMessage message) {
         var identifier = message.identifier();
+
+        if (isAlreadyHandedOver(identifier)) {
+            return;
+        }
+
         log.info("Submitting message [{}] to the backend system", identifier);
 
         DeliveryOutcome outcome;
@@ -160,6 +171,34 @@ public class ConnectorJmsBackendMessageDeliveryListener
 
         markAsDelivered(message, outcome.backendIdentifier());
         log.info("Message [{}] delivered to the backend system", identifier);
+    }
+
+    /**
+     * Tells whether the backend already has the message, which happens when it was queued more
+     * than once, for example by two retries of the same transport step.
+     *
+     * <p>The transport step is locked until the end of the transaction, so a second copy of the
+     * message waits for the delivery of the first and then sees its result, instead of delivering
+     * the message to the backend a second time.
+     */
+    private boolean isAlreadyHandedOver(String identifier) {
+        var transportStep =
+            transportStepRepository.findByTransportedMessageIdentifierForUpdate(identifier);
+
+        if (transportStep == null) {
+            return false;
+        }
+
+        var status = transportStep.status();
+        if (status == ConnectorMessageTransportStatus.DELIVERED
+            || status == ConnectorMessageTransportStatus.PULLED) {
+            log.info(
+                "Message [{}] is not submitted to the backend again: its transport step is [{}]",
+                identifier, status
+            );
+            return true;
+        }
+        return false;
     }
 
     private DeliveryOutcome deliver(ConnectorMessage message) {

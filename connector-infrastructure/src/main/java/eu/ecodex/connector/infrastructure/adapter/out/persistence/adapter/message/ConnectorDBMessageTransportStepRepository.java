@@ -154,6 +154,16 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
+    @Transactional
+    public ConnectorMessageTransportStep findByTransportedMessageIdentifierForUpdate(
+        @NonNull String transportedMessageIdentifier) {
+        var entity = this.transportStepJpaRepository.findByTransportedMessageIdentifierForUpdate(
+            transportedMessageIdentifier);
+
+        return toDomain(entity);
+    }
+
+    @Override
     public ConnectorMessageTransportStep findByIdentifier(@NonNull String identifier) {
         var entity = this.transportStepJpaRepository.findByIdentifier(identifier);
 

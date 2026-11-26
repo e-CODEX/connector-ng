@@ -10,10 +10,13 @@
 
 package eu.ecodex.connector.rest.admin.message;
 
+import static eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus.FAILED;
 import static eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus.READY_FOR_PULL;
+import static eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus.SUBMITTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.ecodex.connector.AbstractIntegrationTest;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
@@ -34,7 +37,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.client.EntityExchangeResult;
@@ -52,6 +54,8 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
     private ConnectorUserRepository userRepository;
     @Autowired
     private ConnectorMessageTransportStepRepository transportStepRepository;
+    @Autowired
+    private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
 
     @AfterEach
     void cleanUp() {
@@ -182,6 +186,45 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
     }
 
     @Test
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/user.sql",
+    })
+    void should_end_the_retry_on_the_same_transport_step_when_the_delivery_is_done() {
+        // Given
+        var transportIdentifier =
+            "b0f19c4c-ac3e-438c-9951-8e3a5211fed4@connector.ecodex.eu_backend_alice";
+        var step = transportStepRepository.findByIdentifier(transportIdentifier);
+        retry(transportIdentifier).expectStatus().isOk();
+
+        // When: the delivery listener reports its result
+        registerMessageTransportStep.execute(step.transportedMessage(), FAILED);
+
+        // Then: it lands on the retried step, and no second step is created
+        var ended = transportStepRepository.findByIdentifier(transportIdentifier);
+        assertThat(ended.status()).isEqualTo(FAILED);
+        assertThat(ended.numberOfAttempts()).isEqualTo(step.numberOfAttempts() + 1);
+        assertThat(jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM connector_message_transport_steps "
+                + "WHERE transported_message_identifier = ?",
+            Integer.class, step.transportedMessageIdentifier())).isOne();
+
+        // and the step can be retried again
+        retry(transportIdentifier).expectStatus().isOk();
+    }
+
+    @Test
     @Sql({"classpath:sql/user.sql"})
     void should_return_404_when_retrieving_transport_steps_for_non_existing_connector_message() {
         var transportIdentifier = "unknownTransportIdentifier@connector.ecodex.eu";
@@ -190,6 +233,13 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .exchange()
             .expectStatus().isNotFound();
+    }
+
+    private RestTestClient.ResponseSpec retry(String transportIdentifier) {
+        return apiClient.post()
+            .uri(buildUrl(transportIdentifier))
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
+            .exchange();
     }
 
     private String buildUrl(String identifier) {

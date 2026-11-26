@@ -77,11 +77,26 @@ public class ConnectorRegisterMessageTransportStepService
         var transportStep =
             transportStepRepository.findByTransportedMessageIdentifier(message.identifier());
 
-        if (transportStep != null && transportStep.isRetryable()) {
+        if (transportStep == null) {
+            return createTransportStep(message, status);
+        }
+
+        // The existing step decides what the registration means, never the status being
+        // registered: a message has a single transport step for its whole life.
+        if (transportStep.isRetryable()) {
             return recordNewAttempt(message, status, transportStep);
         }
 
-        return createTransportStep(message, status);
+        if (transportStep.status() == ConnectorMessageTransportStatus.SUBMITTED) {
+            return recordOutcome(message, status, transportStep);
+        }
+
+        log.warn(
+            "Ignoring status [{}] for message [{}]: its transport step [{}] is already [{}]",
+            status, message.identifier(), transportStep.identifier(), transportStep.status()
+        );
+
+        return transportStep;
     }
 
     private void validate(ConnectorMessage message, ConnectorMessageTransportStatus status) {
@@ -136,6 +151,37 @@ public class ConnectorRegisterMessageTransportStepService
         );
 
         // keep the business message in line with its transport step, as for a new step
+        updateMessageStatus(message, status);
+
+        return updated;
+    }
+
+    /**
+     * Records the outcome of an attempt that is already counted, for example the delivery of a
+     * message the retry has submitted. Repeating the status the step already has changes nothing.
+     */
+    private ConnectorMessageTransportStep recordOutcome(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status,
+        ConnectorMessageTransportStep transportStep) {
+        if (transportStep.status() == status) {
+            log.debug(
+                "Transport step [{}] of message [{}] is already [{}]",
+                transportStep.identifier(), message.identifier(), status
+            );
+            return transportStep;
+        }
+
+        log.debug(
+            "Transport step [{}] of message [{}] moves from [{}] to [{}]",
+            transportStep.identifier(), message.identifier(), transportStep.status(), status
+        );
+
+        var updated = transportStepRepository.update(
+            transportStep.identifier(),
+            status,
+            transportStep.numberOfAttempts());
+
         updateMessageStatus(message, status);
 
         return updated;

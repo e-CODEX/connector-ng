@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -289,6 +290,112 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
             assertThat(result.transportedMessage()).isSameAs(evidence);
             assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
             verifyNoInteractions(messageRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("when the message already has a transport step")
+    class WhenTheMessageAlreadyHasATransportStep {
+        private void existing(ConnectorMessageTransportStatus status, int attempts) {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, attempts)
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_record_a_new_attempt_when_the_step_is_retryable(
+            ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.READY_FOR_PULL, 2);
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 3));
+
+            service.execute(message(), status);
+
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 3);
+            verify(transportStepRepository, never()).save(any());
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_record_the_outcome_without_a_new_attempt_when_the_step_is_submitted(
+            ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.SUBMITTED, 2);
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 2));
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.status()).isEqualTo(status);
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 2);
+            verify(transportStepRepository, never()).save(any());
+            verify(messageRepository).updateStatus(
+                MESSAGE_ID, ConnectorBusinessMessageStatus.fromTransportStep(status.name()));
+        }
+
+        @Test
+        void should_change_nothing_when_the_submitted_step_is_submitted_again() {
+            existing(ConnectorMessageTransportStatus.SUBMITTED, 2);
+
+            var result = service.execute(message(), ConnectorMessageTransportStatus.SUBMITTED);
+
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
+            assertThat(result.numberOfAttempts()).isEqualTo(2);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+            verify(transportStepRepository, never()).save(any());
+            verifyNoInteractions(messageRepository);
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_leave_a_delivered_step_as_it_is(ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.DELIVERED, 2);
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.DELIVERED);
+            assertThat(result.numberOfAttempts()).isEqualTo(2);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+            verify(transportStepRepository, never()).save(any());
+            verifyNoInteractions(messageRepository);
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_leave_a_pulled_step_as_it_is(ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.PULLED, 1);
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.PULLED);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+            verify(transportStepRepository, never()).save(any());
+            verifyNoInteractions(messageRepository);
+        }
+
+        @Test
+        void should_never_create_a_second_step_for_a_message() {
+            for (var existingStatus : ConnectorMessageTransportStatus.values()) {
+                existing(existingStatus, 1);
+                lenient().when(transportStepRepository.update(any(), any(), anyInt()))
+                    .thenReturn(TransportStepFixtures.createTransportStepWithBusinessMessage());
+
+                service.execute(message(), ConnectorMessageTransportStatus.FAILED);
+            }
+
+            verify(transportStepRepository, never()).save(any());
         }
     }
 

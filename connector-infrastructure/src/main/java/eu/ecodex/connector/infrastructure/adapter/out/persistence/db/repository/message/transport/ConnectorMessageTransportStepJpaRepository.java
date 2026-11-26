@@ -51,6 +51,20 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     ConnectorMessageTransportStepEntity findByIdentifierForUpdate(
         @Param("identifier") String identifier);
 
+    /**
+     * Finds the transport step of a message and locks its row until the end of the transaction.
+     * Like {@link #findByIdentifierForUpdate(String)}, it has no entity graph on purpose.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT mts
+        FROM ConnectorMessageTransportStepEntity mts
+        WHERE mts.transportedMessageIdentifier = :transportedMessageIdentifier
+        """
+    )
+    ConnectorMessageTransportStepEntity findByTransportedMessageIdentifierForUpdate(
+        @Param("transportedMessageIdentifier") String transportedMessageIdentifier);
+
     @EntityGraph(attributePaths = {"statuses"})
     ConnectorMessageTransportStepEntity findByTransportedMessageIdentifier(
         String transportedMessageIdentifier);

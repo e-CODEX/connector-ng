@@ -25,12 +25,14 @@ import static org.mockito.Mockito.when;
 import eu.ecodex.connector.BusinessDomainTestFixtures;
 import eu.ecodex.connector.EvidenceMessageTestFixtures;
 import eu.ecodex.connector.EvidenceTestFixtures;
+import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageCommand;
 import eu.ecodex.connector.application.port.api.message.outbound.ConnectorOutboundEvidenceMessageReceiver;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRegisterMessageTransportStep;
 import eu.ecodex.connector.application.port.spi.link.ConnectorLinkPartnerProvider;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageEvidenceRepository;
 import eu.ecodex.connector.application.port.spi.message.ConnectorMessageRepository;
+import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTransportStepRepository;
 import eu.ecodex.connector.domain.ConnectorDefaults;
 import eu.ecodex.connector.domain.model.link.ConnectorLinkMode;
 import eu.ecodex.connector.domain.model.link.partner.ConnectorLinkPartner;
@@ -60,6 +62,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -78,6 +82,8 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
     private ConnectorMessageEvidenceRepository evidenceRepository;
     @Mock
     private ConnectorRegisterMessageTransportStep registerMessageTransportStep;
+    @Mock
+    private ConnectorMessageTransportStepRepository transportStepRepository;
     @Mock
     private ConnectorMessageRepository messageRepository;
     @Mock
@@ -585,6 +591,68 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
     }
 
     @Nested
+    @DisplayName("push delivery of a message that is queued again")
+    class PushDeliveryOfAMessageQueuedAgain {
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"DELIVERED", "PULLED"}
+        )
+        void should_not_deliver_the_message_again_when_the_backend_already_has_it(
+            ConnectorMessageTransportStatus status) {
+            when(linkPartnerProvider.findByName(any())).thenReturn(linkPartner());
+            when(transportStepRepository.findByTransportedMessageIdentifierForUpdate(MESSAGE_ID))
+                .thenReturn(TransportStepFixtures
+                    .createTransportStepWithBusinessMessage(status, 1));
+
+            listener.handle(triggerBusinessMessage());
+
+            verifyNoInteractions(
+                backendServiceClient,
+                legacyMessageHelper,
+                registerMessageTransportStep,
+                messageRepository,
+                evidenceRepository,
+                outboundEvidenceMessageReceiver
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"FAILED", "READY_FOR_PULL", "SUBMITTED"}
+        )
+        void should_deliver_the_message_when_the_backend_does_not_have_it_yet(
+            ConnectorMessageTransportStatus status) {
+            stubDelivery(true, BACKEND_MESSAGE_ID);
+            when(linkPartnerProvider.findByName(any())).thenReturn(linkPartner());
+            when(transportStepRepository.findByTransportedMessageIdentifierForUpdate(MESSAGE_ID))
+                .thenReturn(TransportStepFixtures
+                    .createTransportStepWithBusinessMessage(status, 1));
+
+            listener.handle(triggerBusinessMessage());
+
+            verify(deliveryWebService).deliverMessage(any());
+            verify(registerMessageTransportStep).execute(
+                any(),
+                eq(ConnectorMessageTransportStatus.DELIVERED)
+            );
+        }
+
+        @Test
+        void should_deliver_the_message_when_it_has_no_transport_step_yet() {
+            stubDelivery(true, BACKEND_MESSAGE_ID);
+            when(linkPartnerProvider.findByName(any())).thenReturn(linkPartner());
+            when(transportStepRepository.findByTransportedMessageIdentifierForUpdate(MESSAGE_ID))
+                .thenReturn(null);
+
+            listener.handle(triggerBusinessMessage());
+
+            verify(deliveryWebService).deliverMessage(any());
+        }
+    }
+
+    @Nested
     @DisplayName("pull delivery")
     class PullDelivery {
         @Test
@@ -602,6 +670,7 @@ public class ConnectorJmsBackendMessageDeliveryListenerTest {
             verify(messageRepository, never()).updateStatus(any(), any());
             verify(messageRepository, never()).setAsRejected(any());
             verifyNoInteractions(
+                transportStepRepository,
                 backendServiceClient,
                 evidenceRepository,
                 legacyMessageHelper,

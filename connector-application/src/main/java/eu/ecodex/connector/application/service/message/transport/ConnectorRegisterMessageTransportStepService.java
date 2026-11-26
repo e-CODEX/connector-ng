@@ -17,9 +17,9 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTranspor
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessageStatus;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
+import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
 import lombok.NonNull;
@@ -37,7 +37,7 @@ public class ConnectorRegisterMessageTransportStepService
     implements ConnectorRegisterMessageTransportStep {
     private static final String TRANSPORT_ID_FORMAT = "%s@%s_%s";
 
-    private static final Set<ConnectorMessageTransportStatus> ALLOWED_STATUSES = Set.of(
+    private static final Set<ConnectorMessageTransportStatus> ALLOWED_STATUSES = EnumSet.of(
         ConnectorMessageTransportStatus.SUBMITTED,
         ConnectorMessageTransportStatus.DELIVERED,
         ConnectorMessageTransportStatus.FAILED,
@@ -72,65 +72,150 @@ public class ConnectorRegisterMessageTransportStepService
     public ConnectorMessageTransportStep execute(
         @NonNull ConnectorMessage message,
         @NonNull ConnectorMessageTransportStatus status) {
+        validate(message, status);
 
+        var transportStep =
+            transportStepRepository.findByTransportedMessageIdentifier(message.identifier());
+
+        if (transportStep == null) {
+            return createTransportStep(message, status);
+        }
+
+        // The existing step decides what the registration means, never the status being
+        // registered: a message has a single transport step for its whole life.
+        if (transportStep.isRetryable()) {
+            return recordNewAttempt(message, status, transportStep);
+        }
+
+        if (transportStep.status() == ConnectorMessageTransportStatus.SUBMITTED) {
+            return recordOutcome(message, status, transportStep);
+        }
+
+        log.warn(
+            "Ignoring status [{}] for message [{}]: its transport step [{}] is already [{}]",
+            status, message.identifier(), transportStep.identifier(), transportStep.status()
+        );
+
+        return transportStep;
+    }
+
+    private void validate(ConnectorMessage message, ConnectorMessageTransportStatus status) {
         if (message.identifier() == null) {
             throw new IllegalArgumentException("Message identifier must not be null");
         }
 
         if (!ALLOWED_STATUSES.contains(status)) {
             throw new IllegalArgumentException(
-                "Status must be one of [%s]".formatted(ALLOWED_STATUSES)
+                "Status must be one of %s".formatted(ALLOWED_STATUSES)
             );
         }
+    }
 
+    private ConnectorMessageTransportStep createTransportStep(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status) {
         log.debug(
             "Registering transport step for message [{}] with status [{}]",
             message.identifier(), status
         );
+        var linkPartnerName = message.linkPartnerName();
+
+        updateMessageStatus(message, status);
 
         var transportStep = ConnectorMessageTransportStep
             .builder()
-            .identifier(buildIdentifier(message))
+            .identifier(buildIdentifier(linkPartnerName))
             .transportedMessageIdentifier(message.identifier())
-            .transportedMessage(updateMessageStatus(message, status))
+            .transportedMessage(withTransportStatus(message, status))
             .status(status)
-            .numberOfAttempts(ALLOWED_STATUSES.contains(status) ? 1 : 0)
-            .linkPartnerName(resolveLinkPartnerName(message))
+            .numberOfAttempts(1)
+            .linkPartnerName(linkPartnerName)
             .build();
 
         return transportStepRepository.save(transportStep);
     }
 
-    private String buildIdentifier(ConnectorMessage message) {
+    private ConnectorMessageTransportStep recordNewAttempt(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status,
+        ConnectorMessageTransportStep transportStep) {
+        log.debug(
+            "Updating transport step [{}] for message [{}] by incrementing number of attempts",
+            transportStep.identifier(), message.identifier()
+        );
+
+        var updated = transportStepRepository.update(
+            transportStep.identifier(),
+            status,
+            transportStep.numberOfAttempts() + 1
+        );
+
+        // keep the business message in line with its transport step, as for a new step
+        updateMessageStatus(message, status);
+
+        return updated;
+    }
+
+    /**
+     * Records the outcome of an attempt that is already counted, for example the delivery of a
+     * message the retry has submitted. Repeating the status the step already has changes nothing.
+     */
+    private ConnectorMessageTransportStep recordOutcome(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status,
+        ConnectorMessageTransportStep transportStep) {
+        if (transportStep.status() == status) {
+            log.debug(
+                "Transport step [{}] of message [{}] is already [{}]",
+                transportStep.identifier(), message.identifier(), status
+            );
+            return transportStep;
+        }
+
+        log.debug(
+            "Transport step [{}] of message [{}] moves from [{}] to [{}]",
+            transportStep.identifier(), message.identifier(), transportStep.status(), status
+        );
+
+        var updated = transportStepRepository.update(
+            transportStep.identifier(),
+            status,
+            transportStep.numberOfAttempts());
+
+        updateMessageStatus(message, status);
+
+        return updated;
+    }
+
+    private String buildIdentifier(String linkPartnerName) {
         var config = processingConfigurationProvider.getConfiguration();
         return TRANSPORT_ID_FORMAT.formatted(
             UUID.randomUUID(),
             config.transportIdSuffix(),
-            resolveLinkPartnerName(message)
+            linkPartnerName
         );
     }
 
-    private String resolveLinkPartnerName(ConnectorMessage message) {
-        return message.direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
-            ? message.gatewayName()
-            : message.backendName();
+    private void updateMessageStatus(
+        ConnectorMessage message,
+        ConnectorMessageTransportStatus status) {
+        if (message instanceof ConnectorBusinessMessage) {
+            messageRepository.updateStatus(
+                message.identifier(),
+                ConnectorBusinessMessageStatus.fromTransportStep(status.name())
+            );
+        }
     }
 
-    private ConnectorMessage updateMessageStatus(
+    private ConnectorMessage withTransportStatus(
         ConnectorMessage message,
         ConnectorMessageTransportStatus status) {
         if (message instanceof ConnectorBusinessMessage businessMessage) {
-            var messageStatus = ConnectorBusinessMessageStatus.fromTransportStep(status.name());
-            messageRepository.updateStatus(
-                businessMessage.identifier(),
-                messageStatus
-            );
-
-            return businessMessage.toBuilder()
-                                  .status(messageStatus)
-                                  .build();
+            return businessMessage
+                .toBuilder()
+                .status(ConnectorBusinessMessageStatus.fromTransportStep(status.name()))
+                .build();
         }
-
         return message;
     }
 }

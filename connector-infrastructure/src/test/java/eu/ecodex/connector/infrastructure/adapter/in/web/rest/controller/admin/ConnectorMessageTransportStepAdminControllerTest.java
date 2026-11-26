@@ -11,9 +11,12 @@
 package eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -21,9 +24,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import eu.ecodex.connector.BusinessMessageTestFixtures;
 import eu.ecodex.connector.TransportStepFixtures;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepRetryException;
 import eu.ecodex.connector.application.port.api.message.ConnectorRetrieveMessage;
 import eu.ecodex.connector.application.port.api.transport.ConnectorListTransportSteps;
 import eu.ecodex.connector.application.port.api.transport.ConnectorRetrieveTransportStepByTransportId;
+import eu.ecodex.connector.application.port.api.transport.ConnectorRetryTransportStep;
 import eu.ecodex.connector.domain.model.paging.ConnectorPageResult;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.AbstractWebMvcTest;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.controller.admin.transport.ConnectorMessageTransportStepAdminController;
@@ -41,6 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @WebMvcTest(ConnectorMessageTransportStepAdminController.class)
 public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWebMvcTest {
     private static final String URL = "/api/v1/admin/transport-steps";
+    private static final String RETRY_URL = "/api/v1/admin/transport-steps/%s/retry";
     private static final String RETRIEVE_URL = "/api/v1/admin/transport-steps/%s/message";
 
     @MockitoBean
@@ -49,9 +55,49 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
     private ConnectorRetrieveTransportStepByTransportId retrieveTransportStep;
     @MockitoBean
     private ConnectorRetrieveMessage retrieveMessage;
+    @MockitoBean
+    private ConnectorRetryTransportStep retryTransportStep;
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Nested
+    @DisplayName("Retry a transport step")
+    class RetryTransportStep {
+        private static final String TRANSPORT_ID =
+            "1c544c2e-7e60-4647-a4b2-c3c89958b2a7@connector.ecodex.eu";
+
+        @Test
+        void should_return_404_when_not_found_transport_step() throws Exception {
+            doThrow(ConnectorMessageTransportStepNotFoundException.class)
+                .when(retryTransportStep).execute(TRANSPORT_ID);
+
+            mockMvc.perform(post(RETRY_URL.formatted(TRANSPORT_ID))
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        }
+
+        @Test
+        void should_return_409_when_not_transport_step_is_not_retryable() throws Exception {
+            doThrow(ConnectorMessageTransportStepRetryException.class)
+                .when(retryTransportStep).execute(TRANSPORT_ID);
+
+            mockMvc.perform(post(RETRY_URL.formatted(TRANSPORT_ID))
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+        }
+
+        @Test
+        void should_return_200_when_retry_transport_step_is_successful() throws Exception {
+            doNothing().when(retryTransportStep).execute(anyString());
+
+            mockMvc.perform(post(RETRY_URL.formatted(TRANSPORT_ID))
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        }
+    }
 
     @Nested
     @DisplayName("list transport steps")
@@ -65,16 +111,16 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
             when(listTransportSteps.execute(any())).thenReturn(pageResult);
 
             mockMvc.perform(get(URL)
-                                .param("page", "0")
-                                .param("size", "20")
-                                .contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(status().isOk())
-                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(jsonPath("$.totalElements").value(1))
-                   .andExpect(jsonPath("$.totalPages").value(1))
-                   .andExpect(jsonPath("$.size").value(1))
-                   .andExpect(jsonPath("$.content").isArray())
-                   .andExpect(jsonPath("$.content.length()").value(1));
+                    .param("page", "0")
+                    .param("size", "20")
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.size").value(1))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1));
         }
     }
 
@@ -87,31 +133,33 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
             "223caef9-cae9-4387-a38c-ad4879f94b4e@connector.ecodex.eu";
 
         @Test
-        void should_return_200_with_found_transport_step_transported_evidence_message() throws Exception {
+        void should_return_200_with_found_transport_step_transported_evidence_message()
+            throws Exception {
             when(retrieveTransportStep.execute(TRANSPORT_ID))
                 .thenReturn(TransportStepFixtures.createTransportStepWithEvidenceMessage());
 
             mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
-                                .contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(status().isOk())
-                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID))
-                   .andExpect(jsonPath("$.isBusiness").value(false));
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID))
+                .andExpect(jsonPath("$.isBusiness").value(false));
         }
 
         @Test
-        void should_return_200_with_found_transport_step_transported_business_message() throws Exception {
+        void should_return_200_with_found_transport_step_transported_business_message()
+            throws Exception {
             when(retrieveTransportStep.execute(TRANSPORT_ID))
                 .thenReturn(TransportStepFixtures.createTransportStepWithBusinessMessage());
             when(retrieveMessage.execute(any()))
                 .thenReturn(BusinessMessageTestFixtures.createValidatedInboundMessage());
 
             mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
-                                .contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(status().isOk())
-                   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID))
-                   .andExpect(jsonPath("$.isBusiness").value(true));
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.identifier").value(TRANSPORTED_MESSAGE_ID))
+                .andExpect(jsonPath("$.isBusiness").value(true));
         }
 
         @Test
@@ -120,9 +168,9 @@ public class ConnectorMessageTransportStepAdminControllerTest extends AbstractWe
                 .when(retrieveTransportStep).execute(TRANSPORT_ID);
 
             mockMvc.perform(get(RETRIEVE_URL.formatted(TRANSPORT_ID))
-                                .contentType(MediaType.APPLICATION_JSON))
-                   .andExpect(status().isNotFound())
-                   .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         }
     }
 }

@@ -17,6 +17,7 @@ import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceExcep
 import eu.ecodex.connector.application.exception.evidence.ConnectorEvidenceNotFoundException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageNotFoundException;
 import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepNotFoundException;
+import eu.ecodex.connector.application.exception.message.ConnectorMessageTransportStepRetryException;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.advice.ErrorResponse;
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
@@ -82,6 +83,16 @@ public class ConnectorMessageExceptionHandler {
         ConnectorMessageTransportStepNotFoundException exception) {
         return new ErrorResponse(
             HttpStatus.NOT_FOUND.value(), exception.getMessage()
+        );
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConnectorMessageTransportStepRetryException.class)
+    public ErrorResponse handleMessageTransportStepRetryException(
+        ConnectorMessageTransportStepRetryException exception) {
+        return new ErrorResponse(
+            HttpStatus.CONFLICT.value(), exception.getMessage()
         );
     }
 

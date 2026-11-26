@@ -46,4 +46,16 @@ public sealed interface ConnectorMessage extends ConnectorPublishable
     ConnectorMessageDirection direction();
 
     List<ConnectorMessageEvidence> transportedEvidences();
+
+    /**
+     * Returns the name of the system this message is exchanged with: the gateway for a message
+     * going to the gateway, the backend otherwise.
+     *
+     * @return the name of the link partner
+     */
+    default String linkPartnerName() {
+        return direction() == ConnectorMessageDirection.BACKEND_TO_GATEWAY
+            ? gatewayName()
+            : backendName();
+    }
 }

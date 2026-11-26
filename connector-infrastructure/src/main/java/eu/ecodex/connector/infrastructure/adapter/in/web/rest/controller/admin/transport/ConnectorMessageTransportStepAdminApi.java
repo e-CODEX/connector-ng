@@ -22,6 +22,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -57,4 +58,11 @@ public interface ConnectorMessageTransportStepAdminApi {
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "404", description = "Not Found")
     ConnectorMessageDetailDto retrieveTransportedMessage(@PathVariable String identifier);
+
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("{identifier}/retry")
+    @Operation(summary = "Retry the submission of a failed message")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    void retryTransportStep(@PathVariable String identifier);
 }

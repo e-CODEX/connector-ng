@@ -23,6 +23,35 @@ import java.util.List;
  */
 public interface ConnectorMessageTransportStepRepository {
     /**
+     * Finds the transport step with the given identifier and locks it until the end of the current
+     * transaction, so that no other transaction can lock or change it meanwhile.
+     *
+     * <p>It must be called inside a transaction. A concurrent caller waits for the lock and then
+     * sees the state committed by the first one.
+     *
+     * @param identifier the unique identifier of the transport step (must not be null)
+     *
+     * @return the locked {@link ConnectorMessageTransportStep}, or {@code null} if none exists
+     */
+    ConnectorMessageTransportStep findByIdentifierForUpdate(@Nonnull String identifier);
+
+    /**
+     * Finds the transport step of the message with the given identifier and locks it until the end
+     * of the current transaction, so that no other transaction can lock or change it meanwhile.
+     *
+     * <p>It must be called inside a transaction. A concurrent caller waits for the lock and then
+     * sees the state committed by the first one.
+     *
+     * @param transportedMessageIdentifier the identifier of the transported message (must not be
+     *                                     null)
+     *
+     * @return the locked {@link ConnectorMessageTransportStep}, or {@code null} if the message has
+     *     none yet
+     */
+    ConnectorMessageTransportStep findByTransportedMessageIdentifierForUpdate(
+        @Nonnull String transportedMessageIdentifier);
+
+    /**
      * Persists the given transport step, inserting it or updating it if it already exists.
      *
      * @param transportStep the transport step to persist (must not be null)
@@ -59,6 +88,22 @@ public interface ConnectorMessageTransportStepRepository {
         @Nonnull ConnectorMessageTransportStatus status);
 
     /**
+     * Retrieves a transport step like {@link #findByStepOrMessageOrRemoteSystemIdentifier(String)}
+     * and locks it until the end of the current transaction, so that no other transaction can lock
+     * or change it meanwhile.
+     *
+     * <p>It must be called inside a transaction. A concurrent caller waits for the lock and then
+     * sees the state committed by the first one.
+     *
+     * @param identifier the transport step identifier, the message identifier or the remote system
+     *                   identifier (must not be null)
+     *
+     * @return the locked {@link ConnectorMessageTransportStep}, or {@code null} if none is found
+     */
+    ConnectorMessageTransportStep findByStepOrMessageOrRemoteSystemIdentifierForUpdate(
+        @Nonnull String identifier);
+
+    /**
      * Retrieves a transport step by its own identifier, by the identifier of its message, or by a
      * remote system identifier (backend ID or ebMS ID).
      *
@@ -78,6 +123,16 @@ public interface ConnectorMessageTransportStepRepository {
      * @return the matching {@link ConnectorMessageTransportStep}, or {@code null} if none is found
      */
     ConnectorMessageTransportStep findByIdentifier(@Nonnull String identifier);
+
+    /**
+     * Retrieves a transport step by its transported message identifier.
+     *
+     * @param transportedMessageIdentifier the transported message identifier (must not be null)
+     *
+     * @return the matching {@link ConnectorMessageTransportStep}, or {@code null} if none is found
+     */
+    ConnectorMessageTransportStep findByTransportedMessageIdentifier(
+        @Nonnull String transportedMessageIdentifier);
 
     /**
      * Retrieves the identifiers of the transport steps of the given backend that are ready to be

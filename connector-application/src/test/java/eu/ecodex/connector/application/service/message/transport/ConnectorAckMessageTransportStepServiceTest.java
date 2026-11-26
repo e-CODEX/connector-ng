@@ -229,11 +229,32 @@ public class ConnectorAckMessageTransportStepServiceTest {
     }
 
     @Nested
+    @DisplayName("when the answer cannot be applied")
+    class WhenTheAnswerCannotBeApplied {
+        @Test
+        void should_fail_when_the_command_status_is_submitted() {
+            var command = commandWithStatus(ConnectorMessageTransportStatus.SUBMITTED);
+
+            assertThatThrownBy(() -> service.execute(MESSAGE_ID, command))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("SUBMITTED");
+
+            verifyNoInteractions(
+                transportStepRepository,
+                messageRepository,
+                evidenceRepository,
+                messageErrorRepository
+            );
+        }
+    }
+
+    @Nested
     @DisplayName("when the transport step is not found")
     class WhenStepNotFound {
         @Test
         void should_fail_when_no_transport_step_exists_for_the_message() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(null);
 
             assertThatThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()))
@@ -249,7 +270,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
         @Test
         void should_fail_when_the_requesting_link_partner_does_not_own_the_transport_of_the_message() {
             var step = stepWithStatus(ConnectorMessageTransportStatus.DELIVERED, 1);
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(step);
 
             var command = deliveredCommand().toBuilder().linkPartnerName("alice_backend").build();
@@ -261,7 +283,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
         @Test
         void should_ignore_the_case_of_the_link_partner_name_when_checking_the_ownership() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DELIVERED, 1));
 
             var command = deliveredCommand().toBuilder()
@@ -277,20 +300,9 @@ public class ConnectorAckMessageTransportStepServiceTest {
     class WhenStepIsTerminal {
         @Test
         void should_skip_the_update_when_the_step_is_already_delivered() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.DELIVERED, 1));
-
-            assertThatNoException()
-                .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
-
-            verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
-            verify(transportStepRepository, never()).update(any(), any(), anyInt());
-        }
-
-        @Test
-        void should_skip_the_update_when_the_step_has_already_failed() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.FAILED, 1));
 
             assertThatNoException()
                 .isThrownBy(() -> service.execute(MESSAGE_ID, deliveredCommand()));
@@ -301,11 +313,65 @@ public class ConnectorAckMessageTransportStepServiceTest {
     }
 
     @Nested
+    @DisplayName("when the answer repeats the status of the step")
+    class WhenTheAnswerRepeatsTheStatusOfTheStep {
+        @Test
+        void should_not_save_the_errors_of_a_failed_step_again() {
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.FAILED, 1));
+
+            assertThatNoException().isThrownBy(() -> service.execute(
+                MESSAGE_ID,
+                failedCommand(List.of(ConnectorMessageError.builder().label("timeout").build()))
+            ));
+
+            verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+        }
+
+        @Test
+        void should_not_update_a_pulled_step_again() {
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
+
+            assertThatNoException().isThrownBy(() -> service.execute(
+                MESSAGE_ID,
+                commandWithStatus(ConnectorMessageTransportStatus.PULLED)
+            ));
+
+            verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+        }
+
+        @Test
+        void should_apply_the_answer_when_a_retry_has_moved_the_step_out_of_that_status() {
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
+                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 2));
+
+            service.execute(
+                MESSAGE_ID,
+                failedCommand(List.of(ConnectorMessageError.builder().label("timeout").build()))
+            );
+
+            verify(transportStepRepository).update(
+                TRANSPORT_STEP_ID,
+                ConnectorMessageTransportStatus.FAILED,
+                2
+            );
+            verify(messageErrorRepository).save(any(), any());
+        }
+    }
+
+    @Nested
     @DisplayName("when the transported message is inconsistent")
     class WhenTransportedMessageIsInconsistent {
         @Test
         void should_fail_when_the_transported_evidence_uuid_is_null() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(
                     stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
                         .toBuilder()
@@ -346,7 +412,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
     class WhenMessageIsPulled {
         @Test
         void should_update_the_step_and_mark_the_business_message_as_pulled() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.READY_FOR_PULL, 0));
 
             service.execute(
@@ -372,7 +439,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
         @Test
         void should_not_update_any_message_status_when_the_transported_message_is_an_evidence() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(
                     stepWithStatus(ConnectorMessageTransportStatus.READY_FOR_PULL, 0)
                         .toBuilder()
@@ -394,33 +462,12 @@ public class ConnectorAckMessageTransportStepServiceTest {
     }
 
     @Nested
-    @DisplayName("when the status requires no post processing")
-    class WhenStatusRequiresNoPostProcessing {
-        @Test
-        void should_only_update_the_step_when_the_status_is_submitted() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
-                .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
-
-            service.execute(
-                MESSAGE_ID,
-                commandWithStatus(ConnectorMessageTransportStatus.SUBMITTED)
-            );
-
-            verify(transportStepRepository).update(
-                TRANSPORT_STEP_ID,
-                ConnectorMessageTransportStatus.SUBMITTED,
-                1
-            );
-            verifyNoInteractions(messageRepository, evidenceRepository, messageErrorRepository);
-        }
-    }
-
-    @Nested
     @DisplayName("when the delivery succeeds")
     class WhenDeliverySucceeds {
         @Test
         void should_update_the_business_message_step_and_the_message() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
             when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(businessMessage());
 
@@ -448,7 +495,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
                 .toBuilder()
                 .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
                 .build();
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(
                     stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1)
                         .toBuilder()
@@ -471,7 +519,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
         @Test
         void should_update_the_evidence_message_step_and_flag_the_evidence() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(
                     stepWithStatus(ConnectorMessageTransportStatus.SUBMITTED, 1)
                         .toBuilder()
@@ -496,7 +545,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
 
         @Test
         void should_not_update_the_message_info_when_the_message_does_not_exist() {
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
             when(messageRepository.findByIdentifier(MESSAGE_ID)).thenReturn(null);
 
@@ -518,7 +568,8 @@ public class ConnectorAckMessageTransportStepServiceTest {
                 ConnectorMessageError.builder().label("timeout").build(),
                 ConnectorMessageError.builder().label("connection refused").build()
             );
-            when(transportStepRepository.findByStepOrMessageOrRemoteSystemIdentifier(MESSAGE_ID))
+            when(transportStepRepository
+                .findByStepOrMessageOrRemoteSystemIdentifierForUpdate(MESSAGE_ID))
                 .thenReturn(stepWithStatus(ConnectorMessageTransportStatus.PULLED, 1));
 
             service.execute(MESSAGE_ID, failedCommand(errors));

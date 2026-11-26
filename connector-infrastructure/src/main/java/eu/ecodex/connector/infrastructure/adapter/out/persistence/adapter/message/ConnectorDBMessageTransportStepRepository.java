@@ -18,7 +18,6 @@ import eu.ecodex.connector.domain.model.filter.ConnectorTransportStepsListFilter
 import eu.ecodex.connector.domain.model.message.ConnectorBusinessMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessage;
-import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStepStatus;
@@ -112,9 +111,9 @@ public class ConnectorDBMessageTransportStepRepository
         }
 
         var updatedEntity = entity.toBuilder()
-                                  .numberOfAttempts(numberOfAttempts)
-                                  .status(status)
-                                  .build();
+            .numberOfAttempts(numberOfAttempts)
+            .status(status)
+            .build();
         var updated = this.transportStepJpaRepository.save(updatedEntity);
 
         var stepStatusEntity = toEntity(status);
@@ -147,8 +146,45 @@ public class ConnectorDBMessageTransportStepRepository
     }
 
     @Override
+    @Transactional
+    public ConnectorMessageTransportStep findByStepOrMessageOrRemoteSystemIdentifierForUpdate(
+        @NonNull String identifier) {
+        var entity = this.transportStepJpaRepository
+            .findByTransportOrMessageOrRemoteSystemIdentifierForUpdate(identifier);
+
+        return toDomain(entity);
+    }
+
+    @Override
+    @Transactional
+    public ConnectorMessageTransportStep findByIdentifierForUpdate(@NonNull String identifier) {
+        var entity = this.transportStepJpaRepository.findByIdentifierForUpdate(identifier);
+
+        return toDomain(entity);
+    }
+
+    @Override
+    @Transactional
+    public ConnectorMessageTransportStep findByTransportedMessageIdentifierForUpdate(
+        @NonNull String transportedMessageIdentifier) {
+        var entity = this.transportStepJpaRepository.findByTransportedMessageIdentifierForUpdate(
+            transportedMessageIdentifier);
+
+        return toDomain(entity);
+    }
+
+    @Override
     public ConnectorMessageTransportStep findByIdentifier(@NonNull String identifier) {
         var entity = this.transportStepJpaRepository.findByIdentifier(identifier);
+
+        return toDomain(entity);
+    }
+
+    @Override
+    public ConnectorMessageTransportStep findByTransportedMessageIdentifier(
+        @NonNull String transportedMessageIdentifier) {
+        var entity = this.transportStepJpaRepository.findByTransportedMessageIdentifier(
+            transportedMessageIdentifier);
 
         return toDomain(entity);
     }
@@ -173,7 +209,7 @@ public class ConnectorDBMessageTransportStepRepository
         var pageable = paginationMapper.toPageable(filter.pageRequest());
         var specification = TransportStepSpecification.withFilters(filter);
         var transportSteps = transportStepJpaRepository.findAll(specification, pageable)
-                                                       .map(this::toDomain);
+            .map(this::toDomain);
 
         return paginationMapper.toPageResult(transportSteps);
     }
@@ -213,7 +249,6 @@ public class ConnectorDBMessageTransportStepRepository
 
     private ConnectorMessageTransportStepEntity toEntity(
         ConnectorMessageTransportStep transportStep) throws JsonProcessingException {
-        var transportedMessage = transportStep.transportedMessage();
         return ConnectorMessageTransportStepEntity
             .builder()
             .identifier(transportStep.identifier())
@@ -235,12 +270,12 @@ public class ConnectorDBMessageTransportStepRepository
     private Set<ConnectorMessageTransportStepStatus> toStatuses(
         Set<ConnectorMessageTransportStepStatusEntity> statuses) {
         return statuses.stream()
-                       .map(status -> ConnectorMessageTransportStepStatus
-                           .builder()
-                           .status(status.getStatus())
-                           .createdAt(status.getCreatedAt())
-                           .build())
-                       .collect(Collectors.toCollection(LinkedHashSet::new));
+            .map(status -> ConnectorMessageTransportStepStatus
+                .builder()
+                .status(status.getStatus())
+                .createdAt(status.getCreatedAt())
+                .build())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private ConnectorMessage deserializeMessage(String json)

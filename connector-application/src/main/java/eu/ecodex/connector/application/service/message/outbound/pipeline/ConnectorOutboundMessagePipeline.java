@@ -82,11 +82,9 @@ public class ConnectorOutboundMessagePipeline implements ConnectorMessagePipelin
         ConnectorMessageStep<ConnectorMessage, ConnectorMessage> linkSubmissionStep) {
         this.validationStep = validationStep;
         this.securityStep = securityStep;
-        this.gatewayValidationStep =
-            gatewayValidationStep;
+        this.gatewayValidationStep = gatewayValidationStep;
         this.ebmsIdStep = ebmsIdStep;
-        this.acceptanceStep =
-            acceptanceStep;
+        this.acceptanceStep = acceptanceStep;
         this.confirmationStep = confirmationStep;
         this.rejectionStep = rejectionStep;
         this.linkSubmissionStep = linkSubmissionStep;

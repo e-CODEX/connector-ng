@@ -10,11 +10,15 @@
 
 package eu.ecodex.connector.application.service.message.transport;
 
+import static eu.ecodex.connector.TransportStepFixtures.TRANSPORT_STEP_ID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -31,7 +35,6 @@ import eu.ecodex.connector.domain.model.message.ConnectorEvidenceMessage;
 import eu.ecodex.connector.domain.model.message.ConnectorMessageDirection;
 import eu.ecodex.connector.domain.model.message.processing.ConnectorMessageProcessingConfiguration;
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
-import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStep;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -64,26 +67,26 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
     private ConnectorBusinessMessage message() {
         return BusinessMessageTestFixtures.createInboundMessage().toBuilder()
-                                          .identifier(MESSAGE_ID)
-                                          .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                          .backendName(BACKEND_NAME)
-                                          .gatewayName(GATEWAY_NAME)
-                                          .build();
+            .identifier(MESSAGE_ID)
+            .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .backendName(BACKEND_NAME)
+            .gatewayName(GATEWAY_NAME)
+            .build();
     }
 
     private ConnectorEvidenceMessage evidenceMessage() {
         return EvidenceMessageTestFixtures.createDeliveryEvidenceMessage().toBuilder()
-                                          .identifier(MESSAGE_ID)
-                                          .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
-                                          .backendName(BACKEND_NAME)
-                                          .gatewayName(GATEWAY_NAME)
-                                          .build();
+            .identifier(MESSAGE_ID)
+            .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
+            .backendName(BACKEND_NAME)
+            .gatewayName(GATEWAY_NAME)
+            .build();
     }
 
     private ConnectorMessageProcessingConfiguration configuration() {
         return ConnectorMessageProcessingConfiguration.builder()
-                                                      .transportIdSuffix(TRANSPORT_SUFFIX)
-                                                      .build();
+            .transportIdSuffix(TRANSPORT_SUFFIX)
+            .build();
     }
 
     @Nested
@@ -101,10 +104,70 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
 
             verify(transportStepRepository).save(
                 argThat(step ->
-                            step.numberOfAttempts() == 1
-                                && step.status() == ConnectorMessageTransportStatus.SUBMITTED
+                    step.numberOfAttempts() == 1
+                        && step.status() == ConnectorMessageTransportStatus.SUBMITTED
                 )
             );
+
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"FAILED", "READY_FOR_PULL"}
+        )
+        void should_update_existing_transport_step_status_and_nb_of_attempts(
+            ConnectorMessageTransportStatus status) {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 0)
+            );
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 1));
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.numberOfAttempts()).isEqualTo(1);
+            assertThat(result.status()).isEqualTo(status);
+
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 1);
+            verify(transportStepRepository, never()).save(any());
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_update_the_business_message_status_when_a_new_attempt_is_recorded(
+            ConnectorMessageTransportStatus status) {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(
+                    ConnectorMessageTransportStatus.FAILED, 2)
+            );
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 3));
+
+            service.execute(message(), status);
+
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 3);
+            verify(messageRepository).updateStatus(
+                MESSAGE_ID, ConnectorBusinessMessageStatus.fromTransportStep(status.name()));
+        }
+
+        @Test
+        void should_not_update_any_message_status_for_an_evidence_message_attempt() {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(
+                    ConnectorMessageTransportStatus.FAILED, 0)
+            );
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(
+                    ConnectorMessageTransportStatus.SUBMITTED, 1));
+
+            service.execute(evidenceMessage(), ConnectorMessageTransportStatus.SUBMITTED);
+
+            verifyNoInteractions(messageRepository);
         }
 
         @ParameterizedTest
@@ -176,8 +239,8 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
         @Test
         void should_use_the_gateway_name_when_the_message_goes_from_the_backend_to_the_gateway() {
             var outbound = message().toBuilder()
-                                    .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
-                                    .build();
+                .direction(ConnectorMessageDirection.BACKEND_TO_GATEWAY)
+                .build();
             when(processingConfigurationProvider.getConfiguration()).thenReturn(configuration());
             when(transportStepRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
@@ -227,6 +290,112 @@ public class ConnectorRegisterMessageTransportStepServiceTest {
             assertThat(result.transportedMessage()).isSameAs(evidence);
             assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
             verifyNoInteractions(messageRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("when the message already has a transport step")
+    class WhenTheMessageAlreadyHasATransportStep {
+        private void existing(ConnectorMessageTransportStatus status, int attempts) {
+            when(transportStepRepository.findByTransportedMessageIdentifier(any())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, attempts)
+            );
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_record_a_new_attempt_when_the_step_is_retryable(
+            ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.READY_FOR_PULL, 2);
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 3));
+
+            service.execute(message(), status);
+
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 3);
+            verify(transportStepRepository, never()).save(any());
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_record_the_outcome_without_a_new_attempt_when_the_step_is_submitted(
+            ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.SUBMITTED, 2);
+            when(transportStepRepository.update(any(), any(), anyInt())).thenReturn(
+                TransportStepFixtures.createTransportStepWithBusinessMessage(status, 2));
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.status()).isEqualTo(status);
+            verify(transportStepRepository).update(TRANSPORT_STEP_ID, status, 2);
+            verify(transportStepRepository, never()).save(any());
+            verify(messageRepository).updateStatus(
+                MESSAGE_ID, ConnectorBusinessMessageStatus.fromTransportStep(status.name()));
+        }
+
+        @Test
+        void should_change_nothing_when_the_submitted_step_is_submitted_again() {
+            existing(ConnectorMessageTransportStatus.SUBMITTED, 2);
+
+            var result = service.execute(message(), ConnectorMessageTransportStatus.SUBMITTED);
+
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.SUBMITTED);
+            assertThat(result.numberOfAttempts()).isEqualTo(2);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+            verify(transportStepRepository, never()).save(any());
+            verifyNoInteractions(messageRepository);
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_leave_a_delivered_step_as_it_is(ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.DELIVERED, 2);
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.DELIVERED);
+            assertThat(result.numberOfAttempts()).isEqualTo(2);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+            verify(transportStepRepository, never()).save(any());
+            verifyNoInteractions(messageRepository);
+        }
+
+        @ParameterizedTest
+        @EnumSource(
+            value = ConnectorMessageTransportStatus.class,
+            names = {"SUBMITTED", "DELIVERED", "FAILED", "READY_FOR_PULL"}
+        )
+        void should_leave_a_pulled_step_as_it_is(ConnectorMessageTransportStatus status) {
+            existing(ConnectorMessageTransportStatus.PULLED, 1);
+
+            var result = service.execute(message(), status);
+
+            assertThat(result.status()).isEqualTo(ConnectorMessageTransportStatus.PULLED);
+            verify(transportStepRepository, never()).update(any(), any(), anyInt());
+            verify(transportStepRepository, never()).save(any());
+            verifyNoInteractions(messageRepository);
+        }
+
+        @Test
+        void should_never_create_a_second_step_for_a_message() {
+            for (var existingStatus : ConnectorMessageTransportStatus.values()) {
+                existing(existingStatus, 1);
+                lenient().when(transportStepRepository.update(any(), any(), anyInt()))
+                    .thenReturn(TransportStepFixtures.createTransportStepWithBusinessMessage());
+
+                service.execute(message(), ConnectorMessageTransportStatus.FAILED);
+            }
+
+            verify(transportStepRepository, never()).save(any());
         }
     }
 

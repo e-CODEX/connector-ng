@@ -12,11 +12,13 @@ package eu.ecodex.connector.infrastructure.adapter.out.persistence.db.repository
 
 import eu.ecodex.connector.domain.model.message.transport.ConnectorMessageTransportStatus;
 import eu.ecodex.connector.infrastructure.adapter.out.persistence.db.entity.message.transport.ConnectorMessageTransportStepEntity;
+import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,6 +36,39 @@ public interface ConnectorMessageTransportStepJpaRepository extends
     @EntityGraph(attributePaths = {"statuses"})
     ConnectorMessageTransportStepEntity findByIdentifier(String identifier);
 
+    /**
+     * Finds a transport step and locks its row until the end of the transaction.
+     *
+     * <p>There is deliberately no entity graph: some databases, PostgreSQL among them, refuse
+     * {@code FOR UPDATE} on the outer-joined statuses. They are loaded lazily instead.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT mts
+        FROM ConnectorMessageTransportStepEntity mts
+        WHERE mts.identifier = :identifier
+        """)
+    ConnectorMessageTransportStepEntity findByIdentifierForUpdate(
+        @Param("identifier") String identifier);
+
+    /**
+     * Finds the transport step of a message and locks its row until the end of the transaction.
+     * Like {@link #findByIdentifierForUpdate(String)}, it has no entity graph on purpose.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT mts
+        FROM ConnectorMessageTransportStepEntity mts
+        WHERE mts.transportedMessageIdentifier = :transportedMessageIdentifier
+        """
+    )
+    ConnectorMessageTransportStepEntity findByTransportedMessageIdentifierForUpdate(
+        @Param("transportedMessageIdentifier") String transportedMessageIdentifier);
+
+    @EntityGraph(attributePaths = {"statuses"})
+    ConnectorMessageTransportStepEntity findByTransportedMessageIdentifier(
+        String transportedMessageIdentifier);
+
     @Query("""
         SELECT mts
         FROM ConnectorMessageTransportStepEntity mts
@@ -43,6 +78,22 @@ public interface ConnectorMessageTransportStepJpaRepository extends
         """
     )
     ConnectorMessageTransportStepEntity findByTransportOrMessageOrRemoteSystemIdentifier(
+        @Param("identifier") String identifier);
+
+    /**
+     * Finds a transport step like {@link #findByTransportOrMessageOrRemoteSystemIdentifier} and
+     * locks its row until the end of the transaction. It has no entity graph on purpose.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT mts
+        FROM ConnectorMessageTransportStepEntity mts
+        WHERE mts.identifier = :identifier
+            OR mts.transportedMessageIdentifier = :identifier
+            OR mts.remoteSystemIdentifier = :identifier
+        """
+    )
+    ConnectorMessageTransportStepEntity findByTransportOrMessageOrRemoteSystemIdentifierForUpdate(
         @Param("identifier") String identifier);
 
     @Query("""

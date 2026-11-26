@@ -43,6 +43,7 @@ dependencies {
     testImplementation(platform(libs.spring.boot.bom))
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.apache.logging.log4j:log4j-core")
+    testImplementation("org.awaitility:awaitility")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 

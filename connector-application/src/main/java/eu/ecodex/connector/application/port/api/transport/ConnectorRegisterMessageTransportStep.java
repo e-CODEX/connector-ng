@@ -23,7 +23,16 @@ import jakarta.annotation.Nonnull;
  */
 public interface ConnectorRegisterMessageTransportStep {
     /**
-     * Registers a new transport step for the given message with the given transport status.
+     * Registers the given transport status for the given message. A message has a single
+     * transport step, so the registration depends on the step it already has:
+     * <ul>
+     *     <li>none: a new step is created, with one attempt;
+     *     <li>{@code FAILED} or {@code READY_FOR_PULL}: a new attempt is recorded, with the given
+     *     status;
+     *     <li>{@code SUBMITTED}: the attempt is under way, so its outcome is recorded without
+     *     counting another attempt, and repeating {@code SUBMITTED} changes nothing;
+     *     <li>{@code DELIVERED} or {@code PULLED}: the step is final and is left as it is.
+     * </ul>
      *
      * @param message the connector message the transport step relates to (must not be null)
      * @param status  the transport status to record for the message (must not be null)

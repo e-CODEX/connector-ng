@@ -65,11 +65,7 @@ public class ConnectorLinkPartnerVerifierService implements ConnectorLinkPartner
     }
 
     private ConnectorLinkPartnerName getLinkPartnerName(ConnectorMessage message) {
-        if (message.direction() == ConnectorMessageDirection.GATEWAY_TO_BACKEND) {
-            return new ConnectorLinkPartnerName(message.backendName());
-        }
-
-        return new ConnectorLinkPartnerName(message.gatewayName());
+        return new ConnectorLinkPartnerName(message.linkPartnerName());
     }
 
     private void validateDirection(ConnectorMessageDirection direction, ConnectorLinkType type) {

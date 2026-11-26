@@ -17,6 +17,7 @@ import eu.ecodex.connector.application.port.api.auth.role.ConnectorRetrieveRoles
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserRoles;
 import eu.ecodex.connector.application.port.spi.auth.role.ConnectorRoleRepository;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
+import eu.ecodex.connector.application.service.auth.user.ConnectorAdminSafeguard;
 import eu.ecodex.connector.domain.model.user.ConnectorRole;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.domain.model.user.ConnectorUser;
@@ -54,6 +55,7 @@ public class ConnectorEditUserRolesService implements ConnectorEditUserRoles {
     private final ConnectorRetrieveRolesByNames retrieveRolesByNames;
     private final ConnectorRetrieveRoleByName retrieveRoleByName;
     private final ConnectorUserRepository userRepository;
+    private final ConnectorAdminSafeguard adminSafeguard;
 
     /**
      * Construct edit user roles service.
@@ -62,14 +64,17 @@ public class ConnectorEditUserRolesService implements ConnectorEditUserRoles {
      * @param retrieveRoleByName   the service used to retrieve a specific role. throws NotFound
      *                             exception if not found.
      * @param userRepository       the repository use to update user information
+     * @param adminSafeguard       the check that an enabled administrator remains
      */
     public ConnectorEditUserRolesService(
         ConnectorRetrieveRolesByNames retrieveRolesByNames,
         ConnectorRetrieveRoleByName retrieveRoleByName,
-        ConnectorUserRepository userRepository) {
+        ConnectorUserRepository userRepository,
+        ConnectorAdminSafeguard adminSafeguard) {
         this.retrieveRolesByNames = retrieveRolesByNames;
         this.retrieveRoleByName = retrieveRoleByName;
         this.userRepository = userRepository;
+        this.adminSafeguard = adminSafeguard;
     }
 
     private ConnectorUser getUserByIdentifier(String identifier) {
@@ -111,6 +116,9 @@ public class ConnectorEditUserRolesService implements ConnectorEditUserRoles {
         }
 
         var updated = user.editRoles(foundRoles);
+        if (!updated.roleNames().contains(ConnectorRole.DEFAULT_ADMIN_ROLE)) {
+            adminSafeguard.assertAnotherAdministratorRemains(user);
+        }
         return (user.equals(updated)) ? user : userRepository.save(updated);
     }
 

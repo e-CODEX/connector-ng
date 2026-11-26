@@ -10,32 +10,46 @@
 
 package eu.ecodex.connector.application.service.auth.user;
 
+import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorRemoveUser;
 import eu.ecodex.connector.application.port.spi.auth.user.ConnectorUserRepository;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service implementation for managing the removal of ConnectorUser entities.
  *
- * <p>This class provides functionality to delete a user from the system by their unique identifier.
+ * <p>This class provides functionality to delete a user from the system by their unique
+ * identifier.
  * It interacts with the underlying persistence layer to ensure that the specified user exists
  * before performing the removal operation. If the user is not found, an exception is thrown.
+ *
+ * <p>The last enabled administrator cannot be removed, see {@link ConnectorAdminSafeguard}.
  *
  * <p>An instance of {@link ConnectorUserRepository} is used to perform database operations.
  */
 @Slf4j
 @Service
+@Transactional
 public class ConnectorRemoveUserService implements ConnectorRemoveUser {
     private final ConnectorUserRepository repository;
+    private final ConnectorAdminSafeguard adminSafeguard;
 
-    public ConnectorRemoveUserService(ConnectorUserRepository repository) {
+    public ConnectorRemoveUserService(
+        ConnectorUserRepository repository,
+        ConnectorAdminSafeguard adminSafeguard) {
         this.repository = repository;
+        this.adminSafeguard = adminSafeguard;
     }
 
     @Override
     public void execute(@Nonnull String userIdentifier) {
+        var user = repository.findByUuid(userIdentifier).orElseThrow(
+            () -> new ConnectorUserNotFoundException(
+                "No user found by identifier " + userIdentifier));
+        adminSafeguard.assertAnotherAdministratorRemains(user);
         repository.deleteByUuid(userIdentifier);
     }
 }

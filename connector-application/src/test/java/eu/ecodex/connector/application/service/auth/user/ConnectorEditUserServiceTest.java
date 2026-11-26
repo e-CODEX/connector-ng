@@ -18,9 +18,11 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import eu.ecodex.connector.application.exception.user.ConnectorLastAdministratorException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserAlreadyExistsException;
 import eu.ecodex.connector.application.exception.user.ConnectorUserNotFoundException;
 import eu.ecodex.connector.application.port.api.auth.user.ConnectorEditUserCommand;
@@ -45,6 +47,8 @@ class ConnectorEditUserServiceTest {
     private ConnectorRetrieveUserByIdentifierService retrieveUserByIdentifier;
     @Mock
     private ConnectorRefreshTokenRepository refreshTokenRepository;
+    @Mock
+    private ConnectorAdminSafeguard adminSafeguard;
     @Mock
     private Clock clock;
 
@@ -179,6 +183,25 @@ class ConnectorEditUserServiceTest {
         // Then
         assertThat(saved.enabled()).isFalse();
         verify(refreshTokenRepository).revokeByUserUuid("uuid", now);
+        verify(adminSafeguard).assertAnotherAdministratorRemains(existing);
+    }
+
+    @Test
+    void edit_should_not_disable_the_last_administrator() {
+        // Given
+        var existing = ConnectorUser.defaultAdminUser().toBuilder().uuid("uuid").build();
+        when(retrieveUserByIdentifier.execute("uuid")).thenReturn(existing);
+        doThrow(new ConnectorLastAdministratorException("last"))
+            .when(adminSafeguard).assertAnotherAdministratorRemains(existing);
+
+        // When
+        var disable = ConnectorEditUserCommand.builder().enabled(false).build();
+        assertThatThrownBy(() -> service.execute("uuid", disable))
+            .isInstanceOf(ConnectorLastAdministratorException.class);
+
+        // Then
+        verify(repository, never()).save(any());
+        verify(refreshTokenRepository, never()).revokeByUserUuid(any(), any());
     }
 
     @Test
@@ -194,6 +217,7 @@ class ConnectorEditUserServiceTest {
 
         // Then
         verify(refreshTokenRepository, never()).revokeByUserUuid(any(), any());
+        verifyNoInteractions(adminSafeguard);
     }
 
     private void assertNoMoreInteractions() {

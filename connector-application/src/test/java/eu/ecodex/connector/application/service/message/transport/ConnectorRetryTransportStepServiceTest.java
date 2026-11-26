@@ -56,7 +56,7 @@ class ConnectorRetryTransportStepServiceTest {
     void retry_should_submit_transported_message(ConnectorMessageTransportStatus status) {
         // Given
         var step = TransportStepFixtures.createTransportStepWithBusinessMessage(status, 0);
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(step);
         doNothing().when(linkSubmitter).submit(any());
 
         // When
@@ -64,7 +64,7 @@ class ConnectorRetryTransportStepServiceTest {
 
         // Then
         verify(linkSubmitter).submit(same(step.transportedMessage()));
-        verify(transportStepRepository).findByIdentifier(TRANSPORT_ID);
+        verify(transportStepRepository).findByIdentifierForUpdate(TRANSPORT_ID);
         verifyNoMoreInteractions(transportStepRepository, linkSubmitter);
     }
 
@@ -74,7 +74,7 @@ class ConnectorRetryTransportStepServiceTest {
         var step = TransportStepFixtures.createTransportStepWithEvidenceMessage().toBuilder()
             .status(ConnectorMessageTransportStatus.FAILED)
             .build();
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(step);
 
         // When
         retryTransportStepService.execute(TRANSPORT_ID);
@@ -97,7 +97,7 @@ class ConnectorRetryTransportStepServiceTest {
             .direction(ConnectorMessageDirection.GATEWAY_TO_BACKEND)
             .build();
         var step = base.toBuilder().transportedMessage(inbound).build();
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(step);
 
         // When
         retryTransportStepService.execute(TRANSPORT_ID);
@@ -116,7 +116,7 @@ class ConnectorRetryTransportStepServiceTest {
         ConnectorMessageTransportStatus status) {
         // Given
         var step = TransportStepFixtures.createTransportStepWithBusinessMessage(status, 1);
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(step);
 
         // When
         // Then
@@ -135,7 +135,7 @@ class ConnectorRetryTransportStepServiceTest {
         var step = TransportStepFixtures.createTransportStepWithBusinessMessage(
             ConnectorMessageTransportStatus.FAILED, 0);
         var failure = new IllegalArgumentException("gateway unreachable");
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(step);
         doThrow(failure).when(linkSubmitter).submit(any());
 
         // When
@@ -153,7 +153,7 @@ class ConnectorRetryTransportStepServiceTest {
         // Given
         var step = TransportStepFixtures.createTransportStepWithBusinessMessage(
             ConnectorMessageTransportStatus.FAILED, 0);
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(step);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(step);
         doThrow(new IllegalStateException("jdbc:mysql://internal-host/db")).when(linkSubmitter)
             .submit(any());
 
@@ -167,7 +167,7 @@ class ConnectorRetryTransportStepServiceTest {
     @Test
     void retry_should_throw_NotFound_exception_when_not_found() {
         // Given
-        when(transportStepRepository.findByIdentifier(any())).thenReturn(null);
+        when(transportStepRepository.findByIdentifierForUpdate(any())).thenReturn(null);
 
         // When
         // Then

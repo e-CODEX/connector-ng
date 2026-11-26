@@ -19,13 +19,25 @@ import eu.ecodex.connector.application.port.spi.message.ConnectorMessageTranspor
 import eu.ecodex.connector.domain.model.auth.ConnectorUserAuthenticationResult;
 import eu.ecodex.connector.domain.model.user.ConnectorRoleName;
 import eu.ecodex.connector.infrastructure.adapter.in.web.rest.request.login.ConnectorLoginRequest;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.client.EntityExchangeResult;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 @DisplayName("ConnectorRetryTransportStepsIT REST")
@@ -36,10 +48,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
     @Autowired
     private RestTestClient apiClient;
-
     @Autowired
     private ConnectorUserRepository userRepository;
-
     @Autowired
     private ConnectorMessageTransportStepRepository transportStepRepository;
 
@@ -85,21 +95,7 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql({
-        "classpath:sql/business-domain.sql",
-        "classpath:sql/processing-mode.sql",
-        "classpath:sql/processing-mode-party.sql",
-        "classpath:sql/processing-mode-service.sql",
-        "classpath:sql/processing-mode-action.sql",
-        "classpath:sql/message.sql",
-        "classpath:sql/message-as4-properties.sql",
-        "classpath:sql/attachment.sql",
-        "classpath:sql/message-business-content.sql",
-        "classpath:sql/message-business-document.sql",
-        "classpath:sql/message-transport-step.sql",
-        "classpath:sql/message-transport-step-statuses.sql",
-        "classpath:sql/user.sql",
-    })
+    @WithReferenceData
     void should_retry_transport_step_when_is_retriable() {
         // Given
         var transportIdentifier =
@@ -118,21 +114,7 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @Sql({
-        "classpath:sql/business-domain.sql",
-        "classpath:sql/processing-mode.sql",
-        "classpath:sql/processing-mode-party.sql",
-        "classpath:sql/processing-mode-service.sql",
-        "classpath:sql/processing-mode-action.sql",
-        "classpath:sql/message.sql",
-        "classpath:sql/message-as4-properties.sql",
-        "classpath:sql/attachment.sql",
-        "classpath:sql/message-business-content.sql",
-        "classpath:sql/message-business-document.sql",
-        "classpath:sql/message-transport-step.sql",
-        "classpath:sql/message-transport-step-statuses.sql",
-        "classpath:sql/user.sql",
-    })
+    @WithReferenceData
     void should_not_retry_transport_step_when_is_not_retriable() {
         var transportIdentifier =
             "8af8af19-839a-4594-a19d-40d67868474c@connector.ecodex.eu_backend_alice";
@@ -141,6 +123,62 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + generateDefaultAdminToken())
             .exchange()
             .expectStatus().isEqualTo(409);
+    }
+
+    @Test
+    @WithReferenceData
+    void should_retry_a_transport_step_only_once_when_retried_concurrently() throws Exception {
+        // Given: a failed step for a message going to the gateway, whose status the submission
+        // changes within the retry itself
+        var transportIdentifier =
+            "8af8af19-839a-4594-a19d-40d67868474c@connector.ecodex.eu_backend_alice";
+        jdbcTemplate.update(
+            "UPDATE connector_message_transport_steps SET status = 'FAILED', "
+                + "transported_message = REPLACE(transported_message, "
+                + "'GATEWAY_TO_BACKEND', 'BACKEND_TO_GATEWAY') WHERE identifier = ?",
+            transportIdentifier);
+        var attemptsBefore =
+            transportStepRepository.findByIdentifier(transportIdentifier).numberOfAttempts();
+        var token = generateDefaultAdminToken();
+        var callers = 4;
+        var start = new CountDownLatch(1);
+        var executor = Executors.newFixedThreadPool(callers);
+
+        // When
+        List<Future<EntityExchangeResult<String>>> responses = new ArrayList<>();
+        try {
+            for (int i = 0; i < callers; i++) {
+                responses.add(executor.submit(() -> {
+                    start.await();
+                    return apiClient.post()
+                        .uri(buildUrl(transportIdentifier))
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                        .exchange()
+                        .returnResult(String.class);
+                }));
+            }
+            start.countDown();
+
+            var results = new ArrayList<EntityExchangeResult<String>>();
+            for (var response : responses) {
+                results.add(response.get(60, TimeUnit.SECONDS));
+            }
+
+            // Then: one retry went through, the others were refused because the step had been
+            // retried, not because something broke while retrying it
+            assertThat(results)
+                .extracting(result -> result.getStatus().value())
+                .containsExactlyInAnyOrder(200, 409, 409, 409);
+            assertThat(results)
+                .filteredOn(result -> result.getStatus().value() == 409)
+                .extracting(EntityExchangeResult::getResponseBody)
+                .allSatisfy(body -> assertThat(body).contains("not retryable"));
+        } finally {
+            executor.shutdownNow();
+        }
+
+        var transportStep = transportStepRepository.findByIdentifier(transportIdentifier);
+        assertThat(transportStep.numberOfAttempts()).isEqualTo(attemptsBefore + 1);
     }
 
     @Test
@@ -156,5 +194,25 @@ public class ConnectorRetryTransportStepsIT extends AbstractIntegrationTest {
 
     private String buildUrl(String identifier) {
         return "/api/v1/admin/transport-steps/%s/retry".formatted(identifier);
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @Sql({
+        "classpath:sql/business-domain.sql",
+        "classpath:sql/processing-mode.sql",
+        "classpath:sql/processing-mode-party.sql",
+        "classpath:sql/processing-mode-service.sql",
+        "classpath:sql/processing-mode-action.sql",
+        "classpath:sql/message.sql",
+        "classpath:sql/message-as4-properties.sql",
+        "classpath:sql/attachment.sql",
+        "classpath:sql/message-business-content.sql",
+        "classpath:sql/message-business-document.sql",
+        "classpath:sql/message-transport-step.sql",
+        "classpath:sql/message-transport-step-statuses.sql",
+        "classpath:sql/user.sql",
+    })
+    private @interface WithReferenceData {
     }
 }

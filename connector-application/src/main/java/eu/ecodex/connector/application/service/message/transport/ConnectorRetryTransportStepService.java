@@ -45,7 +45,9 @@ public class ConnectorRetryTransportStepService implements ConnectorRetryTranspo
 
     @Override
     public void execute(@NonNull String transportIdentifier) {
-        var step = transportStepRepository.findByIdentifier(transportIdentifier);
+        // The row stays locked until the end of the transaction: a concurrent retry of the same
+        // step waits here, then finds the status left by this one and is refused.
+        var step = transportStepRepository.findByIdentifierForUpdate(transportIdentifier);
 
         if (step == null) {
             throw new ConnectorMessageTransportStepNotFoundException(

@@ -23,6 +23,19 @@ import java.util.List;
  */
 public interface ConnectorMessageTransportStepRepository {
     /**
+     * Finds the transport step with the given identifier and locks it until the end of the current
+     * transaction, so that no other transaction can lock or change it meanwhile.
+     *
+     * <p>It must be called inside a transaction. A concurrent caller waits for the lock and then
+     * sees the state committed by the first one.
+     *
+     * @param identifier the unique identifier of the transport step (must not be null)
+     *
+     * @return the locked {@link ConnectorMessageTransportStep}, or {@code null} if none exists
+     */
+    ConnectorMessageTransportStep findByIdentifierForUpdate(@Nonnull String identifier);
+
+    /**
      * Persists the given transport step, inserting it or updating it if it already exists.
      *
      * @param transportStep the transport step to persist (must not be null)

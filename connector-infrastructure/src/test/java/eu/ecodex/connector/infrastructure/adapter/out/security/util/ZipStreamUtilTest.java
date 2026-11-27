@@ -40,7 +40,7 @@ class ZipStreamUtilTest {
     void should_refuse_an_entry_which_expands_beyond_the_entry_limit() throws IOException {
         // 10 MB of zeros compress to a few KB
         var bomb = zip(Map.of("bomb.bin", bytes(10_000_000)));
-        assertThat(bomb.openStream().readAllBytes().length).isLessThan(100_000);
+        assertThat(bomb.openStream().readAllBytes()).hasSizeLessThan(100_000);
 
         assertThatThrownBy(() -> ZipStreamUtil.extract(bomb, SMALL))
             .isInstanceOf(ConnectorZipLimitExceededException.class)
@@ -48,12 +48,14 @@ class ZipStreamUtilTest {
     }
 
     @Test
-    void should_refuse_entries_which_expand_beyond_the_total_limit() {
+    void should_refuse_entries_which_expand_beyond_the_total_limit() throws IOException {
         var entries = new LinkedHashMap<String, byte[]>();
         entries.put("a.bin", bytes(800));
         entries.put("b.bin", bytes(800));
 
-        assertThatThrownBy(() -> ZipStreamUtil.extract(zip(entries), SMALL))
+        var zipEntries = zip(entries);
+
+        assertThatThrownBy(() -> ZipStreamUtil.extract(zipEntries, SMALL))
             .isInstanceOf(ConnectorZipLimitExceededException.class)
             .hasMessageContaining("1500 bytes");
     }
@@ -68,13 +70,15 @@ class ZipStreamUtilTest {
     }
 
     @Test
-    void should_refuse_a_zip_with_too_many_entries() {
+    void should_refuse_a_zip_with_too_many_entries() throws IOException {
         var entries = new LinkedHashMap<String, byte[]>();
         for (var i = 0; i < 4; i++) {
             entries.put("e" + i, bytes(1));
         }
 
-        assertThatThrownBy(() -> ZipStreamUtil.extract(zip(entries), SMALL))
+        var zipEntries = zip(entries);
+
+        assertThatThrownBy(() -> ZipStreamUtil.extract(zipEntries, SMALL))
             .isInstanceOf(ConnectorZipLimitExceededException.class)
             .hasMessageContaining("more than 3 entries");
     }

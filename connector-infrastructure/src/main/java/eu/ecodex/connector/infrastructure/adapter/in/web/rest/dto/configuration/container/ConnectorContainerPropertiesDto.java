@@ -19,11 +19,13 @@ import lombok.Builder;
 @Builder
 @SuppressWarnings({"checkstyle:MissingJavadocMethod", "checkstyle:MissingJavadocType"})
 public record ConnectorContainerPropertiesDto(
-    ContainerSignatureDto signature
+    ContainerSignatureDto signature,
+    ContainerZipDto zip
 ) {
     public static ConnectorContainerPropertiesDto from(ConnectorContainerProperties properties) {
         return new ConnectorContainerPropertiesDto(
-            ContainerSignatureDto.from(properties.getSignature())
+            ContainerSignatureDto.from(properties.getSignature()),
+            ContainerZipDto.from(properties.getZip())
         );
     }
 }

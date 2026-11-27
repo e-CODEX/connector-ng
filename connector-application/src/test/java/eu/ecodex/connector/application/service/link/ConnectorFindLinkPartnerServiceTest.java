@@ -62,6 +62,20 @@ public class ConnectorFindLinkPartnerServiceTest {
         }
 
         @Test
+        void should_fail_when_the_matching_link_partner_is_disabled() {
+            var disabled = LinkPartnerTestFixtures.createAliceBackendLinkPartner()
+                                                  .toBuilder()
+                                                  .enabled(false)
+                                                  .build();
+            when(linkPartnerRepository.findByCertificateDn("cn=alice")).thenReturn(disabled);
+
+            assertThrows(
+                ConnectorLinkPartnerException.class,
+                () -> findLinkPartnerService.findByCertificateDn("cn=alice")
+            );
+        }
+
+        @Test
         void should_fail_when_the_certificate_dn_is_null() {
             assertThrows(
                 NullPointerException.class,

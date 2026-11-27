@@ -27,7 +27,9 @@ import eu.ecodex.connector.infrastructure.adapter.out.security.model.container.C
 import eu.ecodex.connector.infrastructure.adapter.out.security.model.container.ConnectorContainerBusinessContent;
 import eu.ecodex.connector.infrastructure.adapter.out.security.model.token.ConnectorToken;
 import eu.ecodex.connector.infrastructure.adapter.out.security.util.XMLStreamUtil;
+import eu.ecodex.connector.infrastructure.adapter.out.security.util.ZipLimits;
 import eu.ecodex.connector.infrastructure.adapter.out.security.util.ZipStreamUtil;
+import eu.ecodex.connector.infrastructure.config.property.container.ConnectorContainerProperties;
 import eu.europa.esig.dss.model.DSSDocument;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import eu.europa.esig.dss.spi.DSSUtils;
@@ -60,6 +62,7 @@ public class ConnectorContainerValidator {
     private final ConnectorMessageBusinessContentRepository businessContentRepository;
     private final ConnectorMessageAttachmentRepository attachmentRepository;
     private final ConnectorFileStorageProvider fileStorageProvider;
+    private final ZipLimits zipLimits;
 
     /**
      * Constructor for the ConnectorAsicContainerValidator.
@@ -74,18 +77,22 @@ public class ConnectorContainerValidator {
      *                                  associated with a connector message
      * @param fileStorageProvider       the service provider responsible for storage operations
      *                                  related to attachments and metadata
+     * @param containerProperties       the container properties, which hold the limits applied
+     *                                  when the ASiC-S container is extracted
      */
     public ConnectorContainerValidator(
         List<ConnectorMessageContainerChecker> checkers,
         ConnectorContainerDocumentSignatureChecker signatureChecker,
         ConnectorMessageBusinessContentRepository businessContentRepository,
         ConnectorMessageAttachmentRepository attachmentRepository,
-        ConnectorFileStorageProvider fileStorageProvider) {
+        ConnectorFileStorageProvider fileStorageProvider,
+        ConnectorContainerProperties containerProperties) {
         this.checkers = checkers;
         this.signatureChecker = signatureChecker;
         this.businessContentRepository = businessContentRepository;
         this.attachmentRepository = attachmentRepository;
         this.fileStorageProvider = fileStorageProvider;
+        this.zipLimits = containerProperties.getZip().toLimits();
     }
 
     /**
@@ -184,7 +191,7 @@ public class ConnectorContainerValidator {
         var businessDocumentName = token.getDocument().getFilename();
         var detachedSignatureName = token.getDocument().getSignatureFilename();
 
-        var asicsContents = ZipStreamUtil.extract(asicsDocument);
+        var asicsContents = ZipStreamUtil.extract(asicsDocument, zipLimits);
         var businessContent = new ConnectorContainerBusinessContent();
         DSSDocument pdfTrustOKToken = null;
 
@@ -195,7 +202,7 @@ public class ConnectorContainerValidator {
                 continue;
             }
             pdfTrustOKToken = classifyZipEntries(
-                ZipStreamUtil.extract(asicsContent),
+                ZipStreamUtil.extract(asicsContent, zipLimits),
                 businessContent,
                 businessDocumentName,
                 detachedSignatureName

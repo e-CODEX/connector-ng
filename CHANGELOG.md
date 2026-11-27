@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file.
 - **Logging** — A value containing line breaks, such as a username or an identifier sent by a client, can no longer forge log lines: the line breaks are written as `\r` and `\n` in the log message.
 - **Error responses** — An unexpected error while receiving an attachment or a SOAP submission no longer returns the internal exception message (which can contain file paths or database details) to the client: the REST API answers with a fixed message and the SOAP `resultMessage` is generic, except for the messages of the connector's own errors, such as an unknown service. The cause is written to the connector log.
 - **Containers** — The extraction of an ASiC-S container is now bounded: a container which expands beyond `connector.container.zip.max-entries` (`1000`), `max-entry-size` or `max-total-size` (`250MB` each) is refused instead of exhausting the memory. An entry name which is absolute or contains `..` is refused too.
+- **Link partners** — A disabled backend link partner can no longer submit messages through the SOAP backend interface: its requests are refused like those of an unknown certificate.
 
 #### Technical
 - **API security** — Protect the auto-generated Swagger documentation and the Actuator endpoints with `Basic` authentication.

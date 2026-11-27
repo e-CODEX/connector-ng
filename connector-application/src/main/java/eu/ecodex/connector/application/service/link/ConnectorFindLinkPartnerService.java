@@ -42,6 +42,13 @@ public class ConnectorFindLinkPartnerService implements ConnectorFindLinkPartner
             );
         }
 
+        if (!linkPartner.enabled()) {
+            log.warn("Link partner [{}] is disabled", linkPartner.name().name());
+            throw new ConnectorLinkPartnerException(
+                "Link partner is disabled for certificateDn: " + certificateDn
+            );
+        }
+
         return linkPartner;
     }
 }

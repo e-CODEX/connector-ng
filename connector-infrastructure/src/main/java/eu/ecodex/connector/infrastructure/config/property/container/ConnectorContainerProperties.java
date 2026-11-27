@@ -30,4 +30,9 @@ public class ConnectorContainerProperties {
     @NotNull
     @NestedConfigurationProperty
     private ContainerSignatureProperties signature;
+
+    @Valid
+    @NotNull
+    @NestedConfigurationProperty
+    private ContainerZipProperties zip = new ContainerZipProperties();
 }

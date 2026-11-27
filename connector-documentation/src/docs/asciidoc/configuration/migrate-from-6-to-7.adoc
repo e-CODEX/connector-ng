@@ -477,6 +477,11 @@ Additionally, the validation constraints property has been reorganized under the
 | `connector.container.signature.validation.constraints-xml`
 | Renamed — prefix and sub-path both changed. Defaults to `classpath:/102853/constraint.xml`.
 The file must exist, otherwise the startup fails.
+
+| _(none)_
+| `connector.container.zip.max-entries`, `.max-entry-size`, `.max-total-size`
+| *New* — limits of the extraction of the ASiC-S container, `1000` entries and `250MB` by default.
+A container which expands beyond them is refused. See the container configuration.
 |===
 
 WARNING: The `connector.ecodex-container` prefix is no longer recognized in 7.x.

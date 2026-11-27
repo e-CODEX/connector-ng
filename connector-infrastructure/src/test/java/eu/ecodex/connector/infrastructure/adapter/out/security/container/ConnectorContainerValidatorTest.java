@@ -41,6 +41,7 @@ import eu.ecodex.connector.infrastructure.adapter.out.security.model.container.C
 import eu.ecodex.connector.infrastructure.adapter.out.security.model.container.ConnectorContainerBusinessContent;
 import eu.ecodex.connector.infrastructure.adapter.out.security.model.token.ConnectorToken;
 import eu.ecodex.connector.infrastructure.adapter.out.security.model.token.ConnectorTokenDocument;
+import eu.ecodex.connector.infrastructure.config.property.container.ConnectorContainerProperties;
 import eu.europa.esig.dss.enumerations.MimeTypeEnum;
 import eu.europa.esig.dss.model.InMemoryDocument;
 import jakarta.xml.bind.JAXBException;
@@ -100,7 +101,8 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             signatureChecker,
             businessContentRepository,
             attachmentRepository,
-            fileStorageProvider
+            fileStorageProvider,
+            new ConnectorContainerProperties()
         );
     }
 
@@ -152,7 +154,8 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
             signatureChecker,
             businessContentRepository,
             attachmentRepository,
-            fileStorageProvider
+            fileStorageProvider,
+            new ConnectorContainerProperties()
         ) {
             @Override
             protected ConnectorContainer buildContainer(
@@ -559,7 +562,8 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
                 signatureChecker,
                 businessContentRepository,
                 attachmentRepository,
-                fileStorageProvider
+                fileStorageProvider,
+                new ConnectorContainerProperties()
             ) {
                 @Override
                 protected ConnectorContainer buildContainer(
@@ -589,7 +593,8 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
                 signatureChecker,
                 businessContentRepository,
                 attachmentRepository,
-                fileStorageProvider
+                fileStorageProvider,
+                new ConnectorContainerProperties()
             ) {
                 @Override
                 protected ConnectorContainer buildContainer(
@@ -623,7 +628,8 @@ public class ConnectorContainerValidatorTest extends BaseContainerTest {
                 signatureChecker,
                 businessContentRepository,
                 attachmentRepository,
-                fileStorageProvider
+                fileStorageProvider,
+                new ConnectorContainerProperties()
             ) {
                 @Override
                 protected ConnectorContainer buildContainer(

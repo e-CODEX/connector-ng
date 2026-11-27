@@ -132,3 +132,45 @@ Accepts a `classpath:` or `file:` location. The file must exist, otherwise the s
 ----
 connector.container.signature.validation.constraints-xml=classpath:/102853/constraint.xml
 ----
+
+== Extraction limits
+
+The ASiC-S container of a message is extracted in memory to be validated. To keep a small container
+from exhausting the memory once expanded (a "zip bomb"), the extraction is bounded: a container which
+expands beyond one of these limits is refused, and the message fails with a container error.
+
+The limits apply to the _expanded_ sizes, which are counted while the container is read. They are
+unrelated to the size of the uploaded file (`spring.servlet.multipart.max-file-size`). The container
+holds a nested ZIP, and each of the two extractions has its own limits, so the memory needed in the
+worst case is about twice the total limit.
+
+.Container Extraction Limits
+[cols="35,40,10,15"]
+|===
+| Property | Description| Optional | Example
+
+| `connector.container.zip.max-entries`
+| Maximum number of entries of a ZIP document.
+| Yes
+| `1000`. By default, set to *1000*
+
+| `connector.container.zip.max-entry-size`
+| Maximum size of one entry, once expanded.
+| Yes
+| `250MB`. By default, set to *250MB*
+
+| `connector.container.zip.max-total-size`
+| Maximum size of all the entries of a ZIP document together, once expanded.
+| Yes
+| `250MB`. By default, set to *250MB*
+|===
+
+An entry whose name is absolute (starts with `/`) or contains a `..` segment is refused too.
+
+.Configuration Example
+[source,properties]
+----
+connector.container.zip.max-entries=1000
+connector.container.zip.max-entry-size=250MB
+connector.container.zip.max-total-size=250MB
+----
